@@ -1,0 +1,689 @@
+{
+  "genesis_time": "2022-12-21T00:10:00.230706379Z",
+  "chain_id": "joltifylocalnet_8888-1",
+  "initial_height": "1",
+  "consensus_params": {
+    "block": {
+      "max_bytes": "22020096",
+      "max_gas": "-1",
+      "time_iota_ms": "1000"
+    },
+    "evidence": {
+      "max_age_num_blocks": "100000",
+      "max_age_duration": "172800000000000",
+      "max_bytes": "1048576"
+    },
+    "validator": {
+      "pub_key_types": [
+        "ed25519"
+      ]
+    },
+    "version": {}
+  },
+  "app_hash": "",
+  "app_state": {
+    "auction": {
+      "next_auction_id": "1",
+      "params": {
+        "max_auction_duration": "3600s",
+        "forward_bid_duration": "1800s",
+        "reverse_bid_duration": "1800s",
+        "increment_surplus": "0.050000000000000000",
+        "increment_debt": "0.050000000000000000",
+        "increment_collateral": "0.050000000000000000"
+      },
+      "auctions": []
+    },
+    "auth": {
+      "params": {
+        "max_memo_characters": "256",
+        "tx_sig_limit": "7",
+        "tx_size_cost_per_byte": "10",
+        "sig_verify_cost_ed25519": "590",
+        "sig_verify_cost_secp256k1": "1000"
+      },
+      "accounts": [
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl",
+          "pub_key": null,
+          "account_number": "0",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "jolt1g6q7rff5jdyny0ph6gm6nc9x540gs02tlu7nsp",
+          "pub_key": null,
+          "account_number": "0",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "jolt1ldrkkcr2j7fln9nscaq2aent3c88c3gkevt46w",
+          "pub_key": null,
+          "account_number": "0",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8",
+          "pub_key": null,
+          "account_number": "0",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "jolt1u0ycjql6q8agllpkjnlfh9ze37r6k78thmne5u",
+          "pub_key": null,
+          "account_number": "0",
+          "sequence": "0"
+        }
+      ]
+    },
+    "authz": {
+      "authorization": []
+    },
+    "bank": {
+      "params": {
+        "send_enabled": [],
+        "default_send_enabled": true
+      },
+      "balances": [
+        {
+          "address": "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8",
+          "coins": [
+            {
+              "denom": "abnb",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ausdc",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ausdt",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ujolt",
+              "amount": "200000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "jolt1g6q7rff5jdyny0ph6gm6nc9x540gs02tlu7nsp",
+          "coins": [
+            {
+              "denom": "abnb",
+              "amount": "100000000000000000000000"
+            },
+            {
+              "denom": "ausdc",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ausdt",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ujolt",
+              "amount": "2000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl",
+          "coins": [
+            {
+              "denom": "abnb",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ausdc",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ausdt",
+              "amount": "100000000000000000000000000000"
+            },
+            {
+              "denom": "ujolt",
+              "amount": "200000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "jolt1u0ycjql6q8agllpkjnlfh9ze37r6k78thmne5u",
+          "coins": [
+            {
+              "denom": "ujolt",
+              "amount": "1000000000"
+            }
+          ]
+        },
+        {
+          "address": "jolt1ldrkkcr2j7fln9nscaq2aent3c88c3gkevt46w",
+          "coins": [
+            {
+              "denom": "ujolt",
+              "amount": "100000000000000"
+            }
+          ]
+        }
+      ],
+      "supply": [],
+      "denom_metadata": []
+    },
+    "capability": {
+      "index": "1",
+      "owners": []
+    },
+    "cdp": {
+      "params": {
+        "collateral_params": [],
+        "debt_param": {
+          "denom": "usdx",
+          "reference_asset": "usd",
+          "conversion_factor": "6",
+          "debt_floor": "10000000"
+        },
+        "global_debt_limit": {
+          "denom": "usdx",
+          "amount": "0"
+        },
+        "surplus_auction_threshold": "500000000000",
+        "surplus_auction_lot": "10000000000",
+        "debt_auction_threshold": "100000000000",
+        "debt_auction_lot": "10000000000",
+        "circuit_breaker": false
+      },
+      "cdps": [],
+      "deposits": [],
+      "starting_cdp_id": "1",
+      "debt_denom": "debt",
+      "gov_denom": "ujolt",
+      "previous_accumulation_times": [],
+      "total_principals": []
+    },
+    "crisis": {
+      "constant_fee": {
+        "denom": "ujolt",
+        "amount": "1000"
+      }
+    },
+    "distribution": {
+      "params": {
+        "community_tax": "0",
+        "base_proposer_reward": "0.010000000000000000",
+        "bonus_proposer_reward": "0.040000000000000000",
+        "withdraw_addr_enabled": true
+      },
+      "fee_pool": {
+        "community_pool": []
+      },
+      "delegator_withdraw_infos": [],
+      "previous_proposer": "",
+      "outstanding_rewards": [],
+      "validator_accumulated_commissions": [],
+      "validator_historical_rewards": [],
+      "validator_current_rewards": [],
+      "delegator_starting_infos": [],
+      "validator_slash_events": []
+    },
+    "evidence": {
+      "evidence": []
+    },
+    "feegrant": {
+      "allowances": []
+    },
+    "genutil": {
+      "gen_txs": [
+        {
+          "body": {
+            "messages": [
+              {
+                "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+                "description": {
+                  "moniker": "validator",
+                  "identity": "",
+                  "website": "",
+                  "security_contact": "",
+                  "details": ""
+                },
+                "commission": {
+                  "rate": "0.100000000000000000",
+                  "max_rate": "0.200000000000000000",
+                  "max_change_rate": "0.010000000000000000"
+                },
+                "min_self_delegation": "1",
+                "delegator_address": "jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl",
+                "validator_address": "joltvaloper10jghunnwjka54yzvaly4pjcxmarkvevzmgara2",
+                "pubkey": {
+                  "@type": "/cosmos.crypto.ed25519.PubKey",
+                  "key": "yOL/m5fxlC+hTFr6Q/lUYJ6uYEFvulF9uacYJXu7Hp4="
+                },
+                "value": {
+                  "denom": "ujolt",
+                  "amount": "1000000000"
+                }
+              }
+            ],
+            "memo": "f61118085347a60cf7ae12828b2035df987e380b@10.2.118.4:26656",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+          },
+          "auth_info": {
+            "signer_infos": [
+              {
+                "public_key": {
+                  "@type": "/cosmos.crypto.secp256k1.PubKey",
+                  "key": "AqJIj+geI6bjdDYbbjIzJtigfgEEICUVpGRvvtVrLb5R"
+                },
+                "mode_info": {
+                  "single": {
+                    "mode": "SIGN_MODE_DIRECT"
+                  }
+                },
+                "sequence": "0"
+              }
+            ],
+            "fee": {
+              "amount": [],
+              "gas_limit": "200000",
+              "payer": "",
+              "granter": ""
+            }
+          },
+          "signatures": [
+            "odPfBdgaZtLnSbXT3kcofLg69JLBnzKJvb1TKYG+UdoLIY+QxLHfiVYoGjKkPizXOVZIQV270fpDgFXeGcrVbQ=="
+          ]
+        }
+      ]
+    },
+    "gov": {
+      "starting_proposal_id": "1",
+      "deposits": [],
+      "votes": [],
+      "proposals": [],
+      "deposit_params": {
+        "min_deposit": [
+          {
+            "denom": "ujolt",
+            "amount": "10000000"
+          }
+        ],
+        "max_deposit_period": "172800s"
+      },
+      "voting_params": {
+        "voting_period": "60s"
+      },
+      "tally_params": {
+        "quorum": "0.334000000000000000",
+        "threshold": "0.500000000000000000",
+        "veto_threshold": "0.334000000000000000"
+      }
+    },
+    "ibc": {
+      "client_genesis": {
+        "clients": [],
+        "clients_consensus": [],
+        "clients_metadata": [],
+        "params": {
+          "allowed_clients": [
+            "06-solomachine",
+            "07-tendermint"
+          ]
+        },
+        "create_localhost": false,
+        "next_client_sequence": "0"
+      },
+      "connection_genesis": {
+        "connections": [],
+        "client_connection_paths": [],
+        "next_connection_sequence": "0",
+        "params": {
+          "max_expected_time_per_block": "30000000000"
+        }
+      },
+      "channel_genesis": {
+        "channels": [],
+        "acknowledgements": [],
+        "commitments": [],
+        "receipts": [],
+        "send_sequences": [],
+        "recv_sequences": [],
+        "ack_sequences": [],
+        "next_channel_sequence": "0"
+      }
+    },
+    "incentive": {
+      "params": {
+        "usdx_minting_reward_periods": [],
+        "jolt_supply_reward_periods": [
+          {
+            "active": true,
+            "collateral_type": "abnb",
+            "start": "2021-12-21T00:10:00.229072583Z",
+            "end": "2023-12-21T00:10:00.229072973Z",
+            "rewards_per_second": [
+              {
+                "denom": "ujolt",
+                "amount": "500"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "collateral_type": "ujolt",
+            "start": "2021-12-21T00:10:00.229074593Z",
+            "end": "2023-12-21T00:10:00.229074663Z",
+            "rewards_per_second": [
+              {
+                "denom": "ujolt",
+                "amount": "277"
+              }
+            ]
+          }
+        ],
+        "jolt_borrow_reward_periods": [
+          {
+            "active": true,
+            "collateral_type": "ujolt",
+            "start": "2021-12-21T00:10:00.229075283Z",
+            "end": "2023-12-21T00:10:00.229075333Z",
+            "rewards_per_second": [
+              {
+                "denom": "ujolt",
+                "amount": "100"
+              }
+            ]
+          },
+          {
+            "active": true,
+            "collateral_type": "ausdt",
+            "start": "2021-12-21T00:10:00.229075903Z",
+            "end": "2023-12-21T00:10:00.229075973Z",
+            "rewards_per_second": [
+              {
+                "denom": "ujolt",
+                "amount": "300"
+              }
+            ]
+          }
+        ],
+        "delegator_reward_periods": [],
+        "swap_reward_periods": [],
+        "claim_multipliers": [
+          {
+            "denom": "ujolt",
+            "multipliers": [
+              {
+                "name": "small",
+                "months_lockup": "0",
+                "factor": "1.000000000000000000"
+              }
+            ]
+          }
+        ],
+        "claim_end": "2023-12-21T00:10:00.229077483Z",
+        "savings_reward_periods": []
+      },
+      "usdx_reward_state": {
+        "accumulation_times": [],
+        "multi_reward_indexes": []
+      },
+      "jolt_supply_reward_state": {
+        "accumulation_times": [],
+        "multi_reward_indexes": []
+      },
+      "jolt_borrow_reward_state": {
+        "accumulation_times": [],
+        "multi_reward_indexes": []
+      },
+      "delegator_reward_state": {
+        "accumulation_times": [],
+        "multi_reward_indexes": []
+      },
+      "swap_reward_state": {
+        "accumulation_times": [],
+        "multi_reward_indexes": []
+      },
+      "usdx_minting_claims": [],
+      "jolt_liquidity_provider_claims": [],
+      "delegator_claims": [],
+      "swap_claims": [],
+      "savings_reward_state": {
+        "accumulation_times": [],
+        "multi_reward_indexes": []
+      },
+      "savings_claims": []
+    },
+    "issuance": {
+      "params": {
+        "assets": []
+      },
+      "supplies": []
+    },
+    "jolt": {
+      "params": {
+        "money_markets": [
+          {
+            "denom": "ujolt",
+            "borrow_limit": {
+              "has_max_limit": true,
+              "maximum_limit": "120000000000000.000000000000000000",
+              "loan_to_value": "0.200000000000000000"
+            },
+            "spot_market_id": "jolt:usd",
+            "conversion_factor": "1000000",
+            "interest_rate_model": {
+              "base_rate_apy": "0.000000000000000000",
+              "base_multiplier": "0.020000000000000000",
+              "kink": "0.800000000000000000",
+              "jump_multiplier": "5.000000000000000000"
+            },
+            "reserve_factor": "0.200000000000000000",
+            "keeper_reward_percentage": "0.020000000000000000"
+          },
+          {
+            "denom": "abnb",
+            "borrow_limit": {
+              "has_max_limit": false,
+              "maximum_limit": "1000000000000000.000000000000000000",
+              "loan_to_value": "0.600000000000000000"
+            },
+            "spot_market_id": "bnb:usd",
+            "conversion_factor": "1000000000000000000",
+            "interest_rate_model": {
+              "base_rate_apy": "0.000000000000000000",
+              "base_multiplier": "0.020000000000000000",
+              "kink": "0.800000000000000000",
+              "jump_multiplier": "5.000000000000000000"
+            },
+            "reserve_factor": "0.020000000000000000",
+            "keeper_reward_percentage": "0.020000000000000000"
+          },
+          {
+            "denom": "ausdt",
+            "borrow_limit": {
+              "has_max_limit": false,
+              "maximum_limit": "1000000000000000.000000000000000000",
+              "loan_to_value": "0.950000000000000000"
+            },
+            "spot_market_id": "usdt:usd",
+            "conversion_factor": "1000000000000000000",
+            "interest_rate_model": {
+              "base_rate_apy": "0.000000000000000000",
+              "base_multiplier": "0.080000000000000000",
+              "kink": "1.000000000000000000",
+              "jump_multiplier": "0.080000000000000000"
+            },
+            "reserve_factor": "0.200000000000000000",
+            "keeper_reward_percentage": "0.020000000000000000"
+          },
+          {
+            "denom": "ausdc",
+            "borrow_limit": {
+              "has_max_limit": false,
+              "maximum_limit": "1000000000000000.000000000000000000",
+              "loan_to_value": "0.950000000000000000"
+            },
+            "spot_market_id": "usdc:usd",
+            "conversion_factor": "1000000000000000000",
+            "interest_rate_model": {
+              "base_rate_apy": "0.000000000000000000",
+              "base_multiplier": "0.080000000000000000",
+              "kink": "1.000000000000000000",
+              "jump_multiplier": "0.080000000000000000"
+            },
+            "reserve_factor": "0.200000000000000000",
+            "keeper_reward_percentage": "0.020000000000000000"
+          }
+        ],
+        "minimum_borrow_usd_value": "10.000000000000000000",
+        "surplus_auction_threshold": "50"
+      },
+      "previous_accumulation_times": [],
+      "deposits": [],
+      "borrows": [],
+      "total_supplied": [],
+      "total_borrowed": [],
+      "total_reserves": []
+    },
+    "mint": {
+      "params": {
+        "halfCount": "525600",
+        "first_provisions": "95129375.951300000000000000",
+        "current_provisions": "95129375.951300000000000000",
+        "unit": "minute",
+        "community_provisions": "50000000000000.000000000000000000"
+      },
+      "historical_dist_info": null
+    },
+    "params": null,
+    "pricefeed": {
+      "params": {
+        "markets": [
+          {
+            "market_id": "jolt:usd",
+            "base_asset": "jolt",
+            "quote_asset": "usd",
+            "oracles": [
+              "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
+            ],
+            "active": true
+          },
+          {
+            "market_id": "bnb:usd",
+            "base_asset": "bnb",
+            "quote_asset": "usd",
+            "oracles": [
+              "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
+            ],
+            "active": true
+          },
+          {
+            "market_id": "usdt:usd",
+            "base_asset": "usdt",
+            "quote_asset": "usd",
+            "oracles": [
+              "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
+            ],
+            "active": true
+          },
+          {
+            "market_id": "usdc:usd",
+            "base_asset": "usdc",
+            "quote_asset": "usd",
+            "oracles": [
+              "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
+            ],
+            "active": true
+          }
+        ]
+      },
+      "posted_prices": []
+    },
+    "slashing": {
+      "params": {
+        "signed_blocks_window": "100",
+        "min_signed_per_window": "0.500000000000000000",
+        "downtime_jail_duration": "600s",
+        "slash_fraction_double_sign": "0.050000000000000000",
+        "slash_fraction_downtime": "0.010000000000000000"
+      },
+      "signing_infos": [],
+      "missed_blocks": []
+    },
+    "staking": {
+      "params": {
+        "unbonding_time": "1814400s",
+        "max_validators": 100,
+        "max_entries": 7,
+        "historical_entries": 10000,
+        "bond_denom": "ujolt"
+      },
+      "last_total_power": "0",
+      "last_validator_powers": [],
+      "validators": [],
+      "delegations": [],
+      "unbonding_delegations": [],
+      "redelegations": [],
+      "exported": false
+    },
+    "transfer": {
+      "port_id": "transfer",
+      "denom_traces": [],
+      "params": {
+        "send_enabled": true,
+        "receive_enabled": true
+      }
+    },
+    "upgrade": {},
+    "vault": {
+      "params": {
+        "block_churn_interval": "241920",
+        "power": "10000",
+        "step": "1000",
+        "candidate_ratio": "0.800000000000000000",
+        "targetQuota": [
+          {
+            "denom": "abnb",
+            "amount": "300000000000000000000"
+          },
+          {
+            "denom": "abusd",
+            "amount": "500000000000000000000000"
+          },
+          {
+            "denom": "aeth",
+            "amount": "100000000000000000000"
+          },
+          {
+            "denom": "ajolt",
+            "amount": "500000000000000000000000"
+          },
+          {
+            "denom": "ausdt",
+            "amount": "500000000000000000000000"
+          }
+        ],
+        "history_length": 14400
+      },
+      "outboundTxList": [],
+      "issueTokenList": [],
+      "createPoolList": [],
+      "validatorinfoList": [],
+      "latestTwoPool": [],
+      "standbypowerList": [],
+      "feeCollectedList": [],
+      "coinsQuota": {
+        "history": [],
+        "CoinsSum": []
+      },
+      "exported": false
+    },
+    "vesting": {}
+  }
+}

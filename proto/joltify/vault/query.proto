@@ -1,0 +1,180 @@
+syntax = "proto3";
+package joltify.vault;
+
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "joltify/vault/outbound_tx.proto";
+// this line is used by starport scaffolding # 1
+import "gogoproto/gogo.proto";
+import "joltify/vault/issue_token.proto";
+import "joltify/vault/create_pool.proto";
+import "joltify/vault/staking.proto";
+import "joltify/vault/quota.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/vault/types";
+
+// Query defines the gRPC querier service.
+service Query {
+    // Queries a OutboundTx by index.
+	rpc OutboundTx(QueryGetOutboundTxRequest) returns (QueryGetOutboundTxResponse) {
+		option (google.api.http).get = "/joltify/vault/outbound_tx/{requestID}";
+	}
+
+	// Queries a list of OutboundTx items.
+	rpc OutboundTxAll(QueryAllOutboundTxRequest) returns (QueryAllOutboundTxResponse) {
+		option (google.api.http).get = "/joltify/vault/outbound_tx";
+	}
+
+// Queries a list of GetValidators items.
+	rpc GetValidators(QueryGetValidatorsRequest) returns (QueryGetValidatorsResponse) {
+		option (google.api.http).get = "/joltify/vault/get_validators/{height}";
+	}
+
+	// Queries a list of GetValidators items.
+	rpc GetAllValidators(QueryAllValidatorsRequest) returns (QueryAllValidatorsResponse) {
+		option (google.api.http).get = "/joltify/vault/validators";
+	}
+
+// Queries a list of GetQuota items.
+	rpc GetQuota(QueryGetQuotaRequest) returns (QueryGetQuotaResponse) {
+		option (google.api.http).get = "/oppy-finance/oppychain/vault/get_quota/{query_length}";
+	}
+
+// this line is used by starport scaffolding # 2
+
+	// Queries a issueToken by index.
+	rpc IssueToken(QueryGetIssueTokenRequest) returns (QueryGetIssueTokenResponse) {
+		option (google.api.http).get = "/joltify/vault/issueToken/{index}";
+	}
+
+	// Queries a list of issueToken items.
+	rpc IssueTokenAll(QueryAllIssueTokenRequest) returns (QueryAllIssueTokenResponse) {
+		option (google.api.http).get = "/joltify/vault/issueToken";
+	}
+
+
+	// Queries a createPool by index.
+	rpc CreatePool(QueryGetCreatePoolRequest) returns (QueryGetCreatePoolResponse) {
+		option (google.api.http).get = "/joltify/vault/createPool/{index}";
+	}
+
+	// Queries a list of createPool items.
+	rpc CreatePoolAll(QueryAllCreatePoolRequest) returns (QueryAllCreatePoolResponse) {
+		option (google.api.http).get = "/joltify/vault/createPool";
+	}
+
+	// Queries a createPool by index.
+	rpc GetLastPool(QueryLatestPoolRequest) returns (QueryLastPoolResponse) {
+		option (google.api.http).get = "/joltify/vault/getLastPool";
+	}
+
+	// Queries the pending fee
+	rpc GetPendingFee(QueryPendingFeeRequest) returns (QueryPendingFeeResponse) {
+		option (google.api.http).get = "/joltify/vault/get_pending_fee";
+	}
+}
+
+message QueryPendingFeeRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryPendingFeeResponse{
+	repeated cosmos.base.v1beta1.Coin feecoin = 1 [
+		(gogoproto.nullable) = false,
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+	];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryGetOutboundTxRequest {
+	  string requestID = 1;
+}
+
+message QueryGetOutboundTxResponse {
+	OutboundTx outboundTx = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllOutboundTxRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllOutboundTxResponse {
+	repeated OutboundTx outboundTx = 1 [(gogoproto.nullable) = false];
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+
+
+message QueryGetValidatorsRequest {
+	string height = 1;
+}
+
+message QueryGetValidatorsResponse {
+   Validators validators = 1;
+}
+
+message QueryAllValidatorsRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllValidatorsResponse{
+	repeated Validators all_validators = 1;
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryGetQuotaRequest {
+	int32 query_length=1;
+	cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryGetQuotaResponse {
+	coinsQuota coinQuotaResponse=1  [(gogoproto.nullable) = false] ;
+}
+
+// this line is used by starport scaffolding # 3
+message QueryGetIssueTokenRequest {
+	string index = 1;
+}
+
+message QueryGetIssueTokenResponse {
+	IssueToken IssueToken = 1;
+}
+
+message QueryAllIssueTokenRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllIssueTokenResponse {
+	repeated IssueToken IssueToken = 1;
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+message QueryGetCreatePoolRequest {
+	string index = 1;
+}
+
+message QueryGetCreatePoolResponse {
+	PoolProposal CreatePool = 1;
+}
+
+message poolInfo {
+	string BlockHeight=1;
+	PoolProposal CreatePool = 2;
+}
+
+message QueryLastPoolResponse {
+	repeated poolInfo pools = 1;
+}
+
+message QueryAllCreatePoolRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryLatestPoolRequest {
+	cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryAllCreatePoolResponse {
+	repeated PoolProposal CreatePool = 1;
+	cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
