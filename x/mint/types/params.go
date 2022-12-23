@@ -13,9 +13,8 @@ import (
 var _ paramtypes.ParamSet = (*Params)(nil)
 
 var (
-	KeyFirstProvision = []byte("FirstProvision")
-	//DefaultFirstProvision = sdk.MustNewDecFromStr("13698630137")
-	DefaultFirstProvision = sdk.MustNewDecFromStr("95129375.9513")
+	KeyFirstProvision     = []byte("FirstProvision")
+	DefaultFirstProvision = sdk.MustNewDecFromStr("85616438.3562")
 	KeyCurrentProvision   = []byte("CurrentProvision")
 )
 

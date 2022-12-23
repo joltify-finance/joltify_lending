@@ -1,28 +1,29 @@
 package keeper
 
 import (
-	"time"
-
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
+	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
+	"time"
 )
 
-//func (k Keeper) FirstDist(ctx sdk.Context, pa types.Params) error {
-//	newCoins := sdk.NewCoins(sdk.NewCoin("ujolt", pa.CommunityProvisions.TruncateInt()))
-//	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, newCoins)
-//	if err != nil {
-//		return err
-//	}
-//	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, incentivetypes.ModuleName, newCoins)
-//	if err != nil {
-//		return err
-//	}
-//	senderAddr := k.accountKeeper.GetModuleAddress(incentivetypes.JoltIncentiveMacc)
-//	ctx.Logger().Info("the incentive account is %v", senderAddr.String())
-//
-//	return nil
-//}
+func (k Keeper) FirstDist(ctx sdk.Context) error {
+	firstDrop, ok := sdk.NewIntFromString("10000000000000")
+	if !ok {
+		panic("should never fail")
+	}
+	newCoins := sdk.NewCoins(sdk.NewCoin("ujolt", firstDrop))
+	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, newCoins)
+	if err != nil {
+		return err
+	}
+	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, incentivetypes.ModuleName, newCoins)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // SetDistInfo sets the historical distribution info
 func (k Keeper) SetDistInfo(ctx sdk.Context, h types.HistoricalDistInfo) {
@@ -51,7 +52,7 @@ func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params) error {
 		return err
 	}
 
-	amountToCommunity := pa.CurrentProvisions.Mul(sdk.MustNewDecFromStr("0.2"))
+	amountToCommunity := pa.CurrentProvisions.Mul(sdk.MustNewDecFromStr("0.15"))
 	communityCoins := sdk.NewCoins(sdk.NewCoin("ujolt", amountToCommunity.TruncateInt()))
 	feeCollector := newCoins.Sub(communityCoins)
 
