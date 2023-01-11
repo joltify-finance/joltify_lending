@@ -2,10 +2,11 @@ package cli_test
 
 import (
 	"fmt"
-	app2 "github.com/joltify-finance/joltify_lending/app"
 	"strconv"
 	"testing"
 	"time"
+
+	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"

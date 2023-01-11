@@ -2,10 +2,11 @@ package app
 
 import (
 	"encoding/json"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"math/rand"
 	"testing"
 	"time"
+
+	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"

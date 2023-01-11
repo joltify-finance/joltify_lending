@@ -2,9 +2,10 @@ package cli_test
 
 import (
 	"fmt"
-	app2 "github.com/joltify-finance/joltify_lending/app"
 	"strconv"
 	"testing"
+
+	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32" //nolint

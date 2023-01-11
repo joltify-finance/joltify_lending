@@ -697,9 +697,9 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 			//	},
 			//)
 
-			//types.KeyJoltBorrowRewardPeriods
+			// types.KeyJoltBorrowRewardPeriods
 
-			//Value:    string(suite.app.LegacyAmino().MustMarshalJSON(&currIncentiveJoltSupplyRewardPeriods)),
+			// Value:    string(suite.app.LegacyAmino().MustMarshalJSON(&currIncentiveJoltSupplyRewardPeriods)),
 
 			params := suite.app.GetIncentiveKeeper().GetParams(suite.ctx)
 			params.JoltSupplyRewardPeriods = currIncentiveJoltSupplyRewardPeriods

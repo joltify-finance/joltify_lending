@@ -3,9 +3,8 @@ package keeper
 import (
 	"html"
 
-	types2 "github.com/cosmos/cosmos-sdk/x/auth/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	types2 "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
@@ -39,29 +38,25 @@ func (k Keeper) sendFeesToValidators(ctx sdk.Context, pool *types.PoolInfo) bool
 	if addr == nil {
 		return true
 	}
-	coinsBalance := k.bankKeeper.GetAllBalances(ctx, addr)
-	fee := k.GetAllFeeAmount(ctx)
-	fee.Sort()
-	coinsBalance.Sort()
-	if coinsBalance.IsAnyGTE(fee) && !fee.Empty() {
-		err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, addr, types2.FeeCollectorName, fee)
-		if err != nil {
-			k.Logger(ctx).Error("vault", "fail to send fee", err)
-			return false
+	coinsBalance := sdk.NewCoins(k.bankKeeper.GetAllBalances(ctx, addr)...)
+	fee := sdk.NewCoins(k.GetAllFeeAmount(ctx)...)
+	var feeProcessed sdk.Coins
+	for _, el := range fee {
+		if coinsBalance.IsAllGTE(sdk.NewCoins(el)) {
+			err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, addr, types2.FeeCollectorName, sdk.NewCoins(el))
+			if err != nil {
+				k.Logger(ctx).Error("vault", "fail to send fee", err)
+				continue
+			}
+			tick := html.UnescapeString("&#" + "128176" + ";")
+			k.Logger(ctx).Info(tick, "money distributed", el)
+			feeProcessed = feeProcessed.Add(el)
 		}
-		tick := html.UnescapeString("&#" + "128176" + ";")
-		k.Logger(ctx).Info(tick, "money distributed", fee)
-
-		for i := range fee {
-			fee[i].Amount = sdk.NewInt(0)
-		}
-		k.SetStoreFeeAmount(ctx, fee)
-		return true
 	}
-	if fee.Empty() {
-		return true
-	}
-	return false
+	feeProcessed.Sort()
+	fee = fee.Sub(feeProcessed)
+	k.SetStoreFeeAmount(ctx, fee)
+	return true
 }
 
 func (k Keeper) ProcessAccountLeft(ctx sdk.Context) {

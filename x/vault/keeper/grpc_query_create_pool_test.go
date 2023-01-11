@@ -1,8 +1,9 @@
 package keeper_test
 
 import (
-	app2 "github.com/joltify-finance/joltify_lending/app"
 	"testing"
+
+	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"

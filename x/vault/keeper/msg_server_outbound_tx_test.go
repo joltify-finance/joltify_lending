@@ -2,12 +2,13 @@ package keeper_test
 
 import (
 	"encoding/hex"
-	"github.com/ethereum/go-ethereum/crypto"
-	app2 "github.com/joltify-finance/joltify_lending/app"
 	"math/rand"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
+	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/types/simulation"

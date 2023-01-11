@@ -3,8 +3,9 @@ package cli_test
 import (
 	stderr "errors"
 	"fmt"
-	app2 "github.com/joltify-finance/joltify_lending/app"
 	"testing"
+
+	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/stretchr/testify/assert"
 
