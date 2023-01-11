@@ -61,7 +61,8 @@ func DefaultParams() Params {
 		},
 		MultiRewardPeriods{
 			//NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
-			//NewMultiRewardPeriod(true, "ausdt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(300)))),
+			NewMultiRewardPeriod(true, "ausdt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
+			NewMultiRewardPeriod(true, "ausdc", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 		},
 		MultiRewardPeriods{},
 		MultiRewardPeriods{},

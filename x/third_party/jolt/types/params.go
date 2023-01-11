@@ -205,7 +205,7 @@ func NewParams(moneyMarkets MoneyMarkets, minimumBorrowUSDValue sdk.Dec) Params 
 
 // DefaultParams returns default params for jolt module
 func DefaultParams() Params {
-	loanToValue, _ := sdk.NewDecFromStr("0.6")
+	loanToValue, _ := sdk.NewDecFromStr("0.8")
 	loanToValueStable, _ := sdk.NewDecFromStr("0.95")
 	loanToValueJolt, _ := sdk.NewDecFromStr("0.2")
 
@@ -285,8 +285,46 @@ func DefaultParams() Params {
 		sdk.MustNewDecFromStr("0.02"),
 	)
 
+	m5 := NewMoneyMarket(
+		"aeth",
+		NewBorrowLimit(
+			false,
+			sdk.NewDec(1e15),
+			loanToValue,
+		),
+		"eth:usd",
+		sdk.NewInt(1e18),
+		NewInterestRateModel(
+			sdk.MustNewDecFromStr("0.0"),
+			sdk.MustNewDecFromStr("0.02"),
+			sdk.MustNewDecFromStr("0.8"),
+			sdk.MustNewDecFromStr("5"),
+		),
+		sdk.MustNewDecFromStr("0.02"),
+		sdk.MustNewDecFromStr("0.02"),
+	)
+
+	m6 := NewMoneyMarket(
+		"uatom",
+		NewBorrowLimit(
+			false,
+			sdk.NewDec(1e15),
+			loanToValue,
+		),
+		"eth:usd",
+		sdk.NewInt(1e6),
+		NewInterestRateModel(
+			sdk.MustNewDecFromStr("0.0"),
+			sdk.MustNewDecFromStr("0.02"),
+			sdk.MustNewDecFromStr("0.8"),
+			sdk.MustNewDecFromStr("5"),
+		),
+		sdk.MustNewDecFromStr("0.02"),
+		sdk.MustNewDecFromStr("0.02"),
+	)
+
 	params := NewParams(
-		MoneyMarkets{m1, m2, m3, m4},
+		MoneyMarkets{m1, m2, m3, m4, m5, m6},
 		sdk.NewDec(10),
 	)
 
