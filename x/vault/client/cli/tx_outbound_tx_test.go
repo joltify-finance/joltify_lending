@@ -3,11 +3,12 @@ package cli_test
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
-	app2 "github.com/joltify-finance/joltify_lending/app"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
+	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
@@ -57,7 +58,6 @@ func TestCreateOutboundTx(t *testing.T) {
 	} {
 		tc := tc
 		t.Run(tc.desc, func(t *testing.T) {
-
 			data, err := hex.DecodeString(tc.inTxHash)
 			require.NoError(t, err)
 

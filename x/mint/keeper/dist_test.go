@@ -1,10 +1,11 @@
 package keeper_test
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"testing"
 	"time"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -44,7 +45,7 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 	k.DoDistribute(ctx)
 	bk := tApp.GetBankKeeper()
 
-	amountToCommunity := params.CurrentProvisions.Mul(sdk.MustNewDecFromStr("0.2")).TruncateInt()
+	amountToCommunity := params.CurrentProvisions.Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
 
 	feeCollector := params.CurrentProvisions.TruncateInt().Sub(amountToCommunity)
 
@@ -203,7 +204,7 @@ func TestMintCoinsAndDistributeFor3Years(t *testing.T) {
 		deltaCoin = balance.Sub(balanceBefore)
 		deltaCoinsC = balanceC.Sub(balanceBeforeC)
 
-		amountToCommunity := currentProvision.Mul(sdk.MustNewDecFromStr("0.2")).TruncateDec()
+		amountToCommunity := currentProvision.Mul(sdk.MustNewDecFromStr("0.15")).TruncateDec()
 		toFeeCollector := currentProvision.TruncateInt().Sub(amountToCommunity.TruncateInt())
 
 		assert.True(t, deltaCoin.Amount.Equal(toFeeCollector))
@@ -255,12 +256,13 @@ func TestMintCoinsAndDistributeForAllYears(t *testing.T) {
 		balanceBeforeC = dis.GetFeePool(ctx).CommunityPool
 		k.DoDistribute(ctx)
 
+		// get the balance of the fee collector
 		balance = bk.GetBalance(ctx, addr, "ujolt")
 		balanceC = dis.GetFeePool(ctx).CommunityPool
 		deltaCoin = balance.Sub(balanceBefore)
 		deltaCoinsC = balanceC.Sub(balanceBeforeC)
 
-		amountToCommunity := currentProvision.Mul(sdk.MustNewDecFromStr("0.2")).TruncateDec()
+		amountToCommunity := currentProvision.Mul(sdk.MustNewDecFromStr("0.15")).TruncateDec()
 		toFeeCollector := currentProvision.TruncateInt().Sub(amountToCommunity.TruncateInt())
 
 		assert.True(t, deltaCoin.Amount.Equal(toFeeCollector))

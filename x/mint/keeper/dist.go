@@ -1,11 +1,12 @@
 package keeper
 
 import (
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
-	"time"
 )
 
 func (k Keeper) FirstDist(ctx sdk.Context) error {
@@ -116,5 +117,4 @@ func (k Keeper) DoDistribute(ctx sdk.Context) {
 	}
 	k.SetDistInfo(ctx, h)
 	k.SetParams(ctx, pa)
-
 }

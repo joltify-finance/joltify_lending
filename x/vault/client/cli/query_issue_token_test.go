@@ -2,9 +2,10 @@ package cli_test
 
 import (
 	"fmt"
-	"github.com/joltify-finance/joltify_lending/app"
 	"strconv"
 	"testing"
+
+	"github.com/joltify-finance/joltify_lending/app"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"

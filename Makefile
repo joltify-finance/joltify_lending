@@ -99,9 +99,9 @@ all: install
 
 build: go.sum
 ifeq ($(OS), Windows_NT)
-	go build -mod=readonly $(BUILD_FLAGS) -o build/$(shell go env GOOS)/joltifyd.exe ./cmd/joltify
+	go build -mod=readonly $(BUILD_FLAGS) -o build/$(shell go env GOOS)/joltify.exe ./cmd/joltify
 else
-	go build -mod=readonly $(BUILD_FLAGS) -o build/$(shell go env GOOS)/joltifyd ./cmd/joltify
+	go build -mod=readonly $(BUILD_FLAGS) -o build/$(shell go env GOOS)/joltify ./cmd/joltify
 endif
 
 build-linux: go.sum
@@ -156,6 +156,8 @@ format:
 start:
 	./contrib/devnet/init-new-chain.sh
 	joltify start
+test:
+	go test ./...
 
 ###############################################################################
 ###                                Protobuf                                 ###

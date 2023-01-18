@@ -2,11 +2,12 @@ package keeper_test
 
 import (
 	"fmt"
-	app2 "github.com/joltify-finance/joltify_lending/app"
 	"math/rand"
 	"strconv"
 	"testing"
 	"time"
+
+	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
