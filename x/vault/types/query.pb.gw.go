@@ -1069,7 +1069,7 @@ var (
 
 	pattern_Query_GetAllValidators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"joltify", "vault", "validators"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_GetQuota_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"oppy-finance", "oppychain", "vault", "get_quota", "query_length"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetQuota_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "vault", "get_quota", "query_length"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_IssueToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "vault", "issueToken", "index"}, "", runtime.AssumeColonVerbOpt(false)))
 
