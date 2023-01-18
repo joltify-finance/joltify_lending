@@ -38,7 +38,7 @@ service Query {
 
 // Queries a list of GetQuota items.
 	rpc GetQuota(QueryGetQuotaRequest) returns (QueryGetQuotaResponse) {
-		option (google.api.http).get = "/oppy-finance/oppychain/vault/get_quota/{query_length}";
+		option (google.api.http).get = "/joltify/vault/get_quota/{query_length}";
 	}
 
 // this line is used by starport scaffolding # 2
