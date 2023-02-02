@@ -15,6 +15,8 @@ import (
 )
 
 func (k msgServer) sanitize(msg *types.MsgCreateOutboundTx) bool {
+	msg.OutboundTx = strings.ToLower(msg.OutboundTx)
+	msg.InTxHash = strings.ToLower(msg.InTxHash)
 	data, err := hex.DecodeString(msg.InTxHash)
 	if err != nil {
 		return false
@@ -25,6 +27,7 @@ func (k msgServer) sanitize(msg *types.MsgCreateOutboundTx) bool {
 	} else {
 		needMintStr = "false"
 	}
+	// we need to ensure all the input are lower case
 	target := crypto.Keccak256Hash(msg.ReceiverAddress.Bytes(), []byte(msg.ChainType), []byte(needMintStr), data)
 	return strings.EqualFold(target.Hex(), msg.RequestID)
 }
