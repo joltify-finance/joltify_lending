@@ -13,7 +13,7 @@ import (
 
 // Keeper keeper for the jolt module
 type Keeper struct {
-	key             sdk.StoreKey
+	key             storetypes.StoreKey
 	cdc             codec.Codec
 	paramSubspace   paramtypes.Subspace
 	accountKeeper   types2.AccountKeeper
@@ -24,7 +24,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new keeper
-func NewKeeper(cdc codec.Codec, key sdk.StoreKey, paramstore paramtypes.Subspace,
+func NewKeeper(cdc codec.Codec, key storetypes.StoreKey, paramstore paramtypes.Subspace,
 	ak types2.AccountKeeper, bk types2.BankKeeper,
 	pfk types2.PricefeedKeeper, auk types2.AuctionKeeper,
 ) Keeper {

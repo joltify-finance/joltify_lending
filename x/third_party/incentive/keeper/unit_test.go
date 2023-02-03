@@ -23,7 +23,7 @@ import (
 )
 
 // NewTestContext sets up a basic context with an in-memory db
-func NewTestContext(requiredStoreKeys ...sdk.StoreKey) sdk.Context {
+func NewTestContext(requiredStoreKeys ...storetypes.StoreKey) sdk.Context {
 	memDB := db.NewMemDB()
 	cms := store.NewCommitMultiStore(memDB)
 
@@ -46,7 +46,7 @@ type unitTester struct {
 	ctx    sdk.Context
 
 	cdc               codec.Codec
-	incentiveStoreKey sdk.StoreKey
+	incentiveStoreKey storetypes.StoreKey
 }
 
 func (suite *unitTester) SetupSuite() {

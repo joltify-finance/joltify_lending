@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -14,7 +15,7 @@ import (
 
 // Keeper keeper for the cdp module
 type Keeper struct {
-	key             sdk.StoreKey
+	key             storetypes.StoreKey
 	cdc             codec.Codec
 	paramSubspace   paramtypes.Subspace
 	pricefeedKeeper types2.PricefeedKeeper
@@ -26,7 +27,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new keeper
-func NewKeeper(cdc codec.Codec, key sdk.StoreKey, paramstore paramtypes.Subspace, pfk types2.PricefeedKeeper,
+func NewKeeper(cdc codec.Codec, key storetypes.StoreKey, paramstore paramtypes.Subspace, pfk types2.PricefeedKeeper,
 	ak types2.AuctionKeeper, bk types2.BankKeeper, ack types2.AccountKeeper, maccs map[string][]string,
 ) Keeper {
 	if !paramstore.HasKeyTable() {

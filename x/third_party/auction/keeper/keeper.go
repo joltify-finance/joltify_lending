@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -15,7 +16,7 @@ import (
 )
 
 type Keeper struct {
-	storeKey      sdk.StoreKey
+	storeKey      storetypes.StoreKey
 	cdc           codec.Codec
 	paramSubspace paramtypes.Subspace
 	bankKeeper    types2.BankKeeper
@@ -23,7 +24,7 @@ type Keeper struct {
 }
 
 // NewKeeper returns a new auction keeper.
-func NewKeeper(cdc codec.Codec, storeKey sdk.StoreKey, paramstore paramtypes.Subspace,
+func NewKeeper(cdc codec.Codec, storeKey storetypes.StoreKey, paramstore paramtypes.Subspace,
 	bankKeeper types2.BankKeeper, accountKeeper types2.AccountKeeper,
 ) Keeper {
 	if !paramstore.HasKeyTable() {
