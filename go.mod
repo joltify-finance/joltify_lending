@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/cosmos/cosmos-proto v1.0.0-alpha6
-	github.com/cosmos/cosmos-sdk v0.45.10
+	github.com/cosmos/cosmos-sdk v0.46.8
 	github.com/cosmos/gogoproto v1.4.3
 	github.com/cosmos/ibc-go/v3 v3.4.0
 	github.com/ethereum/go-ethereum v1.9.25
@@ -197,5 +197,5 @@ replace (
 	// Use rocksdb 7.1.2
 	github.com/tendermint/tm-db => github.com/kava-labs/tm-db v0.6.7-kava.1
 	// Make sure that we use grpc compatible with cosmos
-	google.golang.org/grpc => google.golang.org/grpc v1.33.2
+	//google.golang.org/grpc => google.golang.org/grpc v1.33.2
 )
