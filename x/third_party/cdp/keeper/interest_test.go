@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 
@@ -26,10 +28,11 @@ type InterestTestSuite struct {
 }
 
 func (suite *InterestTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	cdc := tApp.AppCodec()
-	tApp.InitializeFromGenesisStates(
+	tApp.InitializeFromGenesisStates(nil, nil,
 		NewPricefeedGenStateMulti(cdc),
 		NewCDPGenStateMulti(cdc),
 	)

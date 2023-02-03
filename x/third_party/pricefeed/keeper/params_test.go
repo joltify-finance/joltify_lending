@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
@@ -25,9 +27,9 @@ type KeeperTestSuite struct {
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
-	tApp.InitializeFromGenesisStates(
+	tApp.InitializeFromGenesisStates(nil, nil,
 		NewPricefeedGenStateMulti(),
 	)
 	suite.keeper = tApp.GetPriceFeedKeeper()

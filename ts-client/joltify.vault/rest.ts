@@ -510,6 +510,33 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
+   * @name QueryGetQuota
+   * @summary Queries a list of GetQuota items.
+   * @request GET:/joltify/vault/get_quota/{query_length}
+   */
+  queryGetQuota = (
+    queryLength: number,
+    query?: {
+      "pagination.key"?: string;
+      "pagination.offset"?: string;
+      "pagination.limit"?: string;
+      "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.request<VaultQueryGetQuotaResponse, RpcStatus>({
+      path: `/joltify/vault/get_quota/${queryLength}`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
    * @name QueryGetValidators
    * @summary Queries a list of GetValidators items.
    * @request GET:/joltify/vault/get_validators/{height}
@@ -626,33 +653,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
   ) =>
     this.request<VaultQueryAllValidatorsResponse, RpcStatus>({
       path: `/joltify/vault/validators`,
-      method: "GET",
-      query: query,
-      format: "json",
-      ...params,
-    });
-
-  /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryGetQuota
-   * @summary Queries a list of GetQuota items.
-   * @request GET:/oppy-finance/oppychain/vault/get_quota/{query_length}
-   */
-  queryGetQuota = (
-    queryLength: number,
-    query?: {
-      "pagination.key"?: string;
-      "pagination.offset"?: string;
-      "pagination.limit"?: string;
-      "pagination.count_total"?: boolean;
-      "pagination.reverse"?: boolean;
-    },
-    params: RequestParams = {},
-  ) =>
-    this.request<VaultQueryGetQuotaResponse, RpcStatus>({
-      path: `/oppy-finance/oppychain/vault/get_quota/${queryLength}`,
       method: "GET",
       query: query,
       format: "json",

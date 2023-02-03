@@ -52,7 +52,7 @@ func TestQuotaCheck(t *testing.T) {
 	assert.False(t, ret)
 	t1 := sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(100)))
 
-	q.CoinsSum = q.CoinsSum.Sub(t1)
+	q.CoinsSum = q.CoinsSum.Sub(t1...)
 	app.VaultKeeper.SetQuotaData(ctx, q)
 	ret = app.VaultKeeper.QuotaCheck(ctx, t1)
 	assert.True(t, ret)

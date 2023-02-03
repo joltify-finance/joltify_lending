@@ -6,6 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
+
 	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -156,16 +160,24 @@ func networkPrepare(t *testing.T, maxValidator uint32, addr string) (*network.Ne
 	return nb, state.CreatePoolList
 }
 
+func getCodec() codec.Codec {
+	registry := codectypes.NewInterfaceRegistry()
+	cryptocodec.RegisterInterfaces(registry)
+	return codec.NewProtoCodec(registry)
+}
+
 // this test will fail as it is not from pool owner
 func TestCreateIssue(t *testing.T) {
 	app2.SetSDKConfig()
-	k2 := keyring.NewInMemory()
+	k2 := keyring.NewInMemory(getCodec())
 	_, _, err := k2.NewMnemonic("0",
 		keyring.English, sdk.FullFundraiserPath, keyring.DefaultBIP39Passphrase, hd.Secp256k1)
 	assert.Nil(t, err)
 	v, err := k2.Key("0")
 	assert.Nil(t, err)
-	net, _ := networkPrepare(t, 3, v.GetAddress().String())
+	addr, err := v.GetAddress()
+	assert.NoError(t, err)
+	net, _ := networkPrepare(t, 3, addr.String())
 
 	_, err = net.WaitForHeightWithTimeout(5, time.Minute)
 	assert.NoError(t, err)
@@ -184,18 +196,27 @@ func TestCreateIssue(t *testing.T) {
 	thisInfo, err := key.Key("0")
 	assert.Nil(t, err)
 
-	pubkey := legacybech32.MustMarshalPubKey(legacybech32.AccPK, thisInfo.GetPubKey()) //nolint
+	thisInfoPk, err := thisInfo.GetPubKey()
+	assert.Nil(t, err)
+
+	pubkey := legacybech32.MustMarshalPubKey(legacybech32.AccPK, thisInfoPk) //nolint
 	createPoolFields := []string{pubkey, "4"}
 
+	infoAddr, err := info[0].GetAddress()
+	assert.Nil(t, err)
+
+	thisInfoAddr, err := thisInfo.GetAddress()
+	assert.Nil(t, err)
+
 	commonArgs := []string{
-		fmt.Sprintf("--%s=%s", flags.FlagFrom, info[0].GetAddress()),
+		fmt.Sprintf("--%s=%s", flags.FlagFrom, infoAddr),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
 		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdk.NewInt(10))).String()),
 	}
 
 	commonArgs2 := []string{
-		fmt.Sprintf("--%s=%s", flags.FlagFrom, thisInfo.GetAddress()),
+		fmt.Sprintf("--%s=%s", flags.FlagFrom, thisInfoAddr),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
 	}
@@ -224,6 +245,5 @@ func TestCreateIssue(t *testing.T) {
 	assert.Nil(t, err)
 	var respIssueToken sdk.TxResponse
 	require.NoError(t, ctx.Codec.UnmarshalJSON(out.Bytes(), &respIssueToken))
-	fmt.Printf(">>>>>>>>>>>>>>>>>%v\n", respIssueToken.RawLog)
 	require.Equal(t, uint32(0), respIssueToken.Code)
 }

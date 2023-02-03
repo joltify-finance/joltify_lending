@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 
 	cli2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/client/cli"
-	"github.com/joltify-finance/joltify_lending/x/third_party/cdp/client/rest"
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 
-	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
@@ -61,11 +59,6 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 // RegisterInterfaces implements InterfaceModule.RegisterInterfaces
 func (a AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	types2.RegisterInterfaces(registry)
-}
-
-// RegisterRESTRoutes registers REST routes for the swap module.
-func (a AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {
-	rest.RegisterRoutes(clientCtx, rtr)
 }
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the gov module.

@@ -31,6 +31,8 @@ func (suite *abciTestSuite) TestKeeper_BeginBlocker() {
 
 	suite.AddCoinsToNamedModule(suite.ModAcc.Name, cs(c("token1", 100), c("token2", 100), c("debt", 100)))
 
+	suite.AddCoinsToAccount(buyer, cs(c("token1", 100), c("token2", 100), c("debt", 100)))
+
 	// Start an auction and place a bid
 	auctionID, err := suite.Keeper.StartCollateralAuction(suite.Ctx, suite.ModAcc.Name, c("token1", 20), c("token2", 50), returnAddrs, returnWeights, c("debt", 40))
 	suite.Require().NoError(err)

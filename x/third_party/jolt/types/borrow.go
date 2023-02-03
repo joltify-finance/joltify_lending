@@ -35,10 +35,11 @@ func (b Borrow) NormalizedBorrow() (sdk.DecCoins, error) {
 			return nil, fmt.Errorf("interest factor '%s' < 1", coin.Denom)
 		}
 
+		value := sdk.NewDecFromInt(coin.Amount).Quo(factor)
 		normalized = normalized.Add(
 			sdk.NewDecCoinFromDec(
 				coin.Denom,
-				coin.Amount.ToDec().Quo(factor),
+				value,
 			),
 		)
 	}

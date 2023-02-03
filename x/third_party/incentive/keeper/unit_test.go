@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -23,12 +27,12 @@ import (
 )
 
 // NewTestContext sets up a basic context with an in-memory db
-func NewTestContext(requiredStoreKeys ...sdk.StoreKey) sdk.Context {
+func NewTestContext(requiredStoreKeys ...storetypes.StoreKey) sdk.Context {
 	memDB := db.NewMemDB()
 	cms := store.NewCommitMultiStore(memDB)
 
 	for _, key := range requiredStoreKeys {
-		cms.MountStoreWithDB(key, sdk.StoreTypeIAVL, nil)
+		cms.MountStoreWithDB(key, storetypes.StoreTypeIAVL, nil)
 	}
 
 	if err := cms.LoadLatestVersion(); err != nil {
@@ -46,11 +50,11 @@ type unitTester struct {
 	ctx    sdk.Context
 
 	cdc               codec.Codec
-	incentiveStoreKey sdk.StoreKey
+	incentiveStoreKey storetypes.StoreKey
 }
 
 func (suite *unitTester) SetupSuite() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.cdc = tApp.AppCodec()
 
 	suite.incentiveStoreKey = sdk.NewKVStoreKey(types2.StoreKey)

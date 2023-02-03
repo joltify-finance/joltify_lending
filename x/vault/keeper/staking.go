@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"time"
 
+	errorsmod "cosmossdk.io/errors"
+
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -104,7 +105,7 @@ func (k Keeper) getEligibleValidators(ctx sdk.Context) ([]vaulttypes.ValidatorPo
 func (k Keeper) updateValidators(ctx sdk.Context) error {
 	vs, err := k.getEligibleValidators(ctx)
 	if err != nil {
-		return sdkerrors.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
+		return errorsmod.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
 	}
 
 	stakingValidators := make([]*vaulttypes.Validator, len(vs))
@@ -112,7 +113,7 @@ func (k Keeper) updateValidators(ctx sdk.Context) error {
 	for i, el := range vs {
 		key, err := el.Validator.ConsPubKey()
 		if err != nil {
-			return sdkerrors.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
+			return errorsmod.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
 		}
 		v := vaulttypes.Validator{
 			Pubkey: key.Bytes(),

@@ -5,14 +5,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/stretchr/testify/assert"
+	tmdb "github.com/tendermint/tm-db"
+
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/joltify-finance/joltify_lending/app"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 )
@@ -34,8 +37,9 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 	} else {
 		cfg = configs[0]
 	}
-	cfg.EnableLogging = true
-	net := network.New(t, cfg)
+
+	net, err := network.New(t, t.TempDir(), cfg)
+	assert.NoError(t, err)
 	t.Cleanup(net.Cleanup)
 	return net
 }
@@ -43,24 +47,33 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 // DefaultConfig will initialize config for the network with custom application,
 // genesis and single validator. All other parameters are inherited from cosmos-sdk/testutil/network.DefaultConfig
 func DefaultConfig() network.Config {
-	encoding := cosmoscmd.MakeEncodingConfig(app.ModuleBasics)
+	encoding := app.MakeEncodingConfig()
 	return network.Config{
 		Codec:             encoding.Marshaler,
 		TxConfig:          encoding.TxConfig,
 		LegacyAmino:       encoding.Amino,
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		AppConstructor: func(val network.Validator) servertypes.Application {
-			tApp := app.NewTestApp()
-			return &tApp.App
+		// AppConstructor: func(val network.Validator) servertypes.Application {
+		//	tApp := app.NewTestApp()
+		//	return &tApp.App
 
-			// return tApp.App.NewApp(
-			//	val.Ctx.Logger, tmdb.NewMemDB(), nil, true, map[int64]bool{}, val.Ctx.Config.RootDir, 0,
-			//	encoding,
-			//	simapp.EmptyAppOptions{},
-			//	baseapp.SetPruning(storetypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
-			//	baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
-			//)
+		// return tApp.App.NewApp(
+		//	val.Ctx.Logger, tmdb.NewMemDB(), nil, true, map[int64]bool{}, val.Ctx.Config.RootDir, 0,
+		//	encoding,
+		//	simapp.EmptyAppOptions{},
+		//	baseapp.SetPruning(storetypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
+		//	baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
+		// )
+		// },
+
+		AppConstructor: func(val network.Validator) servertypes.Application {
+			return app.NewApp(
+				val.Ctx.Logger, tmdb.NewMemDB(), val.Ctx.Config.RootDir, nil, encoding,
+				app.Options{},
+				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
+				baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
+			)
 		},
 
 		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),
@@ -72,7 +85,7 @@ func DefaultConfig() network.Config {
 		AccountTokens:   sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction),
 		StakingTokens:   sdk.TokensFromConsensusPower(500, sdk.DefaultPowerReduction),
 		BondedTokens:    sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction),
-		PruningStrategy: storetypes.PruningOptionNothing,
+		PruningStrategy: pruningtypes.PruningOptionNothing,
 		CleanupDir:      true,
 		SigningAlgo:     string(hd.Secp256k1Type),
 		KeyringOptions:  []keyring.Option{},

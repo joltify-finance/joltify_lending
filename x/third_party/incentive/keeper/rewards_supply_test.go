@@ -4,6 +4,9 @@ import (
 	"testing"
 	"time"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,13 +58,22 @@ func (suite *SupplyIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncin
 
 	suite.SetApp()
 
-	suite.StartChain(
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range suite.addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	suite.StartChain(genAcc, cs(c("bnb", 1e12), c("sbnb", 1e12)),
 		suite.genesisTime,
 		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
 		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.App.AppCodec()),
 		authBulder.BuildMarshalled(suite.App.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.App.AppCodec()),
 	)
+
+	err := fundModuleAccount(suite.App.GetBankKeeper(), suite.Ctx, types.ModuleName, cs(c("jjolt", 1e18)))
+	suite.Require().NoError(err)
 
 	// Create a deposit
 	suite.NoError(suite.DeliverJoltMsgDeposit(userA, cs(c("bnb", 1e11))))
@@ -92,7 +104,7 @@ func (suite *SupplyIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncin
 	// The users has always had 100% of deposits, so they should receive all rewards for the previous two blocks.
 	// Total rewards for each block is block duration * rewards per second
 	accuracy := 1e-10 // using a very high accuracy to flag future small calculation changes
-	suite.BalanceInEpsilon(userA, cs(c("bnb", 1e12-1e11+1e10), c("jjolt", 2*1e6*1e6), c("sbnb", 1e12)), accuracy)
+	suite.BalanceInEpsilon(userA, cs(c("bnb", 1e12-1e11+1e10), c("jjolt", 2*1e6*1e6), c("stake", 100000000000000), c("sbnb", 1e12)), accuracy)
 }
 
 // Test suite used for all keeper tests
@@ -120,7 +132,7 @@ func (suite *SupplyRewardsTestSuite) SetupTest() {
 }
 
 func (suite *SupplyRewardsTestSuite) SetupApp() {
-	suite.app = app.NewTestApp()
+	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
@@ -128,11 +140,11 @@ func (suite *SupplyRewardsTestSuite) SetupApp() {
 	suite.ctx = suite.app.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
 }
 
-func (suite *SupplyRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder) {
+func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder) {
 	suite.SetupApp()
 
 	suite.app.InitializeFromGenesisStatesWithTime(
-		suite.genesisTime,
+		suite.genesisTime, genAcc, coins,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
 		joltBuilder.BuildMarshalled(suite.app.AppCodec()),
@@ -229,11 +241,13 @@ func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
 		},
 	}
 	for _, tc := range testCases {
+
+		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
 			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
 				userAddr,
-				cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)),
+				coins,
 			)
 			// suite.SetupWithGenState(authBuilder)
 			incentBuilder := testutil.NewIncentiveGenesisBuilder().
@@ -242,7 +256,11 @@ func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
 				incentBuilder = incentBuilder.WithSimpleSupplyRewardPeriod(tc.args.deposit.Denom, tc.args.rewardsPerSecond)
 			}
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			var genAcc []authtypes.GenesisAccount
+			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
+			genAcc = append(genAcc, b)
+
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
 			// User deposits to increase total supplied amount
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(tc.args.deposit))
@@ -381,18 +399,24 @@ func (suite *SupplyRewardsTestSuite) TestInitializeJoltSupplyRewards() {
 		},
 	}
 	for _, tc := range testCases {
+		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("sbnb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
 			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
 				userAddr,
-				cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("sbnb", 1e15), c("xrp", 1e15), c("zzz", 1e15)),
+				coins,
 			)
 
 			incentBuilder := testutil.NewIncentiveGenesisBuilder().WithGenesisTime(suite.genesisTime)
 			for moneyMarketDenom, rewardsPerSecond := range tc.args.moneyMarketRewardDenoms {
 				incentBuilder = incentBuilder.WithSimpleSupplyRewardPeriod(moneyMarketDenom, rewardsPerSecond)
 			}
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+
+			var genAcc []authtypes.GenesisAccount
+			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
+			genAcc = append(genAcc, b)
+
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
 			// User deposits
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.deposit)
@@ -571,18 +595,27 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 		},
 	}
 	for _, tc := range testCases {
+		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("sbnb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
 			authBuilder := app.NewAuthBankGenesisBuilder().
 				WithSimpleAccount(suite.addrs[2], cs(c("ujolt", 1e9), c("sbnb", 1e9))).
-				WithSimpleAccount(userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("sbnb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+				WithSimpleAccount(userAddr, coins)
 
 			incentBuilder := testutil.NewIncentiveGenesisBuilder().
 				WithGenesisTime(suite.genesisTime)
 			if tc.args.rewardsPerSecond != nil {
 				incentBuilder = incentBuilder.WithSimpleSupplyRewardPeriod(tc.args.incentiveSupplyRewardDenom, tc.args.rewardsPerSecond)
 			}
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+
+			var genAcc []authtypes.GenesisAccount
+			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
+			genAcc = append(genAcc, b)
+
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+
+			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[2], cs(c("ujolt", 1e9), c("sbnb", 1e9)))
+			suite.Require().NoError(err)
 
 			// Deposit a fixed amount from another user to dilute primary user's rewards per second.
 			suite.Require().NoError(
@@ -590,7 +623,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 			)
 
 			// User deposits and borrows to increase total borrowed amount
-			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(tc.args.deposit))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(tc.args.deposit))
 			suite.Require().NoError(err)
 
 			// Check that Jolt hooks initialized a JoltLiquidityProviderClaim with 0 reward indexes
@@ -857,11 +890,12 @@ func (suite *SupplyRewardsTestSuite) TestUpdateJoltSupplyIndexDenoms() {
 		},
 	}
 	for _, tc := range testCases {
+		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
 			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
 				userAddr,
-				cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)),
+				coins,
 			)
 			incentBuilder := testutil.NewIncentiveGenesisBuilder().
 				WithGenesisTime(suite.genesisTime).
@@ -870,7 +904,10 @@ func (suite *SupplyRewardsTestSuite) TestUpdateJoltSupplyIndexDenoms() {
 				WithSimpleSupplyRewardPeriod("btcb", tc.args.rewardsPerSecond).
 				WithSimpleSupplyRewardPeriod("xrp", tc.args.rewardsPerSecond)
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			var genAcc []authtypes.GenesisAccount
+			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
+			genAcc = append(genAcc, b)
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
 			// User deposits (first time)
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.firstDeposit)
@@ -941,17 +978,21 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 		},
 	}
 	for _, tc := range testCases {
+		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
 			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
 				userAddr,
-				cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)),
+				coins,
 			)
 			incentBuilder := testutil.NewIncentiveGenesisBuilder().
 				WithGenesisTime(suite.genesisTime).
 				WithSimpleSupplyRewardPeriod(tc.args.deposit.Denom, tc.args.rewardsPerSecond)
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			var genAcc []authtypes.GenesisAccount
+			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
+			genAcc = append(genAcc, b)
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
 			// User deposits and borrows to increase total borrowed amount
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(tc.args.deposit))

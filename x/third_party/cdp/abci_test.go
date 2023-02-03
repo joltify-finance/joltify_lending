@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/cdp"
 	"github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
@@ -40,14 +43,22 @@ type liquidationTracker struct {
 }
 
 func (suite *ModuleTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	tracker := liquidationTracker{}
 
 	coins := cs(c("btc", 100000000), c("xrp", 10000000000))
 	_, addrs := app.GeneratePrivKeyAddressPairs(100)
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), coins, addrs)
-	tApp.InitializeFromGenesisStates(
+
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	tApp.InitializeFromGenesisStates(genAcc, coins,
 		authGS,
 		NewPricefeedGenStateMulti(tApp.AppCodec()),
 		NewCDPGenStateMulti(tApp.AppCodec()),
@@ -61,7 +72,8 @@ func (suite *ModuleTestSuite) SetupTest() {
 }
 
 func (suite *ModuleTestSuite) createCdps() {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	cdps := make(types2.CDPs, 100)
 	tracker := liquidationTracker{}
@@ -70,7 +82,13 @@ func (suite *ModuleTestSuite) createCdps() {
 	_, addrs := app.GeneratePrivKeyAddressPairs(100)
 
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), coins, addrs)
-	tApp.InitializeFromGenesisStates(
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	tApp.InitializeFromGenesisStates(genAcc, coins,
 		authGS,
 		NewPricefeedGenStateMulti(tApp.AppCodec()),
 		NewCDPGenStateMulti(tApp.AppCodec()),

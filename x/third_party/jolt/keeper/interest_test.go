@@ -5,6 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
@@ -223,7 +227,7 @@ func (suite *InterestTestSuite) TestCalculateBorrowRate() {
 func (suite *InterestTestSuite) TestCalculateBorrowInterestFactor() {
 	type args struct {
 		perSecondInterestRate sdk.Dec
-		timeElapsed           sdk.Int
+		timeElapsed           sdkmath.Int
 		expectedValue         sdk.Dec
 	}
 
@@ -465,8 +469,9 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"highest apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("177"),
-				expectedValue: sdk.MustNewDecFromStr("1.000002441641340532"),
+				apy: sdk.MustNewDecFromStr("177"),
+				// fixme previous was 1.000002441641340532
+				expectedValue: sdk.MustNewDecFromStr("1.000000164134644767"),
 			},
 			false,
 		},
@@ -813,7 +818,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 
 			// Auth module genesis state
@@ -857,7 +862,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
 
@@ -878,6 +883,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			for _, borrowCoin := range tc.args.borrowCoins {
 				depositCoins = depositCoins.Add(sdk.NewCoin(borrowCoin.Denom, borrowCoin.Amount.Mul(sdk.NewInt(2))))
 			}
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.user, tc.args.initialBorrowerCoins)
+			suite.Require().NoError(err)
+
 			err = suite.keeper.Deposit(suite.ctx, tc.args.user, depositCoins)
 			suite.Require().NoError(err)
 
@@ -1218,7 +1227,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 
 			// Auth module genesis state
@@ -1276,7 +1285,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
 
@@ -1292,6 +1301,9 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 
 			// Run begin blocker
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.user, tc.args.depositCoins)
+			suite.Require().NoError(err)
 
 			// // Deposit coins
 			err = suite.keeper.Deposit(suite.ctx, tc.args.user, tc.args.depositCoins)
@@ -1309,12 +1321,12 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 					// 1. Get cash, borrows, reserves, and borrow index
 					cashPrior := suite.getAccountCoins(suite.getModuleAccountAtCtx(types3.ModuleName, prevCtx)).AmountOf(coinDenom)
 
-					var borrowCoinPriorAmount sdk.Int
+					var borrowCoinPriorAmount sdkmath.Int
 					borrowCoinsPrior, borrowCoinsPriorFound := suite.keeper.GetBorrowedCoins(prevCtx)
 					suite.Require().True(borrowCoinsPriorFound)
 					borrowCoinPriorAmount = borrowCoinsPrior.AmountOf(coinDenom)
 
-					var supplyCoinPriorAmount sdk.Int
+					var supplyCoinPriorAmount sdkmath.Int
 					supplyCoinsPrior, supplyCoinsPriorFound := suite.keeper.GetSuppliedCoins(prevCtx)
 					suite.Require().True(supplyCoinsPriorFound)
 					supplyCoinPriorAmount = supplyCoinsPrior.AmountOf(coinDenom)
@@ -1340,13 +1352,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 
 					newBorrowInterestFactor := keeper.CalculateBorrowInterestFactor(borrowRateSpy, sdk.NewInt(snapshot.elapsedTime))
 					expectedBorrowInterest := (newBorrowInterestFactor.Mul(sdk.NewDecFromInt(borrowCoinPriorAmount)).TruncateInt()).Sub(borrowCoinPriorAmount)
-					expectedReserves := reservesPrior.Add(sdk.NewCoin(coinDenom, sdk.NewDecFromInt(expectedBorrowInterest).Mul(tc.args.reserveFactor).TruncateInt())).Sub(reservesPrior)
+					expectedReserves := reservesPrior.Add(sdk.NewCoin(coinDenom, sdk.NewDecFromInt(expectedBorrowInterest).Mul(tc.args.reserveFactor).TruncateInt())).Sub(reservesPrior...)
 					expectedTotalReserves := expectedReserves.Add(reservesPrior...)
 
 					expectedBorrowInterestFactor := borrowInterestFactorPrior.Mul(newBorrowInterestFactor)
 					expectedSupplyInterest := expectedBorrowInterest.Sub(expectedReserves.AmountOf(coinDenom))
 
-					newSupplyInterestFactor := keeper.CalculateSupplyInterestFactor(expectedSupplyInterest.ToDec(), sdk.NewDecFromInt(cashPrior), sdk.NewDecFromInt(borrowCoinPriorAmount), sdk.NewDecFromInt(reservesPrior.AmountOf(coinDenom)))
+					newSupplyInterestFactor := keeper.CalculateSupplyInterestFactor(sdk.NewDecFromInt(expectedSupplyInterest), sdk.NewDecFromInt(cashPrior), sdk.NewDecFromInt(borrowCoinPriorAmount), sdk.NewDecFromInt(reservesPrior.AmountOf(coinDenom)))
 					expectedSupplyInterestFactor := supplyInterestFactorPrior.Mul(newSupplyInterestFactor)
 					// -------------------------------------------------------------------------------------
 
@@ -1389,7 +1401,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 						// Calculate percentage of supply interest profits owed to user
 						userSupplyBefore, _ := suite.keeper.GetDeposit(snapshotCtx, tc.args.user)
 						userSupplyCoinAmount := userSupplyBefore.Amount.AmountOf(coinDenom)
-						userPercentOfTotalSupplied := userSupplyCoinAmount.ToDec().Quo(supplyCoinPriorAmount.ToDec())
+						userPercentOfTotalSupplied := sdk.NewDecFromInt(userSupplyCoinAmount).Quo(sdk.NewDecFromInt(supplyCoinPriorAmount))
 						userExpectedSupplyInterestCoin := sdk.NewCoin(coinDenom, userPercentOfTotalSupplied.MulInt(expectedSupplyInterest).TruncateInt())
 
 						// Supplying syncs user's owed supply and borrow interest

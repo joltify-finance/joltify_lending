@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/app"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmprototypes "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtime "github.com/tendermint/tendermint/types/time"
 
@@ -13,7 +14,8 @@ import (
 )
 
 func TestParamsQuery(t *testing.T) {
-	tApp := app.NewTestApp()
+	lg := tmlog.NewNopLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
 
 	keeper := tApp.GetMintKeeper()

@@ -42,7 +42,7 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Coi
 			acc := k.accountKeeper.GetAccount(ctx, depositor)
 			accCoins := k.bankKeeper.SpendableCoins(ctx, acc.GetAddress())
 			for _, coin := range coins {
-				_, isNegative := accCoins.SafeSub(sdk.NewCoins(coin))
+				_, isNegative := accCoins.SafeSub(coin)
 				if isNegative {
 					return sdkerrors.Wrapf(types2.ErrBorrowExceedsAvailableBalance,
 						"insufficient funds: the requested deposit amount of %s exceeds the total available account funds of %s%s",
@@ -138,8 +138,7 @@ func (k Keeper) DecrementSuppliedCoins(ctx sdk.Context, coins sdk.Coins) error {
 	if !found {
 		return sdkerrors.Wrapf(types2.ErrSuppliedCoinsNotFound, "cannot withdraw if no coins are deposited")
 	}
-
-	updatedSuppliedCoins, isNegative := suppliedCoins.SafeSub(coins)
+	updatedSuppliedCoins, isNegative := suppliedCoins.SafeSub(coins...)
 	if isNegative {
 		coinsToSubtract := sdk.NewCoins()
 		for _, coin := range coins {
@@ -151,7 +150,7 @@ func (k Keeper) DecrementSuppliedCoins(ctx sdk.Context, coins sdk.Coins) error {
 				coinsToSubtract = coinsToSubtract.Add(coin)
 			}
 		}
-		updatedSuppliedCoins = suppliedCoins.Sub(coinsToSubtract)
+		updatedSuppliedCoins = suppliedCoins.Sub(coinsToSubtract...)
 	}
 
 	k.SetSuppliedCoins(ctx, updatedSuppliedCoins)

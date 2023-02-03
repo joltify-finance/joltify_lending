@@ -18,11 +18,10 @@ protoc_gen_doc() {
   go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
 }
 
-
-
+cp go.mod go.mod.bak
+cp go.sum go.sum.bak
 protoc_gen_gocosmos
 protoc_gen_doc
-
 
 echo "Generating gogo proto code"
 cd proto
@@ -35,8 +34,9 @@ for dir in $proto_dirs; do
     fi
   done
 done
-
 cd ..
+mv go.mod.bak go.mod
+mv go.sum.bak go.sum
 
 # move proto files to the right places
 #

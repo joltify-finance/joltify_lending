@@ -1,5 +1,6 @@
 // THIS FILE IS GENERATED AUTOMATICALLY. DO NOT MODIFY.
 
+import JoltifyfinanceJoltifyLendingKyc from './joltifyfinance.joltify_lending.kyc'
 import JoltifyMint from './joltify.mint'
 import JoltifyThirdPartyAuctionV1Beta1 from './joltify.third_party.auction.v1beta1'
 import JoltifyThirdPartyCdpV1Beta1 from './joltify.third_party.cdp.v1beta1'
@@ -8,12 +9,6 @@ import JoltifyThirdPartyIssuanceV1Beta1 from './joltify.third_party.issuance.v1b
 import JoltifyThirdPartyJoltV1Beta1 from './joltify.third_party.jolt.v1beta1'
 import JoltifyThirdPartyPricefeedV1Beta1 from './joltify.third_party.pricefeed.v1beta1'
 import JoltifyVault from './joltify.vault'
-import IbcApplicationsInterchainAccountsControllerV1 from './ibc.applications.interchain_accounts.controller.v1'
-import IbcApplicationsInterchainAccountsHostV1 from './ibc.applications.interchain_accounts.host.v1'
-import IbcApplicationsTransferV1 from './ibc.applications.transfer.v1'
-import IbcCoreChannelV1 from './ibc.core.channel.v1'
-import IbcCoreClientV1 from './ibc.core.client.v1'
-import IbcCoreConnectionV1 from './ibc.core.connection.v1'
 import CosmosAuthV1Beta1 from './cosmos.auth.v1beta1'
 import CosmosAuthzV1Beta1 from './cosmos.authz.v1beta1'
 import CosmosBankV1Beta1 from './cosmos.bank.v1beta1'
@@ -32,6 +27,7 @@ import CosmosVestingV1Beta1 from './cosmos.vesting.v1beta1'
 
 
 export default { 
+  JoltifyfinanceJoltifyLendingKyc: load(JoltifyfinanceJoltifyLendingKyc, 'joltifyfinance.joltify_lending.kyc'),
   JoltifyMint: load(JoltifyMint, 'joltify.mint'),
   JoltifyThirdPartyAuctionV1Beta1: load(JoltifyThirdPartyAuctionV1Beta1, 'joltify.third_party.auction.v1beta1'),
   JoltifyThirdPartyCdpV1Beta1: load(JoltifyThirdPartyCdpV1Beta1, 'joltify.third_party.cdp.v1beta1'),
@@ -40,12 +36,6 @@ export default {
   JoltifyThirdPartyJoltV1Beta1: load(JoltifyThirdPartyJoltV1Beta1, 'joltify.third_party.jolt.v1beta1'),
   JoltifyThirdPartyPricefeedV1Beta1: load(JoltifyThirdPartyPricefeedV1Beta1, 'joltify.third_party.pricefeed.v1beta1'),
   JoltifyVault: load(JoltifyVault, 'joltify.vault'),
-  IbcApplicationsInterchainAccountsControllerV1: load(IbcApplicationsInterchainAccountsControllerV1, 'ibc.applications.interchain_accounts.controller.v1'),
-  IbcApplicationsInterchainAccountsHostV1: load(IbcApplicationsInterchainAccountsHostV1, 'ibc.applications.interchain_accounts.host.v1'),
-  IbcApplicationsTransferV1: load(IbcApplicationsTransferV1, 'ibc.applications.transfer.v1'),
-  IbcCoreChannelV1: load(IbcCoreChannelV1, 'ibc.core.channel.v1'),
-  IbcCoreClientV1: load(IbcCoreClientV1, 'ibc.core.client.v1'),
-  IbcCoreConnectionV1: load(IbcCoreConnectionV1, 'ibc.core.connection.v1'),
   CosmosAuthV1Beta1: load(CosmosAuthV1Beta1, 'cosmos.auth.v1beta1'),
   CosmosAuthzV1Beta1: load(CosmosAuthzV1Beta1, 'cosmos.authz.v1beta1'),
   CosmosBankV1Beta1: load(CosmosBankV1Beta1, 'cosmos.bank.v1beta1'),

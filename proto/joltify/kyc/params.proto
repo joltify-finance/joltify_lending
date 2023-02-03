@@ -1,0 +1,31 @@
+syntax = "proto3";
+package joltifyfinance.joltify_lending.kyc;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/kyc/types";
+
+
+message BasicInfo{
+  string description = 1;
+  string projects_url = 2;
+  string project_country = 3;
+  string business_number= 4 ;
+  bytes reserved = 5;
+}
+
+// Market defines an asset in the pricefeed.
+message ProjectInfo {
+  int32  index = 1;
+  string         SPV_name   = 2 ;
+  BasicInfo basic_info = 3;
+  bytes project_owner     = 4 [   (cosmos_proto.scalar) = "cosmos.AddressBytes",   (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  repeated ProjectInfo projects_info = 1;
+  repeated bytes submitter     = 4 [   (cosmos_proto.scalar) = "cosmos.AddressBytes",   (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}

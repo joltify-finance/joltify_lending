@@ -6,6 +6,7 @@ import (
 	"time"
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/stretchr/testify/require"
 
@@ -31,11 +32,11 @@ func TestAuctionBidding(t *testing.T) {
 
 	someTime := time.Date(0o001, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	buyer := addrs[0]
-	secondBuyer := addrs[1]
+	_, addrsAll := app.GeneratePrivKeyAddressPairs(5)
+	buyer := addrsAll[0]
+	secondBuyer := addrsAll[1]
 	modName := "liquidator"
-	collateralAddrs := addrs[2:]
+	collateralAddrs := addrsAll[2:]
 	collateralWeights := is(30, 20, 10)
 
 	initialBalance := cs(c("token1", 1000), c("token2", 1000))
@@ -443,7 +444,9 @@ func TestAuctionBidding(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Setup test
-			tApp := app.NewTestApp()
+
+			lg := tmlog.TestingLogger()
+			tApp := app.NewTestApp(lg, t.TempDir())
 
 			// Set up module account
 			modName := "liquidator"
@@ -469,7 +472,8 @@ func TestAuctionBidding(t *testing.T) {
 
 			moduleGs := tApp.AppCodec().MustMarshalJSON(auctionGs)
 			gs := app.GenesisState{types2.ModuleName: moduleGs}
-			tApp.InitializeFromGenesisStates(authGS, gs)
+
+			tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
 
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: someTime})
 			keeper := tApp.GetAuctionKeeper()
@@ -477,6 +481,21 @@ func TestAuctionBidding(t *testing.T) {
 
 			err = tApp.FundModuleAccount(ctx, modName, cs(c("token1", 1000), c("token2", 1000), c("debt", 1000)))
 			require.NoError(t, err)
+
+			err = tApp.FundModuleAccount(ctx, modName, initialBalance)
+			require.NoError(t, err)
+
+			for _, el := range addrs {
+				err = tApp.FundAccount(ctx, el, initialBalance)
+				// err = tApp.FundAccount(ctx, el, cs(c("token1", 1000), c("token2", 1000), c("debt", 1000)))
+				require.NoError(t, err)
+			}
+
+			for _, el := range addrsAll {
+				err = tApp.FundAccount(ctx, el, initialBalance)
+				// err = tApp.FundAccount(ctx, el, cs(c("token1", 1000), c("token2", 1000), c("debt", 1000)))
+				require.NoError(t, err)
+			}
 
 			// Start Auction
 			var id uint64
@@ -516,7 +535,10 @@ func TestAuctionBidding(t *testing.T) {
 				oldBidder = oldAuction.GetBidder()
 			}
 
-			oldBidderOldCoins := bank.GetAllBalances(ctx, oldBidder)
+			var oldBidderOldCoins sdk.Coins
+			if !oldBidder.Empty() {
+				oldBidderOldCoins = bank.GetAllBalances(ctx, oldBidder)
+			}
 			newBidderOldCoins := bank.GetAllBalances(ctx, tc.bidArgs.bidder)
 
 			// Place bid on auction
@@ -547,9 +569,9 @@ func TestAuctionBidding(t *testing.T) {
 					}
 				}
 				if oldBidder.Equals(tc.bidArgs.bidder) { // same bidder
-					require.Equal(t, newBidderOldCoins.Sub(cs(bidAmt.Sub(oldAuction.GetBid()))), bank.GetAllBalances(ctx, tc.bidArgs.bidder))
+					require.Equal(t, newBidderOldCoins.Sub(bidAmt.Sub(oldAuction.GetBid())), bank.GetAllBalances(ctx, tc.bidArgs.bidder))
 				} else { // different bidder
-					require.Equal(t, newBidderOldCoins.Sub(cs(bidAmt)), bank.GetAllBalances(ctx, tc.bidArgs.bidder)) // wrapping in cs() to avoid comparing nil and empty coins
+					require.Equal(t, newBidderOldCoins.Sub(bidAmt), bank.GetAllBalances(ctx, tc.bidArgs.bidder)) // wrapping in cs() to avoid comparing nil and empty coins
 
 					// handle checking debt coins for case debt auction has had no bids placed yet TODO make this less confusing
 					if oldBidder.Equals(authtypes.NewModuleAddress(oldAuction.GetInitiator())) {
@@ -577,7 +599,9 @@ func TestAuctionBidding(t *testing.T) {
 
 				// Check coins have not moved
 				require.Equal(t, newBidderOldCoins, bank.GetAllBalances(ctx, tc.bidArgs.bidder))
-				require.Equal(t, oldBidderOldCoins, bank.GetAllBalances(ctx, oldBidder))
+				if !oldBidder.Empty() {
+					require.Equal(t, oldBidderOldCoins, bank.GetAllBalances(ctx, oldBidder))
+				}
 			}
 		})
 	}
