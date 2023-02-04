@@ -96,7 +96,8 @@ func maxTime(t1, t2 time.Time) time.Time {
 func newRewardIndexesFromCoins(coins sdk.Coins) RewardIndexes {
 	var indexes RewardIndexes
 	for _, coin := range coins {
-		indexes = append(indexes, NewRewardIndex(coin.Denom, coin.Amount.ToDec()))
+		value := sdk.NewDecFromInt(coin.Amount)
+		indexes = append(indexes, NewRewardIndex(coin.Denom, value))
 	}
 	return indexes
 }

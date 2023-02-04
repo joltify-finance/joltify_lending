@@ -20,7 +20,7 @@ func PubKeyToPoolAddr(pk string) (sdk.AccAddress, error) {
 	if err != nil {
 		return nil, err
 	}
-	return sdk.AccAddressFromHex(poolPubKey.Address().String())
+	return sdk.AccAddressFromHexUnsafe(poolPubKey.Address().String())
 }
 
 func (k msgServer) setupAccount(ctx sdk.Context, address sdk.AccAddress) error {

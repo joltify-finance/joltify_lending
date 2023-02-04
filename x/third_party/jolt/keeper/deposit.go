@@ -138,8 +138,7 @@ func (k Keeper) DecrementSuppliedCoins(ctx sdk.Context, coins sdk.Coins) error {
 	if !found {
 		return sdkerrors.Wrapf(types2.ErrSuppliedCoinsNotFound, "cannot withdraw if no coins are deposited")
 	}
-
-	updatedSuppliedCoins, isNegative := suppliedCoins.SafeSub(coins)
+	updatedSuppliedCoins, isNegative := suppliedCoins.SafeSub(coins...)
 	if isNegative {
 		coinsToSubtract := sdk.NewCoins()
 		for _, coin := range coins {
