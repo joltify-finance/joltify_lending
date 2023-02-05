@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	ibcporttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 
 	v1 "github.com/joltify-finance/joltify_lending/upgrade"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
@@ -453,7 +454,7 @@ func NewApp(
 	)
 
 	// Create static IBC router, add transfer route, then set and seal it
-	ibcRouter := porttypes.NewRouter()
+	ibcRouter := ibcporttypes.NewRouter()
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
 	app.ibcKeeper.SetRouter(ibcRouter)
 

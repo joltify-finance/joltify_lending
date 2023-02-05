@@ -140,7 +140,8 @@ func (k Keeper) payoutKeeperLiquidationReward(ctx sdk.Context, keeper sdk.AccAdd
 	if !found {
 		return types2.CDP{}, sdkerrors.Wrapf(types2.ErrInvalidCollateral, "%s", cdp.Type)
 	}
-	reward := cdp.Collateral.Amount.ToDec().Mul(collateralParam.KeeperRewardPercentage).RoundInt()
+	collateralDec := sdk.NewDecFromInt(cdp.Collateral.Amount)
+	reward := collateralDec.Mul(collateralParam.KeeperRewardPercentage).RoundInt()
 	rewardCoin := sdk.NewCoin(cdp.Collateral.Denom, reward)
 	paidReward := false
 	deposits := k.GetDeposits(ctx, cdp.ID)

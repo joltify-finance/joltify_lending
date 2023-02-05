@@ -52,7 +52,7 @@ func (k Keeper) getJoltSupplyTotalSourceShares(ctx sdk.Context, denom string) sd
 	}
 
 	// return supplied/factor to get the "pre interest" value of the current total supplied
-	return totalSupplied.ToDec().Quo(interestFactor)
+	return sdk.NewDecFromInt(totalSupplied).Quo(interestFactor)
 }
 
 // InitializeJoltSupplyReward initializes the supply-side of a jolt liquidity provider claim
@@ -218,7 +218,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx sdk.Context, claim types2.JoltLi
 			if !found {
 				continue
 			}
-			newRewardsAmount := rewardsAccumulatedFactor.Mul(deposit.Amount.AmountOf(ri.CollateralType).ToDec()).QuoInt(sdk.NewInt(1e12)).RoundInt()
+			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdk.NewDecFromInt(deposit.Amount.AmountOf(ri.CollateralType))).QuoInt(sdk.NewInt(1e12)).RoundInt()
 			if newRewardsAmount.IsZero() || newRewardsAmount.IsNegative() {
 				continue
 			}
@@ -268,7 +268,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx sdk.Context, claim types2.JoltLi
 			if !found {
 				continue
 			}
-			newRewardsAmount := rewardsAccumulatedFactor.Mul(borrow.Amount.AmountOf(ri.CollateralType).ToDec()).QuoInt(sdk.NewInt(1e12)).TruncateInt()
+			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdk.NewDecFromInt(borrow.Amount.AmountOf(ri.CollateralType))).QuoInt(sdk.NewInt(1e12)).TruncateInt()
 			if newRewardsAmount.IsZero() || newRewardsAmount.IsNegative() {
 				continue
 			}

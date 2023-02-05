@@ -39,6 +39,7 @@ func processHistory(historyLength int32, newItem *types.HistoricalAmount, coinsQ
 	}
 	// now we pop up the old and add the new one
 	old := coinsQuota.History[0]
+	old.Amount.Sort()
 	coinsQuota.History = coinsQuota.History[1:]
 	coinsQuota.CoinsSum = coinsQuota.CoinsSum.Sub(old.Amount...).Add(newItem.Amount...)
 	coinsQuota.History = append(coinsQuota.History, newItem)

@@ -30,7 +30,7 @@ func (k Keeper) ClaimJoltReward(ctx sdk.Context, owner, receiver sdk.AccAddress,
 	amt := syncedClaim.Reward.AmountOf(denom)
 
 	claimingCoins := sdk.NewCoins(sdk.NewCoin(denom, amt))
-	rewardCoins := sdk.NewCoins(sdk.NewCoin(denom, amt.ToDec().Mul(multiplier.Factor).RoundInt()))
+	rewardCoins := sdk.NewCoins(sdk.NewCoin(denom, sdk.NewDecFromInt(amt).Mul(multiplier.Factor).RoundInt()))
 	if rewardCoins.IsZero() {
 		return types2.ErrZeroClaim
 	}
@@ -42,7 +42,7 @@ func (k Keeper) ClaimJoltReward(ctx sdk.Context, owner, receiver sdk.AccAddress,
 	}
 
 	// remove claimed coins (NOT reward coins)
-	syncedClaim.Reward = syncedClaim.Reward.Sub(claimingCoins)
+	syncedClaim.Reward = syncedClaim.Reward.Sub(claimingCoins...)
 	k.SetJoltLiquidityProviderClaim(ctx, syncedClaim)
 
 	ctx.EventManager().EmitEvent(
