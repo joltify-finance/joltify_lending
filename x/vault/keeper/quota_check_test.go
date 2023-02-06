@@ -57,7 +57,7 @@ func TestProcessHistory(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f6.Amount))
 
 	expected = expected.Add(f6.Amount...)
-	expected = expected.Sub(f1.Amount)
+	expected = expected.Sub(f1.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f7, &q)
@@ -69,7 +69,7 @@ func TestProcessHistory(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f7.Amount))
 
 	expected = expected.Add(f7.Amount...)
-	expected = expected.Sub(f2.Amount)
+	expected = expected.Sub(f2.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f8, &q)
@@ -81,7 +81,7 @@ func TestProcessHistory(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f8.Amount))
 
 	expected = expected.Add(f8.Amount...)
-	expected = expected.Sub(f3.Amount)
+	expected = expected.Sub(f3.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f9, &q)
@@ -93,7 +93,7 @@ func TestProcessHistory(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f9.Amount))
 
 	expected = expected.Add(f9.Amount...)
-	expected = expected.Sub(f4.Amount)
+	expected = expected.Sub(f4.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f10, &q)
@@ -104,7 +104,7 @@ func TestProcessHistory(t *testing.T) {
 	assert.True(t, q.History[3].Amount.IsEqual(f9.Amount))
 	assert.True(t, q.History[4].Amount.IsEqual(f10.Amount))
 	expected = expected.Add(f10.Amount...)
-	expected = expected.Sub(f5.Amount)
+	expected = expected.Sub(f5.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 }
 
@@ -157,7 +157,7 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f6.Amount))
 
 	expected = expected.Add(f6.Amount...)
-	expected = expected.Sub(f1.Amount)
+	expected = expected.Sub(f1.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f7, &q)
@@ -169,7 +169,7 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f7.Amount))
 
 	expected = expected.Add(f7.Amount...)
-	expected = expected.Sub(f2.Amount)
+	expected = expected.Sub(f2.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f8, &q)
@@ -181,7 +181,7 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f8.Amount))
 
 	expected = expected.Add(f8.Amount...)
-	expected = expected.Sub(f3.Amount)
+	expected = expected.Sub(f3.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f9, &q)
@@ -193,7 +193,7 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f9.Amount))
 
 	expected = expected.Add(f9.Amount...)
-	expected = expected.Sub(f4.Amount)
+	expected = expected.Sub(f4.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f10, &q)
@@ -205,7 +205,7 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f10.Amount))
 
 	expected = expected.Add(f10.Amount...)
-	expected = expected.Sub(f5.Amount)
+	expected = expected.Sub(f5.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f10, &q)
@@ -219,9 +219,9 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 	assert.True(t, q.History[4].Amount.IsEqual(f10.Amount))
 
 	expected = expected.Add(f10.Amount...)
-	expected = expected.Sub(f6.Amount)
-	expected = expected.Sub(f7.Amount)
-	expected = expected.Sub(f8.Amount)
+	expected = expected.Sub(f6.Amount...)
+	expected = expected.Sub(f7.Amount...)
+	expected = expected.Sub(f8.Amount...)
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 
 	processHistory(5, f10, &q)

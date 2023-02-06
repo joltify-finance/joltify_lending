@@ -27,7 +27,6 @@ func TestCreateCreatePool(t *testing.T) {
 	cfg.BondedTokens = sdk.NewInt(10000000000000000)
 	cfg.StakingTokens = sdk.NewInt(100000000000000000)
 	cfg.MinGasPrices = "0poppy"
-	cfg.EnableLogging = true
 	// modification to pay fee with test bond denom "stake"
 	net := network.New(t, cfg)
 

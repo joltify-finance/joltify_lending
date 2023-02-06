@@ -1,15 +1,16 @@
 package keeper
 
 import (
+	"fmt"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"testing"
 	"time"
-
-	jolt "github.com/joltify-finance/joltify_lending/app"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	jolt "github.com/joltify-finance/joltify_lending/app"
 )
 
 type testVaultStaking struct{}
@@ -107,11 +108,14 @@ func (t testVaultStaking) BondDenom(ctx sdk.Context) (res string) {
 
 // setup the general vault app
 func SetupVaultApp(t testing.TB) (*jolt.TestApp, sdk.Context) {
-	tApp := jolt.NewTestApp()
+	logger := tmlog.TestingLogger()
+	tApp := jolt.NewTestApp(logger, t.TempDir())
+	fmt.Printf("3333333333333333333333333#@@@@@@@@@@@@@@@@@@@@s\n")
 	tApp.InitializeFromGenesisStates()
 	ctx := tApp.App.NewContext(false, tmproto.Header{Height: 100, Time: time.Now().UTC()})
 	params := tApp.GetStakingKeeper().GetParams(ctx)
 	params.MaxValidators = 3
 	tApp.GetStakingKeeper().SetParams(ctx, params)
 	return &tApp, ctx
+
 }
