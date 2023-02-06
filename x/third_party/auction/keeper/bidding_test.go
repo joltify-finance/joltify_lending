@@ -6,6 +6,7 @@ import (
 	"time"
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/stretchr/testify/require"
 
@@ -443,7 +444,9 @@ func TestAuctionBidding(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Setup test
-			tApp := app.NewTestApp()
+
+			lg := tmlog.TestingLogger()
+			tApp := app.NewTestApp(lg, t.TempDir())
 
 			// Set up module account
 			modName := "liquidator"
@@ -547,9 +550,9 @@ func TestAuctionBidding(t *testing.T) {
 					}
 				}
 				if oldBidder.Equals(tc.bidArgs.bidder) { // same bidder
-					require.Equal(t, newBidderOldCoins.Sub(cs(bidAmt.Sub(oldAuction.GetBid()))), bank.GetAllBalances(ctx, tc.bidArgs.bidder))
+					require.Equal(t, newBidderOldCoins.Sub(bidAmt.Sub(oldAuction.GetBid())), bank.GetAllBalances(ctx, tc.bidArgs.bidder))
 				} else { // different bidder
-					require.Equal(t, newBidderOldCoins.Sub(cs(bidAmt)), bank.GetAllBalances(ctx, tc.bidArgs.bidder)) // wrapping in cs() to avoid comparing nil and empty coins
+					require.Equal(t, newBidderOldCoins.Sub(bidAmt), bank.GetAllBalances(ctx, tc.bidArgs.bidder)) // wrapping in cs() to avoid comparing nil and empty coins
 
 					// handle checking debt coins for case debt auction has had no bids placed yet TODO make this less confusing
 					if oldBidder.Equals(authtypes.NewModuleAddress(oldAuction.GetInitiator())) {

@@ -4,10 +4,11 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/stretchr/testify/suite"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtime "github.com/tendermint/tendermint/types/time"
 
@@ -35,7 +36,8 @@ type Suite struct {
 func (suite *Suite) SetupTest(numAddrs int) {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
-	tApp := app.NewTestApp()
+	tg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(tg, suite.T().TempDir())
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(numAddrs)
 
@@ -78,20 +80,41 @@ func (suite *Suite) SetupTest(numAddrs int) {
 	suite.AccountKeeper = tApp.GetAccountKeeper()
 }
 
-// CreateAccount adds coins to an account address
-//func (suite *Suite) AddCoinsToAccount(addr sdk.AccAddress, coins sdk.Coins) {
-//	ak := suite.App.GetAccountKeeper()
-//	acc := ak.NewAccountWithAddress(suite.Ctx, addr)
-//	ak.SetAccount(suite.Ctx, acc)
+//CreateAccount adds coins to an account address
+func (suite *Suite) AddCoinsToAccount(addr sdk.AccAddress, coins sdk.Coins) {
+	ak := suite.App.GetAccountKeeper()
+	acc := ak.NewAccountWithAddress(suite.Ctx, addr)
+	ak.SetAccount(suite.Ctx, acc)
+
+	err := fundAccount(suite.BankKeeper, suite.Ctx, acc.GetAddress(), coins)
+	suite.Require().NoError(err)
+}
+
+func fundAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, addr sdk.AccAddress, amounts sdk.Coins) error {
+	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
+		return err
+	}
+	return bankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, amounts)
+}
+
+// fundModuleAccount is a utility function that funds a module account by
+// minting and sending the coins to the address. This should be used for testing
+// purposes only!
 //
-//	err := simapp.FundAccount(suite.BankKeeper, suite.Ctx, acc.GetAddress(), coins)
-//	suite.Require().NoError(err)
-//}
+// TODO: Instead of using the mint module account, which has the
+// permission of minting, create a "faucet" account. (@fdymylja)
+func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, recipientMod string, amounts sdk.Coins) error {
+	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
+		return err
+	}
+
+	return bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, recipientMod, amounts)
+}
 
 // AddCoinsToModule adds coins to a named module account
 func (suite *Suite) AddCoinsToNamedModule(moduleName string, amount sdk.Coins) {
 	// Does not use suite.BankKeeper.MintCoins as module account would not have permission to mint
-	err := simapp.FundModuleAccount(suite.BankKeeper, suite.Ctx, moduleName, amount)
+	err := fundModuleAccount(suite.BankKeeper, suite.Ctx, moduleName, amount)
 	suite.Require().NoError(err)
 }
 
@@ -103,7 +126,7 @@ func (suite *Suite) AddCoinsToNamedModule(moduleName string, amount sdk.Coins) {
 // 	acc := ak.NewAccountWithAddress(suite.Ctx, modAccAddr)
 // 	ak.SetAccount(suite.Ctx, acc)
 
-// 	err := simapp.FundModuleAccount(suite.BankKeeper, suite.Ctx, moduleName, balance)
+// 	err := simapp.fundModuleAccount(suite.BankKeeper, suite.Ctx, moduleName, balance)
 // 	suite.Require().NoError(err)
 
 // 	return acc

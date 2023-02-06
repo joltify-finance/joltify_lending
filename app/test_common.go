@@ -2,6 +2,10 @@ package app
 
 import (
 	"encoding/json"
+	"math/rand"
+	"testing"
+	"time"
+
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
@@ -11,9 +15,6 @@ import (
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmlog "github.com/tendermint/tendermint/libs/log"
-	"math/rand"
-	"testing"
-	"time"
 
 	tmtypes "github.com/tendermint/tendermint/types"
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -16,7 +17,8 @@ import (
 
 func TestGrpcAuctionsFilter(t *testing.T) {
 	// setup
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	tApp.InitializeFromGenesisStates()
 	auctionsKeeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})

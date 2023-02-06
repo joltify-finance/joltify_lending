@@ -5,6 +5,7 @@ import (
 	"time"
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/stretchr/testify/require"
 
@@ -15,7 +16,8 @@ import (
 
 func SetGetDeleteAuction(t *testing.T) {
 	// setup keeper, create auction
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
 
@@ -51,7 +53,8 @@ func SetGetDeleteAuction(t *testing.T) {
 
 func TestIncrementNextAuctionID(t *testing.T) {
 	// setup keeper
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
 
@@ -69,7 +72,8 @@ func TestIncrementNextAuctionID(t *testing.T) {
 
 func TestIterateAuctions(t *testing.T) {
 	// setup
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	tApp.InitializeFromGenesisStates()
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
@@ -96,7 +100,8 @@ func TestIterateAuctions(t *testing.T) {
 
 func TestIterateAuctionsByTime(t *testing.T) {
 	// setup keeper
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
 
