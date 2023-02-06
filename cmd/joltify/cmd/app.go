@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/snapshots/types"
 	"io"
 	"path/filepath"
 	"strings"
@@ -71,6 +72,8 @@ func (ac appCreator) newApp(
 	mempoolAuthAddresses, err := accAddressesFromBech32(
 		cast.ToStringSlice(appOpts.Get(flagMempoolAuthAddresses))...,
 	)
+
+	snapOpts := types.NewSnapshotOptions(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)), cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)))
 	if err != nil {
 		panic(fmt.Sprintf("could not get authorized address from config: %v", err))
 	}
@@ -93,9 +96,7 @@ func (ac appCreator) newApp(
 		baseapp.SetInterBlockCache(cache),
 		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
-		baseapp.SetSnapshotStore(snapshotStore),
-		baseapp.SetSnapshotInterval(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval))),
-		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
+		baseapp.SetSnapshot(snapshotStore, snapOpts),
 	)
 }
 

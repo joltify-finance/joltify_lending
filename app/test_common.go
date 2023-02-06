@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"math/rand"
 	"testing"
 	"time"
@@ -90,10 +91,8 @@ func NewTestAppFromSealed() TestApp {
 
 	var options Options
 	encCfg := MakeEncodingConfig()
-
 	app := NewApp(log.NewNopLogger(), db, DefaultNodeHome, nil, encCfg, options)
-
-	genesisState := NewDefaultGenesisState()
+	genesisState := NewDefaultGenesisState(encCfg.Marshaler)
 	stateBytes, err := json.MarshalIndent(genesisState, "", " ")
 	if err != nil {
 		panic(err)
@@ -158,7 +157,8 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(genTime time.T
 // If any module genesis states are missing, defaults are used.
 func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genesisStates ...GenesisState) TestApp {
 	// Create a default genesis state and overwrite with provided values
-	genesisState := NewDefaultGenesisState()
+	encoding := cosmoscmd.MakeEncodingConfig(ModuleBasics)
+	genesisState := NewDefaultGenesisState(encoding.Marshaler)
 	for _, state := range genesisStates {
 		for k, v := range state {
 			genesisState[k] = v
