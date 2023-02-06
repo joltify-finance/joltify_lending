@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"testing"
@@ -110,7 +109,6 @@ func (t testVaultStaking) BondDenom(ctx sdk.Context) (res string) {
 func SetupVaultApp(t testing.TB) (*jolt.TestApp, sdk.Context) {
 	logger := tmlog.TestingLogger()
 	tApp := jolt.NewTestApp(logger, t.TempDir())
-	fmt.Printf("3333333333333333333333333#@@@@@@@@@@@@@@@@@@@@s\n")
 	tApp.InitializeFromGenesisStates()
 	ctx := tApp.App.NewContext(false, tmproto.Header{Height: 100, Time: time.Now().UTC()})
 	params := tApp.GetStakingKeeper().GetParams(ctx)
