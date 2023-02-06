@@ -79,14 +79,14 @@ func (suite *Suite) SetupTest(numAddrs int) {
 }
 
 // CreateAccount adds coins to an account address
-func (suite *Suite) AddCoinsToAccount(addr sdk.AccAddress, coins sdk.Coins) {
-	ak := suite.App.GetAccountKeeper()
-	acc := ak.NewAccountWithAddress(suite.Ctx, addr)
-	ak.SetAccount(suite.Ctx, acc)
-
-	err := simapp.FundAccount(suite.BankKeeper, suite.Ctx, acc.GetAddress(), coins)
-	suite.Require().NoError(err)
-}
+//func (suite *Suite) AddCoinsToAccount(addr sdk.AccAddress, coins sdk.Coins) {
+//	ak := suite.App.GetAccountKeeper()
+//	acc := ak.NewAccountWithAddress(suite.Ctx, addr)
+//	ak.SetAccount(suite.Ctx, acc)
+//
+//	err := simapp.FundAccount(suite.BankKeeper, suite.Ctx, acc.GetAddress(), coins)
+//	suite.Require().NoError(err)
+//}
 
 // AddCoinsToModule adds coins to a named module account
 func (suite *Suite) AddCoinsToNamedModule(moduleName string, amount sdk.Coins) {
