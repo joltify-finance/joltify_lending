@@ -3,6 +3,7 @@ package testutil
 import (
 	"errors"
 	"fmt"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"time"
 
 	cdpkeeper "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
@@ -39,13 +40,13 @@ func (suite *IntegrationTester) SetupSuite() {
 }
 
 func (suite *IntegrationTester) SetApp() {
-	suite.App = app.NewTestApp()
+	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 }
 
 func (suite *IntegrationTester) StartChain(genesisTime time.Time, genesisStates ...app.GenesisState) {
 	suite.App.InitializeFromGenesisStatesWithTimeAndChainID(
 		genesisTime,
-		testChainID,
+		testChainID, nil, nil,
 		genesisStates...,
 	)
 

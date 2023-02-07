@@ -2,6 +2,8 @@ package keeper_test
 
 import (
 	"errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -28,7 +30,8 @@ type DrawTestSuite struct {
 }
 
 func (suite *DrawTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	cdc := tApp.AppCodec()
 	_, addrs := app.GeneratePrivKeyAddressPairs(3)
@@ -39,7 +42,14 @@ func (suite *DrawTestSuite) SetupTest() {
 	}
 
 	authGS := app.NewFundedGenStateWithCoins(cdc, coins, addrs)
-	tApp.InitializeFromGenesisStates(
+
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	tApp.InitializeFromGenesisStates(genAcc, coins[0],
 		authGS,
 		NewPricefeedGenStateMulti(cdc),
 		NewCDPGenStateMulti(cdc),

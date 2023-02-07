@@ -535,7 +535,10 @@ func TestAuctionBidding(t *testing.T) {
 				oldBidder = oldAuction.GetBidder()
 			}
 
-			oldBidderOldCoins := bank.GetAllBalances(ctx, oldBidder)
+			var oldBidderOldCoins sdk.Coins
+			if !oldBidder.Empty() {
+				oldBidderOldCoins = bank.GetAllBalances(ctx, oldBidder)
+			}
 			newBidderOldCoins := bank.GetAllBalances(ctx, tc.bidArgs.bidder)
 
 			// Place bid on auction
@@ -596,7 +599,9 @@ func TestAuctionBidding(t *testing.T) {
 
 				// Check coins have not moved
 				require.Equal(t, newBidderOldCoins, bank.GetAllBalances(ctx, tc.bidArgs.bidder))
-				require.Equal(t, oldBidderOldCoins, bank.GetAllBalances(ctx, oldBidder))
+				if !oldBidder.Empty() {
+					require.Equal(t, oldBidderOldCoins, bank.GetAllBalances(ctx, oldBidder))
+				}
 			}
 		})
 	}

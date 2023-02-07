@@ -225,7 +225,6 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 	header := tmproto.Header{Height: 1, ChainID: "oppyChain-1", Time: time.Now().UTC()}
 
 	ctx := app.BaseApp.NewContext(false, header)
-	//ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 	return TestApp{App: *app, Ctx: ctx}
 }
 

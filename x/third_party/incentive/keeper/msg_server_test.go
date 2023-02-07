@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func (suite *HandlerTestSuite) SetupTest() {
 }
 
 func (suite *HandlerTestSuite) SetupApp() {
-	suite.App = app.NewTestApp()
+	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
 }
 
@@ -61,7 +62,7 @@ func (suite *HandlerTestSuite) SetupWithGenState(builders ...genesisBuilder) {
 	}
 
 	suite.App.InitializeFromGenesisStatesWithTime(
-		suite.genesisTime,
+		suite.genesisTime, nil, nil,
 		builtGenStates...,
 	)
 }

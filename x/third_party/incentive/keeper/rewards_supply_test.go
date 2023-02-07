@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -120,7 +121,7 @@ func (suite *SupplyRewardsTestSuite) SetupTest() {
 }
 
 func (suite *SupplyRewardsTestSuite) SetupApp() {
-	suite.app = app.NewTestApp()
+	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
@@ -132,7 +133,7 @@ func (suite *SupplyRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBank
 	suite.SetupApp()
 
 	suite.app.InitializeFromGenesisStatesWithTime(
-		suite.genesisTime,
+		suite.genesisTime, nil, nil,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
 		joltBuilder.BuildMarshalled(suite.app.AppCodec()),

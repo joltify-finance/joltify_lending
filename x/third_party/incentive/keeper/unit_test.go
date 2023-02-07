@@ -2,6 +2,9 @@ package keeper_test
 
 import (
 	"fmt"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"time"
 
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
@@ -28,7 +31,7 @@ func NewTestContext(requiredStoreKeys ...storetypes.StoreKey) sdk.Context {
 	cms := store.NewCommitMultiStore(memDB)
 
 	for _, key := range requiredStoreKeys {
-		cms.MountStoreWithDB(key, sdk.StoreTypeIAVL, nil)
+		cms.MountStoreWithDB(key, storetypes.StoreTypeIAVL, nil)
 	}
 
 	if err := cms.LoadLatestVersion(); err != nil {
@@ -50,7 +53,7 @@ type unitTester struct {
 }
 
 func (suite *unitTester) SetupSuite() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.cdc = tApp.AppCodec()
 
 	suite.incentiveStoreKey = sdk.NewKVStoreKey(types2.StoreKey)

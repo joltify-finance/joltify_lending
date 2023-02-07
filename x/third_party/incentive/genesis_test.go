@@ -1,6 +1,7 @@
 package incentive_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -34,7 +35,7 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.app = tApp
 	keeper := tApp.GetIncentiveKeeper()
 	suite.genesisTime = time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -110,12 +111,12 @@ func (suite *GenesisTestSuite) SetupTest() {
 	cdc := suite.app.AppCodec()
 
 	tApp.InitializeFromGenesisStatesWithTime(
-		suite.genesisTime,
-		authBuilder.BuildMarshalled(cdc),
+		suite.genesisTime, nil, nil,
 		app.GenesisState{types2.ModuleName: cdc.MustMarshalJSON(&incentiveGS)},
 		app.GenesisState{types3.ModuleName: cdc.MustMarshalJSON(&joltGS)},
 		NewCDPGenStateMulti(cdc),
 		NewPricefeedGenStateMultiFromTime(cdc, suite.genesisTime),
+		authBuilder.BuildMarshalled(cdc),
 	)
 
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
@@ -256,12 +257,12 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 		},
 	)
 
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 0, Time: genesisTime})
 
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 	// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
-	tApp.InitializeFromGenesisStates(
+	tApp.InitializeFromGenesisStates(nil, nil,
 		NewCDPGenStateMulti(tApp.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(tApp.AppCodec(), genesisTime),
 	)
@@ -337,12 +338,12 @@ func (suite *GenesisTestSuite) TestInitGenesisPanicsWhenAccumulationTimesToLongA
 	}
 
 	for _, tc := range testCases {
-		tApp := app.NewTestApp()
+		tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 0, Time: genesisTime})
 
 		// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 		// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
-		tApp.InitializeFromGenesisStates(
+		tApp.InitializeFromGenesisStates(nil, nil,
 			NewCDPGenStateMulti(tApp.AppCodec()),
 			NewPricefeedGenStateMultiFromTime(tApp.AppCodec(), genesisTime),
 		)

@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 }
 
 func (suite *KeeperTestSuite) SetupApp() {
-	suite.app = app.NewTestApp()
+	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 

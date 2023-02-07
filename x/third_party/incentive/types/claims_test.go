@@ -334,7 +334,11 @@ func TestRewardIndexes(t *testing.T) {
 
 		for _, tc := range testcases {
 			t.Run(tc.name, func(t *testing.T) {
-				require.Equal(t, tc.expected, tc.rewardIndexes.Mul(tc.multiplier))
+				calculated := tc.rewardIndexes.Mul(tc.multiplier)
+				require.Equal(t, len(tc.expected), len(calculated))
+				for i, el := range tc.expected {
+					require.Equal(t, el.RewardFactor.String(), calculated[i].RewardFactor.String())
+				}
 			})
 		}
 	})

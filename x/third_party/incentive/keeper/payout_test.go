@@ -1,6 +1,9 @@
 package keeper_test
 
 import (
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"strings"
 	"testing"
 	"time"
@@ -48,20 +51,23 @@ func (suite *PayoutTestSuite) SetupTest() {
 }
 
 func (suite *PayoutTestSuite) SetupApp() {
-	suite.app = app.NewTestApp()
+	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
 	suite.cdpKeeper = suite.app.GetCDPKeeper()
 
 	suite.ctx = suite.app.NewContext(true, tmprototypes.Header{Time: suite.genesisTime})
+
+	suite.
+
+
 }
 
 func (suite *PayoutTestSuite) SetupWithGenState(authBuilder app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, hardBuilder testutil.JoltGenesisBuilder) {
 	suite.SetupApp()
-
 	suite.app.InitializeFromGenesisStatesWithTime(
-		suite.genesisTime,
+		suite.genesisTime, nil, nil,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
 		NewCDPGenStateMulti(suite.app.AppCodec()),
@@ -348,7 +354,7 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 
 			suite.genesisTime = tc.args.ctxTime
 			suite.SetupApp()
-			suite.app.InitializeFromGenesisStates(
+			suite.app.InitializeFromGenesisStates(nil, nil,
 				authBuilder.BuildMarshalled(suite.app.AppCodec()),
 			)
 
@@ -371,6 +377,13 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 	}
 }
 
+func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, recipientMod string, amounts sdk.Coins) error {
+	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
+		return err
+	}
+	return bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, recipientMod, amounts)
+}
+
 func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 	authBuilder := app.NewAuthBankGenesisBuilder().
 		WithSimpleAccount(suite.addrs[1], cs(c("ujolt", 400))).
@@ -378,9 +391,18 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 
 	suite.genesisTime = time.Unix(100, 0)
 	suite.SetupApp()
-	suite.app.InitializeFromGenesisStates(
+
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range suite.addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	suite.app.InitializeFromGenesisStates(genAcc, cs(c("ujolt", 400)),
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
+
+	fundModuleAccount(suite.app.GetBankKeeper(), suite.app.Ctx, types2.ModuleName, cs(c("ujolt", 200)))
 
 	// send coins to base account
 	err := suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types2.ModuleName, suite.addrs[1], cs(c("ujolt", 100)), 5)
@@ -396,7 +418,7 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 
 	suite.Equal(expectedPeriods, vacc.VestingPeriods)
 	suite.Equal(cs(c("ujolt", 100)), vacc.OriginalVesting)
-	suite.Equal(cs(c("ujolt", 500)), bk.GetAllBalances(suite.ctx, vacc.GetAddress()))
+	suite.Equal(cs(c("ujolt", 500), c("stake", 100000000000000)), bk.GetAllBalances(suite.ctx, vacc.GetAddress()))
 	suite.Equal(int64(105), vacc.EndTime)
 	suite.Equal(int64(100), vacc.StartTime)
 }
@@ -406,7 +428,7 @@ func (suite *PayoutTestSuite) TestSendCoinsToInvalidAccount() {
 		WithSimpleModuleAccount(types2.ModuleName, cs(c("ujolt", 600)))
 
 	suite.SetupApp()
-	suite.app.InitializeFromGenesisStates(
+	suite.app.InitializeFromGenesisStates(nil, nil,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
 

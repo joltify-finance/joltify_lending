@@ -2,6 +2,7 @@ package cdp_test
 
 import (
 	"fmt"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"sort"
 	"strings"
 	"testing"
@@ -32,7 +33,8 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	suite.genTime = tmtime.Canonical(time.Date(2021, 1, 1, 1, 1, 1, 1, time.UTC))
 	suite.ctx = tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genTime})
 	suite.keeper = tApp.GetCDPKeeper()
@@ -147,7 +149,7 @@ func (suite *GenesisTestSuite) TestValidGenState() {
 	cdc := suite.app.AppCodec()
 
 	suite.NotPanics(func() {
-		suite.app.InitializeFromGenesisStates(
+		suite.app.InitializeFromGenesisStates(nil, nil,
 			NewPricefeedGenStateMulti(cdc),
 			NewCDPGenStateMulti(cdc),
 		)
@@ -161,7 +163,7 @@ func (suite *GenesisTestSuite) TestValidGenState() {
 	appGS := app.GenesisState{"cdp": suite.app.AppCodec().MustMarshalJSON(&gs)}
 	suite.NotPanics(func() {
 		suite.SetupTest()
-		suite.app.InitializeFromGenesisStates(
+		suite.app.InitializeFromGenesisStates(nil, nil,
 			NewPricefeedGenStateMulti(cdc),
 			appGS,
 		)
@@ -261,7 +263,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 
 	suite.NotPanics(func() {
 		suite.app.InitializeFromGenesisStatesWithTime(
-			suite.genTime,
+			suite.genTime, nil, nil,
 			NewPricefeedGenStateMulti(suite.app.AppCodec()),
 			app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&cdpGenesis)},
 		)

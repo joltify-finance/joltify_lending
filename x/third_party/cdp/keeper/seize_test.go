@@ -2,6 +2,8 @@ package keeper_test
 
 import (
 	"errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"math/rand"
 	"strings"
 	"testing"
@@ -42,14 +44,20 @@ type liquidationTracker struct {
 }
 
 func (suite *SeizeTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now(), ChainID: "jolttest_1-1"})
 	tracker := liquidationTracker{}
 	coins := cs(c("btc", 100000000), c("xrp", 10000000000))
 	_, addrs := app.GeneratePrivKeyAddressPairs(100)
 
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), coins, addrs)
-	tApp.InitializeFromGenesisStates(
+	tApp.InitializeFromGenesisStates(genAcc, coins,
 		authGS,
 		NewPricefeedGenStateMulti(tApp.AppCodec()),
 		NewCDPGenStateMulti(tApp.AppCodec()),
@@ -63,15 +71,21 @@ func (suite *SeizeTestSuite) SetupTest() {
 }
 
 func (suite *SeizeTestSuite) createCdps() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	cdps := make(types2.CDPs, 100)
 	_, addrs := app.GeneratePrivKeyAddressPairs(100)
 	tracker := liquidationTracker{}
 	coins := cs(c("btc", 100000000), c("xrp", 10000000000))
 
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), coins, addrs)
-	tApp.InitializeFromGenesisStates(
+	tApp.InitializeFromGenesisStates(genAcc, coins,
 		authGS,
 		NewPricefeedGenStateMulti(tApp.AppCodec()),
 		NewCDPGenStateMulti(tApp.AppCodec()),
@@ -264,7 +278,7 @@ func (suite *SeizeTestSuite) TestKeeperLiquidation() {
 				finalTwapPrice:      d("19000.0"),
 				collateral:          c("btc", 10000000),
 				principal:           c("usdx", 1333330000),
-				expectedKeeperCoins: cs(c("btc", 100100000), c("xrp", 10000000000)),
+				expectedKeeperCoins: cs(c("btc", 100100000), c("stake", 100000000000000), c("xrp", 10000000000)),
 				expectedAuctions: []types3.Auction{
 					&types3.CollateralAuction{
 						BaseAuction: types3.BaseAuction{
@@ -303,7 +317,7 @@ func (suite *SeizeTestSuite) TestKeeperLiquidation() {
 				finalTwapPrice:      d("19000.0"),
 				collateral:          c("btc", 10000000),
 				principal:           c("usdx", 1333330000),
-				expectedKeeperCoins: cs(c("btc", 100100000), c("xrp", 10000000000)),
+				expectedKeeperCoins: cs(c("btc", 100100000), c("stake", 100000000000000), c("xrp", 10000000000)),
 				expectedAuctions: []types3.Auction{
 					&types3.CollateralAuction{
 						BaseAuction: types3.BaseAuction{

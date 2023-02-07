@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -26,8 +27,9 @@ type grpcQueryTestSuite struct {
 }
 
 func (suite *grpcQueryTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp()
-	suite.tApp.InitializeFromGenesisStates(
+	lg := tmlog.TestingLogger()
+	suite.tApp = app.NewTestApp(lg, suite.T().TempDir())
+	suite.tApp.InitializeFromGenesisStates(nil, nil,
 		NewPricefeedGenStateMulti(suite.tApp.AppCodec()),
 		NewCDPGenStateMulti(suite.tApp.AppCodec()),
 	)
