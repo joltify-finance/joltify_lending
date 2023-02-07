@@ -1,6 +1,9 @@
 package keeper_test
 
 import (
+	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,7 +58,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	endTimeStr := "9000-01-01T00:00:00.000Z"
 	endTime, _ := time.Parse(layout, endTimeStr)
 
-	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower}, []sdk.Int{sdk.NewInt(100)})
+	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower}, []sdkmath.Int{sdk.NewInt(100)})
 
 	testCases := []liqTest{
 		{
@@ -503,7 +506,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
 
 			// account which will deposit "initial module account coins"
@@ -642,7 +645,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&joltGS)})
 
@@ -656,6 +659,15 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[0], tc.args.initialBorrowerCoins)
+			suite.Require().NoError(err)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.keeper, tc.args.initialKeeperCoins)
+			suite.Require().NoError(err)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor, tc.args.initialModuleCoins)
+			suite.Require().NoError(err)
 
 			// Deposit initial module account coins
 			err = suite.keeper.Deposit(suite.ctx, depositor, tc.args.initialModuleCoins)
@@ -737,7 +749,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 	endTimeStr := "9000-01-01T00:00:00.000Z"
 	endTime, _ := time.Parse(layout, endTimeStr)
 
-	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower1}, []sdk.Int{sdk.NewInt(100)})
+	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower1}, []sdkmath.Int{sdk.NewInt(100)})
 
 	testCases := []liqTest{
 		{
@@ -1124,7 +1136,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 	for i, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
 
 			// account which will deposit "initial module account coins"
@@ -1265,7 +1277,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&joltGS)})
 
@@ -1279,6 +1291,18 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[0], tc.args.initialBorrowerCoins)
+			suite.Require().NoError(err)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[1], tc.args.initialBorrowerCoins)
+			suite.Require().NoError(err)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.keeper, tc.args.initialKeeperCoins)
+			suite.Require().NoError(err)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor1, tc.args.initialModuleCoins)
+			suite.Require().NoError(err)
 
 			// Deposit initial module account coins
 			err = suite.keeper.Deposit(suite.ctx, depositor1, tc.args.initialModuleCoins)

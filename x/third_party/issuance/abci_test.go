@@ -1,6 +1,7 @@
 package issuance_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -32,10 +33,10 @@ type ABCITestSuite struct {
 
 // The default state used by each test
 func (suite *ABCITestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	blockTime := tmtime.Now()
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: blockTime})
-	tApp.InitializeFromGenesisStates()
+	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
 	keeper := tApp.GetIssuanceKeeper()
 	modAccount, err := sdk.AccAddressFromBech32("jolt10wlnqzyss4accfqmyxwx5jy5x9nfkwh6kwhjs9")

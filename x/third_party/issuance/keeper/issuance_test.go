@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"strings"
 	"testing"
 	"time"
@@ -34,10 +35,10 @@ type KeeperTestSuite struct {
 
 // The default state used by each test
 func (suite *KeeperTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 
 	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
-	tApp.InitializeFromGenesisStates()
+	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
 	var strAddrs []string
 	for _, addr := range addrs {
@@ -399,7 +400,7 @@ func (suite *KeeperTestSuite) TestRedeemTokens() {
 				suite.Require().NoError(err)
 				initialSupply := sdk.NewCoins(tc.args.redeemTokens)
 				moduleAccount := suite.getModuleAccount(types2.ModuleAccountName)
-				suite.Require().Equal(sdk.NewCoins(initialSupply.Sub(sdk.NewCoins(tc.args.redeemTokens))...), sdk.NewCoins(suite.getBalance(moduleAccount.GetAddress(), tc.args.redeemTokens.Denom)))
+				suite.Require().Equal(sdk.NewCoins(initialSupply.Sub(tc.args.redeemTokens)...), sdk.NewCoins(suite.getBalance(moduleAccount.GetAddress(), tc.args.redeemTokens.Denom)))
 			} else {
 				suite.Require().Error(err)
 				suite.Require().True(strings.Contains(err.Error(), tc.errArgs.contains))

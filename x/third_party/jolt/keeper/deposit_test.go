@@ -1,6 +1,8 @@
 package keeper_test
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"strings"
 	"time"
 
@@ -100,16 +102,18 @@ func (suite *KeeperTestSuite) TestDeposit() {
 		suite.Run(tc.name, func() {
 			// create new app with one funded account
 
+			coins := sdk.NewCoins(
+				sdk.NewCoin("bnb", sdk.NewInt(1000)),
+				sdk.NewCoin("btcb", sdk.NewInt(1000)),
+			)
+
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
 				[]sdk.Coins{
-					sdk.NewCoins(
-						sdk.NewCoin("bnb", sdk.NewInt(1000)),
-						sdk.NewCoin("btcb", sdk.NewInt(1000)),
-					),
+					coins,
 				},
 				[]sdk.AccAddress{tc.args.depositor},
 			)
@@ -164,7 +168,7 @@ func (suite *KeeperTestSuite) TestDeposit() {
 				},
 			}
 
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
 			)
@@ -176,8 +180,11 @@ func (suite *KeeperTestSuite) TestDeposit() {
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			// run the test
 			var err error
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.depositor, coins)
+			suite.Require().NoError(err)
+
+			// run the test
 			for i := 0; i < tc.args.numberDeposits; i++ {
 				err = suite.keeper.Deposit(suite.ctx, tc.args.depositor, tc.args.amount)
 			}
@@ -268,7 +275,7 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			loanToValue, _ := sdk.NewDecFromStr("0.6")
 			depositor := sdk.AccAddress(crypto.AddressHash([]byte("test")))
@@ -317,7 +324,7 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 					},
 				},
 			}
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
 			)
@@ -329,7 +336,10 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err := suite.keeper.Deposit(suite.ctx, depositor, tc.args.suppliedInitial)
+			err := testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor, tc.args.suppliedInitial)
+			suite.Require().NoError(err)
+
+			err = suite.keeper.Deposit(suite.ctx, depositor, tc.args.suppliedInitial)
 			suite.Require().NoError(err)
 			err = suite.keeper.DecrementSuppliedCoins(ctx, tc.args.decrementCoins)
 			suite.Require().NoError(err)

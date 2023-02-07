@@ -1,6 +1,8 @@
 package keeper_test
 
 import (
+	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"strings"
 	"time"
 
@@ -116,7 +118,7 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			// create new app with one funded account
 
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
@@ -170,7 +172,7 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 				},
 			}
 
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
 			keeper := tApp.GetJoltKeeper()
@@ -178,9 +180,12 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			suite.ctx = ctx
 			suite.keeper = keeper
 
+			err := testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.depositor, []sdk.Coin{sdk.NewCoin("bnb", sdk.NewInt(1000)), sdk.NewCoin("btcb", sdk.NewInt(1000))})
+			suite.Require().NoError(err)
+
 			// Mint coins to Hard module account
 			bankKeeper := tApp.GetBankKeeper()
-			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModAccountBalance)
+			err = bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModAccountBalance)
 			suite.Require().NoError(err)
 
 			if tc.args.createDeposit {
@@ -261,7 +266,7 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 
 			// Auth module genesis state
@@ -319,7 +324,7 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&harvestGS)})
 
@@ -338,6 +343,9 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower, tc.args.initialBorrowerCoins)
+			suite.Require().NoError(err)
 
 			// Borrower deposits coins
 			err = suite.keeper.Deposit(suite.ctx, tc.args.borrower, tc.args.depositCoins)

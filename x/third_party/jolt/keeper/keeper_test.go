@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"strconv"
 	"testing"
 
@@ -35,9 +36,9 @@ func (suite *KeeperTestSuite) SetupTest() {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
 
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	tApp.InitializeFromGenesisStates()
+	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)
 	keeper := tApp.GetJoltKeeper()
 	suite.app = tApp
