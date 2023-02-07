@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"fmt"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	tmlog "github.com/tendermint/tendermint/libs/log"
@@ -58,10 +59,6 @@ func (suite *PayoutTestSuite) SetupApp() {
 	suite.cdpKeeper = suite.app.GetCDPKeeper()
 
 	suite.ctx = suite.app.NewContext(true, tmprototypes.Header{Time: suite.genesisTime})
-
-	suite.
-
-
 }
 
 func (suite *PayoutTestSuite) SetupWithGenState(authBuilder app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, hardBuilder testutil.JoltGenesisBuilder) {
@@ -354,11 +351,22 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 
 			suite.genesisTime = tc.args.ctxTime
 			suite.SetupApp()
+
+			//var genAcc []authtypes.GenesisAccount
+			//for _, el := range suite.addrs {
+			//	b := authtypes.NewBaseAccount(el, nil, 0, 0)
+			//	genAcc = append(genAcc, b)
+			//}
+			fmt.Printf(">>>>>>>>%v\n", tc.args.period.Amount.String())
+
+			err := fundModuleAccount(suite.app.GetBankKeeper(), suite.ctx, types2.ModuleName, tc.args.period.Amount)
+			suite.Require().NoError(err)
+
 			suite.app.InitializeFromGenesisStates(nil, nil,
 				authBuilder.BuildMarshalled(suite.app.AppCodec()),
 			)
 
-			err := suite.keeper.SendTimeLockedCoinsToPeriodicVestingAccount(suite.ctx, types2.ModuleName, suite.addrs[0], tc.args.period.Amount, tc.args.period.Length)
+			err = suite.keeper.SendTimeLockedCoinsToPeriodicVestingAccount(suite.ctx, types2.ModuleName, suite.addrs[0], tc.args.period.Amount, tc.args.period.Length)
 
 			if tc.errArgs.expectErr {
 				suite.Require().Error(err)

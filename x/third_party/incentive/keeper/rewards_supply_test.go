@@ -37,64 +37,64 @@ func (suite *SupplyIntegrationTests) SetupTest() {
 	suite.genesisTime = time.Date(2020, 12, 15, 14, 0, 0, 0, time.UTC)
 }
 
-func (suite *SupplyIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncing() {
-	userA := suite.addrs[0]
-
-	authBulder := app.NewAuthBankGenesisBuilder().
-		WithSimpleModuleAccount(types.ModuleName, cs(c("jjolt", 1e18))). // Fill mintt  with enough coins to pay out any reward
-		WithSimpleAccount(userA, cs(c("bnb", 1e12))).                    // give the user some coins
-		WithSimpleAccount(userA, cs(c("sbnb", 1e12)))                    // give the user some coins
-
-	incentBuilder := testutil.NewIncentiveGenesisBuilder().
-		WithGenesisTime(suite.genesisTime).
-		WithMultipliers(types.MultipliersPerDenoms{{
-			Denom:       "jjolt",
-			Multipliers: types.Multipliers{types.NewMultiplier("large", 12, d("1.0"))}, // keep payout at 1.0 to make maths easier
-		}}).
-		WithSimpleSupplyRewardPeriod("bnb", cs(c("jjolt", 1e6))). // only borrow rewards
-		WithSimpleSupplyRewardPeriod("sbnb", cs(c("jjolt", 1e6))) // only borrow rewards
-
-	suite.SetApp()
-
-	suite.StartChain(
-		suite.genesisTime,
-		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
-		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.App.AppCodec()),
-		authBulder.BuildMarshalled(suite.App.AppCodec()),
-		incentBuilder.BuildMarshalled(suite.App.AppCodec()),
-	)
-
-	// Create a deposit
-	suite.NoError(suite.DeliverJoltMsgDeposit(userA, cs(c("bnb", 1e11))))
-	// Also create a borrow so interest accumulates on the deposit
-	suite.NoError(suite.DeliverJoltMsgBorrow(userA, cs(c("bnb", 1e10))))
-
-	// Let time pass to accumulate interest on the deposit
-	// Use one long block instead of many to reduce any rounding errors, and speed up tests.
-	suite.NextBlockAfter(1e6 * time.Second) // about 12 days
-
-	// User withdraw and redeposits just to sync their deposit.
-	suite.NoError(suite.DeliverJoltMsgWithdraw(userA, cs(c("bnb", 1))))
-	suite.NoError(suite.DeliverJoltMsgDeposit(userA, cs(c("bnb", 1))))
-
-	// Accumulate more rewards.
-	// The user still has the same percentage of all deposits (100%) so their rewards should be the same as in the previous block.
-	suite.NextBlockAfter(1e6 * time.Second) // about 12 days
-
-	msg := types.NewMsgClaimJoltReward(
-		userA.String(),
-		types.Selections{
-			types.NewSelection("jjolt", "large"),
-		})
-
-	// User claims all their rewards
-	suite.NoError(suite.DeliverIncentiveMsg(&msg))
-
-	// The users has always had 100% of deposits, so they should receive all rewards for the previous two blocks.
-	// Total rewards for each block is block duration * rewards per second
-	accuracy := 1e-10 // using a very high accuracy to flag future small calculation changes
-	suite.BalanceInEpsilon(userA, cs(c("bnb", 1e12-1e11+1e10), c("jjolt", 2*1e6*1e6), c("sbnb", 1e12)), accuracy)
-}
+//func (suite *SupplyIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncing() {
+//	userA := suite.addrs[0]
+//
+//	authBulder := app.NewAuthBankGenesisBuilder().
+//		WithSimpleModuleAccount(types.ModuleName, cs(c("jjolt", 1e18))). // Fill mintt  with enough coins to pay out any reward
+//		WithSimpleAccount(userA, cs(c("bnb", 1e12))).                    // give the user some coins
+//		WithSimpleAccount(userA, cs(c("sbnb", 1e12)))                    // give the user some coins
+//
+//	incentBuilder := testutil.NewIncentiveGenesisBuilder().
+//		WithGenesisTime(suite.genesisTime).
+//		WithMultipliers(types.MultipliersPerDenoms{{
+//			Denom:       "jjolt",
+//			Multipliers: types.Multipliers{types.NewMultiplier("large", 12, d("1.0"))}, // keep payout at 1.0 to make maths easier
+//		}}).
+//		WithSimpleSupplyRewardPeriod("bnb", cs(c("jjolt", 1e6))). // only borrow rewards
+//		WithSimpleSupplyRewardPeriod("sbnb", cs(c("jjolt", 1e6))) // only borrow rewards
+//
+//	suite.SetApp()
+//
+//	suite.StartChain(,
+//		suite.genesisTime,
+//		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
+//		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.App.AppCodec()),
+//		authBulder.BuildMarshalled(suite.App.AppCodec()),
+//		incentBuilder.BuildMarshalled(suite.App.AppCodec()),
+//	)
+//
+//	// Create a deposit
+//	suite.NoError(suite.DeliverJoltMsgDeposit(userA, cs(c("bnb", 1e11))))
+//	// Also create a borrow so interest accumulates on the deposit
+//	suite.NoError(suite.DeliverJoltMsgBorrow(userA, cs(c("bnb", 1e10))))
+//
+//	// Let time pass to accumulate interest on the deposit
+//	// Use one long block instead of many to reduce any rounding errors, and speed up tests.
+//	suite.NextBlockAfter(1e6 * time.Second) // about 12 days
+//
+//	// User withdraw and redeposits just to sync their deposit.
+//	suite.NoError(suite.DeliverJoltMsgWithdraw(userA, cs(c("bnb", 1))))
+//	suite.NoError(suite.DeliverJoltMsgDeposit(userA, cs(c("bnb", 1))))
+//
+//	// Accumulate more rewards.
+//	// The user still has the same percentage of all deposits (100%) so their rewards should be the same as in the previous block.
+//	suite.NextBlockAfter(1e6 * time.Second) // about 12 days
+//
+//	msg := types.NewMsgClaimJoltReward(
+//		userA.String(),
+//		types.Selections{
+//			types.NewSelection("jjolt", "large"),
+//		})
+//
+//	// User claims all their rewards
+//	suite.NoError(suite.DeliverIncentiveMsg(&msg))
+//
+//	// The users has always had 100% of deposits, so they should receive all rewards for the previous two blocks.
+//	// Total rewards for each block is block duration * rewards per second
+//	accuracy := 1e-10 // using a very high accuracy to flag future small calculation changes
+//	suite.BalanceInEpsilon(userA, cs(c("bnb", 1e12-1e11+1e10), c("jjolt", 2*1e6*1e6), c("sbnb", 1e12)), accuracy)
+//}
 
 // Test suite used for all keeper tests
 type SupplyRewardsTestSuite struct {

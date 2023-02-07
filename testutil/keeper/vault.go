@@ -109,7 +109,7 @@ func (t testVaultStaking) BondDenom(ctx sdk.Context) (res string) {
 func SetupVaultApp(t testing.TB) (*jolt.TestApp, sdk.Context) {
 	logger := tmlog.TestingLogger()
 	tApp := jolt.NewTestApp(logger, t.TempDir())
-	tApp.InitializeFromGenesisStates()
+	tApp.InitializeFromGenesisStates(nil, nil)
 	ctx := tApp.App.NewContext(false, tmproto.Header{Height: 100, Time: time.Now().UTC()})
 	params := tApp.GetStakingKeeper().GetParams(ctx)
 	params.MaxValidators = 3

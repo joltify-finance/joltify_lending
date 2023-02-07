@@ -43,10 +43,10 @@ func (suite *IntegrationTester) SetApp() {
 	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 }
 
-func (suite *IntegrationTester) StartChain(genesisTime time.Time, genesisStates ...app.GenesisState) {
+func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisTime time.Time, genesisStates ...app.GenesisState) {
 	suite.App.InitializeFromGenesisStatesWithTimeAndChainID(
 		genesisTime,
-		testChainID, nil, nil,
+		testChainID, genAccs, coins,
 		genesisStates...,
 	)
 

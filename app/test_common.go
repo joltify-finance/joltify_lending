@@ -98,8 +98,8 @@ func genesisStateWithValSet(
 	balances ...banktypes.Balance,
 ) GenesisState {
 	// set genesis accounts
-	authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
-	genesisState[authtypes.ModuleName] = app.AppCodec().MustMarshalJSON(authGenesis)
+	//authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
+	//genesisState[authtypes.ModuleName] = app.AppCodec().MustMarshalJSON(authGenesis)
 
 	validators := make([]stakingtypes.Validator, 0, len(valSet.Validators))
 	delegations := make([]stakingtypes.Delegation, 0, len(valSet.Validators))

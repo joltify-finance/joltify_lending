@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
@@ -52,13 +53,22 @@ func (suite *BorrowIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncin
 		WithSimpleBorrowRewardPeriod("bnb", cs(c("uexam", 1e6))) // only borrow rewards
 
 	suite.SetApp()
-	suite.StartChain(
-		suite.genesisTime,
+
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range suite.addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	suite.StartChain(genAcc, cs(c("bnb", 1e12)), suite.genesisTime,
 		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
 		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.App.AppCodec()),
 		authBulder.BuildMarshalled(suite.App.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.App.AppCodec()),
 	)
+
+	err := fundModuleAccount(suite.App.GetBankKeeper(), suite.Ctx, types2.ModuleName, cs(c("uexam", 1e18)))
+	suite.Require().NoError(err)
 
 	// Create a borrow (need to first deposit to allow it)
 	suite.NoError(suite.DeliverJoltMsgDeposit(userA, cs(c("bnb", 1e11))))
