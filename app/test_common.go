@@ -48,7 +48,7 @@ import (
 
 var (
 	emptyTime            time.Time
-	testChainID                = "oppytest_1-1"
+	testChainID                = "joltifytest_1-1"
 	defaultInitialHeight int64 = 1
 )
 
@@ -258,25 +258,26 @@ func (app *App) AppCodec() codec.Codec {
 
 // InitializeFromGenesisStates calls InitChain on the app using the provided genesis states.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStates(genesisStates ...GenesisState) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(emptyTime, testChainID, defaultInitialHeight, genesisStates...)
+func (tApp TestApp) InitializeFromGenesisStates(genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(emptyTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
 }
 
 // InitializeFromGenesisStatesWithTime calls InitChain on the app using the provided genesis states and time.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTime(genTime time.Time, genesisStates ...GenesisState) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genesisStates...)
+func (tApp TestApp) InitializeFromGenesisStatesWithTime(genTime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
 }
 
 // InitializeFromGenesisStatesWithTimeAndChainID calls InitChain on the app using the provided genesis states, time, and chain id.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(genTime time.Time, chainID string, genesisStates ...GenesisState) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, chainID, defaultInitialHeight, genesisStates...)
+func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(genTime time.Time, chainID string,
+	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, chainID, defaultInitialHeight, genAccs, coins, genesisStates...)
 }
 
 // InitializeFromGenesisStatesWithTimeAndChainIDAndHeight calls InitChain on the app using the provided genesis states and other parameters.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genesisStates ...GenesisState) TestApp {
+func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
 	// Create a default genesis state and overwrite with provided values
 	encoding := cosmoscmd.MakeEncodingConfig(ModuleBasics)
 	genesisState := NewDefaultGenesisState(encoding.Marshaler)
@@ -295,15 +296,29 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	// create validator set with single validator
 	validator := tmtypes.NewValidator(pubKey, 1)
 	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
-
-	senderPrivKey := secp256k1.GenPrivKey()
-	acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
-	balance := banktypes.Balance{
-		Address: acc.GetAddress().String(),
-		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(100000000000000))),
+	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(100000000000000))
+	coins = coins.Add(defaultCoins)
+	var balances []banktypes.Balance
+	if len(genAccs) == 0 {
+		senderPrivKey := secp256k1.GenPrivKey()
+		acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
+		balanceItem := banktypes.Balance{
+			Address: acc.GetAddress().String(),
+			Coins:   coins,
+		}
+		genAccs = []authtypes.GenesisAccount{acc}
+		balances = []banktypes.Balance{balanceItem}
+	} else {
+		for _, el := range genAccs {
+			balanceItem := banktypes.Balance{
+				Address: el.GetAddress().String(),
+				Coins:   coins,
+			}
+			balances = append(balances, balanceItem)
+		}
 	}
 
-	genesisState = genesisStateWithValSet(&tApp.App, genesisState, valSet, []authtypes.GenesisAccount{acc}, balance)
+	genesisState = genesisStateWithValSet(&tApp.App, genesisState, valSet, genAccs, balances...)
 	// Initialize the chain
 	stateBytes, err := json.Marshal(genesisState)
 	if err != nil {

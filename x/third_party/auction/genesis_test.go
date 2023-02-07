@@ -134,7 +134,7 @@ func TestExportGenesis(t *testing.T) {
 		lg := tmlog.TestingLogger()
 		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
-		tApp.InitializeFromGenesisStates()
+		tApp.InitializeFromGenesisStates(nil, nil)
 
 		// export
 		gs := auction.ExportGenesis(ctx, tApp.GetAuctionKeeper())
@@ -148,7 +148,7 @@ func TestExportGenesis(t *testing.T) {
 		lg := tmlog.TestingLogger()
 		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
-		tApp.InitializeFromGenesisStates()
+		tApp.InitializeFromGenesisStates(nil, nil)
 		tApp.GetAuctionKeeper().SetAuction(ctx, testAuction)
 
 		// export

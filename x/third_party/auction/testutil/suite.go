@@ -70,7 +70,20 @@ func (suite *Suite) SetupTest(numAddrs int) {
 
 	moduleGs := tApp.AppCodec().MustMarshalJSON(auctionGs)
 	gs := app.GenesisState{types2.ModuleName: moduleGs}
-	tApp.InitializeFromGenesisStates(authGS, gs)
+
+	//var genAcc []authtypes.GenesisAccount
+	//for _, el := range suite.Addrs {
+	//	fmt.Printf(">>>>>>>>##%v\n", el.String())
+	//	b := authtypes.NewBaseAccount(el, nil, 0, 0)
+	//	genAcc = append(genAcc, b)
+	//}
+	//
+	//addr, err := sdk.AccAddressFromBech32("jolt1ze7y9qwdddejmy7jlw4cymqqlt2wh05ypmjzfy")
+	//suite.Require().NoError(err)
+	//b := authtypes.NewBaseAccount(addr, nil, 0, 0)
+	//genAcc = append(genAcc, b)
+	//
+	tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
 
 	suite.App = tApp
 	suite.Ctx = ctx

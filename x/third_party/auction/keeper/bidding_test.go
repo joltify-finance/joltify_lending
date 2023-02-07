@@ -32,11 +32,11 @@ func TestAuctionBidding(t *testing.T) {
 
 	someTime := time.Date(0o001, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	buyer := addrs[0]
-	secondBuyer := addrs[1]
+	_, addrsAll := app.GeneratePrivKeyAddressPairs(5)
+	buyer := addrsAll[0]
+	secondBuyer := addrsAll[1]
 	modName := "liquidator"
-	collateralAddrs := addrs[2:]
+	collateralAddrs := addrsAll[2:]
 	collateralWeights := is(30, 20, 10)
 
 	initialBalance := cs(c("token1", 1000), c("token2", 1000))
@@ -472,7 +472,8 @@ func TestAuctionBidding(t *testing.T) {
 
 			moduleGs := tApp.AppCodec().MustMarshalJSON(auctionGs)
 			gs := app.GenesisState{types2.ModuleName: moduleGs}
-			tApp.InitializeFromGenesisStates(authGS, gs)
+
+			tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
 
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: someTime})
 			keeper := tApp.GetAuctionKeeper()
@@ -480,6 +481,21 @@ func TestAuctionBidding(t *testing.T) {
 
 			err = tApp.FundModuleAccount(ctx, modName, cs(c("token1", 1000), c("token2", 1000), c("debt", 1000)))
 			require.NoError(t, err)
+
+			err = tApp.FundModuleAccount(ctx, modName, initialBalance)
+			require.NoError(t, err)
+
+			for _, el := range addrs {
+				err = tApp.FundAccount(ctx, el, initialBalance)
+				//err = tApp.FundAccount(ctx, el, cs(c("token1", 1000), c("token2", 1000), c("debt", 1000)))
+				require.NoError(t, err)
+			}
+
+			for _, el := range addrsAll {
+				err = tApp.FundAccount(ctx, el, initialBalance)
+				//err = tApp.FundAccount(ctx, el, cs(c("token1", 1000), c("token2", 1000), c("debt", 1000)))
+				require.NoError(t, err)
+			}
 
 			// Start Auction
 			var id uint64

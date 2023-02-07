@@ -74,7 +74,7 @@ func TestIterateAuctions(t *testing.T) {
 	// setup
 	lg := tmlog.TestingLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
-	tApp.InitializeFromGenesisStates()
+	tApp.InitializeFromGenesisStates(nil, nil)
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
 
