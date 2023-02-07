@@ -50,7 +50,7 @@ func TestAppAnteHandler_AuthorizedMempool(t *testing.T) {
 	chainID := "jolttest_1-1"
 	tApp = tApp.InitializeFromGenesisStatesWithTimeAndChainID(
 		time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC),
-		chainID,
+		chainID, nil, nil,
 		app.NewFundedGenStateWithSameCoins(
 			tApp.AppCodec(),
 			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 1e6)),

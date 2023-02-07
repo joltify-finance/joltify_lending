@@ -17,7 +17,7 @@ import (
 )
 
 func newMsgGrant(granter sdk.AccAddress, grantee sdk.AccAddress, a authz.Authorization, expiration time.Time) *authz.MsgGrant {
-	msg, err := authz.NewMsgGrant(granter, grantee, a, expiration)
+	msg, err := authz.NewMsgGrant(granter, grantee, a, &expiration)
 	if err != nil {
 		panic(err)
 	}
