@@ -1,6 +1,7 @@
 package ante_test
 
 import (
+	"math/rand"
 	"testing"
 	"time"
 
@@ -116,7 +117,8 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tx, err := helpers.GenTx(
+			tx, err := helpers.GenSignedMockTx(
+				rand.New(rand.NewSource(time.Now().UnixNano())),
 				txConfig,
 				tc.msgs,
 				sdk.NewCoins(),

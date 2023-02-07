@@ -1,10 +1,10 @@
 package ante_test
 
 import (
+	"github.com/stretchr/testify/require"
+	"math/rand"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/simapp/helpers"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,7 +21,8 @@ func TestVestingMempoolDecorator_MsgCreateVestingAccount_Unauthorized(t *testing
 
 	decorator := ante.NewVestingAccountDecorator()
 
-	tx, err := helpers.GenTx(
+	tx, err := helpers.GenSignedMockTx(
+		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
 			vesting.NewMsgCreateVestingAccount(
