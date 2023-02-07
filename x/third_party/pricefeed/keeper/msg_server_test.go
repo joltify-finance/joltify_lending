@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -15,7 +16,7 @@ import (
 
 func TestKeeper_PostPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(4)
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{}).
 		WithBlockTime(time.Now().UTC())
 	k := tApp.GetPriceFeedKeeper()

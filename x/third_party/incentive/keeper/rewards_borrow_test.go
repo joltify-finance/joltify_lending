@@ -95,8 +95,9 @@ func (suite *BorrowIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncin
 
 	// The users has always had 100% of borrows, so they should receive all rewards for the previous two blocks.
 	// Total rewards for each block is block duration * rewards per second
+	// we need to add 100000000000000stake token as it is initlised in genesis
 	accuracy := 1e-10 // using a very high accuracy to flag future small calculation changes
-	suite.BalanceInEpsilon(userA, cs(c("bnb", 1e12-1e11+1e10), c("uexam", 2*1e6*1e6)), accuracy)
+	suite.BalanceInEpsilon(userA, cs(c("bnb", 1e12-1e11+1e10), c("stake", 100000000000000), c("uexam", 2*1e6*1e6)), accuracy)
 }
 
 // Test suite used for all keeper tests
@@ -246,8 +247,11 @@ func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
 
 			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
+			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			suite.Require().NoError(err)
+
 			// User deposits and borrows to increase total borrowed amount
-			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)
@@ -400,8 +404,11 @@ func (suite *BorrowRewardsTestSuite) TestInitializeHardBorrowRewards() {
 
 			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
+			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			suite.Require().NoError(err)
+
 			// User deposits
-			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.deposit)
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.deposit)
 			suite.Require().NoError(err)
 			// User borrows
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, tc.args.borrow)
@@ -593,6 +600,12 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 
 			suite.SetupWithGenState(authBuilder, incentBuilder, hardBuilder)
 
+			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[2], cs(c("pjolt", 1e9)))
+			suite.Require().NoError(err)
+
+			err = fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("pjolt", 1e9), c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			suite.Require().NoError(err)
+
 			// Borrow a fixed amount from another user to dilute primary user's rewards per second.
 			suite.Require().NoError(
 				suite.joltKeeper.Deposit(suite.ctx, suite.addrs[2], cs(c("pjolt", 200_000_000))),
@@ -602,7 +615,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 			)
 
 			// User deposits and borrows to increase total borrowed amount
-			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)
@@ -881,8 +894,14 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 
 			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
+			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[0], cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			suite.Require().NoError(err)
+
+			err = fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			suite.Require().NoError(err)
+
 			// Fill the hard supply to allow user to borrow
-			err := suite.joltKeeper.Deposit(suite.ctx, suite.addrs[0], tc.args.firstBorrow.Add(tc.args.modification.coins...))
+			err = suite.joltKeeper.Deposit(suite.ctx, suite.addrs[0], tc.args.firstBorrow.Add(tc.args.modification.coins...))
 			suite.Require().NoError(err)
 
 			// User deposits initial funds (so that user can borrow)
@@ -980,8 +999,11 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 
 			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
+			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			suite.Require().NoError(err)
+
 			// User deposits and borrows to increase total borrowed amount
-			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)

@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -26,7 +27,7 @@ type grpcQueryTestSuite struct {
 }
 
 func (suite *grpcQueryTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp()
+	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.ctx = suite.tApp.NewContext(true, tmprototypes.Header{}).
 		WithBlockTime(time.Now().UTC())
 	suite.keeper = suite.tApp.GetPriceFeedKeeper()

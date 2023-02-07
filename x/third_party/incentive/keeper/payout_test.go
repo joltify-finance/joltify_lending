@@ -392,6 +392,13 @@ func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, recipientM
 	return bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, recipientMod, amounts)
 }
 
+func fundAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, addr sdk.AccAddress, amounts sdk.Coins) error {
+	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
+		return err
+	}
+	return bankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, amounts)
+}
+
 func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 	authBuilder := app.NewAuthBankGenesisBuilder().
 		WithSimpleAccount(suite.addrs[1], cs(c("ujolt", 400))).
@@ -401,16 +408,14 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 	suite.SetupApp()
 
 	var genAcc []authtypes.GenesisAccount
-	for _, el := range suite.addrs {
-		b := authtypes.NewBaseAccount(el, nil, 0, 0)
-		genAcc = append(genAcc, b)
-	}
+	b := authtypes.NewBaseAccount(suite.addrs[1], nil, 0, 0)
+	genAcc = append(genAcc, b)
 
 	suite.app.InitializeFromGenesisStates(genAcc, cs(c("ujolt", 400)),
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
 
-	fundModuleAccount(suite.app.GetBankKeeper(), suite.app.Ctx, types2.ModuleName, cs(c("ujolt", 200)))
+	fundModuleAccount(suite.app.GetBankKeeper(), suite.app.Ctx, types2.ModuleName, cs(c("ujolt", 600)))
 
 	// send coins to base account
 	err := suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types2.ModuleName, suite.addrs[1], cs(c("ujolt", 100)), 5)

@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	"testing"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 
 // TestKeeper_SetGetMarket tests adding markets to the pricefeed, getting markets from the store
 func TestKeeper_SetGetMarket(t *testing.T) {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{})
 	keeper := tApp.GetPriceFeedKeeper()
 
@@ -56,7 +57,7 @@ func TestKeeper_SetGetMarket(t *testing.T) {
 // TestKeeper_GetSetPrice Test Posting the price by an oracle
 func TestKeeper_GetSetPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{})
 	keeper := tApp.GetPriceFeedKeeper()
 
@@ -108,7 +109,7 @@ func TestKeeper_GetSetPrice(t *testing.T) {
 // TestKeeper_GetSetCurrentPrice Test Setting the median price of an Asset
 func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{}).
 		WithBlockTime(time.Now().UTC())
 	keeper := tApp.GetPriceFeedKeeper()
@@ -198,7 +199,7 @@ func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 
 func TestKeeper_ExpiredSetCurrentPrices(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{}).
 		WithBlockTime(time.Now().UTC())
 	keeper := tApp.GetPriceFeedKeeper()
