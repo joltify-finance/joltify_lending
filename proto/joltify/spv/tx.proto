@@ -1,0 +1,158 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc CreatePool(MsgCreatePool) returns (MsgCreatePoolResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
+  rpc AddInvestors(MsgAddInvestors) returns (MsgAddInvestorsResponse);
+
+  rpc Deposit(MsgDeposit) returns (MsgDepositResponse);
+
+  rpc Borrow(MsgBorrow) returns (MsgBorrowResponse);
+
+  rpc RepayInterest(MsgRepayInterest) returns (MsgRepayInterestResponse);
+
+  rpc ClaimInterest(MsgClaimInterest) returns (MsgClaimInterestResponse);
+
+  rpc UpdatePool(MsgUpdatePool) returns (MsgUpdatePoolResponse);
+
+  rpc ActivePool(MsgActivePool) returns (MsgActivePoolResponse);
+
+  rpc PayPrincipal(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
+
+  rpc PayPrincipalForWithdrawalRequests(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
+
+  rpc WithdrawPrincipal(MsgWithdrawPrincipal) returns (MsgWithdrawPrincipalResponse);
+
+  rpc SubmitWithdrawProposal(MsgSubmitWithdrawProposal) returns (MsgSubmitWithdrawProposalResponse);
+
+  rpc TransferOwnership(MsgTransferOwnership) returns (MsgTransferOwnershipResponse);
+}
+
+message MsgCreatePool {
+  string creator = 1;
+  int32 project_index = 2;
+  string pool_name=3;
+  string apy = 4;
+  cosmos.base.v1beta1.Coin target_token_amount = 5[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+}
+
+message MsgCreatePoolResponse {
+  repeated string pool_index = 1;
+}
+
+message MsgAddInvestors {
+  string creator = 1;
+  string pool_index = 2;
+  repeated string investor_iD= 3;
+}
+
+message MsgAddInvestorsResponse {
+  bool operation_result = 1;
+}
+
+message MsgDeposit {
+  string creator = 1;
+  string pool_index = 2;
+  cosmos.base.v1beta1.Coin token = 3[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
+
+message MsgDepositResponse {
+}
+
+message MsgBorrow {
+  string creator = 1;
+  string pool_index = 2;
+  cosmos.base.v1beta1.Coin borrow_amount= 3[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
+
+message MsgBorrowResponse {
+  string borrow_amount = 1;
+}
+
+
+message MsgRepayInterest{
+  string creator = 1;
+  string pool_index = 2;
+  cosmos.base.v1beta1.Coin token = 4[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
+message MsgRepayInterestResponse{}
+
+message MsgClaimInterest {
+  string creator = 1;
+  string pool_index = 2;
+}
+
+message MsgClaimInterestResponse {
+  string amount = 1;
+}
+
+message MsgUpdatePool {
+  string creator = 1;
+  string pool_index = 2;
+  string pool_name  = 3;
+  string pool_apy  = 4;
+  cosmos.base.v1beta1.Coin target_token_amount = 6[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+}
+
+message MsgUpdatePoolResponse {
+}
+
+message MsgActivePool {
+  string creator = 1;
+  string pool_index = 2;
+}
+
+message MsgActivePoolResponse {
+}
+
+message MsgPayPrincipal {
+  string creator = 1;
+  string pool_index = 2;
+  cosmos.base.v1beta1.Coin token= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
+}
+
+message MsgPayPrincipalResponse {
+}
+
+message MsgWithdrawPrincipal {
+  string creator = 1;
+  string pool_index = 2;
+  cosmos.base.v1beta1.Coin token = 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+}
+
+message MsgWithdrawPrincipalResponse {
+  string amount=1;
+}
+
+
+message MsgSubmitWithdrawProposal {
+  string creator = 1;
+  string pool_index = 2;
+}
+
+message MsgSubmitWithdrawProposalResponse {
+  bool operation_result = 1;
+}
+
+message MsgTransferOwnership {
+  string creator = 1;
+  string pool_index = 2;
+}
+
+message MsgTransferOwnershipResponse {
+  bool operation_result = 1;
+}

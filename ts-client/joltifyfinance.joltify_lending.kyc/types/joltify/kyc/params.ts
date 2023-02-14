@@ -1,5 +1,7 @@
 /* eslint-disable */
+import Long from "long";
 import _m0 from "protobufjs/minimal";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 
 export const protobufPackage = "joltifyfinance.joltify_lending.kyc";
 
@@ -9,6 +11,7 @@ export interface BasicInfo {
   projectCountry: string;
   businessNumber: string;
   reserved: Uint8Array;
+  projectName: string;
 }
 
 /** Market defines an asset in the pricefeed. */
@@ -17,6 +20,10 @@ export interface ProjectInfo {
   SPVName: string;
   basicInfo: BasicInfo | undefined;
   projectOwner: Uint8Array;
+  projectLength: number;
+  projectTargetAmount: Coin | undefined;
+  baseApy: string;
+  payFreq: string;
 }
 
 /** Params defines the parameters for the module. */
@@ -26,7 +33,14 @@ export interface Params {
 }
 
 function createBaseBasicInfo(): BasicInfo {
-  return { description: "", projectsUrl: "", projectCountry: "", businessNumber: "", reserved: new Uint8Array() };
+  return {
+    description: "",
+    projectsUrl: "",
+    projectCountry: "",
+    businessNumber: "",
+    reserved: new Uint8Array(),
+    projectName: "",
+  };
 }
 
 export const BasicInfo = {
@@ -45,6 +59,9 @@ export const BasicInfo = {
     }
     if (message.reserved.length !== 0) {
       writer.uint32(42).bytes(message.reserved);
+    }
+    if (message.projectName !== "") {
+      writer.uint32(50).string(message.projectName);
     }
     return writer;
   },
@@ -71,6 +88,9 @@ export const BasicInfo = {
         case 5:
           message.reserved = reader.bytes();
           break;
+        case 6:
+          message.projectName = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -86,6 +106,7 @@ export const BasicInfo = {
       projectCountry: isSet(object.projectCountry) ? String(object.projectCountry) : "",
       businessNumber: isSet(object.businessNumber) ? String(object.businessNumber) : "",
       reserved: isSet(object.reserved) ? bytesFromBase64(object.reserved) : new Uint8Array(),
+      projectName: isSet(object.projectName) ? String(object.projectName) : "",
     };
   },
 
@@ -97,6 +118,7 @@ export const BasicInfo = {
     message.businessNumber !== undefined && (obj.businessNumber = message.businessNumber);
     message.reserved !== undefined
       && (obj.reserved = base64FromBytes(message.reserved !== undefined ? message.reserved : new Uint8Array()));
+    message.projectName !== undefined && (obj.projectName = message.projectName);
     return obj;
   },
 
@@ -107,12 +129,22 @@ export const BasicInfo = {
     message.projectCountry = object.projectCountry ?? "";
     message.businessNumber = object.businessNumber ?? "";
     message.reserved = object.reserved ?? new Uint8Array();
+    message.projectName = object.projectName ?? "";
     return message;
   },
 };
 
 function createBaseProjectInfo(): ProjectInfo {
-  return { index: 0, SPVName: "", basicInfo: undefined, projectOwner: new Uint8Array() };
+  return {
+    index: 0,
+    SPVName: "",
+    basicInfo: undefined,
+    projectOwner: new Uint8Array(),
+    projectLength: 0,
+    projectTargetAmount: undefined,
+    baseApy: "",
+    payFreq: "",
+  };
 }
 
 export const ProjectInfo = {
@@ -128,6 +160,18 @@ export const ProjectInfo = {
     }
     if (message.projectOwner.length !== 0) {
       writer.uint32(34).bytes(message.projectOwner);
+    }
+    if (message.projectLength !== 0) {
+      writer.uint32(40).uint64(message.projectLength);
+    }
+    if (message.projectTargetAmount !== undefined) {
+      Coin.encode(message.projectTargetAmount, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.baseApy !== "") {
+      writer.uint32(58).string(message.baseApy);
+    }
+    if (message.payFreq !== "") {
+      writer.uint32(66).string(message.payFreq);
     }
     return writer;
   },
@@ -151,6 +195,18 @@ export const ProjectInfo = {
         case 4:
           message.projectOwner = reader.bytes();
           break;
+        case 5:
+          message.projectLength = longToNumber(reader.uint64() as Long);
+          break;
+        case 6:
+          message.projectTargetAmount = Coin.decode(reader, reader.uint32());
+          break;
+        case 7:
+          message.baseApy = reader.string();
+          break;
+        case 8:
+          message.payFreq = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -165,6 +221,10 @@ export const ProjectInfo = {
       SPVName: isSet(object.SPVName) ? String(object.SPVName) : "",
       basicInfo: isSet(object.basicInfo) ? BasicInfo.fromJSON(object.basicInfo) : undefined,
       projectOwner: isSet(object.projectOwner) ? bytesFromBase64(object.projectOwner) : new Uint8Array(),
+      projectLength: isSet(object.projectLength) ? Number(object.projectLength) : 0,
+      projectTargetAmount: isSet(object.projectTargetAmount) ? Coin.fromJSON(object.projectTargetAmount) : undefined,
+      baseApy: isSet(object.baseApy) ? String(object.baseApy) : "",
+      payFreq: isSet(object.payFreq) ? String(object.payFreq) : "",
     };
   },
 
@@ -178,6 +238,11 @@ export const ProjectInfo = {
       && (obj.projectOwner = base64FromBytes(
         message.projectOwner !== undefined ? message.projectOwner : new Uint8Array(),
       ));
+    message.projectLength !== undefined && (obj.projectLength = Math.round(message.projectLength));
+    message.projectTargetAmount !== undefined
+      && (obj.projectTargetAmount = message.projectTargetAmount ? Coin.toJSON(message.projectTargetAmount) : undefined);
+    message.baseApy !== undefined && (obj.baseApy = message.baseApy);
+    message.payFreq !== undefined && (obj.payFreq = message.payFreq);
     return obj;
   },
 
@@ -189,6 +254,12 @@ export const ProjectInfo = {
       ? BasicInfo.fromPartial(object.basicInfo)
       : undefined;
     message.projectOwner = object.projectOwner ?? new Uint8Array();
+    message.projectLength = object.projectLength ?? 0;
+    message.projectTargetAmount = (object.projectTargetAmount !== undefined && object.projectTargetAmount !== null)
+      ? Coin.fromPartial(object.projectTargetAmount)
+      : undefined;
+    message.baseApy = object.baseApy ?? "";
+    message.payFreq = object.payFreq ?? "";
     return message;
   },
 };
@@ -315,6 +386,18 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

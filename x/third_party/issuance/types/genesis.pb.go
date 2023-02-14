@@ -6,11 +6,11 @@ package types
 import (
 	fmt "fmt"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
-	types1 "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
-	_ "github.com/gogo/protobuf/types"
 	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
+	_ "google.golang.org/protobuf/types/known/durationpb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -268,7 +268,7 @@ func (m *RateLimit) GetTimePeriod() time.Duration {
 // AssetSupply contains information about an asset's rate-limited supply (the
 // total supply of the asset is tracked in the top-level supply module)
 type AssetSupply struct {
-	CurrentSupply types1.Coin   `protobuf:"bytes,1,opt,name=current_supply,json=currentSupply,proto3" json:"current_supply"`
+	CurrentSupply types.Coin    `protobuf:"bytes,1,opt,name=current_supply,json=currentSupply,proto3" json:"current_supply"`
 	TimeElapsed   time.Duration `protobuf:"bytes,2,opt,name=time_elapsed,json=timeElapsed,proto3,stdduration" json:"time_elapsed" yaml:"time_elapsed,omitempty"`
 }
 
@@ -304,11 +304,11 @@ func (m *AssetSupply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AssetSupply proto.InternalMessageInfo
 
-func (m *AssetSupply) GetCurrentSupply() types1.Coin {
+func (m *AssetSupply) GetCurrentSupply() types.Coin {
 	if m != nil {
 		return m.CurrentSupply
 	}
-	return types1.Coin{}
+	return types.Coin{}
 }
 
 func (m *AssetSupply) GetTimeElapsed() time.Duration {

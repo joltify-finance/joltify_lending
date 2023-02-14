@@ -1,11 +1,9 @@
 package keeper
 
 import (
+	errorsmod "cosmossdk.io/errors"
 	"sort"
 	"strconv"
-	"time"
-
-	errorsmod "cosmossdk.io/errors"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -131,7 +129,7 @@ func (k Keeper) updateValidators(ctx sdk.Context) error {
 }
 
 func (k Keeper) NewUpdate(ctx sdk.Context) []abci.ValidatorUpdate {
-	defer telemetry.ModuleMeasureSince(vaulttypes.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
+	defer telemetry.ModuleMeasureSince(vaulttypes.ModuleName, ctx.BlockTime(), telemetry.MetricKeyEndBlocker)
 
 	blockHeight := k.GetParams(ctx).BlockChurnInterval
 	if ctx.BlockHeight()%blockHeight == 0 {

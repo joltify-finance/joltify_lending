@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
@@ -24,24 +26,30 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	// b := BasicInfo{
-	//	"This is the test info",
-	//	"empty",
-	//	"ABC",
-	//	"ABC123",
-	//	[]byte("reserved"),
-	// }
-
-	acc, err := types.AccAddressFromBech32("jolt1gh6fnh6xt8lzhqy6z8n32lh7esxfrmspey8tp6")
+	b := BasicInfo{
+		"This is the test info",
+		"empty",
+		"ABC",
+		"ABC123",
+		[]byte("reserved"),
+		"This is the Test Project 1",
+	}
+	amount, _ := sdkmath.NewIntFromString("100000000000000000000000")
+	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 	if err != nil {
 		panic(err)
 	}
-	// pi := ProjectInfo{
-	//	Index:        1,
-	//	SPVName:      "defaultSPV",
-	//	ProjectOwner: acc,
-	// }
-	return Params{[]*ProjectInfo{}, []types.AccAddress{acc}}
+	pi := ProjectInfo{
+		Index:               1,
+		SPVName:             "defaultSPV",
+		ProjectOwner:        acc,
+		BasicInfo:           &b,
+		ProjectLength:       31536000, //1 year
+		ProjectTargetAmount: types.NewCoin("ausdc", amount),
+		BaseApy:             types.NewDecWithPrec(15, 2),
+		PayFreq:             "60",
+	}
+	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }
 
 // DefaultParams returns a default set of parameters

@@ -311,7 +311,7 @@ func DefaultParams() Params {
 			sdk.NewDec(1e15),
 			loanToValue,
 		),
-		"eth:usd",
+		"atom:usd",
 		sdk.NewInt(1e6),
 		NewInterestRateModel(
 			sdk.MustNewDecFromStr("0.0"),

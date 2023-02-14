@@ -1,0 +1,136 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+message PoolInfo {
+  string index  =1 ;
+  string pool_name = 2 ;
+  int32 linked_project = 3 ;
+  bytes owner_address     = 4
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+
+
+  string      apy      = 5 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+
+  cosmos.base.v1beta1.Coin total_amount = 6[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  int32 pay_freq = 7;
+
+  string            reserve_factor      = 8 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+
+//  string            pool_nFT_class      = 9 [
+//    (cosmos_proto.scalar)  = "cosmos.Class",
+//    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+//    (gogoproto.nullable)   = false
+//  ];
+  repeated string pool_nFT_ids =9 ;
+
+  google.protobuf.Timestamp last_payment_time = 10 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+  enum POOLSTATUS{
+    ACTIVE = 0;
+    INACTIVE = 1;
+    CLOSED = 2;
+    PREPARE = 3;
+    CLOSING  =4;
+  }
+  POOLSTATUS pool_status = 11;
+
+  cosmos.base.v1beta1.Coin borrowed_amount = 12[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  string            pool_interest      = 13 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+ uint64  project_length = 14;
+
+  cosmos.base.v1beta1.Coin usable_amount = 15[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  cosmos.base.v1beta1.Coin target_amount = 16[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  enum POOLTYPE{
+    JUNIOR = 0;
+    SENIOR = 1;
+  }
+  POOLTYPE pool_type = 17;
+
+  string escrow_interest_amount = 18 [
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+
+
+  cosmos.base.v1beta1.Coin escrow_principal_amount = 19[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  cosmos.base.v1beta1.Coin withdraw_proposal_amount = 20[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  google.protobuf.Timestamp project_due_time = 21 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+  repeated bytes withdraw_accounts     = 22
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+  repeated bytes transfer_accounts     = 23
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+}
+
+message PoolWithInvestors {
+  string pool_index =1;
+  repeated string investors    = 2;
+}
+
+message PoolDepositedInvestors {
+  string pool_index = 1;
+  repeated  bytes wallet_address     = 4
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+}
+
+message WalletsLinkPool {
+  bytes wallet_address = 1
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+  repeated string pools_index = 2;
+
+}

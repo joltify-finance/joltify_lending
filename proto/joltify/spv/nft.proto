@@ -1,0 +1,71 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+
+message BorrowDetail{
+	cosmos.base.v1beta1.Coin borrowed_amount = 1[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+	google.protobuf.Timestamp time_stamp = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+}
+
+message NftInfo{
+	string issuer = 1;
+	string receiver = 2;
+	cosmos.base.v1beta1.Coin borrowed = 3[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+	google.protobuf.Timestamp last_payment = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+}
+
+message PaymentItem {
+	google.protobuf.Timestamp payment_time = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	cosmos.base.v1beta1.Coin payment_amount = 2[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+
+	cosmos.base.v1beta1.Coin borrowed_amount = 3[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+
+}
+message BorrowInterest{
+	string pool_index  =1 ;
+	string      apy      = 2 [
+		(cosmos_proto.scalar)  = "cosmos.Dec",
+		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.nullable)   = false
+	];
+	int32 pay_freq = 3;
+	google.protobuf.Timestamp issue_time = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	repeated BorrowDetail borrow_details = 5 [(gogoproto.nullable) = false];
+//	cosmos.base.v1beta1.Coin borrowed_last = 6[
+//		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+//		(gogoproto.nullable) = false];
+
+	string      monthly_ratio      = 6 [
+		(cosmos_proto.scalar)  = "cosmos.Dec",
+		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.nullable)   = false
+	];
+
+
+	string      interest_sPY      = 7 [
+		(cosmos_proto.scalar)  = "cosmos.Dec",
+		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.nullable)   = false
+	];
+
+	repeated PaymentItem payments = 8;
+
+	cosmos.base.v1beta1.Coin interestPaid = 9[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+}

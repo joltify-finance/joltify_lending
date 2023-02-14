@@ -170,7 +170,7 @@ func (k Keeper) ValidateBorrow(ctx sdk.Context, borrower sdk.AccAddress, amount 
 	if !found {
 		return sdkerrors.Wrapf(types2.ErrDepositsNotFound, "no deposits found for %s", borrower)
 	}
-	totalBorrowableAmount := sdk.ZeroDec()
+	totalUsableAmount := sdk.ZeroDec()
 	for _, coin := range deposit.Amount {
 		moneyMarket, found := k.GetMoneyMarket(ctx, coin.Denom)
 		if !found {
@@ -183,8 +183,8 @@ func (k Keeper) ValidateBorrow(ctx sdk.Context, borrower sdk.AccAddress, amount 
 			return sdkerrors.Wrapf(types2.ErrPriceNotFound, "no price found for market %s", moneyMarket.SpotMarketID)
 		}
 		depositUSDValue := sdk.NewDecFromInt(coin.Amount).Quo(sdk.NewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPriceInfo.Price)
-		borrowableAmountForDeposit := depositUSDValue.Mul(moneyMarket.BorrowLimit.LoanToValue)
-		totalBorrowableAmount = totalBorrowableAmount.Add(borrowableAmountForDeposit)
+		UsableAmountForDeposit := depositUSDValue.Mul(moneyMarket.BorrowLimit.LoanToValue)
+		totalUsableAmount = totalUsableAmount.Add(UsableAmountForDeposit)
 	}
 
 	// Get the total USD value of user's existing borrows
@@ -214,7 +214,7 @@ func (k Keeper) ValidateBorrow(ctx sdk.Context, borrower sdk.AccAddress, amount 
 	}
 
 	// Validate that the proposed borrow's USD value is within user's borrowable limit
-	if proprosedBorrowUSDValue.GT(totalBorrowableAmount.Sub(existingBorrowUSDValue)) {
+	if proprosedBorrowUSDValue.GT(totalUsableAmount.Sub(existingBorrowUSDValue)) {
 		return sdkerrors.Wrapf(types2.ErrInsufficientLoanToValue, "requested borrow %s exceeds the allowable amount as determined by the collateralization ratio", amount)
 	}
 	return nil

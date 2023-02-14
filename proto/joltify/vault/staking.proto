@@ -19,7 +19,7 @@ message Params{
     (gogoproto.nullable)   = false
   ];
 
-  repeated cosmos.base.v1beta1.Coin targetQuota= 5 [
+  repeated cosmos.base.v1beta1.Coin target_quota= 5 [
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.moretags) = "yaml:\"target_quota\""

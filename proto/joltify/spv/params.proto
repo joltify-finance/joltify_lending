@@ -1,0 +1,12 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  
+}

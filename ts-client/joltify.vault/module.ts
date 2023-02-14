@@ -11,6 +11,21 @@ import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
 import { MsgCreateIssueToken } from "./types/joltify/vault/tx";
 import { MsgCreateOutboundTx } from "./types/joltify/vault/tx";
 
+import { PoolProposal as typePoolProposal} from "./types"
+import { CreatePool as typeCreatePool} from "./types"
+import { IssueToken as typeIssueToken} from "./types"
+import { Entity as typeEntity} from "./types"
+import { Proposals as typeProposals} from "./types"
+import { OutboundTx as typeOutboundTx} from "./types"
+import { AddressV16 as typeAddressV16} from "./types"
+import { OutboundTxV16 as typeOutboundTxV16} from "./types"
+import { PoolInfo as typePoolInfo} from "./types"
+import { HistoricalAmount as typeHistoricalAmount} from "./types"
+import { CoinsQuota as typeCoinsQuota} from "./types"
+import { Params as typeParams} from "./types"
+import { Validator as typeValidator} from "./types"
+import { StandbyPower as typeStandbyPower} from "./types"
+import { Validators as typeValidators} from "./types"
 
 export { MsgCreateCreatePool, MsgCreateIssueToken, MsgCreateOutboundTx };
 
@@ -48,6 +63,18 @@ type msgCreateOutboundTxParams = {
 
 export const registry = new Registry(msgTypes);
 
+type Field = {
+	name: string;
+	type: unknown;
+}
+function getStructure(template) {
+	const structure: {fields: Field[]} = { fields: [] }
+	for (let [key, value] of Object.entries(template)) {
+		let field = { name: key, type: typeof value }
+		structure.fields.push(field)
+	}
+	return structure
+}
 const defaultFee = {
   amount: [],
   gas: "200000",
@@ -144,13 +171,46 @@ export const queryClient = ({ addr: addr }: QueryClientOptions = { addr: "http:/
 class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
-	
-	public registry: Array<[string, GeneratedType]>;
+	public structure: Record<string,unknown>;
+	public registry: Array<[string, GeneratedType]> = [];
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });
-		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
+		this.query = queryClient({ addr: client.env.apiURL });		
+		this.updateTX(client);
+		this.structure =  {
+						PoolProposal: getStructure(typePoolProposal.fromPartial({})),
+						CreatePool: getStructure(typeCreatePool.fromPartial({})),
+						IssueToken: getStructure(typeIssueToken.fromPartial({})),
+						Entity: getStructure(typeEntity.fromPartial({})),
+						Proposals: getStructure(typeProposals.fromPartial({})),
+						OutboundTx: getStructure(typeOutboundTx.fromPartial({})),
+						AddressV16: getStructure(typeAddressV16.fromPartial({})),
+						OutboundTxV16: getStructure(typeOutboundTxV16.fromPartial({})),
+						PoolInfo: getStructure(typePoolInfo.fromPartial({})),
+						HistoricalAmount: getStructure(typeHistoricalAmount.fromPartial({})),
+						CoinsQuota: getStructure(typeCoinsQuota.fromPartial({})),
+						Params: getStructure(typeParams.fromPartial({})),
+						Validator: getStructure(typeValidator.fromPartial({})),
+						StandbyPower: getStructure(typeStandbyPower.fromPartial({})),
+						Validators: getStructure(typeValidators.fromPartial({})),
+						
+		};
+		client.on('signer-changed',(signer) => {			
+		 this.updateTX(client);
+		})
+	}
+	updateTX(client: IgniteClient) {
+    const methods = txClient({
+        signer: client.signer,
+        addr: client.env.rpcURL,
+        prefix: client.env.prefix ?? "cosmos",
+    })
+	
+    this.tx = methods;
+    for (let m in methods) {
+        this.tx[m] = methods[m].bind(this.tx);
+    }
 	}
 };
 

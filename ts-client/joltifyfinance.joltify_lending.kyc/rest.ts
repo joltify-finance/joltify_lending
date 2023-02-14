@@ -17,6 +17,7 @@ export interface KycBasicInfo {
 
   /** @format byte */
   reserved?: string;
+  project_name?: string;
 }
 
 export interface KycInvestor {
@@ -62,6 +63,19 @@ export interface KycProjectInfo {
 
   /** @format byte */
   project_owner?: string;
+
+  /** @format uint64 */
+  project_length?: string;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  project_target_amount?: V1Beta1Coin;
+  base_apy?: string;
+  pay_freq?: string;
 }
 
 export interface KycQueryByWalletResponse {
@@ -89,6 +103,17 @@ export interface RpcStatus {
   code?: number;
   message?: string;
   details?: ProtobufAny[];
+}
+
+/**
+* Coin defines a token with a denomination and an amount.
+
+NOTE: The amount field is an Int which implements the custom method
+signatures required by gogoproto.
+*/
+export interface V1Beta1Coin {
+  denom?: string;
+  amount?: string;
 }
 
 /**
@@ -149,7 +174,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
