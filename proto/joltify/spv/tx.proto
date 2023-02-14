@@ -1,0 +1,36 @@
+syntax = "proto3";
+package joltify.spv;
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc CreatePool(MsgCreatePool) returns (MsgCreatePoolResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
+  rpc AddInvestors(MsgAddInvestors) returns (MsgAddInvestorsResponse);
+}
+
+message MsgCreatePool {
+  string creator = 1;
+  int32 project_index = 2;
+  string pool_name=3;
+  string apy = 4;
+  string pay_freq = 5;
+  string target_amount = 6;
+}
+
+message MsgCreatePoolResponse {
+  string poolIndex = 1;
+}
+
+message MsgAddInvestors {
+  string creator = 1;
+  string pool_index = 2;
+  repeated string invetor_iD= 3;
+}
+
+message MsgAddInvestorsResponse {
+  bool operationResult = 1;
+}

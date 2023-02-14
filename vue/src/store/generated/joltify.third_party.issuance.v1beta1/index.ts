@@ -134,6 +134,19 @@ export default {
 		},
 		
 		
+		async sendMsgIssueTokens({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyIssuanceV1Beta1.tx.sendMsgIssueTokens({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgIssueTokens:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgIssueTokens:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		async sendMsgBlockAddress({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -186,20 +199,20 @@ export default {
 				}
 			}
 		},
-		async sendMsgIssueTokens({ rootGetters }, { value, fee = [], memo = '' }) {
+		
+		async MsgIssueTokens({ rootGetters }, { value }) {
 			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyIssuanceV1Beta1.tx.sendMsgIssueTokens({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifyThirdPartyIssuanceV1Beta1.tx.msgIssueTokens({value})
+				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
 					throw new Error('TxClient:MsgIssueTokens:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgIssueTokens:Send Could not broadcast Tx: '+ e.message)
+				} else{
+					throw new Error('TxClient:MsgIssueTokens:Create Could not create message: ' + e.message)
 				}
 			}
 		},
-		
 		async MsgBlockAddress({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -249,19 +262,6 @@ export default {
 					throw new Error('TxClient:MsgUnblockAddress:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgUnblockAddress:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgIssueTokens({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyIssuanceV1Beta1.tx.msgIssueTokens({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgIssueTokens:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgIssueTokens:Create Could not create message: ' + e.message)
 				}
 			}
 		},

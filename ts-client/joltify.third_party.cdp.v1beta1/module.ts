@@ -8,17 +8,35 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgDeposit } from "./types/joltify/third_party/cdp/v1beta1/tx";
+import { MsgRepayDebt } from "./types/joltify/third_party/cdp/v1beta1/tx";
+import { MsgCreateCDP } from "./types/joltify/third_party/cdp/v1beta1/tx";
+import { MsgWithdraw } from "./types/joltify/third_party/cdp/v1beta1/tx";
 import { MsgLiquidate } from "./types/joltify/third_party/cdp/v1beta1/tx";
 import { MsgDrawDebt } from "./types/joltify/third_party/cdp/v1beta1/tx";
-import { MsgWithdraw } from "./types/joltify/third_party/cdp/v1beta1/tx";
-import { MsgCreateCDP } from "./types/joltify/third_party/cdp/v1beta1/tx";
-import { MsgRepayDebt } from "./types/joltify/third_party/cdp/v1beta1/tx";
 
 
-export { MsgDeposit, MsgLiquidate, MsgDrawDebt, MsgWithdraw, MsgCreateCDP, MsgRepayDebt };
+export { MsgDeposit, MsgRepayDebt, MsgCreateCDP, MsgWithdraw, MsgLiquidate, MsgDrawDebt };
 
 type sendMsgDepositParams = {
   value: MsgDeposit,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgRepayDebtParams = {
+  value: MsgRepayDebt,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgCreateCDPParams = {
+  value: MsgCreateCDP,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgWithdrawParams = {
+  value: MsgWithdraw,
   fee?: StdFee,
   memo?: string
 };
@@ -35,27 +53,21 @@ type sendMsgDrawDebtParams = {
   memo?: string
 };
 
-type sendMsgWithdrawParams = {
-  value: MsgWithdraw,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgCreateCDPParams = {
-  value: MsgCreateCDP,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgRepayDebtParams = {
-  value: MsgRepayDebt,
-  fee?: StdFee,
-  memo?: string
-};
-
 
 type msgDepositParams = {
   value: MsgDeposit,
+};
+
+type msgRepayDebtParams = {
+  value: MsgRepayDebt,
+};
+
+type msgCreateCDPParams = {
+  value: MsgCreateCDP,
+};
+
+type msgWithdrawParams = {
+  value: MsgWithdraw,
 };
 
 type msgLiquidateParams = {
@@ -64,18 +76,6 @@ type msgLiquidateParams = {
 
 type msgDrawDebtParams = {
   value: MsgDrawDebt,
-};
-
-type msgWithdrawParams = {
-  value: MsgWithdraw,
-};
-
-type msgCreateCDPParams = {
-  value: MsgCreateCDP,
-};
-
-type msgRepayDebtParams = {
-  value: MsgRepayDebt,
 };
 
 
@@ -110,6 +110,48 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		async sendMsgRepayDebt({ value, fee, memo }: sendMsgRepayDebtParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgRepayDebt: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgRepayDebt({ value: MsgRepayDebt.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgRepayDebt: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgCreateCDP({ value, fee, memo }: sendMsgCreateCDPParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgCreateCDP: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgCreateCDP({ value: MsgCreateCDP.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgCreateCDP: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgWithdraw({ value, fee, memo }: sendMsgWithdrawParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgWithdraw: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgWithdraw({ value: MsgWithdraw.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgWithdraw: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		async sendMsgLiquidate({ value, fee, memo }: sendMsgLiquidateParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgLiquidate: Unable to sign Tx. Signer is not present.')
@@ -138,54 +180,36 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgWithdraw({ value, fee, memo }: sendMsgWithdrawParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgWithdraw: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgWithdraw({ value: MsgWithdraw.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgWithdraw: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		async sendMsgCreateCDP({ value, fee, memo }: sendMsgCreateCDPParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgCreateCDP: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCreateCDP({ value: MsgCreateCDP.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCreateCDP: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		async sendMsgRepayDebt({ value, fee, memo }: sendMsgRepayDebtParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgRepayDebt: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgRepayDebt({ value: MsgRepayDebt.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgRepayDebt: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		
 		msgDeposit({ value }: msgDepositParams): EncodeObject {
 			try {
 				return { typeUrl: "/joltify.third_party.cdp.v1beta1.MsgDeposit", value: MsgDeposit.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgDeposit: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgRepayDebt({ value }: msgRepayDebtParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.third_party.cdp.v1beta1.MsgRepayDebt", value: MsgRepayDebt.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgRepayDebt: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgCreateCDP({ value }: msgCreateCDPParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.third_party.cdp.v1beta1.MsgCreateCDP", value: MsgCreateCDP.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgCreateCDP: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgWithdraw({ value }: msgWithdrawParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.third_party.cdp.v1beta1.MsgWithdraw", value: MsgWithdraw.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgWithdraw: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -205,30 +229,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgWithdraw({ value }: msgWithdrawParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.third_party.cdp.v1beta1.MsgWithdraw", value: MsgWithdraw.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgWithdraw: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgCreateCDP({ value }: msgCreateCDPParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.third_party.cdp.v1beta1.MsgCreateCDP", value: MsgCreateCDP.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgCreateCDP: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgRepayDebt({ value }: msgRepayDebtParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.third_party.cdp.v1beta1.MsgRepayDebt", value: MsgRepayDebt.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgRepayDebt: Could not create message: ' + e.message)
-			}
-		},
-		
 	}
 };
 
@@ -244,12 +244,27 @@ class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
 	
-	public registry: Array<[string, GeneratedType]>;
+	public registry: Array<[string, GeneratedType]> = [];
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });
-		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
+		this.query = queryClient({ addr: client.env.apiURL });		
+		this.updateTX(client);
+		client.on('signer-changed',(signer) => {			
+		 this.updateTX(client);
+		})
+	}
+	updateTX(client: IgniteClient) {
+    const methods = txClient({
+        signer: client.signer,
+        addr: client.env.rpcURL,
+        prefix: client.env.prefix ?? "cosmos",
+    })
+	
+    this.tx = methods;
+    for (let m in methods) {
+        this.tx[m] = methods[m].bind(this.tx);
+    }
 	}
 };
 

@@ -24,24 +24,25 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	// b := BasicInfo{
-	//	"This is the test info",
-	//	"empty",
-	//	"ABC",
-	//	"ABC123",
-	//	[]byte("reserved"),
-	// }
+	b := BasicInfo{
+		"This is the test info",
+		"empty",
+		"ABC",
+		"ABC123",
+		[]byte("reserved"),
+	}
 
-	acc, err := types.AccAddressFromBech32("jolt1gh6fnh6xt8lzhqy6z8n32lh7esxfrmspey8tp6")
+	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 	if err != nil {
 		panic(err)
 	}
-	// pi := ProjectInfo{
-	//	Index:        1,
-	//	SPVName:      "defaultSPV",
-	//	ProjectOwner: acc,
-	// }
-	return Params{[]*ProjectInfo{}, []types.AccAddress{acc}}
+	pi := ProjectInfo{
+		Index:        1,
+		SPVName:      "defaultSPV",
+		ProjectOwner: acc,
+		BasicInfo:    &b,
+	}
+	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }
 
 // DefaultParams returns a default set of parameters

@@ -18,6 +18,7 @@ import { Module as CosmosTxV1Beta1, msgTypes as CosmosTxV1Beta1MsgTypes } from '
 import { Module as CosmosUpgradeV1Beta1, msgTypes as CosmosUpgradeV1Beta1MsgTypes } from './cosmos.upgrade.v1beta1'
 import { Module as CosmosVestingV1Beta1, msgTypes as CosmosVestingV1Beta1MsgTypes } from './cosmos.vesting.v1beta1'
 import { Module as JoltifyMint, msgTypes as JoltifyMintMsgTypes } from './joltify.mint'
+import { Module as JoltifySpv, msgTypes as JoltifySpvMsgTypes } from './joltify.spv'
 import { Module as JoltifyThirdPartyAuctionV1Beta1, msgTypes as JoltifyThirdPartyAuctionV1Beta1MsgTypes } from './joltify.third_party.auction.v1beta1'
 import { Module as JoltifyThirdPartyCdpV1Beta1, msgTypes as JoltifyThirdPartyCdpV1Beta1MsgTypes } from './joltify.third_party.cdp.v1beta1'
 import { Module as JoltifyThirdPartyIncentiveV1Beta1, msgTypes as JoltifyThirdPartyIncentiveV1Beta1MsgTypes } from './joltify.third_party.incentive.v1beta1'
@@ -26,10 +27,11 @@ import { Module as JoltifyThirdPartyJoltV1Beta1, msgTypes as JoltifyThirdPartyJo
 import { Module as JoltifyThirdPartyPricefeedV1Beta1, msgTypes as JoltifyThirdPartyPricefeedV1Beta1MsgTypes } from './joltify.third_party.pricefeed.v1beta1'
 import { Module as JoltifyVault, msgTypes as JoltifyVaultMsgTypes } from './joltify.vault'
 import { Module as JoltifyfinanceJoltifyLendingKyc, msgTypes as JoltifyfinanceJoltifyLendingKycMsgTypes } from './joltifyfinance.joltify_lending.kyc'
+import { Module as JoltifyfinanceJoltifyLendingSpv, msgTypes as JoltifyfinanceJoltifyLendingSpvMsgTypes } from './joltifyfinance.joltify_lending.spv'
 
 
 const Client = IgniteClient.plugin([
-    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, JoltifyMint, JoltifyThirdPartyAuctionV1Beta1, JoltifyThirdPartyCdpV1Beta1, JoltifyThirdPartyIncentiveV1Beta1, JoltifyThirdPartyIssuanceV1Beta1, JoltifyThirdPartyJoltV1Beta1, JoltifyThirdPartyPricefeedV1Beta1, JoltifyVault, JoltifyfinanceJoltifyLendingKyc
+    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, JoltifyMint, JoltifySpv, JoltifyThirdPartyAuctionV1Beta1, JoltifyThirdPartyCdpV1Beta1, JoltifyThirdPartyIncentiveV1Beta1, JoltifyThirdPartyIssuanceV1Beta1, JoltifyThirdPartyJoltV1Beta1, JoltifyThirdPartyPricefeedV1Beta1, JoltifyVault, JoltifyfinanceJoltifyLendingKyc, JoltifyfinanceJoltifyLendingSpv
 ]);
 
 const registry = new Registry([
@@ -49,6 +51,7 @@ const registry = new Registry([
   ...CosmosUpgradeV1Beta1MsgTypes,
   ...CosmosVestingV1Beta1MsgTypes,
   ...JoltifyMintMsgTypes,
+  ...JoltifySpvMsgTypes,
   ...JoltifyThirdPartyAuctionV1Beta1MsgTypes,
   ...JoltifyThirdPartyCdpV1Beta1MsgTypes,
   ...JoltifyThirdPartyIncentiveV1Beta1MsgTypes,
@@ -57,6 +60,7 @@ const registry = new Registry([
   ...JoltifyThirdPartyPricefeedV1Beta1MsgTypes,
   ...JoltifyVaultMsgTypes,
   ...JoltifyfinanceJoltifyLendingKycMsgTypes,
+  ...JoltifyfinanceJoltifyLendingSpvMsgTypes,
   
 ])
 
