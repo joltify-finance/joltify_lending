@@ -367,19 +367,6 @@ export default {
 		},
 		
 		
-		async sendMsgMultiSend({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.CosmosBankV1Beta1.tx.sendMsgMultiSend({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgMultiSend:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgMultiSend:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		async sendMsgSend({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -393,20 +380,20 @@ export default {
 				}
 			}
 		},
-		
-		async MsgMultiSend({ rootGetters }, { value }) {
+		async sendMsgMultiSend({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
-				const client=initClient(rootGetters)
-				const msg = await client.CosmosBankV1Beta1.tx.msgMultiSend({value})
-				return msg
+				const client=await initClient(rootGetters)
+				const result = await client.CosmosBankV1Beta1.tx.sendMsgMultiSend({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
 					throw new Error('TxClient:MsgMultiSend:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgMultiSend:Create Could not create message: ' + e.message)
+				}else{
+					throw new Error('TxClient:MsgMultiSend:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
+		
 		async MsgSend({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -417,6 +404,19 @@ export default {
 					throw new Error('TxClient:MsgSend:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgSend:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgMultiSend({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.CosmosBankV1Beta1.tx.msgMultiSend({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgMultiSend:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgMultiSend:Create Could not create message: ' + e.message)
 				}
 			}
 		},

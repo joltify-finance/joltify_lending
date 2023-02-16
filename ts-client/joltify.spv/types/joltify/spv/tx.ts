@@ -1,5 +1,6 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 
 export const protobufPackage = "joltify.spv";
 
@@ -9,7 +10,7 @@ export interface MsgCreatePool {
   poolName: string;
   apy: string;
   payFreq: string;
-  targetAmount: string;
+  targetTokenAmount: Coin | undefined;
 }
 
 export interface MsgCreatePoolResponse {
@@ -26,8 +27,18 @@ export interface MsgAddInvestorsResponse {
   operationResult: boolean;
 }
 
+export interface MsgDeposit {
+  creator: string;
+  poolIndex: string;
+  investorID: string;
+  token: Coin | undefined;
+}
+
+export interface MsgDepositResponse {
+}
+
 function createBaseMsgCreatePool(): MsgCreatePool {
-  return { creator: "", projectIndex: 0, poolName: "", apy: "", payFreq: "", targetAmount: "" };
+  return { creator: "", projectIndex: 0, poolName: "", apy: "", payFreq: "", targetTokenAmount: undefined };
 }
 
 export const MsgCreatePool = {
@@ -47,8 +58,8 @@ export const MsgCreatePool = {
     if (message.payFreq !== "") {
       writer.uint32(42).string(message.payFreq);
     }
-    if (message.targetAmount !== "") {
-      writer.uint32(50).string(message.targetAmount);
+    if (message.targetTokenAmount !== undefined) {
+      Coin.encode(message.targetTokenAmount, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -76,7 +87,7 @@ export const MsgCreatePool = {
           message.payFreq = reader.string();
           break;
         case 6:
-          message.targetAmount = reader.string();
+          message.targetTokenAmount = Coin.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -93,7 +104,7 @@ export const MsgCreatePool = {
       poolName: isSet(object.poolName) ? String(object.poolName) : "",
       apy: isSet(object.apy) ? String(object.apy) : "",
       payFreq: isSet(object.payFreq) ? String(object.payFreq) : "",
-      targetAmount: isSet(object.targetAmount) ? String(object.targetAmount) : "",
+      targetTokenAmount: isSet(object.targetTokenAmount) ? Coin.fromJSON(object.targetTokenAmount) : undefined,
     };
   },
 
@@ -104,7 +115,8 @@ export const MsgCreatePool = {
     message.poolName !== undefined && (obj.poolName = message.poolName);
     message.apy !== undefined && (obj.apy = message.apy);
     message.payFreq !== undefined && (obj.payFreq = message.payFreq);
-    message.targetAmount !== undefined && (obj.targetAmount = message.targetAmount);
+    message.targetTokenAmount !== undefined
+      && (obj.targetTokenAmount = message.targetTokenAmount ? Coin.toJSON(message.targetTokenAmount) : undefined);
     return obj;
   },
 
@@ -115,7 +127,9 @@ export const MsgCreatePool = {
     message.poolName = object.poolName ?? "";
     message.apy = object.apy ?? "";
     message.payFreq = object.payFreq ?? "";
-    message.targetAmount = object.targetAmount ?? "";
+    message.targetTokenAmount = (object.targetTokenAmount !== undefined && object.targetTokenAmount !== null)
+      ? Coin.fromPartial(object.targetTokenAmount)
+      : undefined;
     return message;
   },
 };
@@ -285,11 +299,127 @@ export const MsgAddInvestorsResponse = {
   },
 };
 
+function createBaseMsgDeposit(): MsgDeposit {
+  return { creator: "", poolIndex: "", investorID: "", token: undefined };
+}
+
+export const MsgDeposit = {
+  encode(message: MsgDeposit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    if (message.investorID !== "") {
+      writer.uint32(26).string(message.investorID);
+    }
+    if (message.token !== undefined) {
+      Coin.encode(message.token, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgDeposit {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgDeposit();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        case 3:
+          message.investorID = reader.string();
+          break;
+        case 4:
+          message.token = Coin.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgDeposit {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+      investorID: isSet(object.investorID) ? String(object.investorID) : "",
+      token: isSet(object.token) ? Coin.fromJSON(object.token) : undefined,
+    };
+  },
+
+  toJSON(message: MsgDeposit): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    message.investorID !== undefined && (obj.investorID = message.investorID);
+    message.token !== undefined && (obj.token = message.token ? Coin.toJSON(message.token) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgDeposit>, I>>(object: I): MsgDeposit {
+    const message = createBaseMsgDeposit();
+    message.creator = object.creator ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    message.investorID = object.investorID ?? "";
+    message.token = (object.token !== undefined && object.token !== null) ? Coin.fromPartial(object.token) : undefined;
+    return message;
+  },
+};
+
+function createBaseMsgDepositResponse(): MsgDepositResponse {
+  return {};
+}
+
+export const MsgDepositResponse = {
+  encode(_: MsgDepositResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgDepositResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgDepositResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgDepositResponse {
+    return {};
+  },
+
+  toJSON(_: MsgDepositResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgDepositResponse>, I>>(_: I): MsgDepositResponse {
+    const message = createBaseMsgDepositResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse>;
   /** this line is used by starport scaffolding # proto/tx/rpc */
   AddInvestors(request: MsgAddInvestors): Promise<MsgAddInvestorsResponse>;
+  Deposit(request: MsgDeposit): Promise<MsgDepositResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -298,6 +428,7 @@ export class MsgClientImpl implements Msg {
     this.rpc = rpc;
     this.CreatePool = this.CreatePool.bind(this);
     this.AddInvestors = this.AddInvestors.bind(this);
+    this.Deposit = this.Deposit.bind(this);
   }
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse> {
     const data = MsgCreatePool.encode(request).finish();
@@ -309,6 +440,12 @@ export class MsgClientImpl implements Msg {
     const data = MsgAddInvestors.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Msg", "AddInvestors", data);
     return promise.then((data) => MsgAddInvestorsResponse.decode(new _m0.Reader(data)));
+  }
+
+  Deposit(request: MsgDeposit): Promise<MsgDepositResponse> {
+    const data = MsgDeposit.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Msg", "Deposit", data);
+    return promise.then((data) => MsgDepositResponse.decode(new _m0.Reader(data)));
   }
 }
 

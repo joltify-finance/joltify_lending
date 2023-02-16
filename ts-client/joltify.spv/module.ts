@@ -8,13 +8,20 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgCreatePool } from "./types/joltify/spv/tx";
+import { MsgDeposit } from "./types/joltify/spv/tx";
 import { MsgAddInvestors } from "./types/joltify/spv/tx";
 
 
-export { MsgCreatePool, MsgAddInvestors };
+export { MsgCreatePool, MsgDeposit, MsgAddInvestors };
 
 type sendMsgCreatePoolParams = {
   value: MsgCreatePool,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgDepositParams = {
+  value: MsgDeposit,
   fee?: StdFee,
   memo?: string
 };
@@ -28,6 +35,10 @@ type sendMsgAddInvestorsParams = {
 
 type msgCreatePoolParams = {
   value: MsgCreatePool,
+};
+
+type msgDepositParams = {
+  value: MsgDeposit,
 };
 
 type msgAddInvestorsParams = {
@@ -66,6 +77,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		async sendMsgDeposit({ value, fee, memo }: sendMsgDepositParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgDeposit: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgDeposit({ value: MsgDeposit.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgDeposit: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		async sendMsgAddInvestors({ value, fee, memo }: sendMsgAddInvestorsParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgAddInvestors: Unable to sign Tx. Signer is not present.')
@@ -86,6 +111,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/joltify.spv.MsgCreatePool", value: MsgCreatePool.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgCreatePool: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgDeposit({ value }: msgDepositParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.spv.MsgDeposit", value: MsgDeposit.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgDeposit: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -112,27 +145,12 @@ class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
 	
-	public registry: Array<[string, GeneratedType]> = [];
+	public registry: Array<[string, GeneratedType]>;
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });		
-		this.updateTX(client);
-		client.on('signer-changed',(signer) => {			
-		 this.updateTX(client);
-		})
-	}
-	updateTX(client: IgniteClient) {
-    const methods = txClient({
-        signer: client.signer,
-        addr: client.env.rpcURL,
-        prefix: client.env.prefix ?? "cosmos",
-    })
-	
-    this.tx = methods;
-    for (let m in methods) {
-        this.tx[m] = methods[m].bind(this.tx);
-    }
+		this.query = queryClient({ addr: client.env.apiURL });
+		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
 	}
 };
 

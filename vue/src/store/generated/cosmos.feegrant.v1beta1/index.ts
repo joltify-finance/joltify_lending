@@ -200,19 +200,6 @@ export default {
 		},
 		
 		
-		async sendMsgGrantAllowance({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.CosmosFeegrantV1Beta1.tx.sendMsgGrantAllowance({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgGrantAllowance:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgGrantAllowance:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		async sendMsgRevokeAllowance({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -226,20 +213,20 @@ export default {
 				}
 			}
 		},
-		
-		async MsgGrantAllowance({ rootGetters }, { value }) {
+		async sendMsgGrantAllowance({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
-				const client=initClient(rootGetters)
-				const msg = await client.CosmosFeegrantV1Beta1.tx.msgGrantAllowance({value})
-				return msg
+				const client=await initClient(rootGetters)
+				const result = await client.CosmosFeegrantV1Beta1.tx.sendMsgGrantAllowance({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
 					throw new Error('TxClient:MsgGrantAllowance:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgGrantAllowance:Create Could not create message: ' + e.message)
+				}else{
+					throw new Error('TxClient:MsgGrantAllowance:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
+		
 		async MsgRevokeAllowance({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -250,6 +237,19 @@ export default {
 					throw new Error('TxClient:MsgRevokeAllowance:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgRevokeAllowance:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgGrantAllowance({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.CosmosFeegrantV1Beta1.tx.msgGrantAllowance({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgGrantAllowance:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgGrantAllowance:Create Could not create message: ' + e.message)
 				}
 			}
 		},

@@ -1,6 +1,7 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
 import { PageRequest, PageResponse } from "../../cosmos/base/query/v1beta1/pagination";
+import { DepositorInfo } from "./deposit";
 import { Params } from "./params";
 import { PoolInfo } from "./poolinfo";
 
@@ -31,6 +32,15 @@ export interface QueryQueryPoolRequest {
 
 export interface QueryQueryPoolResponse {
   poolInfo: PoolInfo | undefined;
+}
+
+export interface QueryDepositorRequest {
+  walletAddress: string;
+  depositPoolIndex: string;
+}
+
+export interface QueryDepositorResponse {
+  depositor: DepositorInfo | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -332,6 +342,114 @@ export const QueryQueryPoolResponse = {
   },
 };
 
+function createBaseQueryDepositorRequest(): QueryDepositorRequest {
+  return { walletAddress: "", depositPoolIndex: "" };
+}
+
+export const QueryDepositorRequest = {
+  encode(message: QueryDepositorRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.walletAddress !== "") {
+      writer.uint32(10).string(message.walletAddress);
+    }
+    if (message.depositPoolIndex !== "") {
+      writer.uint32(18).string(message.depositPoolIndex);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryDepositorRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryDepositorRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.walletAddress = reader.string();
+          break;
+        case 2:
+          message.depositPoolIndex = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryDepositorRequest {
+    return {
+      walletAddress: isSet(object.walletAddress) ? String(object.walletAddress) : "",
+      depositPoolIndex: isSet(object.depositPoolIndex) ? String(object.depositPoolIndex) : "",
+    };
+  },
+
+  toJSON(message: QueryDepositorRequest): unknown {
+    const obj: any = {};
+    message.walletAddress !== undefined && (obj.walletAddress = message.walletAddress);
+    message.depositPoolIndex !== undefined && (obj.depositPoolIndex = message.depositPoolIndex);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryDepositorRequest>, I>>(object: I): QueryDepositorRequest {
+    const message = createBaseQueryDepositorRequest();
+    message.walletAddress = object.walletAddress ?? "";
+    message.depositPoolIndex = object.depositPoolIndex ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryDepositorResponse(): QueryDepositorResponse {
+  return { depositor: undefined };
+}
+
+export const QueryDepositorResponse = {
+  encode(message: QueryDepositorResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.depositor !== undefined) {
+      DepositorInfo.encode(message.depositor, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryDepositorResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryDepositorResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.depositor = DepositorInfo.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryDepositorResponse {
+    return { depositor: isSet(object.depositor) ? DepositorInfo.fromJSON(object.depositor) : undefined };
+  },
+
+  toJSON(message: QueryDepositorResponse): unknown {
+    const obj: any = {};
+    message.depositor !== undefined
+      && (obj.depositor = message.depositor ? DepositorInfo.toJSON(message.depositor) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryDepositorResponse>, I>>(object: I): QueryDepositorResponse {
+    const message = createBaseQueryDepositorResponse();
+    message.depositor = (object.depositor !== undefined && object.depositor !== null)
+      ? DepositorInfo.fromPartial(object.depositor)
+      : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -340,6 +458,7 @@ export interface Query {
   ListPools(request: QueryListPoolsRequest): Promise<QueryListPoolsResponse>;
   /** Queries a list of QueryPool items. */
   QueryPool(request: QueryQueryPoolRequest): Promise<QueryQueryPoolResponse>;
+  Depositor(request: QueryDepositorRequest): Promise<QueryDepositorResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -349,6 +468,7 @@ export class QueryClientImpl implements Query {
     this.Params = this.Params.bind(this);
     this.ListPools = this.ListPools.bind(this);
     this.QueryPool = this.QueryPool.bind(this);
+    this.Depositor = this.Depositor.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -366,6 +486,12 @@ export class QueryClientImpl implements Query {
     const data = QueryQueryPoolRequest.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Query", "QueryPool", data);
     return promise.then((data) => QueryQueryPoolResponse.decode(new _m0.Reader(data)));
+  }
+
+  Depositor(request: QueryDepositorRequest): Promise<QueryDepositorResponse> {
+    const data = QueryDepositorRequest.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Query", "Depositor", data);
+    return promise.then((data) => QueryDepositorResponse.decode(new _m0.Reader(data)));
   }
 }
 

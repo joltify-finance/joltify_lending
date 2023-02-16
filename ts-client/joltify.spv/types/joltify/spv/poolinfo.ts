@@ -1,5 +1,6 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 import { Timestamp } from "../../google/protobuf/timestamp";
 
 export const protobufPackage = "joltify.spv";
@@ -10,7 +11,7 @@ export interface PoolInfo {
   linkedProject: number;
   ownerAddress: Uint8Array;
   apy: string;
-  totalAmount: string;
+  totalAmount: Coin | undefined;
   payFreq: number;
   reserveFactor: string;
   poolNFTClass: string;
@@ -29,7 +30,7 @@ function createBasePoolInfo(): PoolInfo {
     linkedProject: 0,
     ownerAddress: new Uint8Array(),
     apy: "",
-    totalAmount: "",
+    totalAmount: undefined,
     payFreq: 0,
     reserveFactor: "",
     poolNFTClass: "",
@@ -54,8 +55,8 @@ export const PoolInfo = {
     if (message.apy !== "") {
       writer.uint32(42).string(message.apy);
     }
-    if (message.totalAmount !== "") {
-      writer.uint32(50).string(message.totalAmount);
+    if (message.totalAmount !== undefined) {
+      Coin.encode(message.totalAmount, writer.uint32(50).fork()).ldelim();
     }
     if (message.payFreq !== 0) {
       writer.uint32(56).int32(message.payFreq);
@@ -95,7 +96,7 @@ export const PoolInfo = {
           message.apy = reader.string();
           break;
         case 6:
-          message.totalAmount = reader.string();
+          message.totalAmount = Coin.decode(reader, reader.uint32());
           break;
         case 7:
           message.payFreq = reader.int32();
@@ -124,7 +125,7 @@ export const PoolInfo = {
       linkedProject: isSet(object.linkedProject) ? Number(object.linkedProject) : 0,
       ownerAddress: isSet(object.ownerAddress) ? bytesFromBase64(object.ownerAddress) : new Uint8Array(),
       apy: isSet(object.apy) ? String(object.apy) : "",
-      totalAmount: isSet(object.totalAmount) ? String(object.totalAmount) : "",
+      totalAmount: isSet(object.totalAmount) ? Coin.fromJSON(object.totalAmount) : undefined,
       payFreq: isSet(object.payFreq) ? Number(object.payFreq) : 0,
       reserveFactor: isSet(object.reserveFactor) ? String(object.reserveFactor) : "",
       poolNFTClass: isSet(object.poolNFTClass) ? String(object.poolNFTClass) : "",
@@ -142,7 +143,8 @@ export const PoolInfo = {
         message.ownerAddress !== undefined ? message.ownerAddress : new Uint8Array(),
       ));
     message.apy !== undefined && (obj.apy = message.apy);
-    message.totalAmount !== undefined && (obj.totalAmount = message.totalAmount);
+    message.totalAmount !== undefined
+      && (obj.totalAmount = message.totalAmount ? Coin.toJSON(message.totalAmount) : undefined);
     message.payFreq !== undefined && (obj.payFreq = Math.round(message.payFreq));
     message.reserveFactor !== undefined && (obj.reserveFactor = message.reserveFactor);
     message.poolNFTClass !== undefined && (obj.poolNFTClass = message.poolNFTClass);
@@ -157,7 +159,9 @@ export const PoolInfo = {
     message.linkedProject = object.linkedProject ?? 0;
     message.ownerAddress = object.ownerAddress ?? new Uint8Array();
     message.apy = object.apy ?? "";
-    message.totalAmount = object.totalAmount ?? "";
+    message.totalAmount = (object.totalAmount !== undefined && object.totalAmount !== null)
+      ? Coin.fromPartial(object.totalAmount)
+      : undefined;
     message.payFreq = object.payFreq ?? 0;
     message.reserveFactor = object.reserveFactor ?? "";
     message.poolNFTClass = object.poolNFTClass ?? "";

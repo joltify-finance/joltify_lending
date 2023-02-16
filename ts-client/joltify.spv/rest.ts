@@ -20,6 +20,49 @@ export interface RpcStatus {
   details?: ProtobufAny[];
 }
 
+export interface SpvDepositorInfo {
+  investor_id?: string;
+
+  /** @format byte */
+  depositor_address?: string;
+  pool_index?: string;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  locked_amount?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  withdrawable_amount?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  claimable_interest_amount?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  incentive_amount?: V1Beta1Coin;
+
+  /** @format byte */
+  linkedNFT?: string;
+}
+
 export interface SpvMsgAddInvestorsResponse {
   operationResult?: boolean;
 }
@@ -27,6 +70,8 @@ export interface SpvMsgAddInvestorsResponse {
 export interface SpvMsgCreatePoolResponse {
   poolIndex?: string;
 }
+
+export type SpvMsgDepositResponse = object;
 
 /**
  * Params defines the parameters for the module.
@@ -43,7 +88,14 @@ export interface SpvPoolInfo {
   /** @format byte */
   owner_address?: string;
   apy?: string;
-  total_amount?: string;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  total_amount?: V1Beta1Coin;
 
   /** @format int32 */
   pay_freq?: number;
@@ -52,6 +104,10 @@ export interface SpvPoolInfo {
 
   /** @format date-time */
   pool_start_time?: string;
+}
+
+export interface SpvQueryDepositorResponse {
+  depositor?: SpvDepositorInfo;
 }
 
 export interface SpvQueryListPoolsResponse {
@@ -79,6 +135,17 @@ export interface SpvQueryParamsResponse {
 
 export interface SpvQueryQueryPoolResponse {
   pool_info?: SpvPoolInfo;
+}
+
+/**
+* Coin defines a token with a denomination and an amount.
+
+NOTE: The amount field is an Int which implements the custom method
+signatures required by gogoproto.
+*/
+export interface V1Beta1Coin {
+  denom?: string;
+  amount?: string;
 }
 
 /**
@@ -273,10 +340,26 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title joltify/spv/genesis.proto
+ * @title joltify/spv/deposit.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryDepositor
+   * @request GET:/joltify/spv/depositor/{walletAddress}
+   */
+  queryDepositor = (walletAddress: string, query?: { depositPoolIndex?: string }, params: RequestParams = {}) =>
+    this.request<SpvQueryDepositorResponse, RpcStatus>({
+      path: `/joltify/spv/depositor/${walletAddress}`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
   /**
    * No description
    *

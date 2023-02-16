@@ -8,22 +8,16 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgLiquidate } from "./types/joltify/third_party/jolt/v1beta1/tx";
-import { MsgBorrow } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgRepay } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgDeposit } from "./types/joltify/third_party/jolt/v1beta1/tx";
+import { MsgBorrow } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgWithdraw } from "./types/joltify/third_party/jolt/v1beta1/tx";
 
 
-export { MsgLiquidate, MsgBorrow, MsgRepay, MsgDeposit, MsgWithdraw };
+export { MsgLiquidate, MsgRepay, MsgDeposit, MsgBorrow, MsgWithdraw };
 
 type sendMsgLiquidateParams = {
   value: MsgLiquidate,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgBorrowParams = {
-  value: MsgBorrow,
   fee?: StdFee,
   memo?: string
 };
@@ -40,6 +34,12 @@ type sendMsgDepositParams = {
   memo?: string
 };
 
+type sendMsgBorrowParams = {
+  value: MsgBorrow,
+  fee?: StdFee,
+  memo?: string
+};
+
 type sendMsgWithdrawParams = {
   value: MsgWithdraw,
   fee?: StdFee,
@@ -51,16 +51,16 @@ type msgLiquidateParams = {
   value: MsgLiquidate,
 };
 
-type msgBorrowParams = {
-  value: MsgBorrow,
-};
-
 type msgRepayParams = {
   value: MsgRepay,
 };
 
 type msgDepositParams = {
   value: MsgDeposit,
+};
+
+type msgBorrowParams = {
+  value: MsgBorrow,
 };
 
 type msgWithdrawParams = {
@@ -99,20 +99,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgBorrow({ value, fee, memo }: sendMsgBorrowParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgBorrow: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgBorrow({ value: MsgBorrow.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgBorrow: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgRepay({ value, fee, memo }: sendMsgRepayParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgRepay: Unable to sign Tx. Signer is not present.')
@@ -141,6 +127,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		async sendMsgBorrow({ value, fee, memo }: sendMsgBorrowParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgBorrow: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgBorrow({ value: MsgBorrow.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgBorrow: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		async sendMsgWithdraw({ value, fee, memo }: sendMsgWithdrawParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgWithdraw: Unable to sign Tx. Signer is not present.')
@@ -164,14 +164,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgBorrow({ value }: msgBorrowParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgBorrow", value: MsgBorrow.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgBorrow: Could not create message: ' + e.message)
-			}
-		},
-		
 		msgRepay({ value }: msgRepayParams): EncodeObject {
 			try {
 				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgRepay", value: MsgRepay.fromPartial( value ) }  
@@ -185,6 +177,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgDeposit", value: MsgDeposit.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgDeposit: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgBorrow({ value }: msgBorrowParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgBorrow", value: MsgBorrow.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgBorrow: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -211,27 +211,12 @@ class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
 	
-	public registry: Array<[string, GeneratedType]> = [];
+	public registry: Array<[string, GeneratedType]>;
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });		
-		this.updateTX(client);
-		client.on('signer-changed',(signer) => {			
-		 this.updateTX(client);
-		})
-	}
-	updateTX(client: IgniteClient) {
-    const methods = txClient({
-        signer: client.signer,
-        addr: client.env.rpcURL,
-        prefix: client.env.prefix ?? "cosmos",
-    })
-	
-    this.tx = methods;
-    for (let m in methods) {
-        this.tx[m] = methods[m].bind(this.tx);
-    }
+		this.query = queryClient({ addr: client.env.apiURL });
+		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
 	}
 };
 

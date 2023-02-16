@@ -1,11 +1,12 @@
 import { Client, registry, MissingWalletError } from 'joltify-finance-joltify_lending-client-ts'
 
+import { Depositor_info } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
 import { Params } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
 import { Pool_info } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
 import { PoolWithInvestors } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
 
 
-export { Params, Pool_info, PoolWithInvestors };
+export { Depositor_info, Params, Pool_info, PoolWithInvestors };
 
 function initClient(vuexGetters) {
 	return new Client(vuexGetters['common/env/getEnv'], vuexGetters['common/wallet/signer'])
@@ -39,8 +40,10 @@ const getDefaultState = () => {
 				Params: {},
 				ListPools: {},
 				QueryPool: {},
+				Depositor: {},
 				
 				_Structure: {
+						Depositor_info: getStructure(Depositor_info.fromPartial({})),
 						Params: getStructure(Params.fromPartial({})),
 						Pool_info: getStructure(Pool_info.fromPartial({})),
 						PoolWithInvestors: getStructure(PoolWithInvestors.fromPartial({})),
@@ -89,6 +92,12 @@ export default {
 						(<any> params).query=null
 					}
 			return state.QueryPool[JSON.stringify(params)] ?? {}
+		},
+				getDepositor: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.Depositor[JSON.stringify(params)] ?? {}
 		},
 				
 		getTypeStructure: (state) => (type) => {
@@ -194,6 +203,32 @@ export default {
 		},
 		
 		
+		
+		
+		 		
+		
+		
+		async QueryDepositor({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.JoltifySpv.query.queryDepositor( key.walletAddress, query ?? undefined)).data
+				
+					
+				while (all && (<any> value).pagination && (<any> value).pagination.next_key!=null) {
+					let next_values=(await client.JoltifySpv.query.queryDepositor( key.walletAddress, {...query ?? {}, 'pagination.key':(<any> value).pagination.next_key} as any)).data
+					value = mergeResults(value, next_values);
+				}
+				commit('QUERY', { query: 'Depositor', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryDepositor', payload: { options: { all }, params: {...key},query }})
+				return getters['getDepositor']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QueryDepositor API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
 		async sendMsgCreatePool({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -204,6 +239,19 @@ export default {
 					throw new Error('TxClient:MsgCreatePool:Init Could not initialize signing client. Wallet is required.')
 				}else{
 					throw new Error('TxClient:MsgCreatePool:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -231,6 +279,19 @@ export default {
 					throw new Error('TxClient:MsgCreatePool:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgCreatePool:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgDeposit({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifySpv.tx.msgDeposit({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgDeposit:Create Could not create message: ' + e.message)
 				}
 			}
 		},

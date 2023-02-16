@@ -499,19 +499,6 @@ export default {
 		},
 		
 		
-		async sendMsgBorrow({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyJoltV1Beta1.tx.sendMsgBorrow({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgBorrow:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		async sendMsgLiquidate({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -522,32 +509,6 @@ export default {
 					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
 				}else{
 					throw new Error('TxClient:MsgLiquidate:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgWithdraw({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyJoltV1Beta1.tx.sendMsgWithdraw({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgWithdraw:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyJoltV1Beta1.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -564,20 +525,46 @@ export default {
 				}
 			}
 		},
-		
-		async MsgBorrow({ rootGetters }, { value }) {
+		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyJoltV1Beta1.tx.msgBorrow({value})
-				return msg
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyJoltV1Beta1.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgBorrow:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
+		async sendMsgBorrow({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyJoltV1Beta1.tx.sendMsgBorrow({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgBorrow:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgWithdraw({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyJoltV1Beta1.tx.sendMsgWithdraw({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgWithdraw:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		
 		async MsgLiquidate({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -591,16 +578,16 @@ export default {
 				}
 			}
 		},
-		async MsgWithdraw({ rootGetters }, { value }) {
+		async MsgRepay({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyJoltV1Beta1.tx.msgWithdraw({value})
+				const msg = await client.JoltifyThirdPartyJoltV1Beta1.tx.msgRepay({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgRepay:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgWithdraw:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgRepay:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -617,16 +604,29 @@ export default {
 				}
 			}
 		},
-		async MsgRepay({ rootGetters }, { value }) {
+		async MsgBorrow({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyJoltV1Beta1.tx.msgRepay({value})
+				const msg = await client.JoltifyThirdPartyJoltV1Beta1.tx.msgBorrow({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgRepay:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgRepay:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgBorrow:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgWithdraw({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifyThirdPartyJoltV1Beta1.tx.msgWithdraw({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgWithdraw:Create Could not create message: ' + e.message)
 				}
 			}
 		},
