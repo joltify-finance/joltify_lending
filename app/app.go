@@ -188,6 +188,7 @@ var (
 		types3.LiquidatorMacc:          {authtypes.Minter, authtypes.Burner},
 		types2.ModuleName:              {authtypes.Minter, authtypes.Burner},
 		incentivetypes.ModuleName:      nil,
+		spvmoduletypes.ModuleAccount:   nil,
 	}
 )
 

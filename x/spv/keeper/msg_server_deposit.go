@@ -53,7 +53,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	// now we transfer the token from the investor to the pool.
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, investor, types.ModuleName, sdk.NewCoins(msg.Token))
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, investor, types.ModuleAccount, sdk.NewCoins(msg.Token))
 	if err != nil {
 		return nil, coserrors.Wrap(sdkerrors.ErrInvalidRequest, "fail to transfer the toekn to the pool")
 	}
