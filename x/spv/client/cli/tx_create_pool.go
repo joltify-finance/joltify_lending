@@ -1,6 +1,7 @@
 package cli
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -27,7 +28,10 @@ func CmdCreatePool() *cobra.Command {
 
 			argApy := args[2]
 			argPayfreq := args[3]
-			argTarget := args[4]
+			argTarget, err := sdk.ParseCoinNormalized(args[4])
+			if err != nil {
+				return err
+			}
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {

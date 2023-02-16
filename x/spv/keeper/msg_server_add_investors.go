@@ -10,19 +10,23 @@ import (
 )
 
 func addToList(previousList, newElements []string) []string {
-	tempStore := make(map[string]string)
+	combinedList := make([]string, 0, len(previousList)+len(newElements))
+	exists := make(map[string]bool)
+
 	for _, el := range previousList {
-		tempStore[el] = el
+		if !exists[el] {
+			exists[el] = true
+			combinedList = append(combinedList, el)
+		}
 	}
 
 	for _, el := range newElements {
-		tempStore[el] = el
+		if !exists[el] {
+			exists[el] = true
+			combinedList = append(combinedList, el)
+		}
 	}
 
-	var combinedList []string
-	for _, val := range tempStore {
-		combinedList = append(combinedList, val)
-	}
 	return combinedList
 }
 

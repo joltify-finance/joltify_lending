@@ -8,7 +8,6 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -19,7 +18,8 @@ type (
 		storeKey   storetypes.StoreKey
 		memKey     storetypes.StoreKey
 		paramstore paramtypes.Subspace
-		kycKeeper  kycmodulekeeper.Keeper
+		kycKeeper  types.KycKeeper
+		bankKeeper types.BankKeeper
 	}
 )
 
@@ -28,7 +28,8 @@ func NewKeeper(
 	storeKey,
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
-	kycKeeper kycmodulekeeper.Keeper,
+	kycKeeper types.KycKeeper,
+	bankKeeper types.BankKeeper,
 
 ) *Keeper {
 	// set KeyTable if it has not already been set
@@ -37,12 +38,12 @@ func NewKeeper(
 	}
 
 	return &Keeper{
-
 		cdc:        cdc,
 		storeKey:   storeKey,
 		memKey:     memKey,
 		paramstore: ps,
 		kycKeeper:  kycKeeper,
+		bankKeeper: bankKeeper,
 	}
 }
 
@@ -79,11 +80,30 @@ func (k Keeper) GetInvestorToPool(ctx sdk.Context, poolIndex string) (currentInv
 // GetPools gets the poolInfo with given pool index
 func (k Keeper) GetPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo, ok bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectsKeyPrefix))
-
 	bz := store.Get(types.KeyPrefix(index))
 	if bz == nil {
 		return poolInfo, false
 	}
 	k.cdc.MustUnmarshal(bz, &poolInfo)
 	return poolInfo, true
+}
+
+// SetDepositor sets the depositor
+func (k Keeper) SetDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))
+
+	bz := k.cdc.MustMarshal(&depositor)
+	depositorPoolStore.Set(depositor.GetDepositorAddress().Bytes(), bz)
+}
+
+func (k Keeper) GetDepositor(ctx sdk.Context, walletAddress sdk.AccAddress) (depositor types.DepositorInfo, found bool) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))
+
+	bz := depositorPoolStore.Get(walletAddress.Bytes())
+	if bz == nil {
+		return depositor, found
+	}
+
+	k.cdc.MustUnmarshal(bz, &depositor)
+	return depositor, true
 }

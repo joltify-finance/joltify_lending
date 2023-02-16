@@ -1,6 +1,8 @@
 syntax = "proto3";
 package joltify.spv;
 
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
 // this line is used by starport scaffolding # proto/tx/import
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
@@ -10,6 +12,8 @@ service Msg {
   rpc CreatePool(MsgCreatePool) returns (MsgCreatePoolResponse);
   // this line is used by starport scaffolding # proto/tx/rpc
   rpc AddInvestors(MsgAddInvestors) returns (MsgAddInvestorsResponse);
+
+  rpc Deposit(MsgDeposit) returns (MsgDepositResponse);
 }
 
 message MsgCreatePool {
@@ -18,7 +22,7 @@ message MsgCreatePool {
   string pool_name=3;
   string apy = 4;
   string pay_freq = 5;
-  string target_amount = 6;
+  cosmos.base.v1beta1.Coin target_token_amount = 6[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
 
 message MsgCreatePoolResponse {
@@ -33,4 +37,15 @@ message MsgAddInvestors {
 
 message MsgAddInvestorsResponse {
   bool operationResult = 1;
+}
+
+
+message MsgDeposit {
+  string creator = 1;
+  string poolIndex = 2;
+  string investorID = 3;
+  cosmos.base.v1beta1.Coin token = 4[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+}
+
+message MsgDepositResponse {
 }

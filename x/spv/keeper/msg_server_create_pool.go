@@ -13,21 +13,16 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func parameterSanitize(msg *types.MsgCreatePool) (sdk.Dec, int32, sdk.Dec, error) {
+func parameterSanitize(msg *types.MsgCreatePool) (sdk.Dec, int32, error) {
 	apy, err := sdk.NewDecFromStr(msg.Apy)
 	if err != nil {
-		return sdk.Dec{}, 0, sdk.Dec{}, err
+		return sdk.Dec{}, 0, err
 	}
 	payFreq, err := strconv.ParseInt(msg.PayFreq, 10, 64)
 	if payFreq > types.Maxfreq || payFreq < types.Minfreq {
-		return sdk.Dec{}, 0, sdk.Dec{}, errors.New("pay frequency is invalid")
+		return sdk.Dec{}, 0, errors.New("pay frequency is invalid")
 	}
-
-	targetAmount, err := sdk.NewDecFromStr(msg.TargetAmount)
-	if err != nil {
-		return sdk.Dec{}, 0, sdk.Dec{}, err
-	}
-	return apy, int32(payFreq), targetAmount, nil
+	return apy, int32(payFreq), nil
 }
 
 func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (*types.MsgCreatePoolResponse, error) {
@@ -50,7 +45,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized address %v", msg.Creator)
 	}
 
-	apy, payfreq, targetAmount, err := parameterSanitize(msg)
+	apy, payfreq, err := parameterSanitize(msg)
 	if err != nil {
 		return nil, coserrors.Wrapf(types.InvalidParameter, "invalid parameter: %v", err.Error())
 	}
@@ -72,7 +67,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		LinkedProject: msg.ProjectIndex,
 		OwnerAddress:  spvAddress,
 		Apy:           apy,
-		TotalAmount:   targetAmount,
+		TotalAmount:   msg.TargetTokenAmount,
 		PayFreq:       payfreq,
 		ReserveFactor: types.RESERVEFACTOR,
 		PoolNFTClass:  poolNFTClass,
