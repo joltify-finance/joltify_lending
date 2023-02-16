@@ -11,9 +11,9 @@ var _ sdk.Msg = &MsgAddInvestors{}
 
 func NewMsgAddInvestors(creator, poolIndex string, investorID []string) *MsgAddInvestors {
 	return &MsgAddInvestors{
-		Creator:   creator,
-		PoolIndex: poolIndex,
-		InvetorID: investorID,
+		Creator:    creator,
+		PoolIndex:  poolIndex,
+		InvestorID: investorID,
 	}
 }
 

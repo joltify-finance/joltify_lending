@@ -46,7 +46,7 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 		return nil, coserrors.Wrap(types.Unauthorized, "unauthorized operations")
 	}
 
-	investorAddresses := make([]string, len(msg.GetInvetorID()))
+	investorAddresses := make([]string, len(msg.GetInvestorID()))
 	investorPoolInfo, found := k.GetInvestorToPool(ctx, msg.PoolIndex)
 	if found {
 		newList := addToList(investorPoolInfo.Investors, investorAddresses)

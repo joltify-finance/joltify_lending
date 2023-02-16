@@ -20,7 +20,7 @@ export interface MsgCreatePoolResponse {
 export interface MsgAddInvestors {
   creator: string;
   poolIndex: string;
-  invetorID: string[];
+  investorID: string[];
 }
 
 export interface MsgAddInvestorsResponse {
@@ -182,7 +182,7 @@ export const MsgCreatePoolResponse = {
 };
 
 function createBaseMsgAddInvestors(): MsgAddInvestors {
-  return { creator: "", poolIndex: "", invetorID: [] };
+  return { creator: "", poolIndex: "", investorID: [] };
 }
 
 export const MsgAddInvestors = {
@@ -193,7 +193,7 @@ export const MsgAddInvestors = {
     if (message.poolIndex !== "") {
       writer.uint32(18).string(message.poolIndex);
     }
-    for (const v of message.invetorID) {
+    for (const v of message.investorID) {
       writer.uint32(26).string(v!);
     }
     return writer;
@@ -213,7 +213,7 @@ export const MsgAddInvestors = {
           message.poolIndex = reader.string();
           break;
         case 3:
-          message.invetorID.push(reader.string());
+          message.investorID.push(reader.string());
           break;
         default:
           reader.skipType(tag & 7);
@@ -227,7 +227,7 @@ export const MsgAddInvestors = {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
       poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
-      invetorID: Array.isArray(object?.invetorID) ? object.invetorID.map((e: any) => String(e)) : [],
+      investorID: Array.isArray(object?.investorID) ? object.investorID.map((e: any) => String(e)) : [],
     };
   },
 
@@ -235,10 +235,10 @@ export const MsgAddInvestors = {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
-    if (message.invetorID) {
-      obj.invetorID = message.invetorID.map((e) => e);
+    if (message.investorID) {
+      obj.investorID = message.investorID.map((e) => e);
     } else {
-      obj.invetorID = [];
+      obj.investorID = [];
     }
     return obj;
   },
@@ -247,7 +247,7 @@ export const MsgAddInvestors = {
     const message = createBaseMsgAddInvestors();
     message.creator = object.creator ?? "";
     message.poolIndex = object.poolIndex ?? "";
-    message.invetorID = object.invetorID?.map((e) => e) || [];
+    message.investorID = object.investorID?.map((e) => e) || [];
     return message;
   },
 };

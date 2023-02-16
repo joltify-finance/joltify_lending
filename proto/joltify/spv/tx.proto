@@ -32,7 +32,7 @@ message MsgCreatePoolResponse {
 message MsgAddInvestors {
   string creator = 1;
   string pool_index = 2;
-  repeated string invetor_iD= 3;
+  repeated string investor_iD= 3;
 }
 
 message MsgAddInvestorsResponse {
