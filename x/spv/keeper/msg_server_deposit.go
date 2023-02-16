@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -97,16 +98,10 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		depositor := types.DepositorInfo{InvestorId: msg.InvestorID, DepositorAddress: investor, PoolIndex: msg.PoolIndex, WithdrawableAmount: msg.Token}
 		k.SetDepositor(ctx, depositor)
 
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeDeposit,
-				sdk.NewAttribute(types.AttributeCreator, msg.Creator),
-			),
-		)
-		return &types.MsgDepositResponse{}, nil
+	} else {
+		previousDepositor.WithdrawableAmount = previousDepositor.WithdrawableAmount.Add(msg.Token)
+		k.SetDepositor(ctx, previousDepositor)
 	}
-	previousDepositor.WithdrawableAmount = previousDepositor.WithdrawableAmount.Add(msg.Token)
-	k.SetDepositor(ctx, previousDepositor)
 
 	wallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
 	if !found {
@@ -116,6 +111,10 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		wallets.WalletAddress = addAddrToList(wallets.WalletAddress, investor)
 		k.SetPoolDepositedWallets(ctx, wallets)
 	}
+
+	// now we update borrowable
+	poolInfo.BorrowedAmount = poolInfo.BorrowableAmount.Add(msg.Token)
+	k.SetPool(ctx, poolInfo)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(

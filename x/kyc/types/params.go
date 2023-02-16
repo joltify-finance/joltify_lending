@@ -37,10 +37,11 @@ func NewParams() Params {
 		panic(err)
 	}
 	pi := ProjectInfo{
-		Index:        1,
-		SPVName:      "defaultSPV",
-		ProjectOwner: acc,
-		BasicInfo:    &b,
+		Index:         1,
+		SPVName:       "defaultSPV",
+		ProjectOwner:  acc,
+		BasicInfo:     &b,
+		ProjectLength: 31536000, //1 year
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }

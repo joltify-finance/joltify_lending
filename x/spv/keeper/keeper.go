@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -60,7 +61,7 @@ func (k Keeper) SetPool(ctx sdk.Context, poolInfo types.PoolInfo) {
 	poolsStore.Set(types.KeyPrefix(poolInfo.Index), bz)
 }
 
-// AddInvestorToPool add investors to the give poolindex
+// AddInvestorToPool add investors to the give pool
 func (k Keeper) AddInvestorToPool(ctx sdk.Context, poolWithInvestors *types.PoolWithInvestors) {
 	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolInvestor))
 	key := types.KeyPrefix(poolWithInvestors.PoolIndex)
@@ -130,4 +131,18 @@ func (k Keeper) SetPoolDepositedWallets(ctx sdk.Context, depositor types.PoolDep
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))
 	bz := k.cdc.MustMarshal(&depositor)
 	depositorPoolStore.Set(types.KeyPrefix(depositor.GetPoolIndex()), bz)
+}
+
+// IterateDepositors iterates over all deposit objects in the store and performs a callback function
+func (k Keeper) IterateDepositors(ctx sdk.Context, poolIndex string, cb func(depositor types.DepositorInfo) (stop bool)) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(poolIndex))
+	iterator := sdk.KVStorePrefixIterator(depositorPoolStore, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var depositor types.DepositorInfo
+		k.cdc.MustUnmarshal(iterator.Value(), &depositor)
+		if cb(depositor) {
+			break
+		}
+	}
 }

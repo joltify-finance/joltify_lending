@@ -78,6 +78,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		ReserveFactor: types.RESERVEFACTOR,
 		PoolNFTClass:  poolNFTClass,
 		PoolStatus:    types.PoolInfo_INACTIVE,
+		ProjectLength: targetProject.ProjectLength,
 	}
 
 	k.SetPool(ctx, poolInfo)

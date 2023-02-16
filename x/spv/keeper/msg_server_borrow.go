@@ -2,20 +2,26 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	nft "github.com/cosmos/cosmos-sdk/x/nft/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
 func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, amount sdk.Coin) (*types.PoolInfo, error) {
 
-	macc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
-	modAccCoin := k.bankKeeper.GetBalance(ctx, macc.GetAddress(), amount.GetDenom())
-
-	if modAccCoin.IsLT(amount) {
+	//macc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
+	//modAccCoin := k.bankKeeper.GetBalance(ctx, macc.GetAddress(), amount.GetDenom())
+	//
+	//if modAccCoin.IsLT(amount) {
+	//	return nil, types.ErrInsufficientFund
+	//}
+	if poolInfo.BorrowableAmount.IsLT(amount) {
 		return nil, types.ErrInsufficientFund
 	}
+	utilization := sdk.NewDecFromInt(amount.Amount).QuoTruncate(sdk.NewDecFromInt(poolInfo.BorrowableAmount.Amount))
 
 	// we transfer the fund from the module to the spv
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(amount))
@@ -23,19 +29,45 @@ func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, amou
 		return nil, err
 	}
 
-	// we add the amount of the tokens that borrowed in the pool
+	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Add(amount)
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(amount)
 
-	// we update each investors leftover
+	// we update each investor leftover
 	investorWallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
 	if found {
 		panic("should never happened that investors have depposited the money while the store is empty")
 	}
-	k.processInvestors(investorWallets.WalletAddress, poolInfo)
+	k.processInvestors(ctx, investorWallets.WalletAddress, poolInfo, utilization)
 	return poolInfo, nil
 }
 
-func (k msgServer) processInvestors(investorWallets []sdk.AccAddress, poolInfo *types.PoolInfo) {
+func (k msgServer) processInvestors(ctx sdk.Context, investorWallets []sdk.AccAddress, poolInfo *types.PoolInfo, utilization sdk.Dec) {
+
+	var depositors []types.DepositorInfo
+
+	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
+		locked := sdk.NewDecFromInt(depositor.WithdrawableAmount.Amount).Mul(utilization).TruncateInt()
+		depositor.LockedAmount = sdk.NewCoin(depositor.WithdrawableAmount.Denom, locked)
+		depositor.WithdrawableAmount = depositor.WithdrawableAmount.SubAmount(locked)
+		depositors = append(depositors)
+
+		nft.
+
+
+
+		return false
+	})
+
+	for _, el := range investorWallets {
+		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
+		if !found {
+			panic("shoud never fail to find the depositor")
+		}
+
+		depositor.WithdrawableAmount
+
+	}
 
 }
 

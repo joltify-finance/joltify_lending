@@ -2,8 +2,10 @@ package types
 
 import (
 	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 )
 
@@ -31,4 +33,8 @@ type BankKeeper interface {
 type KycKeeper interface {
 	GetProjects(ctx sdk.Context) (projectsInfo []*kyctypes.ProjectInfo)
 	QueryInvestorWallets(goCtx context.Context, req *kyctypes.QueryInvestorWalletsRequest) (*kyctypes.QueryInvestorWalletsResponse, error)
+}
+
+type NFTkeeper interface {
+	Mint(ctx sdk.Context, nft nfttypes.NFT, receiver sdk.AccAddress) // updates totalSupply
 }

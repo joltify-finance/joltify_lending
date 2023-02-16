@@ -66,6 +66,11 @@ message PoolInfo {
     (gogoproto.nullable)   = false
   ];
 
+ uint64  project_length = 14;
+
+  cosmos.base.v1beta1.Coin borrowable_amount = 15[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
 
 }
 
