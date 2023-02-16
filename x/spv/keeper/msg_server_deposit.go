@@ -23,6 +23,10 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
+	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
+		return nil, coserrors.Wrapf(types.PoolClosed, "pool has been closed")
+	}
+
 	req := kyctypes.QueryInvestorWalletsRequest{
 		InvestorId: msg.GetInvestorID(),
 	}
