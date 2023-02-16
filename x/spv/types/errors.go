@@ -11,5 +11,5 @@ var (
 	InvalidParameter = coserrors.Register(ModuleName, 1, "invalid parameter")
 	PoolNotFound     = coserrors.Register(ModuleName, 2, "pool not found")
 	Unauthorized     = coserrors.Register(ModuleName, 3, "unauthorized operation")
-	PoolClosed       = coserrors.Register(ModuleName, 3, "pool closed")
+	PoolClosed       = coserrors.Register(ModuleName, 4, "pool closed")
 )
