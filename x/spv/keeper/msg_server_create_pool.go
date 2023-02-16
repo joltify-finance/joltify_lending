@@ -34,7 +34,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project cannot be found", msg.ProjectIndex)
 	}
 
-	targetProject := allProjects[msg.ProjectIndex]
+	targetProject := allProjects[msg.ProjectIndex-1]
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
