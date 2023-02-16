@@ -96,8 +96,8 @@ func (k Keeper) SetDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
 	depositorPoolStore.Set(depositor.GetDepositorAddress().Bytes(), bz)
 }
 
-func (k Keeper) GetDepositor(ctx sdk.Context, walletAddress sdk.AccAddress) (depositor types.DepositorInfo, found bool) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))
+func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types.DepositorInfo, found bool) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(poolIndex))
 
 	bz := depositorPoolStore.Get(walletAddress.Bytes())
 	if bz == nil {

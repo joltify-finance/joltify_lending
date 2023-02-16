@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -27,5 +28,5 @@ type BankKeeper interface {
 
 type KycKeeper interface {
 	GetProjects(ctx sdk.Context) (projectsInfo []*kyctypes.ProjectInfo)
-	QueryInvestorWallets(goCtx sdk.Context, req *kyctypes.QueryInvestorWalletsRequest) (*kyctypes.QueryInvestorWalletsResponse, error)
+	QueryInvestorWallets(goCtx context.Context, req *kyctypes.QueryInvestorWalletsRequest) (*kyctypes.QueryInvestorWalletsResponse, error)
 }

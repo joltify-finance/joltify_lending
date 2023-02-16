@@ -50,7 +50,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(types.InvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
-	indexHash := crypto.Keccak256Hash([]byte(msg.GetPoolName()), spvAddress.Bytes())
+	indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.Description), spvAddress.Bytes())
 	urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
 	poolNFTClass := nft.Class{
 		Id:          indexHash.Hex(),

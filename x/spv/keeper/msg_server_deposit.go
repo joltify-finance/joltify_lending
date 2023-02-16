@@ -55,7 +55,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	// now we update the users deposit database
-	previousDepositor, found := k.GetDepositor(ctx, investor)
+	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
 		depositor := types.DepositorInfo{InvestorId: msg.InvestorID, DepositorAddress: investor, PoolIndex: msg.PoolIndex, WithdrawableAmount: msg.Token}
 		k.SetDepositor(ctx, depositor)
