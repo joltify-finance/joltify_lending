@@ -1,13 +1,13 @@
-import { Depositor_info } from "./types/joltify/spv/deposit"
+import { DepositorInfo } from "./types/joltify/spv/deposit"
 import { Params } from "./types/joltify/spv/params"
-import { Pool_info } from "./types/joltify/spv/poolinfo"
+import { PoolInfo } from "./types/joltify/spv/poolinfo"
 import { PoolWithInvestors } from "./types/joltify/spv/poolinfo"
 
 
 export {     
-    Depositor_info,
+    DepositorInfo,
     Params,
-    Pool_info,
+    PoolInfo,
     PoolWithInvestors,
     
  }

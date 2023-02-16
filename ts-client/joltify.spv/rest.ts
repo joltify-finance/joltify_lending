@@ -9,6 +9,13 @@
  * ---------------------------------------------------------------
  */
 
+export enum PoolInfoPOOLSTATUS {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  CLOSED = "CLOSED",
+  OPEN = "OPEN",
+}
+
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -104,6 +111,7 @@ export interface SpvPoolInfo {
 
   /** @format date-time */
   pool_start_time?: string;
+  pool_status?: PoolInfoPOOLSTATUS;
 }
 
 export interface SpvQueryDepositorResponse {
@@ -134,7 +142,7 @@ export interface SpvQueryParamsResponse {
 }
 
 export interface SpvQueryQueryPoolResponse {
-  pool_info?: SpvPoolInfo;
+  poolInfo?: SpvPoolInfo;
 }
 
 /**

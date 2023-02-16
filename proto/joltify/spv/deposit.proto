@@ -8,7 +8,7 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
 
-message Depositor_info {
+message DepositorInfo {
   string investor_id=1;
   bytes depositor_address     = 2
   [(cosmos_proto.scalar) = "cosmos.AddressBytes",

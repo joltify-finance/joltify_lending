@@ -16,6 +16,52 @@ export interface PoolInfo {
   reserveFactor: string;
   poolNFTClass: string;
   poolStartTime: Date | undefined;
+  poolStatus: PoolInfo_POOLSTATUS;
+}
+
+export enum PoolInfo_POOLSTATUS {
+  ACTIVE = 0,
+  INACTIVE = 1,
+  CLOSED = 2,
+  OPEN = 3,
+  UNRECOGNIZED = -1,
+}
+
+export function poolInfo_POOLSTATUSFromJSON(object: any): PoolInfo_POOLSTATUS {
+  switch (object) {
+    case 0:
+    case "ACTIVE":
+      return PoolInfo_POOLSTATUS.ACTIVE;
+    case 1:
+    case "INACTIVE":
+      return PoolInfo_POOLSTATUS.INACTIVE;
+    case 2:
+    case "CLOSED":
+      return PoolInfo_POOLSTATUS.CLOSED;
+    case 3:
+    case "OPEN":
+      return PoolInfo_POOLSTATUS.OPEN;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return PoolInfo_POOLSTATUS.UNRECOGNIZED;
+  }
+}
+
+export function poolInfo_POOLSTATUSToJSON(object: PoolInfo_POOLSTATUS): string {
+  switch (object) {
+    case PoolInfo_POOLSTATUS.ACTIVE:
+      return "ACTIVE";
+    case PoolInfo_POOLSTATUS.INACTIVE:
+      return "INACTIVE";
+    case PoolInfo_POOLSTATUS.CLOSED:
+      return "CLOSED";
+    case PoolInfo_POOLSTATUS.OPEN:
+      return "OPEN";
+    case PoolInfo_POOLSTATUS.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
 }
 
 export interface PoolWithInvestors {
@@ -35,6 +81,7 @@ function createBasePoolInfo(): PoolInfo {
     reserveFactor: "",
     poolNFTClass: "",
     poolStartTime: undefined,
+    poolStatus: 0,
   };
 }
 
@@ -69,6 +116,9 @@ export const PoolInfo = {
     }
     if (message.poolStartTime !== undefined) {
       Timestamp.encode(toTimestamp(message.poolStartTime), writer.uint32(82).fork()).ldelim();
+    }
+    if (message.poolStatus !== 0) {
+      writer.uint32(88).int32(message.poolStatus);
     }
     return writer;
   },
@@ -110,6 +160,9 @@ export const PoolInfo = {
         case 10:
           message.poolStartTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           break;
+        case 11:
+          message.poolStatus = reader.int32() as any;
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -130,6 +183,7 @@ export const PoolInfo = {
       reserveFactor: isSet(object.reserveFactor) ? String(object.reserveFactor) : "",
       poolNFTClass: isSet(object.poolNFTClass) ? String(object.poolNFTClass) : "",
       poolStartTime: isSet(object.poolStartTime) ? fromJsonTimestamp(object.poolStartTime) : undefined,
+      poolStatus: isSet(object.poolStatus) ? poolInfo_POOLSTATUSFromJSON(object.poolStatus) : 0,
     };
   },
 
@@ -149,6 +203,7 @@ export const PoolInfo = {
     message.reserveFactor !== undefined && (obj.reserveFactor = message.reserveFactor);
     message.poolNFTClass !== undefined && (obj.poolNFTClass = message.poolNFTClass);
     message.poolStartTime !== undefined && (obj.poolStartTime = message.poolStartTime.toISOString());
+    message.poolStatus !== undefined && (obj.poolStatus = poolInfo_POOLSTATUSToJSON(message.poolStatus));
     return obj;
   },
 
@@ -166,6 +221,7 @@ export const PoolInfo = {
     message.reserveFactor = object.reserveFactor ?? "";
     message.poolNFTClass = object.poolNFTClass ?? "";
     message.poolStartTime = object.poolStartTime ?? undefined;
+    message.poolStatus = object.poolStatus ?? 0;
     return message;
   },
 };

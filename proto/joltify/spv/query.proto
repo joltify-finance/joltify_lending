@@ -50,7 +50,7 @@ message QueryListPoolsRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 message QueryListPoolsResponse {
-  repeated  Pool_info pools_info = 1;
+  repeated  PoolInfo pools_info = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
@@ -59,7 +59,7 @@ message QueryQueryPoolRequest {
 }
 
 message QueryQueryPoolResponse {
-  Pool_info pool_info = 1;
+  PoolInfo poolInfo = 1;
 }
 
 message QueryDepositorRequest {
@@ -68,5 +68,5 @@ message QueryDepositorRequest {
 }
 
 message QueryDepositorResponse {
-  Depositor_info depositor =1;
+  DepositorInfo depositor =1;
 }

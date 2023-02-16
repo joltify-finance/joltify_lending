@@ -8,7 +8,7 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
 
-message Pool_info {
+message PoolInfo {
   string index  =1 ;
   string pool_name = 2 ;
   int32 linked_project = 3 ;
@@ -18,7 +18,7 @@ message Pool_info {
   ];
 
 
-  string            apy      = 5 [
+  string      apy      = 5 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
@@ -46,6 +46,15 @@ message Pool_info {
   ];
 
   google.protobuf.Timestamp pool_start_time = 10 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+  enum POOLSTATUS{
+    ACTIVE = 0;
+    INACTIVE = 1;
+    CLOSED = 2;
+    OPEN = 3;
+  }
+  POOLSTATUS pool_status = 11;
+
 }
 
 message PoolWithInvestors {
