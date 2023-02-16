@@ -24,6 +24,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	nftmoduletypes "github.com/cosmos/cosmos-sdk/x/nft"
+	nftmodulekeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -120,6 +122,7 @@ import (
 	ibchost "github.com/cosmos/ibc-go/v5/modules/core/24-host"
 	ibckeeper "github.com/cosmos/ibc-go/v5/modules/core/keeper"
 
+	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/joltify-finance/joltify_lending/app/ante"
 	joltparams "github.com/joltify-finance/joltify_lending/app/params"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
@@ -168,6 +171,7 @@ var (
 		vaultmodule.AppModuleBasic{},
 		kycmodule.AppModuleBasic{},
 		spvmodule.AppModuleBasic{},
+		nftmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -188,7 +192,7 @@ var (
 		types3.LiquidatorMacc:          {authtypes.Minter, authtypes.Burner},
 		types2.ModuleName:              {authtypes.Minter, authtypes.Burner},
 		incentivetypes.ModuleName:      nil,
-		spvmoduletypes.ModuleAccount:   nil,
+		spvmoduletypes.ModuleAccount:   {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -246,6 +250,7 @@ type App struct {
 	VaultKeeper      vaultmodulekeeper.Keeper
 	kycKeeper        kycmodulekeeper.Keeper
 	spvKeeper        spvmodulekeeper.Keeper
+	nftKeeper        nftmodulekeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -319,6 +324,7 @@ func NewApp(
 		vaultmoduletypes.StoreKey,
 		kycmoduletypes.StoreKey,
 		spvmoduletypes.StoreKey,
+		nftmoduletypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -538,7 +544,9 @@ func NewApp(
 
 	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace)
 
-	app.spvKeeper = *spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper)
+	app.spvKeeper = *spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper)
+
+	app.nftKeeper = nftmodulekeeper.NewKeeper(keys[nftmoduletypes.StoreKey], appCodec, app.accountKeeper, app.bankKeeper)
 
 	// Note: the committee proposal handler is not registered on the committee router. This means committees cannot create or update other committees.
 	// Adding the committee proposal handler to the router is possible but awkward as the handler depends on the keeper which depends on the handler.
@@ -604,6 +612,7 @@ func NewApp(
 		vaultmodule.NewAppModule(appCodec, app.VaultKeeper, app.accountKeeper, app.bankKeeper),
 		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.accountKeeper, app.bankKeeper),
 		spvmodule.NewAppModule(appCodec, app.spvKeeper, app.accountKeeper, app.bankKeeper),
+		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -632,6 +641,7 @@ func NewApp(
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
+		nftmoduletypes.ModuleName,
 		ibchost.ModuleName,
 		// Add all remaining modules with an empty begin blocker below since cosmos 0.45.0 requires it
 		vestingtypes.ModuleName,
@@ -665,6 +675,7 @@ func NewApp(
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
+		nftmoduletypes.ModuleName,
 		upgradetypes.ModuleName,
 		evidencetypes.ModuleName,
 		feegrant.ModuleName,
@@ -701,6 +712,7 @@ func NewApp(
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
+		nftmoduletypes.ModuleName,
 		incentivetypes.ModuleName, // reads cdp params, so must run after cdp genesis
 		genutiltypes.ModuleName,   // runs arbitrary txs included in genisis state, so run after modules have been initialized
 		crisistypes.ModuleName,    // runs the invariants at genesis, should run after other modules
