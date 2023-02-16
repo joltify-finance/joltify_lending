@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -20,6 +19,7 @@ type (
 		paramstore paramtypes.Subspace
 		kycKeeper  types.KycKeeper
 		bankKeeper types.BankKeeper
+		accKeeper  types.AccountKeeper
 	}
 )
 
@@ -30,6 +30,7 @@ func NewKeeper(
 	ps paramtypes.Subspace,
 	kycKeeper types.KycKeeper,
 	bankKeeper types.BankKeeper,
+	accKeeper types.AccountKeeper,
 
 ) *Keeper {
 	// set KeyTable if it has not already been set
@@ -44,6 +45,7 @@ func NewKeeper(
 		paramstore: ps,
 		kycKeeper:  kycKeeper,
 		bankKeeper: bankKeeper,
+		accKeeper:  accKeeper,
 	}
 }
 
@@ -106,4 +108,26 @@ func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sd
 
 	k.cdc.MustUnmarshal(bz, &depositor)
 	return depositor, true
+}
+
+// GetPoolDepositedWallets gets the deposited wallets
+func (k Keeper) GetPoolDepositedWallets(ctx sdk.Context, index string) (deposited types.PoolDepositedInvestors, found bool) {
+	depositedPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))
+
+	bz := depositedPoolStore.Get(types.KeyPrefix(index))
+
+	if bz == nil {
+		return deposited, false
+	}
+
+	k.cdc.MustUnmarshal(bz, &deposited)
+	return deposited, true
+
+}
+
+// SetPoolDepositedWallets sets the deposited wallets
+func (k Keeper) SetPoolDepositedWallets(ctx sdk.Context, depositor types.PoolDepositedInvestors) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))
+	bz := k.cdc.MustMarshal(&depositor)
+	depositorPoolStore.Set(types.KeyPrefix(depositor.GetPoolIndex()), bz)
 }

@@ -47,7 +47,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 
 	apy, payfreq, err := parameterSanitize(msg)
 	if err != nil {
-		return nil, coserrors.Wrapf(types.InvalidParameter, "invalid parameter: %v", err.Error())
+		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
 	indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.Description), spvAddress.Bytes(), apy.BigInt().Bytes())
@@ -55,7 +55,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 
 	_, found := k.GetPools(ctx, indexHash.Hex())
 	if found {
-		return nil, coserrors.Wrapf(types.PoolExisted, "pool existed")
+		return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
 	}
 
 	poolNFTClass := nft.Class{

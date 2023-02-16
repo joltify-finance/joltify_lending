@@ -21,6 +21,7 @@ message ProjectInfo {
   string         SPV_name   = 2 ;
   BasicInfo basic_info = 3;
   bytes project_owner     = 4 [   (cosmos_proto.scalar) = "cosmos.AddressBytes",   (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  int32 project_length = 5;
 }
 
 // Params defines the parameters for the module.

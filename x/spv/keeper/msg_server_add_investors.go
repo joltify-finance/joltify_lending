@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -30,6 +29,24 @@ func addToList(previousList, newElements []string) []string {
 	return combinedList
 }
 
+func addAddrToList(previousList []sdk.AccAddress, newElement sdk.AccAddress) []sdk.AccAddress {
+	combinedList := make([]sdk.AccAddress, 0, len(previousList)+1)
+	exists := make(map[string]bool)
+
+	for _, el := range previousList {
+		if !exists[el.String()] {
+			exists[el.String()] = true
+			combinedList = append(combinedList, el)
+		}
+	}
+
+	if !exists[newElement.String()] {
+		combinedList = append(combinedList, newElement)
+	}
+
+	return combinedList
+}
+
 func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestors) (*types.MsgAddInvestorsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -40,10 +57,10 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 
 	pool, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
-		return nil, coserrors.Wrapf(types.PoolNotFound, "pool not found with index %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool not found with index %v", msg.GetPoolIndex())
 	}
 	if !pool.OwnerAddress.Equals(spvAddress) {
-		return nil, coserrors.Wrap(types.Unauthorized, "unauthorized operations")
+		return nil, coserrors.Wrap(types.ErrUnauthorized, "unauthorized operations")
 	}
 
 	investorAddresses := make([]string, len(msg.GetInvestorID()))
