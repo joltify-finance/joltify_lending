@@ -1,4 +1,5 @@
 /* eslint-disable */
+import Long from "long";
 import _m0 from "protobufjs/minimal";
 import { Coin } from "../../cosmos/base/v1beta1/coin";
 import { Timestamp } from "../../google/protobuf/timestamp";
@@ -14,9 +15,20 @@ export interface PoolInfo {
   totalAmount: Coin | undefined;
   payFreq: number;
   reserveFactor: string;
-  poolNFTClass: string;
+  /**
+   * string            pool_nFT_class      = 9 [
+   *    (cosmos_proto.scalar)  = "cosmos.Class",
+   *    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+   *    (gogoproto.nullable)   = false
+   *  ];
+   */
+  poolNFTIds: string[];
   poolStartTime: Date | undefined;
   poolStatus: PoolInfo_POOLSTATUS;
+  borrowedAmount: Coin | undefined;
+  poolInterest: string;
+  projectLength: number;
+  borrowableAmount: Coin | undefined;
 }
 
 export enum PoolInfo_POOLSTATUS {
@@ -69,6 +81,11 @@ export interface PoolWithInvestors {
   investors: string[];
 }
 
+export interface PoolDepositedInvestors {
+  poolIndex: string;
+  walletAddress: Uint8Array[];
+}
+
 function createBasePoolInfo(): PoolInfo {
   return {
     index: "",
@@ -79,9 +96,13 @@ function createBasePoolInfo(): PoolInfo {
     totalAmount: undefined,
     payFreq: 0,
     reserveFactor: "",
-    poolNFTClass: "",
+    poolNFTIds: [],
     poolStartTime: undefined,
     poolStatus: 0,
+    borrowedAmount: undefined,
+    poolInterest: "",
+    projectLength: 0,
+    borrowableAmount: undefined,
   };
 }
 
@@ -111,14 +132,26 @@ export const PoolInfo = {
     if (message.reserveFactor !== "") {
       writer.uint32(66).string(message.reserveFactor);
     }
-    if (message.poolNFTClass !== "") {
-      writer.uint32(74).string(message.poolNFTClass);
+    for (const v of message.poolNFTIds) {
+      writer.uint32(74).string(v!);
     }
     if (message.poolStartTime !== undefined) {
       Timestamp.encode(toTimestamp(message.poolStartTime), writer.uint32(82).fork()).ldelim();
     }
     if (message.poolStatus !== 0) {
       writer.uint32(88).int32(message.poolStatus);
+    }
+    if (message.borrowedAmount !== undefined) {
+      Coin.encode(message.borrowedAmount, writer.uint32(98).fork()).ldelim();
+    }
+    if (message.poolInterest !== "") {
+      writer.uint32(106).string(message.poolInterest);
+    }
+    if (message.projectLength !== 0) {
+      writer.uint32(112).uint64(message.projectLength);
+    }
+    if (message.borrowableAmount !== undefined) {
+      Coin.encode(message.borrowableAmount, writer.uint32(122).fork()).ldelim();
     }
     return writer;
   },
@@ -155,13 +188,25 @@ export const PoolInfo = {
           message.reserveFactor = reader.string();
           break;
         case 9:
-          message.poolNFTClass = reader.string();
+          message.poolNFTIds.push(reader.string());
           break;
         case 10:
           message.poolStartTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           break;
         case 11:
           message.poolStatus = reader.int32() as any;
+          break;
+        case 12:
+          message.borrowedAmount = Coin.decode(reader, reader.uint32());
+          break;
+        case 13:
+          message.poolInterest = reader.string();
+          break;
+        case 14:
+          message.projectLength = longToNumber(reader.uint64() as Long);
+          break;
+        case 15:
+          message.borrowableAmount = Coin.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -181,9 +226,13 @@ export const PoolInfo = {
       totalAmount: isSet(object.totalAmount) ? Coin.fromJSON(object.totalAmount) : undefined,
       payFreq: isSet(object.payFreq) ? Number(object.payFreq) : 0,
       reserveFactor: isSet(object.reserveFactor) ? String(object.reserveFactor) : "",
-      poolNFTClass: isSet(object.poolNFTClass) ? String(object.poolNFTClass) : "",
+      poolNFTIds: Array.isArray(object?.poolNFTIds) ? object.poolNFTIds.map((e: any) => String(e)) : [],
       poolStartTime: isSet(object.poolStartTime) ? fromJsonTimestamp(object.poolStartTime) : undefined,
       poolStatus: isSet(object.poolStatus) ? poolInfo_POOLSTATUSFromJSON(object.poolStatus) : 0,
+      borrowedAmount: isSet(object.borrowedAmount) ? Coin.fromJSON(object.borrowedAmount) : undefined,
+      poolInterest: isSet(object.poolInterest) ? String(object.poolInterest) : "",
+      projectLength: isSet(object.projectLength) ? Number(object.projectLength) : 0,
+      borrowableAmount: isSet(object.borrowableAmount) ? Coin.fromJSON(object.borrowableAmount) : undefined,
     };
   },
 
@@ -201,9 +250,19 @@ export const PoolInfo = {
       && (obj.totalAmount = message.totalAmount ? Coin.toJSON(message.totalAmount) : undefined);
     message.payFreq !== undefined && (obj.payFreq = Math.round(message.payFreq));
     message.reserveFactor !== undefined && (obj.reserveFactor = message.reserveFactor);
-    message.poolNFTClass !== undefined && (obj.poolNFTClass = message.poolNFTClass);
+    if (message.poolNFTIds) {
+      obj.poolNFTIds = message.poolNFTIds.map((e) => e);
+    } else {
+      obj.poolNFTIds = [];
+    }
     message.poolStartTime !== undefined && (obj.poolStartTime = message.poolStartTime.toISOString());
     message.poolStatus !== undefined && (obj.poolStatus = poolInfo_POOLSTATUSToJSON(message.poolStatus));
+    message.borrowedAmount !== undefined
+      && (obj.borrowedAmount = message.borrowedAmount ? Coin.toJSON(message.borrowedAmount) : undefined);
+    message.poolInterest !== undefined && (obj.poolInterest = message.poolInterest);
+    message.projectLength !== undefined && (obj.projectLength = Math.round(message.projectLength));
+    message.borrowableAmount !== undefined
+      && (obj.borrowableAmount = message.borrowableAmount ? Coin.toJSON(message.borrowableAmount) : undefined);
     return obj;
   },
 
@@ -219,9 +278,17 @@ export const PoolInfo = {
       : undefined;
     message.payFreq = object.payFreq ?? 0;
     message.reserveFactor = object.reserveFactor ?? "";
-    message.poolNFTClass = object.poolNFTClass ?? "";
+    message.poolNFTIds = object.poolNFTIds?.map((e) => e) || [];
     message.poolStartTime = object.poolStartTime ?? undefined;
     message.poolStatus = object.poolStatus ?? 0;
+    message.borrowedAmount = (object.borrowedAmount !== undefined && object.borrowedAmount !== null)
+      ? Coin.fromPartial(object.borrowedAmount)
+      : undefined;
+    message.poolInterest = object.poolInterest ?? "";
+    message.projectLength = object.projectLength ?? 0;
+    message.borrowableAmount = (object.borrowableAmount !== undefined && object.borrowableAmount !== null)
+      ? Coin.fromPartial(object.borrowableAmount)
+      : undefined;
     return message;
   },
 };
@@ -284,6 +351,70 @@ export const PoolWithInvestors = {
     const message = createBasePoolWithInvestors();
     message.poolIndex = object.poolIndex ?? "";
     message.investors = object.investors?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBasePoolDepositedInvestors(): PoolDepositedInvestors {
+  return { poolIndex: "", walletAddress: [] };
+}
+
+export const PoolDepositedInvestors = {
+  encode(message: PoolDepositedInvestors, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.poolIndex !== "") {
+      writer.uint32(10).string(message.poolIndex);
+    }
+    for (const v of message.walletAddress) {
+      writer.uint32(34).bytes(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PoolDepositedInvestors {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePoolDepositedInvestors();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.poolIndex = reader.string();
+          break;
+        case 4:
+          message.walletAddress.push(reader.bytes());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PoolDepositedInvestors {
+    return {
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+      walletAddress: Array.isArray(object?.walletAddress)
+        ? object.walletAddress.map((e: any) => bytesFromBase64(e))
+        : [],
+    };
+  },
+
+  toJSON(message: PoolDepositedInvestors): unknown {
+    const obj: any = {};
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    if (message.walletAddress) {
+      obj.walletAddress = message.walletAddress.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
+    } else {
+      obj.walletAddress = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<PoolDepositedInvestors>, I>>(object: I): PoolDepositedInvestors {
+    const message = createBasePoolDepositedInvestors();
+    message.poolIndex = object.poolIndex ?? "";
+    message.walletAddress = object.walletAddress?.map((e) => e) || [];
     return message;
   },
 };
@@ -363,6 +494,18 @@ function fromJsonTimestamp(o: any): Date {
   } else {
     return fromTimestamp(Timestamp.fromJSON(o));
   }
+}
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
 }
 
 function isSet(value: any): boolean {

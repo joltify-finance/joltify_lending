@@ -7,20 +7,20 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgAddInvestors } from "./types/joltifylending/spv/tx";
+import { MsgBorrow } from "./types/spv/tx";
 
 
-export { MsgAddInvestors };
+export { MsgBorrow };
 
-type sendMsgAddInvestorsParams = {
-  value: MsgAddInvestors,
+type sendMsgBorrowParams = {
+  value: MsgBorrow,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgAddInvestorsParams = {
-  value: MsgAddInvestors,
+type msgBorrowParams = {
+  value: MsgBorrow,
 };
 
 
@@ -41,26 +41,26 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgAddInvestors({ value, fee, memo }: sendMsgAddInvestorsParams): Promise<DeliverTxResponse> {
+		async sendMsgBorrow({ value, fee, memo }: sendMsgBorrowParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgAddInvestors: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgBorrow: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgAddInvestors({ value: MsgAddInvestors.fromPartial(value) })
+				let msg = this.msgBorrow({ value: MsgBorrow.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgAddInvestors: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgBorrow: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgAddInvestors({ value }: msgAddInvestorsParams): EncodeObject {
+		msgBorrow({ value }: msgBorrowParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltifyfinance.joltify_lending.spv.MsgAddInvestors", value: MsgAddInvestors.fromPartial( value ) }  
+				return { typeUrl: "/joltifyfinance.joltify_lending.spv.MsgBorrow", value: MsgBorrow.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgAddInvestors: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgBorrow: Could not create message: ' + e.message)
 			}
 		},
 		

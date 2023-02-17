@@ -360,16 +360,16 @@ export default {
 				}
 			}
 		},
-		async sendMsgLiquidate({ rootGetters }, { value, fee = [], memo = '' }) {
+		async sendMsgCreateCDP({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgLiquidate({ value, fee: {amount: fee, gas: "200000"}, memo })
+				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgCreateCDP({ value, fee: {amount: fee, gas: "200000"}, memo })
 				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgCreateCDP:Init Could not initialize signing client. Wallet is required.')
 				}else{
-					throw new Error('TxClient:MsgLiquidate:Send Could not broadcast Tx: '+ e.message)
+					throw new Error('TxClient:MsgCreateCDP:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -386,19 +386,6 @@ export default {
 				}
 			}
 		},
-		async sendMsgCreateCDP({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgCreateCDP({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgCreateCDP:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgCreateCDP:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		async sendMsgRepayDebt({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -409,6 +396,19 @@ export default {
 					throw new Error('TxClient:MsgRepayDebt:Init Could not initialize signing client. Wallet is required.')
 				}else{
 					throw new Error('TxClient:MsgRepayDebt:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgLiquidate({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgLiquidate({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgLiquidate:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -439,16 +439,16 @@ export default {
 				}
 			}
 		},
-		async MsgLiquidate({ rootGetters }, { value }) {
+		async MsgCreateCDP({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgLiquidate({value})
+				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgCreateCDP({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgCreateCDP:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgLiquidate:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgCreateCDP:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -465,19 +465,6 @@ export default {
 				}
 			}
 		},
-		async MsgCreateCDP({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgCreateCDP({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgCreateCDP:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgCreateCDP:Create Could not create message: ' + e.message)
-				}
-			}
-		},
 		async MsgRepayDebt({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -488,6 +475,19 @@ export default {
 					throw new Error('TxClient:MsgRepayDebt:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgRepayDebt:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgLiquidate({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgLiquidate({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgLiquidate:Create Could not create message: ' + e.message)
 				}
 			}
 		},

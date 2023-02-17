@@ -62,6 +62,9 @@ export interface KycProjectInfo {
 
   /** @format byte */
   project_owner?: string;
+
+  /** @format uint64 */
+  project_length?: string;
 }
 
 export interface KycQueryByWalletResponse {

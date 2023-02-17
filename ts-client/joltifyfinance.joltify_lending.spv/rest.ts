@@ -20,9 +20,7 @@ export interface RpcStatus {
   details?: ProtobufAny[];
 }
 
-export interface SpvMsgAddInvestorsResponse {
-  operationResult?: boolean;
-}
+export type SpvMsgBorrowResponse = object;
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
 
@@ -145,7 +143,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title joltifylending/spv/tx.proto
+ * @title spv/tx.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {}

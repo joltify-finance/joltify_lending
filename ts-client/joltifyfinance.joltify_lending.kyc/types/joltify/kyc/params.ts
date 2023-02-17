@@ -1,4 +1,5 @@
 /* eslint-disable */
+import Long from "long";
 import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "joltifyfinance.joltify_lending.kyc";
@@ -17,6 +18,7 @@ export interface ProjectInfo {
   SPVName: string;
   basicInfo: BasicInfo | undefined;
   projectOwner: Uint8Array;
+  projectLength: number;
 }
 
 /** Params defines the parameters for the module. */
@@ -112,7 +114,7 @@ export const BasicInfo = {
 };
 
 function createBaseProjectInfo(): ProjectInfo {
-  return { index: 0, SPVName: "", basicInfo: undefined, projectOwner: new Uint8Array() };
+  return { index: 0, SPVName: "", basicInfo: undefined, projectOwner: new Uint8Array(), projectLength: 0 };
 }
 
 export const ProjectInfo = {
@@ -128,6 +130,9 @@ export const ProjectInfo = {
     }
     if (message.projectOwner.length !== 0) {
       writer.uint32(34).bytes(message.projectOwner);
+    }
+    if (message.projectLength !== 0) {
+      writer.uint32(40).uint64(message.projectLength);
     }
     return writer;
   },
@@ -151,6 +156,9 @@ export const ProjectInfo = {
         case 4:
           message.projectOwner = reader.bytes();
           break;
+        case 5:
+          message.projectLength = longToNumber(reader.uint64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -165,6 +173,7 @@ export const ProjectInfo = {
       SPVName: isSet(object.SPVName) ? String(object.SPVName) : "",
       basicInfo: isSet(object.basicInfo) ? BasicInfo.fromJSON(object.basicInfo) : undefined,
       projectOwner: isSet(object.projectOwner) ? bytesFromBase64(object.projectOwner) : new Uint8Array(),
+      projectLength: isSet(object.projectLength) ? Number(object.projectLength) : 0,
     };
   },
 
@@ -178,6 +187,7 @@ export const ProjectInfo = {
       && (obj.projectOwner = base64FromBytes(
         message.projectOwner !== undefined ? message.projectOwner : new Uint8Array(),
       ));
+    message.projectLength !== undefined && (obj.projectLength = Math.round(message.projectLength));
     return obj;
   },
 
@@ -189,6 +199,7 @@ export const ProjectInfo = {
       ? BasicInfo.fromPartial(object.basicInfo)
       : undefined;
     message.projectOwner = object.projectOwner ?? new Uint8Array();
+    message.projectLength = object.projectLength ?? 0;
     return message;
   },
 };
@@ -315,6 +326,18 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

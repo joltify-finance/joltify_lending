@@ -74,6 +74,8 @@ export interface SpvMsgAddInvestorsResponse {
   operationResult?: boolean;
 }
 
+export type SpvMsgBorrowResponse = object;
+
 export interface SpvMsgCreatePoolResponse {
   poolIndex?: string;
 }
@@ -107,11 +109,39 @@ export interface SpvPoolInfo {
   /** @format int32 */
   pay_freq?: number;
   reserve_factor?: string;
-  pool_nFT_class?: string;
+
+  /**
+   * string            pool_nFT_class      = 9 [
+   *    (cosmos_proto.scalar)  = "cosmos.Class",
+   *    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+   *    (gogoproto.nullable)   = false
+   *  ];
+   */
+  pool_nFT_ids?: string[];
 
   /** @format date-time */
   pool_start_time?: string;
   pool_status?: PoolInfoPOOLSTATUS;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  borrowed_amount?: V1Beta1Coin;
+  pool_interest?: string;
+
+  /** @format uint64 */
+  project_length?: string;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  borrowable_amount?: V1Beta1Coin;
 }
 
 export interface SpvQueryDepositorResponse {
