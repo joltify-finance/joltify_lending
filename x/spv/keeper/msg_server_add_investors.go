@@ -68,21 +68,14 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 		newList := addToList(investorPoolInfo.Investors, msg.InvestorID)
 		investorPoolInfo.Investors = newList
 		k.AddInvestorToPool(ctx, &investorPoolInfo)
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeAddInvestors,
-				sdk.NewAttribute(types.AttributeCreator, msg.Creator),
-			),
-		)
-		return &types.MsgAddInvestorsResponse{OperationResult: true}, nil
-	}
 
-	v := types.PoolWithInvestors{
-		PoolIndex: msg.PoolIndex,
-		Investors: msg.GetInvestorID(),
+	} else {
+		v := types.PoolWithInvestors{
+			PoolIndex: msg.PoolIndex,
+			Investors: msg.GetInvestorID(),
+		}
+		k.AddInvestorToPool(ctx, &v)
 	}
-
-	k.AddInvestorToPool(ctx, &v)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(

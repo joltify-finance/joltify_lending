@@ -13,14 +13,14 @@ import (
 
 var _ = strconv.Itoa(0)
 
-func CmdDeposit() *cobra.Command {
+func CmdRepayInterest() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "deposit [pool-index] [amount]",
-		Short: "Broadcast message deposit",
+		Use:   "repay-interest [pool-index][repay-amount]",
+		Short: "Broadcast message repay-interest",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPoolIndex := args[0]
-			token, err := sdk.ParseCoinNormalized(args[1])
+			argRepayAmount, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
@@ -30,10 +30,10 @@ func CmdDeposit() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgDeposit(
+			msg := types.NewMsgRepayInterest(
 				clientCtx.GetFromAddress().String(),
 				argPoolIndex,
-				token,
+				argRepayAmount,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

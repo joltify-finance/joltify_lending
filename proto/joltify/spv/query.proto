@@ -33,6 +33,12 @@ service Query {
     option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}";
   }
 
+
+  // Queries a list of AllowedPools items.
+  rpc AllowedPools(QueryAllowedPoolsRequest) returns (QueryAllowedPoolsResponse) {
+    option (google.api.http).get = "/joltify/spve/allowed_pools/{walletAddress}";
+  }
+
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -69,4 +75,12 @@ message QueryDepositorRequest {
 
 message QueryDepositorResponse {
   DepositorInfo depositor =1;
+}
+
+message QueryAllowedPoolsRequest {
+  string walletAddress = 1;
+}
+
+message QueryAllowedPoolsResponse {
+  repeated string pools_index = 1;
 }

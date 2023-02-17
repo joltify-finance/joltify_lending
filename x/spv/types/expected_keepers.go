@@ -31,7 +31,8 @@ type BankKeeper interface {
 
 type KycKeeper interface {
 	GetProjects(ctx sdk.Context) (projectsInfo []*kyctypes.ProjectInfo)
-	QueryInvestorWallets(goCtx context.Context, req *kyctypes.QueryInvestorWalletsRequest) (*kyctypes.QueryInvestorWalletsResponse, error)
+	//QueryInvestorWallets(goCtx context.Context, req *kyctypes.QueryInvestorWalletsRequest) (*kyctypes.QueryInvestorWalletsResponse, error)
+	QueryByWallet(goCtx context.Context, req *kyctypes.QueryByWalletRequest) (*kyctypes.QueryByWalletResponse, error)
 }
 
 type NFTKeeper interface {

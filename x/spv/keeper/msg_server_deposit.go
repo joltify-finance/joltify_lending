@@ -39,41 +39,29 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, types.ErrPoolFull
 	}
 
-	req := kyctypes.QueryInvestorWalletsRequest{
-		InvestorId: msg.GetInvestorID(),
+	req := kyctypes.QueryByWalletRequest{
+		Wallet: msg.Creator,
 	}
 
-	resp, err := k.kycKeeper.QueryInvestorWallets(goCtx, &req)
+	resp, err := k.kycKeeper.QueryByWallet(goCtx, &req)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "the investor cannot be found %v", msg.InvestorID)
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "the investor cannot be found %v", msg.Creator)
 	}
 
-	found := false
-	for _, el := range resp.Wallets {
-		if el == msg.Creator {
-			found = true
-			break
-		}
-	}
-
+	investorsResp, found := k.GetInvestorToPool(ctx, msg.PoolIndex)
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrUnauthorized, "the given wallet cannot be found %v", msg.Creator)
-	}
-
-	investors, found := k.GetInvestorToPool(ctx, poolInfo.Index)
-	if !found {
-		return nil, coserrors.Wrap(types.ErrUnauthorized, "the investor cannot be found")
+		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "the pool %v does not exist", msg.PoolIndex)
 	}
 
 	found = false
-	for _, el := range investors.Investors {
-		if el == msg.InvestorID {
+	for _, el := range investorsResp.Investors {
+		if el == resp.Investor.InvestorId {
 			found = true
-			break
 		}
 	}
+
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrUnauthorized, "the given investor is not allowed to invest %v", msg.InvestorID)
+		return nil, coserrors.Wrapf(types.ErrUnauthorized, "the given investor is not allowed to invest %v", msg.Creator)
 	}
 
 	if msg.Token.GetDenom() != poolInfo.GetTotalAmount().Denom {
@@ -89,7 +77,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we update the users deposit data
 	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
-		depositor := types.DepositorInfo{InvestorId: msg.InvestorID, DepositorAddress: investor, PoolIndex: msg.PoolIndex, WithdrawableAmount: msg.Token}
+		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, WithdrawableAmount: msg.Token}
 		k.SetDepositor(ctx, depositor)
 
 	} else {

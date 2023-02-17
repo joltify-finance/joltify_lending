@@ -5,27 +5,27 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-const TypeMsgDeposit = "deposit"
+const TypeMsgRepayInterest = "repay_interest"
 
-var _ sdk.Msg = &MsgDeposit{}
+var _ sdk.Msg = &MsgRepayInterest{}
 
-func NewMsgDeposit(creator string, poolIndex string, token sdk.Coin) *MsgDeposit {
-	return &MsgDeposit{
+func NewMsgRepayInterest(creator string, poolIndex string, amount sdk.Coin) *MsgRepayInterest {
+	return &MsgRepayInterest{
 		Creator:   creator,
 		PoolIndex: poolIndex,
-		Token:     token,
+		Token:     amount,
 	}
 }
 
-func (msg *MsgDeposit) Route() string {
+func (msg *MsgRepayInterest) Route() string {
 	return RouterKey
 }
 
-func (msg *MsgDeposit) Type() string {
-	return TypeMsgDeposit
+func (msg *MsgRepayInterest) Type() string {
+	return TypeMsgRepayInterest
 }
 
-func (msg *MsgDeposit) GetSigners() []sdk.AccAddress {
+func (msg *MsgRepayInterest) GetSigners() []sdk.AccAddress {
 	creator, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		panic(err)
@@ -33,12 +33,12 @@ func (msg *MsgDeposit) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{creator}
 }
 
-func (msg *MsgDeposit) GetSignBytes() []byte {
+func (msg *MsgRepayInterest) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgDeposit) ValidateBasic() error {
+func (msg *MsgRepayInterest) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)

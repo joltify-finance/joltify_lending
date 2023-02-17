@@ -16,6 +16,9 @@ service Msg {
   rpc Deposit(MsgDeposit) returns (MsgDepositResponse);
 
   rpc Borrow(MsgBorrow) returns (MsgBorrowResponse);
+
+  rpc RepayInterest(MsgRepayInterest) returns (MsgRepayInterestResponse);
+
 }
 
 message MsgCreatePool {
@@ -45,14 +48,14 @@ message MsgAddInvestorsResponse {
 message MsgDeposit {
   string creator = 1;
   string poolIndex = 2;
-  string investorID = 3;
-  cosmos.base.v1beta1.Coin token = 4[
+  cosmos.base.v1beta1.Coin token = 3[
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 }
 
 message MsgDepositResponse {
 }
+
 message MsgBorrow {
   string creator = 1;
   string pool_index = 2;
@@ -63,3 +66,13 @@ message MsgBorrow {
 
 message MsgBorrowResponse {
 }
+
+
+message MsgRepayInterest{
+  string creator = 1;
+  string poolIndex = 2;
+  cosmos.base.v1beta1.Coin token = 4[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
+message MsgRepayInterestResponse{}

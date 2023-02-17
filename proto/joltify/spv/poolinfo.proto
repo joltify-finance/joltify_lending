@@ -46,7 +46,7 @@ message PoolInfo {
 //  ];
   repeated string pool_nFT_ids =9 ;
 
-  google.protobuf.Timestamp pool_start_time = 10 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp last_payment_time = 10 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 
   enum POOLSTATUS{
     ACTIVE = 0;
@@ -86,4 +86,12 @@ message PoolDepositedInvestors {
   [(cosmos_proto.scalar) = "cosmos.AddressBytes",
     (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
   ];
+}
+
+message WalletsLinkPool {
+  bytes wallet_address = 1
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+  repeated string pools_index = 2;
 }

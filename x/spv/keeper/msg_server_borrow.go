@@ -144,6 +144,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	// we finally update the pool info
+	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
 	k.SetPool(ctx, poolInfo)
 	return &types.MsgBorrowResponse{}, nil
 }
