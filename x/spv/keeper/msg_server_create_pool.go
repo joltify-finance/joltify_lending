@@ -32,7 +32,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	allProjects := k.kycKeeper.GetProjects(ctx)
 
 	if allProjects == nil || int32(len(allProjects)) < msg.ProjectIndex {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project cannot be found", msg.ProjectIndex)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", msg.ProjectIndex)
 	}
 
 	targetProject := allProjects[msg.ProjectIndex-1]
