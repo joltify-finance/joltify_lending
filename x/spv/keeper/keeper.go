@@ -106,7 +106,7 @@ func (k Keeper) SetDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
 }
 
 func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types.DepositorInfo, found bool) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(poolIndex))
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+poolIndex))
 
 	bz := depositorPoolStore.Get(walletAddress.Bytes())
 	if bz == nil {
@@ -141,7 +141,7 @@ func (k Keeper) SetPoolDepositedWallets(ctx sdk.Context, depositor types.PoolDep
 
 // IterateDepositors iterates over all deposit objects in the store and performs a callback function
 func (k Keeper) IterateDepositors(ctx sdk.Context, poolIndex string, cb func(depositor types.DepositorInfo) (stop bool)) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(poolIndex))
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+poolIndex))
 	iterator := sdk.KVStorePrefixIterator(depositorPoolStore, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {

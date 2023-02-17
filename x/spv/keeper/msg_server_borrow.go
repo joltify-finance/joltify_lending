@@ -78,6 +78,7 @@ func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, u
 		if err != nil {
 			return types.ErrMINTNFT
 		}
+		fmt.Printf(">>>we mint nft for >>%v\n", el.DepositorAddress.String())
 	}
 	return nil
 }
@@ -108,7 +109,8 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	// create the new nft class for this borrow event
-	poolClass, found := k.nftKeeper.GetClass(ctx, poolInfo.Index)
+	classID := fmt.Sprintf("nft-%v", poolInfo.Index[2:])
+	poolClass, found := k.nftKeeper.GetClass(ctx, classID)
 	if !found {
 		panic("pool class must have already been set")
 	}
@@ -116,7 +118,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	latestSeries := len(poolInfo.PoolNFTIds)
 
 	currentBorrowClass := poolClass
-	currentBorrowClass.Id = fmt.Sprintf("%v_%v", currentBorrowClass.Id, latestSeries)
+	currentBorrowClass.Id = fmt.Sprintf("%v-%v", currentBorrowClass.Id, latestSeries)
 
 	bi := types.BorrowInterest{
 		PoolIndex: poolInfo.Index,

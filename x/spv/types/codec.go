@@ -32,6 +32,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterInterface(
 		"joltify.spv.BorrowInterest",
 		(*NFTBorrowInterest)(nil),
+		(*NftInfo)(nil),
 	)
 
 	registry.RegisterImplementations((*NFTBorrowInterest)(nil), &BorrowInterest{})
