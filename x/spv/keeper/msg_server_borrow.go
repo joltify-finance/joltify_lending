@@ -2,15 +2,17 @@ package keeper
 
 import (
 	"context"
-
 	coserrors "cosmossdk.io/errors"
+	"fmt"
+	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	nft "github.com/cosmos/cosmos-sdk/x/nft/keeper"
+	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, amount sdk.Coin) (*types.PoolInfo, error) {
+func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin) error {
 
 	//macc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
 	//modAccCoin := k.bankKeeper.GetBalance(ctx, macc.GetAddress(), amount.GetDenom())
@@ -19,14 +21,14 @@ func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, amou
 	//	return nil, types.ErrInsufficientFund
 	//}
 	if poolInfo.BorrowableAmount.IsLT(amount) {
-		return nil, types.ErrInsufficientFund
+		return types.ErrInsufficientFund
 	}
 	utilization := sdk.NewDecFromInt(amount.Amount).QuoTruncate(sdk.NewDecFromInt(poolInfo.BorrowableAmount.Amount))
 
 	// we transfer the fund from the module to the spv
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(amount))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
@@ -34,41 +36,50 @@ func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, amou
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(amount)
 
 	// we update each investor leftover
-	investorWallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
-	if found {
-		panic("should never happened that investors have depposited the money while the store is empty")
-	}
-	k.processInvestors(ctx, investorWallets.WalletAddress, poolInfo, utilization)
-	return poolInfo, nil
+	// todo YB it seems we do not need to store the deposit wallets
+	//investorWallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
+	//if found {
+	//	panic("should never happened that investors have depposited the money while the store is empty")
+	//}
+	k.processInvestors(ctx, poolInfo, utilization, nftClass)
+	return nil
 }
 
-func (k msgServer) processInvestors(ctx sdk.Context, investorWallets []sdk.AccAddress, poolInfo *types.PoolInfo, utilization sdk.Dec) {
+func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, nftClass nfttypes.Class) error {
 
+	// now we update the depositor's withdrawal amount and locked amount
 	var depositors []types.DepositorInfo
-
 	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
 		locked := sdk.NewDecFromInt(depositor.WithdrawableAmount.Amount).Mul(utilization).TruncateInt()
 		depositor.LockedAmount = sdk.NewCoin(depositor.WithdrawableAmount.Denom, locked)
 		depositor.WithdrawableAmount = depositor.WithdrawableAmount.SubAmount(locked)
-		depositors = append(depositors)
-
-		nft.
-
-
-
+		depositors = append(depositors, depositor)
 		return false
 	})
 
-	for _, el := range investorWallets {
-		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
-		if !found {
-			panic("shoud never fail to find the depositor")
-		}
-
-		depositor.WithdrawableAmount
-
+	nftTemplate := nfttypes.NFT{
+		ClassId: nftClass.Id,
+		Uri:     nftClass.Uri,
+		UriHash: nftClass.UriHash,
 	}
 
+	for _, el := range depositors {
+		// nft ID is the hash(nft class ID, investorWallet)
+		indexHash := crypto.Keccak256Hash([]byte(nftClass.Id), el.DepositorAddress)
+		nftTemplate.Id = indexHash.Hex()
+
+		userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: el.DepositorAddress.String(), IssueTime: ctx.BlockTime()}
+		data, err := types2.NewAnyWithValue(&userData)
+		if err != nil {
+			panic("should never fail")
+		}
+		nftTemplate.Data = data
+		err = k.nftKeeper.Mint(ctx, nftTemplate, el.DepositorAddress)
+		if err != nil {
+			return types.ErrMINTNFT
+		}
+	}
+	return nil
 }
 
 func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.MsgBorrowResponse, error) {
@@ -89,14 +100,48 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	if !poolInfo.OwnerAddress.Equals(caller) {
-		return nil, coserrors.Wrapf(types.ErrUnauthorized, "caller is not authorized to borrow money", msg.Creator)
+		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to borrow money", msg.Creator)
 	}
 
 	if msg.BorrowAmount.Denom != poolInfo.TotalAmount.Denom {
 		return nil, coserrors.Wrap(types.ErrInconsistencyToken, "token to be borrowed is inconsistency")
 	}
 
-	k.processBorrow(ctx, &poolInfo, msg.BorrowAmount)
+	// create the new nft class for this borrow event
+	poolClass, found := k.nftKeeper.GetClass(ctx, poolInfo.Index)
+	if !found {
+		panic("pool class must have already been set")
+	}
 
+	latestSeries := len(poolInfo.PoolNFTIds)
+
+	currentBorrowClass := poolClass
+	currentBorrowClass.Id = fmt.Sprintf("%v-%v", currentBorrowClass.Id, latestSeries)
+
+	bi := types.BorrowInterest{
+		PoolIndex: poolInfo.Index,
+		Apy:       poolInfo.Apy,
+		PayFreq:   poolInfo.PayFreq,
+		IssueTime: ctx.BlockTime(),
+		Borrowed:  msg.BorrowAmount,
+	}
+
+	data, err := types2.NewAnyWithValue(&bi)
+	if err != nil {
+		panic(err)
+	}
+	currentBorrowClass.Data = data
+	k.nftKeeper.SaveClass(ctx, currentBorrowClass)
+
+	// update the borrow series
+	poolInfo.PoolNFTIds = append(poolInfo.PoolNFTIds, currentBorrowClass.Id)
+
+	err = k.processBorrow(ctx, &poolInfo, currentBorrowClass, msg.BorrowAmount)
+	if err != nil {
+		return nil, err
+	}
+
+	// we finally update the pool info
+	k.SetPool(ctx, poolInfo)
 	return &types.MsgBorrowResponse{}, nil
 }

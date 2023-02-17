@@ -543,10 +543,8 @@ func NewApp(
 	)
 
 	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace)
-
-	app.spvKeeper = *spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper)
-
 	app.nftKeeper = nftmodulekeeper.NewKeeper(keys[nftmoduletypes.StoreKey], appCodec, app.accountKeeper, app.bankKeeper)
+	app.spvKeeper = *spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper)
 
 	// Note: the committee proposal handler is not registered on the committee router. This means committees cannot create or update other committees.
 	// Adding the committee proposal handler to the router is possible but awkward as the handler depends on the keeper which depends on the handler.
@@ -640,8 +638,8 @@ func NewApp(
 		incentivetypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
-		spvmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
+		spvmoduletypes.ModuleName,
 		ibchost.ModuleName,
 		// Add all remaining modules with an empty begin blocker below since cosmos 0.45.0 requires it
 		vestingtypes.ModuleName,
@@ -674,8 +672,8 @@ func NewApp(
 		types2.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
-		spvmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
+		spvmoduletypes.ModuleName,
 		upgradetypes.ModuleName,
 		evidencetypes.ModuleName,
 		feegrant.ModuleName,
@@ -711,8 +709,8 @@ func NewApp(
 		types2.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
-		spvmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
+		spvmoduletypes.ModuleName,
 		incentivetypes.ModuleName, // reads cdp params, so must run after cdp genesis
 		genutiltypes.ModuleName,   // runs arbitrary txs included in genisis state, so run after modules have been initialized
 		crisistypes.ModuleName,    // runs the invariants at genesis, should run after other modules

@@ -39,11 +39,12 @@ message PoolInfo {
   ];
 
 
-  string            pool_nFT_class      = 9 [
-    (cosmos_proto.scalar)  = "cosmos.Class",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
-    (gogoproto.nullable)   = false
-  ];
+//  string            pool_nFT_class      = 9 [
+//    (cosmos_proto.scalar)  = "cosmos.Class",
+//    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+//    (gogoproto.nullable)   = false
+//  ];
+  repeated string pool_nFT_ids =9 ;
 
   google.protobuf.Timestamp pool_start_time = 10 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 

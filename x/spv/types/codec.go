@@ -1,7 +1,6 @@
 package types
 
 import (
-"github.com/cosmos/cosmos-sdk/types/msgservice"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,7 +12,7 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgAddInvestors{}, "spv/AddInvestors", nil)
 	cdc.RegisterConcrete(&MsgDeposit{}, "spv/Deposit", nil)
 	cdc.RegisterConcrete(&MsgBorrow{}, "spv/Borrow", nil)
-// this line is used by starport scaffolding # 2
+	// this line is used by starport scaffolding # 2
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -27,11 +26,11 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgDeposit{},
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-	&MsgBorrow{},
-)
-// this line is used by starport scaffolding # 3
+		&MsgBorrow{},
+	)
+	// this line is used by starport scaffolding # 3
 
-msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
+	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 

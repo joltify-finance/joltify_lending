@@ -76,12 +76,13 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		TotalAmount:   msg.TargetTokenAmount,
 		PayFreq:       payfreq,
 		ReserveFactor: types.RESERVEFACTOR,
-		PoolNFTClass:  poolNFTClass,
+		PoolNFTIds:    []string{},
 		PoolStatus:    types.PoolInfo_INACTIVE,
 		ProjectLength: targetProject.ProjectLength,
 	}
 
 	k.SetPool(ctx, poolInfo)
+	k.nftKeeper.SaveClass(ctx, poolNFTClass)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(

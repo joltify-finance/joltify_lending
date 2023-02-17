@@ -1,0 +1,35 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+message NftInfo{
+	string issuer = 1;
+	string receiver = 2;
+	string      ratio     = 3 [
+		(cosmos_proto.scalar)  = "cosmos.Dec",
+		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.nullable)   = false
+	];
+	google.protobuf.Timestamp issue_time = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+}
+
+message BorrowInterest{
+	string pool_index  =1 ;
+	string      apy      = 2 [
+		(cosmos_proto.scalar)  = "cosmos.Dec",
+		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.nullable)   = false
+	];
+	int32 pay_freq = 3;
+	google.protobuf.Timestamp issue_time = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+	cosmos.base.v1beta1.Coin borrowed = 5[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+}

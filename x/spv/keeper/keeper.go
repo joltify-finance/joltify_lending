@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -21,6 +20,7 @@ type (
 		kycKeeper  types.KycKeeper
 		bankKeeper types.BankKeeper
 		accKeeper  types.AccountKeeper
+		nftKeeper  types.NFTKeeper
 	}
 )
 
@@ -32,11 +32,16 @@ func NewKeeper(
 	kycKeeper types.KycKeeper,
 	bankKeeper types.BankKeeper,
 	accKeeper types.AccountKeeper,
-
+	nftKeeper types.NFTKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
 		ps = ps.WithKeyTable(types.ParamKeyTable())
+	}
+
+	// ensure nft module account is set
+	if addr := accKeeper.GetModuleAddress(types.ModuleName); addr == nil {
+		panic("the spv module account has not been set")
 	}
 
 	return &Keeper{
@@ -47,6 +52,7 @@ func NewKeeper(
 		kycKeeper:  kycKeeper,
 		bankKeeper: bankKeeper,
 		accKeeper:  accKeeper,
+		nftKeeper:  nftKeeper,
 	}
 }
 
