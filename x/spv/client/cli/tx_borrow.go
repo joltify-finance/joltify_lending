@@ -17,7 +17,7 @@ func CmdBorrow() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "borrow [pool-index] [borrow-amount]",
 		Short: "Broadcast message borrow",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argsPoolindex := args[0]
 

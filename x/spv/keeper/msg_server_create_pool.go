@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 
 	coserrors "cosmossdk.io/errors"
@@ -58,8 +59,9 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
 	}
 
+	nftClassID := fmt.Sprintf("nft-%v", indexHash.String()[2:])
 	poolNFTClass := nft.Class{
-		Id:          indexHash.Hex(),
+		Id:          nftClassID,
 		Name:        msg.PoolName,
 		Symbol:      "asset-" + indexHash.Hex(),
 		Description: targetProject.BasicInfo.Description,
@@ -68,17 +70,19 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	}
 
 	poolInfo := types.PoolInfo{
-		Index:         indexHash.Hex(),
-		PoolName:      msg.PoolName,
-		LinkedProject: msg.ProjectIndex,
-		OwnerAddress:  spvAddress,
-		Apy:           apy,
-		TotalAmount:   msg.TargetTokenAmount,
-		PayFreq:       payfreq,
-		ReserveFactor: types.RESERVEFACTOR,
-		PoolNFTIds:    []string{},
-		PoolStatus:    types.PoolInfo_INACTIVE,
-		ProjectLength: targetProject.ProjectLength,
+		Index:            indexHash.Hex(),
+		PoolName:         msg.PoolName,
+		LinkedProject:    msg.ProjectIndex,
+		OwnerAddress:     spvAddress,
+		Apy:              apy,
+		TotalAmount:      msg.TargetTokenAmount,
+		PayFreq:          payfreq,
+		ReserveFactor:    types.RESERVEFACTOR,
+		PoolNFTIds:       []string{},
+		PoolStatus:       types.PoolInfo_INACTIVE,
+		ProjectLength:    targetProject.ProjectLength,
+		BorrowedAmount:   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+		BorrowableAmount: sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 	}
 
 	k.SetPool(ctx, poolInfo)

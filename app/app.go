@@ -193,6 +193,7 @@ var (
 		types2.ModuleName:              {authtypes.Minter, authtypes.Burner},
 		incentivetypes.ModuleName:      nil,
 		spvmoduletypes.ModuleAccount:   {authtypes.Minter, authtypes.Burner},
+		nftmoduletypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
 	}
 )
 

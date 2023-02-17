@@ -66,7 +66,7 @@ func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, u
 	for _, el := range depositors {
 		// nft ID is the hash(nft class ID, investorWallet)
 		indexHash := crypto.Keccak256Hash([]byte(nftClass.Id), el.DepositorAddress)
-		nftTemplate.Id = indexHash.Hex()
+		nftTemplate.Id = fmt.Sprintf("invoice-%v", indexHash.String()[2:])
 
 		userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: el.DepositorAddress.String(), IssueTime: ctx.BlockTime()}
 		data, err := types2.NewAnyWithValue(&userData)
@@ -116,7 +116,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	latestSeries := len(poolInfo.PoolNFTIds)
 
 	currentBorrowClass := poolClass
-	currentBorrowClass.Id = fmt.Sprintf("%v-%v", currentBorrowClass.Id, latestSeries)
+	currentBorrowClass.Id = fmt.Sprintf("%v_%v", currentBorrowClass.Id, latestSeries)
 
 	bi := types.BorrowInterest{
 		PoolIndex: poolInfo.Index,

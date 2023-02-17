@@ -28,6 +28,14 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgBorrow{},
 	)
+
+	registry.RegisterInterface(
+		"joltify.spv.BorrowInterest",
+		(*NFTBorrowInterest)(nil),
+	)
+
+	registry.RegisterImplementations((*NFTBorrowInterest)(nil), &BorrowInterest{})
+
 	// this line is used by starport scaffolding # 3
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

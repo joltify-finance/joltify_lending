@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -14,13 +13,8 @@ import (
 func (k msgServer) checkAcceptNewDeposit(ctx sdk.Context, poolInfo types.PoolInfo, newAmount sdk.Coin) bool {
 
 	acc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
-
 	amount := k.bankKeeper.GetBalance(ctx, acc.GetAddress(), poolInfo.TotalAmount.GetDenom())
-	if amount.Add(newAmount).IsLT(poolInfo.TotalAmount) {
-		return false
-	}
-	return true
-
+	return amount.Add(newAmount).IsLT(poolInfo.TotalAmount)
 }
 
 func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types.MsgDepositResponse, error) {
@@ -113,7 +107,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	// now we update borrowable
-	poolInfo.BorrowedAmount = poolInfo.BorrowableAmount.Add(msg.Token)
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)
 	k.SetPool(ctx, poolInfo)
 
 	ctx.EventManager().EmitEvent(
