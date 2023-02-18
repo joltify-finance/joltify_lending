@@ -34,7 +34,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"lowest apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("1.051271109622422061"),
+				apy:           sdk.MustNewDecFromStr("0.051271109622422061"),
 				payfrq:        4,
 				expectedValue: sdk.MustNewDecFromStr("0.999999831991472557"),
 			},
@@ -103,13 +103,14 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 				suite.Require().NoError(err)
 			} else {
 				suite.Require().NoError(err)
-				total := sdk.NewDec(OneYear).Quo(sdk.NewDec(int64(tc.args.payfrq * OneWeek)))
 
 				accTime := tc.args.payfrq * OneWeek
 				accumulate := i.Power(uint64(accTime))
 
-				gap := sdk.NewDec(1).Sub(total.Mul(accumulate))
+				total := accumulate.Mul(sdk.NewDec(OneYear / int64(accTime)))
+				gap := total.Sub(tc.args.apy)
 				fmt.Printf("gap>>>>>%v\n", gap)
+				suite.Require().True(gap.LT(sdk.NewDecFromIntWithPrec(sdk.NewInt(1), 8)))
 
 			}
 		})

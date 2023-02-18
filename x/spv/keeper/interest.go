@@ -20,7 +20,10 @@ func CalculateInterest(apy sdk.Dec, payFreq int) (sdk.Dec, error) {
 	// by default, we set the interest as the payment for the whole year which is 3600*24*365=31536000 seconds
 	// the minimal pay frequency is one week
 	seconds := OneWeek * payFreq
-	i, err := apyTospy(apy, uint64(seconds))
+
+	monthAPY := apy.Quo(sdk.NewDec(OneYear / int64(seconds)))
+
+	i, err := apyTospy(monthAPY, uint64(seconds))
 	if err != nil {
 		return sdk.Dec{}, err
 	}
