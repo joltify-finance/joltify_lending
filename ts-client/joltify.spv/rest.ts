@@ -82,6 +82,8 @@ export interface SpvMsgCreatePoolResponse {
 
 export type SpvMsgDepositResponse = object;
 
+export type SpvMsgRepayInterestResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
@@ -120,7 +122,7 @@ export interface SpvPoolInfo {
   pool_nFT_ids?: string[];
 
   /** @format date-time */
-  pool_start_time?: string;
+  last_payment_time?: string;
   pool_status?: PoolInfoPOOLSTATUS;
 
   /**
@@ -142,6 +144,10 @@ export interface SpvPoolInfo {
    * signatures required by gogoproto.
    */
   borrowable_amount?: V1Beta1Coin;
+}
+
+export interface SpvQueryAllowedPoolsResponse {
+  pools_index?: string[];
 }
 
 export interface SpvQueryDepositorResponse {
@@ -451,6 +457,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
   queryQueryPool = (poolIndex: string, params: RequestParams = {}) =>
     this.request<SpvQueryQueryPoolResponse, RpcStatus>({
       path: `/joltify/spv/query_pool/${poolIndex}`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryAllowedPools
+   * @summary Queries a list of AllowedPools items.
+   * @request GET:/joltify/spve/allowed_pools/{walletAddress}
+   */
+  queryAllowedPools = (walletAddress: string, params: RequestParams = {}) =>
+    this.request<SpvQueryAllowedPoolsResponse, RpcStatus>({
+      path: `/joltify/spve/allowed_pools/${walletAddress}`,
       method: "GET",
       format: "json",
       ...params,

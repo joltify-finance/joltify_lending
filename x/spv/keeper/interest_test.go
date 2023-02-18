@@ -2,9 +2,10 @@ package keeper
 
 import (
 	"fmt"
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 func (suite *InterestTestSuite) TestAPYToSPY() {
@@ -98,7 +99,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 	}
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			i, err := CalculateInterest(tc.args.apy, tc.args.payfrq)
+			i, err := CalculateInterestRate(tc.args.apy, tc.args.payfrq)
 			if tc.expectError {
 				suite.Require().NoError(err)
 			} else {

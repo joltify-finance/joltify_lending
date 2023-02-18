@@ -7,9 +7,10 @@ import { Params } from "joltify-finance-joltify_lending-client-ts/joltify.spv/ty
 import { PoolInfo } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
 import { PoolWithInvestors } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
 import { PoolDepositedInvestors } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
+import { WalletsLinkPool } from "joltify-finance-joltify_lending-client-ts/joltify.spv/types"
 
 
-export { DepositorInfo, NftInfo, BorrowInterest, Params, PoolInfo, PoolWithInvestors, PoolDepositedInvestors };
+export { DepositorInfo, NftInfo, BorrowInterest, Params, PoolInfo, PoolWithInvestors, PoolDepositedInvestors, WalletsLinkPool };
 
 function initClient(vuexGetters) {
 	return new Client(vuexGetters['common/env/getEnv'], vuexGetters['common/wallet/signer'])
@@ -44,6 +45,7 @@ const getDefaultState = () => {
 				ListPools: {},
 				QueryPool: {},
 				Depositor: {},
+				AllowedPools: {},
 				
 				_Structure: {
 						DepositorInfo: getStructure(DepositorInfo.fromPartial({})),
@@ -53,6 +55,7 @@ const getDefaultState = () => {
 						PoolInfo: getStructure(PoolInfo.fromPartial({})),
 						PoolWithInvestors: getStructure(PoolWithInvestors.fromPartial({})),
 						PoolDepositedInvestors: getStructure(PoolDepositedInvestors.fromPartial({})),
+						WalletsLinkPool: getStructure(WalletsLinkPool.fromPartial({})),
 						
 		},
 		_Registry: registry,
@@ -104,6 +107,12 @@ export default {
 						(<any> params).query=null
 					}
 			return state.Depositor[JSON.stringify(params)] ?? {}
+		},
+				getAllowedPools: (state) => (params = { params: {}}) => {
+					if (!(<any> params).query) {
+						(<any> params).query=null
+					}
+			return state.AllowedPools[JSON.stringify(params)] ?? {}
 		},
 				
 		getTypeStructure: (state) => (type) => {
@@ -235,6 +244,41 @@ export default {
 		},
 		
 		
+		
+		
+		 		
+		
+		
+		async QueryAllowedPools({ commit, rootGetters, getters }, { options: { subscribe, all} = { subscribe:false, all:false}, params, query=null }) {
+			try {
+				const key = params ?? {};
+				const client = initClient(rootGetters);
+				let value= (await client.JoltifySpv.query.queryAllowedPools( key.walletAddress)).data
+				
+					
+				commit('QUERY', { query: 'AllowedPools', key: { params: {...key}, query}, value })
+				if (subscribe) commit('SUBSCRIBE', { action: 'QueryAllowedPools', payload: { options: { all }, params: {...key},query }})
+				return getters['getAllowedPools']( { params: {...key}, query}) ?? {}
+			} catch (e) {
+				throw new Error('QueryClient:QueryAllowedPools API Node Unavailable. Could not perform query: ' + e.message)
+				
+			}
+		},
+		
+		
+		async sendMsgRepayInterest({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgRepayInterest({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgRepayInterest:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgRepayInterest:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		async sendMsgCreatePool({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -245,32 +289,6 @@ export default {
 					throw new Error('TxClient:MsgCreatePool:Init Could not initialize signing client. Wallet is required.')
 				}else{
 					throw new Error('TxClient:MsgCreatePool:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifySpv.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgAddInvestors({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifySpv.tx.sendMsgAddInvestors({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgAddInvestors:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgAddInvestors:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -287,7 +305,46 @@ export default {
 				}
 			}
 		},
+		async sendMsgAddInvestors({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgAddInvestors({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgAddInvestors:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgAddInvestors:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		
+		async MsgRepayInterest({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifySpv.tx.msgRepayInterest({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgRepayInterest:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgRepayInterest:Create Could not create message: ' + e.message)
+				}
+			}
+		},
 		async MsgCreatePool({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -301,16 +358,16 @@ export default {
 				}
 			}
 		},
-		async MsgDeposit({ rootGetters }, { value }) {
+		async MsgBorrow({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.JoltifySpv.tx.msgDeposit({value})
+				const msg = await client.JoltifySpv.tx.msgBorrow({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgDeposit:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgBorrow:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -327,16 +384,16 @@ export default {
 				}
 			}
 		},
-		async MsgBorrow({ rootGetters }, { value }) {
+		async MsgDeposit({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.JoltifySpv.tx.msgBorrow({value})
+				const msg = await client.JoltifySpv.tx.msgDeposit({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgBorrow:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgDeposit:Create Could not create message: ' + e.message)
 				}
 			}
 		},

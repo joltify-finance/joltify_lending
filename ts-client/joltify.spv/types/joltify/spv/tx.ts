@@ -30,7 +30,6 @@ export interface MsgAddInvestorsResponse {
 export interface MsgDeposit {
   creator: string;
   poolIndex: string;
-  investorID: string;
   token: Coin | undefined;
 }
 
@@ -44,6 +43,15 @@ export interface MsgBorrow {
 }
 
 export interface MsgBorrowResponse {
+}
+
+export interface MsgRepayInterest {
+  creator: string;
+  poolIndex: string;
+  token: Coin | undefined;
+}
+
+export interface MsgRepayInterestResponse {
 }
 
 function createBaseMsgCreatePool(): MsgCreatePool {
@@ -309,7 +317,7 @@ export const MsgAddInvestorsResponse = {
 };
 
 function createBaseMsgDeposit(): MsgDeposit {
-  return { creator: "", poolIndex: "", investorID: "", token: undefined };
+  return { creator: "", poolIndex: "", token: undefined };
 }
 
 export const MsgDeposit = {
@@ -320,11 +328,8 @@ export const MsgDeposit = {
     if (message.poolIndex !== "") {
       writer.uint32(18).string(message.poolIndex);
     }
-    if (message.investorID !== "") {
-      writer.uint32(26).string(message.investorID);
-    }
     if (message.token !== undefined) {
-      Coin.encode(message.token, writer.uint32(34).fork()).ldelim();
+      Coin.encode(message.token, writer.uint32(26).fork()).ldelim();
     }
     return writer;
   },
@@ -343,9 +348,6 @@ export const MsgDeposit = {
           message.poolIndex = reader.string();
           break;
         case 3:
-          message.investorID = reader.string();
-          break;
-        case 4:
           message.token = Coin.decode(reader, reader.uint32());
           break;
         default:
@@ -360,7 +362,6 @@ export const MsgDeposit = {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
       poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
-      investorID: isSet(object.investorID) ? String(object.investorID) : "",
       token: isSet(object.token) ? Coin.fromJSON(object.token) : undefined,
     };
   },
@@ -369,7 +370,6 @@ export const MsgDeposit = {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
-    message.investorID !== undefined && (obj.investorID = message.investorID);
     message.token !== undefined && (obj.token = message.token ? Coin.toJSON(message.token) : undefined);
     return obj;
   },
@@ -378,7 +378,6 @@ export const MsgDeposit = {
     const message = createBaseMsgDeposit();
     message.creator = object.creator ?? "";
     message.poolIndex = object.poolIndex ?? "";
-    message.investorID = object.investorID ?? "";
     message.token = (object.token !== undefined && object.token !== null) ? Coin.fromPartial(object.token) : undefined;
     return message;
   },
@@ -532,6 +531,112 @@ export const MsgBorrowResponse = {
   },
 };
 
+function createBaseMsgRepayInterest(): MsgRepayInterest {
+  return { creator: "", poolIndex: "", token: undefined };
+}
+
+export const MsgRepayInterest = {
+  encode(message: MsgRepayInterest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    if (message.token !== undefined) {
+      Coin.encode(message.token, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRepayInterest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRepayInterest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        case 4:
+          message.token = Coin.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRepayInterest {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+      token: isSet(object.token) ? Coin.fromJSON(object.token) : undefined,
+    };
+  },
+
+  toJSON(message: MsgRepayInterest): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    message.token !== undefined && (obj.token = message.token ? Coin.toJSON(message.token) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgRepayInterest>, I>>(object: I): MsgRepayInterest {
+    const message = createBaseMsgRepayInterest();
+    message.creator = object.creator ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    message.token = (object.token !== undefined && object.token !== null) ? Coin.fromPartial(object.token) : undefined;
+    return message;
+  },
+};
+
+function createBaseMsgRepayInterestResponse(): MsgRepayInterestResponse {
+  return {};
+}
+
+export const MsgRepayInterestResponse = {
+  encode(_: MsgRepayInterestResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRepayInterestResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRepayInterestResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRepayInterestResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRepayInterestResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgRepayInterestResponse>, I>>(_: I): MsgRepayInterestResponse {
+    const message = createBaseMsgRepayInterestResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse>;
@@ -539,6 +644,7 @@ export interface Msg {
   AddInvestors(request: MsgAddInvestors): Promise<MsgAddInvestorsResponse>;
   Deposit(request: MsgDeposit): Promise<MsgDepositResponse>;
   Borrow(request: MsgBorrow): Promise<MsgBorrowResponse>;
+  RepayInterest(request: MsgRepayInterest): Promise<MsgRepayInterestResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -549,6 +655,7 @@ export class MsgClientImpl implements Msg {
     this.AddInvestors = this.AddInvestors.bind(this);
     this.Deposit = this.Deposit.bind(this);
     this.Borrow = this.Borrow.bind(this);
+    this.RepayInterest = this.RepayInterest.bind(this);
   }
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse> {
     const data = MsgCreatePool.encode(request).finish();
@@ -572,6 +679,12 @@ export class MsgClientImpl implements Msg {
     const data = MsgBorrow.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Msg", "Borrow", data);
     return promise.then((data) => MsgBorrowResponse.decode(new _m0.Reader(data)));
+  }
+
+  RepayInterest(request: MsgRepayInterest): Promise<MsgRepayInterestResponse> {
+    const data = MsgRepayInterest.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Msg", "RepayInterest", data);
+    return promise.then((data) => MsgRepayInterestResponse.decode(new _m0.Reader(data)));
   }
 }
 

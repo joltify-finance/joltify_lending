@@ -43,6 +43,14 @@ export interface QueryDepositorResponse {
   depositor: DepositorInfo | undefined;
 }
 
+export interface QueryAllowedPoolsRequest {
+  walletAddress: string;
+}
+
+export interface QueryAllowedPoolsResponse {
+  poolsIndex: string[];
+}
+
 function createBaseQueryParamsRequest(): QueryParamsRequest {
   return {};
 }
@@ -450,6 +458,104 @@ export const QueryDepositorResponse = {
   },
 };
 
+function createBaseQueryAllowedPoolsRequest(): QueryAllowedPoolsRequest {
+  return { walletAddress: "" };
+}
+
+export const QueryAllowedPoolsRequest = {
+  encode(message: QueryAllowedPoolsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.walletAddress !== "") {
+      writer.uint32(10).string(message.walletAddress);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllowedPoolsRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllowedPoolsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.walletAddress = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllowedPoolsRequest {
+    return { walletAddress: isSet(object.walletAddress) ? String(object.walletAddress) : "" };
+  },
+
+  toJSON(message: QueryAllowedPoolsRequest): unknown {
+    const obj: any = {};
+    message.walletAddress !== undefined && (obj.walletAddress = message.walletAddress);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryAllowedPoolsRequest>, I>>(object: I): QueryAllowedPoolsRequest {
+    const message = createBaseQueryAllowedPoolsRequest();
+    message.walletAddress = object.walletAddress ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryAllowedPoolsResponse(): QueryAllowedPoolsResponse {
+  return { poolsIndex: [] };
+}
+
+export const QueryAllowedPoolsResponse = {
+  encode(message: QueryAllowedPoolsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.poolsIndex) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllowedPoolsResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryAllowedPoolsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.poolsIndex.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryAllowedPoolsResponse {
+    return { poolsIndex: Array.isArray(object?.poolsIndex) ? object.poolsIndex.map((e: any) => String(e)) : [] };
+  },
+
+  toJSON(message: QueryAllowedPoolsResponse): unknown {
+    const obj: any = {};
+    if (message.poolsIndex) {
+      obj.poolsIndex = message.poolsIndex.map((e) => e);
+    } else {
+      obj.poolsIndex = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryAllowedPoolsResponse>, I>>(object: I): QueryAllowedPoolsResponse {
+    const message = createBaseQueryAllowedPoolsResponse();
+    message.poolsIndex = object.poolsIndex?.map((e) => e) || [];
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -459,6 +565,8 @@ export interface Query {
   /** Queries a list of QueryPool items. */
   QueryPool(request: QueryQueryPoolRequest): Promise<QueryQueryPoolResponse>;
   Depositor(request: QueryDepositorRequest): Promise<QueryDepositorResponse>;
+  /** Queries a list of AllowedPools items. */
+  AllowedPools(request: QueryAllowedPoolsRequest): Promise<QueryAllowedPoolsResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -469,6 +577,7 @@ export class QueryClientImpl implements Query {
     this.ListPools = this.ListPools.bind(this);
     this.QueryPool = this.QueryPool.bind(this);
     this.Depositor = this.Depositor.bind(this);
+    this.AllowedPools = this.AllowedPools.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -492,6 +601,12 @@ export class QueryClientImpl implements Query {
     const data = QueryDepositorRequest.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Query", "Depositor", data);
     return promise.then((data) => QueryDepositorResponse.decode(new _m0.Reader(data)));
+  }
+
+  AllowedPools(request: QueryAllowedPoolsRequest): Promise<QueryAllowedPoolsResponse> {
+    const data = QueryAllowedPoolsRequest.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Query", "AllowedPools", data);
+    return promise.then((data) => QueryAllowedPoolsResponse.decode(new _m0.Reader(data)));
   }
 }
 

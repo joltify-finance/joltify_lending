@@ -27,11 +27,10 @@ import { Module as JoltifyThirdPartyJoltV1Beta1, msgTypes as JoltifyThirdPartyJo
 import { Module as JoltifyThirdPartyPricefeedV1Beta1, msgTypes as JoltifyThirdPartyPricefeedV1Beta1MsgTypes } from './joltify.third_party.pricefeed.v1beta1'
 import { Module as JoltifyVault, msgTypes as JoltifyVaultMsgTypes } from './joltify.vault'
 import { Module as JoltifyfinanceJoltifyLendingKyc, msgTypes as JoltifyfinanceJoltifyLendingKycMsgTypes } from './joltifyfinance.joltify_lending.kyc'
-import { Module as JoltifyfinanceJoltifyLendingSpv, msgTypes as JoltifyfinanceJoltifyLendingSpvMsgTypes } from './joltifyfinance.joltify_lending.spv'
 
 
 const Client = IgniteClient.plugin([
-    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, JoltifyMint, JoltifySpv, JoltifyThirdPartyAuctionV1Beta1, JoltifyThirdPartyCdpV1Beta1, JoltifyThirdPartyIncentiveV1Beta1, JoltifyThirdPartyIssuanceV1Beta1, JoltifyThirdPartyJoltV1Beta1, JoltifyThirdPartyPricefeedV1Beta1, JoltifyVault, JoltifyfinanceJoltifyLendingKyc, JoltifyfinanceJoltifyLendingSpv
+    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, JoltifyMint, JoltifySpv, JoltifyThirdPartyAuctionV1Beta1, JoltifyThirdPartyCdpV1Beta1, JoltifyThirdPartyIncentiveV1Beta1, JoltifyThirdPartyIssuanceV1Beta1, JoltifyThirdPartyJoltV1Beta1, JoltifyThirdPartyPricefeedV1Beta1, JoltifyVault, JoltifyfinanceJoltifyLendingKyc
 ]);
 
 const registry = new Registry([
@@ -60,7 +59,6 @@ const registry = new Registry([
   ...JoltifyThirdPartyPricefeedV1Beta1MsgTypes,
   ...JoltifyVaultMsgTypes,
   ...JoltifyfinanceJoltifyLendingKycMsgTypes,
-  ...JoltifyfinanceJoltifyLendingSpvMsgTypes,
   
 ])
 

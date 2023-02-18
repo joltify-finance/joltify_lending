@@ -23,7 +23,7 @@ export interface PoolInfo {
    *  ];
    */
   poolNFTIds: string[];
-  poolStartTime: Date | undefined;
+  lastPaymentTime: Date | undefined;
   poolStatus: PoolInfo_POOLSTATUS;
   borrowedAmount: Coin | undefined;
   poolInterest: string;
@@ -86,6 +86,11 @@ export interface PoolDepositedInvestors {
   walletAddress: Uint8Array[];
 }
 
+export interface WalletsLinkPool {
+  walletAddress: Uint8Array;
+  poolsIndex: string[];
+}
+
 function createBasePoolInfo(): PoolInfo {
   return {
     index: "",
@@ -97,7 +102,7 @@ function createBasePoolInfo(): PoolInfo {
     payFreq: 0,
     reserveFactor: "",
     poolNFTIds: [],
-    poolStartTime: undefined,
+    lastPaymentTime: undefined,
     poolStatus: 0,
     borrowedAmount: undefined,
     poolInterest: "",
@@ -135,8 +140,8 @@ export const PoolInfo = {
     for (const v of message.poolNFTIds) {
       writer.uint32(74).string(v!);
     }
-    if (message.poolStartTime !== undefined) {
-      Timestamp.encode(toTimestamp(message.poolStartTime), writer.uint32(82).fork()).ldelim();
+    if (message.lastPaymentTime !== undefined) {
+      Timestamp.encode(toTimestamp(message.lastPaymentTime), writer.uint32(82).fork()).ldelim();
     }
     if (message.poolStatus !== 0) {
       writer.uint32(88).int32(message.poolStatus);
@@ -191,7 +196,7 @@ export const PoolInfo = {
           message.poolNFTIds.push(reader.string());
           break;
         case 10:
-          message.poolStartTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.lastPaymentTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           break;
         case 11:
           message.poolStatus = reader.int32() as any;
@@ -227,7 +232,7 @@ export const PoolInfo = {
       payFreq: isSet(object.payFreq) ? Number(object.payFreq) : 0,
       reserveFactor: isSet(object.reserveFactor) ? String(object.reserveFactor) : "",
       poolNFTIds: Array.isArray(object?.poolNFTIds) ? object.poolNFTIds.map((e: any) => String(e)) : [],
-      poolStartTime: isSet(object.poolStartTime) ? fromJsonTimestamp(object.poolStartTime) : undefined,
+      lastPaymentTime: isSet(object.lastPaymentTime) ? fromJsonTimestamp(object.lastPaymentTime) : undefined,
       poolStatus: isSet(object.poolStatus) ? poolInfo_POOLSTATUSFromJSON(object.poolStatus) : 0,
       borrowedAmount: isSet(object.borrowedAmount) ? Coin.fromJSON(object.borrowedAmount) : undefined,
       poolInterest: isSet(object.poolInterest) ? String(object.poolInterest) : "",
@@ -255,7 +260,7 @@ export const PoolInfo = {
     } else {
       obj.poolNFTIds = [];
     }
-    message.poolStartTime !== undefined && (obj.poolStartTime = message.poolStartTime.toISOString());
+    message.lastPaymentTime !== undefined && (obj.lastPaymentTime = message.lastPaymentTime.toISOString());
     message.poolStatus !== undefined && (obj.poolStatus = poolInfo_POOLSTATUSToJSON(message.poolStatus));
     message.borrowedAmount !== undefined
       && (obj.borrowedAmount = message.borrowedAmount ? Coin.toJSON(message.borrowedAmount) : undefined);
@@ -279,7 +284,7 @@ export const PoolInfo = {
     message.payFreq = object.payFreq ?? 0;
     message.reserveFactor = object.reserveFactor ?? "";
     message.poolNFTIds = object.poolNFTIds?.map((e) => e) || [];
-    message.poolStartTime = object.poolStartTime ?? undefined;
+    message.lastPaymentTime = object.lastPaymentTime ?? undefined;
     message.poolStatus = object.poolStatus ?? 0;
     message.borrowedAmount = (object.borrowedAmount !== undefined && object.borrowedAmount !== null)
       ? Coin.fromPartial(object.borrowedAmount)
@@ -415,6 +420,71 @@ export const PoolDepositedInvestors = {
     const message = createBasePoolDepositedInvestors();
     message.poolIndex = object.poolIndex ?? "";
     message.walletAddress = object.walletAddress?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseWalletsLinkPool(): WalletsLinkPool {
+  return { walletAddress: new Uint8Array(), poolsIndex: [] };
+}
+
+export const WalletsLinkPool = {
+  encode(message: WalletsLinkPool, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.walletAddress.length !== 0) {
+      writer.uint32(10).bytes(message.walletAddress);
+    }
+    for (const v of message.poolsIndex) {
+      writer.uint32(18).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WalletsLinkPool {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWalletsLinkPool();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.walletAddress = reader.bytes();
+          break;
+        case 2:
+          message.poolsIndex.push(reader.string());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WalletsLinkPool {
+    return {
+      walletAddress: isSet(object.walletAddress) ? bytesFromBase64(object.walletAddress) : new Uint8Array(),
+      poolsIndex: Array.isArray(object?.poolsIndex) ? object.poolsIndex.map((e: any) => String(e)) : [],
+    };
+  },
+
+  toJSON(message: WalletsLinkPool): unknown {
+    const obj: any = {};
+    message.walletAddress !== undefined
+      && (obj.walletAddress = base64FromBytes(
+        message.walletAddress !== undefined ? message.walletAddress : new Uint8Array(),
+      ));
+    if (message.poolsIndex) {
+      obj.poolsIndex = message.poolsIndex.map((e) => e);
+    } else {
+      obj.poolsIndex = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<WalletsLinkPool>, I>>(object: I): WalletsLinkPool {
+    const message = createBaseWalletsLinkPool();
+    message.walletAddress = object.walletAddress ?? new Uint8Array();
+    message.poolsIndex = object.poolsIndex?.map((e) => e) || [];
     return message;
   },
 };
