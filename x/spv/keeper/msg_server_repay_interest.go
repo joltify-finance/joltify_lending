@@ -2,20 +2,53 @@ package keeper
 
 import (
 	"context"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) getAllInterestToBePaid(poolInfo *types.PoolInfo) {
+func (k msgServer) updateInterestData(currentTime time.Time, interestData types.BorrowInterest) {
 
-	//nftClasseslasses := poolInfo.PoolNFTIds
-	//for _, el := range nftClasses {
-	//
-	//}
+	var payment sdk.Coin
+	latestTimeStamp := interestData.Payments[len(interestData.Payments())-1]
+	delta := int32(currentTime.Sub(latestTimeStamp).Minutes())
+	if delta > interestData.PayFreq*BASE {
+		// we need to may the whole month
+		payment = interestData.CyclePayment
+	} else {
+		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
+		interest := r.Power(uint64(delta))
+		interestData.Borrowed.Amount(interest)
+	}
+
+}
+
+func (k msgServer) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) {
+
+	nftClasseslasses := poolInfo.PoolNFTIds
+	// the first element is the pool class, we skip it
+	totalPayment := sdk.NewInt(0)
+	for _, el := range nftClasseslasses[1:] {
+		class, found := k.nftKeeper.GetClass(ctx, el)
+		if !found {
+			panic(found)
+		}
+		data := class.GetData().GetCachedValue()
+		interestData, ok := data.(types.BorrowInterest)
+		if !ok {
+			panic("not the borrow interest type")
+		}
+
+		k.updateInterestData(interestData)
+
+		currentTime := ctx.BlockTime()
+
+		delta := int(currentTime.Sub(interestData.IssueTime).Seconds())
+
+	}
 
 }
 func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {

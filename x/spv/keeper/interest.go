@@ -8,6 +8,7 @@ import (
 
 const OneYear = 365 * 24 * 3600
 const OneWeek = 7 * 24 * 3600
+const BASE = OneWeek
 
 var one = sdk.NewDec(1)
 
@@ -20,28 +21,28 @@ func apyTospy(r sdk.Dec, seconds uint64) (sdk.Dec, error) {
 	return root, nil
 }
 
-func CalculateInterestRate(apy sdk.Dec, payFreq int) (sdk.Dec, error) {
+func CalculateInterestRate(apy sdk.Dec, payFreq int) sdk.Dec {
 	// by default, we set the interest as the payment for the whole year which is 3600*24*365=31536000 seconds
 	// the minimal pay frequency is one week
 
-	seconds := OneWeek * payFreq
+	seconds := BASE * payFreq
 	monthAPY, err := CalculateInterestAmount(apy, payFreq)
 	if err != nil {
 		panic(err)
 	}
 	i, err := apyTospy(monthAPY, uint64(seconds))
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdk.Dec{}
 	}
 
-	return i, nil
+	return i
 }
 
 func CalculateInterestAmount(apy sdk.Dec, payFreq int) (sdk.Dec, error) {
 	if payFreq == 0 {
 		return sdk.Dec{}, errors.New("payFreq cannot be zero")
 	}
-	seconds := OneWeek * payFreq
+	seconds := BASE * payFreq
 	monthAPY := apy.Quo(sdk.NewDec(OneYear / int64(seconds)))
 	return monthAPY, nil
 }

@@ -99,7 +99,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 	}
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			i, err := CalculateInterestRate(tc.args.apy, tc.args.payfrq)
+			i := CalculateInterestRate(tc.args.apy, tc.args.payfrq)
 			if tc.expectError {
 				suite.Require().NoError(err)
 			} else {

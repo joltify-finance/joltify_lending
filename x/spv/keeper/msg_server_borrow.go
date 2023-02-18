@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"context"
-	coserrors "cosmossdk.io/errors"
 	"fmt"
+	"time"
+
+	coserrors "cosmossdk.io/errors"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -120,12 +122,20 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	currentBorrowClass := poolClass
 	currentBorrowClass.Id = fmt.Sprintf("%v-%v", currentBorrowClass.Id, latestSeries)
 
+	i, err := CalculateInterestAmount(poolInfo.Apy, int(poolInfo.PayFreq))
+	if err != nil {
+		panic(err)
+	}
+
+	amount := i.MulInt(msg.BorrowAmount.Amount).TruncateInt()
 	bi := types.BorrowInterest{
-		PoolIndex: poolInfo.Index,
-		Apy:       poolInfo.Apy,
-		PayFreq:   poolInfo.PayFreq,
-		IssueTime: ctx.BlockTime(),
-		Borrowed:  msg.BorrowAmount,
+		PoolIndex:    poolInfo.Index,
+		Apy:          poolInfo.Apy,
+		PayFreq:      poolInfo.PayFreq,
+		IssueTime:    ctx.BlockTime(),
+		Borrowed:     msg.BorrowAmount,
+		CyclePayment: sdk.NewCoin(msg.BorrowAmount.Denom, amount),
+		PaymentTime:  []time.Time{ctx.BlockTime()},
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)
