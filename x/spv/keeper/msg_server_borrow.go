@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"time"
 
 	coserrors "cosmossdk.io/errors"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
@@ -128,6 +127,9 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	amount := i.MulInt(msg.BorrowAmount.Amount).TruncateInt()
+
+	firstPayment := types.PaymentItem{PaymentTime: ctx.BlockTime(), PaymentAmount: sdk.NewCoin(msg.BorrowAmount.Denom, sdk.NewInt(0))}
+
 	bi := types.BorrowInterest{
 		PoolIndex:    poolInfo.Index,
 		Apy:          poolInfo.Apy,
@@ -135,7 +137,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		IssueTime:    ctx.BlockTime(),
 		Borrowed:     msg.BorrowAmount,
 		CyclePayment: sdk.NewCoin(msg.BorrowAmount.Denom, amount),
-		PaymentTime:  []time.Time{ctx.BlockTime()},
+		Payments:     []*types.PaymentItem{&firstPayment},
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)
@@ -156,5 +158,14 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	// we finally update the pool info
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
 	k.SetPool(ctx, poolInfo)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeBorrow,
+			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+			sdk.NewAttribute("amount", msg.BorrowAmount.Amount.String()),
+		),
+	)
+
 	return &types.MsgBorrowResponse{}, nil
 }

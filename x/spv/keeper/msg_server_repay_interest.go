@@ -5,33 +5,43 @@ import (
 	"time"
 
 	coserrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) updateInterestData(currentTime time.Time, interestData types.BorrowInterest) {
+func (k msgServer) updateInterestData(currentTime time.Time, interestData *types.BorrowInterest) sdk.Coin {
 
 	var payment sdk.Coin
-	latestTimeStamp := interestData.Payments[len(interestData.Payments())-1]
-	delta := int32(currentTime.Sub(latestTimeStamp).Minutes())
-	if delta > interestData.PayFreq*BASE {
+	latestTimeStamp := interestData.Payments[len(interestData.Payments)-1]
+	delta := currentTime.Sub(latestTimeStamp.PaymentTime).Seconds()
+	if int32(delta) > interestData.PayFreq*BASE {
 		// we need to may the whole month
 		payment = interestData.CyclePayment
 	} else {
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
 		interest := r.Power(uint64(delta))
-		interestData.Borrowed.Amount(interest)
+		paymentAmount := interest.MulInt(interestData.Borrowed.Amount).TruncateInt()
+		payment = sdk.NewCoin(interestData.CyclePayment.Denom, paymentAmount)
 	}
+
+	// since the spv maynot pay the interest at exact next payment circle, we need to adjust it here
+
+	thisPaymentTime := latestTimeStamp.GetPaymentTime().Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
+
+	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: payment}
+	interestData.Payments = append(interestData.Payments, &currentPayment)
+	return payment
 
 }
 
-func (k msgServer) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) {
+func (k msgServer) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) sdkmath.Int {
 
-	nftClasseslasses := poolInfo.PoolNFTIds
+	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
-	totalPayment := sdk.NewInt(0)
-	for _, el := range nftClasseslasses[1:] {
+	totalPayment := sdkmath.NewInt(0)
+	for _, el := range nftClasses[1:] {
 		class, found := k.nftKeeper.GetClass(ctx, el)
 		if !found {
 			panic(found)
@@ -42,15 +52,13 @@ func (k msgServer) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolI
 			panic("not the borrow interest type")
 		}
 
-		k.updateInterestData(interestData)
-
-		currentTime := ctx.BlockTime()
-
-		delta := int(currentTime.Sub(interestData.IssueTime).Seconds())
-
+		thisBorrowInterest := k.updateInterestData(ctx.BlockTime(), &interestData)
+		k.nftKeeper.SaveClass(ctx, class)
+		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
 	}
-
+	return totalPayment
 }
+
 func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -71,25 +79,27 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repaly is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
 	}
 
-	//k.getAllInterestToBePaid(poolInfo)
+	totalAmountDue := k.getAllInterestToBePaid(ctx, &poolInfo)
 
-	// calcuate the interest amount
-	i, err := CalculateInterestAmount(poolInfo.Apy, int(poolInfo.PayFreq))
-	if err != nil {
-		panic(err)
+	if msg.Token.Amount.LT(totalAmountDue) {
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "the interest is %v while you try to repay %v", totalAmountDue, msg.Token.Amount)
 	}
 
-	interestDue := sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(i).TruncateInt()
-	if msg.Token.Amount.LT(interestDue) {
-		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "the interest is %v while you try to repay %v", interestDue, msg.Token.Amount)
-	}
-
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{sdk.NewCoin(msg.Token.Denom, interestDue)})
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{sdk.NewCoin(msg.Token.Denom, totalAmountDue)})
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
 	}
 	// finally, we update the poolinfo
 	poolInfo.LastPaymentTime = ctx.BlockTime()
 	k.SetPool(ctx, poolInfo)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRepayInterest,
+			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+			sdk.NewAttribute("amount", msg.Token.Amount.String()),
+		),
+	)
+
 	return &types.MsgRepayInterestResponse{}, nil
 }
