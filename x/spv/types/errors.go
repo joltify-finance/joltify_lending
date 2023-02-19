@@ -18,4 +18,5 @@ var (
 	ErrPoolFull           = coserrors.Register(ModuleName, 8, "pool is full")
 	ErrMINTNFT            = coserrors.Register(ModuleName, 9, "fail to mint nft")
 	ErrINCONSISTENCYDENOM = coserrors.Register(ModuleName, 10, "denom inconsistency")
+	ErrDepositorNotFound  = coserrors.Register(ModuleName, 11, "depositor not found")
 )

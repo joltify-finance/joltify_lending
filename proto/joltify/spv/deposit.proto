@@ -36,6 +36,6 @@ message DepositorInfo {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
-  bytes linkedNFT = 8;
+  repeated string linkedNFT = 8;
 }
 

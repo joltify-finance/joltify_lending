@@ -79,8 +79,10 @@ func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, u
 		if err != nil {
 			return types.ErrMINTNFT
 		}
-		fmt.Printf(">>>we mint nft for >>%v\n", el.DepositorAddress.String())
+		el.LinkedNFT = append(el.LinkedNFT, nftTemplate.Id)
+		k.SetDepositor(ctx, el)
 	}
+
 	return nil
 }
 

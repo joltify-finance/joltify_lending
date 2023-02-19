@@ -77,7 +77,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we update the users deposit data
 	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
-		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, WithdrawableAmount: msg.Token}
+		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, WithdrawableAmount: msg.Token, LinkedNFT: []string{}}
 		k.SetDepositor(ctx, depositor)
 
 	} else {
@@ -85,6 +85,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		k.SetDepositor(ctx, previousDepositor)
 	}
 
+	// todo do we really need this??
 	wallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
 	if !found {
 		depositorWallets := types.PoolDepositedInvestors{PoolIndex: poolInfo.Index, WalletAddress: []sdk.AccAddress{investor}}
