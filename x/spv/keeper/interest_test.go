@@ -100,20 +100,15 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			i := CalculateInterestRate(tc.args.apy, tc.args.payfrq)
-			if tc.expectError {
-				suite.Require().NoError(err)
-			} else {
-				suite.Require().NoError(err)
 
-				accTime := tc.args.payfrq * OneWeek
-				accumulate := i.Power(uint64(accTime))
+			accTime := tc.args.payfrq * OneWeek
+			accumulate := i.Power(uint64(accTime))
 
-				total := accumulate.Mul(sdk.NewDec(OneYear / int64(accTime)))
-				gap := total.Sub(tc.args.apy)
-				fmt.Printf("gap>>>>>%v\n", gap)
-				suite.Require().True(gap.LT(sdk.NewDecFromIntWithPrec(sdk.NewInt(1), 8)))
+			total := accumulate.Mul(sdk.NewDec(OneYear / int64(accTime)))
+			gap := total.Sub(tc.args.apy)
+			fmt.Printf("gap>>>>>%v\n", gap)
+			suite.Require().True(gap.LT(sdk.NewDecFromIntWithPrec(sdk.NewInt(1), 8)))
 
-			}
 		})
 	}
 }
