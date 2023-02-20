@@ -30,6 +30,7 @@ func NewParams() Params {
 		"ABC",
 		"ABC123",
 		[]byte("reserved"),
+		"This is the Test Project 1",
 	}
 
 	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")

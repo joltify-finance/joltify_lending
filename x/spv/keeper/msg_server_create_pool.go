@@ -51,8 +51,12 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
-	indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.Description), spvAddress.Bytes(), apy.BigInt().Bytes())
-	fmt.Printf(">>>>>>>>>>>>>%v>>>>>>>\n", indexHash)
+	flag := []byte("false")
+	if msg.Is_Senior {
+		flag = []byte("true")
+	}
+
+	indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), flag)
 	urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
 
 	_, found := k.GetPools(ctx, indexHash.Hex())
@@ -80,7 +84,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		PayFreq:          payfreq,
 		ReserveFactor:    types.RESERVEFACTOR,
 		PoolNFTIds:       []string{},
-		PoolStatus:       types.PoolInfo_INACTIVE,
+		PoolStatus:       types.PoolInfo_PREPARE,
 		ProjectLength:    targetProject.ProjectLength,
 		BorrowedAmount:   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 		BorrowableAmount: sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
