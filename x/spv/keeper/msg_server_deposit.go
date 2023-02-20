@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"

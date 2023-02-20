@@ -2,10 +2,11 @@ package keeper
 
 import (
 	"context"
+	"testing"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
-	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -61,8 +62,15 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 }
 
 func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.QueryByWalletRequest) (*kycmoduletypes.QueryByWalletResponse, error) {
-	//TODO implement me
-	panic("implement me")
+
+	inv := kycmoduletypes.Investor{
+		InvestorId:    "1",
+		WalletAddress: []string{req.Wallet},
+	}
+
+	return &kycmoduletypes.QueryByWalletResponse{
+		Investor: &inv,
+	}, nil
 }
 
 type mockAccKeeper struct{}
@@ -73,8 +81,9 @@ func (m mockAccKeeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtype
 }
 
 func (m mockAccKeeper) GetModuleAccount(ctx sdk.Context, name string) authtypes.ModuleAccountI {
-	//TODO implement me
-	panic("implement me")
+	addr := authtypes.NewModuleAddress(types.ModuleAccount)
+	baseAcc := authtypes.NewBaseAccountWithAddress(addr)
+	return authtypes.NewModuleAccount(baseAcc, types.ModuleName, "mint")
 }
 
 func (m mockAccKeeper) GetModuleAddress(name string) sdk.AccAddress {
@@ -134,8 +143,7 @@ func (m mockbankKeeper) GetSupply(ctx sdk.Context, denom string) sdk.Coin {
 }
 
 func (m mockbankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	//TODO implement me
-	panic("implement me")
+	return sdk.NewCoin("usdc", sdk.NewInt(0))
 }
 
 func (m mockbankKeeper) GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
