@@ -11,7 +11,7 @@ import (
 
 var _ = strconv.Itoa(0)
 
-func CmdClaimalbeInterest() *cobra.Command {
+func CmdClaimableInterest() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "claimalbe-interest [wallet] [pool index]",
 		Short: "Query claimable-interest",
@@ -31,7 +31,7 @@ func CmdClaimalbeInterest() *cobra.Command {
 				PoolIndex: args[1],
 			}
 
-			res, err := queryClient.ClaimalbeInterest(cmd.Context(), params)
+			res, err := queryClient.ClaimableInterest(cmd.Context(), params)
 			if err != nil {
 				return err
 			}

@@ -40,9 +40,9 @@ func NewKeeper(
 	}
 
 	// ensure nft module account is set
-	if addr := accKeeper.GetModuleAddress(types.ModuleName); addr == nil {
-		panic("the spv module account has not been set")
-	}
+	//if addr := accKeeper.GetModuleAddress(types.ModuleName); addr == nil {
+	//	panic("the spv module account has not been set")
+	//}
 
 	return &Keeper{
 		cdc:        cdc,

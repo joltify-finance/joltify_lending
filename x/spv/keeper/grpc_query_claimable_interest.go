@@ -24,7 +24,7 @@ func (k Keeper) ClaimableInterest(goCtx context.Context, req *types.QueryClaimab
 
 	depositor, found := k.GetDepositor(ctx, req.PoolIndex, investor)
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor not found for pool", req.PoolIndex)
+		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor not found for pool %v", req.PoolIndex)
 	}
 
 	poolInfo, found := k.GetPools(ctx, depositor.PoolIndex)

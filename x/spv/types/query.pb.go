@@ -596,7 +596,7 @@ func init() {
 func init() { proto.RegisterFile("joltify/spv/query.proto", fileDescriptor_4ad7ca650742ee34) }
 
 var fileDescriptor_4ad7ca650742ee34 = []byte{
-	// 857 bytes of a gzipped FileDescriptorProto
+	// 853 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x95, 0x4d, 0x6f, 0xf3, 0x44,
 	0x10, 0xc7, 0xe3, 0x14, 0x22, 0xb2, 0x01, 0x09, 0xb6, 0x6f, 0x89, 0x69, 0x9d, 0xca, 0xa5, 0x25,
 	0x4a, 0x55, 0x6f, 0x5f, 0x00, 0x71, 0xe0, 0x40, 0x5b, 0x04, 0x54, 0x70, 0x08, 0x3e, 0x70, 0xe0,
@@ -644,13 +644,13 @@ var fileDescriptor_4ad7ca650742ee34 = []byte{
 	0x60, 0x42, 0xd3, 0x92, 0x0c, 0x2d, 0xbc, 0x49, 0xa6, 0x7c, 0x26, 0xf8, 0x88, 0x5c, 0xe5, 0x7c,
 	0x73, 0x8d, 0x7f, 0xd3, 0xd0, 0x9b, 0x59, 0xd3, 0xe0, 0x8d, 0xa2, 0xca, 0x14, 0x5b, 0xea, 0x9b,
 	0x4f, 0x85, 0x01, 0xcf, 0xbe, 0xe4, 0xd9, 0xc6, 0x5b, 0x59, 0x1e, 0x4a, 0x1c, 0x15, 0xab, 0xee,
-	0xa3, 0x00, 0xf5, 0xa7, 0x86, 0xde, 0x51, 0x96, 0xf1, 0x7b, 0xe9, 0x98, 0xe2, 0x76, 0x51, 0x72,
-	0x96, 0x61, 0xf5, 0xad, 0x67, 0xc5, 0x02, 0xe3, 0x8e, 0x64, 0x6c, 0xe3, 0x56, 0xee, 0xcc, 0x8a,
-	0xae, 0x4c, 0x38, 0xaf, 0x0f, 0x3b, 0xb7, 0xf7, 0x86, 0x76, 0x77, 0x6f, 0x68, 0xff, 0xdf, 0x1b,
-	0xda, 0xaf, 0x0f, 0x46, 0xe9, 0xee, 0xc1, 0x28, 0xfd, 0xf3, 0x60, 0x94, 0xbe, 0xfb, 0x28, 0x63,
-	0x44, 0xa8, 0xb6, 0x3d, 0x60, 0x81, 0x13, 0xf4, 0x69, 0xf2, 0xdc, 0xf5, 0x69, 0xe0, 0xb2, 0xc0,
-	0x23, 0x17, 0x52, 0x47, 0x9a, 0xb3, 0x57, 0x91, 0xdf, 0xe9, 0xfd, 0x97, 0x01, 0x00, 0x00, 0xff,
-	0xff, 0x57, 0x66, 0xd6, 0xc9, 0xa0, 0x08, 0x00, 0x00,
+	0xa3, 0x00, 0xf5, 0xa7, 0x86, 0xde, 0x29, 0x58, 0x06, 0xb7, 0x8b, 0x92, 0xb3, 0x0c, 0xab, 0x6f,
+	0x3d, 0x2b, 0x16, 0x18, 0x77, 0x24, 0x63, 0x1b, 0xb7, 0x72, 0x67, 0x56, 0x74, 0x65, 0xc2, 0x79,
+	0x7d, 0xd8, 0xb9, 0xbd, 0x37, 0xb4, 0xbb, 0x7b, 0x43, 0xfb, 0xff, 0xde, 0xd0, 0x7e, 0x7d, 0x30,
+	0x4a, 0x77, 0x0f, 0x46, 0xe9, 0x9f, 0x07, 0xa3, 0xf4, 0xdd, 0x47, 0x19, 0x23, 0x42, 0xb5, 0xed,
+	0x01, 0x0b, 0x9c, 0xa0, 0x4f, 0x93, 0xe7, 0xae, 0x4f, 0x03, 0x97, 0x05, 0x1e, 0xb9, 0x90, 0x3a,
+	0xd2, 0x9c, 0xbd, 0x8a, 0xfc, 0x4e, 0xef, 0xbf, 0x0c, 0x00, 0x00, 0xff, 0xff, 0xd2, 0x8a, 0x6a,
+	0x29, 0xa0, 0x08, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -674,8 +674,8 @@ type QueryClient interface {
 	Depositor(ctx context.Context, in *QueryDepositorRequest, opts ...grpc.CallOption) (*QueryDepositorResponse, error)
 	// Queries a list of AllowedPools items.
 	AllowedPools(ctx context.Context, in *QueryAllowedPoolsRequest, opts ...grpc.CallOption) (*QueryAllowedPoolsResponse, error)
-	// Queries a list of ClaimalbeInterest items.
-	ClaimalbeInterest(ctx context.Context, in *QueryClaimableInterestRequest, opts ...grpc.CallOption) (*QueryClaimableInterestResponse, error)
+	// Queries a list of ClaimableInterest items.
+	ClaimableInterest(ctx context.Context, in *QueryClaimableInterestRequest, opts ...grpc.CallOption) (*QueryClaimableInterestResponse, error)
 }
 
 type queryClient struct {
@@ -731,9 +731,9 @@ func (c *queryClient) AllowedPools(ctx context.Context, in *QueryAllowedPoolsReq
 	return out, nil
 }
 
-func (c *queryClient) ClaimalbeInterest(ctx context.Context, in *QueryClaimableInterestRequest, opts ...grpc.CallOption) (*QueryClaimableInterestResponse, error) {
+func (c *queryClient) ClaimableInterest(ctx context.Context, in *QueryClaimableInterestRequest, opts ...grpc.CallOption) (*QueryClaimableInterestResponse, error) {
 	out := new(QueryClaimableInterestResponse)
-	err := c.cc.Invoke(ctx, "/joltify.spv.Query/ClaimalbeInterest", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/joltify.spv.Query/ClaimableInterest", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -751,8 +751,8 @@ type QueryServer interface {
 	Depositor(context.Context, *QueryDepositorRequest) (*QueryDepositorResponse, error)
 	// Queries a list of AllowedPools items.
 	AllowedPools(context.Context, *QueryAllowedPoolsRequest) (*QueryAllowedPoolsResponse, error)
-	// Queries a list of ClaimalbeInterest items.
-	ClaimalbeInterest(context.Context, *QueryClaimableInterestRequest) (*QueryClaimableInterestResponse, error)
+	// Queries a list of ClaimableInterest items.
+	ClaimableInterest(context.Context, *QueryClaimableInterestRequest) (*QueryClaimableInterestResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -774,8 +774,8 @@ func (*UnimplementedQueryServer) Depositor(ctx context.Context, req *QueryDeposi
 func (*UnimplementedQueryServer) AllowedPools(ctx context.Context, req *QueryAllowedPoolsRequest) (*QueryAllowedPoolsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AllowedPools not implemented")
 }
-func (*UnimplementedQueryServer) ClaimalbeInterest(ctx context.Context, req *QueryClaimableInterestRequest) (*QueryClaimableInterestResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ClaimalbeInterest not implemented")
+func (*UnimplementedQueryServer) ClaimableInterest(ctx context.Context, req *QueryClaimableInterestRequest) (*QueryClaimableInterestResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClaimableInterest not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -872,20 +872,20 @@ func _Query_AllowedPools_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_ClaimalbeInterest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Query_ClaimableInterest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryClaimableInterestRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).ClaimalbeInterest(ctx, in)
+		return srv.(QueryServer).ClaimableInterest(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/joltify.spv.Query/ClaimalbeInterest",
+		FullMethod: "/joltify.spv.Query/ClaimableInterest",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ClaimalbeInterest(ctx, req.(*QueryClaimableInterestRequest))
+		return srv.(QueryServer).ClaimableInterest(ctx, req.(*QueryClaimableInterestRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -915,8 +915,8 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_AllowedPools_Handler,
 		},
 		{
-			MethodName: "ClaimalbeInterest",
-			Handler:    _Query_ClaimalbeInterest_Handler,
+			MethodName: "ClaimableInterest",
+			Handler:    _Query_ClaimableInterest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

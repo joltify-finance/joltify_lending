@@ -41,8 +41,8 @@ service Query {
   }
 
 
-  // Queries a list of ClaimalbeInterest items.
-  rpc ClaimalbeInterest(QueryClaimableInterestRequest) returns (QueryClaimableInterestResponse) {
+  // Queries a list of ClaimableInterest items.
+  rpc ClaimableInterest(QueryClaimableInterestRequest) returns (QueryClaimableInterestResponse) {
     option (google.api.http).get = "/joltify/spv/claimable_interest/{wallet}";
   }
 

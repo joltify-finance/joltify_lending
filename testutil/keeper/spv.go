@@ -24,8 +24,40 @@ import (
 type mockKycKeeper struct{}
 
 func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmoduletypes.ProjectInfo) {
-	//TODO implement me
-	panic("implement me")
+
+	b := kycmoduletypes.BasicInfo{
+		"This is the test info",
+		"empty",
+		"ABC",
+		"ABC123",
+		[]byte("reserved"),
+	}
+
+	acc, _ := sdk.AccAddressFromBech32("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0")
+	pi1 := kycmoduletypes.ProjectInfo{
+		Index:         1,
+		SPVName:       "defaultSPV",
+		ProjectOwner:  acc,
+		BasicInfo:     &b,
+		ProjectLength: 31536000, //1 year
+	}
+
+	b2 := kycmoduletypes.BasicInfo{
+		"This is the test info2",
+		"empty2",
+		"ABC2",
+		"ABC123-2",
+		[]byte("reserved"),
+	}
+
+	pi2 := kycmoduletypes.ProjectInfo{
+		Index:         1,
+		SPVName:       "defaultSPV2",
+		ProjectOwner:  acc,
+		BasicInfo:     &b2,
+		ProjectLength: 31536000, //1 year
+	}
+	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2}
 }
 
 func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.QueryByWalletRequest) (*kycmoduletypes.QueryByWalletResponse, error) {
@@ -50,7 +82,19 @@ func (m mockAccKeeper) GetModuleAddress(name string) sdk.AccAddress {
 	panic("implement me")
 }
 
-type mockNFTKeeper struct{}
+type mockNFTKeeper struct {
+	classes map[string]*nft.Class
+}
+
+func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, bool) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockNFTKeeper) Update(ctx sdk.Context, token nft.NFT) error {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (m mockNFTKeeper) Mint(ctx sdk.Context, nft nft.NFT, receiver sdk.AccAddress) error {
 	//TODO implement me
@@ -58,8 +102,8 @@ func (m mockNFTKeeper) Mint(ctx sdk.Context, nft nft.NFT, receiver sdk.AccAddres
 }
 
 func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
-	//TODO implement me
-	panic("implement me")
+	m.classes[class.Id] = &class
+	return nil
 }
 
 func (m mockNFTKeeper) GetClass(ctx sdk.Context, classID string) (nft.Class, bool) {
@@ -130,7 +174,9 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	)
 	kycKeeper := mockKycKeeper{}
 	accKeeper := mockAccKeeper{}
-	nftKeeper := mockNFTKeeper{}
+	nftKeeper := mockNFTKeeper{
+		classes: make(map[string]*nft.Class),
+	}
 	bankKeeper := mockbankKeeper{}
 
 	k := keeper.NewKeeper(

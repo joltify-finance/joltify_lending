@@ -52,6 +52,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	}
 
 	indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.Description), spvAddress.Bytes(), apy.BigInt().Bytes())
+	fmt.Printf(">>>>>>>>>>>>>%v>>>>>>>\n", indexHash)
 	urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
 
 	_, found := k.GetPools(ctx, indexHash.Hex())
