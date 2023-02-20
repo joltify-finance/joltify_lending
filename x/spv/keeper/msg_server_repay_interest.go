@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -17,7 +18,7 @@ func (k msgServer) updateInterestData(currentTime time.Time, interestData *types
 	latestTimeStamp := interestData.Payments[len(interestData.Payments)-1]
 	delta := currentTime.Sub(latestTimeStamp.PaymentTime).Seconds()
 	if int32(delta) > interestData.PayFreq*BASE {
-		// we need to may the whole month
+		// we need to pay the whole month
 		payment = interestData.CyclePayment
 	} else {
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
@@ -53,6 +54,11 @@ func (k msgServer) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolI
 		}
 
 		thisBorrowInterest := k.updateInterestData(ctx.BlockTime(), &interestData)
+		var err error
+		class.Data, err = types2.NewAnyWithValue(&interestData)
+		if err != nil {
+			panic("pack class any data failed")
+		}
 		k.nftKeeper.SaveClass(ctx, class)
 		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
 	}

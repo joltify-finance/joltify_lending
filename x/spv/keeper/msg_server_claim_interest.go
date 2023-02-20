@@ -22,11 +22,35 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.GetPoolIndex())
 	}
 
-	depositor.
+	if !depositor.DepositorAddress.Equals(investorAddress) {
+		return nil, coserrors.Wrap(types.ErrUnauthorized, "not the depositer")
+	}
 
+	poolInfo, found := k.GetPools(ctx, depositor.PoolIndex)
+	if !found {
+		panic("should never fail to find the pool")
+	}
 
+	// for each lending NFT this owner has
+	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, poolInfo.ReserveFactor, true)
+	if err != nil {
+		return nil, err
+	}
 
+	claimed := sdk.NewCoin(depositor.LockedAmount.Denom, totalInterest)
 
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investorAddress, sdk.NewCoins(claimed))
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeClaimInterest,
+			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+			sdk.NewAttribute("amount", claimed.String()),
+		),
+	)
 
 	return &types.MsgClaimInterestResponse{}, nil
 }

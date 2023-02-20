@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	sdkmath "cosmossdk.io/math"
 	"fmt"
 
 	coserrors "cosmossdk.io/errors"
@@ -42,21 +43,11 @@ func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftC
 	//if found {
 	//	panic("should never happened that investors have depposited the money while the store is empty")
 	//}
-	k.processInvestors(ctx, poolInfo, utilization, nftClass)
+	k.processInvestors(ctx, poolInfo, utilization, amount.Amount, nftClass)
 	return nil
 }
 
-func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, nftClass nfttypes.Class) error {
-
-	// now we update the depositor's withdrawal amount and locked amount
-	var depositors []types.DepositorInfo
-	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
-		locked := sdk.NewDecFromInt(depositor.WithdrawableAmount.Amount).Mul(utilization).TruncateInt()
-		depositor.LockedAmount = sdk.NewCoin(depositor.WithdrawableAmount.Denom, locked)
-		depositor.WithdrawableAmount = depositor.WithdrawableAmount.SubAmount(locked)
-		depositors = append(depositors, depositor)
-		return false
-	})
+func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, totalBorrow sdkmath.Int, nftClass nfttypes.Class) error {
 
 	nftTemplate := nfttypes.NFT{
 		ClassId: nftClass.Id,
@@ -64,26 +55,37 @@ func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, u
 		UriHash: nftClass.UriHash,
 	}
 
-	for _, el := range depositors {
+	// now we update the depositor's withdrawal amount and locked amount
+	var errGlobal error
+	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
+		locked := sdk.NewDecFromInt(depositor.WithdrawableAmount.Amount).Mul(utilization).TruncateInt()
+		depositor.LockedAmount = sdk.NewCoin(depositor.WithdrawableAmount.Denom, locked)
+		depositor.WithdrawableAmount = depositor.WithdrawableAmount.SubAmount(locked)
+		borrowRatio := sdk.NewDecFromInt(locked).Quo(sdk.NewDecFromInt(totalBorrow))
+
 		// nft ID is the hash(nft class ID, investorWallet)
-		indexHash := crypto.Keccak256Hash([]byte(nftClass.Id), el.DepositorAddress)
+		indexHash := crypto.Keccak256Hash([]byte(nftClass.Id), depositor.DepositorAddress)
 		nftTemplate.Id = fmt.Sprintf("invoice-%v", indexHash.String()[2:])
 
-		userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: el.DepositorAddress.String(), IssueTime: ctx.BlockTime()}
+		userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: depositor.DepositorAddress.String(), Ratio: borrowRatio, LastPayment: ctx.BlockTime()}
 		data, err := types2.NewAnyWithValue(&userData)
 		if err != nil {
 			panic("should never fail")
 		}
 		nftTemplate.Data = data
-		err = k.nftKeeper.Mint(ctx, nftTemplate, el.DepositorAddress)
+		err = k.nftKeeper.Mint(ctx, nftTemplate, depositor.DepositorAddress)
 		if err != nil {
-			return types.ErrMINTNFT
+			errGlobal = types.ErrMINTNFT
+			return false
 		}
-		el.LinkedNFT = append(el.LinkedNFT, nftTemplate.Id)
-		k.SetDepositor(ctx, el)
-	}
 
-	return nil
+		classIDAndNFTID := fmt.Sprintf("%v:%v", nftTemplate.ClassId, nftTemplate.Id)
+		depositor.LinkedNFT = append(depositor.LinkedNFT, classIDAndNFTID)
+		k.SetDepositor(ctx, depositor)
+		return false
+	})
+
+	return errGlobal
 }
 
 func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.MsgBorrowResponse, error) {

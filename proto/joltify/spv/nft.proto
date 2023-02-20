@@ -16,7 +16,7 @@ message NftInfo{
 		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
 		(gogoproto.nullable)   = false
 	];
-	google.protobuf.Timestamp issue_time = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp last_payment = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
 
 message PaymentItem {

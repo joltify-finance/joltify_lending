@@ -33,7 +33,11 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 
 	cmd.AddCommand(CmdAllowedPools())
 
-	// this line is used by starport scaffolding # 1
+	cmd.AddCommand(CmdClaimalbeInterest())
+
+cmd.AddCommand(CmdClaimalbeInterest())
+
+// this line is used by starport scaffolding # 1
 
 	return cmd
 }

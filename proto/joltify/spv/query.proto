@@ -5,6 +5,7 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "joltify/spv/poolinfo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "joltify/spv/deposit.proto";
 import "joltify/spv/params.proto";
 // this line is used by starport scaffolding # 1
@@ -37,6 +38,12 @@ service Query {
   // Queries a list of AllowedPools items.
   rpc AllowedPools(QueryAllowedPoolsRequest) returns (QueryAllowedPoolsResponse) {
     option (google.api.http).get = "/joltify/spve/allowed_pools/{walletAddress}";
+  }
+
+
+  // Queries a list of ClaimalbeInterest items.
+  rpc ClaimalbeInterest(QueryClaimableInterestRequest) returns (QueryClaimableInterestResponse) {
+    option (google.api.http).get = "/joltify/spv/claimable_interest/{wallet}";
   }
 
 }
@@ -83,4 +90,15 @@ message QueryAllowedPoolsRequest {
 
 message QueryAllowedPoolsResponse {
   repeated string pools_index = 1;
+}
+message QueryClaimableInterestRequest {
+  string wallet = 1;
+  string pool_index = 2;
+}
+
+message QueryClaimableInterestResponse {
+  cosmos.base.v1beta1.Coin claimable_interest_amount = 6[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
 }
