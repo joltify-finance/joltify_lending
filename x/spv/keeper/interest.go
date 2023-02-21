@@ -8,7 +8,7 @@ import (
 
 const OneYear = 365 * 24 * 3600
 const OneWeek = 7 * 24 * 3600
-const BASE = OneWeek
+const BASE = 1
 
 var one = sdk.NewDec(1)
 

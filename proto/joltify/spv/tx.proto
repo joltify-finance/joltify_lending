@@ -25,6 +25,7 @@ service Msg {
 
   rpc ActivePool(MsgActivePool) returns (MsgActivePoolResponse);
 
+  rpc PayPrincipal(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
 }
 
 message MsgCreatePool {
@@ -48,7 +49,6 @@ message MsgAddInvestors {
 message MsgAddInvestorsResponse {
   bool operationResult = 1;
 }
-
 
 message MsgDeposit {
   string creator = 1;
@@ -107,4 +107,13 @@ message MsgActivePool {
 }
 
 message MsgActivePoolResponse {
+}
+
+message MsgPayPrincipal {
+  string creator = 1;
+  string poolIndex = 2;
+  cosmos.base.v1beta1.Coin token= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
+}
+
+message MsgPayPrincipalResponse {
 }

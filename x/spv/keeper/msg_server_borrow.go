@@ -124,8 +124,6 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		panic(err)
 	}
 
-	amount := i.MulInt(msg.BorrowAmount.Amount).TruncateInt()
-
 	firstPayment := types.PaymentItem{PaymentTime: ctx.BlockTime(), PaymentAmount: sdk.NewCoin(msg.BorrowAmount.Denom, sdk.NewInt(0))}
 
 	bi := types.BorrowInterest{
@@ -134,7 +132,8 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		PayFreq:      poolInfo.PayFreq,
 		IssueTime:    ctx.BlockTime(),
 		Borrowed:     msg.BorrowAmount,
-		CyclePayment: sdk.NewCoin(msg.BorrowAmount.Denom, amount),
+		BorrowedLast: msg.BorrowAmount,
+		MonthlyRatio: i,
 		Payments:     []*types.PaymentItem{&firstPayment},
 	}
 

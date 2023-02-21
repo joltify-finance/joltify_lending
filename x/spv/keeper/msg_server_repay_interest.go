@@ -17,15 +17,19 @@ func (k msgServer) updateInterestData(currentTime time.Time, interestData *types
 	var payment sdk.Coin
 	latestTimeStamp := interestData.Payments[len(interestData.Payments)-1]
 	delta := currentTime.Sub(latestTimeStamp.PaymentTime).Seconds()
+	denom := interestData.Payments[0].PaymentAmount.Denom
 	if int32(delta) > interestData.PayFreq*BASE {
 		// we need to pay the whole month
-		payment = interestData.CyclePayment
+		monthlyRatio := interestData.MonthlyRatio
+		paymentAmount := monthlyRatio.MulInt(interestData.BorrowedLast.Amount).TruncateInt()
+		payment = sdk.NewCoin(denom, paymentAmount)
 	} else {
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
 		interest := r.Power(uint64(delta))
-		paymentAmount := interest.MulInt(interestData.Borrowed.Amount).TruncateInt()
-		payment = sdk.NewCoin(interestData.CyclePayment.Denom, paymentAmount)
+		paymentAmount := interest.MulInt(interestData.BorrowedLast.Amount).TruncateInt()
+		payment = sdk.NewCoin(denom, paymentAmount)
 	}
+	interestData.BorrowedLast = interestData.Borrowed
 
 	// since the spv maynot pay the interest at exact next payment circle, we need to adjust it here
 

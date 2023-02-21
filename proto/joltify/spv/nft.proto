@@ -40,11 +40,16 @@ message BorrowInterest{
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
 
-	cosmos.base.v1beta1.Coin cycle_payment = 6[
+
+	cosmos.base.v1beta1.Coin borrowed_last = 6[
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
 
+	string      monthly_ratio      = 7 [
+		(cosmos_proto.scalar)  = "cosmos.Dec",
+		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.nullable)   = false
+	];
 
-	repeated PaymentItem payments = 7;
-
+	repeated PaymentItem payments = 8;
 }

@@ -5,6 +5,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"strings"
 	"time"
@@ -20,11 +21,12 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		if !found {
 			return sdkmath.Int{}, coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", ids[1])
 		}
-		data := thisNFT.Data.GetCachedValue()
-		interestData, ok := data.(types.NftInfo)
-		if !ok {
-			panic("not the borrow interest type")
+		var interestData types.NftInfo
+		err := proto.Unmarshal(thisNFT.Data.Value, &interestData)
+		if err != nil {
+			panic(err)
 		}
+
 		lendsRatio[el] = interestData.Ratio
 
 		borrowClass, found := nftKeeper.GetClass(ctx, ids[0])
@@ -32,10 +34,10 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 			panic("it should never fail to find the class")
 		}
 
-		v := borrowClass.GetData().GetCachedValue()
-		borrowClassInfo, ok := v.(types.BorrowInterest)
-		if !ok {
-			panic("not the class type")
+		var borrowClassInfo types.BorrowInterest
+		err = proto.Unmarshal(borrowClass.Data.Value, &borrowClassInfo)
+		if err != nil {
+			panic(err)
 		}
 
 		allPayments := borrowClassInfo.Payments

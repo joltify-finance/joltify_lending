@@ -56,6 +56,10 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgActivePool int = 100
 
+	opWeightMsgPayPrincipal = "op_weight_msg_pay_principal"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgPayPrincipal int = 100
+
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -177,6 +181,17 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgActivePool,
 		spvsimulation.SimulateMsgActivePool(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgPayPrincipal int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgPayPrincipal, &weightMsgPayPrincipal, nil,
+		func(_ *rand.Rand) {
+			weightMsgPayPrincipal = defaultWeightMsgPayPrincipal
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgPayPrincipal,
+		spvsimulation.SimulateMsgPayPrincipal(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
 	// this line is used by starport scaffolding # simapp/module/operation
