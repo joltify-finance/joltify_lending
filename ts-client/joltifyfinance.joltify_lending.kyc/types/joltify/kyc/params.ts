@@ -10,6 +10,7 @@ export interface BasicInfo {
   projectCountry: string;
   businessNumber: string;
   reserved: Uint8Array;
+  projectName: string;
 }
 
 /** Market defines an asset in the pricefeed. */
@@ -28,7 +29,14 @@ export interface Params {
 }
 
 function createBaseBasicInfo(): BasicInfo {
-  return { description: "", projectsUrl: "", projectCountry: "", businessNumber: "", reserved: new Uint8Array() };
+  return {
+    description: "",
+    projectsUrl: "",
+    projectCountry: "",
+    businessNumber: "",
+    reserved: new Uint8Array(),
+    projectName: "",
+  };
 }
 
 export const BasicInfo = {
@@ -47,6 +55,9 @@ export const BasicInfo = {
     }
     if (message.reserved.length !== 0) {
       writer.uint32(42).bytes(message.reserved);
+    }
+    if (message.projectName !== "") {
+      writer.uint32(50).string(message.projectName);
     }
     return writer;
   },
@@ -73,6 +84,9 @@ export const BasicInfo = {
         case 5:
           message.reserved = reader.bytes();
           break;
+        case 6:
+          message.projectName = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -88,6 +102,7 @@ export const BasicInfo = {
       projectCountry: isSet(object.projectCountry) ? String(object.projectCountry) : "",
       businessNumber: isSet(object.businessNumber) ? String(object.businessNumber) : "",
       reserved: isSet(object.reserved) ? bytesFromBase64(object.reserved) : new Uint8Array(),
+      projectName: isSet(object.projectName) ? String(object.projectName) : "",
     };
   },
 
@@ -99,6 +114,7 @@ export const BasicInfo = {
     message.businessNumber !== undefined && (obj.businessNumber = message.businessNumber);
     message.reserved !== undefined
       && (obj.reserved = base64FromBytes(message.reserved !== undefined ? message.reserved : new Uint8Array()));
+    message.projectName !== undefined && (obj.projectName = message.projectName);
     return obj;
   },
 
@@ -109,6 +125,7 @@ export const BasicInfo = {
     message.projectCountry = object.projectCountry ?? "";
     message.businessNumber = object.businessNumber ?? "";
     message.reserved = object.reserved ?? new Uint8Array();
+    message.projectName = object.projectName ?? "";
     return message;
   },
 };

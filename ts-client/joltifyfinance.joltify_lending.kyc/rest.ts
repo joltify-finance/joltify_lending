@@ -17,6 +17,7 @@ export interface KycBasicInfo {
 
   /** @format byte */
   reserved?: string;
+  project_name?: string;
 }
 
 export interface KycInvestor {

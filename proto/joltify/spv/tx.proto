@@ -21,6 +21,10 @@ service Msg {
 
   rpc ClaimInterest(MsgClaimInterest) returns (MsgClaimInterestResponse);
 
+  rpc UpdatePool(MsgUpdatePool) returns (MsgUpdatePoolResponse);
+
+  rpc ActivePool(MsgActivePool) returns (MsgActivePoolResponse);
+
 }
 
 message MsgCreatePool {
@@ -86,4 +90,24 @@ message MsgClaimInterest {
 }
 
 message MsgClaimInterestResponse {
+}
+
+message MsgUpdatePool {
+  string creator = 1;
+  string pool_index = 2;
+  string pool_name  = 3;
+  string pool_apy  = 4;
+  string pay_freq = 5;
+  cosmos.base.v1beta1.Coin target_token_amount = 6[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+}
+
+message MsgUpdatePoolResponse {
+}
+
+message MsgActivePool {
+  string creator = 1;
+  string poolIndex = 2;
+}
+
+message MsgActivePoolResponse {
 }

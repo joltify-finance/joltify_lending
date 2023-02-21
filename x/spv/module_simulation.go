@@ -48,6 +48,14 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgClaimInterest int = 100
 
+	opWeightMsgUpdatePool = "op_weight_msg_update_pool"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgUpdatePool int = 100
+
+	opWeightMsgActivePool = "op_weight_msg_active_pool"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgActivePool int = 100
+
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -147,6 +155,28 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgClaimInterest,
 		spvsimulation.SimulateMsgClaimInterest(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgUpdatePool int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgUpdatePool, &weightMsgUpdatePool, nil,
+		func(_ *rand.Rand) {
+			weightMsgUpdatePool = defaultWeightMsgUpdatePool
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgUpdatePool,
+		spvsimulation.SimulateMsgUpdatePool(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgActivePool int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgActivePool, &weightMsgActivePool, nil,
+		func(_ *rand.Rand) {
+			weightMsgActivePool = defaultWeightMsgActivePool
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgActivePool,
+		spvsimulation.SimulateMsgActivePool(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
 	// this line is used by starport scaffolding # simapp/module/operation

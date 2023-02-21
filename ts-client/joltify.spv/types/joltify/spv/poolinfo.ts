@@ -35,7 +35,7 @@ export enum PoolInfo_POOLSTATUS {
   ACTIVE = 0,
   INACTIVE = 1,
   CLOSED = 2,
-  OPEN = 3,
+  PREPARE = 3,
   UNRECOGNIZED = -1,
 }
 
@@ -51,8 +51,8 @@ export function poolInfo_POOLSTATUSFromJSON(object: any): PoolInfo_POOLSTATUS {
     case "CLOSED":
       return PoolInfo_POOLSTATUS.CLOSED;
     case 3:
-    case "OPEN":
-      return PoolInfo_POOLSTATUS.OPEN;
+    case "PREPARE":
+      return PoolInfo_POOLSTATUS.PREPARE;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -68,8 +68,8 @@ export function poolInfo_POOLSTATUSToJSON(object: PoolInfo_POOLSTATUS): string {
       return "INACTIVE";
     case PoolInfo_POOLSTATUS.CLOSED:
       return "CLOSED";
-    case PoolInfo_POOLSTATUS.OPEN:
-      return "OPEN";
+    case PoolInfo_POOLSTATUS.PREPARE:
+      return "PREPARE";
     case PoolInfo_POOLSTATUS.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

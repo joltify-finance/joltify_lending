@@ -7,35 +7,20 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgRepayInterest } from "./types/joltify/spv/tx";
 import { MsgCreatePool } from "./types/joltify/spv/tx";
-import { MsgBorrow } from "./types/joltify/spv/tx";
-import { MsgAddInvestors } from "./types/joltify/spv/tx";
 import { MsgDeposit } from "./types/joltify/spv/tx";
+import { MsgBorrow } from "./types/joltify/spv/tx";
+import { MsgClaimInterest } from "./types/joltify/spv/tx";
+import { MsgAddInvestors } from "./types/joltify/spv/tx";
+import { MsgRepayInterest } from "./types/joltify/spv/tx";
+import { MsgActivePool } from "./types/joltify/spv/tx";
+import { MsgUpdatePool } from "./types/joltify/spv/tx";
 
 
-export { MsgRepayInterest, MsgCreatePool, MsgBorrow, MsgAddInvestors, MsgDeposit };
-
-type sendMsgRepayInterestParams = {
-  value: MsgRepayInterest,
-  fee?: StdFee,
-  memo?: string
-};
+export { MsgCreatePool, MsgDeposit, MsgBorrow, MsgClaimInterest, MsgAddInvestors, MsgRepayInterest, MsgActivePool, MsgUpdatePool };
 
 type sendMsgCreatePoolParams = {
   value: MsgCreatePool,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgBorrowParams = {
-  value: MsgBorrow,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgAddInvestorsParams = {
-  value: MsgAddInvestors,
   fee?: StdFee,
   memo?: string
 };
@@ -46,25 +31,73 @@ type sendMsgDepositParams = {
   memo?: string
 };
 
-
-type msgRepayInterestParams = {
-  value: MsgRepayInterest,
+type sendMsgBorrowParams = {
+  value: MsgBorrow,
+  fee?: StdFee,
+  memo?: string
 };
+
+type sendMsgClaimInterestParams = {
+  value: MsgClaimInterest,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgAddInvestorsParams = {
+  value: MsgAddInvestors,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgRepayInterestParams = {
+  value: MsgRepayInterest,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgActivePoolParams = {
+  value: MsgActivePool,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgUpdatePoolParams = {
+  value: MsgUpdatePool,
+  fee?: StdFee,
+  memo?: string
+};
+
 
 type msgCreatePoolParams = {
   value: MsgCreatePool,
+};
+
+type msgDepositParams = {
+  value: MsgDeposit,
 };
 
 type msgBorrowParams = {
   value: MsgBorrow,
 };
 
+type msgClaimInterestParams = {
+  value: MsgClaimInterest,
+};
+
 type msgAddInvestorsParams = {
   value: MsgAddInvestors,
 };
 
-type msgDepositParams = {
-  value: MsgDeposit,
+type msgRepayInterestParams = {
+  value: MsgRepayInterest,
+};
+
+type msgActivePoolParams = {
+  value: MsgActivePool,
+};
+
+type msgUpdatePoolParams = {
+  value: MsgUpdatePool,
 };
 
 
@@ -85,20 +118,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgRepayInterest({ value, fee, memo }: sendMsgRepayInterestParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgRepayInterest: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgRepayInterest({ value: MsgRepayInterest.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgRepayInterest: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgCreatePool({ value, fee, memo }: sendMsgCreatePoolParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgCreatePool: Unable to sign Tx. Signer is not present.')
@@ -110,34 +129,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
 				throw new Error('TxClient:sendMsgCreatePool: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		async sendMsgBorrow({ value, fee, memo }: sendMsgBorrowParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgBorrow: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgBorrow({ value: MsgBorrow.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgBorrow: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		async sendMsgAddInvestors({ value, fee, memo }: sendMsgAddInvestorsParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgAddInvestors: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgAddInvestors({ value: MsgAddInvestors.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgAddInvestors: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -155,20 +146,104 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		
-		msgRepayInterest({ value }: msgRepayInterestParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.spv.MsgRepayInterest", value: MsgRepayInterest.fromPartial( value ) }  
+		async sendMsgBorrow({ value, fee, memo }: sendMsgBorrowParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgBorrow: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgBorrow({ value: MsgBorrow.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:MsgRepayInterest: Could not create message: ' + e.message)
+				throw new Error('TxClient:sendMsgBorrow: Could not broadcast Tx: '+ e.message)
 			}
 		},
+		
+		async sendMsgClaimInterest({ value, fee, memo }: sendMsgClaimInterestParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgClaimInterest: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgClaimInterest({ value: MsgClaimInterest.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgClaimInterest: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgAddInvestors({ value, fee, memo }: sendMsgAddInvestorsParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgAddInvestors: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgAddInvestors({ value: MsgAddInvestors.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgAddInvestors: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgRepayInterest({ value, fee, memo }: sendMsgRepayInterestParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgRepayInterest: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgRepayInterest({ value: MsgRepayInterest.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgRepayInterest: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgActivePool({ value, fee, memo }: sendMsgActivePoolParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgActivePool: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgActivePool({ value: MsgActivePool.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgActivePool: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgUpdatePool({ value, fee, memo }: sendMsgUpdatePoolParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgUpdatePool: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgUpdatePool({ value: MsgUpdatePool.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgUpdatePool: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		
 		msgCreatePool({ value }: msgCreatePoolParams): EncodeObject {
 			try {
 				return { typeUrl: "/joltify.spv.MsgCreatePool", value: MsgCreatePool.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgCreatePool: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgDeposit({ value }: msgDepositParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.spv.MsgDeposit", value: MsgDeposit.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgDeposit: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -180,6 +255,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		msgClaimInterest({ value }: msgClaimInterestParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.spv.MsgClaimInterest", value: MsgClaimInterest.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgClaimInterest: Could not create message: ' + e.message)
+			}
+		},
+		
 		msgAddInvestors({ value }: msgAddInvestorsParams): EncodeObject {
 			try {
 				return { typeUrl: "/joltify.spv.MsgAddInvestors", value: MsgAddInvestors.fromPartial( value ) }  
@@ -188,11 +271,27 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgDeposit({ value }: msgDepositParams): EncodeObject {
+		msgRepayInterest({ value }: msgRepayInterestParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.spv.MsgDeposit", value: MsgDeposit.fromPartial( value ) }  
+				return { typeUrl: "/joltify.spv.MsgRepayInterest", value: MsgRepayInterest.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgDeposit: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgRepayInterest: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgActivePool({ value }: msgActivePoolParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.spv.MsgActivePool", value: MsgActivePool.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgActivePool: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgUpdatePool({ value }: msgUpdatePoolParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.spv.MsgUpdatePool", value: MsgUpdatePool.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgUpdatePool: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -211,27 +310,12 @@ class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
 	
-	public registry: Array<[string, GeneratedType]> = [];
+	public registry: Array<[string, GeneratedType]>;
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });		
-		this.updateTX(client);
-		client.on('signer-changed',(signer) => {			
-		 this.updateTX(client);
-		})
-	}
-	updateTX(client: IgniteClient) {
-    const methods = txClient({
-        signer: client.signer,
-        addr: client.env.rpcURL,
-        prefix: client.env.prefix ?? "cosmos",
-    })
-	
-    this.tx = methods;
-    for (let m in methods) {
-        this.tx[m] = methods[m].bind(this.tx);
-    }
+		this.query = queryClient({ addr: client.env.apiURL });
+		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
 	}
 };
 

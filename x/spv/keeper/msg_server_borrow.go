@@ -16,12 +16,6 @@ import (
 
 func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin) error {
 
-	//macc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
-	//modAccCoin := k.bankKeeper.GetBalance(ctx, macc.GetAddress(), amount.GetDenom())
-	//
-	//if modAccCoin.IsLT(amount) {
-	//	return nil, types.ErrInsufficientFund
-	//}
 	if poolInfo.BorrowableAmount.IsLT(amount) {
 		return types.ErrInsufficientFund
 	}

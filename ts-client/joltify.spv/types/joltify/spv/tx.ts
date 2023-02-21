@@ -11,6 +11,7 @@ export interface MsgCreatePool {
   apy: string;
   payFreq: string;
   targetTokenAmount: Coin | undefined;
+  isSenior: boolean;
 }
 
 export interface MsgCreatePoolResponse {
@@ -54,8 +55,44 @@ export interface MsgRepayInterest {
 export interface MsgRepayInterestResponse {
 }
 
+export interface MsgClaimInterest {
+  creator: string;
+  poolIndex: string;
+}
+
+export interface MsgClaimInterestResponse {
+}
+
+export interface MsgUpdatePool {
+  creator: string;
+  poolIndex: string;
+  poolName: string;
+  poolApy: string;
+  payFreq: string;
+  targetTokenAmount: Coin | undefined;
+}
+
+export interface MsgUpdatePoolResponse {
+}
+
+export interface MsgActivePool {
+  creator: string;
+  poolIndex: string;
+}
+
+export interface MsgActivePoolResponse {
+}
+
 function createBaseMsgCreatePool(): MsgCreatePool {
-  return { creator: "", projectIndex: 0, poolName: "", apy: "", payFreq: "", targetTokenAmount: undefined };
+  return {
+    creator: "",
+    projectIndex: 0,
+    poolName: "",
+    apy: "",
+    payFreq: "",
+    targetTokenAmount: undefined,
+    isSenior: false,
+  };
 }
 
 export const MsgCreatePool = {
@@ -77,6 +114,9 @@ export const MsgCreatePool = {
     }
     if (message.targetTokenAmount !== undefined) {
       Coin.encode(message.targetTokenAmount, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.isSenior === true) {
+      writer.uint32(56).bool(message.isSenior);
     }
     return writer;
   },
@@ -106,6 +146,9 @@ export const MsgCreatePool = {
         case 6:
           message.targetTokenAmount = Coin.decode(reader, reader.uint32());
           break;
+        case 7:
+          message.isSenior = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -122,6 +165,7 @@ export const MsgCreatePool = {
       apy: isSet(object.apy) ? String(object.apy) : "",
       payFreq: isSet(object.payFreq) ? String(object.payFreq) : "",
       targetTokenAmount: isSet(object.targetTokenAmount) ? Coin.fromJSON(object.targetTokenAmount) : undefined,
+      isSenior: isSet(object.isSenior) ? Boolean(object.isSenior) : false,
     };
   },
 
@@ -134,6 +178,7 @@ export const MsgCreatePool = {
     message.payFreq !== undefined && (obj.payFreq = message.payFreq);
     message.targetTokenAmount !== undefined
       && (obj.targetTokenAmount = message.targetTokenAmount ? Coin.toJSON(message.targetTokenAmount) : undefined);
+    message.isSenior !== undefined && (obj.isSenior = message.isSenior);
     return obj;
   },
 
@@ -147,6 +192,7 @@ export const MsgCreatePool = {
     message.targetTokenAmount = (object.targetTokenAmount !== undefined && object.targetTokenAmount !== null)
       ? Coin.fromPartial(object.targetTokenAmount)
       : undefined;
+    message.isSenior = object.isSenior ?? false;
     return message;
   },
 };
@@ -637,6 +683,336 @@ export const MsgRepayInterestResponse = {
   },
 };
 
+function createBaseMsgClaimInterest(): MsgClaimInterest {
+  return { creator: "", poolIndex: "" };
+}
+
+export const MsgClaimInterest = {
+  encode(message: MsgClaimInterest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgClaimInterest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgClaimInterest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgClaimInterest {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+    };
+  },
+
+  toJSON(message: MsgClaimInterest): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgClaimInterest>, I>>(object: I): MsgClaimInterest {
+    const message = createBaseMsgClaimInterest();
+    message.creator = object.creator ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgClaimInterestResponse(): MsgClaimInterestResponse {
+  return {};
+}
+
+export const MsgClaimInterestResponse = {
+  encode(_: MsgClaimInterestResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgClaimInterestResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgClaimInterestResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgClaimInterestResponse {
+    return {};
+  },
+
+  toJSON(_: MsgClaimInterestResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgClaimInterestResponse>, I>>(_: I): MsgClaimInterestResponse {
+    const message = createBaseMsgClaimInterestResponse();
+    return message;
+  },
+};
+
+function createBaseMsgUpdatePool(): MsgUpdatePool {
+  return { creator: "", poolIndex: "", poolName: "", poolApy: "", payFreq: "", targetTokenAmount: undefined };
+}
+
+export const MsgUpdatePool = {
+  encode(message: MsgUpdatePool, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    if (message.poolName !== "") {
+      writer.uint32(26).string(message.poolName);
+    }
+    if (message.poolApy !== "") {
+      writer.uint32(34).string(message.poolApy);
+    }
+    if (message.payFreq !== "") {
+      writer.uint32(42).string(message.payFreq);
+    }
+    if (message.targetTokenAmount !== undefined) {
+      Coin.encode(message.targetTokenAmount, writer.uint32(50).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdatePool {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdatePool();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        case 3:
+          message.poolName = reader.string();
+          break;
+        case 4:
+          message.poolApy = reader.string();
+          break;
+        case 5:
+          message.payFreq = reader.string();
+          break;
+        case 6:
+          message.targetTokenAmount = Coin.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgUpdatePool {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+      poolName: isSet(object.poolName) ? String(object.poolName) : "",
+      poolApy: isSet(object.poolApy) ? String(object.poolApy) : "",
+      payFreq: isSet(object.payFreq) ? String(object.payFreq) : "",
+      targetTokenAmount: isSet(object.targetTokenAmount) ? Coin.fromJSON(object.targetTokenAmount) : undefined,
+    };
+  },
+
+  toJSON(message: MsgUpdatePool): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    message.poolName !== undefined && (obj.poolName = message.poolName);
+    message.poolApy !== undefined && (obj.poolApy = message.poolApy);
+    message.payFreq !== undefined && (obj.payFreq = message.payFreq);
+    message.targetTokenAmount !== undefined
+      && (obj.targetTokenAmount = message.targetTokenAmount ? Coin.toJSON(message.targetTokenAmount) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgUpdatePool>, I>>(object: I): MsgUpdatePool {
+    const message = createBaseMsgUpdatePool();
+    message.creator = object.creator ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    message.poolName = object.poolName ?? "";
+    message.poolApy = object.poolApy ?? "";
+    message.payFreq = object.payFreq ?? "";
+    message.targetTokenAmount = (object.targetTokenAmount !== undefined && object.targetTokenAmount !== null)
+      ? Coin.fromPartial(object.targetTokenAmount)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseMsgUpdatePoolResponse(): MsgUpdatePoolResponse {
+  return {};
+}
+
+export const MsgUpdatePoolResponse = {
+  encode(_: MsgUpdatePoolResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdatePoolResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdatePoolResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgUpdatePoolResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUpdatePoolResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgUpdatePoolResponse>, I>>(_: I): MsgUpdatePoolResponse {
+    const message = createBaseMsgUpdatePoolResponse();
+    return message;
+  },
+};
+
+function createBaseMsgActivePool(): MsgActivePool {
+  return { creator: "", poolIndex: "" };
+}
+
+export const MsgActivePool = {
+  encode(message: MsgActivePool, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgActivePool {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgActivePool();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgActivePool {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+    };
+  },
+
+  toJSON(message: MsgActivePool): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgActivePool>, I>>(object: I): MsgActivePool {
+    const message = createBaseMsgActivePool();
+    message.creator = object.creator ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgActivePoolResponse(): MsgActivePoolResponse {
+  return {};
+}
+
+export const MsgActivePoolResponse = {
+  encode(_: MsgActivePoolResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgActivePoolResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgActivePoolResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgActivePoolResponse {
+    return {};
+  },
+
+  toJSON(_: MsgActivePoolResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgActivePoolResponse>, I>>(_: I): MsgActivePoolResponse {
+    const message = createBaseMsgActivePoolResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse>;
@@ -645,6 +1021,9 @@ export interface Msg {
   Deposit(request: MsgDeposit): Promise<MsgDepositResponse>;
   Borrow(request: MsgBorrow): Promise<MsgBorrowResponse>;
   RepayInterest(request: MsgRepayInterest): Promise<MsgRepayInterestResponse>;
+  ClaimInterest(request: MsgClaimInterest): Promise<MsgClaimInterestResponse>;
+  UpdatePool(request: MsgUpdatePool): Promise<MsgUpdatePoolResponse>;
+  ActivePool(request: MsgActivePool): Promise<MsgActivePoolResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -656,6 +1035,9 @@ export class MsgClientImpl implements Msg {
     this.Deposit = this.Deposit.bind(this);
     this.Borrow = this.Borrow.bind(this);
     this.RepayInterest = this.RepayInterest.bind(this);
+    this.ClaimInterest = this.ClaimInterest.bind(this);
+    this.UpdatePool = this.UpdatePool.bind(this);
+    this.ActivePool = this.ActivePool.bind(this);
   }
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse> {
     const data = MsgCreatePool.encode(request).finish();
@@ -685,6 +1067,24 @@ export class MsgClientImpl implements Msg {
     const data = MsgRepayInterest.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Msg", "RepayInterest", data);
     return promise.then((data) => MsgRepayInterestResponse.decode(new _m0.Reader(data)));
+  }
+
+  ClaimInterest(request: MsgClaimInterest): Promise<MsgClaimInterestResponse> {
+    const data = MsgClaimInterest.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Msg", "ClaimInterest", data);
+    return promise.then((data) => MsgClaimInterestResponse.decode(new _m0.Reader(data)));
+  }
+
+  UpdatePool(request: MsgUpdatePool): Promise<MsgUpdatePoolResponse> {
+    const data = MsgUpdatePool.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Msg", "UpdatePool", data);
+    return promise.then((data) => MsgUpdatePoolResponse.decode(new _m0.Reader(data)));
+  }
+
+  ActivePool(request: MsgActivePool): Promise<MsgActivePoolResponse> {
+    const data = MsgActivePool.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Msg", "ActivePool", data);
+    return promise.then((data) => MsgActivePoolResponse.decode(new _m0.Reader(data)));
   }
 }
 

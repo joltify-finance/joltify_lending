@@ -7,12 +7,18 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
+import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
 import { MsgCreateIssueToken } from "./types/joltify/vault/tx";
 import { MsgCreateOutboundTx } from "./types/joltify/vault/tx";
-import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
 
 
-export { MsgCreateIssueToken, MsgCreateOutboundTx, MsgCreateCreatePool };
+export { MsgCreateCreatePool, MsgCreateIssueToken, MsgCreateOutboundTx };
+
+type sendMsgCreateCreatePoolParams = {
+  value: MsgCreateCreatePool,
+  fee?: StdFee,
+  memo?: string
+};
 
 type sendMsgCreateIssueTokenParams = {
   value: MsgCreateIssueToken,
@@ -26,12 +32,10 @@ type sendMsgCreateOutboundTxParams = {
   memo?: string
 };
 
-type sendMsgCreateCreatePoolParams = {
-  value: MsgCreateCreatePool,
-  fee?: StdFee,
-  memo?: string
-};
 
+type msgCreateCreatePoolParams = {
+  value: MsgCreateCreatePool,
+};
 
 type msgCreateIssueTokenParams = {
   value: MsgCreateIssueToken,
@@ -39,10 +43,6 @@ type msgCreateIssueTokenParams = {
 
 type msgCreateOutboundTxParams = {
   value: MsgCreateOutboundTx,
-};
-
-type msgCreateCreatePoolParams = {
-  value: MsgCreateCreatePool,
 };
 
 
@@ -62,6 +62,20 @@ interface TxClientOptions {
 export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "http://localhost:26657", prefix: "cosmos" }) => {
 
   return {
+		
+		async sendMsgCreateCreatePool({ value, fee, memo }: sendMsgCreateCreatePoolParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgCreateCreatePool: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgCreateCreatePool({ value: MsgCreateCreatePool.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgCreateCreatePool: Could not broadcast Tx: '+ e.message)
+			}
+		},
 		
 		async sendMsgCreateIssueToken({ value, fee, memo }: sendMsgCreateIssueTokenParams): Promise<DeliverTxResponse> {
 			if (!signer) {
@@ -91,20 +105,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgCreateCreatePool({ value, fee, memo }: sendMsgCreateCreatePoolParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgCreateCreatePool: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCreateCreatePool({ value: MsgCreateCreatePool.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+		
+		msgCreateCreatePool({ value }: msgCreateCreatePoolParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.vault.MsgCreateCreatePool", value: MsgCreateCreatePool.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCreateCreatePool: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:MsgCreateCreatePool: Could not create message: ' + e.message)
 			}
 		},
-		
 		
 		msgCreateIssueToken({ value }: msgCreateIssueTokenParams): EncodeObject {
 			try {
@@ -119,14 +127,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/joltify.vault.MsgCreateOutboundTx", value: MsgCreateOutboundTx.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgCreateOutboundTx: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgCreateCreatePool({ value }: msgCreateCreatePoolParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.vault.MsgCreateCreatePool", value: MsgCreateCreatePool.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgCreateCreatePool: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -145,27 +145,12 @@ class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
 	
-	public registry: Array<[string, GeneratedType]> = [];
+	public registry: Array<[string, GeneratedType]>;
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });		
-		this.updateTX(client);
-		client.on('signer-changed',(signer) => {			
-		 this.updateTX(client);
-		})
-	}
-	updateTX(client: IgniteClient) {
-    const methods = txClient({
-        signer: client.signer,
-        addr: client.env.rpcURL,
-        prefix: client.env.prefix ?? "cosmos",
-    })
-	
-    this.tx = methods;
-    for (let m in methods) {
-        this.tx[m] = methods[m].bind(this.tx);
-    }
+		this.query = queryClient({ addr: client.env.apiURL });
+		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
 	}
 };
 

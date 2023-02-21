@@ -36,6 +36,8 @@ cmd.AddCommand(CmdDeposit())
 cmd.AddCommand(CmdBorrow())
 cmd.AddCommand(CmdRepayInterest())
 cmd.AddCommand(CmdClaimInterest())
+cmd.AddCommand(CmdUpdatePool())
+cmd.AddCommand(CmdActivePool())
 // this line is used by starport scaffolding # 1
 
 	return cmd 

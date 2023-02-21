@@ -10,9 +10,8 @@ export interface DepositorInfo {
   poolIndex: string;
   lockedAmount: Coin | undefined;
   withdrawableAmount: Coin | undefined;
-  claimableInterestAmount: Coin | undefined;
   incentiveAmount: Coin | undefined;
-  linkedNFT: Uint8Array;
+  linkedNFT: string[];
 }
 
 function createBaseDepositorInfo(): DepositorInfo {
@@ -22,9 +21,8 @@ function createBaseDepositorInfo(): DepositorInfo {
     poolIndex: "",
     lockedAmount: undefined,
     withdrawableAmount: undefined,
-    claimableInterestAmount: undefined,
     incentiveAmount: undefined,
-    linkedNFT: new Uint8Array(),
+    linkedNFT: [],
   };
 }
 
@@ -45,14 +43,11 @@ export const DepositorInfo = {
     if (message.withdrawableAmount !== undefined) {
       Coin.encode(message.withdrawableAmount, writer.uint32(42).fork()).ldelim();
     }
-    if (message.claimableInterestAmount !== undefined) {
-      Coin.encode(message.claimableInterestAmount, writer.uint32(50).fork()).ldelim();
-    }
     if (message.incentiveAmount !== undefined) {
-      Coin.encode(message.incentiveAmount, writer.uint32(58).fork()).ldelim();
+      Coin.encode(message.incentiveAmount, writer.uint32(50).fork()).ldelim();
     }
-    if (message.linkedNFT.length !== 0) {
-      writer.uint32(66).bytes(message.linkedNFT);
+    for (const v of message.linkedNFT) {
+      writer.uint32(58).string(v!);
     }
     return writer;
   },
@@ -80,13 +75,10 @@ export const DepositorInfo = {
           message.withdrawableAmount = Coin.decode(reader, reader.uint32());
           break;
         case 6:
-          message.claimableInterestAmount = Coin.decode(reader, reader.uint32());
-          break;
-        case 7:
           message.incentiveAmount = Coin.decode(reader, reader.uint32());
           break;
-        case 8:
-          message.linkedNFT = reader.bytes();
+        case 7:
+          message.linkedNFT.push(reader.string());
           break;
         default:
           reader.skipType(tag & 7);
@@ -103,11 +95,8 @@ export const DepositorInfo = {
       poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
       lockedAmount: isSet(object.lockedAmount) ? Coin.fromJSON(object.lockedAmount) : undefined,
       withdrawableAmount: isSet(object.withdrawableAmount) ? Coin.fromJSON(object.withdrawableAmount) : undefined,
-      claimableInterestAmount: isSet(object.claimableInterestAmount)
-        ? Coin.fromJSON(object.claimableInterestAmount)
-        : undefined,
       incentiveAmount: isSet(object.incentiveAmount) ? Coin.fromJSON(object.incentiveAmount) : undefined,
-      linkedNFT: isSet(object.linkedNFT) ? bytesFromBase64(object.linkedNFT) : new Uint8Array(),
+      linkedNFT: Array.isArray(object?.linkedNFT) ? object.linkedNFT.map((e: any) => String(e)) : [],
     };
   },
 
@@ -123,13 +112,13 @@ export const DepositorInfo = {
       && (obj.lockedAmount = message.lockedAmount ? Coin.toJSON(message.lockedAmount) : undefined);
     message.withdrawableAmount !== undefined
       && (obj.withdrawableAmount = message.withdrawableAmount ? Coin.toJSON(message.withdrawableAmount) : undefined);
-    message.claimableInterestAmount !== undefined && (obj.claimableInterestAmount = message.claimableInterestAmount
-      ? Coin.toJSON(message.claimableInterestAmount)
-      : undefined);
     message.incentiveAmount !== undefined
       && (obj.incentiveAmount = message.incentiveAmount ? Coin.toJSON(message.incentiveAmount) : undefined);
-    message.linkedNFT !== undefined
-      && (obj.linkedNFT = base64FromBytes(message.linkedNFT !== undefined ? message.linkedNFT : new Uint8Array()));
+    if (message.linkedNFT) {
+      obj.linkedNFT = message.linkedNFT.map((e) => e);
+    } else {
+      obj.linkedNFT = [];
+    }
     return obj;
   },
 
@@ -144,14 +133,10 @@ export const DepositorInfo = {
     message.withdrawableAmount = (object.withdrawableAmount !== undefined && object.withdrawableAmount !== null)
       ? Coin.fromPartial(object.withdrawableAmount)
       : undefined;
-    message.claimableInterestAmount =
-      (object.claimableInterestAmount !== undefined && object.claimableInterestAmount !== null)
-        ? Coin.fromPartial(object.claimableInterestAmount)
-        : undefined;
     message.incentiveAmount = (object.incentiveAmount !== undefined && object.incentiveAmount !== null)
       ? Coin.fromPartial(object.incentiveAmount)
       : undefined;
-    message.linkedNFT = object.linkedNFT ?? new Uint8Array();
+    message.linkedNFT = object.linkedNFT?.map((e) => e) || [];
     return message;
   },
 };

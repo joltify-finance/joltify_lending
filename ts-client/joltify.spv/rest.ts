@@ -13,7 +13,7 @@ export enum PoolInfoPOOLSTATUS {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
   CLOSED = "CLOSED",
-  OPEN = "OPEN",
+  PREPARE = "PREPARE",
 }
 
 export interface ProtobufAny {
@@ -56,25 +56,19 @@ export interface SpvDepositorInfo {
    * NOTE: The amount field is an Int which implements the custom method
    * signatures required by gogoproto.
    */
-  claimable_interest_amount?: V1Beta1Coin;
-
-  /**
-   * Coin defines a token with a denomination and an amount.
-   *
-   * NOTE: The amount field is an Int which implements the custom method
-   * signatures required by gogoproto.
-   */
   incentive_amount?: V1Beta1Coin;
-
-  /** @format byte */
-  linkedNFT?: string;
+  linkedNFT?: string[];
 }
+
+export type SpvMsgActivePoolResponse = object;
 
 export interface SpvMsgAddInvestorsResponse {
   operationResult?: boolean;
 }
 
 export type SpvMsgBorrowResponse = object;
+
+export type SpvMsgClaimInterestResponse = object;
 
 export interface SpvMsgCreatePoolResponse {
   poolIndex?: string;
@@ -83,6 +77,8 @@ export interface SpvMsgCreatePoolResponse {
 export type SpvMsgDepositResponse = object;
 
 export type SpvMsgRepayInterestResponse = object;
+
+export type SpvMsgUpdatePoolResponse = object;
 
 /**
  * Params defines the parameters for the module.
@@ -148,6 +144,16 @@ export interface SpvPoolInfo {
 
 export interface SpvQueryAllowedPoolsResponse {
   pools_index?: string[];
+}
+
+export interface SpvQueryClaimableInterestResponse {
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  claimable_interest_amount?: V1Beta1Coin;
 }
 
 export interface SpvQueryDepositorResponse {
@@ -388,6 +394,23 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryClaimableInterest
+   * @summary Queries a list of ClaimableInterest items.
+   * @request GET:/joltify/spv/claimable_interest/{wallet}
+   */
+  queryClaimableInterest = (wallet: string, query?: { pool_index?: string }, params: RequestParams = {}) =>
+    this.request<SpvQueryClaimableInterestResponse, RpcStatus>({
+      path: `/joltify/spv/claimable_interest/${wallet}`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
   /**
    * No description
    *

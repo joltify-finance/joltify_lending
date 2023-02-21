@@ -9,7 +9,12 @@ export interface NftInfo {
   issuer: string;
   receiver: string;
   ratio: string;
-  issueTime: Date | undefined;
+  lastPayment: Date | undefined;
+}
+
+export interface PaymentItem {
+  paymentTime: Date | undefined;
+  paymentAmount: Coin | undefined;
 }
 
 export interface BorrowInterest {
@@ -18,10 +23,12 @@ export interface BorrowInterest {
   payFreq: number;
   issueTime: Date | undefined;
   borrowed: Coin | undefined;
+  cyclePayment: Coin | undefined;
+  payments: PaymentItem[];
 }
 
 function createBaseNftInfo(): NftInfo {
-  return { issuer: "", receiver: "", ratio: "", issueTime: undefined };
+  return { issuer: "", receiver: "", ratio: "", lastPayment: undefined };
 }
 
 export const NftInfo = {
@@ -35,8 +42,8 @@ export const NftInfo = {
     if (message.ratio !== "") {
       writer.uint32(26).string(message.ratio);
     }
-    if (message.issueTime !== undefined) {
-      Timestamp.encode(toTimestamp(message.issueTime), writer.uint32(34).fork()).ldelim();
+    if (message.lastPayment !== undefined) {
+      Timestamp.encode(toTimestamp(message.lastPayment), writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
@@ -58,7 +65,7 @@ export const NftInfo = {
           message.ratio = reader.string();
           break;
         case 4:
-          message.issueTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          message.lastPayment = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           break;
         default:
           reader.skipType(tag & 7);
@@ -73,7 +80,7 @@ export const NftInfo = {
       issuer: isSet(object.issuer) ? String(object.issuer) : "",
       receiver: isSet(object.receiver) ? String(object.receiver) : "",
       ratio: isSet(object.ratio) ? String(object.ratio) : "",
-      issueTime: isSet(object.issueTime) ? fromJsonTimestamp(object.issueTime) : undefined,
+      lastPayment: isSet(object.lastPayment) ? fromJsonTimestamp(object.lastPayment) : undefined,
     };
   },
 
@@ -82,7 +89,7 @@ export const NftInfo = {
     message.issuer !== undefined && (obj.issuer = message.issuer);
     message.receiver !== undefined && (obj.receiver = message.receiver);
     message.ratio !== undefined && (obj.ratio = message.ratio);
-    message.issueTime !== undefined && (obj.issueTime = message.issueTime.toISOString());
+    message.lastPayment !== undefined && (obj.lastPayment = message.lastPayment.toISOString());
     return obj;
   },
 
@@ -91,13 +98,82 @@ export const NftInfo = {
     message.issuer = object.issuer ?? "";
     message.receiver = object.receiver ?? "";
     message.ratio = object.ratio ?? "";
-    message.issueTime = object.issueTime ?? undefined;
+    message.lastPayment = object.lastPayment ?? undefined;
+    return message;
+  },
+};
+
+function createBasePaymentItem(): PaymentItem {
+  return { paymentTime: undefined, paymentAmount: undefined };
+}
+
+export const PaymentItem = {
+  encode(message: PaymentItem, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.paymentTime !== undefined) {
+      Timestamp.encode(toTimestamp(message.paymentTime), writer.uint32(10).fork()).ldelim();
+    }
+    if (message.paymentAmount !== undefined) {
+      Coin.encode(message.paymentAmount, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PaymentItem {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePaymentItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.paymentTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.paymentAmount = Coin.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PaymentItem {
+    return {
+      paymentTime: isSet(object.paymentTime) ? fromJsonTimestamp(object.paymentTime) : undefined,
+      paymentAmount: isSet(object.paymentAmount) ? Coin.fromJSON(object.paymentAmount) : undefined,
+    };
+  },
+
+  toJSON(message: PaymentItem): unknown {
+    const obj: any = {};
+    message.paymentTime !== undefined && (obj.paymentTime = message.paymentTime.toISOString());
+    message.paymentAmount !== undefined
+      && (obj.paymentAmount = message.paymentAmount ? Coin.toJSON(message.paymentAmount) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<PaymentItem>, I>>(object: I): PaymentItem {
+    const message = createBasePaymentItem();
+    message.paymentTime = object.paymentTime ?? undefined;
+    message.paymentAmount = (object.paymentAmount !== undefined && object.paymentAmount !== null)
+      ? Coin.fromPartial(object.paymentAmount)
+      : undefined;
     return message;
   },
 };
 
 function createBaseBorrowInterest(): BorrowInterest {
-  return { poolIndex: "", apy: "", payFreq: 0, issueTime: undefined, borrowed: undefined };
+  return {
+    poolIndex: "",
+    apy: "",
+    payFreq: 0,
+    issueTime: undefined,
+    borrowed: undefined,
+    cyclePayment: undefined,
+    payments: [],
+  };
 }
 
 export const BorrowInterest = {
@@ -116,6 +192,12 @@ export const BorrowInterest = {
     }
     if (message.borrowed !== undefined) {
       Coin.encode(message.borrowed, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.cyclePayment !== undefined) {
+      Coin.encode(message.cyclePayment, writer.uint32(50).fork()).ldelim();
+    }
+    for (const v of message.payments) {
+      PaymentItem.encode(v!, writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -142,6 +224,12 @@ export const BorrowInterest = {
         case 5:
           message.borrowed = Coin.decode(reader, reader.uint32());
           break;
+        case 6:
+          message.cyclePayment = Coin.decode(reader, reader.uint32());
+          break;
+        case 7:
+          message.payments.push(PaymentItem.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -157,6 +245,8 @@ export const BorrowInterest = {
       payFreq: isSet(object.payFreq) ? Number(object.payFreq) : 0,
       issueTime: isSet(object.issueTime) ? fromJsonTimestamp(object.issueTime) : undefined,
       borrowed: isSet(object.borrowed) ? Coin.fromJSON(object.borrowed) : undefined,
+      cyclePayment: isSet(object.cyclePayment) ? Coin.fromJSON(object.cyclePayment) : undefined,
+      payments: Array.isArray(object?.payments) ? object.payments.map((e: any) => PaymentItem.fromJSON(e)) : [],
     };
   },
 
@@ -167,6 +257,13 @@ export const BorrowInterest = {
     message.payFreq !== undefined && (obj.payFreq = Math.round(message.payFreq));
     message.issueTime !== undefined && (obj.issueTime = message.issueTime.toISOString());
     message.borrowed !== undefined && (obj.borrowed = message.borrowed ? Coin.toJSON(message.borrowed) : undefined);
+    message.cyclePayment !== undefined
+      && (obj.cyclePayment = message.cyclePayment ? Coin.toJSON(message.cyclePayment) : undefined);
+    if (message.payments) {
+      obj.payments = message.payments.map((e) => e ? PaymentItem.toJSON(e) : undefined);
+    } else {
+      obj.payments = [];
+    }
     return obj;
   },
 
@@ -179,6 +276,10 @@ export const BorrowInterest = {
     message.borrowed = (object.borrowed !== undefined && object.borrowed !== null)
       ? Coin.fromPartial(object.borrowed)
       : undefined;
+    message.cyclePayment = (object.cyclePayment !== undefined && object.cyclePayment !== null)
+      ? Coin.fromPartial(object.cyclePayment)
+      : undefined;
+    message.payments = object.payments?.map((e) => PaymentItem.fromPartial(e)) || [];
     return message;
   },
 };

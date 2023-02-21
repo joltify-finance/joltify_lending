@@ -14,12 +14,12 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func parameterSanitize(msg *types.MsgCreatePool) (sdk.Dec, int32, error) {
-	apy, err := sdk.NewDecFromStr(msg.Apy)
+func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {
+	apy, err := sdk.NewDecFromStr(apyStr)
 	if err != nil {
 		return sdk.Dec{}, 0, err
 	}
-	payFreq, err := strconv.ParseInt(msg.PayFreq, 10, 64)
+	payFreq, err := strconv.ParseInt(payFreqStr, 10, 64)
 	if payFreq > types.Maxfreq || payFreq < types.Minfreq {
 		return sdk.Dec{}, 0, errors.New("pay frequency is invalid")
 	}
@@ -46,7 +46,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized address %v", msg.Creator)
 	}
 
-	apy, payfreq, err := parameterSanitize(msg)
+	apy, payfreq, err := parameterSanitize(msg.PayFreq, msg.Apy)
 	if err != nil {
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}

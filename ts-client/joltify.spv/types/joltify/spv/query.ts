@@ -1,6 +1,7 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
 import { PageRequest, PageResponse } from "../../cosmos/base/query/v1beta1/pagination";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 import { DepositorInfo } from "./deposit";
 import { Params } from "./params";
 import { PoolInfo } from "./poolinfo";
@@ -49,6 +50,15 @@ export interface QueryAllowedPoolsRequest {
 
 export interface QueryAllowedPoolsResponse {
   poolsIndex: string[];
+}
+
+export interface QueryClaimableInterestRequest {
+  wallet: string;
+  poolIndex: string;
+}
+
+export interface QueryClaimableInterestResponse {
+  claimableInterestAmount: Coin | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -556,6 +566,124 @@ export const QueryAllowedPoolsResponse = {
   },
 };
 
+function createBaseQueryClaimableInterestRequest(): QueryClaimableInterestRequest {
+  return { wallet: "", poolIndex: "" };
+}
+
+export const QueryClaimableInterestRequest = {
+  encode(message: QueryClaimableInterestRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.wallet !== "") {
+      writer.uint32(10).string(message.wallet);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryClaimableInterestRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryClaimableInterestRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.wallet = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryClaimableInterestRequest {
+    return {
+      wallet: isSet(object.wallet) ? String(object.wallet) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+    };
+  },
+
+  toJSON(message: QueryClaimableInterestRequest): unknown {
+    const obj: any = {};
+    message.wallet !== undefined && (obj.wallet = message.wallet);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryClaimableInterestRequest>, I>>(
+    object: I,
+  ): QueryClaimableInterestRequest {
+    const message = createBaseQueryClaimableInterestRequest();
+    message.wallet = object.wallet ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryClaimableInterestResponse(): QueryClaimableInterestResponse {
+  return { claimableInterestAmount: undefined };
+}
+
+export const QueryClaimableInterestResponse = {
+  encode(message: QueryClaimableInterestResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.claimableInterestAmount !== undefined) {
+      Coin.encode(message.claimableInterestAmount, writer.uint32(50).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryClaimableInterestResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryClaimableInterestResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 6:
+          message.claimableInterestAmount = Coin.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryClaimableInterestResponse {
+    return {
+      claimableInterestAmount: isSet(object.claimableInterestAmount)
+        ? Coin.fromJSON(object.claimableInterestAmount)
+        : undefined,
+    };
+  },
+
+  toJSON(message: QueryClaimableInterestResponse): unknown {
+    const obj: any = {};
+    message.claimableInterestAmount !== undefined && (obj.claimableInterestAmount = message.claimableInterestAmount
+      ? Coin.toJSON(message.claimableInterestAmount)
+      : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryClaimableInterestResponse>, I>>(
+    object: I,
+  ): QueryClaimableInterestResponse {
+    const message = createBaseQueryClaimableInterestResponse();
+    message.claimableInterestAmount =
+      (object.claimableInterestAmount !== undefined && object.claimableInterestAmount !== null)
+        ? Coin.fromPartial(object.claimableInterestAmount)
+        : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -567,6 +695,8 @@ export interface Query {
   Depositor(request: QueryDepositorRequest): Promise<QueryDepositorResponse>;
   /** Queries a list of AllowedPools items. */
   AllowedPools(request: QueryAllowedPoolsRequest): Promise<QueryAllowedPoolsResponse>;
+  /** Queries a list of ClaimableInterest items. */
+  ClaimableInterest(request: QueryClaimableInterestRequest): Promise<QueryClaimableInterestResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -578,6 +708,7 @@ export class QueryClientImpl implements Query {
     this.QueryPool = this.QueryPool.bind(this);
     this.Depositor = this.Depositor.bind(this);
     this.AllowedPools = this.AllowedPools.bind(this);
+    this.ClaimableInterest = this.ClaimableInterest.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -607,6 +738,12 @@ export class QueryClientImpl implements Query {
     const data = QueryAllowedPoolsRequest.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Query", "AllowedPools", data);
     return promise.then((data) => QueryAllowedPoolsResponse.decode(new _m0.Reader(data)));
+  }
+
+  ClaimableInterest(request: QueryClaimableInterestRequest): Promise<QueryClaimableInterestResponse> {
+    const data = QueryClaimableInterestRequest.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Query", "ClaimableInterest", data);
+    return promise.then((data) => QueryClaimableInterestResponse.decode(new _m0.Reader(data)));
   }
 }
 
