@@ -33,36 +33,36 @@ func TestMsgSERvCreatePool(t *testing.T) {
 	_ = k
 	//pa := types.Params{Submitter: []sdk.AccAddress{acc}}
 
-	req := types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 4, PoolName: "hello", Apy: "7.8", PayFreq: "3", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req := types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 4, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
-	req = types.MsgCreatePool{Creator: "invalid address", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", PayFreq: "3", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: "invalid address", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
-	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", PayFreq: "3", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
 	// invalid pay freq
-	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", PayFreq: "300", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
 	// create the first pool apy 7.8%
-	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", IsSenior: true, ProjectIndex: 1, PoolName: "hello", Apy: "7.8", PayFreq: "6", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
 	// duplicate pool
-	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", IsSenior: true, ProjectIndex: 1, PoolName: "hello2", Apy: "7.8", PayFreq: "7", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(4322))}
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello2", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(4322))}
 	_, err = app.CreatePool(ctx, &req)
 	fmt.Printf(">>>%v\n", err)
 	require.Error(t, err)
 
 	// create the second pool apy 17.8%
-	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", IsSenior: false, ProjectIndex: 1, PoolName: "hello", Apy: "17.8", PayFreq: "7", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "17.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 

@@ -95,7 +95,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
-	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
+	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
 		return nil, coserrors.Wrap(types.ErrPoolNotActive, "pool has been closed")
 	}
 
