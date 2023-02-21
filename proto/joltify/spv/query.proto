@@ -36,15 +36,12 @@ service Query {
 
   // Queries a list of AllowedPools items.
   rpc AllowedPools(QueryAllowedPoolsRequest) returns (QueryAllowedPoolsResponse) {
-    option (google.api.http).get = "/joltify/spve/allowed_pools/{walletAddress
+    option (google.api.http).get = "/joltify/spve/allowed_pools/{walletAddress}";}
 
 
 
    rpc OutstandingInterest(QueryOutstandingInterestRequest) returns (QueryOutstandingInterestResponse) {
-		option (google.api.http).get = "/joltify/spv/outstanding_interest/{wallet}/{poolIndex}";
-
-
-}}
+		option (google.api.http).get = "/joltify/spv/outstanding_interest/{wallet}/{poolIndex}";}
 
 
   // Queries a list of ClaimableInterest items.
