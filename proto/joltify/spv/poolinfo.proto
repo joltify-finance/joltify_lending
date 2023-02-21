@@ -77,6 +77,14 @@ message PoolInfo {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
+
+  enum POOLTYPE{
+    JUNIOR = 0;
+    SENIOR = 1;
+  }
+  POOLTYPE pool_type = 17;
+
+
 }
 
 message PoolWithInvestors {

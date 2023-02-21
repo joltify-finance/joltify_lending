@@ -16,6 +16,11 @@ export enum PoolInfoPOOLSTATUS {
   PREPARE = "PREPARE",
 }
 
+export enum PoolInfoPOOLTYPE {
+  JUNIOR = "JUNIOR",
+  SENIOR = "SENIOR",
+}
+
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -148,6 +153,7 @@ export interface SpvPoolInfo {
    * signatures required by gogoproto.
    */
   target_amount?: V1Beta1Coin;
+  pool_type?: PoolInfoPOOLTYPE;
 }
 
 export interface SpvQueryAllowedPoolsResponse {

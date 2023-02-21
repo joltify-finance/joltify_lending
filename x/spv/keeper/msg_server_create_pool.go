@@ -26,6 +26,38 @@ func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {
 	return apy, int32(payFreq), nil
 }
 
+func calculateApys(targetAmount, pool1Amount sdk.Coin, baseApy, pool1Apy sdk.Dec, isJunior bool) (map[string]sdk.Dec, map[string]sdk.Coin, error) {
+	poolsInfoAPY := make(map[string]sdk.Dec)
+	poolsInfoAmount := make(map[string]sdk.Coin)
+
+	if targetAmount.IsLTE(pool1Amount) {
+		return nil, nil, errors.New("amount incorrect")
+	}
+
+	pool2Amount := targetAmount.Sub(pool1Amount)
+	if isJunior {
+		poolsInfoAmount["junior"] = pool1Amount
+		poolsInfoAmount["senior"] = pool2Amount
+	} else {
+		poolsInfoAmount["junior"] = pool2Amount
+		poolsInfoAmount["senior"] = pool1Amount
+	}
+
+	ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
+	it := sdk.NewDecFromInt(targetAmount.Amount).Mul(baseApy)
+	pool2Apy := it.Sub(ij).Quo(sdk.NewDecFromInt(pool2Amount.Amount))
+
+	if isJunior {
+		poolsInfoAPY["junior"] = pool1Apy
+		poolsInfoAPY["senior"] = pool2Apy
+	} else {
+		poolsInfoAPY["junior"] = pool2Apy
+		poolsInfoAPY["senior"] = pool1Apy
+	}
+	return poolsInfoAPY, poolsInfoAmount, nil
+
+}
+
 func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (*types.MsgCreatePoolResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -51,29 +83,20 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
-	poolsInfoAPY := make(map[string]sdk.Dec)
-	poolsInfoAmount := make(map[string]sdk.Coin)
+	poolsInfoAPY, poolsInfoAmount, err := calculateApys(targetProject.ProjectTargetAmount, msg.TargetTokenAmount, targetProject.BaseApy, apy, true)
 
-	if targetProject.ProjectTargetAmount.IsLTE(msg.TargetTokenAmount) {
+	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger thatn target")
 	}
-
-	seniorAmount := targetProject.ProjectTargetAmount.Sub(msg.TargetTokenAmount)
-	poolsInfoAmount["junior"] = msg.TargetTokenAmount
-	poolsInfoAmount["senior"] = seniorAmount
-
-	poolsInfoAPY["junior"] = apy
-
-	ij := sdk.NewDecFromInt(msg.TargetTokenAmount.Amount).Mul(apy)
-	it := sdk.NewDecFromInt(targetProject.ProjectTargetAmount.Amount).Mul(targetProject.BaseApy)
-	apySenior := it.Sub(ij).Quo(sdk.NewDecFromInt(seniorAmount.Amount))
-
-	poolsInfoAPY["junior"] = apy
-	poolsInfoAPY["senior"] = apySenior
 
 	for poolType, amount := range poolsInfoAmount {
 
 		poolApy := poolsInfoAPY[poolType]
+
+		enuPoolType := types.PoolInfo_JUNIOR
+		if poolType == "senior" {
+			enuPoolType = types.PoolInfo_SENIOR
+		}
 
 		indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))
 		urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
@@ -106,6 +129,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			ReserveFactor:    types.RESERVEFACTOR,
 			PoolNFTIds:       []string{},
 			PoolStatus:       types.PoolInfo_PREPARE,
+			PoolType:         enuPoolType,
 			ProjectLength:    targetProject.ProjectLength,
 			BorrowedAmount:   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			BorrowableAmount: sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),

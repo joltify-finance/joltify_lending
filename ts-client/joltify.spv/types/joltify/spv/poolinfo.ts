@@ -30,6 +30,7 @@ export interface PoolInfo {
   projectLength: number;
   borrowableAmount: Coin | undefined;
   targetAmount: Coin | undefined;
+  poolType: PoolInfo_POOLTYPE;
 }
 
 export enum PoolInfo_POOLSTATUS {
@@ -77,6 +78,39 @@ export function poolInfo_POOLSTATUSToJSON(object: PoolInfo_POOLSTATUS): string {
   }
 }
 
+export enum PoolInfo_POOLTYPE {
+  JUNIOR = 0,
+  SENIOR = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function poolInfo_POOLTYPEFromJSON(object: any): PoolInfo_POOLTYPE {
+  switch (object) {
+    case 0:
+    case "JUNIOR":
+      return PoolInfo_POOLTYPE.JUNIOR;
+    case 1:
+    case "SENIOR":
+      return PoolInfo_POOLTYPE.SENIOR;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return PoolInfo_POOLTYPE.UNRECOGNIZED;
+  }
+}
+
+export function poolInfo_POOLTYPEToJSON(object: PoolInfo_POOLTYPE): string {
+  switch (object) {
+    case PoolInfo_POOLTYPE.JUNIOR:
+      return "JUNIOR";
+    case PoolInfo_POOLTYPE.SENIOR:
+      return "SENIOR";
+    case PoolInfo_POOLTYPE.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 export interface PoolWithInvestors {
   poolIndex: string;
   investors: string[];
@@ -110,6 +144,7 @@ function createBasePoolInfo(): PoolInfo {
     projectLength: 0,
     borrowableAmount: undefined,
     targetAmount: undefined,
+    poolType: 0,
   };
 }
 
@@ -162,6 +197,9 @@ export const PoolInfo = {
     }
     if (message.targetAmount !== undefined) {
       Coin.encode(message.targetAmount, writer.uint32(130).fork()).ldelim();
+    }
+    if (message.poolType !== 0) {
+      writer.uint32(136).int32(message.poolType);
     }
     return writer;
   },
@@ -221,6 +259,9 @@ export const PoolInfo = {
         case 16:
           message.targetAmount = Coin.decode(reader, reader.uint32());
           break;
+        case 17:
+          message.poolType = reader.int32() as any;
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -247,6 +288,7 @@ export const PoolInfo = {
       projectLength: isSet(object.projectLength) ? Number(object.projectLength) : 0,
       borrowableAmount: isSet(object.borrowableAmount) ? Coin.fromJSON(object.borrowableAmount) : undefined,
       targetAmount: isSet(object.targetAmount) ? Coin.fromJSON(object.targetAmount) : undefined,
+      poolType: isSet(object.poolType) ? poolInfo_POOLTYPEFromJSON(object.poolType) : 0,
     };
   },
 
@@ -279,6 +321,7 @@ export const PoolInfo = {
       && (obj.borrowableAmount = message.borrowableAmount ? Coin.toJSON(message.borrowableAmount) : undefined);
     message.targetAmount !== undefined
       && (obj.targetAmount = message.targetAmount ? Coin.toJSON(message.targetAmount) : undefined);
+    message.poolType !== undefined && (obj.poolType = poolInfo_POOLTYPEToJSON(message.poolType));
     return obj;
   },
 
@@ -308,6 +351,7 @@ export const PoolInfo = {
     message.targetAmount = (object.targetAmount !== undefined && object.targetAmount !== null)
       ? Coin.fromPartial(object.targetAmount)
       : undefined;
+    message.poolType = object.poolType ?? 0;
     return message;
   },
 };

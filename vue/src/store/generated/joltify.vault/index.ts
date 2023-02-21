@@ -474,6 +474,19 @@ export default {
 		},
 		
 		
+		async sendMsgCreateIssueToken({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyVault.tx.sendMsgCreateIssueToken({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgCreateIssueToken:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgCreateIssueToken:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		async sendMsgCreateCreatePool({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -500,20 +513,20 @@ export default {
 				}
 			}
 		},
-		async sendMsgCreateIssueToken({ rootGetters }, { value, fee = [], memo = '' }) {
+		
+		async MsgCreateIssueToken({ rootGetters }, { value }) {
 			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyVault.tx.sendMsgCreateIssueToken({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifyVault.tx.msgCreateIssueToken({value})
+				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
 					throw new Error('TxClient:MsgCreateIssueToken:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgCreateIssueToken:Send Could not broadcast Tx: '+ e.message)
+				} else{
+					throw new Error('TxClient:MsgCreateIssueToken:Create Could not create message: ' + e.message)
 				}
 			}
 		},
-		
 		async MsgCreateCreatePool({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -537,19 +550,6 @@ export default {
 					throw new Error('TxClient:MsgCreateOutboundTx:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgCreateOutboundTx:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgCreateIssueToken({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifyVault.tx.msgCreateIssueToken({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgCreateIssueToken:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgCreateIssueToken:Create Could not create message: ' + e.message)
 				}
 			}
 		},

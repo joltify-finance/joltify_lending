@@ -95,7 +95,6 @@ message MsgUpdatePool {
   string pool_index = 2;
   string pool_name  = 3;
   string pool_apy  = 4;
-  string pay_freq = 5;
   cosmos.base.v1beta1.Coin target_token_amount = 6[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
 

@@ -66,7 +66,6 @@ export interface MsgUpdatePool {
   poolIndex: string;
   poolName: string;
   poolApy: string;
-  payFreq: string;
   targetTokenAmount: Coin | undefined;
 }
 
@@ -753,7 +752,7 @@ export const MsgClaimInterestResponse = {
 };
 
 function createBaseMsgUpdatePool(): MsgUpdatePool {
-  return { creator: "", poolIndex: "", poolName: "", poolApy: "", payFreq: "", targetTokenAmount: undefined };
+  return { creator: "", poolIndex: "", poolName: "", poolApy: "", targetTokenAmount: undefined };
 }
 
 export const MsgUpdatePool = {
@@ -769,9 +768,6 @@ export const MsgUpdatePool = {
     }
     if (message.poolApy !== "") {
       writer.uint32(34).string(message.poolApy);
-    }
-    if (message.payFreq !== "") {
-      writer.uint32(42).string(message.payFreq);
     }
     if (message.targetTokenAmount !== undefined) {
       Coin.encode(message.targetTokenAmount, writer.uint32(50).fork()).ldelim();
@@ -798,9 +794,6 @@ export const MsgUpdatePool = {
         case 4:
           message.poolApy = reader.string();
           break;
-        case 5:
-          message.payFreq = reader.string();
-          break;
         case 6:
           message.targetTokenAmount = Coin.decode(reader, reader.uint32());
           break;
@@ -818,7 +811,6 @@ export const MsgUpdatePool = {
       poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
       poolName: isSet(object.poolName) ? String(object.poolName) : "",
       poolApy: isSet(object.poolApy) ? String(object.poolApy) : "",
-      payFreq: isSet(object.payFreq) ? String(object.payFreq) : "",
       targetTokenAmount: isSet(object.targetTokenAmount) ? Coin.fromJSON(object.targetTokenAmount) : undefined,
     };
   },
@@ -829,7 +821,6 @@ export const MsgUpdatePool = {
     message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
     message.poolName !== undefined && (obj.poolName = message.poolName);
     message.poolApy !== undefined && (obj.poolApy = message.poolApy);
-    message.payFreq !== undefined && (obj.payFreq = message.payFreq);
     message.targetTokenAmount !== undefined
       && (obj.targetTokenAmount = message.targetTokenAmount ? Coin.toJSON(message.targetTokenAmount) : undefined);
     return obj;
@@ -841,7 +832,6 @@ export const MsgUpdatePool = {
     message.poolIndex = object.poolIndex ?? "";
     message.poolName = object.poolName ?? "";
     message.poolApy = object.poolApy ?? "";
-    message.payFreq = object.payFreq ?? "";
     message.targetTokenAmount = (object.targetTokenAmount !== undefined && object.targetTokenAmount !== null)
       ? Coin.fromPartial(object.targetTokenAmount)
       : undefined;
