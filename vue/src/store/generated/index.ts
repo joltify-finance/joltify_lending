@@ -10,7 +10,6 @@ import JoltifyThirdPartyIssuanceV1Beta1 from './joltify.third_party.issuance.v1b
 import JoltifyThirdPartyJoltV1Beta1 from './joltify.third_party.jolt.v1beta1'
 import JoltifyThirdPartyPricefeedV1Beta1 from './joltify.third_party.pricefeed.v1beta1'
 import JoltifyVault from './joltify.vault'
-import JoltifyfinanceJoltifyLendingSpv from './joltifyfinance.joltify_lending.spv'
 import CosmosAuthV1Beta1 from './cosmos.auth.v1beta1'
 import CosmosAuthzV1Beta1 from './cosmos.authz.v1beta1'
 import CosmosBankV1Beta1 from './cosmos.bank.v1beta1'
@@ -39,7 +38,6 @@ export default {
   JoltifyThirdPartyJoltV1Beta1: load(JoltifyThirdPartyJoltV1Beta1, 'joltify.third_party.jolt.v1beta1'),
   JoltifyThirdPartyPricefeedV1Beta1: load(JoltifyThirdPartyPricefeedV1Beta1, 'joltify.third_party.pricefeed.v1beta1'),
   JoltifyVault: load(JoltifyVault, 'joltify.vault'),
-  JoltifyfinanceJoltifyLendingSpv: load(JoltifyfinanceJoltifyLendingSpv, 'joltifyfinance.joltify_lending.spv'),
   CosmosAuthV1Beta1: load(CosmosAuthV1Beta1, 'cosmos.auth.v1beta1'),
   CosmosAuthzV1Beta1: load(CosmosAuthzV1Beta1, 'cosmos.authz.v1beta1'),
   CosmosBankV1Beta1: load(CosmosBankV1Beta1, 'cosmos.bank.v1beta1'),

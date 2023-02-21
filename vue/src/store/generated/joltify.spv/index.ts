@@ -301,16 +301,42 @@ export default {
 		},
 		
 		
-		async sendMsgCreatePool({ rootGetters }, { value, fee = [], memo = '' }) {
+		async sendMsgClaimInterest({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
-				const result = await client.JoltifySpv.tx.sendMsgCreatePool({ value, fee: {amount: fee, gas: "200000"}, memo })
+				const result = await client.JoltifySpv.tx.sendMsgClaimInterest({ value, fee: {amount: fee, gas: "200000"}, memo })
 				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgCreatePool:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgClaimInterest:Init Could not initialize signing client. Wallet is required.')
 				}else{
-					throw new Error('TxClient:MsgCreatePool:Send Could not broadcast Tx: '+ e.message)
+					throw new Error('TxClient:MsgClaimInterest:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgRepayInterest({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgRepayInterest({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgRepayInterest:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgRepayInterest:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -324,6 +350,32 @@ export default {
 					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
 				}else{
 					throw new Error('TxClient:MsgBorrow:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgAddInvestors({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgAddInvestors({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgAddInvestors:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgAddInvestors:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
+		async sendMsgCreatePool({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifySpv.tx.sendMsgCreatePool({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgCreatePool:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgCreatePool:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -353,69 +405,43 @@ export default {
 				}
 			}
 		},
-		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifySpv.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgAddInvestors({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifySpv.tx.sendMsgAddInvestors({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgAddInvestors:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgAddInvestors:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgClaimInterest({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifySpv.tx.sendMsgClaimInterest({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgClaimInterest:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgClaimInterest:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgRepayInterest({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifySpv.tx.sendMsgRepayInterest({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgRepayInterest:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgRepayInterest:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		
-		async MsgCreatePool({ rootGetters }, { value }) {
+		async MsgClaimInterest({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.JoltifySpv.tx.msgCreatePool({value})
+				const msg = await client.JoltifySpv.tx.msgClaimInterest({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgCreatePool:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgClaimInterest:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgCreatePool:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgClaimInterest:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgDeposit({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifySpv.tx.msgDeposit({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgDeposit:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgRepayInterest({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifySpv.tx.msgRepayInterest({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgRepayInterest:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgRepayInterest:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -429,6 +455,32 @@ export default {
 					throw new Error('TxClient:MsgBorrow:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgBorrow:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgAddInvestors({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifySpv.tx.msgAddInvestors({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgAddInvestors:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgAddInvestors:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgCreatePool({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifySpv.tx.msgCreatePool({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgCreatePool:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgCreatePool:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -455,58 +507,6 @@ export default {
 					throw new Error('TxClient:MsgActivePool:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgActivePool:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgDeposit({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifySpv.tx.msgDeposit({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgDeposit:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgAddInvestors({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifySpv.tx.msgAddInvestors({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgAddInvestors:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgAddInvestors:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgClaimInterest({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifySpv.tx.msgClaimInterest({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgClaimInterest:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgClaimInterest:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgRepayInterest({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifySpv.tx.msgRepayInterest({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgRepayInterest:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgRepayInterest:Create Could not create message: ' + e.message)
 				}
 			}
 		},
