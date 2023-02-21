@@ -34,11 +34,17 @@ service Query {
     option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}";
   }
 
-
   // Queries a list of AllowedPools items.
   rpc AllowedPools(QueryAllowedPoolsRequest) returns (QueryAllowedPoolsResponse) {
-    option (google.api.http).get = "/joltify/spve/allowed_pools/{walletAddress}";
-  }
+    option (google.api.http).get = "/joltify/spve/allowed_pools/{walletAddress
+
+
+
+   rpc OutstandingInterest(QueryOutstandingInterestRequest) returns (QueryOutstandingInterestResponse) {
+		option (google.api.http).get = "/joltify/spv/outstanding_interest/{wallet}/{poolIndex}";
+
+
+}}
 
 
   // Queries a list of ClaimableInterest items.
@@ -101,4 +107,13 @@ message QueryClaimableInterestResponse {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
+}
+
+message QueryOutstandingInterestRequest {
+  string wallet = 1;
+  string poolIndex = 2;
+}
+
+message QueryOutstandingInterestResponse {
+  string amount = 1;
 }
