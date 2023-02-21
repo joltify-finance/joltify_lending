@@ -32,9 +32,7 @@ message MsgCreatePool {
   int32 project_index = 2;
   string pool_name=3;
   string apy = 4;
-  string pay_freq = 5;
-  cosmos.base.v1beta1.Coin target_token_amount = 6[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
-  bool is_Senior  = 7;
+  cosmos.base.v1beta1.Coin target_token_amount = 5[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
 
 message MsgCreatePoolResponse {

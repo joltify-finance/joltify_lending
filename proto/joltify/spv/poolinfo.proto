@@ -73,6 +73,10 @@ message PoolInfo {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
+  cosmos.base.v1beta1.Coin target_amount = 16[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
 }
 
 message PoolWithInvestors {
@@ -94,4 +98,5 @@ message WalletsLinkPool {
     (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
   ];
   repeated string pools_index = 2;
+
 }

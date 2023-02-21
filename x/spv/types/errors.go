@@ -11,7 +11,7 @@ var (
 	ErrInvalidParameter   = coserrors.Register(ModuleName, 1, "invalid parameter")
 	ErrPoolNotFound       = coserrors.Register(ModuleName, 2, "pool not found")
 	ErrUnauthorized       = coserrors.Register(ModuleName, 3, "unauthorized operation")
-	ErrPoolClosed         = coserrors.Register(ModuleName, 4, "pool closed")
+	ErrPoolNotActive      = coserrors.Register(ModuleName, 4, "pool is not active")
 	ErrPoolExisted        = coserrors.Register(ModuleName, 5, "pool existed")
 	ErrInconsistencyToken = coserrors.Register(ModuleName, 6, "inconsistency tokens")
 	ErrInsufficientFund   = coserrors.Register(ModuleName, 7, "insufficient tokens")

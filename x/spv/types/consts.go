@@ -3,8 +3,8 @@ package types
 import sdk "github.com/cosmos/cosmos-sdk/types"
 
 const (
-	Maxfreq = 24
-	Minfreq = 1
+	Maxfreq = 1310400
+	Minfreq = 100800
 )
 
 var (

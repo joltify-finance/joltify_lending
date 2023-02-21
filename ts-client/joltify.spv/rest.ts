@@ -140,6 +140,14 @@ export interface SpvPoolInfo {
    * signatures required by gogoproto.
    */
   borrowable_amount?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  target_amount?: V1Beta1Coin;
 }
 
 export interface SpvQueryAllowedPoolsResponse {

@@ -29,6 +29,7 @@ export interface PoolInfo {
   poolInterest: string;
   projectLength: number;
   borrowableAmount: Coin | undefined;
+  targetAmount: Coin | undefined;
 }
 
 export enum PoolInfo_POOLSTATUS {
@@ -108,6 +109,7 @@ function createBasePoolInfo(): PoolInfo {
     poolInterest: "",
     projectLength: 0,
     borrowableAmount: undefined,
+    targetAmount: undefined,
   };
 }
 
@@ -157,6 +159,9 @@ export const PoolInfo = {
     }
     if (message.borrowableAmount !== undefined) {
       Coin.encode(message.borrowableAmount, writer.uint32(122).fork()).ldelim();
+    }
+    if (message.targetAmount !== undefined) {
+      Coin.encode(message.targetAmount, writer.uint32(130).fork()).ldelim();
     }
     return writer;
   },
@@ -213,6 +218,9 @@ export const PoolInfo = {
         case 15:
           message.borrowableAmount = Coin.decode(reader, reader.uint32());
           break;
+        case 16:
+          message.targetAmount = Coin.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -238,6 +246,7 @@ export const PoolInfo = {
       poolInterest: isSet(object.poolInterest) ? String(object.poolInterest) : "",
       projectLength: isSet(object.projectLength) ? Number(object.projectLength) : 0,
       borrowableAmount: isSet(object.borrowableAmount) ? Coin.fromJSON(object.borrowableAmount) : undefined,
+      targetAmount: isSet(object.targetAmount) ? Coin.fromJSON(object.targetAmount) : undefined,
     };
   },
 
@@ -268,6 +277,8 @@ export const PoolInfo = {
     message.projectLength !== undefined && (obj.projectLength = Math.round(message.projectLength));
     message.borrowableAmount !== undefined
       && (obj.borrowableAmount = message.borrowableAmount ? Coin.toJSON(message.borrowableAmount) : undefined);
+    message.targetAmount !== undefined
+      && (obj.targetAmount = message.targetAmount ? Coin.toJSON(message.targetAmount) : undefined);
     return obj;
   },
 
@@ -293,6 +304,9 @@ export const PoolInfo = {
     message.projectLength = object.projectLength ?? 0;
     message.borrowableAmount = (object.borrowableAmount !== undefined && object.borrowableAmount !== null)
       ? Coin.fromPartial(object.borrowableAmount)
+      : undefined;
+    message.targetAmount = (object.targetAmount !== undefined && object.targetAmount !== null)
+      ? Coin.fromPartial(object.targetAmount)
       : undefined;
     return message;
   },

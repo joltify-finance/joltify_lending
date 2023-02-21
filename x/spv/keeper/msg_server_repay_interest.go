@@ -78,7 +78,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool %v not found", msg.PoolIndex)
 	}
 	if poolInfo.PoolStatus == types.PoolInfo_CLOSED || poolInfo.PoolStatus == types.PoolInfo_INACTIVE {
-		return nil, types.ErrPoolClosed
+		return nil, types.ErrPoolNotActive
 	}
 
 	// todo here we allow all the poeple pay for the spv

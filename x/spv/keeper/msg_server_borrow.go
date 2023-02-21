@@ -96,7 +96,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
-		return nil, coserrors.Wrap(types.ErrPoolClosed, "pool has been closed")
+		return nil, coserrors.Wrap(types.ErrPoolNotActive, "pool has been closed")
 	}
 
 	if !poolInfo.OwnerAddress.Equals(caller) {

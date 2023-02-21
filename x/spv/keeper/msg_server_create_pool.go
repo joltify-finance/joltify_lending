@@ -46,53 +46,75 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized address %v", msg.Creator)
 	}
 
-	apy, payfreq, err := parameterSanitize(msg.PayFreq, msg.Apy)
+	apy, payfreq, err := parameterSanitize(targetProject.PayFreq, msg.Apy)
 	if err != nil {
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
-	flag := []byte("false")
-	if msg.Is_Senior {
-		flag = []byte("true")
+	poolsInfoAPY := make(map[string]sdk.Dec)
+	poolsInfoAmount := make(map[string]sdk.Coin)
+
+	if targetProject.ProjectTargetAmount.IsLTE(msg.TargetTokenAmount) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger thatn target")
 	}
 
-	indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), flag)
-	urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
+	seniorAmount := targetProject.ProjectTargetAmount.Sub(msg.TargetTokenAmount)
+	poolsInfoAmount["junior"] = msg.TargetTokenAmount
+	poolsInfoAmount["senior"] = seniorAmount
 
-	_, found := k.GetPools(ctx, indexHash.Hex())
-	if found {
-		return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
+	poolsInfoAPY["junior"] = apy
+
+	ij := sdk.NewDecFromInt(msg.TargetTokenAmount.Amount).Mul(apy)
+	it := sdk.NewDecFromInt(targetProject.ProjectTargetAmount.Amount).Mul(targetProject.BaseApy)
+	apySenior := it.Sub(ij).Quo(sdk.NewDecFromInt(seniorAmount.Amount))
+
+	poolsInfoAPY["junior"] = apy
+	poolsInfoAPY["senior"] = apySenior
+
+	for poolType, amount := range poolsInfoAmount {
+
+		poolApy := poolsInfoAPY[poolType]
+
+		indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))
+		urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
+
+		fmt.Printf(">>>%v\n", indexHash)
+
+		_, found := k.GetPools(ctx, indexHash.Hex())
+		if found {
+			return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
+		}
+
+		nftClassID := fmt.Sprintf("nft-%v", indexHash.String()[2:])
+		poolNFTClass := nft.Class{
+			Id:          nftClassID,
+			Name:        msg.PoolName,
+			Symbol:      "asset-" + indexHash.Hex(),
+			Description: targetProject.BasicInfo.Description,
+			Uri:         targetProject.BasicInfo.ProjectsUrl,
+			UriHash:     urlHash.Hex(),
+		}
+
+		poolInfo := types.PoolInfo{
+			Index:            indexHash.Hex(),
+			PoolName:         msg.PoolName,
+			LinkedProject:    msg.ProjectIndex,
+			OwnerAddress:     spvAddress,
+			Apy:              poolApy,
+			TargetAmount:     amount,
+			PayFreq:          payfreq,
+			ReserveFactor:    types.RESERVEFACTOR,
+			PoolNFTIds:       []string{},
+			PoolStatus:       types.PoolInfo_PREPARE,
+			ProjectLength:    targetProject.ProjectLength,
+			BorrowedAmount:   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			BorrowableAmount: sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			TotalAmount:      sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+		}
+
+		k.SetPool(ctx, poolInfo)
+		k.nftKeeper.SaveClass(ctx, poolNFTClass)
 	}
-
-	nftClassID := fmt.Sprintf("nft-%v", indexHash.String()[2:])
-	poolNFTClass := nft.Class{
-		Id:          nftClassID,
-		Name:        msg.PoolName,
-		Symbol:      "asset-" + indexHash.Hex(),
-		Description: targetProject.BasicInfo.Description,
-		Uri:         targetProject.BasicInfo.ProjectsUrl,
-		UriHash:     urlHash.Hex(),
-	}
-
-	poolInfo := types.PoolInfo{
-		Index:            indexHash.Hex(),
-		PoolName:         msg.PoolName,
-		LinkedProject:    msg.ProjectIndex,
-		OwnerAddress:     spvAddress,
-		Apy:              apy,
-		TotalAmount:      msg.TargetTokenAmount,
-		PayFreq:          payfreq,
-		ReserveFactor:    types.RESERVEFACTOR,
-		PoolNFTIds:       []string{},
-		PoolStatus:       types.PoolInfo_PREPARE,
-		ProjectLength:    targetProject.ProjectLength,
-		BorrowedAmount:   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-		BorrowableAmount: sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-	}
-
-	k.SetPool(ctx, poolInfo)
-	k.nftKeeper.SaveClass(ctx, poolNFTClass)
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeCreatePool,

@@ -32,6 +32,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		"ABC",
 		"ABC123",
 		[]byte("reserved"),
+		"This is the test info",
 	}
 
 	acc, _ := sdk.AccAddressFromBech32("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0")
@@ -49,6 +50,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		"ABC2",
 		"ABC123-2",
 		[]byte("reserved"),
+		"This is the test info2",
 	}
 
 	pi2 := kycmoduletypes.ProjectInfo{
@@ -66,6 +68,12 @@ func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.
 	inv := kycmoduletypes.Investor{
 		InvestorId:    "1",
 		WalletAddress: []string{req.Wallet},
+	}
+
+	inv2 := kycmoduletypes.Investor{InvestorId: "2", WalletAddress: []string{"jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq", "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"}}
+
+	if req.Wallet == "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl" || req.Wallet == "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq" {
+		return &kycmoduletypes.QueryByWalletResponse{Investor: &inv2}, nil
 	}
 
 	return &kycmoduletypes.QueryByWalletResponse{
@@ -128,8 +136,7 @@ func (m mockbankKeeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModul
 }
 
 func (m mockbankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (m mockbankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {

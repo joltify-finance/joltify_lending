@@ -10,7 +10,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func setupMsgServer(t testing.TB) (types.MsgServer, context.Context) {
+func setupMsgServer(t testing.TB) (types.MsgServer, *keeper.Keeper, context.Context) {
 	k, ctx := keepertest.SpvKeeper(t)
-	return keeper.NewMsgServerImpl(*k), sdk.WrapSDKContext(ctx)
+	return keeper.NewMsgServerImpl(*k), k, sdk.WrapSDKContext(ctx)
 }

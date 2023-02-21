@@ -33,6 +33,7 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 	}
 
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
+	k.SetPool(ctx, poolInfo)
 
 	return &types.MsgActivePoolResponse{}, nil
 }

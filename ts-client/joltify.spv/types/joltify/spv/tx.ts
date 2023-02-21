@@ -9,9 +9,7 @@ export interface MsgCreatePool {
   projectIndex: number;
   poolName: string;
   apy: string;
-  payFreq: string;
   targetTokenAmount: Coin | undefined;
-  isSenior: boolean;
 }
 
 export interface MsgCreatePoolResponse {
@@ -84,15 +82,7 @@ export interface MsgActivePoolResponse {
 }
 
 function createBaseMsgCreatePool(): MsgCreatePool {
-  return {
-    creator: "",
-    projectIndex: 0,
-    poolName: "",
-    apy: "",
-    payFreq: "",
-    targetTokenAmount: undefined,
-    isSenior: false,
-  };
+  return { creator: "", projectIndex: 0, poolName: "", apy: "", targetTokenAmount: undefined };
 }
 
 export const MsgCreatePool = {
@@ -109,14 +99,8 @@ export const MsgCreatePool = {
     if (message.apy !== "") {
       writer.uint32(34).string(message.apy);
     }
-    if (message.payFreq !== "") {
-      writer.uint32(42).string(message.payFreq);
-    }
     if (message.targetTokenAmount !== undefined) {
-      Coin.encode(message.targetTokenAmount, writer.uint32(50).fork()).ldelim();
-    }
-    if (message.isSenior === true) {
-      writer.uint32(56).bool(message.isSenior);
+      Coin.encode(message.targetTokenAmount, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -141,13 +125,7 @@ export const MsgCreatePool = {
           message.apy = reader.string();
           break;
         case 5:
-          message.payFreq = reader.string();
-          break;
-        case 6:
           message.targetTokenAmount = Coin.decode(reader, reader.uint32());
-          break;
-        case 7:
-          message.isSenior = reader.bool();
           break;
         default:
           reader.skipType(tag & 7);
@@ -163,9 +141,7 @@ export const MsgCreatePool = {
       projectIndex: isSet(object.projectIndex) ? Number(object.projectIndex) : 0,
       poolName: isSet(object.poolName) ? String(object.poolName) : "",
       apy: isSet(object.apy) ? String(object.apy) : "",
-      payFreq: isSet(object.payFreq) ? String(object.payFreq) : "",
       targetTokenAmount: isSet(object.targetTokenAmount) ? Coin.fromJSON(object.targetTokenAmount) : undefined,
-      isSenior: isSet(object.isSenior) ? Boolean(object.isSenior) : false,
     };
   },
 
@@ -175,10 +151,8 @@ export const MsgCreatePool = {
     message.projectIndex !== undefined && (obj.projectIndex = Math.round(message.projectIndex));
     message.poolName !== undefined && (obj.poolName = message.poolName);
     message.apy !== undefined && (obj.apy = message.apy);
-    message.payFreq !== undefined && (obj.payFreq = message.payFreq);
     message.targetTokenAmount !== undefined
       && (obj.targetTokenAmount = message.targetTokenAmount ? Coin.toJSON(message.targetTokenAmount) : undefined);
-    message.isSenior !== undefined && (obj.isSenior = message.isSenior);
     return obj;
   },
 
@@ -188,11 +162,9 @@ export const MsgCreatePool = {
     message.projectIndex = object.projectIndex ?? 0;
     message.poolName = object.poolName ?? "";
     message.apy = object.apy ?? "";
-    message.payFreq = object.payFreq ?? "";
     message.targetTokenAmount = (object.targetTokenAmount !== undefined && object.targetTokenAmount !== null)
       ? Coin.fromPartial(object.targetTokenAmount)
       : undefined;
-    message.isSenior = object.isSenior ?? false;
     return message;
   },
 };

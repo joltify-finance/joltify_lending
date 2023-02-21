@@ -11,11 +11,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) checkAcceptNewDeposit(ctx sdk.Context, poolInfo types.PoolInfo, newAmount sdk.Coin) bool {
-
-	acc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
-	amount := k.bankKeeper.GetBalance(ctx, acc.GetAddress(), poolInfo.TotalAmount.GetDenom())
-	return amount.Add(newAmount).IsLT(poolInfo.TotalAmount)
+func (k msgServer) checkAcceptNewDeposit(poolInfo types.PoolInfo, newAmount sdk.Coin) bool {
+	return poolInfo.TotalAmount.Add(newAmount).IsLT(poolInfo.TargetAmount)
 }
 
 func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types.MsgDepositResponse, error) {
@@ -31,11 +28,15 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
-	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
-		return nil, coserrors.Wrapf(types.ErrPoolClosed, "pool has been closed")
+	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
+		return nil, coserrors.Wrapf(types.ErrPoolNotActive, "pool is not active")
 	}
 
-	acceptFund := k.checkAcceptNewDeposit(ctx, poolInfo, msg.Token)
+	if msg.Token.GetDenom() != poolInfo.GetTotalAmount().Denom {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidCoins, "we only accept %v", poolInfo.GetTotalAmount().Denom)
+	}
+
+	acceptFund := k.checkAcceptNewDeposit(poolInfo, msg.Token)
 	if !acceptFund {
 		return nil, types.ErrPoolFull
 	}
@@ -65,10 +66,6 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, coserrors.Wrapf(types.ErrUnauthorized, "the given investor is not allowed to invest %v", msg.Creator)
 	}
 
-	if msg.Token.GetDenom() != poolInfo.GetTotalAmount().Denom {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidCoins, "we only accept %v", poolInfo.GetTotalAmount().Denom)
-	}
-
 	// now we transfer the token from the investor to the pool.
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, investor, types.ModuleAccount, sdk.NewCoins(msg.Token))
 	if err != nil {
@@ -78,7 +75,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we update the users deposit data
 	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
-		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, WithdrawableAmount: msg.Token, LinkedNFT: []string{}}
+		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(msg.Token.Denom, sdk.NewInt(0)), WithdrawableAmount: msg.Token, LinkedNFT: []string{}}
 		k.SetDepositor(ctx, depositor)
 
 	} else {
@@ -98,6 +95,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	// now we update borrowable
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)
+	poolInfo.TotalAmount = poolInfo.TotalAmount.Add(msg.Token)
 	k.SetPool(ctx, poolInfo)
 
 	ctx.EventManager().EmitEvent(

@@ -15,9 +15,9 @@ var _ = strconv.Itoa(0)
 
 func CmdCreatePool() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create-pool [pool title] [project index] [apy] [payfreq] [target]",
+		Use:   "create-pool [pool title] [project index] [apy] [target]",
 		Short: "Broadcast message create-pool",
-		Args:  cobra.ExactArgs(5),
+		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			name := args[0]
 
@@ -27,8 +27,7 @@ func CmdCreatePool() *cobra.Command {
 			}
 
 			argApy := args[2]
-			argPayfreq := args[3]
-			argTarget, err := sdk.ParseCoinNormalized(args[4])
+			argTarget, err := sdk.ParseCoinNormalized(args[3])
 			if err != nil {
 				return err
 			}
@@ -43,7 +42,6 @@ func CmdCreatePool() *cobra.Command {
 				name,
 				int32(projectIndex),
 				argApy,
-				argPayfreq,
 				argTarget,
 			)
 			if err := msg.ValidateBasic(); err != nil {

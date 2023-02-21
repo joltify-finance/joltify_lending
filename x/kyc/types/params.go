@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
 
@@ -38,11 +39,14 @@ func NewParams() Params {
 		panic(err)
 	}
 	pi := ProjectInfo{
-		Index:         1,
-		SPVName:       "defaultSPV",
-		ProjectOwner:  acc,
-		BasicInfo:     &b,
-		ProjectLength: 31536000, //1 year
+		Index:               1,
+		SPVName:             "defaultSPV",
+		ProjectOwner:        acc,
+		BasicInfo:           &b,
+		ProjectLength:       31536000, //1 year
+		ProjectTargetAmount: types.NewCoin("usdc", sdkmath.NewInt(100000000)),
+		BaseApy:             types.NewDecWithPrec(15, 2),
+		PayFreq:             "453600",
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }
