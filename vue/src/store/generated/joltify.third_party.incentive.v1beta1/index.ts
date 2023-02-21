@@ -143,19 +143,6 @@ export default {
 			})
 		},
 		
-		async sendMsgClaimUSDXMintingReward({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.sendMsgClaimUSDXMintingReward({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgClaimUSDXMintingReward:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgClaimUSDXMintingReward:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		async sendMsgClaimSavingsReward({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -166,19 +153,6 @@ export default {
 					throw new Error('TxClient:MsgClaimSavingsReward:Init Could not initialize signing client. Wallet is required.')
 				}else{
 					throw new Error('TxClient:MsgClaimSavingsReward:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
-		async sendMsgClaimSwapReward({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.sendMsgClaimSwapReward({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgClaimSwapReward:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgClaimSwapReward:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -195,6 +169,19 @@ export default {
 				}
 			}
 		},
+		async sendMsgClaimUSDXMintingReward({ rootGetters }, { value, fee = [], memo = '' }) {
+			try {
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.sendMsgClaimUSDXMintingReward({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgClaimUSDXMintingReward:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgClaimUSDXMintingReward:Send Could not broadcast Tx: '+ e.message)
+				}
+			}
+		},
 		async sendMsgClaimDelegatorReward({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -208,20 +195,20 @@ export default {
 				}
 			}
 		},
-		
-		async MsgClaimUSDXMintingReward({ rootGetters }, { value }) {
+		async sendMsgClaimSwapReward({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.msgClaimUSDXMintingReward({value})
-				return msg
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.sendMsgClaimSwapReward({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgClaimUSDXMintingReward:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgClaimUSDXMintingReward:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgClaimSwapReward:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgClaimSwapReward:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
+		
 		async MsgClaimSavingsReward({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -232,19 +219,6 @@ export default {
 					throw new Error('TxClient:MsgClaimSavingsReward:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgClaimSavingsReward:Create Could not create message: ' + e.message)
-				}
-			}
-		},
-		async MsgClaimSwapReward({ rootGetters }, { value }) {
-			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.msgClaimSwapReward({value})
-				return msg
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgClaimSwapReward:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgClaimSwapReward:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -261,6 +235,19 @@ export default {
 				}
 			}
 		},
+		async MsgClaimUSDXMintingReward({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.msgClaimUSDXMintingReward({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgClaimUSDXMintingReward:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgClaimUSDXMintingReward:Create Could not create message: ' + e.message)
+				}
+			}
+		},
 		async MsgClaimDelegatorReward({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -271,6 +258,19 @@ export default {
 					throw new Error('TxClient:MsgClaimDelegatorReward:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgClaimDelegatorReward:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgClaimSwapReward({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifyThirdPartyIncentiveV1Beta1.tx.msgClaimSwapReward({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgClaimSwapReward:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgClaimSwapReward:Create Could not create message: ' + e.message)
 				}
 			}
 		},
