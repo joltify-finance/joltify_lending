@@ -1,14 +1,15 @@
 package keeper
 
 import (
+	"strings"
+	"time"
+
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
-	"strings"
-	"time"
 )
 
 func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdk.Dec, updateNFT bool) (sdkmath.Int, error) {
@@ -43,6 +44,7 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		allPayments := borrowClassInfo.Payments
 		latestTimeStamp := time.Time{}
 		for _, eachPayment := range allPayments {
+			// if the latest payment  this spv have is smaller than the spv that paied to all the investor, we claim the interest
 			if interestData.LastPayment.Sub(eachPayment.PaymentTime) > time.Second {
 				continue
 			}

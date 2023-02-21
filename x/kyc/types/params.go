@@ -33,7 +33,7 @@ func NewParams() Params {
 		[]byte("reserved"),
 		"This is the Test Project 1",
 	}
-
+	amount, _ := sdkmath.NewIntFromString("100000000000000000000000")
 	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 	if err != nil {
 		panic(err)
@@ -44,7 +44,7 @@ func NewParams() Params {
 		ProjectOwner:        acc,
 		BasicInfo:           &b,
 		ProjectLength:       31536000, //1 year
-		ProjectTargetAmount: types.NewCoin("usdc", sdkmath.NewInt(100000000)),
+		ProjectTargetAmount: types.NewCoin("ausdc", amount),
 		BaseApy:             types.NewDecWithPrec(15, 2),
 		PayFreq:             "453600",
 	}
