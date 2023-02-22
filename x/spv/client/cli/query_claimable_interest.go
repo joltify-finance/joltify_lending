@@ -13,7 +13,7 @@ var _ = strconv.Itoa(0)
 
 func CmdClaimableInterest() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claimalbe-interest [wallet] [pool index]",
+		Use:   "claimable-interest [wallet] [pool index]",
 		Short: "Query claimable-interest",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {

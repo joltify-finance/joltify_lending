@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/gogo/protobuf/proto"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -51,15 +52,15 @@ func (k msgServer) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolI
 		if !found {
 			panic(found)
 		}
-		data := class.GetData().GetCachedValue()
-		interestData, ok := data.(types.BorrowInterest)
-		if !ok {
-			panic("not the borrow interest type")
+		var borrowInterest types.BorrowInterest
+		var err error
+		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+		if err != nil {
+			panic(err)
 		}
 
-		thisBorrowInterest := k.updateInterestData(ctx.BlockTime(), &interestData)
-		var err error
-		class.Data, err = types2.NewAnyWithValue(&interestData)
+		thisBorrowInterest := k.updateInterestData(ctx.BlockTime(), &borrowInterest)
+		class.Data, err = types2.NewAnyWithValue(&borrowInterest)
 		if err != nil {
 			panic("pack class any data failed")
 		}
@@ -91,7 +92,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 	//}
 
 	if msg.Token.Denom != poolInfo.TotalAmount.Denom {
-		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repaly is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
+		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
 	}
 
 	totalAmountDue := k.getAllInterestToBePaid(ctx, &poolInfo)

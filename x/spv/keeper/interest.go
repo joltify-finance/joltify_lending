@@ -1,16 +1,17 @@
 package keeper
 
 import (
+	cosmath "cosmossdk.io/math"
 	"errors"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const OneYear = 365 * 24 * 3600
-const OneWeek = 7 * 24 * 3600
-const BASE = 1
-
-var one = sdk.NewDec(1)
+const (
+	OneWeek       = 7 * 24 * 3600
+	OneYear       = OneWeek * 52
+	BASE          = 1
+	scalingFactor = 1e18
+)
 
 func apyTospy(r sdk.Dec, seconds uint64) (sdk.Dec, error) {
 	// Note: any APY 179 or greater will cause an out-of-bounds error
@@ -26,11 +27,12 @@ func CalculateInterestRate(apy sdk.Dec, payFreq int) sdk.Dec {
 	// the minimal pay frequency is one week
 
 	seconds := BASE * payFreq
-	monthAPY, err := CalculateInterestAmount(apy, payFreq)
+	splitAPY, err := CalculateInterestAmount(apy, payFreq)
 	if err != nil {
 		panic(err)
 	}
-	i, err := apyTospy(monthAPY, uint64(seconds))
+	adjMonthAPY := sdk.OneDec().Add(splitAPY)
+	i, err := apyTospy(adjMonthAPY, uint64(seconds))
 	if err != nil {
 		return sdk.Dec{}
 	}
@@ -45,4 +47,22 @@ func CalculateInterestAmount(apy sdk.Dec, payFreq int) (sdk.Dec, error) {
 	seconds := BASE * payFreq
 	monthAPY := apy.Quo(sdk.NewDec(OneYear / int64(seconds)))
 	return monthAPY, nil
+}
+
+// CalculateInterestFactor calculates the simple interest scaling factor,
+// which is equal to: (per-second interest rate * number of seconds elapsed)
+// Will return 1.000x, multiply by principal to get new principal with added interest
+func CalculateInterestFactor(perSecondInterestRate sdk.Dec, secondsElapsed sdk.Int) sdk.Dec {
+	scalingFactorUint := sdk.NewUint(uint64(scalingFactor))
+	scalingFactorInt := sdk.NewInt(int64(scalingFactor))
+
+	// Convert per-second interest rate to a uint scaled by 1e18
+	interestMantissa := cosmath.NewUintFromBigInt(perSecondInterestRate.MulInt(scalingFactorInt).RoundInt().BigInt())
+	// Convert seconds elapsed to uint (*not scaled*)
+	secondsElapsedUint := cosmath.NewUintFromBigInt(secondsElapsed.BigInt())
+	// Calculate the interest factor as a uint scaled by 1e18
+	interestFactorMantissa := cosmath.RelativePow(interestMantissa, secondsElapsedUint, scalingFactorUint)
+
+	// Convert interest factor to an unscaled sdk.Dec
+	return sdk.NewDecFromBigInt(interestFactorMantissa.BigInt()).QuoInt(scalingFactorInt)
 }

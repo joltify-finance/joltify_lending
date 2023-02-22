@@ -124,8 +124,8 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		panic(err)
 	}
 
+	rate := CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	firstPayment := types.PaymentItem{PaymentTime: ctx.BlockTime(), PaymentAmount: sdk.NewCoin(msg.BorrowAmount.Denom, sdk.NewInt(0))}
-
 	bi := types.BorrowInterest{
 		PoolIndex:    poolInfo.Index,
 		Apy:          poolInfo.Apy,
@@ -134,6 +134,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		Borrowed:     msg.BorrowAmount,
 		BorrowedLast: msg.BorrowAmount,
 		MonthlyRatio: i,
+		InterestSPY:  rate,
 		Payments:     []*types.PaymentItem{&firstPayment},
 	}
 

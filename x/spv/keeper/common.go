@@ -95,15 +95,13 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 			panic(err)
 		}
 
-		i := CalculateInterestRate(borrowClassInfo.Apy, int(borrowClassInfo.PayFreq))
-
 		allPayments := borrowClassInfo.Payments
 		for _, eachPayment := range allPayments {
 			// if the latest payment  this spv have is smaller than the spv that paied to all the investor, we claim the interest
 			delta := uint64(ctx.BlockTime().Sub(eachPayment.PaymentTime).Seconds())
-			paymentAmount := eachPayment.PaymentAmount
-			ratio := i.Power(delta)
-			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDec(1).Sub(reserve)).Mul(ratio).TruncateInt()
+			factor := CalculateInterestFactor(borrowClassInfo.InterestSPY, sdk.NewIntFromUint64(delta))
+			paymentAmountToInvestor := sdk.NewDecFromInt(borrowClassInfo.Borrowed.Amount).Mul(sdk.OneDec().Sub(reserve))
+			interest := paymentAmountToInvestor.Mul(factor.Sub(sdk.OneDec())).TruncateInt()
 			totalInterest = totalInterest.Add(interest)
 		}
 	}

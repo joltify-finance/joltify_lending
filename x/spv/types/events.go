@@ -7,7 +7,9 @@ const (
 	EventTypeBorrow        = "borrow"
 	EventTypeRepayInterest = "repay_interest"
 	EventTypeClaimInterest = "claim_interest"
+	EventTypePayPrincipal  = "pay_principal"
 )
 const (
 	AttributeCreator = "creator"
+	AttributeAmount  = "token"
 )
