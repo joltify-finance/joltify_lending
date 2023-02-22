@@ -130,6 +130,20 @@ func (k Keeper) GetPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo
 	return poolInfo, true
 }
 
+// IteratePool iterates over all deposit objects in the store and performs a callback function
+func (k Keeper) IteratePool(ctx sdk.Context, cb func(poolInfo types.PoolInfo) (stop bool)) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectsKeyPrefix))
+	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var poolInfo types.PoolInfo
+		k.cdc.MustUnmarshal(iterator.Value(), &poolInfo)
+		if cb(poolInfo) {
+			break
+		}
+	}
+}
+
 // SetDepositor sets the depositor
 func (k Keeper) SetDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))

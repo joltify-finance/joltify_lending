@@ -13,7 +13,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) updateInterestData(currentTime time.Time, interestData *types.BorrowInterest) sdk.Coin {
+func (k Keeper) updateInterestData(currentTime time.Time, interestData *types.BorrowInterest) sdk.Coin {
 
 	var payment sdk.Coin
 	latestTimeStamp := interestData.Payments[len(interestData.Payments)-1]
@@ -42,7 +42,7 @@ func (k msgServer) updateInterestData(currentTime time.Time, interestData *types
 
 }
 
-func (k msgServer) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) sdkmath.Int {
+func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) sdkmath.Int {
 
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
@@ -95,31 +95,14 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
 	}
 
-	totalAmountDue := k.getAllInterestToBePaid(ctx, &poolInfo)
-
-	if msg.Token.Amount.LT(totalAmountDue) {
-		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "the interest is %v while you try to repay %v", totalAmountDue, msg.Token.Amount)
-	}
-
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{sdk.NewCoin(msg.Token.Denom, totalAmountDue)})
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{msg.Token})
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
 	}
-	// finally, we update the poolinfo
-	poolInfo.LastPaymentTime = ctx.BlockTime()
 
-	if poolInfo.BorrowedAmount.Equal(sdk.ZeroInt()) {
-		poolInfo.PoolStatus = types.PoolInfo_CLOSED
-	}
-
+	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Add(msg.Token)
 	k.SetPool(ctx, poolInfo)
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeRepayInterest,
-			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
-			sdk.NewAttribute("amount", msg.Token.Amount.String()),
-		),
-	)
 
 	return &types.MsgRepayInterestResponse{}, nil
+
 }

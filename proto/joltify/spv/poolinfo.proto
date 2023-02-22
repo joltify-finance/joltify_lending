@@ -85,6 +85,14 @@ message PoolInfo {
   POOLTYPE pool_type = 17;
 
 
+  cosmos.base.v1beta1.Coin escrow_interest_amount = 18[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  cosmos.base.v1beta1.Coin escrow_principal_amount = 19[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
 }
 
 message PoolWithInvestors {
