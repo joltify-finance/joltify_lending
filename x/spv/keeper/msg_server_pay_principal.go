@@ -77,6 +77,10 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 	poolInfo.BorrowedAmount = poolInfo.BorrowableAmount.Sub(msg.Token)
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)
 
+	// once the pool borrowed is 0, we will deactive the pool
+	if poolInfo.BorrowedAmount.Amount.Equal(sdk.ZeroInt()) {
+		poolInfo.PoolStatus = types.PoolInfo_INACTIVE
+	}
 	k.SetPool(ctx, poolInfo)
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))

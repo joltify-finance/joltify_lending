@@ -107,8 +107,12 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 	}
 	// finally, we update the poolinfo
 	poolInfo.LastPaymentTime = ctx.BlockTime()
-	k.SetPool(ctx, poolInfo)
 
+	if poolInfo.BorrowedAmount.Equal(sdk.ZeroInt()) {
+		poolInfo.PoolStatus = types.PoolInfo_CLOSED
+	}
+
+	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRepayInterest,

@@ -202,7 +202,7 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 
 	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
 
-	suite.Require().True(depositorData.WithdrawableAmount.Equal(depositAmount))
+	suite.Require().True(depositorData.withdrawalAmount.Equal(depositAmount))
 
 	// we deposit more money
 
@@ -222,6 +222,6 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 
 	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
 
-	suite.Require().True(depositorData.WithdrawableAmount.Equal(depositAmount.Add(depositAmount)))
+	suite.Require().True(depositorData.withdrawalAmount.Equal(depositAmount.Add(depositAmount)))
 
 }

@@ -75,11 +75,11 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we update the users deposit data
 	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
-		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(msg.Token.Denom, sdk.NewInt(0)), WithdrawableAmount: msg.Token, LinkedNFT: []string{}}
+		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(msg.Token.Denom, sdk.NewInt(0)), WithdrawalAmount: msg.Token, LinkedNFT: []string{}}
 		k.SetDepositor(ctx, depositor)
 
 	} else {
-		previousDepositor.WithdrawableAmount = previousDepositor.WithdrawableAmount.Add(msg.Token)
+		previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
 		k.SetDepositor(ctx, previousDepositor)
 	}
 

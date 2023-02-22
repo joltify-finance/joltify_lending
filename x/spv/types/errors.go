@@ -20,4 +20,5 @@ var (
 	ErrINCONSISTENCYDENOM = coserrors.Register(ModuleName, 10, "denom inconsistency")
 	ErrDepositorNotFound  = coserrors.Register(ModuleName, 11, "depositor not found")
 	ErrUNEXPECTEDSTATUS   = coserrors.Register(ModuleName, 12, "unexpected pool status")
+	ErrClassNotFound      = coserrors.Register(ModuleName, 13, "class cannot be found")
 )

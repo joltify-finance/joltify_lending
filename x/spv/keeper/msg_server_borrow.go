@@ -52,9 +52,9 @@ func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, u
 	// now we update the depositor's withdrawal amount and locked amount
 	var errGlobal error
 	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
-		locked := sdk.NewDecFromInt(depositor.WithdrawableAmount.Amount).Mul(utilization).TruncateInt()
-		depositor.LockedAmount = sdk.NewCoin(depositor.WithdrawableAmount.Denom, locked)
-		depositor.WithdrawableAmount = depositor.WithdrawableAmount.SubAmount(locked)
+		locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
+		depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(depositor.WithdrawalAmount.Denom, locked))
+		depositor.WithdrawalAmount = depositor.WithdrawalAmount.SubAmount(locked)
 		borrowRatio := sdk.NewDecFromInt(locked).Quo(sdk.NewDecFromInt(totalBorrow))
 
 		// nft ID is the hash(nft class ID, investorWallet)

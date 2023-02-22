@@ -47,6 +47,11 @@ service Query {
     option (google.api.http).get = "/joltify/spv/claimable_interest/{wallet}";
   }
 
+  // Queries a list of withdrawalPrincipal items.
+  rpc withdrawalPrincipal(QuerywithdrawalPrincipalRequest) returns (QuerywithdrawalPrincipalResponse) {
+    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/withdrawal_principal/{poolIndex}";
+  }
+
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -110,5 +115,15 @@ message QueryOutstandingInterestRequest {
 }
 
 message QueryOutstandingInterestResponse {
+  string amount = 1;
+}
+
+
+message QuerywithdrawalPrincipalRequest {
+  string poolIndex = 1;
+  string walletAddress = 2;
+}
+
+message QuerywithdrawalPrincipalResponse {
   string amount = 1;
 }

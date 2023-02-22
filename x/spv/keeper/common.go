@@ -107,3 +107,37 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 	}
 	return totalInterest, nil
 }
+
+func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper) (sdkmath.Int, error) {
+	totalBorrowed := sdk.NewInt(0)
+
+	for _, el := range lendNFTs {
+		ids := strings.Split(el, ":")
+
+		thisClass, found := nftKeeper.GetClass(ctx, ids[0])
+		if !found {
+			return sdkmath.Int{}, coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
+		}
+
+		var borrowClassInfo types.BorrowInterest
+		err := proto.Unmarshal(thisClass.Data.Value, &borrowClassInfo)
+		if err != nil {
+			panic(err)
+		}
+		borrowed := borrowClassInfo.Borrowed
+
+		thisNFT, found := nftKeeper.GetNFT(ctx, ids[0], ids[1])
+		if !found {
+			return sdkmath.Int{}, coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", ids[1])
+		}
+		var interestData types.NftInfo
+		err = proto.Unmarshal(thisNFT.Data.Value, &interestData)
+		if err != nil {
+			panic(err)
+		}
+
+		thisNFTBorrowed := sdk.NewDecFromInt(borrowed.Amount).Mul(interestData.Ratio).TruncateInt()
+		totalBorrowed = totalBorrowed.Add(thisNFTBorrowed)
+	}
+	return totalBorrowed, nil
+}

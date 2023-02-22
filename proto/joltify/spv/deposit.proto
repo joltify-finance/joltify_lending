@@ -22,7 +22,7 @@ message DepositorInfo {
     (gogoproto.nullable) = false];
 
 
-  cosmos.base.v1beta1.Coin withdrawable_amount = 5[
+  cosmos.base.v1beta1.Coin withdrawal_amount = 5[
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
