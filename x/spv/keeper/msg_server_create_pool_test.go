@@ -91,8 +91,6 @@ func TestMsgSERvCreatePoolApyCheck(t *testing.T) {
 	interest2 := p1.Apy.MulInt(p1.TargetAmount.Amount)
 	interest3 := p2.Apy.MulInt(p2.TargetAmount.Amount)
 
-	fmt.Printf(">>>>%v\n", interest1.String())
 	total := interest2.Add(interest3)
-	fmt.Printf(">>>>%v\n", total.String())
 	require.True(t, total.Sub(interest1).Abs().LT(sdk.NewDecWithPrec(1, 8)))
 }

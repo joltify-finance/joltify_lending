@@ -78,17 +78,18 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 
 	poolInfo.PoolName = msg.PoolName
 	poolInfo.Apy = apy
-	poolInfo.PayFreq = payfreq
 	poolInfo.TotalAmount = msg.TargetTokenAmount
 	k.SetPool(ctx, poolInfo)
 
 	if isJunior {
 		poolSenior.Apy = poolsInfoAPY["senior"]
 		poolSenior.TargetAmount = poolsInfoAmount["senior"]
+		poolSenior.PoolName = msg.PoolName
 		k.SetPool(ctx, *poolSenior)
 	} else {
 		poolJunior.Apy = poolsInfoAPY["junior"]
 		poolJunior.TargetAmount = poolsInfoAmount["junior"]
+		poolSenior.PoolName = msg.PoolName
 		k.SetPool(ctx, *poolJunior)
 	}
 
