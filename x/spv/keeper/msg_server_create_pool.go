@@ -43,9 +43,10 @@ func calculateApys(targetAmount, pool1Amount sdk.Coin, baseApy, pool1Apy sdk.Dec
 		poolsInfoAmount["senior"] = pool1Amount
 	}
 
-	ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
-	it := sdk.NewDecFromInt(targetAmount.Amount).Mul(baseApy)
-	pool2Apy := it.Sub(ij).Quo(sdk.NewDecFromInt(pool2Amount.Amount))
+	//ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
+	ij := pool1Apy.MulInt(pool1Amount.Amount)
+	it := baseApy.MulInt(targetAmount.Amount)
+	pool2Apy := it.Sub(ij).QuoTruncate(sdk.NewDecFromInt(pool2Amount.Amount))
 
 	if isJunior {
 		poolsInfoAPY["junior"] = pool1Apy

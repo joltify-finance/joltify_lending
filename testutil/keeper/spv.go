@@ -37,11 +37,14 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 
 	acc, _ := sdk.AccAddressFromBech32("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0")
 	pi1 := kycmoduletypes.ProjectInfo{
-		Index:         1,
-		SPVName:       "defaultSPV",
-		ProjectOwner:  acc,
-		BasicInfo:     &b,
-		ProjectLength: 31536000, //1 year
+		Index:               1,
+		SPVName:             "defaultSPV",
+		ProjectOwner:        acc,
+		BasicInfo:           &b,
+		ProjectLength:       31536000, //1 year
+		PayFreq:             "15768000",
+		BaseApy:             sdk.NewDecWithPrec(12, 2),
+		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100000000)),
 	}
 
 	b2 := kycmoduletypes.BasicInfo{
@@ -54,11 +57,14 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 	}
 
 	pi2 := kycmoduletypes.ProjectInfo{
-		Index:         1,
-		SPVName:       "defaultSPV2",
-		ProjectOwner:  acc,
-		BasicInfo:     &b2,
-		ProjectLength: 31536000, //1 year
+		Index:               1,
+		SPVName:             "defaultSPV2",
+		ProjectOwner:        acc,
+		BasicInfo:           &b2,
+		ProjectLength:       31536000, //1 year
+		PayFreq:             "15768000",
+		BaseApy:             sdk.NewDecWithPrec(12, 2),
+		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100000000)),
 	}
 	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2}
 }
@@ -101,6 +107,21 @@ func (m mockAccKeeper) GetModuleAddress(name string) sdk.AccAddress {
 
 type mockNFTKeeper struct {
 	classes map[string]*nft.Class
+}
+
+func (m mockNFTKeeper) Burn(ctx sdk.Context, classID string, nftID string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockNFTKeeper) Transfer(ctx sdk.Context, classID string, nftID string, receiver sdk.AccAddress) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockNFTKeeper) GetTotalSupply(ctx sdk.Context, classID string) uint64 {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, bool) {
