@@ -41,4 +41,6 @@ type NFTKeeper interface {
 	GetClass(ctx sdk.Context, classID string) (nfttypes.Class, bool)
 	GetNFT(ctx sdk.Context, classID, nftID string) (nfttypes.NFT, bool)
 	Update(ctx sdk.Context, token nfttypes.NFT) error
+	Burn(ctx sdk.Context, classID string, nftID string) error
+	Transfer(ctx sdk.Context, classID string, nftID string, receiver sdk.AccAddress) error
 }

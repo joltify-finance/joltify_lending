@@ -21,4 +21,6 @@ var (
 	ErrDepositorNotFound  = coserrors.Register(ModuleName, 11, "depositor not found")
 	ErrUNEXPECTEDSTATUS   = coserrors.Register(ModuleName, 12, "unexpected pool status")
 	ErrClassNotFound      = coserrors.Register(ModuleName, 13, "class cannot be found")
+	ErrTransferNFT        = coserrors.Register(ModuleName, 14, "fail to transfer nft ownership")
+	ErrBurnNFT            = coserrors.Register(ModuleName, 15, "fail to burn the nft")
 )
