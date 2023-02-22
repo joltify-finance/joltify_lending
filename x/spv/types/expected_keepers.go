@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
@@ -43,4 +44,5 @@ type NFTKeeper interface {
 	Update(ctx sdk.Context, token nfttypes.NFT) error
 	Burn(ctx sdk.Context, classID string, nftID string) error
 	Transfer(ctx sdk.Context, classID string, nftID string, receiver sdk.AccAddress) error
+	GetTotalSupply(ctx sdk.Context, classID string) uint64
 }

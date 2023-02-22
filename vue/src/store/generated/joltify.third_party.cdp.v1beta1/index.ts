@@ -334,19 +334,6 @@ export default {
 		},
 		
 		
-		async sendMsgWithdraw({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgWithdraw({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgWithdraw:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		async sendMsgCreateCDP({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -373,16 +360,16 @@ export default {
 				}
 			}
 		},
-		async sendMsgLiquidate({ rootGetters }, { value, fee = [], memo = '' }) {
+		async sendMsgWithdraw({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
-				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgLiquidate({ value, fee: {amount: fee, gas: "200000"}, memo })
+				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgWithdraw({ value, fee: {amount: fee, gas: "200000"}, memo })
 				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
 				}else{
-					throw new Error('TxClient:MsgLiquidate:Send Could not broadcast Tx: '+ e.message)
+					throw new Error('TxClient:MsgWithdraw:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -412,20 +399,20 @@ export default {
 				}
 			}
 		},
-		
-		async MsgWithdraw({ rootGetters }, { value }) {
+		async sendMsgLiquidate({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
-				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgWithdraw({value})
-				return msg
+				const client=await initClient(rootGetters)
+				const result = await client.JoltifyThirdPartyCdpV1Beta1.tx.sendMsgLiquidate({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgWithdraw:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgLiquidate:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
+		
 		async MsgCreateCDP({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -452,16 +439,16 @@ export default {
 				}
 			}
 		},
-		async MsgLiquidate({ rootGetters }, { value }) {
+		async MsgWithdraw({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgLiquidate({value})
+				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgWithdraw({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgWithdraw:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgLiquidate:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgWithdraw:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -488,6 +475,19 @@ export default {
 					throw new Error('TxClient:MsgDrawDebt:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgDrawDebt:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgLiquidate({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.JoltifyThirdPartyCdpV1Beta1.tx.msgLiquidate({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgLiquidate:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgLiquidate:Create Could not create message: ' + e.message)
 				}
 			}
 		},

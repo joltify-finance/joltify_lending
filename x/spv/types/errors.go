@@ -23,4 +23,5 @@ var (
 	ErrClassNotFound      = coserrors.Register(ModuleName, 13, "class cannot be found")
 	ErrTransferNFT        = coserrors.Register(ModuleName, 14, "fail to transfer nft ownership")
 	ErrBurnNFT            = coserrors.Register(ModuleName, 15, "fail to burn the nft")
+	ErrNFTNotFound        = coserrors.Register(ModuleName, 16, "nft not found")
 )

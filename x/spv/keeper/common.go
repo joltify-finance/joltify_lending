@@ -44,8 +44,8 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		allPayments := borrowClassInfo.Payments
 		latestTimeStamp := time.Time{}
 		for _, eachPayment := range allPayments {
-			// if the latest payment  this spv have is smaller than the spv that paied to all the investor, we claim the interest
-			if interestData.LastPayment.Sub(eachPayment.PaymentTime) > time.Second {
+			// if the latest payment  this spv has is smaller than the spv that paied to all the investor, we claim the interest
+			if interestData.LastPayment.After(eachPayment.PaymentTime) {
 				continue
 			}
 			paymentAmount := eachPayment.PaymentAmount
@@ -110,7 +110,6 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 
 func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper) (sdkmath.Int, error) {
 	totalBorrowed := sdk.NewInt(0)
-
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
 

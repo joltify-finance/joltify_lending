@@ -14,6 +14,7 @@ export enum PoolInfoPOOLSTATUS {
   INACTIVE = "INACTIVE",
   CLOSED = "CLOSED",
   PREPARE = "PREPARE",
+  CLOSING = "CLOSING",
 }
 
 export enum PoolInfoPOOLTYPE {
@@ -53,7 +54,7 @@ export interface SpvDepositorInfo {
    * NOTE: The amount field is an Int which implements the custom method
    * signatures required by gogoproto.
    */
-  withdrawable_amount?: V1Beta1Coin;
+  withdrawal_amount?: V1Beta1Coin;
 
   /**
    * Coin defines a token with a denomination and an amount.
@@ -81,9 +82,13 @@ export interface SpvMsgCreatePoolResponse {
 
 export type SpvMsgDepositResponse = object;
 
+export type SpvMsgPayPrincipalResponse = object;
+
 export type SpvMsgRepayInterestResponse = object;
 
 export type SpvMsgUpdatePoolResponse = object;
+
+export type SpvMsgWithdrawPrincipalResponse = object;
 
 /**
  * Params defines the parameters for the module.
@@ -154,6 +159,22 @@ export interface SpvPoolInfo {
    */
   target_amount?: V1Beta1Coin;
   pool_type?: PoolInfoPOOLTYPE;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  escrow_interest_amount?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  escrow_principal_amount?: V1Beta1Coin;
 }
 
 export interface SpvQueryAllowedPoolsResponse {
@@ -189,6 +210,10 @@ export interface SpvQueryListPoolsResponse {
   pagination?: V1Beta1PageResponse;
 }
 
+export interface SpvQueryOutstandingInterestResponse {
+  amount?: string;
+}
+
 /**
  * QueryParamsResponse is response type for the Query/Params RPC method.
  */
@@ -199,6 +224,10 @@ export interface SpvQueryParamsResponse {
 
 export interface SpvQueryQueryPoolResponse {
   poolInfo?: SpvPoolInfo;
+}
+
+export interface SpvQuerywithdrawalPrincipalResponse {
+  amount?: string;
 }
 
 /**
@@ -412,6 +441,23 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
+   * @name QueryWithdrawalPrincipal
+   * @summary Queries a list of withdrawalPrincipal items.
+   * @request GET:/joltify-finance/joltify_lending/spv/withdrawal_principal/{poolIndex}
+   */
+  queryWithdrawalPrincipal = (poolIndex: string, query?: { walletAddress?: string }, params: RequestParams = {}) =>
+    this.request<SpvQuerywithdrawalPrincipalResponse, RpcStatus>({
+      path: `/joltify-finance/joltify_lending/spv/withdrawal_principal/${poolIndex}`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
    * @name QueryClaimableInterest
    * @summary Queries a list of ClaimableInterest items.
    * @request GET:/joltify/spv/claimable_interest/{wallet}
@@ -463,6 +509,21 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       path: `/joltify/spv/list_pools`,
       method: "GET",
       query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryOutstandingInterest
+   * @request GET:/joltify/spv/outstanding_interest/{wallet}/{poolIndex}
+   */
+  queryOutstandingInterest = (wallet: string, poolIndex: string, params: RequestParams = {}) =>
+    this.request<SpvQueryOutstandingInterestResponse, RpcStatus>({
+      path: `/joltify/spv/outstanding_interest/${wallet}/${poolIndex}`,
+      method: "GET",
       format: "json",
       ...params,
     });

@@ -23,7 +23,9 @@ export interface BorrowInterest {
   payFreq: number;
   issueTime: Date | undefined;
   borrowed: Coin | undefined;
-  cyclePayment: Coin | undefined;
+  borrowedLast: Coin | undefined;
+  monthlyRatio: string;
+  interestSPY: string;
   payments: PaymentItem[];
 }
 
@@ -171,7 +173,9 @@ function createBaseBorrowInterest(): BorrowInterest {
     payFreq: 0,
     issueTime: undefined,
     borrowed: undefined,
-    cyclePayment: undefined,
+    borrowedLast: undefined,
+    monthlyRatio: "",
+    interestSPY: "",
     payments: [],
   };
 }
@@ -193,11 +197,17 @@ export const BorrowInterest = {
     if (message.borrowed !== undefined) {
       Coin.encode(message.borrowed, writer.uint32(42).fork()).ldelim();
     }
-    if (message.cyclePayment !== undefined) {
-      Coin.encode(message.cyclePayment, writer.uint32(50).fork()).ldelim();
+    if (message.borrowedLast !== undefined) {
+      Coin.encode(message.borrowedLast, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.monthlyRatio !== "") {
+      writer.uint32(58).string(message.monthlyRatio);
+    }
+    if (message.interestSPY !== "") {
+      writer.uint32(66).string(message.interestSPY);
     }
     for (const v of message.payments) {
-      PaymentItem.encode(v!, writer.uint32(58).fork()).ldelim();
+      PaymentItem.encode(v!, writer.uint32(74).fork()).ldelim();
     }
     return writer;
   },
@@ -225,9 +235,15 @@ export const BorrowInterest = {
           message.borrowed = Coin.decode(reader, reader.uint32());
           break;
         case 6:
-          message.cyclePayment = Coin.decode(reader, reader.uint32());
+          message.borrowedLast = Coin.decode(reader, reader.uint32());
           break;
         case 7:
+          message.monthlyRatio = reader.string();
+          break;
+        case 8:
+          message.interestSPY = reader.string();
+          break;
+        case 9:
           message.payments.push(PaymentItem.decode(reader, reader.uint32()));
           break;
         default:
@@ -245,7 +261,9 @@ export const BorrowInterest = {
       payFreq: isSet(object.payFreq) ? Number(object.payFreq) : 0,
       issueTime: isSet(object.issueTime) ? fromJsonTimestamp(object.issueTime) : undefined,
       borrowed: isSet(object.borrowed) ? Coin.fromJSON(object.borrowed) : undefined,
-      cyclePayment: isSet(object.cyclePayment) ? Coin.fromJSON(object.cyclePayment) : undefined,
+      borrowedLast: isSet(object.borrowedLast) ? Coin.fromJSON(object.borrowedLast) : undefined,
+      monthlyRatio: isSet(object.monthlyRatio) ? String(object.monthlyRatio) : "",
+      interestSPY: isSet(object.interestSPY) ? String(object.interestSPY) : "",
       payments: Array.isArray(object?.payments) ? object.payments.map((e: any) => PaymentItem.fromJSON(e)) : [],
     };
   },
@@ -257,8 +275,10 @@ export const BorrowInterest = {
     message.payFreq !== undefined && (obj.payFreq = Math.round(message.payFreq));
     message.issueTime !== undefined && (obj.issueTime = message.issueTime.toISOString());
     message.borrowed !== undefined && (obj.borrowed = message.borrowed ? Coin.toJSON(message.borrowed) : undefined);
-    message.cyclePayment !== undefined
-      && (obj.cyclePayment = message.cyclePayment ? Coin.toJSON(message.cyclePayment) : undefined);
+    message.borrowedLast !== undefined
+      && (obj.borrowedLast = message.borrowedLast ? Coin.toJSON(message.borrowedLast) : undefined);
+    message.monthlyRatio !== undefined && (obj.monthlyRatio = message.monthlyRatio);
+    message.interestSPY !== undefined && (obj.interestSPY = message.interestSPY);
     if (message.payments) {
       obj.payments = message.payments.map((e) => e ? PaymentItem.toJSON(e) : undefined);
     } else {
@@ -276,9 +296,11 @@ export const BorrowInterest = {
     message.borrowed = (object.borrowed !== undefined && object.borrowed !== null)
       ? Coin.fromPartial(object.borrowed)
       : undefined;
-    message.cyclePayment = (object.cyclePayment !== undefined && object.cyclePayment !== null)
-      ? Coin.fromPartial(object.cyclePayment)
+    message.borrowedLast = (object.borrowedLast !== undefined && object.borrowedLast !== null)
+      ? Coin.fromPartial(object.borrowedLast)
       : undefined;
+    message.monthlyRatio = object.monthlyRatio ?? "";
+    message.interestSPY = object.interestSPY ?? "";
     message.payments = object.payments?.map((e) => PaymentItem.fromPartial(e)) || [];
     return message;
   },

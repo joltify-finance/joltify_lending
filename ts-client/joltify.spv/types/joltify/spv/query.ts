@@ -61,6 +61,24 @@ export interface QueryClaimableInterestResponse {
   claimableInterestAmount: Coin | undefined;
 }
 
+export interface QueryOutstandingInterestRequest {
+  wallet: string;
+  poolIndex: string;
+}
+
+export interface QueryOutstandingInterestResponse {
+  amount: string;
+}
+
+export interface QuerywithdrawalPrincipalRequest {
+  poolIndex: string;
+  walletAddress: string;
+}
+
+export interface QuerywithdrawalPrincipalResponse {
+  amount: string;
+}
+
 function createBaseQueryParamsRequest(): QueryParamsRequest {
   return {};
 }
@@ -684,6 +702,224 @@ export const QueryClaimableInterestResponse = {
   },
 };
 
+function createBaseQueryOutstandingInterestRequest(): QueryOutstandingInterestRequest {
+  return { wallet: "", poolIndex: "" };
+}
+
+export const QueryOutstandingInterestRequest = {
+  encode(message: QueryOutstandingInterestRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.wallet !== "") {
+      writer.uint32(10).string(message.wallet);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryOutstandingInterestRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryOutstandingInterestRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.wallet = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryOutstandingInterestRequest {
+    return {
+      wallet: isSet(object.wallet) ? String(object.wallet) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+    };
+  },
+
+  toJSON(message: QueryOutstandingInterestRequest): unknown {
+    const obj: any = {};
+    message.wallet !== undefined && (obj.wallet = message.wallet);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryOutstandingInterestRequest>, I>>(
+    object: I,
+  ): QueryOutstandingInterestRequest {
+    const message = createBaseQueryOutstandingInterestRequest();
+    message.wallet = object.wallet ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryOutstandingInterestResponse(): QueryOutstandingInterestResponse {
+  return { amount: "" };
+}
+
+export const QueryOutstandingInterestResponse = {
+  encode(message: QueryOutstandingInterestResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.amount !== "") {
+      writer.uint32(10).string(message.amount);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryOutstandingInterestResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryOutstandingInterestResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.amount = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryOutstandingInterestResponse {
+    return { amount: isSet(object.amount) ? String(object.amount) : "" };
+  },
+
+  toJSON(message: QueryOutstandingInterestResponse): unknown {
+    const obj: any = {};
+    message.amount !== undefined && (obj.amount = message.amount);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryOutstandingInterestResponse>, I>>(
+    object: I,
+  ): QueryOutstandingInterestResponse {
+    const message = createBaseQueryOutstandingInterestResponse();
+    message.amount = object.amount ?? "";
+    return message;
+  },
+};
+
+function createBaseQuerywithdrawalPrincipalRequest(): QuerywithdrawalPrincipalRequest {
+  return { poolIndex: "", walletAddress: "" };
+}
+
+export const QuerywithdrawalPrincipalRequest = {
+  encode(message: QuerywithdrawalPrincipalRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.poolIndex !== "") {
+      writer.uint32(10).string(message.poolIndex);
+    }
+    if (message.walletAddress !== "") {
+      writer.uint32(18).string(message.walletAddress);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QuerywithdrawalPrincipalRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQuerywithdrawalPrincipalRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.poolIndex = reader.string();
+          break;
+        case 2:
+          message.walletAddress = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QuerywithdrawalPrincipalRequest {
+    return {
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+      walletAddress: isSet(object.walletAddress) ? String(object.walletAddress) : "",
+    };
+  },
+
+  toJSON(message: QuerywithdrawalPrincipalRequest): unknown {
+    const obj: any = {};
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    message.walletAddress !== undefined && (obj.walletAddress = message.walletAddress);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QuerywithdrawalPrincipalRequest>, I>>(
+    object: I,
+  ): QuerywithdrawalPrincipalRequest {
+    const message = createBaseQuerywithdrawalPrincipalRequest();
+    message.poolIndex = object.poolIndex ?? "";
+    message.walletAddress = object.walletAddress ?? "";
+    return message;
+  },
+};
+
+function createBaseQuerywithdrawalPrincipalResponse(): QuerywithdrawalPrincipalResponse {
+  return { amount: "" };
+}
+
+export const QuerywithdrawalPrincipalResponse = {
+  encode(message: QuerywithdrawalPrincipalResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.amount !== "") {
+      writer.uint32(10).string(message.amount);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QuerywithdrawalPrincipalResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQuerywithdrawalPrincipalResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.amount = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QuerywithdrawalPrincipalResponse {
+    return { amount: isSet(object.amount) ? String(object.amount) : "" };
+  },
+
+  toJSON(message: QuerywithdrawalPrincipalResponse): unknown {
+    const obj: any = {};
+    message.amount !== undefined && (obj.amount = message.amount);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QuerywithdrawalPrincipalResponse>, I>>(
+    object: I,
+  ): QuerywithdrawalPrincipalResponse {
+    const message = createBaseQuerywithdrawalPrincipalResponse();
+    message.amount = object.amount ?? "";
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -695,8 +931,11 @@ export interface Query {
   Depositor(request: QueryDepositorRequest): Promise<QueryDepositorResponse>;
   /** Queries a list of AllowedPools items. */
   AllowedPools(request: QueryAllowedPoolsRequest): Promise<QueryAllowedPoolsResponse>;
+  OutstandingInterest(request: QueryOutstandingInterestRequest): Promise<QueryOutstandingInterestResponse>;
   /** Queries a list of ClaimableInterest items. */
   ClaimableInterest(request: QueryClaimableInterestRequest): Promise<QueryClaimableInterestResponse>;
+  /** Queries a list of withdrawalPrincipal items. */
+  withdrawalPrincipal(request: QuerywithdrawalPrincipalRequest): Promise<QuerywithdrawalPrincipalResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -708,7 +947,9 @@ export class QueryClientImpl implements Query {
     this.QueryPool = this.QueryPool.bind(this);
     this.Depositor = this.Depositor.bind(this);
     this.AllowedPools = this.AllowedPools.bind(this);
+    this.OutstandingInterest = this.OutstandingInterest.bind(this);
     this.ClaimableInterest = this.ClaimableInterest.bind(this);
+    this.withdrawalPrincipal = this.withdrawalPrincipal.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -740,10 +981,22 @@ export class QueryClientImpl implements Query {
     return promise.then((data) => QueryAllowedPoolsResponse.decode(new _m0.Reader(data)));
   }
 
+  OutstandingInterest(request: QueryOutstandingInterestRequest): Promise<QueryOutstandingInterestResponse> {
+    const data = QueryOutstandingInterestRequest.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Query", "OutstandingInterest", data);
+    return promise.then((data) => QueryOutstandingInterestResponse.decode(new _m0.Reader(data)));
+  }
+
   ClaimableInterest(request: QueryClaimableInterestRequest): Promise<QueryClaimableInterestResponse> {
     const data = QueryClaimableInterestRequest.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Query", "ClaimableInterest", data);
     return promise.then((data) => QueryClaimableInterestResponse.decode(new _m0.Reader(data)));
+  }
+
+  withdrawalPrincipal(request: QuerywithdrawalPrincipalRequest): Promise<QuerywithdrawalPrincipalResponse> {
+    const data = QuerywithdrawalPrincipalRequest.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Query", "withdrawalPrincipal", data);
+    return promise.then((data) => QuerywithdrawalPrincipalResponse.decode(new _m0.Reader(data)));
   }
 }
 

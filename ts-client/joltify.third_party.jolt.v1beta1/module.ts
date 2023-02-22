@@ -8,16 +8,22 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgLiquidate } from "./types/joltify/third_party/jolt/v1beta1/tx";
+import { MsgRepay } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgWithdraw } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgBorrow } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgDeposit } from "./types/joltify/third_party/jolt/v1beta1/tx";
-import { MsgRepay } from "./types/joltify/third_party/jolt/v1beta1/tx";
 
 
-export { MsgLiquidate, MsgWithdraw, MsgBorrow, MsgDeposit, MsgRepay };
+export { MsgLiquidate, MsgRepay, MsgWithdraw, MsgBorrow, MsgDeposit };
 
 type sendMsgLiquidateParams = {
   value: MsgLiquidate,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgRepayParams = {
+  value: MsgRepay,
   fee?: StdFee,
   memo?: string
 };
@@ -40,15 +46,13 @@ type sendMsgDepositParams = {
   memo?: string
 };
 
-type sendMsgRepayParams = {
-  value: MsgRepay,
-  fee?: StdFee,
-  memo?: string
-};
-
 
 type msgLiquidateParams = {
   value: MsgLiquidate,
+};
+
+type msgRepayParams = {
+  value: MsgRepay,
 };
 
 type msgWithdrawParams = {
@@ -61,10 +65,6 @@ type msgBorrowParams = {
 
 type msgDepositParams = {
   value: MsgDeposit,
-};
-
-type msgRepayParams = {
-  value: MsgRepay,
 };
 
 
@@ -96,6 +96,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
 				throw new Error('TxClient:sendMsgLiquidate: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgRepay({ value, fee, memo }: sendMsgRepayParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgRepay: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgRepay({ value: MsgRepay.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgRepay: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -141,26 +155,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgRepay({ value, fee, memo }: sendMsgRepayParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgRepay: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgRepay({ value: MsgRepay.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgRepay: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		
 		msgLiquidate({ value }: msgLiquidateParams): EncodeObject {
 			try {
 				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgLiquidate", value: MsgLiquidate.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgLiquidate: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgRepay({ value }: msgRepayParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgRepay", value: MsgRepay.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgRepay: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -188,14 +196,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgRepay({ value }: msgRepayParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgRepay", value: MsgRepay.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgRepay: Could not create message: ' + e.message)
-			}
-		},
-		
 	}
 };
 
@@ -211,12 +211,27 @@ class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
 	
-	public registry: Array<[string, GeneratedType]>;
+	public registry: Array<[string, GeneratedType]> = [];
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });
-		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
+		this.query = queryClient({ addr: client.env.apiURL });		
+		this.updateTX(client);
+		client.on('signer-changed',(signer) => {			
+		 this.updateTX(client);
+		})
+	}
+	updateTX(client: IgniteClient) {
+    const methods = txClient({
+        signer: client.signer,
+        addr: client.env.rpcURL,
+        prefix: client.env.prefix ?? "cosmos",
+    })
+	
+    this.tx = methods;
+    for (let m in methods) {
+        this.tx[m] = methods[m].bind(this.tx);
+    }
 	}
 };
 

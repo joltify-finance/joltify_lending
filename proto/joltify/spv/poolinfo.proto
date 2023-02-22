@@ -53,6 +53,7 @@ message PoolInfo {
     INACTIVE = 1;
     CLOSED = 2;
     PREPARE = 3;
+    CLOSING  =4;
   }
   POOLSTATUS pool_status = 11;
 

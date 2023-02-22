@@ -11,7 +11,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo, amountTopay sdk.Coin) {
+func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo, amountToPay sdk.Coin) {
 
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
@@ -30,7 +30,7 @@ func (k msgServer) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *type
 		}
 
 		if index == borrowTimes {
-			borrowInterest.Borrowed = borrowInterest.Borrowed.Sub(amountTopay)
+			borrowInterest.Borrowed = borrowInterest.Borrowed.Sub(amountToPay)
 			class.Data, err = types2.NewAnyWithValue(&borrowInterest)
 			if err != nil {
 				panic("pack class any data failed")
@@ -49,7 +49,7 @@ func (k msgServer) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *type
 func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipal) (*types.MsgPayPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	spv, err := sdk.AccAddressFromBech32(msg.Creator)
+	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
@@ -71,23 +71,8 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
 	}
 
-	k.travelThoughPrincipalToBePaid(ctx, &poolInfo, msg.Token)
-	// now we query all the borrows
-
-	poolInfo.BorrowedAmount = poolInfo.BorrowableAmount.Sub(msg.Token)
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)
-
-	// once the pool borrowed is 0, we will deactive the pool
-	if poolInfo.BorrowedAmount.Amount.Equal(sdk.ZeroInt()) {
-		poolInfo.PoolStatus = types.PoolInfo_INACTIVE
-	}
+	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
 	k.SetPool(ctx, poolInfo)
-
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
-	if err != nil {
-		return nil, err
-	}
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypePayPrincipal,

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -63,6 +64,18 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 // SetPool sets the pool
 func (k Keeper) SetPool(ctx sdk.Context, poolInfo types.PoolInfo) {
 	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectsKeyPrefix))
+	bz := k.cdc.MustMarshal(&poolInfo)
+	poolsStore.Set(types.KeyPrefix(poolInfo.Index), bz)
+}
+
+func (k Keeper) DelPool(ctx sdk.Context, index string) {
+	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectsKeyPrefix))
+	poolsStore.Delete(types.KeyPrefix(index))
+}
+
+// SetHistoryPool sets the pool
+func (k Keeper) SetHistoryPool(ctx sdk.Context, poolInfo types.PoolInfo) {
+	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.HistoryProjectsKeyPrefix))
 	bz := k.cdc.MustMarshal(&poolInfo)
 	poolsStore.Set(types.KeyPrefix(poolInfo.Index), bz)
 }
@@ -162,6 +175,12 @@ func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sd
 
 	k.cdc.MustUnmarshal(bz, &depositor)
 	return depositor, true
+}
+
+func (k Keeper) DelDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+poolIndex))
+	depositorPoolStore.Delete(walletAddress.Bytes())
+	return
 }
 
 // GetPoolDepositedWallets gets the deposited wallets

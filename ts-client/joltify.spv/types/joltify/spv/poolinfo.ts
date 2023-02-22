@@ -31,6 +31,8 @@ export interface PoolInfo {
   borrowableAmount: Coin | undefined;
   targetAmount: Coin | undefined;
   poolType: PoolInfo_POOLTYPE;
+  escrowInterestAmount: Coin | undefined;
+  escrowPrincipalAmount: Coin | undefined;
 }
 
 export enum PoolInfo_POOLSTATUS {
@@ -38,6 +40,7 @@ export enum PoolInfo_POOLSTATUS {
   INACTIVE = 1,
   CLOSED = 2,
   PREPARE = 3,
+  CLOSING = 4,
   UNRECOGNIZED = -1,
 }
 
@@ -55,6 +58,9 @@ export function poolInfo_POOLSTATUSFromJSON(object: any): PoolInfo_POOLSTATUS {
     case 3:
     case "PREPARE":
       return PoolInfo_POOLSTATUS.PREPARE;
+    case 4:
+    case "CLOSING":
+      return PoolInfo_POOLSTATUS.CLOSING;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -72,6 +78,8 @@ export function poolInfo_POOLSTATUSToJSON(object: PoolInfo_POOLSTATUS): string {
       return "CLOSED";
     case PoolInfo_POOLSTATUS.PREPARE:
       return "PREPARE";
+    case PoolInfo_POOLSTATUS.CLOSING:
+      return "CLOSING";
     case PoolInfo_POOLSTATUS.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
@@ -145,6 +153,8 @@ function createBasePoolInfo(): PoolInfo {
     borrowableAmount: undefined,
     targetAmount: undefined,
     poolType: 0,
+    escrowInterestAmount: undefined,
+    escrowPrincipalAmount: undefined,
   };
 }
 
@@ -200,6 +210,12 @@ export const PoolInfo = {
     }
     if (message.poolType !== 0) {
       writer.uint32(136).int32(message.poolType);
+    }
+    if (message.escrowInterestAmount !== undefined) {
+      Coin.encode(message.escrowInterestAmount, writer.uint32(146).fork()).ldelim();
+    }
+    if (message.escrowPrincipalAmount !== undefined) {
+      Coin.encode(message.escrowPrincipalAmount, writer.uint32(154).fork()).ldelim();
     }
     return writer;
   },
@@ -262,6 +278,12 @@ export const PoolInfo = {
         case 17:
           message.poolType = reader.int32() as any;
           break;
+        case 18:
+          message.escrowInterestAmount = Coin.decode(reader, reader.uint32());
+          break;
+        case 19:
+          message.escrowPrincipalAmount = Coin.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -289,6 +311,10 @@ export const PoolInfo = {
       borrowableAmount: isSet(object.borrowableAmount) ? Coin.fromJSON(object.borrowableAmount) : undefined,
       targetAmount: isSet(object.targetAmount) ? Coin.fromJSON(object.targetAmount) : undefined,
       poolType: isSet(object.poolType) ? poolInfo_POOLTYPEFromJSON(object.poolType) : 0,
+      escrowInterestAmount: isSet(object.escrowInterestAmount) ? Coin.fromJSON(object.escrowInterestAmount) : undefined,
+      escrowPrincipalAmount: isSet(object.escrowPrincipalAmount)
+        ? Coin.fromJSON(object.escrowPrincipalAmount)
+        : undefined,
     };
   },
 
@@ -322,6 +348,12 @@ export const PoolInfo = {
     message.targetAmount !== undefined
       && (obj.targetAmount = message.targetAmount ? Coin.toJSON(message.targetAmount) : undefined);
     message.poolType !== undefined && (obj.poolType = poolInfo_POOLTYPEToJSON(message.poolType));
+    message.escrowInterestAmount !== undefined && (obj.escrowInterestAmount = message.escrowInterestAmount
+      ? Coin.toJSON(message.escrowInterestAmount)
+      : undefined);
+    message.escrowPrincipalAmount !== undefined && (obj.escrowPrincipalAmount = message.escrowPrincipalAmount
+      ? Coin.toJSON(message.escrowPrincipalAmount)
+      : undefined);
     return obj;
   },
 
@@ -352,6 +384,13 @@ export const PoolInfo = {
       ? Coin.fromPartial(object.targetAmount)
       : undefined;
     message.poolType = object.poolType ?? 0;
+    message.escrowInterestAmount = (object.escrowInterestAmount !== undefined && object.escrowInterestAmount !== null)
+      ? Coin.fromPartial(object.escrowInterestAmount)
+      : undefined;
+    message.escrowPrincipalAmount =
+      (object.escrowPrincipalAmount !== undefined && object.escrowPrincipalAmount !== null)
+        ? Coin.fromPartial(object.escrowPrincipalAmount)
+        : undefined;
     return message;
   },
 };

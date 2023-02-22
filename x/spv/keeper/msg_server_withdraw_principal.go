@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"errors"
+
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -38,26 +40,21 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, err
 	}
 
-	depositor.LockedAmount = depositor.LockedAmount.SubAmount(totalBorrowedNow)
-	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(totalBorrowedNow).Sub(msg.Token)
+	// can be negative
+	deltaAmount := depositor.LockedAmount.Amount.Sub(totalBorrowedNow)
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, deltaAmount)
 
-	// todo we need to delete the nft once the
-	//if depositor.WithdrawalAmount.Amount.Equal(sdk.ZeroInt()) {
-	//	// we burn the nft
-	//	for _, el := range lendNFTs {
-	//		ids := strings.Split(el, ":")
-	//		err = k.nftKeeper.Transfer(ctx, ids[0], ids[1], poolInfo.OwnerAddress)
-	//		if err != nil {
-	//			return &types.MsgWithdrawPrincipalResponse{}, types.ErrTransferNFT
-	//		}
-	//
-	//		err = k.nftKeeper.Burn(ctx, ids[0], ids[1])
-	//		if err != nil {
-	//			return &types.MsgWithdrawPrincipalResponse{}, types.ErrBurnNFT
-	//		}
-	//
-	//	}
-	//}
+	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(deltaAmount)
+
+	depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(msg.Token)
+	if err != nil {
+		return nil, errors.New("withdraw amount too large")
+	}
+
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(msg.Token))
+	if err != nil {
+		return nil, err
+	}
 
 	k.SetDepositor(ctx, depositor)
 	ctx.EventManager().EmitEvent(
