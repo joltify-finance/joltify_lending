@@ -117,7 +117,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2233))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[1], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2233))}
 
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().ErrorContains(err, "insufficient tokens")
