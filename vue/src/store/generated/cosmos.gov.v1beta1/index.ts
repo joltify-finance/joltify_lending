@@ -359,19 +359,6 @@ export default {
 		},
 		
 		
-		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
-			try {
-				const client=await initClient(rootGetters)
-				const result = await client.CosmosGovV1Beta1.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
-				return result
-			} catch (e) {
-				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
-				}else{
-					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
-				}
-			}
-		},
 		async sendMsgSubmitProposal({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
@@ -385,16 +372,16 @@ export default {
 				}
 			}
 		},
-		async sendMsgVoteWeighted({ rootGetters }, { value, fee = [], memo = '' }) {
+		async sendMsgDeposit({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
 				const client=await initClient(rootGetters)
-				const result = await client.CosmosGovV1Beta1.tx.sendMsgVoteWeighted({ value, fee: {amount: fee, gas: "200000"}, memo })
+				const result = await client.CosmosGovV1Beta1.tx.sendMsgDeposit({ value, fee: {amount: fee, gas: "200000"}, memo })
 				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgVoteWeighted:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
 				}else{
-					throw new Error('TxClient:MsgVoteWeighted:Send Could not broadcast Tx: '+ e.message)
+					throw new Error('TxClient:MsgDeposit:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
@@ -411,20 +398,20 @@ export default {
 				}
 			}
 		},
-		
-		async MsgDeposit({ rootGetters }, { value }) {
+		async sendMsgVoteWeighted({ rootGetters }, { value, fee = [], memo = '' }) {
 			try {
-				const client=initClient(rootGetters)
-				const msg = await client.CosmosGovV1Beta1.tx.msgDeposit({value})
-				return msg
+				const client=await initClient(rootGetters)
+				const result = await client.CosmosGovV1Beta1.tx.sendMsgVoteWeighted({ value, fee: {amount: fee, gas: "200000"}, memo })
+				return result
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
-				} else{
-					throw new Error('TxClient:MsgDeposit:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgVoteWeighted:Init Could not initialize signing client. Wallet is required.')
+				}else{
+					throw new Error('TxClient:MsgVoteWeighted:Send Could not broadcast Tx: '+ e.message)
 				}
 			}
 		},
+		
 		async MsgSubmitProposal({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
@@ -438,16 +425,16 @@ export default {
 				}
 			}
 		},
-		async MsgVoteWeighted({ rootGetters }, { value }) {
+		async MsgDeposit({ rootGetters }, { value }) {
 			try {
 				const client=initClient(rootGetters)
-				const msg = await client.CosmosGovV1Beta1.tx.msgVoteWeighted({value})
+				const msg = await client.CosmosGovV1Beta1.tx.msgDeposit({value})
 				return msg
 			} catch (e) {
 				if (e == MissingWalletError) {
-					throw new Error('TxClient:MsgVoteWeighted:Init Could not initialize signing client. Wallet is required.')
+					throw new Error('TxClient:MsgDeposit:Init Could not initialize signing client. Wallet is required.')
 				} else{
-					throw new Error('TxClient:MsgVoteWeighted:Create Could not create message: ' + e.message)
+					throw new Error('TxClient:MsgDeposit:Create Could not create message: ' + e.message)
 				}
 			}
 		},
@@ -461,6 +448,19 @@ export default {
 					throw new Error('TxClient:MsgVote:Init Could not initialize signing client. Wallet is required.')
 				} else{
 					throw new Error('TxClient:MsgVote:Create Could not create message: ' + e.message)
+				}
+			}
+		},
+		async MsgVoteWeighted({ rootGetters }, { value }) {
+			try {
+				const client=initClient(rootGetters)
+				const msg = await client.CosmosGovV1Beta1.tx.msgVoteWeighted({value})
+				return msg
+			} catch (e) {
+				if (e == MissingWalletError) {
+					throw new Error('TxClient:MsgVoteWeighted:Init Could not initialize signing client. Wallet is required.')
+				} else{
+					throw new Error('TxClient:MsgVoteWeighted:Create Could not create message: ' + e.message)
 				}
 			}
 		},

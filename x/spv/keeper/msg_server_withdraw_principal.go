@@ -23,12 +23,6 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor not found for pool %v", msg.PoolIndex)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
-	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
-	}
-
-	_ = poolInfo
 	if depositor.WithdrawalAmount.Denom != msg.Token.Denom {
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "you can only withdraw %v", depositor.WithdrawalAmount.Denom)
 	}

@@ -7,23 +7,17 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgBlockAddress } from "./types/joltify/third_party/issuance/v1beta1/tx";
-import { MsgSetPauseStatus } from "./types/joltify/third_party/issuance/v1beta1/tx";
+import { MsgRedeemTokens } from "./types/joltify/third_party/issuance/v1beta1/tx";
 import { MsgUnblockAddress } from "./types/joltify/third_party/issuance/v1beta1/tx";
 import { MsgIssueTokens } from "./types/joltify/third_party/issuance/v1beta1/tx";
-import { MsgRedeemTokens } from "./types/joltify/third_party/issuance/v1beta1/tx";
+import { MsgBlockAddress } from "./types/joltify/third_party/issuance/v1beta1/tx";
+import { MsgSetPauseStatus } from "./types/joltify/third_party/issuance/v1beta1/tx";
 
 
-export { MsgBlockAddress, MsgSetPauseStatus, MsgUnblockAddress, MsgIssueTokens, MsgRedeemTokens };
+export { MsgRedeemTokens, MsgUnblockAddress, MsgIssueTokens, MsgBlockAddress, MsgSetPauseStatus };
 
-type sendMsgBlockAddressParams = {
-  value: MsgBlockAddress,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgSetPauseStatusParams = {
-  value: MsgSetPauseStatus,
+type sendMsgRedeemTokensParams = {
+  value: MsgRedeemTokens,
   fee?: StdFee,
   memo?: string
 };
@@ -40,19 +34,21 @@ type sendMsgIssueTokensParams = {
   memo?: string
 };
 
-type sendMsgRedeemTokensParams = {
-  value: MsgRedeemTokens,
+type sendMsgBlockAddressParams = {
+  value: MsgBlockAddress,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgSetPauseStatusParams = {
+  value: MsgSetPauseStatus,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgBlockAddressParams = {
-  value: MsgBlockAddress,
-};
-
-type msgSetPauseStatusParams = {
-  value: MsgSetPauseStatus,
+type msgRedeemTokensParams = {
+  value: MsgRedeemTokens,
 };
 
 type msgUnblockAddressParams = {
@@ -63,8 +59,12 @@ type msgIssueTokensParams = {
   value: MsgIssueTokens,
 };
 
-type msgRedeemTokensParams = {
-  value: MsgRedeemTokens,
+type msgBlockAddressParams = {
+  value: MsgBlockAddress,
+};
+
+type msgSetPauseStatusParams = {
+  value: MsgSetPauseStatus,
 };
 
 
@@ -85,31 +85,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgBlockAddress({ value, fee, memo }: sendMsgBlockAddressParams): Promise<DeliverTxResponse> {
+		async sendMsgRedeemTokens({ value, fee, memo }: sendMsgRedeemTokensParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgBlockAddress: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgRedeemTokens: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgBlockAddress({ value: MsgBlockAddress.fromPartial(value) })
+				let msg = this.msgRedeemTokens({ value: MsgRedeemTokens.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgBlockAddress: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		async sendMsgSetPauseStatus({ value, fee, memo }: sendMsgSetPauseStatusParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgSetPauseStatus: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgSetPauseStatus({ value: MsgSetPauseStatus.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgSetPauseStatus: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgRedeemTokens: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -141,34 +127,40 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgRedeemTokens({ value, fee, memo }: sendMsgRedeemTokensParams): Promise<DeliverTxResponse> {
+		async sendMsgBlockAddress({ value, fee, memo }: sendMsgBlockAddressParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgRedeemTokens: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgBlockAddress: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgRedeemTokens({ value: MsgRedeemTokens.fromPartial(value) })
+				let msg = this.msgBlockAddress({ value: MsgBlockAddress.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgRedeemTokens: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgBlockAddress: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgSetPauseStatus({ value, fee, memo }: sendMsgSetPauseStatusParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgSetPauseStatus: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgSetPauseStatus({ value: MsgSetPauseStatus.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgSetPauseStatus: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgBlockAddress({ value }: msgBlockAddressParams): EncodeObject {
+		msgRedeemTokens({ value }: msgRedeemTokensParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.third_party.issuance.v1beta1.MsgBlockAddress", value: MsgBlockAddress.fromPartial( value ) }  
+				return { typeUrl: "/joltify.third_party.issuance.v1beta1.MsgRedeemTokens", value: MsgRedeemTokens.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgBlockAddress: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgSetPauseStatus({ value }: msgSetPauseStatusParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.third_party.issuance.v1beta1.MsgSetPauseStatus", value: MsgSetPauseStatus.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgSetPauseStatus: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgRedeemTokens: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -188,11 +180,19 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgRedeemTokens({ value }: msgRedeemTokensParams): EncodeObject {
+		msgBlockAddress({ value }: msgBlockAddressParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.third_party.issuance.v1beta1.MsgRedeemTokens", value: MsgRedeemTokens.fromPartial( value ) }  
+				return { typeUrl: "/joltify.third_party.issuance.v1beta1.MsgBlockAddress", value: MsgBlockAddress.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgRedeemTokens: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgBlockAddress: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgSetPauseStatus({ value }: msgSetPauseStatusParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.third_party.issuance.v1beta1.MsgSetPauseStatus", value: MsgSetPauseStatus.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgSetPauseStatus: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -211,27 +211,12 @@ class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
 	
-	public registry: Array<[string, GeneratedType]> = [];
+	public registry: Array<[string, GeneratedType]>;
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });		
-		this.updateTX(client);
-		client.on('signer-changed',(signer) => {			
-		 this.updateTX(client);
-		})
-	}
-	updateTX(client: IgniteClient) {
-    const methods = txClient({
-        signer: client.signer,
-        addr: client.env.rpcURL,
-        prefix: client.env.prefix ?? "cosmos",
-    })
-	
-    this.tx = methods;
-    for (let m in methods) {
-        this.tx[m] = methods[m].bind(this.tx);
-    }
+		this.query = queryClient({ addr: client.env.apiURL });
+		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
 	}
 };
 

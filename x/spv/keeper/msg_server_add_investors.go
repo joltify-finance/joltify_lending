@@ -5,6 +5,7 @@ import (
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -63,20 +64,37 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 		return nil, coserrors.Wrap(types.ErrUnauthorized, "unauthorized operations")
 	}
 
-	investorPoolInfo, found := k.GetInvestorToPool(ctx, msg.PoolIndex)
-	if found {
-		newList := addToList(investorPoolInfo.Investors, msg.InvestorID)
-		investorPoolInfo.Investors = newList
-		k.AddInvestorToPool(ctx, &investorPoolInfo)
+	allProjects := k.kycKeeper.GetProjects(ctx)
+	targetProject := allProjects[pool.LinkedProject-1]
 
-	} else {
-		v := types.PoolWithInvestors{
-			PoolIndex: msg.PoolIndex,
-			Investors: msg.GetInvestorID(),
-		}
-		k.AddInvestorToPool(ctx, &v)
+	poolType := "senior"
+	if pool.PoolType == types.PoolInfo_SENIOR {
+		poolType = "junior"
 	}
 
+	indexHashreq := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))
+
+	_, found = k.GetPools(ctx, indexHashreq.Hex())
+	if !found {
+		panic("second pool cannot be found")
+	}
+	allPools := []string{msg.PoolIndex, indexHashreq.Hex()}
+	for _, poolIndex := range allPools {
+
+		investorPoolInfo, found := k.GetInvestorToPool(ctx, poolIndex)
+		if found {
+			newList := addToList(investorPoolInfo.Investors, msg.InvestorID)
+			investorPoolInfo.Investors = newList
+			k.AddInvestorToPool(ctx, &investorPoolInfo)
+
+		} else {
+			v := types.PoolWithInvestors{
+				PoolIndex: poolIndex,
+				Investors: msg.GetInvestorID(),
+			}
+			k.AddInvestorToPool(ctx, &v)
+		}
+	}
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeAddInvestors,
