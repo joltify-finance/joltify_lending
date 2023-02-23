@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -30,15 +31,15 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 
 	targetProject := allProjects[poolInfo.LinkedProject-1]
 
-	apy, payfreq, err := parameterSanitize(targetProject.PayFreq, msg.PoolApy)
+	apy, _, err := parameterSanitize(targetProject.PayFreq, msg.PoolApy)
 	if err != nil {
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
 	var poolJunior, poolSenior *types.PoolInfo
-	queryType := "senior"
+	queryType := "junior"
 	if poolInfo.PoolType == types.PoolInfo_JUNIOR {
-		queryType = "junior"
+		queryType = "senior"
 	}
 
 	indexHash2 := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), poolInfo.OwnerAddress.Bytes(), []byte(queryType))
@@ -78,7 +79,7 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 
 	poolInfo.PoolName = msg.PoolName
 	poolInfo.Apy = apy
-	poolInfo.TotalAmount = msg.TargetTokenAmount
+	poolInfo.TargetAmount = msg.TargetTokenAmount
 	k.SetPool(ctx, poolInfo)
 
 	if isJunior {
@@ -89,7 +90,7 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 	} else {
 		poolJunior.Apy = poolsInfoAPY["junior"]
 		poolJunior.TargetAmount = poolsInfoAmount["junior"]
-		poolSenior.PoolName = msg.PoolName
+		poolJunior.PoolName = msg.PoolName
 		k.SetPool(ctx, *poolJunior)
 	}
 

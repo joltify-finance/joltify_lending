@@ -102,8 +102,6 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))
 		urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
 
-		fmt.Printf(">>>%v\n", indexHash)
-
 		_, found := k.GetPools(ctx, indexHash.Hex())
 		if found {
 			return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
