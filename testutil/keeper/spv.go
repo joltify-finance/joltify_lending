@@ -57,14 +57,14 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 	}
 
 	pi2 := kycmoduletypes.ProjectInfo{
-		Index:               1,
+		Index:               2,
 		SPVName:             "defaultSPV2",
 		ProjectOwner:        acc,
 		BasicInfo:           &b2,
 		ProjectLength:       31536000, //1 year
 		PayFreq:             "15768000",
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
-		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100000000)),
+		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
 	}
 	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2}
 }
@@ -145,8 +145,8 @@ func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
 }
 
 func (m mockNFTKeeper) GetClass(ctx sdk.Context, classID string) (nft.Class, bool) {
-	//TODO implement me
-	panic("implement me")
+	r, ok := m.classes[classID]
+	return *r, ok
 }
 
 type mockbankKeeper struct{}

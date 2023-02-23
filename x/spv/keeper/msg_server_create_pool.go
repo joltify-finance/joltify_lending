@@ -68,6 +68,10 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", msg.ProjectIndex)
 	}
 
+	if msg.TargetTokenAmount.IsZero() {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidVersion, "the amount cannot be 0")
+	}
+
 	targetProject := allProjects[msg.ProjectIndex-1]
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
@@ -87,7 +91,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	poolsInfoAPY, poolsInfoAmount, err := calculateApys(targetProject.ProjectTargetAmount, msg.TargetTokenAmount, targetProject.BaseApy, apy, true)
 
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger thatn target")
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger than target")
 	}
 
 	var indexHashResp []string
