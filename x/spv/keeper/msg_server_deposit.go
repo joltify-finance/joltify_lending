@@ -84,14 +84,14 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	// todo do we really need this??
-	wallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
-	if !found {
-		depositorWallets := types.PoolDepositedInvestors{PoolIndex: poolInfo.Index, WalletAddress: []sdk.AccAddress{investor}}
-		k.SetPoolDepositedWallets(ctx, depositorWallets)
-	} else {
-		wallets.WalletAddress = addAddrToList(wallets.WalletAddress, investor)
-		k.SetPoolDepositedWallets(ctx, wallets)
-	}
+	//wallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
+	//if !found {
+	//	depositorWallets := types.PoolDepositedInvestors{PoolIndex: poolInfo.Index, WalletAddress: []sdk.AccAddress{investor}}
+	//	k.SetPoolDepositedWallets(ctx, depositorWallets)
+	//} else {
+	//	wallets.WalletAddress = addAddrToList(wallets.WalletAddress, investor)
+	//	k.SetPoolDepositedWallets(ctx, wallets)
+	//}
 
 	// now we update borrowable
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)

@@ -184,26 +184,26 @@ func (k Keeper) DelDepositor(ctx sdk.Context, poolIndex string, walletAddress sd
 }
 
 // GetPoolDepositedWallets gets the deposited wallets
-func (k Keeper) GetPoolDepositedWallets(ctx sdk.Context, index string) (deposited types.PoolDepositedInvestors, found bool) {
-	depositedPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))
-
-	bz := depositedPoolStore.Get(types.KeyPrefix(index))
-
-	if bz == nil {
-		return deposited, false
-	}
-
-	k.cdc.MustUnmarshal(bz, &deposited)
-	return deposited, true
-
-}
+//func (k Keeper) GetPoolDepositedWallets(ctx sdk.Context, index string) (deposited types.PoolDepositedInvestors, found bool) {
+//	depositedPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))
+//
+//	bz := depositedPoolStore.Get(types.KeyPrefix(index))
+//
+//	if bz == nil {
+//		return deposited, false
+//	}
+//
+//	k.cdc.MustUnmarshal(bz, &deposited)
+//	return deposited, true
+//
+//}
 
 // SetPoolDepositedWallets sets the deposited wallets
-func (k Keeper) SetPoolDepositedWallets(ctx sdk.Context, depositor types.PoolDepositedInvestors) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))
-	bz := k.cdc.MustMarshal(&depositor)
-	depositorPoolStore.Set(types.KeyPrefix(depositor.GetPoolIndex()), bz)
-}
+//func (k Keeper) SetPoolDepositedWallets(ctx sdk.Context, depositor types.PoolDepositedInvestors) {
+//	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))
+//	bz := k.cdc.MustMarshal(&depositor)
+//	depositorPoolStore.Set(types.KeyPrefix(depositor.GetPoolIndex()), bz)
+//}
 
 // IterateDepositors iterates over all deposit objects in the store and performs a callback function
 func (k Keeper) IterateDepositors(ctx sdk.Context, poolIndex string, cb func(depositor types.DepositorInfo) (stop bool)) {

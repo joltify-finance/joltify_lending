@@ -39,7 +39,7 @@ message MsgCreatePool {
 }
 
 message MsgCreatePoolResponse {
-  string poolIndex = 1;
+  repeated string poolIndex = 1;
 }
 
 message MsgAddInvestors {
