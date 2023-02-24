@@ -10,7 +10,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func setupMsgServer(t testing.TB) (types.MsgServer, *keeper.Keeper, context.Context) {
-	k, ctx := keepertest.SpvKeeper(t)
-	return keeper.NewMsgServerImpl(*k), k, sdk.WrapSDKContext(ctx)
+func setupMsgServer(t testing.TB) (types.MsgServer, *keeper.Keeper, types.NFTKeeper, context.Context) {
+	k, nftKeeper, ctx := keepertest.SpvKeeper(t)
+	return keeper.NewMsgServerImpl(*k), k, nftKeeper, sdk.WrapSDKContext(ctx)
 }

@@ -30,7 +30,7 @@ func (suite *DepositTestSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
-	app, k, wctx := setupMsgServer(suite.T())
+	app, k, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
@@ -225,7 +225,7 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	depositorData, found = suite.keeper.GetDepositor(suite.ctx, "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3", depositerAddr)
 	suite.Require().True(found)
 
-	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
+	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 
 	suite.Require().True(depositorData.WithdrawalAmount.Equal(depositAmount.Add(depositAmount)))
 

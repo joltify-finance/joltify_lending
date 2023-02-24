@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"fmt"
+	"github.com/gogo/protobuf/proto"
 	"testing"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -106,7 +108,9 @@ func (m mockAccKeeper) GetModuleAddress(name string) sdk.AccAddress {
 }
 
 type mockNFTKeeper struct {
-	classes map[string]*nft.Class
+	classes         map[string]*nft.Class
+	nfts            map[string]*nft.NFT
+	nftsWithClassID map[string]*nft.NFT
 }
 
 func (m mockNFTKeeper) Burn(ctx sdk.Context, classID string, nftID string) error {
@@ -115,7 +119,6 @@ func (m mockNFTKeeper) Burn(ctx sdk.Context, classID string, nftID string) error
 }
 
 func (m mockNFTKeeper) Transfer(ctx sdk.Context, classID string, nftID string, receiver sdk.AccAddress) error {
-	//TODO implement me
 	panic("implement me")
 }
 
@@ -125,8 +128,24 @@ func (m mockNFTKeeper) GetTotalSupply(ctx sdk.Context, classID string) uint64 {
 }
 
 func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, bool) {
-	//TODO implement me
-	panic("implement me")
+	key := fmt.Sprintf("%v:%v", classID, nftID)
+	thisNft, found := m.nftsWithClassID[key]
+	if !found {
+		return nft.NFT{}, false
+	}
+
+	bz, err := proto.Marshal(thisNft)
+	if err != nil {
+		panic(err)
+	}
+
+	var returnNFT nft.NFT
+	err = proto.Unmarshal(bz, &returnNFT)
+	if err != nil {
+		panic(err)
+	}
+	return returnNFT, true
+
 }
 
 func (m mockNFTKeeper) Update(ctx sdk.Context, token nft.NFT) error {
@@ -135,8 +154,11 @@ func (m mockNFTKeeper) Update(ctx sdk.Context, token nft.NFT) error {
 }
 
 func (m mockNFTKeeper) Mint(ctx sdk.Context, nft nft.NFT, receiver sdk.AccAddress) error {
-	//TODO implement me
-	panic("implement me")
+	m.nfts[receiver.String()] = &nft
+	key := fmt.Sprintf("%v:%v", nft.ClassId, nft.Id)
+	m.nftsWithClassID[key] = &nft
+	return nil
+
 }
 
 func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
@@ -149,20 +171,23 @@ func (m mockNFTKeeper) GetClass(ctx sdk.Context, classID string) (nft.Class, boo
 	return *r, ok
 }
 
-type mockbankKeeper struct{}
+type mockbankKeeper struct {
+	bankData map[string]sdk.Coins
+}
 
 func (m mockbankKeeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error {
-	//TODO implement me
-	panic("implement me")
+	m.bankData[recipientModule] = m.bankData[recipientModule].Add(amt...)
+	return nil
 }
 
 func (m mockbankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+	m.bankData[recipientModule] = m.bankData[recipientModule].Add(amt...)
 	return nil
 }
 
 func (m mockbankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
-	//TODO implement me
-	panic("implement me")
+	m.bankData[recipientAddr.String()] = m.bankData[recipientAddr.String()].Add(amt...)
+	return nil
 }
 
 func (m mockbankKeeper) GetSupply(ctx sdk.Context, denom string) sdk.Coin {
@@ -189,7 +214,7 @@ func (m mockbankKeeper) BurnCoins(ctx sdk.Context, name string, amt sdk.Coins) e
 	panic("implement me")
 }
 
-func SpvKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
+func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
@@ -211,9 +236,11 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	kycKeeper := mockKycKeeper{}
 	accKeeper := mockAccKeeper{}
 	nftKeeper := mockNFTKeeper{
-		classes: make(map[string]*nft.Class),
+		classes:         make(map[string]*nft.Class),
+		nfts:            make(map[string]*nft.NFT),
+		nftsWithClassID: make(map[string]*nft.NFT),
 	}
-	bankKeeper := mockbankKeeper{}
+	bankKeeper := mockbankKeeper{make(map[string]sdk.Coins)}
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -231,5 +258,5 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
 
-	return k, ctx
+	return k, &nftKeeper, ctx
 }

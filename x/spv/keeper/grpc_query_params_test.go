@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
-	testkeeper 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
+	testkeeper "github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParamsQuery(t *testing.T) {
-	keeper, ctx := testkeeper.SpvKeeper(t)
+	keeper, _, ctx := testkeeper.SpvKeeper(t)
 	wctx := sdk.WrapSDKContext(ctx)
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)

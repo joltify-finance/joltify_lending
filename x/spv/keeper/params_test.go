@@ -3,13 +3,13 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	testkeeper "github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetParams(t *testing.T) {
-	k, ctx := testkeeper.SpvKeeper(t)
+	k, _, ctx := testkeeper.SpvKeeper(t)
 	params := types.DefaultParams()
 
 	k.SetParams(ctx, params)
