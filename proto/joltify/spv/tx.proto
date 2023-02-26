@@ -90,6 +90,7 @@ message MsgClaimInterest {
 }
 
 message MsgClaimInterestResponse {
+  string amount = 1;
 }
 
 message MsgUpdatePool {

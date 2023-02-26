@@ -2,10 +2,11 @@ package keeper_test
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/gogo/protobuf/proto"
 	"strings"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -56,7 +57,7 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 	}
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(1*1e9))}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 

@@ -3,8 +3,9 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"github.com/gogo/protobuf/proto"
 	"testing"
+
+	"github.com/gogo/protobuf/proto"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/nft"
@@ -68,7 +69,19 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
 		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
 	}
-	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2}
+
+	pi3 := kycmoduletypes.ProjectInfo{
+		Index:               3,
+		SPVName:             "defaultSPV3",
+		ProjectOwner:        acc,
+		BasicInfo:           &b2,
+		ProjectLength:       31536000, //1 year
+		PayFreq:             "2592000",
+		BaseApy:             sdk.NewDecWithPrec(12, 2),
+		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
+	}
+
+	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3}
 }
 
 func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.QueryByWalletRequest) (*kycmoduletypes.QueryByWalletResponse, error) {

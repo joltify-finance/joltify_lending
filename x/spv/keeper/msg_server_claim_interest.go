@@ -69,7 +69,7 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 		),
 	)
 
-	return &types.MsgClaimInterestResponse{}, nil
+	return &types.MsgClaimInterestResponse{Amount: claimed.String()}, nil
 }
 
 func (k Keeper) cleanupDepositor(ctx sdk.Context, depositor types.DepositorInfo) error {
