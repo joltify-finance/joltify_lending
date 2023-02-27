@@ -72,6 +72,7 @@ message MsgBorrow {
 }
 
 message MsgBorrowResponse {
+  string borrow_amount = 1;
 }
 
 

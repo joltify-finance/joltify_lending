@@ -25,7 +25,7 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 	}
 
 	if !depositor.DepositorAddress.Equals(investorAddress) {
-		return nil, coserrors.Wrap(types.ErrUnauthorized, "not the depositer")
+		return nil, coserrors.Wrap(types.ErrUnauthorized, "not the depositor")
 	}
 
 	poolInfo, found := k.GetPools(ctx, depositor.PoolIndex)

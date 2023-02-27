@@ -19,7 +19,7 @@ func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftC
 	if poolInfo.BorrowableAmount.IsLT(amount) {
 		return types.ErrInsufficientFund
 	}
-	utilization := sdk.NewDecFromInt(amount.Amount).QuoTruncate(sdk.NewDecFromInt(poolInfo.BorrowableAmount.Amount))
+	utilization := sdk.NewDecFromInt(amount.Amount).Quo(sdk.NewDecFromInt(poolInfo.BorrowableAmount.Amount))
 
 	// we transfer the fund from the module to the spv
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(amount))
@@ -32,13 +32,35 @@ func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftC
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(amount)
 
 	// we update each investor leftover
-	// todo YB it seems we do not need to store the deposit wallets
-	//investorWallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
-	//if found {
-	//	panic("should never happened that investors have depposited the money while the store is empty")
-	//}
 	k.processInvestors(ctx, poolInfo, utilization, amount.Amount, nftClass)
 	return nil
+}
+
+func (k msgServer) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, locked, totalBorrow sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, errGlobal error) {
+	depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(depositor.WithdrawalAmount.Denom, locked))
+	depositor.WithdrawalAmount = depositor.WithdrawalAmount.SubAmount(locked)
+	borrowRatio := sdk.NewDecFromInt(locked).Quo(sdk.NewDecFromInt(totalBorrow))
+
+	// nft ID is the hash(nft class ID, investorWallet)
+	indexHash := crypto.Keccak256Hash([]byte(nftClassId), depositor.DepositorAddress)
+	nftTemplate.Id = fmt.Sprintf("invoice-%v", indexHash.String()[2:])
+
+	userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: depositor.DepositorAddress.String(), Ratio: borrowRatio, LastPayment: ctx.BlockTime()}
+	data, err := types2.NewAnyWithValue(&userData)
+	if err != nil {
+		panic("should never fail")
+	}
+	nftTemplate.Data = data
+	err = k.nftKeeper.Mint(ctx, nftTemplate, depositor.DepositorAddress)
+	if err != nil {
+		errGlobal = types.ErrMINTNFT
+		return
+	}
+
+	classIDAndNFTID := fmt.Sprintf("%v:%v", nftTemplate.ClassId, nftTemplate.Id)
+	depositor.LinkedNFT = append(depositor.LinkedNFT, classIDAndNFTID)
+	k.SetDepositor(ctx, *depositor)
+
 }
 
 func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, totalBorrow sdkmath.Int, nftClass nfttypes.Class) error {
@@ -51,33 +73,22 @@ func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, u
 
 	// now we update the depositor's withdrawal amount and locked amount
 	var errGlobal error
+	var firstDepositor *types.DepositorInfo
+	totalLocked := sdk.ZeroInt()
 	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
-		locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
-		depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(depositor.WithdrawalAmount.Denom, locked))
-		depositor.WithdrawalAmount = depositor.WithdrawalAmount.SubAmount(locked)
-		borrowRatio := sdk.NewDecFromInt(locked).Quo(sdk.NewDecFromInt(totalBorrow))
-
-		// nft ID is the hash(nft class ID, investorWallet)
-		indexHash := crypto.Keccak256Hash([]byte(nftClass.Id), depositor.DepositorAddress)
-		nftTemplate.Id = fmt.Sprintf("invoice-%v", indexHash.String()[2:])
-
-		userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: depositor.DepositorAddress.String(), Ratio: borrowRatio, LastPayment: ctx.BlockTime()}
-		data, err := types2.NewAnyWithValue(&userData)
-		if err != nil {
-			panic("should never fail")
-		}
-		nftTemplate.Data = data
-		err = k.nftKeeper.Mint(ctx, nftTemplate, depositor.DepositorAddress)
-		if err != nil {
-			errGlobal = types.ErrMINTNFT
+		if firstDepositor == nil {
+			firstDepositor = &depositor
 			return false
 		}
-
-		classIDAndNFTID := fmt.Sprintf("%v:%v", nftTemplate.ClassId, nftTemplate.Id)
-		depositor.LinkedNFT = append(depositor.LinkedNFT, classIDAndNFTID)
-		k.SetDepositor(ctx, depositor)
+		locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
+		k.doProcessInvestor(ctx, &depositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
+		totalLocked = totalLocked.Add(locked)
 		return false
 	})
+
+	// now we process the last one
+	locked := totalBorrow.Sub(totalLocked)
+	k.doProcessInvestor(ctx, firstDepositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
 
 	return errGlobal
 }
@@ -165,5 +176,5 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		),
 	)
 
-	return &types.MsgBorrowResponse{}, nil
+	return &types.MsgBorrowResponse{BorrowAmount: msg.BorrowAmount.String()}, nil
 }

@@ -68,6 +68,14 @@ func (k Keeper) SetPool(ctx sdk.Context, poolInfo types.PoolInfo) {
 	poolsStore.Set(types.KeyPrefix(poolInfo.Index), bz)
 }
 
+// SetReserve sets the pool
+func (k Keeper) SetReserve(ctx sdk.Context, reserved sdk.Coin) {
+	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectsKeyPrefix))
+	bz := k.cdc.MustMarshal(&reserved)
+	key := fmt.Sprintf("reserve-%v", reserved.Denom)
+	poolsStore.Set(types.KeyPrefix(key), bz)
+}
+
 func (k Keeper) DelPool(ctx sdk.Context, index string) {
 	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectsKeyPrefix))
 	poolsStore.Delete(types.KeyPrefix(index))
@@ -141,6 +149,18 @@ func (k Keeper) GetPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo
 	}
 	k.cdc.MustUnmarshal(bz, &poolInfo)
 	return poolInfo, true
+}
+
+// GetReserve gets the poolInfo with given pool index
+func (k Keeper) GetReserve(ctx sdk.Context, denom string) (amount sdk.Coin, ok bool) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectsKeyPrefix))
+	key := fmt.Sprintf("reserve-%v", denom)
+	bz := store.Get(types.KeyPrefix(key))
+	if bz == nil {
+		return amount, false
+	}
+	k.cdc.MustUnmarshal(bz, &amount)
+	return amount, true
 }
 
 // IteratePool iterates over all deposit objects in the store and performs a callback function

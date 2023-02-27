@@ -43,17 +43,22 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 
 		allPayments := borrowClassInfo.Payments
 		latestTimeStamp := time.Time{}
+		lastPaymentSet := false
 		for _, eachPayment := range allPayments {
 			// if the latest payment  this spv has is smaller than the spv that paied to all the investor, we claim the interest
-			if interestData.LastPayment.After(eachPayment.PaymentTime) {
+			if eachPayment.PaymentTime.Before(interestData.LastPayment) || eachPayment.PaymentTime.Equal(interestData.LastPayment) {
+				continue
+			}
+			if eachPayment.PaymentAmount.Amount.IsZero() {
 				continue
 			}
 			paymentAmount := eachPayment.PaymentAmount
-			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDec(1).Sub(reserve)).Mul(interestData.Ratio).TruncateInt()
+			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(interestData.Ratio).TruncateInt()
 			totalInterest = totalInterest.Add(interest)
 			latestTimeStamp = eachPayment.PaymentTime
+			lastPaymentSet = true
 		}
-		if updateNFT {
+		if updateNFT && lastPaymentSet {
 			interestData.LastPayment = latestTimeStamp
 			data, err := types2.NewAnyWithValue(&interestData)
 			if err != nil {

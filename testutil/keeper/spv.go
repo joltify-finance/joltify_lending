@@ -161,9 +161,11 @@ func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, 
 
 }
 
-func (m mockNFTKeeper) Update(ctx sdk.Context, token nft.NFT) error {
-	//TODO implement me
-	panic("implement me")
+func (m mockNFTKeeper) Update(ctx sdk.Context, nftToken nft.NFT) error {
+	key := fmt.Sprintf("%v:%v", nftToken.ClassId, nftToken.Id)
+	m.nftsWithClassID[key] = &nftToken
+
+	return nil
 }
 
 func (m mockNFTKeeper) Mint(ctx sdk.Context, nft nft.NFT, receiver sdk.AccAddress) error {
