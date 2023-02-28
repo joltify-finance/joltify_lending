@@ -1,12 +1,13 @@
 package keeper_test
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"fmt"
-	"github.com/gogo/protobuf/proto"
 	"strings"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
+	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -239,6 +240,83 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	expectedInterest := sdk.NewDecFromInt(investor1Borrowd).Mul(sdk.MustNewDecFromStr("0.15")).Mul(sdk.MustNewDecFromStr("0.85")).TruncateInt()
 	fmt.Printf(">>>>>%v===%v\n", investor1TotalClaimed.String(), expectedInterest.String())
 	suite.Require().True(expectedInterest.Equal(investor1TotalClaimed))
+}
+
+func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
+
+	investor1TotalClaimed := sdk.OneInt()
+	SetupPool(suite)
+	// now we deposit some token and it should be enough to borrow
+	creator1 := suite.investors[0]
+	creator2 := suite.investors[1]
+	creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
+	suite.Require().NoError(err)
+	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
+	suite.Require().NoError(err)
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	//suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount}
+
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.Require().NoError(err)
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	//now we borrow 1.34e5
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+
+	investor1Borrowd := depositor1.LockedAmount.Amount
+	fmt.Printf(">>>>>%v\n", investor1Borrowd.String())
+
+	reqInterest := types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e9))}
+	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+
+	req := types.MsgClaimInterest{
+		Creator:   creator1,
+		PoolIndex: suite.investorPool,
+	}
+
+	result1, err := suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	req.Creator = suite.investors[1]
+	result2, err := suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+
+	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
+
+	investor1TotalClaimed = investor1TotalClaimed.Add(a1.AmountOf("ausdc"))
+	a2, _ := sdk.ParseCoinsNormalized(result2.Amount)
+
+	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
+	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
+
+	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
+
 }
 
 func (suite *claimInterestSuite) TestClaimInterest() {

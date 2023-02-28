@@ -34,12 +34,10 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, err
 	}
 
-	// can be negative
+	//can be negative
 	deltaAmount := depositor.LockedAmount.Amount.Sub(totalBorrowedNow)
-	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, deltaAmount)
-
+	depositor.LockedAmount = depositor.LockedAmount.SubAmount(deltaAmount)
 	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(deltaAmount)
-
 	depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(msg.Token)
 	if err != nil {
 		return nil, errors.New("withdraw amount too large")
