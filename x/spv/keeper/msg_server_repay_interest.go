@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/gogo/protobuf/proto"
@@ -14,11 +15,16 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec) sdk.Coin {
-	currentTime := ctx.BlockTime()
+func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, latestPaymentTime time.Time) (sdk.Coin, error) {
 	var payment, paymentToInvestor sdk.Coin
-	latestTimeStamp := interestData.Payments[len(interestData.Payments)-1]
-	delta := currentTime.Sub(latestTimeStamp.PaymentTime).Seconds()
+	// as the payment canot be happed at exact payfreq time, so we need to round down to the latest payment time
+	currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+
+	if ctx.BlockTime().Before(latestPaymentTime.Add(time.Duration(interestData.PayFreq) * time.Second)) {
+		return sdk.Coin{}, errors.New("pay interest too early")
+	}
+
+	delta := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
 	denom := interestData.Payments[0].PaymentAmount.Denom
 	if int32(delta) >= interestData.PayFreq*BASE {
 		// we need to pay the whole month
@@ -56,15 +62,15 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	interestData.BorrowedLast = interestData.Borrowed
 
 	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
-	thisPaymentTime := latestTimeStamp.GetPaymentTime().Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
-	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor}
+	// thisPaymentTime := latestTimeStamp.GetPaymentTime().Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
+	currentPayment := types.PaymentItem{PaymentTime: currentTimeTruncated, PaymentAmount: paymentToInvestor}
 	interestData.Payments = append(interestData.Payments, &currentPayment)
 	fmt.Printf(">>>total:>>>%v and %v to investor\n", payment.String(), paymentToInvestor.String())
-	return payment
+	return payment, nil
 
 }
 
-func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) sdkmath.Int {
+func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) (sdkmath.Int, error) {
 
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
@@ -81,7 +87,10 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 			panic(err)
 		}
 
-		thisBorrowInterest := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor)
+		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, poolInfo.LastPaymentTime)
+		if err != nil {
+			return sdkmath.Int{}, err
+		}
 		class.Data, err = types2.NewAnyWithValue(&borrowInterest)
 		if err != nil {
 			panic("pack class any data failed")
@@ -89,7 +98,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		k.nftKeeper.SaveClass(ctx, class)
 		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
 	}
-	return totalPayment
+	return totalPayment, nil
 }
 
 func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {

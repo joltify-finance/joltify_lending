@@ -3,10 +3,15 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
+	"time"
 )
 
 func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) {
-	totalAmountDue := k.getAllInterestToBePaid(ctx, poolInfo)
+	totalAmountDue, err := k.getAllInterestToBePaid(ctx, poolInfo)
+	if err != nil {
+		ctx.Logger().Info("pay the interest too early")
+		return
+	}
 
 	if poolInfo.EscrowInterestAmount.Amount.LT(totalAmountDue) {
 		ctx.Logger().Error("insufficient fund to pay the interest %v<%v", poolInfo.EscrowInterestAmount.String(), totalAmountDue.String())
@@ -14,7 +19,8 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	}
 
 	// finally, we update the poolinfo
-	poolInfo.LastPaymentTime = ctx.BlockTime()
+	currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(poolInfo.PayFreq) * time.Second)
+	poolInfo.LastPaymentTime = currentTimeTruncated
 	if poolInfo.BorrowedAmount.Equal(sdk.ZeroInt()) {
 		poolInfo.PoolStatus = types.PoolInfo_CLOSED
 	}

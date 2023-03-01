@@ -318,16 +318,37 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
 
 	// we borrow again after 15 days
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second*time.Duration(3600*24*15)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(3600*24*15)))
 
 	//now we borrow 1.34e5
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2.1e5))}
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2.1e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second*time.Duration(3600*24*16)))
+	// after another 16 days
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(3600*24*16)))
+	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
-	req.Creator = suite.investor[0]
+	// this payfreq is from the testutil spv.go
+	payFreq := 2592000
+	//r := spvkeeper.CalculateInterestRate(sdk.MustNewDecFromStr("0.15"), payFreq)
+
+	testTime := suite.ctx.BlockTime()
+	currentTimeTruncated := testTime.Truncate(time.Duration(payFreq) * time.Second)
+	fmt.Printf(">>>>>>>%v\n", currentTimeTruncated.Local())
+
+	currentTimeTruncated = testTime.Add(time.Second * 2000).Truncate(time.Duration(payFreq) * time.Second)
+	fmt.Printf(">>>>>>>%v\n", currentTimeTruncated.Local())
+
+	currentTimeTruncated = testTime.Add(time.Second * time.Duration(payFreq)).Truncate(time.Duration(payFreq) * time.Second)
+	fmt.Printf(">>>>>>>%v\n", currentTimeTruncated.Local())
+
+	currentTimeTruncated = testTime.Add(time.Second * time.Duration(payFreq+20)).Truncate(time.Duration(payFreq) * time.Second)
+	fmt.Printf(">>>>>>>%v\n", currentTimeTruncated.Local())
+
+	req.Creator = suite.investors[0]
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -335,13 +356,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	result2, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-	fmt.Printf("%+v\n", result1)
-	fmt.Printf("%+v\n", result2)
-
-	
-
-
-
+	fmt.Printf("===222===%+v\n", result1.Amount)
+	fmt.Printf("==========%+v\n", result2.Amount)
 
 }
 

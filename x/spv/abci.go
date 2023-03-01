@@ -31,6 +31,4 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		}
 		return false
 	})
-
-	return
 }

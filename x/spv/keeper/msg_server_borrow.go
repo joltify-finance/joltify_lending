@@ -4,6 +4,7 @@ import (
 	"context"
 	sdkmath "cosmossdk.io/math"
 	"fmt"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
@@ -136,7 +137,13 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	rate := CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
-	firstPayment := types.PaymentItem{PaymentTime: ctx.BlockTime(), PaymentAmount: sdk.NewCoin(msg.BorrowAmount.Denom, sdk.NewInt(0))}
+	var paymentTime time.Time
+	if latestSeries == 0 {
+		paymentTime = ctx.BlockTime()
+	} else {
+		paymentTime = poolInfo.LastPaymentTime
+	}
+	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(msg.BorrowAmount.Denom, sdk.NewInt(0))}
 	bi := types.BorrowInterest{
 		PoolIndex:    poolInfo.Index,
 		Apy:          poolInfo.Apy,
