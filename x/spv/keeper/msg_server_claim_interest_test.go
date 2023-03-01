@@ -317,6 +317,32 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
 
+	// we borrow again after 15 days
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second*time.Duration(3600*24*15)))
+
+	//now we borrow 1.34e5
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2.1e5))}
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second*time.Duration(3600*24*16)))
+
+	req.Creator = suite.investor[0]
+	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	req.Creator = suite.investors[1]
+	result2, err = suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	fmt.Printf("%+v\n", result1)
+	fmt.Printf("%+v\n", result2)
+
+	
+
+
+
+
 }
 
 func (suite *claimInterestSuite) TestClaimInterest() {
