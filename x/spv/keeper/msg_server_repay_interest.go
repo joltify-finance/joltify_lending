@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/gogo/protobuf/proto"
-	"time"
 
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
@@ -15,13 +16,16 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, latestPaymentTime time.Time) (sdk.Coin, error) {
+func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool) (sdk.Coin, error) {
 	var payment, paymentToInvestor sdk.Coin
 	// as the payment canot be happed at exact payfreq time, so we need to round down to the latest payment time
 	currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 
-	if ctx.BlockTime().Before(latestPaymentTime.Add(time.Duration(interestData.PayFreq) * time.Second)) {
-		return sdk.Coin{}, errors.New("pay interest too early")
+	latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
+	if firstBorrow {
+		if ctx.BlockTime().Before(latestPaymentTime.Add(time.Duration(interestData.PayFreq) * time.Second)) {
+			return sdk.Coin{}, errors.New("pay interest too early")
+		}
 	}
 
 	delta := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
@@ -44,8 +48,8 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	} else {
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
 		interest := r.Power(uint64(delta)).Sub(sdk.OneDec())
-		paymentAmount := interest.MulInt(interestData.BorrowedLast.Amount).TruncateInt()
 
+		paymentAmount := interest.MulInt(interestData.BorrowedLast.Amount).TruncateInt()
 		reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(reserve).TruncateInt()
 		toInvestors := paymentAmount.Sub(reservedAmount)
 
@@ -75,6 +79,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
 	totalPayment := sdkmath.NewInt(0)
+	firstBorrow := true
 	for _, el := range nftClasses {
 		class, found := k.nftKeeper.GetClass(ctx, el)
 		if !found {
@@ -86,8 +91,8 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic(err)
 		}
-
-		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, poolInfo.LastPaymentTime)
+		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow)
+		firstBorrow = false
 		if err != nil {
 			return sdkmath.Int{}, err
 		}
