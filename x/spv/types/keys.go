@@ -21,6 +21,7 @@ const (
 	PoolInvestor             = "poolInvestorsPrefix-"
 	PoolDepositor            = "depositorPrefix-"
 	PoolDeposited            = "depositedPrefix-"
+	Pool                     = "pool-"
 )
 
 func KeyPrefix(p string) []byte {

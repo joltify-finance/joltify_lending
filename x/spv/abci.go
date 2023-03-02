@@ -1,6 +1,7 @@
 package spv
 
 import (
+	"fmt"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,14 +19,12 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 			return false
 		}
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
-		var delta time.Duration
-		if currentTime.After(dueTime) {
-			delta = currentTime.Sub(dueTime)
-		} else {
-			delta = dueTime.Sub(currentTime)
-		}
-
-		if delta < time.Minute {
+		fmt.Printf(">>>>>>%v\n", dueTime.String())
+		fmt.Printf(">>>>>>>>>>delta: %v\n", dueTime.Sub(currentTime).Seconds())
+		fmt.Printf(">>>>>1111111111111--%v\n", poolInfo.LastPaymentTime.String())
+		fmt.Printf(">>>>> due timeTTTT--%v\n", dueTime.String())
+		fmt.Printf(">>>>>1111111apy111111--%v\n", poolInfo.Apy)
+		if dueTime.Before(currentTime) {
 			k.HandleInterest(ctx, &poolInfo)
 			k.HandlePrincipal(ctx, &poolInfo)
 		}

@@ -170,6 +170,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	// we finally update the pool info
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
+	poolInfo.LastPaymentTime = paymentTime
 	k.SetPool(ctx, poolInfo)
 
 	ctx.EventManager().EmitEvent(

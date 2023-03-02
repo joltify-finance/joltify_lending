@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"time"
@@ -9,9 +10,11 @@ import (
 func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error {
 	totalAmountDue, err := k.getAllInterestToBePaid(ctx, poolInfo)
 	if err != nil {
-		ctx.Logger().Info("pay the interest too early")
+		ctx.Logger().Info(err.Error())
 		return err
 	}
+	fmt.Printf(">>>>>>>>>>>%v\n", totalAmountDue)
+	fmt.Printf(">>>>>>>apy>>>>%v\n", poolInfo.Apy)
 
 	if poolInfo.EscrowInterestAmount.Amount.LT(totalAmountDue) {
 		ctx.Logger().Error("insufficient fund to pay the interest %v<%v", poolInfo.EscrowInterestAmount.String(), totalAmountDue.String())
@@ -26,7 +29,9 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	}
 
 	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.SubAmount(totalAmountDue)
+
 	k.SetPool(ctx, *poolInfo)
+
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRepayInterest,

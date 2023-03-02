@@ -46,7 +46,7 @@ func NewParams() Params {
 		ProjectLength:       31536000, //1 year
 		ProjectTargetAmount: types.NewCoin("ausdc", amount),
 		BaseApy:             types.NewDecWithPrec(15, 2),
-		PayFreq:             "453600",
+		PayFreq:             "80",
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }
