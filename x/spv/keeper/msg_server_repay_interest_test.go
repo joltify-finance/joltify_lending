@@ -119,6 +119,9 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	samplePool, found := k.GetPools(ctx, poolIndex)
 	require.True(t, found)
 
+	samplePool.EscrowInterestAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(10e12))
+	k.SetPool(ctx, samplePool)
+
 	samplePool.BorrowableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))
 	samplePool.PoolStatus = types.PoolInfo_ACTIVE
 	firstBorrowTime := ctx.BlockTime()
@@ -136,7 +139,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	require.NoError(t, err)
 	poolInfo, _ := k.GetPools(ctx, poolIndex)
 
-	b1 := poolInfo.PoolNFTIds[1]
+	b1 := poolInfo.PoolNFTIds[0]
 
 	nclass, _ := nftKeeper.GetClass(ctx, b1)
 	var borrowInterest types.BorrowInterest
@@ -148,7 +151,8 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
 	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
-	paymentTime := borrowInterest.Payments[0].PaymentTime
+	paymentTime := borrowInterest.Payments[1].PaymentTime
+	fmt.Printf(">>>>>%v===%v==%v\n", paymentTime, firstBorrowTime.Add(time.Second*oneMonth), firstBorrowTime)
 	require.EqualValues(t, firstBorrowTime.Add(oneMonth), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[0].PaymentAmount.Amount.String(), interestOneYear)
 
