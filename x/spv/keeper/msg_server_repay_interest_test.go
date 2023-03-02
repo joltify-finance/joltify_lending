@@ -4,13 +4,17 @@ import (
 	"fmt"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
+
+const oneMonth = 24 * 30 * 3600
 
 func TestMsgRepayInterest(t *testing.T) {
 
@@ -107,7 +111,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
 	resp, err := app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
@@ -117,7 +121,35 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 
 	samplePool.BorrowableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))
 	samplePool.PoolStatus = types.PoolInfo_ACTIVE
+	firstBorrowTime := ctx.BlockTime()
 	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)))
 	k.SetPool(ctx, samplePool)
+	err = k.HandleInterest(ctx, &samplePool)
+	require.ErrorContains(t, err, "pay interest too early")
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(oneMonth-1)))
+	err = k.HandleInterest(ctx, &samplePool)
+	require.ErrorContains(t, err, "pay interest too early")
+
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 2))
+	fmt.Printf(">>>>%v\n", ctx.BlockTime().String())
+	err = k.HandleInterest(ctx, &samplePool)
+	require.NoError(t, err)
+	poolInfo, _ := k.GetPools(ctx, poolIndex)
+
+	b1 := poolInfo.PoolNFTIds[1]
+
+	nclass, _ := nftKeeper.GetClass(ctx, b1)
+	var borrowInterest types.BorrowInterest
+	err = proto.Unmarshal(nclass.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+
+	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+
+	paymentTime := borrowInterest.Payments[0].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(oneMonth), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[0].PaymentAmount.Amount.String(), interestOneYear)
 
 }

@@ -48,7 +48,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, errors.New("pool cannot be found")
 	}
 
-	poolInfo.BorrowableAmount = poolInfo.BorrowedAmount.SubAmount(deltaAmount)
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(deltaAmount)
 	k.SetPool(ctx, poolInfo)
 
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(msg.Token))

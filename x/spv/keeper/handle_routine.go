@@ -6,16 +6,16 @@ import (
 	"time"
 )
 
-func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) {
+func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error {
 	totalAmountDue, err := k.getAllInterestToBePaid(ctx, poolInfo)
 	if err != nil {
 		ctx.Logger().Info("pay the interest too early")
-		return
+		return err
 	}
 
 	if poolInfo.EscrowInterestAmount.Amount.LT(totalAmountDue) {
 		ctx.Logger().Error("insufficient fund to pay the interest %v<%v", poolInfo.EscrowInterestAmount.String(), totalAmountDue.String())
-		return
+		return types.ErrInsufficientFund
 	}
 
 	// finally, we update the poolinfo
@@ -33,7 +33,7 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) {
 			sdk.NewAttribute("amount", totalAmountDue.String()),
 		),
 	)
-
+	return nil
 }
 
 func (k Keeper) HandlePrincipal(ctx sdk.Context, poolInfo *types.PoolInfo) {
