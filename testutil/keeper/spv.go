@@ -181,6 +181,11 @@ func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
 	return nil
 }
 
+func (m mockNFTKeeper) UpdateClass(ctx sdk.Context, class nft.Class) error {
+	m.classes[class.Id] = &class
+	return nil
+}
+
 func (m mockNFTKeeper) GetClass(ctx sdk.Context, classID string) (nft.Class, bool) {
 	r, ok := m.classes[classID]
 	return *r, ok

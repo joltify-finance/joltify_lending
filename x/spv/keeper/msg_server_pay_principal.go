@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -35,14 +36,21 @@ func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.P
 			if err != nil {
 				panic("pack class any data failed")
 			}
-			k.nftKeeper.SaveClass(ctx, class)
+			err = k.nftKeeper.UpdateClass(ctx, class)
+			if err != nil {
+				panic(err)
+			}
+
 			return
 		}
 
 		ratioOfThisBorrow := sdk.NewDecFromInt(borrowInterest.Borrowed.Amount).Quo(sdk.NewDecFromInt(totalBorrowedAmount.Amount))
 		thisPayAmount := sdk.NewDecFromInt(borrowInterest.Borrowed.Amount).Mul(ratioOfThisBorrow).TruncateInt()
 		borrowInterest.Borrowed = borrowInterest.Borrowed.SubAmount(thisPayAmount)
-		k.nftKeeper.SaveClass(ctx, class)
+		err = k.nftKeeper.UpdateClass(ctx, class)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

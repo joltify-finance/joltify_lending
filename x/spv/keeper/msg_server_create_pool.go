@@ -157,7 +157,10 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		}
 
 		k.SetPool(ctx, poolInfo)
-		k.nftKeeper.SaveClass(ctx, poolNFTClass)
+		err = k.nftKeeper.SaveClass(ctx, poolNFTClass)
+		if err != nil {
+			return nil, err
+		}
 	}
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(

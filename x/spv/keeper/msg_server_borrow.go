@@ -158,7 +158,10 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		panic(err)
 	}
 	currentBorrowClass.Data = data
-	k.nftKeeper.SaveClass(ctx, currentBorrowClass)
+	err = k.nftKeeper.SaveClass(ctx, currentBorrowClass)
+	if err != nil {
+		return nil, err
+	}
 
 	// update the borrow series
 	poolInfo.PoolNFTIds = append(poolInfo.PoolNFTIds, currentBorrowClass.Id)

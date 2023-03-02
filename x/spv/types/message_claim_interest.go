@@ -9,10 +9,10 @@ const TypeMsgClaimInterest = "claim_interest"
 
 var _ sdk.Msg = &MsgClaimInterest{}
 
-func NewMsgClaimInterest(creator string, borrowAmount string) *MsgClaimInterest {
+func NewMsgClaimInterest(creator string, poolIndex string) *MsgClaimInterest {
 	return &MsgClaimInterest{
-		Creator: creator,
-		//BorrowAmount: borrowAmount,
+		Creator:   creator,
+		PoolIndex: poolIndex,
 	}
 }
 

@@ -21,9 +21,6 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		fmt.Printf(">>>>>>%v\n", dueTime.String())
 		fmt.Printf(">>>>>>>>>>delta: %v\n", dueTime.Sub(currentTime).Seconds())
-		fmt.Printf(">>>>>1111111111111--%v\n", poolInfo.LastPaymentTime.String())
-		fmt.Printf(">>>>> due timeTTTT--%v\n", dueTime.String())
-		fmt.Printf(">>>>>1111111apy111111--%v\n", poolInfo.Apy)
 		if dueTime.Before(currentTime) {
 			k.HandleInterest(ctx, &poolInfo)
 			k.HandlePrincipal(ctx, &poolInfo)

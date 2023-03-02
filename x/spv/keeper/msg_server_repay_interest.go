@@ -100,7 +100,17 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic("pack class any data failed")
 		}
-		k.nftKeeper.SaveClass(ctx, class)
+		err = k.nftKeeper.UpdateClass(ctx, class)
+		if err != nil {
+			return sdkmath.Int{}, err
+		}
+		saved, _ := k.nftKeeper.GetClass(ctx, class.GetId())
+
+		err = proto.Unmarshal(saved.Data.Value, &borrowInterest)
+		if err != nil {
+			panic(err)
+		}
+
 		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
 	}
 	return totalPayment, nil
