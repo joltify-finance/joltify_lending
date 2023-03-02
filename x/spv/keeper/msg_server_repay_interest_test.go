@@ -148,12 +148,129 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 		panic(err)
 	}
 
-	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(samplePool.Apy).QuoInt64(12).TruncateInt()
 	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	paymentTime := borrowInterest.Payments[1].PaymentTime
-	fmt.Printf(">>>>>%v===%v==%v\n", paymentTime, firstBorrowTime.Add(time.Second*oneMonth), firstBorrowTime)
-	require.EqualValues(t, firstBorrowTime.Add(oneMonth), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[0].PaymentAmount.Amount.String(), interestOneYear)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), interestOneYear.String())
+
+	// at the middle of the month, we borrow
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 15 * 24 * 3600))
+	secondBorrowTime := ctx.BlockTime()
+	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)))
+
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 15 * 24 * 3600))
+	err = k.HandleInterest(ctx, &samplePool)
+	require.NoError(t, err)
+
+	poolInfo, _ = k.GetPools(ctx, poolIndex)
+
+	b1 = poolInfo.PoolNFTIds[0]
+	nclass, _ = nftKeeper.GetClass(ctx, b1)
+	err = proto.Unmarshal(nclass.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+	paymentTime = borrowInterest.Payments[2].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*2), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), interestOneYear.String())
+
+	b2 := poolInfo.PoolNFTIds[1]
+	nclass, _ = nftKeeper.GetClass(ctx, b2)
+	err = proto.Unmarshal(nclass.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+
+	err = proto.Unmarshal(nclass.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+	paymentTime = borrowInterest.Payments[1].PaymentTime
+
+	delta := firstBorrowTime.Add(time.Second * month * 2).Sub(secondBorrowTime)
+
+	r := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
+	interest := r.Power(uint64(delta.Seconds())).Sub(sdk.OneDec())
+
+	paymentAmount := interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
+	reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	toInvestors := paymentAmount.Sub(reservedAmount)
+
+	err = proto.Unmarshal(nclass.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+
+	paymentTime = borrowInterest.Payments[1].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*2), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), toInvestors.String())
+
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 30 * 24 * 3600))
+	err = k.HandleInterest(ctx, &samplePool)
+	require.NoError(t, err)
+
+	nclass1, _ := nftKeeper.GetClass(ctx, b1)
+	err = proto.Unmarshal(nclass1.Data.Value, &borrowInterest)
+	require.NoError(t, err)
+
+	paymentTime = borrowInterest.Payments[3].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*3), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[3].PaymentAmount.Amount.String(), interestOneYear.String())
+
+	nclass2, _ := nftKeeper.GetClass(ctx, b2)
+	err = proto.Unmarshal(nclass2.Data.Value, &borrowInterest)
+	require.NoError(t, err)
+
+	paymentTime = borrowInterest.Payments[2].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*3), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[2].PaymentAmount.Amount.String(), interestOneYear.String())
+
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(24*3600*13)))
+	thirdBorrowTime := ctx.BlockTime()
+	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)))
+
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(24*3600*19)))
+	err = k.HandleInterest(ctx, &samplePool)
+	require.NoError(t, err)
+
+	delta = firstBorrowTime.Add(time.Second * month * 4).Sub(thirdBorrowTime)
+
+	interest = r.Power(uint64(delta.Seconds())).Sub(sdk.OneDec())
+	paymentAmount = interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
+	reservedAmount = sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	toInvestors = paymentAmount.Sub(reservedAmount)
+
+	poolInfo, _ = k.GetPools(ctx, poolIndex)
+	b3 := poolInfo.PoolNFTIds[2]
+
+	nclass3, _ := nftKeeper.GetClass(ctx, b3)
+	err = proto.Unmarshal(nclass3.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+
+	paymentTime = borrowInterest.Payments[1].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*4), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), toInvestors.String())
+
+	nclass2, _ = nftKeeper.GetClass(ctx, b2)
+	err = proto.Unmarshal(nclass2.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+	paymentTime = borrowInterest.Payments[3].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*4), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[3].PaymentAmount.Amount.String(), interestOneYear.String())
+
+	nclass1, _ = nftKeeper.GetClass(ctx, b1)
+	err = proto.Unmarshal(nclass1.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+	paymentTime = borrowInterest.Payments[4].PaymentTime
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*4), paymentTime)
+	require.EqualValues(t, borrowInterest.Payments[4].PaymentAmount.Amount.String(), interestOneYear.String())
 
 }

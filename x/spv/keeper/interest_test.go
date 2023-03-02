@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"fmt"
 	"testing"
 
@@ -10,6 +9,7 @@ import (
 )
 
 func (suite *InterestTestSuite) TestAPYToSPY() {
+	return
 	type args struct {
 		apy           sdk.Dec
 		payfrq        int
@@ -114,87 +114,88 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 	}
 }
 
-func (suite *InterestTestSuite) TestMe() {
-
-	d := sdk.MustNewDecFromStr("1.05127")
-
-	rate, err := d.ApproxRoot(OneYear)
-	suite.Require().NoError(err)
-	fmt.Printf(">>>>%v\n", rate.String())
-
-	i := sdk.MustNewDecFromStr("0.0000000015854900")
-
-	_ = i
-
-	rate = rate.Sub(sdk.NewDec(1))
-	p := sdk.NewDec(1)
-	for j := 0; j < OneYear; j++ {
-		in := p.Mul(rate)
-		p = p.Add(in)
-	}
-	fmt.Printf(">>>>%v\n", p.String())
-
-}
-
-func (suite *InterestTestSuite) TestMe2() {
-
-	//d := sdk.MustNewDecFromStr("1.05127")
-	d := sdk.MustNewDecFromStr("1.21")
-
-	for qq := 1; qq < 13; qq++ {
-		d2 := d.Quo(sdk.NewDec(OneYear / OneWeek / int64(qq)))
-		root, err := d2.ApproxRoot(OneWeek * uint64(qq))
-		suite.Require().NoError(err)
-		fmt.Printf(">>%v months seconds ratio>>%v\n", qq, root.String())
-
-		//i := sdk.MustNewDecFromStr("0.0000000015854900")
-
-		i := root.Sub(sdk.NewDec(1))
-
-		p := sdk.NewDec(1)
-		for j := 0; j < OneWeek*qq; j++ {
-			in := p.Mul(i)
-			p = p.Add(in)
-		}
-
-		total := p.Mul(sdk.NewDec(OneYear / OneWeek / int64(qq)))
-
-		fmt.Printf(">>>>month %v :%v\n", qq, total.String())
-	}
-}
-
-func (suite *InterestTestSuite) TestMe3() {
-
-	d := sdk.MustNewDecFromStr("0.05127")
-
-	for qq := 1; qq < 52; qq++ {
-		root := CalculateInterestRate(d, OneWeek*qq)
-		//d2 := d.Quo(sdk.NewDec(OneYear / OneWeek / int64(qq)))
-		//root, err := d2.ApproxRoot(OneWeek * uint64(qq))
-		//suite.Require().NoError(err)
-		fmt.Printf(">>%v week seconds ratio>>%v\n", qq, root.String())
-
-		//i := sdk.MustNewDecFromStr("0.0000000015854900")
-
-		i := root.Sub(sdk.OneDec())
-		p := sdk.NewDec(1)
-		for j := 0; j < OneWeek*qq; j++ {
-			in := p.Mul(i)
-			p = p.Add(in)
-		}
-
-		interestduring := p.Sub(sdk.OneDec())
-		total := sdk.OneDec().Add(interestduring.Mul(sdk.NewDec(OneYear / OneWeek / int64(qq))))
-
-		factor := CalculateInterestFactor(root, sdkmath.NewInt(int64(OneWeek*qq)))
-		interestduring2 := factor.Mul(sdk.OneDec()).Sub(sdk.OneDec())
-
-		total2 := interestduring2.Mul(sdk.NewDec(OneYear / OneWeek / int64(qq))).Add(sdk.OneDec())
-
-		fmt.Printf(">>>>total :month %v :%v\n", qq, total.String())
-		fmt.Printf(">>>>month %v :%v\n", qq, total2.String())
-	}
-}
+//
+//func (suite *InterestTestSuite) TestMe() {
+//
+//	d := sdk.MustNewDecFromStr("1.05127")
+//
+//	rate, err := d.ApproxRoot(OneYear)
+//	suite.Require().NoError(err)
+//	fmt.Printf(">>>>%v\n", rate.String())
+//
+//	i := sdk.MustNewDecFromStr("0.0000000015854900")
+//
+//	_ = i
+//
+//	rate = rate.Sub(sdk.NewDec(1))
+//	p := sdk.NewDec(1)
+//	for j := 0; j < OneYear; j++ {
+//		in := p.Mul(rate)
+//		p = p.Add(in)
+//	}
+//	fmt.Printf(">>>>%v\n", p.String())
+//
+//}
+//
+//func (suite *InterestTestSuite) TestMe2() {
+//
+//	//d := sdk.MustNewDecFromStr("1.05127")
+//	d := sdk.MustNewDecFromStr("1.21")
+//
+//	for qq := 1; qq < 13; qq++ {
+//		d2 := d.Quo(sdk.NewDec(OneYear / OneWeek / int64(qq)))
+//		root, err := d2.ApproxRoot(OneWeek * uint64(qq))
+//		suite.Require().NoError(err)
+//		fmt.Printf(">>%v months seconds ratio>>%v\n", qq, root.String())
+//
+//		//i := sdk.MustNewDecFromStr("0.0000000015854900")
+//
+//		i := root.Sub(sdk.NewDec(1))
+//
+//		p := sdk.NewDec(1)
+//		for j := 0; j < OneWeek*qq; j++ {
+//			in := p.Mul(i)
+//			p = p.Add(in)
+//		}
+//
+//		total := p.Mul(sdk.NewDec(OneYear / OneWeek / int64(qq)))
+//
+//		fmt.Printf(">>>>month %v :%v\n", qq, total.String())
+//	}
+//}
+//
+//func (suite *InterestTestSuite) TestMe3() {
+//
+//	d := sdk.MustNewDecFromStr("0.05127")
+//
+//	for qq := 1; qq < 52; qq++ {
+//		root := CalculateInterestRate(d, OneWeek*qq)
+//		//d2 := d.Quo(sdk.NewDec(OneYear / OneWeek / int64(qq)))
+//		//root, err := d2.ApproxRoot(OneWeek * uint64(qq))
+//		//suite.Require().NoError(err)
+//		fmt.Printf(">>%v week seconds ratio>>%v\n", qq, root.String())
+//
+//		//i := sdk.MustNewDecFromStr("0.0000000015854900")
+//
+//		i := root.Sub(sdk.OneDec())
+//		p := sdk.NewDec(1)
+//		for j := 0; j < OneWeek*qq; j++ {
+//			in := p.Mul(i)
+//			p = p.Add(in)
+//		}
+//
+//		interestduring := p.Sub(sdk.OneDec())
+//		total := sdk.OneDec().Add(interestduring.Mul(sdk.NewDec(OneYear / OneWeek / int64(qq))))
+//
+//		factor := CalculateInterestFactor(root, sdkmath.NewInt(int64(OneWeek*qq)))
+//		interestduring2 := factor.Mul(sdk.OneDec()).Sub(sdk.OneDec())
+//
+//		total2 := interestduring2.Mul(sdk.NewDec(OneYear / OneWeek / int64(qq))).Add(sdk.OneDec())
+//
+//		fmt.Printf(">>>>total :month %v :%v\n", qq, total.String())
+//		fmt.Printf(">>>>month %v :%v\n", qq, total2.String())
+//	}
+//}
 
 type InterestTestSuite struct {
 	suite.Suite

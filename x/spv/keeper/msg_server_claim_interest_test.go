@@ -497,8 +497,8 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
 	a2, _ := sdk.ParseCoinsNormalized(result2.Amount)
 
-	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(2))
-	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(2))
+	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
+	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
 
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 

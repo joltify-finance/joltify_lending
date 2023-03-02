@@ -67,7 +67,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		ProjectLength:       31536000, //1 year
 		PayFreq:             "15768000",
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
-		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
+		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e12)),
 	}
 
 	pi3 := kycmoduletypes.ProjectInfo{

@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/stretchr/testify/require"
 	"github.com/joltify-finance/joltify_lending/testutil/sample"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMsgAddInvestors_ValidateBasic(t *testing.T) {
@@ -23,7 +23,8 @@ func TestMsgAddInvestors_ValidateBasic(t *testing.T) {
 		}, {
 			name: "valid address",
 			msg: MsgAddInvestors{
-				Creator: sample.AccAddress(),
+				Creator:    sample.AccAddress(),
+				InvestorID: []string{"1", "2"},
 			},
 		},
 	}

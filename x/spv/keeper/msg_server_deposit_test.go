@@ -157,55 +157,54 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	// create the first pool apy 7.8%
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("usdc", sdk.NewInt(0))}
 	_, err := suite.app.CreatePool(suite.ctx, &req)
-	suite.Require().NoError(err)
+	suite.Require().ErrorContains(err, "the amount cannot be 0")
 
 	// create the first pool apy 8.8%
-	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "8.8", TargetTokenAmount: sdk.NewCoin("usdc", sdk.NewInt(322))}
-	_, err = suite.app.CreatePool(suite.ctx, &req)
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "8.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3"))
+	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[0]))
 	suite.Require().NoError(err)
 
-	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", "0xcac0266ccc0bedb38f3ccc4da1edf884c8d3960497e9a038802fb73c5c0e18bc"))
+	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3",
+	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[1],
 		InvestorID: []string{"2"}}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
-	pool, found := suite.keeper.GetPools(suite.ctx, "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3")
+	pool, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
-	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(322))))
-	suite.Require().True(pool.TotalAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
+	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
+	suite.Require().True(pool.TotalAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
+	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
+	suite.Require().True(pool.BorrowableAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 
-	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
-	suite.Require().True(pool.BorrowableAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
-
-	depositAmount := sdk.NewCoin("usdc", sdk.NewInt(100))
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(100))
 	msgDepositor := types.MsgDeposit{Creator: "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
-		PoolIndex: "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3",
+		PoolIndex: resp.PoolIndex[0],
 		Token:     depositAmount}
 
 	_, err = suite.app.Deposit(suite.ctx, &msgDepositor)
 	suite.Require().NoError(err)
 
-	pool, found = suite.keeper.GetPools(suite.ctx, "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3")
+	pool, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
-	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(322))))
+	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
 	suite.Require().True(pool.TotalAmount.Equal(depositAmount))
 
-	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
+	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.BorrowableAmount.Equal(depositAmount))
 
 	depositerAddr, err := sdk.AccAddressFromBech32("jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl")
 	suite.Require().NoError(err)
 
-	depositorData, found := suite.keeper.GetDepositor(suite.ctx, "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3", depositerAddr)
+	depositorData, found := suite.keeper.GetDepositor(suite.ctx, resp.PoolIndex[0], depositerAddr)
 	suite.Require().True(found)
 
-	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
+	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 
 	suite.Require().True(depositorData.WithdrawalAmount.Equal(depositAmount))
 
@@ -214,15 +213,15 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	_, err = suite.app.Deposit(suite.ctx, &msgDepositor)
 	suite.Require().NoError(err)
 
-	pool, found = suite.keeper.GetPools(suite.ctx, "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3")
+	pool, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
-	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(322))))
+	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
 	suite.Require().True(pool.TotalAmount.Equal(depositAmount.Add(depositAmount)))
 
-	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("usdc", sdk.NewInt(0))))
+	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.BorrowableAmount.Equal(depositAmount.Add(depositAmount)))
 
-	depositorData, found = suite.keeper.GetDepositor(suite.ctx, "0x86a7506e61dfab773c243762f636ea428a5f497ba69205729a12dc428ce4abf3", depositerAddr)
+	depositorData, found = suite.keeper.GetDepositor(suite.ctx, resp.PoolIndex[0], depositerAddr)
 	suite.Require().True(found)
 
 	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))

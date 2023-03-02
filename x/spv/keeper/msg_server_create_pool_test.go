@@ -38,16 +38,16 @@ func TestMsgSERvCreatePool(t *testing.T) {
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
-	req = types.MsgCreatePool{Creator: "invalid address", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: "invalid address", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
-	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
 	// invalid pay freq
-	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("demo", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
