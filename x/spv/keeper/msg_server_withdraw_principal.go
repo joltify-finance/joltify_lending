@@ -43,6 +43,14 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, errors.New("withdraw amount too large")
 	}
 
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
+	if !found {
+		return nil, errors.New("pool cannot be found")
+	}
+
+	poolInfo.BorrowableAmount = poolInfo.BorrowedAmount.SubAmount(deltaAmount)
+	k.SetPool(ctx, poolInfo)
+
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(msg.Token))
 	if err != nil {
 		return nil, err

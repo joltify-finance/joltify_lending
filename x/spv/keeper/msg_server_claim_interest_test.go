@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -76,7 +75,7 @@ func TestClaimInterestTestSuite(t *testing.T) {
 	suite.Run(t, new(claimInterestSuite))
 }
 
-func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAddr2 sdk.AccAddress, interestOneYear sdkmath.Int, expectedAmount1, expectedAmount2 string) {
+func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAddr2 sdk.AccAddress, nftIndex int, expectedAmount1, expectedAmount2 string) {
 
 	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
 	suite.Require().True(found)
@@ -84,16 +83,27 @@ func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAd
 	depositor2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
 	suite.Require().True(found)
 
-	dat := strings.Split(depositor1.LinkedNFT[0], ":")
+	dat := strings.Split(depositor1.LinkedNFT[nftIndex], ":")
 	nftUser1, found := suite.nftKeeper.GetNFT(suite.ctx, dat[0], dat[1])
 	suite.Require().True(found)
 
-	dat = strings.Split(depositor2.LinkedNFT[0], ":")
+	Borrowclass, _ := suite.nftKeeper.GetClass(suite.ctx, dat[0])
+
+	var borrowClassInfo types.BorrowInterest
+	err := proto.Unmarshal(Borrowclass.Data.Value, &borrowClassInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	interestOneYearWithReserve := sdk.NewDecFromInt(borrowClassInfo.Borrowed.Amount).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+
+	dat = strings.Split(depositor2.LinkedNFT[nftIndex], ":")
 	nftUser2, found := suite.nftKeeper.GetNFT(suite.ctx, dat[0], dat[1])
 	suite.Require().True(found)
 
 	var nftInfo1 types.NftInfo
-	err := proto.Unmarshal(nftUser1.Data.Value, &nftInfo1)
+	err = proto.Unmarshal(nftUser1.Data.Value, &nftInfo1)
 	if err != nil {
 		panic(err)
 	}
@@ -113,8 +123,8 @@ func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAd
 
 	fmt.Printf(">>>>%v===%v\n", user1Interest.String(), expectedAmount1)
 	fmt.Printf(">>>>%v===%v\n", user2Interest.String(), expectedAmount2)
-	suite.Require().True(user1Interest.String() == expectedAmount1)
-	suite.Require().True(user2Interest.String() == expectedAmount2)
+	suite.Require().Equal(expectedAmount1, user1Interest.String())
+	suite.Require().Equal(expectedAmount2, user2Interest.String())
 
 }
 
@@ -182,9 +192,6 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	result2, err := suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
-	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
-
 	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
 
 	investor1TotalClaimed = investor1TotalClaimed.Add(a1.AmountOf("ausdc"))
@@ -193,7 +200,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(2))
 	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(2))
 
-	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
+	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
@@ -212,7 +219,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 
 	amount1 = a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
 	amount2 = a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
-	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
+	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
 	// for the rest of 9 month
 
@@ -235,7 +242,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 
 	amount1 = a1.AmountOf("ausdc").Quo(sdk.NewInt(9))
 	amount2 = a2.AmountOf("ausdc").Quo(sdk.NewInt(9))
-	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
+	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
 	expectedInterest := sdk.NewDecFromInt(investor1Borrowd).Mul(sdk.MustNewDecFromStr("0.15")).Mul(sdk.MustNewDecFromStr("0.85")).TruncateInt()
 	fmt.Printf(">>>>>%v===%v\n", investor1TotalClaimed.String(), expectedInterest.String())
@@ -279,9 +286,6 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
 	suite.Require().True(found)
 
-	investor1Borrowd := depositor1.LockedAmount.Amount
-	fmt.Printf(">>>>>%v\n", investor1Borrowd.String())
-
 	reqInterest := types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e9))}
 	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
 	suite.Require().NoError(err)
@@ -304,8 +308,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	result2, err := suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
-	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+	//interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	//interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
 
@@ -315,7 +319,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
 	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
 
-	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
+	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
 	// we borrow again after 15 days
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(3600*24*15)))
@@ -383,6 +387,51 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	suite.Require().Equal(result1.Amount, expectedToUser1.String()+"ausdc")
 	suite.Require().Equal(result2.Amount, expectedToUser2.String()+"ausdc")
 
+	// from then on, it should have the
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+
+	req.Creator = suite.investors[0]
+	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+	req.Creator = suite.investors[1]
+	result2, err = suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	// for the new borrow, each month, it pays
+
+	//interestOneYearWithReserve2 := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	//interestOneYear2 := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+
+	amount1New, _ := sdk.ParseCoinsNormalized(result1.Amount)
+	fmt.Printf(">>>>one month total %v\n", amount1New)
+	amount2New, _ := sdk.ParseCoinsNormalized(result2.Amount)
+
+	newIncome1 := amount1New[0].SubAmount(amount1)
+	newIncome2 := amount2New[0].SubAmount(amount2)
+
+	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 1, newIncome1.Amount.String(), newIncome2.Amount.String())
+
+	for i := 0; i < 9; i++ {
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	}
+
+	req.Creator = suite.investors[0]
+	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	req.Creator = suite.investors[1]
+	result2, err = suite.app.ClaimInterest(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	a1, _ = sdk.ParseCoinsNormalized(result1.Amount)
+	investor1TotalClaimed = investor1TotalClaimed.Add(a1.AmountOf("ausdc"))
+	a2, _ = sdk.ParseCoinsNormalized(result2.Amount)
+	suite.Require().True(a1[0].Amount.Equal(amount1New[0].Amount.MulRaw(9)))
+	suite.Require().True(a2[0].Amount.Equal(amount2New[0].Amount.MulRaw(9)))
+
 }
 
 func (suite *claimInterestSuite) TestClaimInterest() {
@@ -442,8 +491,8 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	suite.Require().NoError(err)
 	// total borrow is 1.34e5 and the user1 offer 4e5 while the second user offer 2e5, reserve is 0.15, the apy is 0.15
 	// after the first month, user 1 get 1.34e5*0.85*0.15/12*4/6
-	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
-	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+	//interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	//interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
 	a2, _ := sdk.ParseCoinsNormalized(result2.Amount)
@@ -451,7 +500,7 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(2))
 	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(2))
 
-	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, interestOneYear, amount1.String(), amount2.String())
+	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)

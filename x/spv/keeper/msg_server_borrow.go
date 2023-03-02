@@ -29,7 +29,10 @@ func (k msgServer) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftC
 
 	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Add(amount)
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(amount)
+	poolInfo.BorrowableAmount, err = poolInfo.BorrowableAmount.SafeSub(amount)
+	if err != nil {
+		return types.ErrInsufficientFund
+	}
 
 	// we update each investor leftover
 	k.processInvestors(ctx, poolInfo, utilization, amount.Amount, nftClass)

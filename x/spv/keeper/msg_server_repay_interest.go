@@ -118,14 +118,9 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 	if !found {
 		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool %v not found", msg.PoolIndex)
 	}
-	if poolInfo.PoolStatus == types.PoolInfo_CLOSED || poolInfo.PoolStatus == types.PoolInfo_INACTIVE {
+	if poolInfo.PoolStatus == types.PoolInfo_CLOSED || poolInfo.PoolStatus == types.PoolInfo_INACTIVE || poolInfo.PoolStatus == types.PoolInfo_CLOSING {
 		return nil, types.ErrPoolNotActive
 	}
-
-	// todo here we allow all the poeple pay for the spv
-	//if !spvAddress.Equals(poolInfo.OwnerAddress) {
-	//	return nil, coserrors.Wrap(types.ErrUnauthorized, "only spv can pay the interest")
-	//}
 
 	if msg.Token.Denom != poolInfo.TotalAmount.Denom {
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
