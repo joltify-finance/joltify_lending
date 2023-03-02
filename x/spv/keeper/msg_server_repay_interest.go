@@ -19,7 +19,8 @@ import (
 func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool) (sdk.Coin, error) {
 	var payment, paymentToInvestor sdk.Coin
 	// as the payment canot be happed at exact payfreq time, so we need to round down to the latest payment time
-	currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+	//currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+	currentTime := ctx.BlockTime()
 
 	latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 	if firstBorrow {
@@ -28,7 +29,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		}
 	}
 
-	delta := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
+	delta := currentTime.Sub(latestPaymentTime).Seconds()
 	denom := interestData.Payments[0].PaymentAmount.Denom
 	if int32(delta) >= interestData.PayFreq*BASE {
 		// we need to pay the whole month
@@ -66,10 +67,10 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	interestData.BorrowedLast = interestData.Borrowed
 
 	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
-	// thisPaymentTime := latestTimeStamp.GetPaymentTime().Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
-	currentPayment := types.PaymentItem{PaymentTime: currentTimeTruncated, PaymentAmount: paymentToInvestor}
+	thisPaymentTime := latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
+	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor}
 	interestData.Payments = append(interestData.Payments, &currentPayment)
-	fmt.Printf(">>>total:>>>%v and %v to investor\n", payment.String(), paymentToInvestor.String())
+	ctx.Logger().Info(fmt.Sprintf(">>>total Interest:>>>%v and %v to investor\n", payment.String(), paymentToInvestor.String()))
 	return payment, nil
 
 }
