@@ -17,8 +17,8 @@ func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.P
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
 	totalBorrowedAmount := poolInfo.BorrowedAmount
-	borrowTimes := len(nftClasses[1:])
-	for index, el := range nftClasses[1:] {
+	borrowTimes := len(nftClasses)
+	for index, el := range nftClasses {
 		class, found := k.nftKeeper.GetClass(ctx, el)
 		if !found {
 			panic(found)
