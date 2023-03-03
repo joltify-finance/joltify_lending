@@ -182,6 +182,12 @@ func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
 }
 
 func (m mockNFTKeeper) UpdateClass(ctx sdk.Context, class nft.Class) error {
+
+	var borrowInterest types.BorrowInterest
+	err := proto.Unmarshal(class.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
 	m.classes[class.Id] = &class
 	return nil
 }

@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"fmt"
+
 	coserrors "cosmossdk.io/errors"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -36,6 +38,11 @@ func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.P
 		thisPayAmount := sdk.NewDecFromInt(amountToPay.Amount).Mul(ratioOfThisBorrow).TruncateInt()
 		borrowInterest.Borrowed = borrowInterest.Borrowed.SubAmount(thisPayAmount)
 		currentPayout = currentPayout.Add(thisPayAmount)
+		class.Data, err = types2.NewAnyWithValue(&borrowInterest)
+		if err != nil {
+			panic("pack class any data failed")
+		}
+
 		err = k.nftKeeper.UpdateClass(ctx, class)
 		if err != nil {
 			panic(err)
@@ -53,6 +60,7 @@ func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.P
 		panic(err)
 	}
 	borrowInterest.Borrowed = borrowInterest.Borrowed.Sub(amountToPay.SubAmount(currentPayout))
+	fmt.Printf(">>>>>>11122111>>>>>>%v---%v\n", firstClass.Id, borrowInterest.Borrowed)
 	firstClass.Data, err = types2.NewAnyWithValue(&borrowInterest)
 	if err != nil {
 		panic("pack class any data failed")

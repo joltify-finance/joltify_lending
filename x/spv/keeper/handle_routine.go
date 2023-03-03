@@ -59,6 +59,7 @@ func (k Keeper) HandlePrincipal(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		poolInfo.PoolStatus = types.PoolInfo_CLOSING
 	}
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(aboutToPay)
+
 	k.SetPool(ctx, *poolInfo)
 
 }
