@@ -12,7 +12,7 @@ import (
 )
 
 // Test suite used for all keeper tests
-type withDrawPrincipalSuite struct {
+type payPrincipalSuite struct {
 	suite.Suite
 	keeper       *spvkeeper.Keeper
 	nftKeeper    types.NFTKeeper
@@ -22,7 +22,7 @@ type withDrawPrincipalSuite struct {
 	investorPool string
 }
 
-func setupPool(suite *withDrawPrincipalSuite) {
+func setupPools(suite *payPrincipalSuite) {
 	// create the first pool apy 7.8%
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: "0.15", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
@@ -51,7 +51,7 @@ func setupPool(suite *withDrawPrincipalSuite) {
 }
 
 // The default state used by each test
-func (suite *withDrawPrincipalSuite) SetupTest() {
+func (suite *payPrincipalSuite) SetupTest() {
 
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
@@ -63,14 +63,43 @@ func (suite *withDrawPrincipalSuite) SetupTest() {
 	suite.keeper = k
 	suite.app = app
 	suite.nftKeeper = nftKeeper
+
 }
-func TestWithdrawPrincipalInterest(t *testing.T) {
+func TestpayPrincipalInterest(t *testing.T) {
 	suite.Run(t, new(withDrawPrincipalSuite))
 }
 
-func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
+func (suite *payPrincipalSuite) TestWithExpectedErrors() {
+	setupPools(suite)
 
-	setupPool(suite)
+	req := types.MsgPayPrincipal{
+		Creator:   "invalid",
+		PoolIndex: suite.investorPool,
+		Token:     sdk.NewCoin("abc", sdk.OneInt()),
+	}
+
+	_, err := suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().ErrorContains(err, "invalid address")
+
+	req.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
+	req.PoolIndex = "232"
+
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().ErrorContains(err, "pool cannot be found")
+
+	req.PoolIndex = suite.investorPool
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().ErrorContains(err, "invalid token demo, want")
+
+	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+}
+
+func (suite *payPrincipalSuite) TestMsgPayPrincipalTest() {
+
+	setupPools(suite)
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]

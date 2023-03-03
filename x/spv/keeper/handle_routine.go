@@ -53,7 +53,6 @@ func (k Keeper) HandlePrincipal(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	// once the pool borrowed is 0, we will deactive the pool
 	if poolInfo.BorrowedAmount.Amount.Equal(sdk.ZeroInt()) {
 		poolInfo.PoolStatus = types.PoolInfo_CLOSING
-
 	}
 
 	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.EscrowInterestAmount.Denom, sdk.ZeroInt())

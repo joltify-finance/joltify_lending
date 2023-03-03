@@ -71,14 +71,6 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
 	}
 
-	if msg.Token.IsGTE(poolInfo.BorrowedAmount) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "extra principal rejected")
-	}
-
-	if msg.Token.Denom != poolInfo.TotalAmount.Denom {
-		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
-	}
-
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
