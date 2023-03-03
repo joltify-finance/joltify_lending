@@ -65,8 +65,8 @@ func (suite *payPrincipalSuite) SetupTest() {
 	suite.nftKeeper = nftKeeper
 
 }
-func TestpayPrincipalInterest(t *testing.T) {
-	suite.Run(t, new(withDrawPrincipalSuite))
+func TestPayPrincipalInterest(t *testing.T) {
+	suite.Run(t, new(payPrincipalSuite))
 }
 
 func (suite *payPrincipalSuite) TestWithExpectedErrors() {
@@ -95,83 +95,8 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-}
-
-func (suite *payPrincipalSuite) TestMsgPayPrincipalTest() {
-
-	setupPools(suite)
-	// now we deposit some token and it should be enough to borrow
-	creator1 := suite.investors[0]
-	creator2 := suite.investors[1]
-	creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
-	suite.Require().NoError(err)
-	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
-	suite.Require().NoError(err)
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
-	//suite.Require().NoError(err)
-	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
-		PoolIndex: suite.investorPool,
-		Token:     depositAmount}
-
-	// user two deposit half of the amount of the user 1
-	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
-		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
-
-	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
-	suite.Require().NoError(err)
-
-	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
-	suite.Require().NoError(err)
-
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
-
-	//now we borrow 1.34e5
-	_, err = suite.app.Borrow(suite.ctx, borrow)
-	suite.Require().NoError(err)
-	totalBorrowed := borrow.BorrowAmount
-
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
+	suite.Require().EqualValues(poolInfo.GetEscrowPrincipalAmount().Amount, req.Token.Amount)
 
-	suite.Require().EqualValues(borrow.BorrowAmount.Amount, poolInfo.BorrowedAmount.Amount)
-
-	borrowable := sdk.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
-	suite.Require().EqualValues(borrowable, poolInfo.BorrowableAmount.Amount)
-	suite.Require().EqualValues(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromUint64(1.34e5))
-
-	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
-	suite.Require().True(found)
-
-	depositor2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
-	suite.Require().True(found)
-
-	totalWithdrawbleFromInvestor := depositor1.WithdrawalAmount.Add(depositor2.WithdrawalAmount)
-	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
-
-	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
-	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
-
-	// now we borrow more money
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.1e5))
-	_, err = suite.app.Borrow(suite.ctx, borrow)
-	suite.Require().NoError(err)
-	totalBorrowed = totalBorrowed.Add(borrow.BorrowAmount)
-
-	borrowable = borrowable.Sub(borrow.BorrowAmount.Amount)
-
-	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
-	suite.Require().True(found)
-
-	suite.Require().EqualValues(borrowable, poolInfo.BorrowableAmount.Amount)
-
-	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
-	suite.Require().True(found)
-
-	depositor2, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
-	suite.Require().True(found)
-	totalWithdrawbleFromInvestor = depositor1.WithdrawalAmount.Add(depositor2.WithdrawalAmount)
-	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
-	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
-	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
 }

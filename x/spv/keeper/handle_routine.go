@@ -44,18 +44,21 @@ func (k Keeper) HandlePrincipal(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	if token.Amount.Equal(sdk.ZeroInt()) {
 		return
 	}
-	k.travelThoughPrincipalToBePaid(ctx, poolInfo, token)
+	aboutToPay := sdk.NewCoin(token.Denom, token.Amount)
+	if token.IsGTE(poolInfo.BorrowedAmount) {
+		aboutToPay = poolInfo.BorrowedAmount
+	}
+	k.travelThoughPrincipalToBePaid(ctx, poolInfo, aboutToPay)
 	// now we query all the borrows
 
-	poolInfo.BorrowedAmount = poolInfo.BorrowableAmount.Sub(token)
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(token)
+	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(aboutToPay)
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(aboutToPay)
 
 	// once the pool borrowed is 0, we will deactive the pool
 	if poolInfo.BorrowedAmount.Amount.Equal(sdk.ZeroInt()) {
 		poolInfo.PoolStatus = types.PoolInfo_CLOSING
 	}
-
-	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.EscrowInterestAmount.Denom, sdk.ZeroInt())
+	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(aboutToPay)
 	k.SetPool(ctx, *poolInfo)
 
 }

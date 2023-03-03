@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -145,4 +146,180 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
 	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
 	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
+
+}
+
+func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowandRepay() {
+
+	setupPool(suite)
+	// now we deposit some token and it should be enough to borrow
+	creator1 := suite.investors[0]
+	creator2 := suite.investors[1]
+	creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
+	suite.Require().NoError(err)
+	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
+	suite.Require().NoError(err)
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	//suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount}
+
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.Require().NoError(err)
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	//now we borrow 1.34e5
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.Require().EqualValues(borrow.BorrowAmount.Amount, poolInfo.BorrowedAmount.Amount)
+
+	borrowable := sdk.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
+	suite.Require().EqualValues(borrowable, poolInfo.BorrowableAmount.Amount)
+	suite.Require().EqualValues(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromUint64(1.34e5))
+
+	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+
+	depositor2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
+	suite.Require().True(found)
+
+	totalWithdrawbleFromInvestor := depositor1.WithdrawalAmount.Add(depositor2.WithdrawalAmount)
+	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
+
+	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
+	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
+
+	firstWithdrawable := depositor2.WithdrawalAmount
+	firstWithdrawable1 := depositor1.WithdrawalAmount
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	// now we pay the principal
+	req := types.MsgPayPrincipal{
+		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
+		PoolIndex: suite.investorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e5)),
+	}
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().NoError(err)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	suite.keeper.HandlePrincipal(suite.ctx, &poolInfo)
+	poolInfoNew, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	withDraw := types.MsgWithdrawPrincipal{
+		Creator:   suite.investors[1],
+		PoolIndex: suite.investorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.ZeroInt()),
+	}
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withDraw)
+	suite.Require().NoError(err)
+	depositor2, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
+	suite.Require().True(found)
+	delta := depositor2.WithdrawalAmount.Sub(firstWithdrawable)
+
+	secondWithdrawable2 := depositor2.WithdrawalAmount
+
+	totalMoney2 := depositor2.WithdrawalAmount.Add(depositor2.LockedAmount)
+	suite.Require().EqualValues(sdk.NewIntFromUint64(2e5), totalMoney2.Amount)
+
+	withDraw.Creator = suite.investors[0]
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withDraw)
+	suite.Require().NoError(err)
+
+	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+	delta2 := depositor1.WithdrawalAmount.Sub(firstWithdrawable1)
+
+	secondWithdrawable1 := depositor1.WithdrawalAmount
+
+	totalMoney1 := depositor1.WithdrawalAmount.Add(depositor1.LockedAmount)
+	suite.Require().EqualValues(sdk.NewIntFromUint64(4e5), totalMoney1.Amount)
+
+	allWithdraw := delta.Add(delta2)
+	suite.Require().True(allWithdraw.SubAmount(sdk.NewIntFromUint64(1e5)).Amount.LT(sdk.NewIntFromUint64(2)))
+
+	// we have another two borrows
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(4e3))
+	//now we borrow 4e3
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e3))
+	//now we borrow 2e3
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfoNew, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	fmt.Printf(">>111>>%v\n", poolInfoNew.BorrowedAmount)
+
+	// now we pay the principal
+	req = types.MsgPayPrincipal{
+		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
+		PoolIndex: suite.investorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e2)),
+	}
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().NoError(err)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.keeper.HandlePrincipal(suite.ctx, &poolInfo)
+	poolInfoNew, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	fmt.Printf(">>>>%v\n", poolInfoNew.EscrowPrincipalAmount)
+
+	// now we verify the depositor 1 and 2
+	withDraw = types.MsgWithdrawPrincipal{
+		Creator:   suite.investors[1],
+		PoolIndex: suite.investorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.ZeroInt()),
+	}
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withDraw)
+	suite.Require().NoError(err)
+	depositor2, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
+	suite.Require().True(found)
+	delta = depositor2.WithdrawalAmount.Sub(secondWithdrawable2)
+
+	totalMoney2 = depositor2.WithdrawalAmount.Add(depositor2.LockedAmount)
+	suite.Require().EqualValues(sdk.NewIntFromUint64(2e5), totalMoney2.Amount)
+
+	withDraw.Creator = suite.investors[0]
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withDraw)
+	suite.Require().NoError(err)
+
+	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+	delta2 = depositor1.WithdrawalAmount.Sub(secondWithdrawable1)
+
+	totalMoney1 = depositor1.WithdrawalAmount.Add(depositor1.LockedAmount)
+	suite.Require().EqualValues(sdk.NewIntFromUint64(4e5), totalMoney1.Amount)
+
+	allWithdraw = delta.Add(delta2)
+	suite.Require().True(allWithdraw.SubAmount(sdk.NewIntFromUint64(1e5)).Amount.LT(sdk.NewIntFromUint64(2)))
+
 }

@@ -30,24 +30,6 @@ func addToList(previousList, newElements []string) []string {
 	return combinedList
 }
 
-func addAddrToList(previousList []sdk.AccAddress, newElement sdk.AccAddress) []sdk.AccAddress {
-	combinedList := make([]sdk.AccAddress, 0, len(previousList)+1)
-	exists := make(map[string]bool)
-
-	for _, el := range previousList {
-		if !exists[el.String()] {
-			exists[el.String()] = true
-			combinedList = append(combinedList, el)
-		}
-	}
-
-	if !exists[newElement.String()] {
-		combinedList = append(combinedList, newElement)
-	}
-
-	return combinedList
-}
-
 func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestors) (*types.MsgAddInvestorsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
