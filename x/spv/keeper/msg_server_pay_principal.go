@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	coserrors "cosmossdk.io/errors"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
@@ -60,7 +59,6 @@ func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.P
 		panic(err)
 	}
 	borrowInterest.Borrowed = borrowInterest.Borrowed.Sub(amountToPay.SubAmount(currentPayout))
-	fmt.Printf(">>>>>>11122111>>>>>>%v---%v\n", firstClass.Id, borrowInterest.Borrowed)
 	firstClass.Data, err = types2.NewAnyWithValue(&borrowInterest)
 	if err != nil {
 		panic("pack class any data failed")
