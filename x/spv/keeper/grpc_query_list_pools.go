@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -19,9 +18,10 @@ func (k Keeper) ListPools(goCtx context.Context, req *types.QueryListPoolsReques
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	store := ctx.KVStore(k.storeKey)
-	investorStores := prefix.NewStore(store, types.KeyPrefix(types.ProjectsKeyPrefix))
+	investorStores := prefix.NewStore(store, types.KeyPrefix(types.Pool))
 
 	var poolsInfos []*types.PoolInfo
+
 	pageRes, err := query.Paginate(investorStores, req.Pagination, func(key []byte, value []byte) error {
 		var investor types.PoolInfo
 		if err := k.cdc.Unmarshal(value, &investor); err != nil {
