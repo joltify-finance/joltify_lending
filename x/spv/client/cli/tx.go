@@ -40,6 +40,7 @@ cmd.AddCommand(CmdUpdatePool())
 cmd.AddCommand(CmdActivePool())
 cmd.AddCommand(CmdPayPrincipal())
 cmd.AddCommand(CmdWithdrawPrincipal())
+cmd.AddCommand(CmdSubmitWitdrawProposal())
 // this line is used by starport scaffolding # 1
 
 	return cmd 

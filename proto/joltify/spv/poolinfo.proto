@@ -94,6 +94,12 @@ message PoolInfo {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
+
+  cosmos.base.v1beta1.Coin withdraw_proposal_amount = 20[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
 }
 
 message PoolWithInvestors {

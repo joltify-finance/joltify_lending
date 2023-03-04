@@ -31,5 +31,6 @@ message DepositorInfo {
     (gogoproto.nullable) = false];
 
   repeated string linkedNFT = 7;
+  bool withdraw_proposal = 8 ;
 }
 

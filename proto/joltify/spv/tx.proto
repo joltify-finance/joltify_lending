@@ -28,6 +28,8 @@ service Msg {
   rpc PayPrincipal(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
 
   rpc WithdrawPrincipal(MsgWithdrawPrincipal) returns (MsgWithdrawPrincipalResponse);
+
+  rpc SubmitWitdrawProposal(MsgSubmitWithdrawProposal) returns (MsgSubmitWithdrawProposalResponse);
 }
 
 message MsgCreatePool {
@@ -129,4 +131,14 @@ message MsgWithdrawPrincipal {
 }
 
 message MsgWithdrawPrincipalResponse {
+}
+
+
+message MsgSubmitWithdrawProposal {
+  string creator = 1;
+  string poolIndex = 2;
+}
+
+message MsgSubmitWithdrawProposalResponse {
+  bool operationResult = 1;
 }
