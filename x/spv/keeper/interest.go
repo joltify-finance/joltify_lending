@@ -1,14 +1,17 @@
 package keeper
 
 import (
-	cosmath "cosmossdk.io/math"
 	"errors"
+
+	cosmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
-	OneWeek       = 7 * 24 * 3600
+	OneWeek = 7 * 24 * 3600
+	// fixme  need to confirm whether we need this one year
 	OneYear       = OneWeek * 52
+	OneMonth      = OneWeek * 4
 	BASE          = 1
 	scalingFactor = 1e18
 )
