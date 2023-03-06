@@ -78,6 +78,9 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		k.SetDepositor(ctx, depositor)
 
 	} else {
+		if previousDepositor.WithdrawProposal {
+			return nil, coserrors.Wrapf(types.ErrDeposit, "fail to deposit as you have set the withdraw proposal")
+		}
 		previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
 		k.SetDepositor(ctx, previousDepositor)
 	}

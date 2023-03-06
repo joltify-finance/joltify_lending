@@ -17,10 +17,17 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
 			return false
 		}
+
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		if dueTime.Before(currentTime) {
 			k.HandleInterest(ctx, &poolInfo)
-			k.HandlePrincipal(ctx, &poolInfo)
+
+			if poolInfo.ProjectDueTime.Before(currentTime) {
+				// we pay the partial of the interest
+				k.HandlePartialPrincipalPayment(ctx, &poolInfo)
+			}
+
+			k.HandlePrincipalPayment(ctx, &poolInfo)
 		}
 		return false
 	})

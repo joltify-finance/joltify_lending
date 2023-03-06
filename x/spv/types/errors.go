@@ -25,4 +25,5 @@ var (
 	ErrBurnNFT            = coserrors.Register(ModuleName, 15, "fail to burn the nft")
 	ErrNFTNotFound        = coserrors.Register(ModuleName, 16, "nft not found")
 	ErrTime               = coserrors.Register(ModuleName, 17, "invalid time stamp")
+	ErrDeposit            = coserrors.Register(ModuleName, 18, "fail to deposit")
 )

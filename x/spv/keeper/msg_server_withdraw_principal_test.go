@@ -220,7 +220,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	suite.Require().NoError(err)
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
-	suite.keeper.HandlePrincipal(suite.ctx, &poolInfo)
+	suite.keeper.HandlePrincipalPayment(suite.ctx, &poolInfo)
 	poolInfoNew, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
@@ -285,7 +285,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	poolInfoNew, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.keeper.HandlePrincipal(suite.ctx, &poolInfoNew)
+	suite.keeper.HandlePrincipalPayment(suite.ctx, &poolInfoNew)
 	poolInfoNew, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
@@ -351,7 +351,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	poolInfoNew, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.keeper.HandlePrincipal(suite.ctx, &poolInfoNew)
+	suite.keeper.HandlePrincipalPayment(suite.ctx, &poolInfoNew)
 	poolInfoNew, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 

@@ -99,7 +99,12 @@ message PoolInfo {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
+  google.protobuf.Timestamp project_due_time = 21 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 
+  repeated bytes withdraw_accounts     = 22
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
 }
 
 message PoolWithInvestors {

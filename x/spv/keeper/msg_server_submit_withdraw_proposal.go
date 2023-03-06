@@ -7,7 +7,6 @@ import (
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -36,20 +35,10 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 	if len(poolInfo.PoolNFTIds) == 0 {
 		return nil, coserrors.Wrapf(types.ErrUnexpectedEndOfGroupNft, "no borrow can be found")
 	}
-	// we get the timestamp of the first borrow
-	firstBorrowNFT, found := k.nftKeeper.GetClass(ctx, poolInfo.PoolNFTIds[0])
-	if !found {
-		panic("should never fail")
-	}
 
-	var borrowInterest types.BorrowInterest
-	err = proto.Unmarshal(firstBorrowNFT.Data.Value, &borrowInterest)
-	if err != nil {
-		panic(err)
-	}
-
-	oneMonthBeforeProjectDueDate := borrowInterest.Payments[0].PaymentTime.Add(time.Duration(poolInfo.ProjectLength-OneMonth) * time.Second)
-	twoMonthBeforeProjectDueDate := borrowInterest.Payments[0].PaymentTime.Add(time.Duration(poolInfo.ProjectLength-OneMonth*2) * time.Second)
+	dueDate := poolInfo.ProjectDueTime
+	oneMonthBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(OneMonth))
+	twoMonthBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(OneMonth*2))
 
 	currentTime := ctx.BlockTime()
 	if currentTime.Before(twoMonthBeforeProjectDueDate) {
@@ -57,7 +46,7 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 	}
 
 	if currentTime.After(oneMonthBeforeProjectDueDate) {
-		return nil, coserrors.Wrapf(types.ErrTime, "submit the poposal too late")
+		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too late")
 	}
 
 	totalBorrowedNow, err := calculateTotalPrinciple(ctx, depositor.LinkedNFT, k.nftKeeper)
@@ -65,14 +54,16 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
-	//can be negative
+	//can be negative, we now sync the locked amount and withdraw amount
 	deltaAmount := depositor.LockedAmount.Amount.Sub(totalBorrowedNow)
 	depositor.LockedAmount = depositor.LockedAmount.SubAmount(deltaAmount)
 	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(deltaAmount)
 
 	depositor.WithdrawProposal = true
-
 	poolInfo.WithdrawProposalAmount = poolInfo.WithdrawProposalAmount.Add(depositor.LockedAmount)
+	poolInfo.WithdrawAccounts = append(poolInfo.WithdrawAccounts, depositor.DepositorAddress)
+	k.SetPool(ctx, poolInfo)
+	k.SetDepositor(ctx, depositor)
 
 	return &types.MsgSubmitWithdrawProposalResponse{}, nil
 }

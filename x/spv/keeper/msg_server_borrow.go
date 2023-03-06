@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
@@ -79,6 +80,10 @@ func (k msgServer) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, u
 	var firstDepositor *types.DepositorInfo
 	totalLocked := sdk.ZeroInt()
 	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
+		if depositor.WithdrawProposal {
+			// since you have submitted the withdrawal request, we skipp the borrow from it
+			return false
+		}
 		if firstDepositor == nil {
 			firstDepositor = &depositor
 			return false
@@ -165,6 +170,11 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	// update the borrow series
 	poolInfo.PoolNFTIds = append(poolInfo.PoolNFTIds, currentBorrowClass.Id)
+
+	// we start the project
+	if len(poolInfo.PoolNFTIds) == 1 {
+		poolInfo.ProjectDueTime = ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.ProjectLength))
+	}
 
 	err = k.processBorrow(ctx, &poolInfo, currentBorrowClass, msg.BorrowAmount)
 	if err != nil {
