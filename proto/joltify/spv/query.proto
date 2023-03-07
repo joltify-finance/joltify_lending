@@ -16,7 +16,6 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/joltify/spv/params";
   }
   // this line is used by starport scaffolding # 2
 
@@ -31,7 +30,7 @@ service Query {
   }
 
   rpc Depositor(QueryDepositorRequest) returns (QueryDepositorResponse) {
-    option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}";
+    option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}/{depositPoolIndex}";
   }
 
   // Queries a list of AllowedPools items.
