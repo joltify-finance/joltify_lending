@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-    "github.com/joltify-finance/joltify_lending/x/spv/types"
-    "github.com/joltify-finance/joltify_lending/x/spv/keeper"
-    keepertest "github.com/joltify-finance/joltify_lending/testutil/keeper"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/x/spv/keeper"
+	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func setupMsgServer(t testing.TB) (types.MsgServer, context.Context) {
-	k, ctx := keepertest.SpvKeeper(t)
-	return keeper.NewMsgServerImpl(*k), sdk.WrapSDKContext(ctx)
+func setupMsgServer(t testing.TB) (types.MsgServer, *keeper.Keeper, types.NFTKeeper, context.Context) {
+	k, nftType, ctx := keepertest.SpvKeeper(t)
+	return keeper.NewMsgServerImpl(*k), k, nftType, sdk.WrapSDKContext(ctx)
 }

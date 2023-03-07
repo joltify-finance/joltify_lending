@@ -2,6 +2,8 @@ package keeper
 
 import (
 	coserrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/gogo/protobuf/proto"
 	"strings"
 	"time"
@@ -42,59 +44,107 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	return nil
 }
 
-func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo) error {
-	// we firstly update the class borrowed amount
-
-	totalBorrowed := sdk.NewInt(0)
-	for _, el := range depositor.LinkedNFT {
-		ids := strings.Split(el, ":")
-
-		thisClass, found := k.nftKeeper.GetClass(ctx, ids[0])
-		if !found {
-			return coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
-		}
-
-		var borrowClassInfo types.BorrowInterest
-		err := proto.Unmarshal(thisClass.Data.Value, &borrowClassInfo)
-		if err != nil {
-			panic(err)
-		}
-		borrowed := borrowClassInfo.Borrowed
-
-		thisNFT, found := k.nftKeeper.GetNFT(ctx, ids[0], ids[1])
-		if !found {
-			return coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", ids[1])
-		}
-		var interestData types.NftInfo
-		err = proto.Unmarshal(thisNFT.Data.Value, &interestData)
-		if err != nil {
-			panic(err)
-		}
-		thisNFTBorrowed := sdk.NewDecFromInt(borrowed.Amount).Mul(interestData.Ratio).TruncateInt()
-		borrowed = borrowed.SubAmount(thisNFTBorrowed)
-
+func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, thisBorrow sdkmath.Int) (sdkmath.Int, error) {
+	thisClass, found := k.nftKeeper.GetClass(ctx, classID)
+	if !found {
+		return sdkmath.ZeroInt(), coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
 	}
+
+	var borrowClassInfo types.BorrowInterest
+	err := proto.Unmarshal(thisClass.Data.Value, &borrowClassInfo)
+	if err != nil {
+		panic(err)
+	}
+	borrowed := borrowClassInfo.Borrowed
+
+	thisNFT, found := k.nftKeeper.GetNFT(ctx, classID, nftID)
+	if !found {
+		return sdkmath.ZeroInt(), coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", nftID)
+	}
+	var interestData types.NftInfo
+	err = proto.Unmarshal(thisNFT.Data.Value, &interestData)
+	if err != nil {
+		panic(err)
+	}
+	thisNFTBorrowed := thisBorrow
+	if thisNFTBorrowed.IsZero() {
+		thisNFTBorrowed = sdk.NewDecFromInt(borrowed.Amount).Mul(interestData.Ratio).TruncateInt()
+	}
+	borrowClassInfo.Borrowed = borrowClassInfo.Borrowed.SubAmount(thisNFTBorrowed)
+	data, err := types2.NewAnyWithValue(&borrowClassInfo)
+	if err != nil {
+		panic("should never fail")
+	}
+	thisClass.Data = data
+	err = k.nftKeeper.UpdateClass(ctx, thisClass)
+	if err != nil {
+		return sdkmath.ZeroInt(), coserrors.Wrapf(err, "fail to update the class")
+	}
+	err = k.nftKeeper.Burn(ctx, classID, nftID)
+	if err != nil {
+		return sdkmath.ZeroInt(), coserrors.Wrapf(err, "fail to burn the nft")
+	}
+
+	return thisNFTBorrowed, nil
 
 }
 
-func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) {
+func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo) error {
+	totalBorrowed := sdk.ZeroInt()
+	// we will handle the first borrow later
+	for _, el := range depositor.LinkedNFT[1:] {
+		ids := strings.Split(el, ":")
+		thisBorrow, err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], sdkmath.ZeroInt())
+		if err != nil {
+			panic(err)
+		}
+		totalBorrowed = totalBorrowed.Add(thisBorrow)
+	}
+	// since we check whether this investor has borrow at the begin, we skip it here
+	firstNFT := depositor.LinkedNFT[0]
+	ids := strings.Split(firstNFT, ":")
+	_, err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], depositor.LockedAmount.SubAmount(totalBorrowed).Amount)
+	if err != nil {
+		panic(err)
+	}
+	k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
+	return nil
+}
 
+func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) {
+	var err error
 	token := poolInfo.EscrowPrincipalAmount
 	if token.IsLT(poolInfo.WithdrawProposalAmount) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
 		return
 	}
 
+	totalPaidAmount := sdkmath.ZeroInt()
 	for _, el := range poolInfo.WithdrawAccounts {
 		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
 			panic("should never fail to find the depositor")
 		}
 
-		k.processEachWithdrawReq(depositor)
+		err = k.processEachWithdrawReq(ctx, depositor)
+		if err != nil {
+			ctx.Logger().Error("fail to pay partial principal", err.Error())
+			panic(err)
+		}
 
+		needToBePaid := depositor.LockedAmount
+		totalPaidAmount = totalPaidAmount.Add(needToBePaid.Amount)
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(needToBePaid))
+		if err != nil {
+			ctx.Logger().Error(err.Error(), "fail to transfer the principal to ", depositor.DepositorAddress.String())
+			panic(err)
+		}
+	}
+	if !poolInfo.WithdrawProposalAmount.Equal(totalPaidAmount) {
+		panic("withdrawble amount is not equal as the total paid!")
 	}
 
+	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
 	k.SetPool(ctx, *poolInfo)
 	return
