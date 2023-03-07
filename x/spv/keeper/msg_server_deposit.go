@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -78,7 +79,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		k.SetDepositor(ctx, depositor)
 
 	} else {
-		if previousDepositor.WithdrawProposal {
+		if previousDepositor.WithdrawProposal || previousDepositor.TransferRequest {
 			return nil, coserrors.Wrapf(types.ErrDeposit, "fail to deposit as you have set the withdraw proposal")
 		}
 		previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)

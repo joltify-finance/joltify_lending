@@ -156,6 +156,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			EscrowPrincipalAmount:  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			WithdrawProposalAmount: sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			WithdrawAccounts:       make([]sdk.AccAddress, 0, 200),
+			TransferAccounts:       make([]sdk.AccAddress, 0, 200),
 		}
 
 		k.SetPool(ctx, poolInfo)

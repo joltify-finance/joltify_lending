@@ -32,5 +32,6 @@ message DepositorInfo {
 
   repeated string linkedNFT = 7;
   bool withdraw_proposal = 8 ;
+  bool transfer_request = 9;
 }
 

@@ -21,6 +21,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		if dueTime.Before(currentTime) {
 			k.HandleInterest(ctx, &poolInfo)
+			k.HandleTransfer(ctx, &poolInfo)
 
 			if poolInfo.ProjectDueTime.Before(currentTime) {
 				// we pay the partial of the interest

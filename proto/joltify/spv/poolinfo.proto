@@ -105,6 +105,10 @@ message PoolInfo {
   [(cosmos_proto.scalar) = "cosmos.AddressBytes",
     (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
   ];
+  repeated bytes transfer_accounts     = 23
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
 }
 
 message PoolWithInvestors {

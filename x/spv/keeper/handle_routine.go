@@ -1,12 +1,13 @@
 package keeper
 
 import (
+	"strings"
+	"time"
+
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/gogo/protobuf/proto"
-	"strings"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -44,6 +45,44 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	return nil
 }
 
+// HandleTransfer if the pool have enough withdrawal amount, we can return the full amount of the investors
+// otherwise, we can only return the partial of the principal
+func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
+	var depositors []types.DepositorInfo
+	totalAmount := sdkmath.ZeroInt()
+	for _, el := range poolInfo.TransferAccounts {
+		d, found := k.GetDepositor(ctx, poolInfo.Index, el)
+		if !found {
+			panic("should never fail to find the depositor")
+		}
+		depositors = append(depositors, d)
+		totalAmount = totalAmount.Add(d.LockedAmount.Amount)
+	}
+
+	// borrowable is larger than the total required, so we can return the money to these investors
+	if poolInfo.BorrowableAmount.Amount.GT(totalAmount) {
+
+		for _, el := range depositors {
+			err := k.processEachWithdrawReq(ctx, el)
+			if err != nil {
+				panic(err)
+			}
+			needToBePaid := el.LockedAmount
+			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, el.DepositorAddress, sdk.NewCoins(needToBePaid))
+			if err != nil {
+				ctx.Logger().Error(err.Error(), "fail to transfer the principal to ", el.DepositorAddress.String())
+				panic(err)
+			}
+		}
+		err := k.doBorrow(ctx, *poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, totalAmount))
+		if err != nil {
+			panic(err)
+		}
+
+	}
+
+}
+
 func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, thisBorrow sdkmath.Int) (sdkmath.Int, error) {
 	thisClass, found := k.nftKeeper.GetClass(ctx, classID)
 	if !found {
@@ -70,7 +109,14 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, th
 	if thisNFTBorrowed.IsZero() {
 		thisNFTBorrowed = sdk.NewDecFromInt(borrowed.Amount).Mul(interestData.Ratio).TruncateInt()
 	}
-	borrowClassInfo.Borrowed = borrowClassInfo.Borrowed.SubAmount(thisNFTBorrowed)
+
+	// there maybe the round of this NFT Borrowed
+	if borrowClassInfo.Borrowed.Amount.LT(thisNFTBorrowed) {
+		borrowClassInfo.Borrowed = sdk.NewCoin(borrowClassInfo.Borrowed.Denom, sdkmath.ZeroInt())
+	} else {
+		borrowClassInfo.Borrowed = borrowClassInfo.Borrowed.SubAmount(thisNFTBorrowed)
+	}
+
 	data, err := types2.NewAnyWithValue(&borrowClassInfo)
 	if err != nil {
 		panic("should never fail")
@@ -100,7 +146,7 @@ func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.Deposito
 		}
 		totalBorrowed = totalBorrowed.Add(thisBorrow)
 	}
-	// since we check whether this investor has borrow at the begin, we skip it here
+	// since we check whether this investor has borrowed at the first borrow, we skip the length check here
 	firstNFT := depositor.LinkedNFT[0]
 	ids := strings.Split(firstNFT, ":")
 	_, err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], depositor.LockedAmount.SubAmount(totalBorrowed).Amount)
@@ -146,6 +192,14 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
+
+	if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
+		poolInfo.PoolStatus = types.PoolInfo_CLOSED
+		ctx.Logger().Info(" the pool", "pool_ID:", poolInfo.Index)
+	} else {
+		poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(poolInfo.WithdrawProposalAmount)
+	}
+
 	k.SetPool(ctx, *poolInfo)
 	return
 

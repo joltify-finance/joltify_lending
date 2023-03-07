@@ -68,6 +68,10 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgSubmitWitdrawProposal int = 100
 
+	opWeightMsgTransferOwnership = "op_weight_msg_transfer_ownership"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgTransferOwnership int = 100
+
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -222,6 +226,17 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgSubmitWitdrawProposal,
 		spvsimulation.SimulateMsgSubmitWitdrawProposal(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgTransferOwnership int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgTransferOwnership, &weightMsgTransferOwnership, nil,
+		func(_ *rand.Rand) {
+			weightMsgTransferOwnership = defaultWeightMsgTransferOwnership
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgTransferOwnership,
+		spvsimulation.SimulateMsgTransferOwnership(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
 	// this line is used by starport scaffolding # simapp/module/operation

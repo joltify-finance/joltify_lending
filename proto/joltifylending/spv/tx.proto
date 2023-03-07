@@ -1,0 +1,23 @@
+syntax = "proto3";
+package joltifyfinance.joltify_lending.spv;
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc TransferOwnership(MsgTransferOwnership) returns (MsgTransferOwnershipResponse);
+// this line is used by starport scaffolding # proto/tx/rpc
+}
+
+message MsgTransferOwnership {
+  string creator = 1;
+  string poolIndex = 2;
+}
+
+message MsgTransferOwnershipResponse {
+  bool operationResult = 1;
+}
+
+// this line is used by starport scaffolding # proto/tx/message

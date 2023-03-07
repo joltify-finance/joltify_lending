@@ -29,7 +29,9 @@ service Msg {
 
   rpc WithdrawPrincipal(MsgWithdrawPrincipal) returns (MsgWithdrawPrincipalResponse);
 
-  rpc SubmitWitdrawProposal(MsgSubmitWithdrawProposal) returns (MsgSubmitWithdrawProposalResponse);
+  rpc SubmitWithdrawProposal(MsgSubmitWithdrawProposal) returns (MsgSubmitWithdrawProposalResponse);
+
+  rpc TransferOwnership(MsgTransferOwnership) returns (MsgTransferOwnershipResponse);
 }
 
 message MsgCreatePool {
@@ -140,5 +142,14 @@ message MsgSubmitWithdrawProposal {
 }
 
 message MsgSubmitWithdrawProposalResponse {
+  bool operationResult = 1;
+}
+
+message MsgTransferOwnership {
+  string creator = 1;
+  string poolIndex = 2;
+}
+
+message MsgTransferOwnershipResponse {
   bool operationResult = 1;
 }
