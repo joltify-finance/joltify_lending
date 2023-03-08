@@ -168,17 +168,19 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount s
 
 	rate := CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	paymentTime := ctx.BlockTime()
+	borrowDetails := make([]types.BorrowDetail, 1, 10)
+	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: tokenAmount, TimeStamp: paymentTime}
 	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(tokenAmount.Denom, sdk.NewInt(0))}
 	bi := types.BorrowInterest{
-		PoolIndex:    poolInfo.Index,
-		Apy:          poolInfo.Apy,
-		PayFreq:      poolInfo.PayFreq,
-		IssueTime:    ctx.BlockTime(),
-		Borrowed:     tokenAmount,
-		BorrowedLast: tokenAmount,
-		MonthlyRatio: i,
-		InterestSPY:  rate,
-		Payments:     []*types.PaymentItem{&firstPayment},
+		PoolIndex:     poolInfo.Index,
+		Apy:           poolInfo.Apy,
+		PayFreq:       poolInfo.PayFreq,
+		IssueTime:     ctx.BlockTime(),
+		BorrowDetails: borrowDetails,
+		BorrowedLast:  tokenAmount,
+		MonthlyRatio:  i,
+		InterestSPY:   rate,
+		Payments:      []*types.PaymentItem{&firstPayment},
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)
@@ -241,13 +243,13 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, locked, totalBorrow sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, errGlobal error) {
 	depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(depositor.WithdrawalAmount.Denom, locked))
 	depositor.WithdrawalAmount = depositor.WithdrawalAmount.SubAmount(locked)
-	borrowRatio := sdk.NewDecFromInt(locked).Quo(sdk.NewDecFromInt(totalBorrow))
 
 	// nft ID is the hash(nft class ID, investorWallet)
 	indexHash := crypto.Keccak256Hash([]byte(nftClassId), depositor.DepositorAddress)
 	nftTemplate.Id = fmt.Sprintf("invoice-%v", indexHash.String()[2:])
 
-	userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: depositor.DepositorAddress.String(), Ratio: borrowRatio, LastPayment: ctx.BlockTime()}
+	lockedCoin := sdk.NewCoin(depositor.LockedAmount.Denom, locked)
+	userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: depositor.DepositorAddress.String(), Borrowed: lockedCoin, LastPayment: ctx.BlockTime()}
 	data, err := types2.NewAnyWithValue(&userData)
 	if err != nil {
 		panic("should never fail")
