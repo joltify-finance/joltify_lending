@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -23,6 +24,10 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 		return &types.MsgTransferOwnershipResponse{}, types.ErrDepositorNotFound
 	}
 
+	if d.DepositType != types.DepositorInfo_unset {
+		return &types.MsgTransferOwnershipResponse{}, fmt.Errorf("you have submitted the %v request", d.DepositType)
+	}
+
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
 		return &types.MsgTransferOwnershipResponse{}, types.ErrPoolNotFound
@@ -33,7 +38,12 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 	}
 
 	poolInfo.TransferAccounts = append(poolInfo.TransferAccounts, caller)
-	d.TransferRequest = true
+	d.DepositType = types.DepositorInfo_transfer_request
+	poolInfo.BorrowableAmount, err = poolInfo.BorrowableAmount.SafeSub(d.WithdrawalAmount)
+
+	if err != nil {
+		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(err, "fail to update the borrowable")
+	}
 
 	k.SetDepositor(ctx, d)
 	k.SetPool(ctx, poolInfo)

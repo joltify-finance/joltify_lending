@@ -31,7 +31,15 @@ message DepositorInfo {
     (gogoproto.nullable) = false];
 
   repeated string linkedNFT = 7;
-  bool withdraw_proposal = 8 ;
-  bool transfer_request = 9;
+
+  enum DEPOSITTYPE{
+    withdraw_proposal= 0;
+    transfer_request = 1;
+    deposit_close = 2;
+    unset  = 3;
+    processed = 4;
+  }
+  DEPOSITTYPE deposit_type = 8;
+
 }
 

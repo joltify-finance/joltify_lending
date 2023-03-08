@@ -2,78 +2,16 @@ package keeper
 
 import (
 	"context"
-
 	coserrors "cosmossdk.io/errors"
-	types2 "github.com/cosmos/cosmos-sdk/codec/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/gogo/protobuf/proto"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
-
-func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo, amountToPay sdk.Coin) {
-
-	nftClasses := poolInfo.PoolNFTIds
-	if len(nftClasses) == 0 {
-		ctx.Logger().Info("do not have any borrow record")
-		return
-	}
-	totalBorrowedAmount := poolInfo.BorrowedAmount
-	currentPayout := sdk.ZeroInt()
-	for _, el := range nftClasses[1:] {
-		class, found := k.nftKeeper.GetClass(ctx, el)
-		if !found {
-			panic(found)
-		}
-		var borrowInterest types.BorrowInterest
-		var err error
-		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
-		if err != nil {
-			panic(err)
-		}
-
-		ratioOfThisBorrow := sdk.NewDecFromInt(borrowInterest.Borrowed.Amount).Quo(sdk.NewDecFromInt(totalBorrowedAmount.Amount))
-		thisPayAmount := sdk.NewDecFromInt(amountToPay.Amount).Mul(ratioOfThisBorrow).TruncateInt()
-		borrowInterest.Borrowed = borrowInterest.Borrowed.SubAmount(thisPayAmount)
-		currentPayout = currentPayout.Add(thisPayAmount)
-		class.Data, err = types2.NewAnyWithValue(&borrowInterest)
-		if err != nil {
-			panic("pack class any data failed")
-		}
-
-		err = k.nftKeeper.UpdateClass(ctx, class)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	firstClass, found := k.nftKeeper.GetClass(ctx, nftClasses[0])
-	if !found {
-		panic(found)
-	}
-	var borrowInterest types.BorrowInterest
-	var err error
-	err = proto.Unmarshal(firstClass.Data.Value, &borrowInterest)
-	if err != nil {
-		panic(err)
-	}
-	borrowInterest.Borrowed = borrowInterest.Borrowed.Sub(amountToPay.SubAmount(currentPayout))
-	firstClass.Data, err = types2.NewAnyWithValue(&borrowInterest)
-	if err != nil {
-		panic("pack class any data failed")
-	}
-	err = k.nftKeeper.UpdateClass(ctx, firstClass)
-	if err != nil {
-		panic(err)
-	}
-
-}
 
 func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipal) (*types.MsgPayPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	spv, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
@@ -87,7 +25,17 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
 	}
 
+	if msg.Token.IsLT(poolInfo.BorrowedAmount) {
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay all the principal")
+	}
+
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
+	if err != nil {
+		return nil, coserrors.Wrapf(err, "fail to pay all the principal")
+	}
+
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
+	poolInfo.PoolStatus = types.PoolInfo_CLOSING
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(

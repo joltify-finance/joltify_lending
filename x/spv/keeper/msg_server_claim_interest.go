@@ -2,8 +2,6 @@ package keeper
 
 import (
 	"context"
-	"strings"
-
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -28,13 +26,12 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 		return nil, coserrors.Wrap(types.ErrUnauthorized, "not the depositor")
 	}
 
-	poolInfo, found := k.GetPools(ctx, depositor.PoolIndex)
-	if !found {
-		panic("should never fail to find the pool")
+	if depositor.DepositType == types.DepositorInfo_deposit_close {
+		return nil, coserrors.Wrapf(types.ErrUnauthorized, "your deposit has been closed")
 	}
 
 	// for each lending NFT this owner has
-	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, poolInfo.ReserveFactor, true)
+	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
 		return nil, err
 	}
@@ -42,19 +39,19 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 	claimed := sdk.NewCoin(depositor.LockedAmount.Denom, totalInterest)
 
 	// we pay the interesting and the principle
-	if poolInfo.PoolStatus == types.PoolInfo_CLOSING {
-		lendNFTs := depositor.LinkedNFT
-
-		totalBorrowedNow, err := calculateTotalPrinciple(ctx, lendNFTs, k.nftKeeper)
-		if err != nil {
-			return nil, err
-		}
-		claimed = claimed.AddAmount(totalBorrowedNow)
-
-		/// we do the cleanup
-		k.cleanupDepositor(ctx, depositor)
-		k.cleanupPool(ctx, poolInfo)
-	}
+	//if poolInfo.PoolStatus == types.PoolInfo_CLOSING {
+	//	lendNFTs := depositor.LinkedNFT
+	//
+	//	totalBorrowedNow, err := calculateTotalPrinciple(ctx, lendNFTs, k.nftKeeper)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	claimed = claimed.AddAmount(totalBorrowedNow)
+	//
+	//	/// we do the cleanup
+	//	k.cleanupDepositor(ctx, depositor)
+	//	k.cleanupPool(ctx, poolInfo)
+	//}
 
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investorAddress, sdk.NewCoins(claimed))
 	if err != nil {
@@ -70,44 +67,4 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 	)
 
 	return &types.MsgClaimInterestResponse{Amount: claimed.String()}, nil
-}
-
-func (k Keeper) cleanupDepositor(ctx sdk.Context, depositor types.DepositorInfo) error {
-
-	for _, el := range depositor.LinkedNFT {
-		ids := strings.Split(el, ":")
-
-		acc := k.accKeeper.GetModuleAddress(types.ModuleAccount)
-
-		err := k.nftKeeper.Transfer(ctx, ids[0], ids[1], acc)
-		if err != nil {
-			return types.ErrTransferNFT
-		}
-
-		err = k.nftKeeper.Burn(ctx, ids[0], ids[1])
-		if err != nil {
-			return types.ErrBurnNFT
-		}
-	}
-
-	// delete the deposit
-	k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
-	// delete the class
-	return nil
-}
-
-func (k Keeper) cleanupPool(ctx sdk.Context, poolInfo types.PoolInfo) {
-	emptyClassCount := 0
-	for _, el := range poolInfo.PoolNFTIds[1:] {
-		n := k.nftKeeper.GetTotalSupply(ctx, el)
-		if n == 0 {
-			emptyClassCount++
-		}
-	}
-	if len(poolInfo.PoolNFTIds) == emptyClassCount+1 {
-		ctx.Logger().Info("move the pool to history pool", "pool index", poolInfo.Index)
-		k.SetHistoryPool(ctx, poolInfo)
-		k.DelPool(ctx, poolInfo.Index)
-	}
-	return
 }

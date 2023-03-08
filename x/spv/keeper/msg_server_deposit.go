@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	sdkmath "cosmossdk.io/math"
 
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -75,15 +76,17 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we update the users deposit data
 	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
-		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(msg.Token.Denom, sdk.NewInt(0)), WithdrawalAmount: msg.Token, LinkedNFT: []string{}}
+		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(msg.Token.Denom, sdkmath.ZeroInt()), WithdrawalAmount: msg.Token, LinkedNFT: []string{}, DepositType: types.DepositorInfo_unset}
 		k.SetDepositor(ctx, depositor)
 
 	} else {
-		if previousDepositor.WithdrawProposal || previousDepositor.TransferRequest {
-			return nil, coserrors.Wrapf(types.ErrDeposit, "fail to deposit as you have set the withdraw proposal")
+		if (previousDepositor.DepositType == types.DepositorInfo_unset) || (previousDepositor.DepositType == types.DepositorInfo_processed) {
+			previousDepositor.DepositType = types.DepositorInfo_unset
+			previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
+			k.SetDepositor(ctx, previousDepositor)
+		} else {
+			return nil, coserrors.Wrapf(types.ErrDeposit, "you are not allow to deposit as %v", previousDepositor.DepositType)
 		}
-		previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
-		k.SetDepositor(ctx, previousDepositor)
 	}
 
 	// todo do we really need this??

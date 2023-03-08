@@ -15,7 +15,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdk.Dec, updateNFT bool) (sdkmath.Int, error) {
+func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
 
 	lendsRatio := make(map[string]sdk.Dec)
 	totalInterest := sdk.NewInt(0)
@@ -113,6 +113,7 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 	return totalInterest, nil
 }
 
+/*
 func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper) (sdkmath.Int, error) {
 	totalBorrowed := sdk.NewInt(0)
 	for _, el := range lendNFTs {
@@ -145,8 +146,9 @@ func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types
 	}
 	return totalBorrowed, nil
 }
+*/
 
-func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount sdk.Coin) error {
+func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo) error {
 	// create the new nft class for this borrow event
 	classID := fmt.Sprintf("nft-%v", poolInfo.Index[2:])
 	poolClass, found := k.nftKeeper.GetClass(ctx, classID)
@@ -197,7 +199,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount s
 		poolInfo.ProjectDueTime = ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.ProjectLength))
 	}
 
-	err = k.processBorrow(ctx, &poolInfo, currentBorrowClass, tokenAmount)
+	err = k.processBorrow(ctx, &poolInfo, currentBorrowClass, tokenAmount, depositors)
 	if err != nil {
 		return err
 	}
@@ -206,21 +208,24 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount s
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
 	poolInfo.LastPaymentTime = paymentTime
 	k.SetPool(ctx, poolInfo)
+
+	if needBankTransfer {
+		// we transfer the fund from the module to the spv
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(tokenAmount))
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin) error {
+func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin, depositors []*types.DepositorInfo) error {
 	if poolInfo.BorrowableAmount.IsLT(amount) {
 		return types.ErrInsufficientFund
 	}
 	utilization := sdk.NewDecFromInt(amount.Amount).Quo(sdk.NewDecFromInt(poolInfo.BorrowableAmount.Amount))
 
-	// we transfer the fund from the module to the spv
-	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(amount))
-	if err != nil {
-		return err
-	}
-
+	var err error
 	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Add(amount)
 	poolInfo.BorrowableAmount, err = poolInfo.BorrowableAmount.SafeSub(amount)
@@ -229,7 +234,7 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 	}
 
 	// we update each investor leftover
-	k.processInvestors(ctx, poolInfo, utilization, amount.Amount, nftClass)
+	k.processInvestors(ctx, poolInfo, utilization, amount.Amount, nftClass, depositors)
 	return nil
 }
 
@@ -260,7 +265,7 @@ func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInf
 
 }
 
-func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, totalBorrow sdkmath.Int, nftClass nfttypes.Class) error {
+func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, totalBorrow sdkmath.Int, nftClass nfttypes.Class, depositors []*types.DepositorInfo) error {
 
 	nftTemplate := nfttypes.NFT{
 		ClassId: nftClass.Id,
@@ -272,25 +277,64 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	var errGlobal error
 	var firstDepositor *types.DepositorInfo
 	totalLocked := sdk.ZeroInt()
-	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
-		if depositor.WithdrawProposal || depositor.TransferRequest {
-			// since you have submitted the withdrawal/transfer request, we skipp the borrow from it
-			return false
-		}
+	if depositors != nil {
+		for _, depositor := range depositors {
 
-		if firstDepositor == nil {
-			firstDepositor = &depositor
-			return false
+			if depositor.DepositType != types.DepositorInfo_unset {
+				// since you have submitted the withdrawal/transfer request, we skipp the borrow from it
+				continue
+			}
+			if firstDepositor == nil {
+				firstDepositor = depositor
+				continue
+			}
+			locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
+			k.doProcessInvestor(ctx, depositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
+			totalLocked = totalLocked.Add(locked)
+			continue
 		}
-		locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
-		k.doProcessInvestor(ctx, &depositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
-		totalLocked = totalLocked.Add(locked)
-		return false
-	})
+	} else {
+		k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
+			if depositor.DepositType != types.DepositorInfo_unset {
+				// since you have submitted the withdrawal/transfer request, we skipp the borrow from it
+				return false
+			}
 
+			if firstDepositor == nil {
+				firstDepositor = &depositor
+				return false
+			}
+			locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
+			k.doProcessInvestor(ctx, &depositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
+			totalLocked = totalLocked.Add(locked)
+			return false
+		})
+	}
 	// now we process the last one
 	locked := totalBorrow.Sub(totalLocked)
 	k.doProcessInvestor(ctx, firstDepositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
 
 	return errGlobal
+}
+
+func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) {
+
+	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.processEachWithdrawReq(ctx, depositor)
+	if err != nil {
+		ctx.Logger().Error("fail to pay partial principal", err.Error())
+		panic(err)
+	}
+
+	totalPaidAmount = totalPaidAmount.Add(depositor.LockedAmount.Amount.Add(interest))
+	depositor.LinkedNFT = []string{}
+	depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(depositor.LockedAmount)
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	depositor.DepositType = types.DepositorInfo_deposit_close
+	k.SetDepositor(ctx, depositor)
+
 }

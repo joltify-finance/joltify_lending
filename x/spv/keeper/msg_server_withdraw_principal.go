@@ -27,31 +27,35 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "you can only withdraw %v", depositor.WithdrawalAmount.Denom)
 	}
 
-	lendNFTs := depositor.LinkedNFT
-
-	totalBorrowedNow, err := calculateTotalPrinciple(ctx, lendNFTs, k.nftKeeper)
-	if err != nil {
-		return nil, err
-	}
-
-	//can be negative
-	deltaAmount := depositor.LockedAmount.Amount.Sub(totalBorrowedNow)
-	depositor.LockedAmount = depositor.LockedAmount.SubAmount(deltaAmount)
-	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(deltaAmount)
-	depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(msg.Token)
-	if err != nil {
-		return nil, errors.New("withdraw amount too large")
-	}
-
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
 		return nil, errors.New("pool cannot be found")
 	}
 
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(msg.Token.Amount)
+	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
+		k.cleanupDepositor(ctx, poolInfo, depositor)
+		return &types.MsgWithdrawPrincipalResponse{}, nil
+	}
+
+	totalWithdraw := msg.Token
+	// if withdraw >= withdrawable
+	if msg.Token.IsGTE(depositor.WithdrawalAmount) {
+		totalWithdraw = depositor.WithdrawalAmount
+		if depositor.DepositType == types.DepositorInfo_deposit_close {
+			// fixme we need to test if a user has close its deposit while still try to withdraw interest
+			k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
+		}
+	}
+
+	depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
+	if err != nil {
+		return nil, errors.New("withdraw amount too large")
+	}
+
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
 	k.SetPool(ctx, poolInfo)
 
-	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(msg.Token))
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(totalWithdraw))
 	if err != nil {
 		return nil, err
 	}

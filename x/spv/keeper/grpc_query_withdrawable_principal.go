@@ -29,14 +29,14 @@ func (k Keeper) WithdrawalPrincipal(goCtx context.Context, req *types.Querywithd
 		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor not found for pool %v", req.PoolIndex)
 	}
 
-	lendNFTs := depositor.LinkedNFT
-	totalBorrowedNow, err := calculateTotalPrinciple(ctx, lendNFTs, k.nftKeeper)
-	if err != nil {
-		return nil, err
-	}
+	//lendNFTs := depositor.LinkedNFT
+	//totalBorrowedNow, err := calculateTotalPrinciple(ctx, lendNFTs, k.nftKeeper)
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	previousLocked := depositor.LockedAmount.SubAmount(totalBorrowedNow)
+	//previousLocked := depositor.LockedAmount.SubAmount(totalBorrowedNow)
 
-	totalWithdrawal := depositor.WithdrawalAmount.Add(previousLocked)
-	return &types.QuerywithdrawalPrincipalResponse{Amount: totalWithdrawal.String()}, nil
+	//totalWithdrawal := depositor.WithdrawalAmount.Add(previousLocked)
+	return &types.QuerywithdrawalPrincipalResponse{Amount: depositor.WithdrawalAmount.String()}, nil
 }

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -27,6 +28,10 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 		return nil, coserrors.Wrap(types.ErrUnauthorized, "not the depositor")
 	}
 
+	if depositor.DepositType != types.DepositorInfo_unset {
+		return nil, errors.New(" you are in transferring ownership status")
+	}
+
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
 		return nil, types.ErrPoolNotFound
@@ -49,21 +54,20 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too late")
 	}
 
-	totalBorrowedNow, err := calculateTotalPrinciple(ctx, depositor.LinkedNFT, k.nftKeeper)
-	if err != nil {
-		return nil, err
-	}
+	//totalBorrowedNow, err := calculateTotalPrinciple(ctx, depositor.LinkedNFT, k.nftKeeper)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	//can be negative, we now sync the locked amount and withdraw amount
-	deltaAmount := depositor.LockedAmount.Amount.Sub(totalBorrowedNow)
-	depositor.LockedAmount = depositor.LockedAmount.SubAmount(deltaAmount)
-	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(deltaAmount)
+	//deltaAmount := depositor.LockedAmount.Amount.Sub(totalBorrowedNow)
+	//depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, totalBorrowedNow)
+	//depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(deltaAmount)
 
-	depositor.WithdrawProposal = true
+	depositor.DepositType = types.DepositorInfo_withdraw_proposal
 	poolInfo.WithdrawProposalAmount = poolInfo.WithdrawProposalAmount.Add(depositor.LockedAmount)
-
 	// since we can not borrow from this investor, we deduct the total borrowable amount
-	poolInfo.BorrowableAmount = poolInfo.BorrowedAmount.Sub(depositor.WithdrawalAmount)
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(depositor.WithdrawalAmount)
 	poolInfo.WithdrawAccounts = append(poolInfo.WithdrawAccounts, depositor.DepositorAddress)
 	k.SetPool(ctx, poolInfo)
 	k.SetDepositor(ctx, depositor)
