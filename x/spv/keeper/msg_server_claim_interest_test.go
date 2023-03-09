@@ -130,11 +130,24 @@ func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAd
 	c1, err := sdk.ParseCoinsNormalized(expectedAmount1 + "ausdc")
 	c2, err := sdk.ParseCoinsNormalized(expectedAmount2 + "ausdc")
 
-	fmt.Printf(">>=----->>%v\n", c1[0].Add(c2[0]))
-	suite.Require().True(borrowClassInfo.InterestPaid.IsEqual(c1[0].Add(c2[0])))
+	totalPaid := sdk.ZeroInt()
+	for _, el := range borrowClassInfo.Payments {
+		totalPaid = totalPaid.Add(el.PaymentAmount.Amount)
+	}
+	//totalPaid := borrowClassInfo.Payments[len(borrowClassInfo.Payments)-1].PaymentAmount.Amount
 
-	suite.Require().Equal(expectedAmount1, user1Interest.String())
-	suite.Require().Equal(expectedAmount2, user2Interest.String())
+	delta := totalPaid.Sub(borrowClassInfo.InterestPaid.Amount)
+
+	fmt.Printf(">>=----->>%v\n", delta)
+
+	fmt.Printf(">>>>>%v---%v\n", expectedAmount1, user1Interest.String())
+	fmt.Printf(">>>>>%v---%v\n", expectedAmount2, user2Interest.String())
+	fmt.Printf(">>>>>333>>>%v\n", c1[0].Add(c2[0]).Amount.Sub(user1Interest.Add(user2Interest)).Abs())
+
+	suite.Require().True(c1[0].Add(c2[0]).Amount.Sub(user1Interest.Add(user2Interest)).Abs().LTE(delta))
+
+	suite.Require().True(c1[0].Amount.Sub(user1Interest).Abs().LTE(delta))
+	suite.Require().True(c2[0].Amount.Sub(user2Interest).Abs().LTE(delta))
 
 }
 

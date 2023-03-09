@@ -17,6 +17,9 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	totalAmountDue, err := k.getAllInterestToBePaid(ctx, poolInfo)
 	if err != nil {
 		ctx.Logger().Info(err.Error())
+		if err.Error() == "pay interest too early" {
+			return err
+		}
 		panic(err)
 	}
 

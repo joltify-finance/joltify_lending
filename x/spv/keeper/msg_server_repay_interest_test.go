@@ -2,6 +2,9 @@ package keeper_test
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
@@ -10,8 +13,6 @@ import (
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 const oneMonth = 24 * 30 * 3600
@@ -82,7 +83,7 @@ func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.Pool
 	rate := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	paymentTime := ctx.BlockTime()
 	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(borrowAmount.Denom, sdk.NewInt(0))}
-	borrowDetails := make([]types.BorrowDetail, 0, 10)
+	borrowDetails := make([]types.BorrowDetail, 1, 10)
 	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: borrowAmount, TimeStamp: ctx.BlockTime()}
 	bi := types.BorrowInterest{
 		PoolIndex:     poolInfo.Index,
@@ -135,7 +136,6 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	require.ErrorContains(t, err, "pay interest too early")
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 2))
-	fmt.Printf(">>>>%v\n", ctx.BlockTime().String())
 	err = k.HandleInterest(ctx, &samplePool)
 	require.NoError(t, err)
 	poolInfo, _ := k.GetPools(ctx, poolIndex)

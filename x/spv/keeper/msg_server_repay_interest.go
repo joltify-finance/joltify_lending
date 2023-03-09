@@ -95,7 +95,6 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf(">>555555555>>>%v-----%v\n", class.GetId(), borrowInterest.BorrowDetails[0].BorrowedAmount)
 		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow)
 		firstBorrow = false
 		if err != nil {

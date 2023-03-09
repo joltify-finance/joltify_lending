@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -177,6 +178,7 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 
 	pool, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
+	fmt.Printf(">>>>>>>>>>>%v\n", pool.TargetAmount)
 	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
 	suite.Require().True(pool.TotalAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))

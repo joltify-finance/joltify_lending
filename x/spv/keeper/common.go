@@ -15,10 +15,10 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func seekCorrectPayment(BorrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
+func seekCorrectPayment(borrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
 	var borrowAmount sdk.Coin
-	for _, el := range BorrowDetails {
-		if el.TimeStamp.Before(eachPayment.PaymentTime) {
+	for _, el := range borrowDetails {
+		if el.TimeStamp.Before(eachPayment.PaymentTime) || el.TimeStamp.Equal(eachPayment.PaymentTime) {
 			borrowAmount = el.BorrowedAmount
 			continue
 		}

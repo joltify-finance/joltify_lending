@@ -9,7 +9,6 @@ import (
 )
 
 func (suite *InterestTestSuite) TestAPYToSPY() {
-	return
 	type args struct {
 		apy           sdk.Dec
 		payfrq        int
@@ -26,9 +25,8 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"lowest apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("0.005"),
-				payfrq:        4,
-				expectedValue: sdk.MustNewDecFromStr("0.999999831991472557"),
+				apy:    sdk.MustNewDecFromStr("0.005"),
+				payfrq: 3600 * 24 * 7,
 			},
 			false,
 		},
@@ -36,45 +34,40 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"lowest apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("0.051271109622422061"),
-				payfrq:        4,
-				expectedValue: sdk.MustNewDecFromStr("0.999999831991472557"),
+				apy:    sdk.MustNewDecFromStr("0.051271109622422061"),
+				payfrq: 4,
 			},
 			false,
 		},
 		{
 			"lower apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("0.05"),
-				payfrq:        4,
-				expectedValue: sdk.MustNewDecFromStr("0.999999905005957279"),
+				apy:    sdk.MustNewDecFromStr("0.05"),
+				payfrq: 4,
 			},
 			false,
 		},
 		{
 			"medium-low apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("0.5"),
-				payfrq:        4,
-				expectedValue: sdk.MustNewDecFromStr("0.999999978020447332"),
+				apy:    sdk.MustNewDecFromStr("0.5"),
+				payfrq: 4,
 			},
 			false,
 		},
 		{
 			"medium-high apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("5"),
-				payfrq:        4,
-				expectedValue: sdk.MustNewDecFromStr("1.000000051034942717"),
+				apy:    sdk.MustNewDecFromStr("5"),
+				payfrq: 4,
 			},
 			false,
 		},
 		{
 			"high apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("50"),
-				payfrq:        4,
-				expectedValue: sdk.MustNewDecFromStr("1.000000124049443433"),
+				apy:    sdk.MustNewDecFromStr("50"),
+				payfrq: 4,
 			},
 			false,
 		},
@@ -83,8 +76,6 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 			args{
 				apy:    sdk.MustNewDecFromStr("177"),
 				payfrq: 4,
-				// fixme previous was 1.000002441641340532
-				expectedValue: sdk.MustNewDecFromStr("1.000000164134644767"),
 			},
 			false,
 		},
@@ -102,10 +93,10 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		suite.Run(tc.name, func() {
 			i := CalculateInterestRate(tc.args.apy, tc.args.payfrq)
 
-			accTime := tc.args.payfrq * OneWeek
+			accTime := tc.args.payfrq
 			accumulate := i.Power(uint64(accTime))
 
-			total := accumulate.Mul(sdk.NewDec(OneYear / int64(accTime)))
+			total := (accumulate.Sub(sdk.OneDec())).Mul(sdk.NewDec(OneYear / int64(accTime)))
 			gap := total.Sub(tc.args.apy)
 			fmt.Printf("gap>>>>>%v\n", gap)
 			suite.Require().True(gap.LT(sdk.NewDecFromIntWithPrec(sdk.NewInt(1), 8)))

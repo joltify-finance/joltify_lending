@@ -247,7 +247,8 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
 	suite.True(lastBorrow.IsEqual(borrow.BorrowAmount))
-	suite.True(borrowClassInfo.Apy.Equal(sdk.NewDecWithPrec(15, 2)))
+	fmt.Printf(">>>>apy>>>%v\n", borrowClassInfo.Apy)
+	suite.Require().True(borrowClassInfo.Apy.Equal(sdk.NewDecWithPrec(15, 2)))
 
 	// nft ID is the hash(nft class ID, investorWallet)
 	indexHash := crypto.Keccak256Hash([]byte(nftClassID), p1.DepositorAddress)
