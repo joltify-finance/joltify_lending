@@ -28,10 +28,10 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 			return sdk.Coin{}, errors.New("pay interest too early")
 		}
 	}
-
 	delta := currentTime.Sub(latestPaymentTime).Seconds()
 	denom := interestData.Payments[0].PaymentAmount.Denom
-	lastBorrow := interestData.BorrowDetails[0].BorrowedAmount
+	lastBorrow := interestData.BorrowDetails[len(interestData.BorrowDetails)-1].BorrowedAmount
+	var thisPaymentTime time.Time
 	if int32(delta) >= interestData.PayFreq*BASE {
 		// we need to pay the whole month
 		monthlyRatio := interestData.MonthlyRatio
@@ -47,9 +47,12 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		}
 		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
 		payment = sdk.NewCoin(denom, paymentAmount)
+		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	} else {
+		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+		deltaTruncated := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
-		interest := r.Power(uint64(delta)).Sub(sdk.OneDec())
+		interest := r.Power(uint64(deltaTruncated)).Sub(sdk.OneDec())
 
 		paymentAmount := interest.MulInt(lastBorrow.Amount).TruncateInt()
 		reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(reserve).TruncateInt()
@@ -64,10 +67,10 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		}
 		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
 		payment = sdk.NewCoin(denom, paymentAmount)
+		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	}
 
 	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
-	thisPaymentTime := latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor}
 	interestData.Payments = append(interestData.Payments, &currentPayment)
 	ctx.Logger().Info(fmt.Sprintf(">>>total Interest:>>>%v and %v to investor\n", payment.String(), paymentToInvestor.String()))
@@ -92,6 +95,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic(err)
 		}
+		fmt.Printf(">>555555555>>>%v-----%v\n", class.GetId(), borrowInterest.BorrowDetails[0].BorrowedAmount)
 		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow)
 		firstBorrow = false
 		if err != nil {

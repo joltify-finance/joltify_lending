@@ -66,11 +66,12 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 			}
 			classBorrowedAmount := seekCorrectPayment(borrowClassInfo.BorrowDetails, eachPayment)
 			paymentAmount := eachPayment.PaymentAmount
-			ratio := sdk.NewDecFromInt(interestData.Borrowed.Amount).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount))
-			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(ratio).TruncateInt()
+			// todo there may be the case that because of the trucate, the total payment is larger than the interest paid to investors
+			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDecFromInt(interestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
 			totalInterest = totalInterest.Add(interest)
 			latestTimeStamp = eachPayment.PaymentTime
 			lastPaymentSet = true
+			borrowClassInfo.InterestPaid = borrowClassInfo.InterestPaid.AddAmount(interest)
 		}
 		if updateNFT && lastPaymentSet {
 			interestData.LastPayment = latestTimeStamp
@@ -80,6 +81,17 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 			}
 			thisNFT.Data = data
 			nftKeeper.Update(ctx, thisNFT)
+
+			data, err = types2.NewAnyWithValue(&borrowClassInfo)
+			if err != nil {
+				panic("pack class any data failed")
+			}
+			borrowClass.Data = data
+			err = nftKeeper.UpdateClass(ctx, borrowClass)
+			if err != nil {
+				panic(err)
+			}
+
 		}
 	}
 	return totalInterest, nil
@@ -191,6 +203,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount s
 		MonthlyRatio:  i,
 		InterestSPY:   rate,
 		Payments:      []*types.PaymentItem{&firstPayment},
+		InterestPaid:  sdk.NewCoin(tokenAmount.Denom, sdk.ZeroInt()),
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)

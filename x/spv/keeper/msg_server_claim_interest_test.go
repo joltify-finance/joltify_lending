@@ -95,7 +95,8 @@ func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAd
 		panic(err)
 	}
 
-	interestOneYearWithReserve := sdk.NewDecFromInt(borrowClassInfo.Borrowed.Amount).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+	interestOneYearWithReserve := sdk.NewDecFromInt(lastBorrow.Amount).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
 	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	dat = strings.Split(depositor2.LinkedNFT[nftIndex], ":")
@@ -114,15 +115,24 @@ func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAd
 		panic(err)
 	}
 
-	ratio := nftInfo1.Ratio.Add(nftInfo2.Ratio)
+	totalBorrowed := nftInfo1.Borrowed.Add(nftInfo2.Borrowed)
 
-	suite.Require().True(ratio.Equal(sdk.OneDec()))
+	suite.Require().True(totalBorrowed.Amount.Equal(lastBorrow.Amount))
 
-	user1Interest := sdk.NewDecFromInt(interestOneYear).Mul(nftInfo1.Ratio).TruncateInt()
-	user2Interest := sdk.NewDecFromInt(interestOneYear).Mul(nftInfo2.Ratio).TruncateInt()
+	ratio1 := sdk.NewDecFromInt(nftInfo1.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.Amount))
+	ratio2 := sdk.NewDecFromInt(nftInfo2.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.Amount))
 
-	fmt.Printf(">>>>%v===%v\n", user1Interest.String(), expectedAmount1)
-	fmt.Printf(">>>>%v===%v\n", user2Interest.String(), expectedAmount2)
+	user1Interest := sdk.NewDecFromInt(interestOneYear).Mul(ratio1).TruncateInt()
+	user2Interest := sdk.NewDecFromInt(interestOneYear).Mul(ratio2).TruncateInt()
+
+	fmt.Printf(">>>>%v\n", borrowClassInfo.InterestPaid)
+
+	c1, err := sdk.ParseCoinsNormalized(expectedAmount1 + "ausdc")
+	c2, err := sdk.ParseCoinsNormalized(expectedAmount2 + "ausdc")
+
+	fmt.Printf(">>=----->>%v\n", c1[0].Add(c2[0]))
+	suite.Require().True(borrowClassInfo.InterestPaid.IsEqual(c1[0].Add(c2[0])))
+
 	suite.Require().Equal(expectedAmount1, user1Interest.String())
 	suite.Require().Equal(expectedAmount2, user2Interest.String())
 
@@ -319,12 +329,29 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
 	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
 
+	dat := strings.Split(depositor1.LinkedNFT[0], ":")
+	nftUser1, found := suite.nftKeeper.GetNFT(suite.ctx, dat[0], dat[1])
+	suite.Require().True(found)
+
+	Borrowclass, _ := suite.nftKeeper.GetClass(suite.ctx, dat[0])
+
+	var borrowClassInfo1 types.BorrowInterest
+	err = proto.Unmarshal(Borrowclass.Data.Value, &borrowClassInfo1)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf(">>>>>>#########>>>>>>>%v----%v---%v\n", a1.String(), a2.String(), a1.Add(a2[0]))
+	suite.Require().True(a1.Add(a2[0])[0].IsEqual(borrowClassInfo1.InterestPaid))
+
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
 	// we borrow again after 15 days
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(3600*24*15)))
 	borroweTime := suite.ctx.BlockTime()
-	//now we borrow 1.34e5
+	fmt.Printf(">.>>.biorrow time %v\n", borroweTime.String())
+
+	//######now we borrow 2.1e5########
 	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2.1e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
@@ -339,6 +366,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	payFreq := 2592000
 	r := spvkeeper.CalculateInterestRate(sdk.MustNewDecFromStr("0.15"), payFreq)
 	delta := suite.ctx.BlockTime().Truncate(time.Second * time.Duration(payFreq)).Sub(borroweTime).Seconds()
+
 	interest := r.Power(uint64(delta)).Sub(sdk.OneDec())
 	paymentAmount := interest.MulInt(borrow.BorrowAmount.Amount).TruncateInt()
 
@@ -351,8 +379,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	depositor2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
 	suite.Require().True(found)
 
-	dat := strings.Split(depositor1.LinkedNFT[0], ":")
-	nftUser1, found := suite.nftKeeper.GetNFT(suite.ctx, dat[0], dat[1])
+	dat = strings.Split(depositor1.LinkedNFT[0], ":")
+	nftUser1, found = suite.nftKeeper.GetNFT(suite.ctx, dat[0], dat[1])
 	suite.Require().True(found)
 
 	dat = strings.Split(depositor2.LinkedNFT[0], ":")
@@ -371,9 +399,22 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 		panic(err)
 	}
 
-	expectedToUser2 := sdk.NewDecFromInt(toInvestors).Mul(nftInfo2.Ratio).TruncateInt()
+	Borrowclass, found = suite.nftKeeper.GetClass(suite.ctx, dat[0])
+	suite.Require().True(found)
+
+	var borrowClassInfo types.BorrowInterest
+	err = proto.Unmarshal(Borrowclass.Data.Value, &borrowClassInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+	ratio1 := sdk.NewDecFromInt(nftInfo1.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.Amount))
+	ratio2 := sdk.NewDecFromInt(nftInfo2.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.Amount))
+
+	expectedToUser2 := sdk.NewDecFromInt(toInvestors).Mul(ratio2).TruncateInt()
 	expectedToUser2 = expectedToUser2.Add(amount2)
-	expectedToUser1 := sdk.NewDecFromInt(toInvestors).Mul(nftInfo1.Ratio).TruncateInt()
+	expectedToUser1 := sdk.NewDecFromInt(toInvestors).Mul(ratio1).TruncateInt()
 	expectedToUser1 = expectedToUser1.Add(amount1)
 
 	req.Creator = suite.investors[0]
@@ -386,8 +427,6 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 
 	suite.Require().Equal(result1.Amount, expectedToUser1.String()+"ausdc")
 	suite.Require().Equal(result2.Amount, expectedToUser2.String()+"ausdc")
-
-	// from then on, it should have the
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
@@ -405,7 +444,6 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	//interestOneYear2 := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	amount1New, _ := sdk.ParseCoinsNormalized(result1.Amount)
-	fmt.Printf(">>>>one month total %v\n", amount1New)
 	amount2New, _ := sdk.ParseCoinsNormalized(result2.Amount)
 
 	newIncome1 := amount1New[0].SubAmount(amount1)

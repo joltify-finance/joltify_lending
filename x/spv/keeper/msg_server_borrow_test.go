@@ -245,9 +245,8 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 		panic(err)
 	}
 
-	suite.True(borrowClassInfo.Borrowed.IsEqual(borrow.BorrowAmount))
-	suite.True(borrowClassInfo.BorrowedLast.IsEqual(borrow.BorrowAmount))
-	fmt.Printf(">>>>%v\n", borrowClassInfo.Apy)
+	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+	suite.True(lastBorrow.IsEqual(borrow.BorrowAmount))
 	suite.True(borrowClassInfo.Apy.Equal(sdk.NewDecWithPrec(15, 2)))
 
 	// nft ID is the hash(nft class ID, investorWallet)
@@ -268,7 +267,11 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	if err != nil {
 		panic(err)
 	}
-	suite.Require().True(nftInfo.Ratio.Equal(user1Ratio))
+
+	lastBorrow = borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+	ration1 := sdk.NewDecFromInt(nftInfo.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.Amount))
+
+	suite.Require().True(ration1.Equal(user1Ratio))
 
 	// now, user 2 deposits more money and then, the spv borrow more. the ratio should  be changed.
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
@@ -330,8 +333,8 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 		panic(err)
 	}
 
-	suite.True(borrowClassInfo.Borrowed.IsEqual(borrow.BorrowAmount))
-	suite.True(borrowClassInfo.BorrowedLast.IsEqual(borrow.BorrowAmount))
+	lastBorrow = borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+	suite.True(lastBorrow.IsEqual(borrow.BorrowAmount))
 
 	//nft ID is the hash(nft class ID, investorWallet)
 	indexHash = crypto.Keccak256Hash([]byte(nftClassID), p1.DepositorAddress)
@@ -352,7 +355,6 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	}
 
 	// this calculates the ratio that user1 contribute to this borrow
-	shoudRatio := sdk.NewDecFromInt(shouldLocked).QuoInt(borrow.BorrowAmount.Amount)
-	suite.Require().True(nftInfo.Ratio.Equal(shoudRatio))
+	suite.Require().True(nftInfo.Borrowed.Amount.Equal(shouldLocked))
 
 }

@@ -10,10 +10,10 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
 
 
 message borrowDetail{
-	cosmos.base.v1beta1.Coin borrowed_amount = 3[
+	cosmos.base.v1beta1.Coin borrowed_amount = 1[
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
-	google.protobuf.Timestamp time_stamp = 5 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp time_stamp = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
 
 message NftInfo{
@@ -60,4 +60,8 @@ message BorrowInterest{
 	];
 
 	repeated PaymentItem payments = 8;
+
+	cosmos.base.v1beta1.Coin interestPaid = 9[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
 }

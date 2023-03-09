@@ -82,16 +82,17 @@ func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.Pool
 	rate := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	paymentTime := ctx.BlockTime()
 	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(borrowAmount.Denom, sdk.NewInt(0))}
+	borrowDetails := make([]types.BorrowDetail, 0, 10)
+	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: borrowAmount, TimeStamp: ctx.BlockTime()}
 	bi := types.BorrowInterest{
-		PoolIndex:    poolInfo.Index,
-		Apy:          poolInfo.Apy,
-		PayFreq:      poolInfo.PayFreq,
-		IssueTime:    ctx.BlockTime(),
-		Borrowed:     borrowAmount,
-		BorrowedLast: borrowAmount,
-		MonthlyRatio: i,
-		InterestSPY:  rate,
-		Payments:     []*types.PaymentItem{&firstPayment},
+		PoolIndex:     poolInfo.Index,
+		Apy:           poolInfo.Apy,
+		PayFreq:       poolInfo.PayFreq,
+		IssueTime:     ctx.BlockTime(),
+		BorrowDetails: borrowDetails,
+		MonthlyRatio:  i,
+		InterestSPY:   rate,
+		Payments:      []*types.PaymentItem{&firstPayment},
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)
