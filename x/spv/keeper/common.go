@@ -15,9 +15,20 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
+func seekCorrectPayment(BorrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
+	var borrowAmount sdk.Coin
+	for _, el := range BorrowDetails {
+		if el.TimeStamp.Before(eachPayment.PaymentTime) {
+			borrowAmount = el.BorrowedAmount
+			continue
+		}
+		break
+	}
+	return borrowAmount
+}
+
 func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
 
-	lendsRatio := make(map[string]sdk.Dec)
 	totalInterest := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -30,8 +41,6 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		if err != nil {
 			panic(err)
 		}
-
-		lendsRatio[el] = interestData.Ratio
 
 		borrowClass, found := nftKeeper.GetClass(ctx, ids[0])
 		if !found {
@@ -48,15 +57,17 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		latestTimeStamp := time.Time{}
 		lastPaymentSet := false
 		for _, eachPayment := range allPayments {
-			// if the latest payment  this spv has is smaller than the spv that paied to all the investor, we claim the interest
+			// if the latest payment  this spv has is smaller than the spv that paid to all the investor, we claim the interest
 			if eachPayment.PaymentTime.Before(interestData.LastPayment) || eachPayment.PaymentTime.Equal(interestData.LastPayment) {
 				continue
 			}
 			if eachPayment.PaymentAmount.Amount.IsZero() {
 				continue
 			}
+			classBorrowedAmount := seekCorrectPayment(borrowClassInfo.BorrowDetails, eachPayment)
 			paymentAmount := eachPayment.PaymentAmount
-			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(interestData.Ratio).TruncateInt()
+			ratio := sdk.NewDecFromInt(interestData.Borrowed.Amount).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount))
+			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(ratio).TruncateInt()
 			totalInterest = totalInterest.Add(interest)
 			latestTimeStamp = eachPayment.PaymentTime
 			lastPaymentSet = true
@@ -76,7 +87,6 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 
 func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdk.Dec) (sdkmath.Int, error) {
 
-	lendsRatio := make(map[string]sdk.Dec)
 	totalInterest := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -90,8 +100,6 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 			panic(err)
 		}
 
-		lendsRatio[el] = interestData.Ratio
-
 		borrowClass, found := nftKeeper.GetClass(ctx, ids[0])
 		if !found {
 			panic("it should never fail to find the class")
@@ -103,11 +111,14 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 			panic(err)
 		}
 
+		lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1]
 		lastPayment := borrowClassInfo.Payments[len(borrowClassInfo.Payments)-1]
 		delta := uint64(ctx.BlockTime().Sub(lastPayment.PaymentTime).Seconds())
 		factor := CalculateInterestFactor(borrowClassInfo.InterestSPY, sdk.NewIntFromUint64(delta))
-		paymentAmountToInvestor := sdk.NewDecFromInt(borrowClassInfo.Borrowed.Amount).Mul(sdk.OneDec().Sub(reserve))
-		interest := paymentAmountToInvestor.Mul(factor.Sub(sdk.OneDec())).TruncateInt()
+
+		ratio := sdk.NewDecFromInt(interestData.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.BorrowedAmount.Amount))
+		paymentAmountToInvestor := sdk.NewDecFromInt(lastBorrow.BorrowedAmount.Amount).Mul(sdk.OneDec().Sub(reserve))
+		interest := paymentAmountToInvestor.Mul(ratio).Mul(factor.Sub(sdk.OneDec())).TruncateInt()
 		totalInterest = totalInterest.Add(interest)
 	}
 	return totalInterest, nil
@@ -150,7 +161,7 @@ func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types
 
 func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo) error {
 	// create the new nft class for this borrow event
-	classID := fmt.Sprintf("nft-%v", poolInfo.Index[2:])
+	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
 	poolClass, found := k.nftKeeper.GetClass(ctx, classID)
 	if !found {
 		panic("pool class must have already been set")
@@ -177,7 +188,6 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount s
 		PayFreq:       poolInfo.PayFreq,
 		IssueTime:     ctx.BlockTime(),
 		BorrowDetails: borrowDetails,
-		BorrowedLast:  tokenAmount,
 		MonthlyRatio:  i,
 		InterestSPY:   rate,
 		Payments:      []*types.PaymentItem{&firstPayment},
@@ -319,7 +329,7 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	return errGlobal
 }
 
-func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) {
+func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) sdkmath.Int {
 
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
@@ -332,11 +342,19 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		panic(err)
 	}
 
-	totalPaidAmount = totalPaidAmount.Add(depositor.LockedAmount.Amount.Add(interest))
-	depositor.LinkedNFT = []string{}
-	depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(depositor.LockedAmount)
-	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
-	depositor.DepositType = types.DepositorInfo_deposit_close
-	k.SetDepositor(ctx, depositor)
+	totalPaidAmount := depositor.LockedAmount.Amount.Add(interest)
 
+	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
+	if err != nil {
+		ctx.Logger().Info("we delete the pool as it is empty")
+		k.DelPool(ctx, poolInfo.Index)
+		k.SetHistoryPool(ctx, poolInfo)
+	}
+	//depositor.LinkedNFT = []string{}
+	//depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(depositor.LockedAmount)
+	//depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	//depositor.DepositType = types.DepositorInfo_deposit_close
+	k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
+	k.SetPool(ctx, poolInfo)
+	return totalPaidAmount
 }

@@ -235,7 +235,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	nftUser1 := p1.LinkedNFT[0]
 	nftUser2 := p2.LinkedNFT[0]
 
-	nftClassID := fmt.Sprintf("nft-%v-0", depositorPool[2:])
+	nftClassID := fmt.Sprintf("class-%v-0", depositorPool[2:])
 	nft, found := suite.nftKeeper.GetClass(suite.ctx, nftClassID)
 	suite.Require().True(found)
 
@@ -321,7 +321,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	nft2User1 := p1.LinkedNFT[1]
 	nft2User2 := p2.LinkedNFT[1]
 
-	nftClassID = fmt.Sprintf("nft-%v-1", depositorPool[2:])
+	nftClassID = fmt.Sprintf("class-%v-1", depositorPool[2:])
 	nft, found = suite.nftKeeper.GetClass(suite.ctx, nftClassID)
 	suite.Require().True(found)
 

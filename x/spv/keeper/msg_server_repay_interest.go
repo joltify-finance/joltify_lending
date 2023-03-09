@@ -31,10 +31,11 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 
 	delta := currentTime.Sub(latestPaymentTime).Seconds()
 	denom := interestData.Payments[0].PaymentAmount.Denom
+	lastBorrow := interestData.BorrowDetails[0].BorrowedAmount
 	if int32(delta) >= interestData.PayFreq*BASE {
 		// we need to pay the whole month
 		monthlyRatio := interestData.MonthlyRatio
-		paymentAmount := monthlyRatio.MulInt(interestData.BorrowedLast.Amount).TruncateInt()
+		paymentAmount := monthlyRatio.MulInt(lastBorrow.Amount).TruncateInt()
 		reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(reserve).TruncateInt()
 		toInvestors := paymentAmount.Sub(reservedAmount)
 		pReserve, found := k.GetReserve(ctx, denom)
@@ -50,7 +51,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
 		interest := r.Power(uint64(delta)).Sub(sdk.OneDec())
 
-		paymentAmount := interest.MulInt(interestData.BorrowedLast.Amount).TruncateInt()
+		paymentAmount := interest.MulInt(lastBorrow.Amount).TruncateInt()
 		reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(reserve).TruncateInt()
 		toInvestors := paymentAmount.Sub(reservedAmount)
 
@@ -64,7 +65,6 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
 		payment = sdk.NewCoin(denom, paymentAmount)
 	}
-	interestData.BorrowedLast = interestData.Borrowed
 
 	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
 	thisPaymentTime := latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second)

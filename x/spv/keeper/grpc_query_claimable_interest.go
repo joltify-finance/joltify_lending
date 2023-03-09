@@ -33,11 +33,10 @@ func (k Keeper) ClaimableInterest(goCtx context.Context, req *types.QueryClaimab
 		panic("should never fail to find the pool")
 	}
 
-	reserve := poolInfo.ReserveFactor
 	lendNFTs := depositor.LinkedNFT
 
 	// for each lending NFT this owner has
-	totalInterest, err := calculateTotalInterest(ctx, lendNFTs, k.nftKeeper, reserve, false)
+	totalInterest, err := calculateTotalInterest(ctx, lendNFTs, k.nftKeeper, false)
 	if err != nil {
 		return nil, err
 	}

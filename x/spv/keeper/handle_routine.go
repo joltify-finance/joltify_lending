@@ -118,7 +118,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	}
 
 	// now we process the partial transfer
-	for i, _ := range depositors {
+	for i := range depositors {
 		depositors[i].DepositType = types.DepositorInfo_processed
 	}
 
@@ -129,10 +129,10 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 
 }
 
-func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, thisBorrow sdkmath.Int) (sdkmath.Int, error) {
+func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string) error {
 	thisClass, found := k.nftKeeper.GetClass(ctx, classID)
 	if !found {
-		return sdkmath.ZeroInt(), coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
+		return coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
 	}
 
 	var borrowClassInfo types.BorrowInterest
@@ -140,28 +140,22 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, th
 	if err != nil {
 		panic(err)
 	}
-	borrowed := borrowClassInfo.Borrowed
+	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1]
 
 	thisNFT, found := k.nftKeeper.GetNFT(ctx, classID, nftID)
 	if !found {
-		return sdkmath.ZeroInt(), coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", nftID)
+		return coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", nftID)
 	}
 	var interestData types.NftInfo
 	err = proto.Unmarshal(thisNFT.Data.Value, &interestData)
 	if err != nil {
 		panic(err)
 	}
-	thisNFTBorrowed := thisBorrow
-	if thisNFTBorrowed.IsZero() {
-		thisNFTBorrowed = sdk.NewDecFromInt(borrowed.Amount).Mul(interestData.Ratio).TruncateInt()
-	}
+	thisNFTBorrowed := interestData.Borrowed
 
-	// there maybe the round of this NFT Borrowed
-	if borrowClassInfo.Borrowed.Amount.LT(thisNFTBorrowed) {
-		borrowClassInfo.Borrowed = sdk.NewCoin(borrowClassInfo.Borrowed.Denom, sdkmath.ZeroInt())
-	} else {
-		borrowClassInfo.Borrowed = borrowClassInfo.Borrowed.SubAmount(thisNFTBorrowed)
-	}
+	newBorrowAmount := lastBorrow.BorrowedAmount.Sub(thisNFTBorrowed)
+	newBorrow := types.BorrowDetail{BorrowedAmount: newBorrowAmount, TimeStamp: ctx.BlockTime()}
+	borrowClassInfo.BorrowDetails = append(borrowClassInfo.BorrowDetails, newBorrow)
 
 	data, err := types2.NewAnyWithValue(&borrowClassInfo)
 	if err != nil {
@@ -170,34 +164,23 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, th
 	thisClass.Data = data
 	err = k.nftKeeper.UpdateClass(ctx, thisClass)
 	if err != nil {
-		return sdkmath.ZeroInt(), coserrors.Wrapf(err, "fail to update the class")
+		return coserrors.Wrapf(err, "fail to update the class")
 	}
 	err = k.nftKeeper.Burn(ctx, classID, nftID)
 	if err != nil {
-		return sdkmath.ZeroInt(), coserrors.Wrapf(err, "fail to burn the nft")
+		return coserrors.Wrapf(err, "fail to burn the nft")
 	}
 
-	return thisNFTBorrowed, nil
-
+	return nil
 }
 
 func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo) error {
-	totalBorrowed := sdk.ZeroInt()
-	// we will handle the first borrow later
 	for _, el := range depositor.LinkedNFT[1:] {
 		ids := strings.Split(el, ":")
-		thisBorrow, err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], sdkmath.ZeroInt())
+		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1])
 		if err != nil {
 			panic(err)
 		}
-		totalBorrowed = totalBorrowed.Add(thisBorrow)
-	}
-	// since we check whether this investor has borrowed at the first borrow, we skip the length check here
-	firstNFT := depositor.LinkedNFT[0]
-	ids := strings.Split(firstNFT, ":")
-	_, err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], depositor.LockedAmount.SubAmount(totalBorrowed).Amount)
-	if err != nil {
-		panic(err)
 	}
 	return nil
 }

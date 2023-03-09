@@ -22,23 +22,24 @@ func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.P
 	}
 	totalBorrowedAmount := poolInfo.BorrowedAmount
 	currentPayout := sdk.ZeroInt()
-	for _, el := range nftClasses[1:] {
+	for _, el := range nftClasses {
 		class, found := k.nftKeeper.GetClass(ctx, el)
 		if !found {
 			panic(found)
 		}
-		var borrowInterest types.BorrowInterest
+		var borrowClassInfo types.BorrowInterest
 		var err error
-		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+		err = proto.Unmarshal(class.Data.Value, &borrowClassInfo)
 		if err != nil {
 			panic(err)
 		}
-
-		ratioOfThisBorrow := sdk.NewDecFromInt(borrowInterest.Borrowed.Amount).Quo(sdk.NewDecFromInt(totalBorrowedAmount.Amount))
+		latestBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+		ratioOfThisBorrow := sdk.NewDecFromInt(latestBorrow.Amount).Quo(sdk.NewDecFromInt(totalBorrowedAmount.Amount))
 		thisPayAmount := sdk.NewDecFromInt(amountToPay.Amount).Mul(ratioOfThisBorrow).TruncateInt()
-		borrowInterest.Borrowed = borrowInterest.Borrowed.SubAmount(thisPayAmount)
+		borrow := types.BorrowDetail{BorrowedAmount: latestBorrow.SubAmount(thisPayAmount), TimeStamp: ctx.BlockTime()}
+		borrowClassInfo.BorrowDetails = append(borrowClassInfo.BorrowDetails, borrow)
 		currentPayout = currentPayout.Add(thisPayAmount)
-		class.Data, err = types2.NewAnyWithValue(&borrowInterest)
+		class.Data, err = types2.NewAnyWithValue(&borrowClassInfo)
 		if err != nil {
 			panic("pack class any data failed")
 		}
@@ -53,14 +54,17 @@ func (k Keeper) travelThoughPrincipalToBePaid(ctx sdk.Context, poolInfo *types.P
 	if !found {
 		panic(found)
 	}
-	var borrowInterest types.BorrowInterest
+	var borrowClassInfo types.BorrowInterest
 	var err error
-	err = proto.Unmarshal(firstClass.Data.Value, &borrowInterest)
+	err = proto.Unmarshal(firstClass.Data.Value, &borrowClassInfo)
 	if err != nil {
 		panic(err)
 	}
-	borrowInterest.Borrowed = borrowInterest.Borrowed.Sub(amountToPay.SubAmount(currentPayout))
-	firstClass.Data, err = types2.NewAnyWithValue(&borrowInterest)
+
+	latestBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+	borrow := types.BorrowDetail{BorrowedAmount: latestBorrow.Sub(amountToPay.SubAmount(currentPayout)), TimeStamp: ctx.BlockTime()}
+	borrowClassInfo.BorrowDetails = append(borrowClassInfo.BorrowDetails, borrow)
+	firstClass.Data, err = types2.NewAnyWithValue(&borrowClassInfo)
 	if err != nil {
 		panic("pack class any data failed")
 	}

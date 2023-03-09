@@ -18,9 +18,9 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgActivePool{}, "spv/ActivePool", nil)
 	cdc.RegisterConcrete(&MsgPayPrincipal{}, "spv/PayPrincipal", nil)
 	cdc.RegisterConcrete(&MsgWithdrawPrincipal{}, "spv/WithdrawPrincipal", nil)
-	cdc.RegisterConcrete(&MsgSubmitWitdrawProposal{}, "spv/SubmitWithdrawProposal", nil)
+	cdc.RegisterConcrete(&MsgSubmitWithdrawProposal{}, "spv/SubmitWithdrawProposal", nil)
 	cdc.RegisterConcrete(&MsgTransferOwnership{}, "spv/TransferOwnership", nil)
-// this line is used by starport scaffolding # 2
+	// this line is used by starport scaffolding # 2
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -64,12 +64,12 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgWithdrawPrincipal{},
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgSubmitWitdrawProposal{},
+		&MsgSubmitWithdrawProposal{},
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-	&MsgTransferOwnership{},
-)
-// this line is used by starport scaffolding # 3
+		&MsgTransferOwnership{},
+	)
+	// this line is used by starport scaffolding # 3
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 

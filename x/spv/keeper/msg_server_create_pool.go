@@ -126,7 +126,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
 		}
 
-		nftClassID := fmt.Sprintf("nft-%v", indexHash.String()[2:])
+		nftClassID := fmt.Sprintf("class-%v", indexHash.String()[2:])
 		poolNFTClass := nft.Class{
 			Id:          nftClassID,
 			Name:        msg.PoolName,

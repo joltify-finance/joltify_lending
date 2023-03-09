@@ -33,7 +33,12 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 	}
 
 	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
-		k.cleanupDepositor(ctx, poolInfo, depositor)
+		amount := k.cleanupDepositor(ctx, poolInfo, depositor)
+		tokenSend := sdk.NewCoin(msg.Token.Denom, amount)
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(tokenSend))
+		if err != nil {
+			return nil, err
+		}
 		return &types.MsgWithdrawPrincipalResponse{}, nil
 	}
 
@@ -42,7 +47,6 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 	if msg.Token.IsGTE(depositor.WithdrawalAmount) {
 		totalWithdraw = depositor.WithdrawalAmount
 		if depositor.DepositType == types.DepositorInfo_deposit_close {
-			// fixme we need to test if a user has close its deposit while still try to withdraw interest
 			k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
 		}
 	}
@@ -52,15 +56,16 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, errors.New("withdraw amount too large")
 	}
 
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
-	k.SetPool(ctx, poolInfo)
+	if depositor.DepositType == types.DepositorInfo_unset {
+		poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
+	}
 
+	k.SetDepositor(ctx, depositor)
+	k.SetPool(ctx, poolInfo)
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(totalWithdraw))
 	if err != nil {
 		return nil, err
 	}
-
-	k.SetDepositor(ctx, depositor)
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeWithdrawPrincipal,

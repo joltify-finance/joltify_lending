@@ -63,7 +63,7 @@ func TestMsgRepayInterest(t *testing.T) {
 
 func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.PoolInfo, borrowAmount sdk.Coin) {
 
-	classID := fmt.Sprintf("nft-%v", poolInfo.Index[2:])
+	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
 	poolClass, found := nftKeeper.GetClass(ctx, classID)
 	if !found {
 		panic("pool class must have already been set")
