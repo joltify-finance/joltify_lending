@@ -5,10 +5,15 @@ import { Timestamp } from "../../google/protobuf/timestamp";
 
 export const protobufPackage = "joltify.spv";
 
+export interface borrowDetail {
+  borrowedAmount: Coin | undefined;
+  timeStamp: Date | undefined;
+}
+
 export interface NftInfo {
   issuer: string;
   receiver: string;
-  ratio: string;
+  borrowed: Coin | undefined;
   lastPayment: Date | undefined;
 }
 
@@ -21,16 +26,84 @@ export interface BorrowInterest {
   poolIndex: string;
   apy: string;
   payFreq: number;
-  issueTime: Date | undefined;
-  borrowed: Coin | undefined;
-  borrowedLast: Coin | undefined;
+  issueTime:
+    | Date
+    | undefined;
+  /**
+   * cosmos.base.v1beta1.Coin borrowed_last = 6[
+   * 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+   * 		(gogoproto.nullable) = false];
+   */
+  borrowDetails: borrowDetail[];
   monthlyRatio: string;
   interestSPY: string;
   payments: PaymentItem[];
+  interestPaid: Coin | undefined;
 }
 
+function createBaseborrowDetail(): borrowDetail {
+  return { borrowedAmount: undefined, timeStamp: undefined };
+}
+
+export const borrowDetail = {
+  encode(message: borrowDetail, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.borrowedAmount !== undefined) {
+      Coin.encode(message.borrowedAmount, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.timeStamp !== undefined) {
+      Timestamp.encode(toTimestamp(message.timeStamp), writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): borrowDetail {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseborrowDetail();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.borrowedAmount = Coin.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.timeStamp = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): borrowDetail {
+    return {
+      borrowedAmount: isSet(object.borrowedAmount) ? Coin.fromJSON(object.borrowedAmount) : undefined,
+      timeStamp: isSet(object.timeStamp) ? fromJsonTimestamp(object.timeStamp) : undefined,
+    };
+  },
+
+  toJSON(message: borrowDetail): unknown {
+    const obj: any = {};
+    message.borrowedAmount !== undefined
+      && (obj.borrowedAmount = message.borrowedAmount ? Coin.toJSON(message.borrowedAmount) : undefined);
+    message.timeStamp !== undefined && (obj.timeStamp = message.timeStamp.toISOString());
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<borrowDetail>, I>>(object: I): borrowDetail {
+    const message = createBaseborrowDetail();
+    message.borrowedAmount = (object.borrowedAmount !== undefined && object.borrowedAmount !== null)
+      ? Coin.fromPartial(object.borrowedAmount)
+      : undefined;
+    message.timeStamp = object.timeStamp ?? undefined;
+    return message;
+  },
+};
+
 function createBaseNftInfo(): NftInfo {
-  return { issuer: "", receiver: "", ratio: "", lastPayment: undefined };
+  return { issuer: "", receiver: "", borrowed: undefined, lastPayment: undefined };
 }
 
 export const NftInfo = {
@@ -41,8 +114,8 @@ export const NftInfo = {
     if (message.receiver !== "") {
       writer.uint32(18).string(message.receiver);
     }
-    if (message.ratio !== "") {
-      writer.uint32(26).string(message.ratio);
+    if (message.borrowed !== undefined) {
+      Coin.encode(message.borrowed, writer.uint32(26).fork()).ldelim();
     }
     if (message.lastPayment !== undefined) {
       Timestamp.encode(toTimestamp(message.lastPayment), writer.uint32(34).fork()).ldelim();
@@ -64,7 +137,7 @@ export const NftInfo = {
           message.receiver = reader.string();
           break;
         case 3:
-          message.ratio = reader.string();
+          message.borrowed = Coin.decode(reader, reader.uint32());
           break;
         case 4:
           message.lastPayment = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
@@ -81,7 +154,7 @@ export const NftInfo = {
     return {
       issuer: isSet(object.issuer) ? String(object.issuer) : "",
       receiver: isSet(object.receiver) ? String(object.receiver) : "",
-      ratio: isSet(object.ratio) ? String(object.ratio) : "",
+      borrowed: isSet(object.borrowed) ? Coin.fromJSON(object.borrowed) : undefined,
       lastPayment: isSet(object.lastPayment) ? fromJsonTimestamp(object.lastPayment) : undefined,
     };
   },
@@ -90,7 +163,7 @@ export const NftInfo = {
     const obj: any = {};
     message.issuer !== undefined && (obj.issuer = message.issuer);
     message.receiver !== undefined && (obj.receiver = message.receiver);
-    message.ratio !== undefined && (obj.ratio = message.ratio);
+    message.borrowed !== undefined && (obj.borrowed = message.borrowed ? Coin.toJSON(message.borrowed) : undefined);
     message.lastPayment !== undefined && (obj.lastPayment = message.lastPayment.toISOString());
     return obj;
   },
@@ -99,7 +172,9 @@ export const NftInfo = {
     const message = createBaseNftInfo();
     message.issuer = object.issuer ?? "";
     message.receiver = object.receiver ?? "";
-    message.ratio = object.ratio ?? "";
+    message.borrowed = (object.borrowed !== undefined && object.borrowed !== null)
+      ? Coin.fromPartial(object.borrowed)
+      : undefined;
     message.lastPayment = object.lastPayment ?? undefined;
     return message;
   },
@@ -172,11 +247,11 @@ function createBaseBorrowInterest(): BorrowInterest {
     apy: "",
     payFreq: 0,
     issueTime: undefined,
-    borrowed: undefined,
-    borrowedLast: undefined,
+    borrowDetails: [],
     monthlyRatio: "",
     interestSPY: "",
     payments: [],
+    interestPaid: undefined,
   };
 }
 
@@ -194,20 +269,20 @@ export const BorrowInterest = {
     if (message.issueTime !== undefined) {
       Timestamp.encode(toTimestamp(message.issueTime), writer.uint32(34).fork()).ldelim();
     }
-    if (message.borrowed !== undefined) {
-      Coin.encode(message.borrowed, writer.uint32(42).fork()).ldelim();
-    }
-    if (message.borrowedLast !== undefined) {
-      Coin.encode(message.borrowedLast, writer.uint32(50).fork()).ldelim();
+    for (const v of message.borrowDetails) {
+      borrowDetail.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     if (message.monthlyRatio !== "") {
-      writer.uint32(58).string(message.monthlyRatio);
+      writer.uint32(50).string(message.monthlyRatio);
     }
     if (message.interestSPY !== "") {
-      writer.uint32(66).string(message.interestSPY);
+      writer.uint32(58).string(message.interestSPY);
     }
     for (const v of message.payments) {
-      PaymentItem.encode(v!, writer.uint32(74).fork()).ldelim();
+      PaymentItem.encode(v!, writer.uint32(66).fork()).ldelim();
+    }
+    if (message.interestPaid !== undefined) {
+      Coin.encode(message.interestPaid, writer.uint32(74).fork()).ldelim();
     }
     return writer;
   },
@@ -232,19 +307,19 @@ export const BorrowInterest = {
           message.issueTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           break;
         case 5:
-          message.borrowed = Coin.decode(reader, reader.uint32());
+          message.borrowDetails.push(borrowDetail.decode(reader, reader.uint32()));
           break;
         case 6:
-          message.borrowedLast = Coin.decode(reader, reader.uint32());
-          break;
-        case 7:
           message.monthlyRatio = reader.string();
           break;
-        case 8:
+        case 7:
           message.interestSPY = reader.string();
           break;
-        case 9:
+        case 8:
           message.payments.push(PaymentItem.decode(reader, reader.uint32()));
+          break;
+        case 9:
+          message.interestPaid = Coin.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -260,11 +335,13 @@ export const BorrowInterest = {
       apy: isSet(object.apy) ? String(object.apy) : "",
       payFreq: isSet(object.payFreq) ? Number(object.payFreq) : 0,
       issueTime: isSet(object.issueTime) ? fromJsonTimestamp(object.issueTime) : undefined,
-      borrowed: isSet(object.borrowed) ? Coin.fromJSON(object.borrowed) : undefined,
-      borrowedLast: isSet(object.borrowedLast) ? Coin.fromJSON(object.borrowedLast) : undefined,
+      borrowDetails: Array.isArray(object?.borrowDetails)
+        ? object.borrowDetails.map((e: any) => borrowDetail.fromJSON(e))
+        : [],
       monthlyRatio: isSet(object.monthlyRatio) ? String(object.monthlyRatio) : "",
       interestSPY: isSet(object.interestSPY) ? String(object.interestSPY) : "",
       payments: Array.isArray(object?.payments) ? object.payments.map((e: any) => PaymentItem.fromJSON(e)) : [],
+      interestPaid: isSet(object.interestPaid) ? Coin.fromJSON(object.interestPaid) : undefined,
     };
   },
 
@@ -274,9 +351,11 @@ export const BorrowInterest = {
     message.apy !== undefined && (obj.apy = message.apy);
     message.payFreq !== undefined && (obj.payFreq = Math.round(message.payFreq));
     message.issueTime !== undefined && (obj.issueTime = message.issueTime.toISOString());
-    message.borrowed !== undefined && (obj.borrowed = message.borrowed ? Coin.toJSON(message.borrowed) : undefined);
-    message.borrowedLast !== undefined
-      && (obj.borrowedLast = message.borrowedLast ? Coin.toJSON(message.borrowedLast) : undefined);
+    if (message.borrowDetails) {
+      obj.borrowDetails = message.borrowDetails.map((e) => e ? borrowDetail.toJSON(e) : undefined);
+    } else {
+      obj.borrowDetails = [];
+    }
     message.monthlyRatio !== undefined && (obj.monthlyRatio = message.monthlyRatio);
     message.interestSPY !== undefined && (obj.interestSPY = message.interestSPY);
     if (message.payments) {
@@ -284,6 +363,8 @@ export const BorrowInterest = {
     } else {
       obj.payments = [];
     }
+    message.interestPaid !== undefined
+      && (obj.interestPaid = message.interestPaid ? Coin.toJSON(message.interestPaid) : undefined);
     return obj;
   },
 
@@ -293,15 +374,13 @@ export const BorrowInterest = {
     message.apy = object.apy ?? "";
     message.payFreq = object.payFreq ?? 0;
     message.issueTime = object.issueTime ?? undefined;
-    message.borrowed = (object.borrowed !== undefined && object.borrowed !== null)
-      ? Coin.fromPartial(object.borrowed)
-      : undefined;
-    message.borrowedLast = (object.borrowedLast !== undefined && object.borrowedLast !== null)
-      ? Coin.fromPartial(object.borrowedLast)
-      : undefined;
+    message.borrowDetails = object.borrowDetails?.map((e) => borrowDetail.fromPartial(e)) || [];
     message.monthlyRatio = object.monthlyRatio ?? "";
     message.interestSPY = object.interestSPY ?? "";
     message.payments = object.payments?.map((e) => PaymentItem.fromPartial(e)) || [];
+    message.interestPaid = (object.interestPaid !== undefined && object.interestPaid !== null)
+      ? Coin.fromPartial(object.interestPaid)
+      : undefined;
     return message;
   },
 };

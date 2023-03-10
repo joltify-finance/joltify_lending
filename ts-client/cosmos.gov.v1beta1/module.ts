@@ -7,19 +7,22 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgSubmitProposal } from "./types/cosmos/gov/v1beta1/tx";
 import { MsgDeposit } from "./types/cosmos/gov/v1beta1/tx";
 import { MsgVote } from "./types/cosmos/gov/v1beta1/tx";
 import { MsgVoteWeighted } from "./types/cosmos/gov/v1beta1/tx";
+import { MsgSubmitProposal } from "./types/cosmos/gov/v1beta1/tx";
 
+import { WeightedVoteOption as typeWeightedVoteOption} from "./types"
+import { TextProposal as typeTextProposal} from "./types"
+import { Deposit as typeDeposit} from "./types"
+import { Proposal as typeProposal} from "./types"
+import { TallyResult as typeTallyResult} from "./types"
+import { Vote as typeVote} from "./types"
+import { DepositParams as typeDepositParams} from "./types"
+import { VotingParams as typeVotingParams} from "./types"
+import { TallyParams as typeTallyParams} from "./types"
 
-export { MsgSubmitProposal, MsgDeposit, MsgVote, MsgVoteWeighted };
-
-type sendMsgSubmitProposalParams = {
-  value: MsgSubmitProposal,
-  fee?: StdFee,
-  memo?: string
-};
+export { MsgDeposit, MsgVote, MsgVoteWeighted, MsgSubmitProposal };
 
 type sendMsgDepositParams = {
   value: MsgDeposit,
@@ -39,10 +42,12 @@ type sendMsgVoteWeightedParams = {
   memo?: string
 };
 
-
-type msgSubmitProposalParams = {
+type sendMsgSubmitProposalParams = {
   value: MsgSubmitProposal,
+  fee?: StdFee,
+  memo?: string
 };
+
 
 type msgDepositParams = {
   value: MsgDeposit,
@@ -56,9 +61,25 @@ type msgVoteWeightedParams = {
   value: MsgVoteWeighted,
 };
 
+type msgSubmitProposalParams = {
+  value: MsgSubmitProposal,
+};
+
 
 export const registry = new Registry(msgTypes);
 
+type Field = {
+	name: string;
+	type: unknown;
+}
+function getStructure(template) {
+	const structure: {fields: Field[]} = { fields: [] }
+	for (let [key, value] of Object.entries(template)) {
+		let field = { name: key, type: typeof value }
+		structure.fields.push(field)
+	}
+	return structure
+}
 const defaultFee = {
   amount: [],
   gas: "200000",
@@ -73,20 +94,6 @@ interface TxClientOptions {
 export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "http://localhost:26657", prefix: "cosmos" }) => {
 
   return {
-		
-		async sendMsgSubmitProposal({ value, fee, memo }: sendMsgSubmitProposalParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgSubmitProposal: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgSubmitProposal({ value: MsgSubmitProposal.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgSubmitProposal: Could not broadcast Tx: '+ e.message)
-			}
-		},
 		
 		async sendMsgDeposit({ value, fee, memo }: sendMsgDepositParams): Promise<DeliverTxResponse> {
 			if (!signer) {
@@ -130,14 +137,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		
-		msgSubmitProposal({ value }: msgSubmitProposalParams): EncodeObject {
-			try {
-				return { typeUrl: "/cosmos.gov.v1beta1.MsgSubmitProposal", value: MsgSubmitProposal.fromPartial( value ) }  
+		async sendMsgSubmitProposal({ value, fee, memo }: sendMsgSubmitProposalParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgSubmitProposal: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgSubmitProposal({ value: MsgSubmitProposal.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:MsgSubmitProposal: Could not create message: ' + e.message)
+				throw new Error('TxClient:sendMsgSubmitProposal: Could not broadcast Tx: '+ e.message)
 			}
 		},
+		
 		
 		msgDeposit({ value }: msgDepositParams): EncodeObject {
 			try {
@@ -163,6 +176,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		msgSubmitProposal({ value }: msgSubmitProposalParams): EncodeObject {
+			try {
+				return { typeUrl: "/cosmos.gov.v1beta1.MsgSubmitProposal", value: MsgSubmitProposal.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgSubmitProposal: Could not create message: ' + e.message)
+			}
+		},
+		
 	}
 };
 
@@ -177,13 +198,40 @@ export const queryClient = ({ addr: addr }: QueryClientOptions = { addr: "http:/
 class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
-	
-	public registry: Array<[string, GeneratedType]>;
+	public structure: Record<string,unknown>;
+	public registry: Array<[string, GeneratedType]> = [];
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });
-		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
+		this.query = queryClient({ addr: client.env.apiURL });		
+		this.updateTX(client);
+		this.structure =  {
+						WeightedVoteOption: getStructure(typeWeightedVoteOption.fromPartial({})),
+						TextProposal: getStructure(typeTextProposal.fromPartial({})),
+						Deposit: getStructure(typeDeposit.fromPartial({})),
+						Proposal: getStructure(typeProposal.fromPartial({})),
+						TallyResult: getStructure(typeTallyResult.fromPartial({})),
+						Vote: getStructure(typeVote.fromPartial({})),
+						DepositParams: getStructure(typeDepositParams.fromPartial({})),
+						VotingParams: getStructure(typeVotingParams.fromPartial({})),
+						TallyParams: getStructure(typeTallyParams.fromPartial({})),
+						
+		};
+		client.on('signer-changed',(signer) => {			
+		 this.updateTX(client);
+		})
+	}
+	updateTX(client: IgniteClient) {
+    const methods = txClient({
+        signer: client.signer,
+        addr: client.env.rpcURL,
+        prefix: client.env.prefix ?? "cosmos",
+    })
+	
+    this.tx = methods;
+    for (let m in methods) {
+        this.tx[m] = methods[m].bind(this.tx);
+    }
 	}
 };
 

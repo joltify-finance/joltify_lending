@@ -33,6 +33,10 @@ export interface PoolInfo {
   poolType: PoolInfo_POOLTYPE;
   escrowInterestAmount: Coin | undefined;
   escrowPrincipalAmount: Coin | undefined;
+  withdrawProposalAmount: Coin | undefined;
+  projectDueTime: Date | undefined;
+  withdrawAccounts: Uint8Array[];
+  transferAccounts: Uint8Array[];
 }
 
 export enum PoolInfo_POOLSTATUS {
@@ -155,6 +159,10 @@ function createBasePoolInfo(): PoolInfo {
     poolType: 0,
     escrowInterestAmount: undefined,
     escrowPrincipalAmount: undefined,
+    withdrawProposalAmount: undefined,
+    projectDueTime: undefined,
+    withdrawAccounts: [],
+    transferAccounts: [],
   };
 }
 
@@ -216,6 +224,18 @@ export const PoolInfo = {
     }
     if (message.escrowPrincipalAmount !== undefined) {
       Coin.encode(message.escrowPrincipalAmount, writer.uint32(154).fork()).ldelim();
+    }
+    if (message.withdrawProposalAmount !== undefined) {
+      Coin.encode(message.withdrawProposalAmount, writer.uint32(162).fork()).ldelim();
+    }
+    if (message.projectDueTime !== undefined) {
+      Timestamp.encode(toTimestamp(message.projectDueTime), writer.uint32(170).fork()).ldelim();
+    }
+    for (const v of message.withdrawAccounts) {
+      writer.uint32(178).bytes(v!);
+    }
+    for (const v of message.transferAccounts) {
+      writer.uint32(186).bytes(v!);
     }
     return writer;
   },
@@ -284,6 +304,18 @@ export const PoolInfo = {
         case 19:
           message.escrowPrincipalAmount = Coin.decode(reader, reader.uint32());
           break;
+        case 20:
+          message.withdrawProposalAmount = Coin.decode(reader, reader.uint32());
+          break;
+        case 21:
+          message.projectDueTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          break;
+        case 22:
+          message.withdrawAccounts.push(reader.bytes());
+          break;
+        case 23:
+          message.transferAccounts.push(reader.bytes());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -315,6 +347,16 @@ export const PoolInfo = {
       escrowPrincipalAmount: isSet(object.escrowPrincipalAmount)
         ? Coin.fromJSON(object.escrowPrincipalAmount)
         : undefined,
+      withdrawProposalAmount: isSet(object.withdrawProposalAmount)
+        ? Coin.fromJSON(object.withdrawProposalAmount)
+        : undefined,
+      projectDueTime: isSet(object.projectDueTime) ? fromJsonTimestamp(object.projectDueTime) : undefined,
+      withdrawAccounts: Array.isArray(object?.withdrawAccounts)
+        ? object.withdrawAccounts.map((e: any) => bytesFromBase64(e))
+        : [],
+      transferAccounts: Array.isArray(object?.transferAccounts)
+        ? object.transferAccounts.map((e: any) => bytesFromBase64(e))
+        : [],
     };
   },
 
@@ -354,6 +396,24 @@ export const PoolInfo = {
     message.escrowPrincipalAmount !== undefined && (obj.escrowPrincipalAmount = message.escrowPrincipalAmount
       ? Coin.toJSON(message.escrowPrincipalAmount)
       : undefined);
+    message.withdrawProposalAmount !== undefined && (obj.withdrawProposalAmount = message.withdrawProposalAmount
+      ? Coin.toJSON(message.withdrawProposalAmount)
+      : undefined);
+    message.projectDueTime !== undefined && (obj.projectDueTime = message.projectDueTime.toISOString());
+    if (message.withdrawAccounts) {
+      obj.withdrawAccounts = message.withdrawAccounts.map((e) =>
+        base64FromBytes(e !== undefined ? e : new Uint8Array())
+      );
+    } else {
+      obj.withdrawAccounts = [];
+    }
+    if (message.transferAccounts) {
+      obj.transferAccounts = message.transferAccounts.map((e) =>
+        base64FromBytes(e !== undefined ? e : new Uint8Array())
+      );
+    } else {
+      obj.transferAccounts = [];
+    }
     return obj;
   },
 
@@ -391,6 +451,13 @@ export const PoolInfo = {
       (object.escrowPrincipalAmount !== undefined && object.escrowPrincipalAmount !== null)
         ? Coin.fromPartial(object.escrowPrincipalAmount)
         : undefined;
+    message.withdrawProposalAmount =
+      (object.withdrawProposalAmount !== undefined && object.withdrawProposalAmount !== null)
+        ? Coin.fromPartial(object.withdrawProposalAmount)
+        : undefined;
+    message.projectDueTime = object.projectDueTime ?? undefined;
+    message.withdrawAccounts = object.withdrawAccounts?.map((e) => e) || [];
+    message.transferAccounts = object.transferAccounts?.map((e) => e) || [];
     return message;
   },
 };

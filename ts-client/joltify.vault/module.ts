@@ -7,15 +7,30 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
-import { MsgCreateIssueToken } from "./types/joltify/vault/tx";
 import { MsgCreateOutboundTx } from "./types/joltify/vault/tx";
+import { MsgCreateIssueToken } from "./types/joltify/vault/tx";
+import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
 
+import { PoolProposal as typePoolProposal} from "./types"
+import { CreatePool as typeCreatePool} from "./types"
+import { IssueToken as typeIssueToken} from "./types"
+import { entity as typeentity} from "./types"
+import { proposals as typeproposals} from "./types"
+import { OutboundTx as typeOutboundTx} from "./types"
+import { addressV16 as typeaddressV16} from "./types"
+import { OutboundTxV16 as typeOutboundTxV16} from "./types"
+import { poolInfo as typepoolInfo} from "./types"
+import { historicalAmount as typehistoricalAmount} from "./types"
+import { coinsQuota as typecoinsQuota} from "./types"
+import { Params as typeParams} from "./types"
+import { Validator as typeValidator} from "./types"
+import { StandbyPower as typeStandbyPower} from "./types"
+import { Validators as typeValidators} from "./types"
 
-export { MsgCreateCreatePool, MsgCreateIssueToken, MsgCreateOutboundTx };
+export { MsgCreateOutboundTx, MsgCreateIssueToken, MsgCreateCreatePool };
 
-type sendMsgCreateCreatePoolParams = {
-  value: MsgCreateCreatePool,
+type sendMsgCreateOutboundTxParams = {
+  value: MsgCreateOutboundTx,
   fee?: StdFee,
   memo?: string
 };
@@ -26,28 +41,40 @@ type sendMsgCreateIssueTokenParams = {
   memo?: string
 };
 
-type sendMsgCreateOutboundTxParams = {
-  value: MsgCreateOutboundTx,
+type sendMsgCreateCreatePoolParams = {
+  value: MsgCreateCreatePool,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgCreateCreatePoolParams = {
-  value: MsgCreateCreatePool,
+type msgCreateOutboundTxParams = {
+  value: MsgCreateOutboundTx,
 };
 
 type msgCreateIssueTokenParams = {
   value: MsgCreateIssueToken,
 };
 
-type msgCreateOutboundTxParams = {
-  value: MsgCreateOutboundTx,
+type msgCreateCreatePoolParams = {
+  value: MsgCreateCreatePool,
 };
 
 
 export const registry = new Registry(msgTypes);
 
+type Field = {
+	name: string;
+	type: unknown;
+}
+function getStructure(template) {
+	const structure: {fields: Field[]} = { fields: [] }
+	for (let [key, value] of Object.entries(template)) {
+		let field = { name: key, type: typeof value }
+		structure.fields.push(field)
+	}
+	return structure
+}
 const defaultFee = {
   amount: [],
   gas: "200000",
@@ -63,17 +90,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgCreateCreatePool({ value, fee, memo }: sendMsgCreateCreatePoolParams): Promise<DeliverTxResponse> {
+		async sendMsgCreateOutboundTx({ value, fee, memo }: sendMsgCreateOutboundTxParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgCreateCreatePool: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgCreateOutboundTx: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCreateCreatePool({ value: MsgCreateCreatePool.fromPartial(value) })
+				let msg = this.msgCreateOutboundTx({ value: MsgCreateOutboundTx.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCreateCreatePool: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgCreateOutboundTx: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -91,26 +118,26 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgCreateOutboundTx({ value, fee, memo }: sendMsgCreateOutboundTxParams): Promise<DeliverTxResponse> {
+		async sendMsgCreateCreatePool({ value, fee, memo }: sendMsgCreateCreatePoolParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgCreateOutboundTx: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgCreateCreatePool: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCreateOutboundTx({ value: MsgCreateOutboundTx.fromPartial(value) })
+				let msg = this.msgCreateCreatePool({ value: MsgCreateCreatePool.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCreateOutboundTx: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgCreateCreatePool: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgCreateCreatePool({ value }: msgCreateCreatePoolParams): EncodeObject {
+		msgCreateOutboundTx({ value }: msgCreateOutboundTxParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.vault.MsgCreateCreatePool", value: MsgCreateCreatePool.fromPartial( value ) }  
+				return { typeUrl: "/joltify.vault.MsgCreateOutboundTx", value: MsgCreateOutboundTx.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgCreateCreatePool: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgCreateOutboundTx: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -122,11 +149,11 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgCreateOutboundTx({ value }: msgCreateOutboundTxParams): EncodeObject {
+		msgCreateCreatePool({ value }: msgCreateCreatePoolParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.vault.MsgCreateOutboundTx", value: MsgCreateOutboundTx.fromPartial( value ) }  
+				return { typeUrl: "/joltify.vault.MsgCreateCreatePool", value: MsgCreateCreatePool.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgCreateOutboundTx: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgCreateCreatePool: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -144,13 +171,46 @@ export const queryClient = ({ addr: addr }: QueryClientOptions = { addr: "http:/
 class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
-	
-	public registry: Array<[string, GeneratedType]>;
+	public structure: Record<string,unknown>;
+	public registry: Array<[string, GeneratedType]> = [];
 
 	constructor(client: IgniteClient) {		
 	
-		this.query = queryClient({ addr: client.env.apiURL });
-		this.tx = txClient({ signer: client.signer, addr: client.env.rpcURL, prefix: client.env.prefix ?? "cosmos" });
+		this.query = queryClient({ addr: client.env.apiURL });		
+		this.updateTX(client);
+		this.structure =  {
+						PoolProposal: getStructure(typePoolProposal.fromPartial({})),
+						CreatePool: getStructure(typeCreatePool.fromPartial({})),
+						IssueToken: getStructure(typeIssueToken.fromPartial({})),
+						entity: getStructure(typeentity.fromPartial({})),
+						proposals: getStructure(typeproposals.fromPartial({})),
+						OutboundTx: getStructure(typeOutboundTx.fromPartial({})),
+						addressV16: getStructure(typeaddressV16.fromPartial({})),
+						OutboundTxV16: getStructure(typeOutboundTxV16.fromPartial({})),
+						poolInfo: getStructure(typepoolInfo.fromPartial({})),
+						historicalAmount: getStructure(typehistoricalAmount.fromPartial({})),
+						coinsQuota: getStructure(typecoinsQuota.fromPartial({})),
+						Params: getStructure(typeParams.fromPartial({})),
+						Validator: getStructure(typeValidator.fromPartial({})),
+						StandbyPower: getStructure(typeStandbyPower.fromPartial({})),
+						Validators: getStructure(typeValidators.fromPartial({})),
+						
+		};
+		client.on('signer-changed',(signer) => {			
+		 this.updateTX(client);
+		})
+	}
+	updateTX(client: IgniteClient) {
+    const methods = txClient({
+        signer: client.signer,
+        addr: client.env.rpcURL,
+        prefix: client.env.prefix ?? "cosmos",
+    })
+	
+    this.tx = methods;
+    for (let m in methods) {
+        this.tx[m] = methods[m].bind(this.tx);
+    }
 	}
 };
 

@@ -13,7 +13,7 @@ export interface MsgCreatePool {
 }
 
 export interface MsgCreatePoolResponse {
-  poolIndex: string;
+  poolIndex: string[];
 }
 
 export interface MsgAddInvestors {
@@ -42,6 +42,7 @@ export interface MsgBorrow {
 }
 
 export interface MsgBorrowResponse {
+  borrowAmount: string;
 }
 
 export interface MsgRepayInterest {
@@ -59,6 +60,7 @@ export interface MsgClaimInterest {
 }
 
 export interface MsgClaimInterestResponse {
+  amount: string;
 }
 
 export interface MsgUpdatePool {
@@ -96,6 +98,24 @@ export interface MsgWithdrawPrincipal {
 }
 
 export interface MsgWithdrawPrincipalResponse {
+}
+
+export interface MsgSubmitWithdrawProposal {
+  creator: string;
+  poolIndex: string;
+}
+
+export interface MsgSubmitWithdrawProposalResponse {
+  operationResult: boolean;
+}
+
+export interface MsgTransferOwnership {
+  creator: string;
+  poolIndex: string;
+}
+
+export interface MsgTransferOwnershipResponse {
+  operationResult: boolean;
 }
 
 function createBaseMsgCreatePool(): MsgCreatePool {
@@ -187,13 +207,13 @@ export const MsgCreatePool = {
 };
 
 function createBaseMsgCreatePoolResponse(): MsgCreatePoolResponse {
-  return { poolIndex: "" };
+  return { poolIndex: [] };
 }
 
 export const MsgCreatePoolResponse = {
   encode(message: MsgCreatePoolResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.poolIndex !== "") {
-      writer.uint32(10).string(message.poolIndex);
+    for (const v of message.poolIndex) {
+      writer.uint32(10).string(v!);
     }
     return writer;
   },
@@ -206,7 +226,7 @@ export const MsgCreatePoolResponse = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.poolIndex = reader.string();
+          message.poolIndex.push(reader.string());
           break;
         default:
           reader.skipType(tag & 7);
@@ -217,18 +237,22 @@ export const MsgCreatePoolResponse = {
   },
 
   fromJSON(object: any): MsgCreatePoolResponse {
-    return { poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "" };
+    return { poolIndex: Array.isArray(object?.poolIndex) ? object.poolIndex.map((e: any) => String(e)) : [] };
   },
 
   toJSON(message: MsgCreatePoolResponse): unknown {
     const obj: any = {};
-    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    if (message.poolIndex) {
+      obj.poolIndex = message.poolIndex.map((e) => e);
+    } else {
+      obj.poolIndex = [];
+    }
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgCreatePoolResponse>, I>>(object: I): MsgCreatePoolResponse {
     const message = createBaseMsgCreatePoolResponse();
-    message.poolIndex = object.poolIndex ?? "";
+    message.poolIndex = object.poolIndex?.map((e) => e) || [];
     return message;
   },
 };
@@ -528,11 +552,14 @@ export const MsgBorrow = {
 };
 
 function createBaseMsgBorrowResponse(): MsgBorrowResponse {
-  return {};
+  return { borrowAmount: "" };
 }
 
 export const MsgBorrowResponse = {
-  encode(_: MsgBorrowResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(message: MsgBorrowResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.borrowAmount !== "") {
+      writer.uint32(10).string(message.borrowAmount);
+    }
     return writer;
   },
 
@@ -543,6 +570,9 @@ export const MsgBorrowResponse = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          message.borrowAmount = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -551,17 +581,19 @@ export const MsgBorrowResponse = {
     return message;
   },
 
-  fromJSON(_: any): MsgBorrowResponse {
-    return {};
+  fromJSON(object: any): MsgBorrowResponse {
+    return { borrowAmount: isSet(object.borrowAmount) ? String(object.borrowAmount) : "" };
   },
 
-  toJSON(_: MsgBorrowResponse): unknown {
+  toJSON(message: MsgBorrowResponse): unknown {
     const obj: any = {};
+    message.borrowAmount !== undefined && (obj.borrowAmount = message.borrowAmount);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<MsgBorrowResponse>, I>>(_: I): MsgBorrowResponse {
+  fromPartial<I extends Exact<DeepPartial<MsgBorrowResponse>, I>>(object: I): MsgBorrowResponse {
     const message = createBaseMsgBorrowResponse();
+    message.borrowAmount = object.borrowAmount ?? "";
     return message;
   },
 };
@@ -731,11 +763,14 @@ export const MsgClaimInterest = {
 };
 
 function createBaseMsgClaimInterestResponse(): MsgClaimInterestResponse {
-  return {};
+  return { amount: "" };
 }
 
 export const MsgClaimInterestResponse = {
-  encode(_: MsgClaimInterestResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(message: MsgClaimInterestResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.amount !== "") {
+      writer.uint32(10).string(message.amount);
+    }
     return writer;
   },
 
@@ -746,6 +781,9 @@ export const MsgClaimInterestResponse = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          message.amount = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -754,17 +792,19 @@ export const MsgClaimInterestResponse = {
     return message;
   },
 
-  fromJSON(_: any): MsgClaimInterestResponse {
-    return {};
+  fromJSON(object: any): MsgClaimInterestResponse {
+    return { amount: isSet(object.amount) ? String(object.amount) : "" };
   },
 
-  toJSON(_: MsgClaimInterestResponse): unknown {
+  toJSON(message: MsgClaimInterestResponse): unknown {
     const obj: any = {};
+    message.amount !== undefined && (obj.amount = message.amount);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<MsgClaimInterestResponse>, I>>(_: I): MsgClaimInterestResponse {
+  fromPartial<I extends Exact<DeepPartial<MsgClaimInterestResponse>, I>>(object: I): MsgClaimInterestResponse {
     const message = createBaseMsgClaimInterestResponse();
+    message.amount = object.amount ?? "";
     return message;
   },
 };
@@ -1205,6 +1245,218 @@ export const MsgWithdrawPrincipalResponse = {
   },
 };
 
+function createBaseMsgSubmitWithdrawProposal(): MsgSubmitWithdrawProposal {
+  return { creator: "", poolIndex: "" };
+}
+
+export const MsgSubmitWithdrawProposal = {
+  encode(message: MsgSubmitWithdrawProposal, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSubmitWithdrawProposal {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSubmitWithdrawProposal();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgSubmitWithdrawProposal {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+    };
+  },
+
+  toJSON(message: MsgSubmitWithdrawProposal): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgSubmitWithdrawProposal>, I>>(object: I): MsgSubmitWithdrawProposal {
+    const message = createBaseMsgSubmitWithdrawProposal();
+    message.creator = object.creator ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgSubmitWithdrawProposalResponse(): MsgSubmitWithdrawProposalResponse {
+  return { operationResult: false };
+}
+
+export const MsgSubmitWithdrawProposalResponse = {
+  encode(message: MsgSubmitWithdrawProposalResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.operationResult === true) {
+      writer.uint32(8).bool(message.operationResult);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSubmitWithdrawProposalResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgSubmitWithdrawProposalResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.operationResult = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgSubmitWithdrawProposalResponse {
+    return { operationResult: isSet(object.operationResult) ? Boolean(object.operationResult) : false };
+  },
+
+  toJSON(message: MsgSubmitWithdrawProposalResponse): unknown {
+    const obj: any = {};
+    message.operationResult !== undefined && (obj.operationResult = message.operationResult);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgSubmitWithdrawProposalResponse>, I>>(
+    object: I,
+  ): MsgSubmitWithdrawProposalResponse {
+    const message = createBaseMsgSubmitWithdrawProposalResponse();
+    message.operationResult = object.operationResult ?? false;
+    return message;
+  },
+};
+
+function createBaseMsgTransferOwnership(): MsgTransferOwnership {
+  return { creator: "", poolIndex: "" };
+}
+
+export const MsgTransferOwnership = {
+  encode(message: MsgTransferOwnership, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.poolIndex !== "") {
+      writer.uint32(18).string(message.poolIndex);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgTransferOwnership {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgTransferOwnership();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.poolIndex = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgTransferOwnership {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      poolIndex: isSet(object.poolIndex) ? String(object.poolIndex) : "",
+    };
+  },
+
+  toJSON(message: MsgTransferOwnership): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.poolIndex !== undefined && (obj.poolIndex = message.poolIndex);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgTransferOwnership>, I>>(object: I): MsgTransferOwnership {
+    const message = createBaseMsgTransferOwnership();
+    message.creator = object.creator ?? "";
+    message.poolIndex = object.poolIndex ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgTransferOwnershipResponse(): MsgTransferOwnershipResponse {
+  return { operationResult: false };
+}
+
+export const MsgTransferOwnershipResponse = {
+  encode(message: MsgTransferOwnershipResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.operationResult === true) {
+      writer.uint32(8).bool(message.operationResult);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgTransferOwnershipResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgTransferOwnershipResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.operationResult = reader.bool();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgTransferOwnershipResponse {
+    return { operationResult: isSet(object.operationResult) ? Boolean(object.operationResult) : false };
+  },
+
+  toJSON(message: MsgTransferOwnershipResponse): unknown {
+    const obj: any = {};
+    message.operationResult !== undefined && (obj.operationResult = message.operationResult);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgTransferOwnershipResponse>, I>>(object: I): MsgTransferOwnershipResponse {
+    const message = createBaseMsgTransferOwnershipResponse();
+    message.operationResult = object.operationResult ?? false;
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse>;
@@ -1218,6 +1470,8 @@ export interface Msg {
   ActivePool(request: MsgActivePool): Promise<MsgActivePoolResponse>;
   PayPrincipal(request: MsgPayPrincipal): Promise<MsgPayPrincipalResponse>;
   WithdrawPrincipal(request: MsgWithdrawPrincipal): Promise<MsgWithdrawPrincipalResponse>;
+  SubmitWithdrawProposal(request: MsgSubmitWithdrawProposal): Promise<MsgSubmitWithdrawProposalResponse>;
+  TransferOwnership(request: MsgTransferOwnership): Promise<MsgTransferOwnershipResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -1234,6 +1488,8 @@ export class MsgClientImpl implements Msg {
     this.ActivePool = this.ActivePool.bind(this);
     this.PayPrincipal = this.PayPrincipal.bind(this);
     this.WithdrawPrincipal = this.WithdrawPrincipal.bind(this);
+    this.SubmitWithdrawProposal = this.SubmitWithdrawProposal.bind(this);
+    this.TransferOwnership = this.TransferOwnership.bind(this);
   }
   CreatePool(request: MsgCreatePool): Promise<MsgCreatePoolResponse> {
     const data = MsgCreatePool.encode(request).finish();
@@ -1293,6 +1549,18 @@ export class MsgClientImpl implements Msg {
     const data = MsgWithdrawPrincipal.encode(request).finish();
     const promise = this.rpc.request("joltify.spv.Msg", "WithdrawPrincipal", data);
     return promise.then((data) => MsgWithdrawPrincipalResponse.decode(new _m0.Reader(data)));
+  }
+
+  SubmitWithdrawProposal(request: MsgSubmitWithdrawProposal): Promise<MsgSubmitWithdrawProposalResponse> {
+    const data = MsgSubmitWithdrawProposal.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Msg", "SubmitWithdrawProposal", data);
+    return promise.then((data) => MsgSubmitWithdrawProposalResponse.decode(new _m0.Reader(data)));
+  }
+
+  TransferOwnership(request: MsgTransferOwnership): Promise<MsgTransferOwnershipResponse> {
+    const data = MsgTransferOwnership.encode(request).finish();
+    const promise = this.rpc.request("joltify.spv.Msg", "TransferOwnership", data);
+    return promise.then((data) => MsgTransferOwnershipResponse.decode(new _m0.Reader(data)));
   }
 }
 

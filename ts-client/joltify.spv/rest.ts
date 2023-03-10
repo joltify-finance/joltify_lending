@@ -9,6 +9,14 @@
  * ---------------------------------------------------------------
  */
 
+export enum DepositorInfoDEPOSITTYPE {
+  WithdrawProposal = "withdraw_proposal",
+  TransferRequest = "transfer_request",
+  DepositClose = "deposit_close",
+  Unset = "unset",
+  Processed = "processed",
+}
+
 export enum PoolInfoPOOLSTATUS {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
@@ -64,6 +72,7 @@ export interface SpvDepositorInfo {
    */
   incentive_amount?: V1Beta1Coin;
   linkedNFT?: string[];
+  deposit_type?: DepositorInfoDEPOSITTYPE;
 }
 
 export type SpvMsgActivePoolResponse = object;
@@ -72,12 +81,16 @@ export interface SpvMsgAddInvestorsResponse {
   operationResult?: boolean;
 }
 
-export type SpvMsgBorrowResponse = object;
+export interface SpvMsgBorrowResponse {
+  borrow_amount?: string;
+}
 
-export type SpvMsgClaimInterestResponse = object;
+export interface SpvMsgClaimInterestResponse {
+  amount?: string;
+}
 
 export interface SpvMsgCreatePoolResponse {
-  poolIndex?: string;
+  poolIndex?: string[];
 }
 
 export type SpvMsgDepositResponse = object;
@@ -85,6 +98,14 @@ export type SpvMsgDepositResponse = object;
 export type SpvMsgPayPrincipalResponse = object;
 
 export type SpvMsgRepayInterestResponse = object;
+
+export interface SpvMsgSubmitWithdrawProposalResponse {
+  operationResult?: boolean;
+}
+
+export interface SpvMsgTransferOwnershipResponse {
+  operationResult?: boolean;
+}
 
 export type SpvMsgUpdatePoolResponse = object;
 
@@ -175,6 +196,19 @@ export interface SpvPoolInfo {
    * signatures required by gogoproto.
    */
   escrow_principal_amount?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  withdraw_proposal_amount?: V1Beta1Coin;
+
+  /** @format date-time */
+  project_due_time?: string;
+  withdraw_accounts?: string[];
+  transfer_accounts?: string[];
 }
 
 export interface SpvQueryAllowedPoolsResponse {
@@ -299,7 +333,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
@@ -441,11 +476,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
-   * @name QueryWithdrawalPrincipal
+   * @name QuerywithdrawalPrincipal
    * @summary Queries a list of withdrawalPrincipal items.
    * @request GET:/joltify-finance/joltify_lending/spv/withdrawal_principal/{poolIndex}
    */
-  queryWithdrawalPrincipal = (poolIndex: string, query?: { walletAddress?: string }, params: RequestParams = {}) =>
+  querywithdrawalPrincipal = (poolIndex: string, query?: { walletAddress?: string }, params: RequestParams = {}) =>
     this.request<SpvQuerywithdrawalPrincipalResponse, RpcStatus>({
       path: `/joltify-finance/joltify_lending/spv/withdrawal_principal/${poolIndex}`,
       method: "GET",
@@ -476,13 +511,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryDepositor
-   * @request GET:/joltify/spv/depositor/{walletAddress}
+   * @request GET:/joltify/spv/depositor/{walletAddress}/{depositPoolIndex}
    */
-  queryDepositor = (walletAddress: string, query?: { depositPoolIndex?: string }, params: RequestParams = {}) =>
+  queryDepositor = (walletAddress: string, depositPoolIndex: string, params: RequestParams = {}) =>
     this.request<SpvQueryDepositorResponse, RpcStatus>({
-      path: `/joltify/spv/depositor/${walletAddress}`,
+      path: `/joltify/spv/depositor/${walletAddress}/${depositPoolIndex}`,
       method: "GET",
-      query: query,
       format: "json",
       ...params,
     });
@@ -523,22 +557,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
   queryOutstandingInterest = (wallet: string, poolIndex: string, params: RequestParams = {}) =>
     this.request<SpvQueryOutstandingInterestResponse, RpcStatus>({
       path: `/joltify/spv/outstanding_interest/${wallet}/${poolIndex}`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
-  /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryParams
-   * @summary Parameters queries the parameters of the module.
-   * @request GET:/joltify/spv/params
-   */
-  queryParams = (params: RequestParams = {}) =>
-    this.request<SpvQueryParamsResponse, RpcStatus>({
-      path: `/joltify/spv/params`,
       method: "GET",
       format: "json",
       ...params,

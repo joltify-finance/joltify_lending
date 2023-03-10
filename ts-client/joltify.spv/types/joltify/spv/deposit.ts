@@ -12,6 +12,58 @@ export interface DepositorInfo {
   withdrawalAmount: Coin | undefined;
   incentiveAmount: Coin | undefined;
   linkedNFT: string[];
+  depositType: DepositorInfo_DEPOSITTYPE;
+}
+
+export enum DepositorInfo_DEPOSITTYPE {
+  withdraw_proposal = 0,
+  transfer_request = 1,
+  deposit_close = 2,
+  unset = 3,
+  processed = 4,
+  UNRECOGNIZED = -1,
+}
+
+export function depositorInfo_DEPOSITTYPEFromJSON(object: any): DepositorInfo_DEPOSITTYPE {
+  switch (object) {
+    case 0:
+    case "withdraw_proposal":
+      return DepositorInfo_DEPOSITTYPE.withdraw_proposal;
+    case 1:
+    case "transfer_request":
+      return DepositorInfo_DEPOSITTYPE.transfer_request;
+    case 2:
+    case "deposit_close":
+      return DepositorInfo_DEPOSITTYPE.deposit_close;
+    case 3:
+    case "unset":
+      return DepositorInfo_DEPOSITTYPE.unset;
+    case 4:
+    case "processed":
+      return DepositorInfo_DEPOSITTYPE.processed;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return DepositorInfo_DEPOSITTYPE.UNRECOGNIZED;
+  }
+}
+
+export function depositorInfo_DEPOSITTYPEToJSON(object: DepositorInfo_DEPOSITTYPE): string {
+  switch (object) {
+    case DepositorInfo_DEPOSITTYPE.withdraw_proposal:
+      return "withdraw_proposal";
+    case DepositorInfo_DEPOSITTYPE.transfer_request:
+      return "transfer_request";
+    case DepositorInfo_DEPOSITTYPE.deposit_close:
+      return "deposit_close";
+    case DepositorInfo_DEPOSITTYPE.unset:
+      return "unset";
+    case DepositorInfo_DEPOSITTYPE.processed:
+      return "processed";
+    case DepositorInfo_DEPOSITTYPE.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
 }
 
 function createBaseDepositorInfo(): DepositorInfo {
@@ -23,6 +75,7 @@ function createBaseDepositorInfo(): DepositorInfo {
     withdrawalAmount: undefined,
     incentiveAmount: undefined,
     linkedNFT: [],
+    depositType: 0,
   };
 }
 
@@ -48,6 +101,9 @@ export const DepositorInfo = {
     }
     for (const v of message.linkedNFT) {
       writer.uint32(58).string(v!);
+    }
+    if (message.depositType !== 0) {
+      writer.uint32(64).int32(message.depositType);
     }
     return writer;
   },
@@ -80,6 +136,9 @@ export const DepositorInfo = {
         case 7:
           message.linkedNFT.push(reader.string());
           break;
+        case 8:
+          message.depositType = reader.int32() as any;
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -97,6 +156,7 @@ export const DepositorInfo = {
       withdrawalAmount: isSet(object.withdrawalAmount) ? Coin.fromJSON(object.withdrawalAmount) : undefined,
       incentiveAmount: isSet(object.incentiveAmount) ? Coin.fromJSON(object.incentiveAmount) : undefined,
       linkedNFT: Array.isArray(object?.linkedNFT) ? object.linkedNFT.map((e: any) => String(e)) : [],
+      depositType: isSet(object.depositType) ? depositorInfo_DEPOSITTYPEFromJSON(object.depositType) : 0,
     };
   },
 
@@ -119,6 +179,7 @@ export const DepositorInfo = {
     } else {
       obj.linkedNFT = [];
     }
+    message.depositType !== undefined && (obj.depositType = depositorInfo_DEPOSITTYPEToJSON(message.depositType));
     return obj;
   },
 
@@ -137,6 +198,7 @@ export const DepositorInfo = {
       ? Coin.fromPartial(object.incentiveAmount)
       : undefined;
     message.linkedNFT = object.linkedNFT?.map((e) => e) || [];
+    message.depositType = object.depositType ?? 0;
     return message;
   },
 };
