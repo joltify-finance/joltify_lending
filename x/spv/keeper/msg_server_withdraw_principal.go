@@ -58,11 +58,6 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		totalWithdraw = depositor.GetWithdrawalAmount()
 	}
 
-	depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
-	if err != nil {
-		return nil, errors.New("withdraw amount too large")
-	}
-
 	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
 		err = k.handlerPoolClose(ctx, poolInfo, depositor)
 		if err != nil {
@@ -92,6 +87,10 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return &types.MsgWithdrawPrincipalResponse{}, nil
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
 		poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
+		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
+		if err != nil {
+			return nil, errors.New("withdraw amount too large")
+		}
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(totalWithdraw))
 		if err != nil {
 			return nil, err

@@ -362,6 +362,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	totalPaidAmount = totalPaidAmount.Add(depositor.WithdrawalAmount.Amount)
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
+
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
