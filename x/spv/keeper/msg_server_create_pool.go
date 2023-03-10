@@ -2,16 +2,15 @@ package keeper
 
 import (
 	"context"
+	coserrors "cosmossdk.io/errors"
 	"errors"
 	"fmt"
-	"strconv"
-
-	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
+	"strconv"
 )
 
 func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {
@@ -149,6 +148,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			PoolStatus:             types.PoolInfo_PREPARE,
 			PoolType:               enuPoolType,
 			ProjectLength:          targetProject.ProjectLength,
+			LastPaymentTime:        ctx.BlockTime(),
 			BorrowedAmount:         sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			BorrowableAmount:       sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			TotalAmount:            sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),

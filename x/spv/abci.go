@@ -14,7 +14,6 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 	// we firstly handle the interest
 
 	k.IteratePool(ctx, func(poolInfo types.PoolInfo) (stop bool) {
-
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		if dueTime.Before(currentTime) {
 			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE {

@@ -10,6 +10,23 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
+func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) error {
+	amount, err := k.cleanupDepositor(ctx, poolInfo, depositor)
+	if err != nil {
+		return err
+	}
+	tokenSend := sdk.NewCoin(depositor.LockedAmount.Denom, amount)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeWithdrawPrincipal,
+			sdk.NewAttribute(types.AttributeCreator, depositor.DepositorAddress.String()),
+			sdk.NewAttribute(types.AttributeAmount, amount.String()),
+		),
+	)
+	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(tokenSend))
+}
+
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -47,38 +64,51 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 	}
 
 	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
-		amount := k.cleanupDepositor(ctx, poolInfo, depositor)
-		tokenSend := sdk.NewCoin(msg.Token.Denom, amount)
-		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(tokenSend))
+		err = k.handlerPoolClose(ctx, poolInfo, depositor)
 		if err != nil {
 			return nil, err
 		}
 		return &types.MsgWithdrawPrincipalResponse{}, nil
 	}
 
-	// if withdraw >= withdrawable
+	switch depositor.DepositType {
+	case types.DepositorInfo_deposit_close:
+		depositor.DepositType = types.DepositorInfo_deactive
+		k.SetDepositor(ctx, depositor)
+		amountToSend := depositor.WithdrawalAmount
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(amountToSend))
+		if err != nil {
+			return nil, err
+		}
+		k.SetPool(ctx, poolInfo)
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeWithdrawPrincipal,
+				sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+				sdk.NewAttribute(types.AttributeAmount, amountToSend.String()),
+			),
+		)
 
-	if depositor.DepositType == types.DepositorInfo_deposit_close {
-		k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
-	}
-
-	if depositor.DepositType == types.DepositorInfo_unset {
+		return &types.MsgWithdrawPrincipalResponse{}, nil
+	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
 		poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
-	}
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(totalWithdraw))
+		if err != nil {
+			return nil, err
+		}
 
-	k.SetDepositor(ctx, depositor)
-	k.SetPool(ctx, poolInfo)
-	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(totalWithdraw))
-	if err != nil {
-		return nil, err
-	}
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeWithdrawPrincipal,
-			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
-			sdk.NewAttribute(types.AttributeAmount, msg.Token.String()),
-		),
-	)
+		k.SetDepositor(ctx, depositor)
+		k.SetPool(ctx, poolInfo)
 
-	return &types.MsgWithdrawPrincipalResponse{}, nil
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeWithdrawPrincipal,
+				sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+				sdk.NewAttribute(types.AttributeAmount, totalWithdraw.String()),
+			),
+		)
+		return &types.MsgWithdrawPrincipalResponse{}, nil
+	default:
+		return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(types.ErrDeposit, "deposit type is %v", depositor.DepositType)
+	}
 }

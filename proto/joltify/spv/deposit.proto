@@ -38,6 +38,7 @@ message DepositorInfo {
     deposit_close = 2;
     unset  = 3;
     processed = 4;
+    deactive = 5;
   }
   DEPOSITTYPE deposit_type = 8;
 

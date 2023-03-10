@@ -198,12 +198,6 @@ func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sd
 	return depositor, true
 }
 
-func (k Keeper) DelDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+poolIndex))
-	depositorPoolStore.Delete(walletAddress.Bytes())
-	return
-}
-
 // GetPoolDepositedWallets gets the deposited wallets
 //func (k Keeper) GetPoolDepositedWallets(ctx sdk.Context, index string) (deposited types.PoolDepositedInvestors, found bool) {
 //	depositedPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDeposited))

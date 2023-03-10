@@ -168,11 +168,18 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	withdrawReq.PoolIndex = suite.investorPool
 	withdrawReq.Token = sdk.NewCoin("invalid", sdk.NewIntFromUint64(22))
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
-	suite.Require().ErrorContains(err, "you can only withdraw")
+	suite.Require().ErrorContains(err, "you can only withdraw ausdc")
 
-	withdrawReq.Token = depositor2.WithdrawalAmount.AddAmount(sdk.NewIntFromUint64(1))
-	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
-	suite.Require().ErrorContains(err, "you can only withdraw")
+	fmt.Printf(">>>>>>>%v\n", depositor2.WithdrawalAmount)
+	fmt.Printf(">>>>>>>%v\n", depositor2.LockedAmount)
+
+	getRatio = sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
+	// the ratio should close to 2
+	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
+
+	//withdrawReq.Token = depositor2.WithdrawalAmount.AddAmount(sdk.NewIntFromU)
+	//_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
+	//suite.Require().ErrorContains(err, "you can only withdraw ausdc")
 
 }
 

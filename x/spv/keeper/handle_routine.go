@@ -57,6 +57,9 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	var err error
 	var depositors []*types.DepositorInfo
 	totalLockedAmount := sdkmath.ZeroInt()
+	if len(poolInfo.TransferAccounts) == 0 {
+		return
+	}
 	for _, el := range poolInfo.TransferAccounts {
 		d, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
@@ -69,7 +72,6 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	// borrowable is larger than the total required, so we can return the money to these investors
 	if poolInfo.BorrowableAmount.Amount.GTE(totalLockedAmount) {
 		for _, el := range depositors {
-
 			interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.nftKeeper, true)
 			if err != nil {
 				panic(err)
@@ -192,6 +194,10 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	token := poolInfo.EscrowPrincipalAmount
 	if token.IsLT(poolInfo.WithdrawProposalAmount) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
+		return
+	}
+
+	if len(withdrawAccounts) == 0 {
 		return
 	}
 

@@ -342,7 +342,7 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	return errGlobal
 }
 
-func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) sdkmath.Int {
+func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
 
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
@@ -352,22 +352,32 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	err = k.processEachWithdrawReq(ctx, depositor)
 	if err != nil {
 		ctx.Logger().Error("fail to pay partial principal", err.Error())
-		panic(err)
+		return sdk.ZeroInt(), err
 	}
 
 	totalPaidAmount := depositor.LockedAmount.Amount.Add(interest)
+	totalPaidAmount = totalPaidAmount.Add(depositor.WithdrawalAmount.Amount)
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
 	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+	if poolInfo.BorrowableAmount.IsZero() {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		k.DelPool(ctx, poolInfo.Index)
 		k.SetHistoryPool(ctx, poolInfo)
+		// we transfer the leftover back to spv
+		totalReturn := poolInfo.EscrowPrincipalAmount.Add(poolInfo.EscrowInterestAmount)
+
+		err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalReturn))
+		if err != nil {
+			return totalPaidAmount, err
+		}
+
+	} else {
+		k.SetPool(ctx, poolInfo)
 	}
-	//depositor.LinkedNFT = []string{}
-	//depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(depositor.LockedAmount)
-	//depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
-	//depositor.DepositType = types.DepositorInfo_deposit_close
-	k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
-	k.SetPool(ctx, poolInfo)
-	return totalPaidAmount
+	depositor.DepositType = types.DepositorInfo_deactive
+	k.SetDepositor(ctx, depositor)
+	return totalPaidAmount, nil
 }
