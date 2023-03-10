@@ -24,6 +24,10 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 		return &types.MsgTransferOwnershipResponse{}, types.ErrDepositorNotFound
 	}
 
+	if len(d.LinkedNFT) == 0 {
+		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(types.ErrDepositorNotFound, "no borrow nft to transfer")
+	}
+
 	if d.DepositType != types.DepositorInfo_unset {
 		return &types.MsgTransferOwnershipResponse{}, fmt.Errorf("you have submitted the %v request", d.DepositType)
 	}

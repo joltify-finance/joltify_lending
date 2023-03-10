@@ -175,7 +175,7 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string) er
 }
 
 func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo) error {
-	for _, el := range depositor.LinkedNFT[1:] {
+	for _, el := range depositor.LinkedNFT {
 		ids := strings.Split(el, ":")
 		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1])
 		if err != nil {

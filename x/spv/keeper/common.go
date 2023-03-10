@@ -382,6 +382,9 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		k.SetPool(ctx, poolInfo)
 	}
 	depositor.DepositType = types.DepositorInfo_deactive
+	depositor.LinkedNFT = []string{}
+	depositor.WithdrawalAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
 	k.SetDepositor(ctx, depositor)
 	return totalPaidAmount, nil
 }
