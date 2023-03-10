@@ -239,11 +239,11 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 200))
 
-	withdrawreq1 := types.MsgWithdrawPrincipal{suite.investors[0], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}
+	withdrawreq1 := types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}
 
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawreq1)
 	suite.Require().NoError(err)
-	
+
 }
 
 func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {

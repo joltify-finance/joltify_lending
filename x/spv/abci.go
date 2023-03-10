@@ -30,6 +30,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 			if poolInfo.PoolStatus == types.PoolInfo_CLOSING {
 				k.HandlePrincipalPayment(ctx, &poolInfo)
 			}
+			k.SetPool(ctx, poolInfo)
 		}
 		return false
 	})

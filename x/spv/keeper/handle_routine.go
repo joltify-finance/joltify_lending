@@ -61,6 +61,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		depositors = append(depositors, &d)
 		totalLockedAmount = totalLockedAmount.Add(d.LockedAmount.Amount)
 	}
+	poolInfo.TransferAccounts = []sdk.AccAddress{}
 
 	// borrowable is larger than the total required, so we can return the money to these investors
 	if poolInfo.BorrowableAmount.Amount.GTE(totalLockedAmount) {
@@ -118,6 +119,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	// now we process the partial transfer
 	for i := range depositors {
 		depositors[i].DepositType = types.DepositorInfo_processed
+		k.SetDepositor(ctx, *depositors[i])
 	}
 
 	err = k.doBorrow(ctx, poolInfo, poolInfo.BorrowableAmount, false, nil)
