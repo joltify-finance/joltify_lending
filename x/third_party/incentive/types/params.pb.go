@@ -6,11 +6,11 @@ package types
 import (
 	fmt "fmt"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
-	types1 "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
-	_ "github.com/gogo/protobuf/types"
 	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -31,11 +31,11 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // RewardPeriod stores the state of an ongoing reward
 type RewardPeriod struct {
-	Active           bool        `protobuf:"varint,1,opt,name=active,proto3" json:"active,omitempty"`
-	CollateralType   string      `protobuf:"bytes,2,opt,name=collateral_type,json=collateralType,proto3" json:"collateral_type,omitempty"`
-	Start            time.Time   `protobuf:"bytes,3,opt,name=start,proto3,stdtime" json:"start"`
-	End              time.Time   `protobuf:"bytes,4,opt,name=end,proto3,stdtime" json:"end"`
-	RewardsPerSecond types1.Coin `protobuf:"bytes,5,opt,name=rewards_per_second,json=rewardsPerSecond,proto3" json:"rewards_per_second"`
+	Active           bool       `protobuf:"varint,1,opt,name=active,proto3" json:"active,omitempty"`
+	CollateralType   string     `protobuf:"bytes,2,opt,name=collateral_type,json=collateralType,proto3" json:"collateral_type,omitempty"`
+	Start            time.Time  `protobuf:"bytes,3,opt,name=start,proto3,stdtime" json:"start"`
+	End              time.Time  `protobuf:"bytes,4,opt,name=end,proto3,stdtime" json:"end"`
+	RewardsPerSecond types.Coin `protobuf:"bytes,5,opt,name=rewards_per_second,json=rewardsPerSecond,proto3" json:"rewards_per_second"`
 }
 
 func (m *RewardPeriod) Reset()         { *m = RewardPeriod{} }
@@ -1189,7 +1189,7 @@ func (m *MultiRewardPeriod) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.RewardsPerSecond = append(m.RewardsPerSecond, types1.Coin{})
+			m.RewardsPerSecond = append(m.RewardsPerSecond, types.Coin{})
 			if err := m.RewardsPerSecond[len(m.RewardsPerSecond)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
