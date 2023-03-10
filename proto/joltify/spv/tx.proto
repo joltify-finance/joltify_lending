@@ -133,6 +133,7 @@ message MsgWithdrawPrincipal {
 }
 
 message MsgWithdrawPrincipalResponse {
+  string amount=1;
 }
 
 

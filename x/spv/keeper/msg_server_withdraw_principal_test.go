@@ -195,8 +195,8 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
-	//creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
-	//suite.Require().NoError(err)
+	creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
+	suite.Require().NoError(err)
 	//creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
 	//suite.Require().NoError(err)
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
@@ -210,7 +210,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 		PoolIndex: suite.investorPool,
 		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
 
-	_, err := suite.app.Deposit(suite.ctx, msgDepositUser1)
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
@@ -240,10 +240,26 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 200))
 
 	withdrawreq1 := types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}
-
-	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawreq1)
+	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &withdrawreq1)
 	suite.Require().NoError(err)
 
+	depositor, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().NoError(err)
+	suite.Require().True(sdk.ZeroInt().Equal(depositor.WithdrawalAmount.Add(depositor.LockedAmount).Amount))
+	suite.Require().EqualValues(depositor.DepositType, types.DepositorInfo_deactive)
+	suite.Require().Len(depositor.LinkedNFT, 0)
+	suite.Require().EqualValues(resp.Amount, "400000ausdc")
+
+	withdrawreq1 = types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}
+	resp, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawreq1)
+	suite.Require().NoError(err)
+	suite.Require().True(sdk.ZeroInt().Equal(depositor.WithdrawalAmount.Add(depositor.LockedAmount).Amount))
+	suite.Require().EqualValues(depositor.DepositType, types.DepositorInfo_deactive)
+	suite.Require().Len(depositor.LinkedNFT, 0)
+	suite.Require().EqualValues(resp.Amount, "200000ausdc")
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().False(found)
 }
 
 func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {

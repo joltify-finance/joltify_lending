@@ -10,10 +10,10 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) error {
+func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdk.Coin, error) {
 	amount, err := k.cleanupDepositor(ctx, poolInfo, depositor)
 	if err != nil {
-		return err
+		return sdk.Coin{}, err
 	}
 	tokenSend := sdk.NewCoin(depositor.LockedAmount.Denom, amount)
 
@@ -24,7 +24,8 @@ func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depos
 			sdk.NewAttribute(types.AttributeAmount, amount.String()),
 		),
 	)
-	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(tokenSend))
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(tokenSend))
+	return tokenSend, err
 }
 
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
@@ -59,11 +60,11 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 	}
 
 	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
-		err = k.handlerPoolClose(ctx, poolInfo, depositor)
+		tokenSend, err := k.handlerPoolClose(ctx, poolInfo, depositor)
 		if err != nil {
 			return nil, err
 		}
-		return &types.MsgWithdrawPrincipalResponse{}, nil
+		return &types.MsgWithdrawPrincipalResponse{Amount: tokenSend.String()}, nil
 	}
 
 	switch depositor.DepositType {
@@ -84,7 +85,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 			),
 		)
 
-		return &types.MsgWithdrawPrincipalResponse{}, nil
+		return &types.MsgWithdrawPrincipalResponse{Amount: amountToSend.String()}, nil
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
 		poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
 		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
@@ -106,7 +107,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 				sdk.NewAttribute(types.AttributeAmount, totalWithdraw.String()),
 			),
 		)
-		return &types.MsgWithdrawPrincipalResponse{}, nil
+		return &types.MsgWithdrawPrincipalResponse{Amount: totalWithdraw.String()}, nil
 	default:
 		return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(types.ErrDeposit, "deposit type is %v", depositor.DepositType)
 	}

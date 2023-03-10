@@ -122,6 +122,10 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		k.SetDepositor(ctx, *depositors[i])
 	}
 
+	if poolInfo.BorrowedAmount.IsZero() {
+		ctx.Logger().Info("zero borrowable money to borrow from")
+		return
+	}
 	err = k.doBorrow(ctx, poolInfo, poolInfo.BorrowableAmount, false, nil)
 	if err != nil {
 		panic(err)

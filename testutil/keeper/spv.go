@@ -128,7 +128,9 @@ type mockNFTKeeper struct {
 
 func (m mockNFTKeeper) Burn(ctx sdk.Context, classID string, nftID string) error {
 	//TODO implement me
-	panic("implement me")
+	key := fmt.Sprintf("%v:%v", classID, nftID)
+	delete(m.nftsWithClassID, key)
+	return nil
 }
 
 func (m mockNFTKeeper) Transfer(ctx sdk.Context, classID string, nftID string, receiver sdk.AccAddress) error {
