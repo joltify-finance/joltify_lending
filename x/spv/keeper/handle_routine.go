@@ -83,7 +83,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		}
 
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-		err := k.doBorrow(ctx, *poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, totalLockedAmount), false, nil)
+		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, totalLockedAmount), false, nil)
 		if err != nil {
 			panic(err)
 		}
@@ -110,7 +110,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	borrowedFromPreviousInvestors := totalLockedAmount.Sub(poolInfo.BorrowableAmount.Amount)
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.AddAmount(borrowedFromPreviousInvestors)
-	err = k.doBorrow(ctx, *poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, borrowedFromPreviousInvestors), false, depositors)
+	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, borrowedFromPreviousInvestors), false, depositors)
 	if err != nil {
 		panic(err)
 	}
@@ -120,7 +120,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		depositors[i].DepositType = types.DepositorInfo_processed
 	}
 
-	err = k.doBorrow(ctx, *poolInfo, poolInfo.BorrowableAmount, false, nil)
+	err = k.doBorrow(ctx, poolInfo, poolInfo.BorrowableAmount, false, nil)
 	if err != nil {
 		panic(err)
 	}

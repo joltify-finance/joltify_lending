@@ -171,7 +171,7 @@ func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types
 }
 */
 
-func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo) error {
+func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo) error {
 	if tokenAmount.IsZero() {
 		return nil
 	}
@@ -227,7 +227,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount s
 		poolInfo.ProjectDueTime = ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.ProjectLength))
 	}
 
-	err = k.processBorrow(ctx, &poolInfo, currentBorrowClass, tokenAmount, depositors)
+	err = k.processBorrow(ctx, poolInfo, currentBorrowClass, tokenAmount, depositors)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount s
 	// we finally update the pool info
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
 	poolInfo.LastPaymentTime = paymentTime
-	k.SetPool(ctx, poolInfo)
+	k.SetPool(ctx, *poolInfo)
 
 	if needBankTransfer {
 		// we transfer the fund from the module to the spv
