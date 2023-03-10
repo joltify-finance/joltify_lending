@@ -125,6 +125,10 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
 	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
 
+	getRatio := sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
+	// the ratio should close to 2
+	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
+
 	// now we borrow more money
 	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.1e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
@@ -147,6 +151,28 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
 	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
 	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
+
+	getRatio = sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
+	// the ratio should close to 2
+	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
+
+	// now we run the withdrawal
+	withdrawReq := types.MsgWithdrawPrincipal{Creator: "invalid"}
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
+	suite.Require().ErrorContains(err, "invalid address")
+
+	withdrawReq = types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: "invalid"}
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
+	suite.Require().ErrorContains(err, "depositor not found for pool")
+
+	withdrawReq.PoolIndex = suite.investorPool
+	withdrawReq.Token = sdk.NewCoin("invalid", sdk.NewIntFromUint64(22))
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
+	suite.Require().ErrorContains(err, "you can only withdraw")
+
+	withdrawReq.Token = depositor2.WithdrawalAmount.AddAmount(sdk.NewIntFromUint64(1))
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
+	suite.Require().ErrorContains(err, "you can only withdraw")
 
 }
 

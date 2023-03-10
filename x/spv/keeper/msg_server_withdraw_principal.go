@@ -27,9 +27,23 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "you can only withdraw %v", depositor.WithdrawalAmount.Denom)
 	}
 
+	if msg.Token.IsZero() {
+		return nil, errors.New("zero amount to withdraw")
+	}
+
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
 		return nil, errors.New("pool cannot be found")
+	}
+
+	totalWithdraw := msg.Token
+	if msg.Token.IsGTE(depositor.GetWithdrawalAmount()) {
+		totalWithdraw = depositor.GetWithdrawalAmount()
+	}
+
+	depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
+	if err != nil {
+		return nil, errors.New("withdraw amount too large")
 	}
 
 	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
@@ -42,18 +56,10 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return &types.MsgWithdrawPrincipalResponse{}, nil
 	}
 
-	totalWithdraw := msg.Token
 	// if withdraw >= withdrawable
-	if msg.Token.IsGTE(depositor.WithdrawalAmount) {
-		totalWithdraw = depositor.WithdrawalAmount
-		if depositor.DepositType == types.DepositorInfo_deposit_close {
-			k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
-		}
-	}
 
-	depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
-	if err != nil {
-		return nil, errors.New("withdraw amount too large")
+	if depositor.DepositType == types.DepositorInfo_deposit_close {
+		k.DelDepositor(ctx, depositor.PoolIndex, depositor.DepositorAddress)
 	}
 
 	if depositor.DepositType == types.DepositorInfo_unset {

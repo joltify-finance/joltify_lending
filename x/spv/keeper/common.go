@@ -15,7 +15,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func seekCorrectPayment(borrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
+func seekCorrectBorrow(borrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
 	var borrowAmount sdk.Coin
 	for _, el := range borrowDetails {
 		if el.TimeStamp.Before(eachPayment.PaymentTime) || el.TimeStamp.Equal(eachPayment.PaymentTime) {
@@ -64,7 +64,7 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 			if eachPayment.PaymentAmount.Amount.IsZero() {
 				continue
 			}
-			classBorrowedAmount := seekCorrectPayment(borrowClassInfo.BorrowDetails, eachPayment)
+			classBorrowedAmount := seekCorrectBorrow(borrowClassInfo.BorrowDetails, eachPayment)
 			paymentAmount := eachPayment.PaymentAmount
 			// todo there may be the case that because of the trucate, the total payment is larger than the interest paid to investors
 			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDecFromInt(interestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()

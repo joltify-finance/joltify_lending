@@ -91,11 +91,31 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().ErrorContains(err, "invalid token demo, want")
 
+	req.PoolIndex = suite.investorPool
+	msgDepositUser1 := &types.MsgDeposit{Creator: suite.investors[1],
+		PoolIndex: suite.investorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))}
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.Require().NoError(err)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	borrow.BorrowAmount = sdk.NewCoin(borrow.BorrowAmount.Denom, sdk.NewInt(1.2e5))
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(211))
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().ErrorContains(err, "you must pay all the principal")
+
 	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	suite.Require().EqualValues(poolInfo.GetEscrowPrincipalAmount().Amount, req.Token.Amount)
 

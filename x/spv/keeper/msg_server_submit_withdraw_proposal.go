@@ -24,12 +24,8 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.GetPoolIndex())
 	}
 
-	if !depositor.DepositorAddress.Equals(investorAddress) {
-		return nil, coserrors.Wrap(types.ErrUnauthorized, "not the depositor")
-	}
-
 	if depositor.DepositType != types.DepositorInfo_unset {
-		return nil, errors.New(" you are in transferring ownership status")
+		return nil, errors.New("you are in the unexpected status")
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
@@ -53,16 +49,6 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 	if currentTime.After(oneMonthBeforeProjectDueDate) {
 		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too late")
 	}
-
-	//totalBorrowedNow, err := calculateTotalPrinciple(ctx, depositor.LinkedNFT, k.nftKeeper)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	//can be negative, we now sync the locked amount and withdraw amount
-	//deltaAmount := depositor.LockedAmount.Amount.Sub(totalBorrowedNow)
-	//depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, totalBorrowedNow)
-	//depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(deltaAmount)
 
 	depositor.DepositType = types.DepositorInfo_withdraw_proposal
 	poolInfo.WithdrawProposalAmount = poolInfo.WithdrawProposalAmount.Add(depositor.LockedAmount)

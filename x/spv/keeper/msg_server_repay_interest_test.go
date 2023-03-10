@@ -15,8 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const oneMonth = 24 * 30 * 3600
-
 func TestMsgRepayInterest(t *testing.T) {
 
 	config := app.SetSDKConfig()
@@ -131,7 +129,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	k.SetPool(ctx, samplePool)
 	err = k.HandleInterest(ctx, &samplePool)
 	require.ErrorContains(t, err, "pay interest too early")
-	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(oneMonth-1)))
+	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth-1)))
 	err = k.HandleInterest(ctx, &samplePool)
 	require.ErrorContains(t, err, "pay interest too early")
 
@@ -153,7 +151,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	paymentTime := borrowInterest.Payments[1].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), interestOneYear.String())
 
 	// at the middle of the month, we borrow
@@ -174,7 +172,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 		panic(err)
 	}
 	paymentTime = borrowInterest.Payments[2].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*2), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*2), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), interestOneYear.String())
 
 	b2 := poolInfo.PoolNFTIds[1]
@@ -205,7 +203,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	}
 
 	paymentTime = borrowInterest.Payments[1].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*2), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*2), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), toInvestors.String())
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 30 * 24 * 3600))
@@ -217,7 +215,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	require.NoError(t, err)
 
 	paymentTime = borrowInterest.Payments[3].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*3), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*3), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[3].PaymentAmount.Amount.String(), interestOneYear.String())
 
 	nclass2, _ := nftKeeper.GetClass(ctx, b2)
@@ -225,7 +223,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	require.NoError(t, err)
 
 	paymentTime = borrowInterest.Payments[2].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*3), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*3), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[2].PaymentAmount.Amount.String(), interestOneYear.String())
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(24*3600*13)))
@@ -253,7 +251,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	}
 
 	paymentTime = borrowInterest.Payments[1].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*4), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*4), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), toInvestors.String())
 
 	nclass2, _ = nftKeeper.GetClass(ctx, b2)
@@ -262,7 +260,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 		panic(err)
 	}
 	paymentTime = borrowInterest.Payments[3].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*4), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*4), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[3].PaymentAmount.Amount.String(), interestOneYear.String())
 
 	nclass1, _ = nftKeeper.GetClass(ctx, b1)
@@ -271,7 +269,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 		panic(err)
 	}
 	paymentTime = borrowInterest.Payments[4].PaymentTime
-	require.EqualValues(t, firstBorrowTime.Add(time.Second*oneMonth*4), paymentTime)
+	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*4), paymentTime)
 	require.EqualValues(t, borrowInterest.Payments[4].PaymentAmount.Amount.String(), interestOneYear.String())
 
 }

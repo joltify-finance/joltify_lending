@@ -17,13 +17,13 @@ func TestSeekCorrectPayment(t *testing.T) {
 		types.BorrowDetail{BorrowedAmount: sdk.NewCoin("demo", sdk.NewIntFromUint64(10000)), TimeStamp: t1},
 	}
 	testPayment := types.PaymentItem{PaymentTime: t1, PaymentAmount: sdk.NewCoin("demo", sdk.NewIntFromUint64(0))}
-	borrowAmount := seekCorrectPayment(borrowDetails, &testPayment)
+	borrowAmount := seekCorrectBorrow(borrowDetails, &testPayment)
 	require.True(t, borrowAmount.IsEqual(sdk.NewCoin("demo", sdk.NewIntFromUint64(10000))))
 
 	t2 := t1.Add(time.Hour)
 	testPayment.PaymentTime = t2
 
-	borrowAmount = seekCorrectPayment(borrowDetails, &testPayment)
+	borrowAmount = seekCorrectBorrow(borrowDetails, &testPayment)
 	require.True(t, borrowAmount.IsEqual(sdk.NewCoin("demo", sdk.NewIntFromUint64(10000))))
 
 	t3 := t2.Add(time.Hour)
@@ -31,25 +31,25 @@ func TestSeekCorrectPayment(t *testing.T) {
 
 	borrowDetails = append(borrowDetails, types.BorrowDetail{BorrowedAmount: sdk.NewCoin("demo", sdk.NewIntFromUint64(12000)), TimeStamp: t3.Add(time.Hour)})
 
-	borrowAmount = seekCorrectPayment(borrowDetails, &testPayment)
+	borrowAmount = seekCorrectBorrow(borrowDetails, &testPayment)
 	require.True(t, borrowAmount.IsEqual(sdk.NewCoin("demo", sdk.NewIntFromUint64(10000))))
 
 	baseTime := testPayment.GetPaymentTime()
 	for i := 0; i < 60; i++ {
 		testPayment.PaymentTime = baseTime.Add(time.Minute * time.Duration(i))
-		borrowAmount = seekCorrectPayment(borrowDetails, &testPayment)
+		borrowAmount = seekCorrectBorrow(borrowDetails, &testPayment)
 		require.True(t, borrowAmount.IsEqual(sdk.NewCoin("demo", sdk.NewIntFromUint64(10000))))
 	}
 
 	for i := 61; i < 120; i++ {
 		testPayment.PaymentTime = baseTime.Add(time.Minute * time.Duration(i))
-		borrowAmount = seekCorrectPayment(borrowDetails, &testPayment)
+		borrowAmount = seekCorrectBorrow(borrowDetails, &testPayment)
 		require.True(t, borrowAmount.IsEqual(sdk.NewCoin("demo", sdk.NewIntFromUint64(11000))))
 	}
 
 	for i := 121; i < 200; i++ {
 		testPayment.PaymentTime = baseTime.Add(time.Minute * time.Duration(i))
-		borrowAmount = seekCorrectPayment(borrowDetails, &testPayment)
+		borrowAmount = seekCorrectBorrow(borrowDetails, &testPayment)
 		require.True(t, borrowAmount.IsEqual(sdk.NewCoin("demo", sdk.NewIntFromUint64(12000))))
 	}
 
