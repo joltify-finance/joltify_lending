@@ -123,6 +123,10 @@ func local_request_Query_QueryPool_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
+var (
+	filter_Query_Depositor_0 = &utilities.DoubleArray{Encoding: map[string]int{"walletAddress": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+)
+
 func request_Query_Depositor_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq QueryDepositorRequest
 	var metadata runtime.ServerMetadata
@@ -145,15 +149,11 @@ func request_Query_Depositor_0(ctx context.Context, marshaler runtime.Marshaler,
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "walletAddress", err)
 	}
 
-	val, ok = pathParams["depositPoolIndex"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "depositPoolIndex")
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-
-	protoReq.DepositPoolIndex, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "depositPoolIndex", err)
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Query_Depositor_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := client.Depositor(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -183,15 +183,11 @@ func local_request_Query_Depositor_0(ctx context.Context, marshaler runtime.Mars
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "walletAddress", err)
 	}
 
-	val, ok = pathParams["depositPoolIndex"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "depositPoolIndex")
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-
-	protoReq.DepositPoolIndex, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "depositPoolIndex", err)
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Query_Depositor_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
 	msg, err := server.Depositor(ctx, &protoReq)
@@ -829,7 +825,7 @@ var (
 
 	pattern_Query_QueryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spv", "query_pool", "poolIndex"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Depositor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"joltify", "spv", "depositor", "walletAddress", "depositPoolIndex"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Depositor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spv", "depositor", "walletAddress"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_AllowedPools_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spve", "allowed_pools", "walletAddress"}, "", runtime.AssumeColonVerbOpt(false)))
 

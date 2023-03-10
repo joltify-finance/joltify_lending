@@ -362,6 +362,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(depositor.WithdrawalAmount)
 	if poolInfo.BorrowableAmount.IsZero() {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		k.DelPool(ctx, poolInfo.Index)

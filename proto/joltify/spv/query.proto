@@ -30,7 +30,7 @@ service Query {
   }
 
   rpc Depositor(QueryDepositorRequest) returns (QueryDepositorResponse) {
-    option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}/{depositPoolIndex}";
+    option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}";
   }
 
   // Queries a list of AllowedPools items.

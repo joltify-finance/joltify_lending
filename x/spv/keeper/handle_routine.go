@@ -44,13 +44,6 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	return nil
 }
 
-// we calculate the total money locked in each nft and then, we "return" it back to the pool, and burn the nft
-// we will call "borrow" function to allow all the investors to automatically get the new nft with the correct
-// locked money and withdrawable amount
-func (k Keeper) updateOwnersNFT(ctx sdk.Context, poolInfo *types.PoolInfo, depositors []types.DepositorInfo) {
-
-}
-
 // HandleTransfer if the pool have enough withdrawal amount, we can return the full amount of the investors
 // otherwise, we can only return the partial of the principal
 func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {

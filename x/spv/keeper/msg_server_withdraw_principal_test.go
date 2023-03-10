@@ -170,16 +170,21 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
 	suite.Require().ErrorContains(err, "you can only withdraw ausdc")
 
-	fmt.Printf(">>>>>>>%v\n", depositor2.WithdrawalAmount)
-	fmt.Printf(">>>>>>>%v\n", depositor2.LockedAmount)
-
 	getRatio = sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
 	// the ratio should close to 2
 	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
 
-	//withdrawReq.Token = depositor2.WithdrawalAmount.AddAmount(sdk.NewIntFromU)
-	//_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
-	//suite.Require().ErrorContains(err, "you can only withdraw ausdc")
+	withdrawReq.Token = sdk.NewCoin(depositor1.LockedAmount.Denom, sdk.NewIntFromUint64(100))
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
+	suite.Require().NoError(err)
+	before := depositor1.WithdrawalAmount.Amount
+	beforePool := poolInfo.BorrowableAmount.Amount
+	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+	suite.Require().True(before.Sub(depositor1.WithdrawalAmount.Amount).Equal(sdk.NewIntFromUint64(100)))
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	suite.Require().True(beforePool.Sub(poolInfo.BorrowableAmount.Amount).Equal(sdk.NewIntFromUint64(100)))
 
 }
 
