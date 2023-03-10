@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
@@ -186,6 +187,63 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().True(found)
 	suite.Require().True(beforePool.Sub(poolInfo.BorrowableAmount.Amount).Equal(sdk.NewIntFromUint64(100)))
 
+}
+
+func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
+
+	setupPool(suite)
+	// now we deposit some token and it should be enough to borrow
+	creator1 := suite.investors[0]
+	creator2 := suite.investors[1]
+	//creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
+	//suite.Require().NoError(err)
+	//creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
+	//suite.Require().NoError(err)
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	//suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount}
+
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
+
+	_, err := suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.Require().NoError(err)
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	//now we borrow 1.34e5
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
+
+	req := types.MsgPayPrincipal{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(5e6))}
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Duration(poolInfo.PayFreq) * time.Second))
+	suite.Require().EqualValues(poolInfo.PoolStatus, types.PoolInfo_CLOSING)
+	suite.keeper.HandlePrincipalPayment(suite.ctx, &poolInfo)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 200))
+
+	withdrawreq1 := types.MsgWithdrawPrincipal{suite.investors[0], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}
+
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawreq1)
+	suite.Require().NoError(err)
+	
 }
 
 func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {

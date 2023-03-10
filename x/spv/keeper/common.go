@@ -172,6 +172,9 @@ func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types
 */
 
 func (k Keeper) doBorrow(ctx sdk.Context, poolInfo types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo) error {
+	if tokenAmount.IsZero() {
+		return nil
+	}
 	// create the new nft class for this borrow event
 	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
 	poolClass, found := k.nftKeeper.GetClass(ctx, classID)
