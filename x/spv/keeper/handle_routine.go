@@ -109,6 +109,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdk.ZeroInt())
 	}
 	borrowedFromPreviousInvestors := totalLockedAmount.Sub(poolInfo.BorrowableAmount.Amount)
+	// we need to adjust the amount of the borrowed and borrowable for the pool as we borrow again from these investors
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.AddAmount(borrowedFromPreviousInvestors)
 	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, borrowedFromPreviousInvestors), false, depositors)

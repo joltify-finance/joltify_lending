@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	sdkmath "cosmossdk.io/math"
 
 	coserrors "cosmossdk.io/errors"
@@ -82,6 +83,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	} else {
 		if (previousDepositor.DepositType == types.DepositorInfo_unset) || (previousDepositor.DepositType == types.DepositorInfo_processed) {
 			previousDepositor.DepositType = types.DepositorInfo_unset
+			poolInfo.BorrowableAmount = poolInfo.GetBorrowableAmount().Add(previousDepositor.WithdrawalAmount)
 			previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
 			k.SetDepositor(ctx, previousDepositor)
 		} else {
@@ -101,7 +103,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	// now we update borrowable
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)
-	poolInfo.TotalAmount = poolInfo.TotalAmount.Add(msg.Token)
+	poolInfo.TotalAmount = poolInfo.BorrowedAmount.Add(poolInfo.BorrowableAmount)
 	k.SetPool(ctx, poolInfo)
 
 	ctx.EventManager().EmitEvent(
