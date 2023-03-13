@@ -34,7 +34,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, coserrors.Wrap(types.ErrInconsistencyToken, "token to be borrowed is inconsistency")
 	}
 
-	if poolInfo.BorrowableAmount.IsLT(msg.BorrowAmount) {
+	if poolInfo.UsableAmount.IsLT(msg.BorrowAmount) {
 		return nil, types.ErrInsufficientFund
 	}
 

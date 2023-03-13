@@ -146,7 +146,7 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 
 	suite.Require().Len(poolInfo.WithdrawAccounts, 0)
 	suite.Require().True(poolInfo.WithdrawProposalAmount.Amount.IsZero())
-	withdrawable := poolInfo.BorrowableAmount
+	withdrawable := poolInfo.UsableAmount
 	borrowed := poolInfo.BorrowedAmount
 	ctx3 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx3, &req)
@@ -164,7 +164,7 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 	suite.Require().EqualValues([]sdk.AccAddress{acc}, poolInfo.WithdrawAccounts)
 	suite.Require().True(poolInfo.WithdrawProposalAmount.IsEqual(depositor.LockedAmount))
 
-	suite.Require().Equal(poolInfo.BorrowableAmount.String(), withdrawable.Sub(depositor.WithdrawalAmount).String())
+	suite.Require().Equal(poolInfo.UsableAmount.String(), withdrawable.Sub(depositor.WithdrawalAmount).String())
 	suite.Require().Equal(poolInfo.BorrowedAmount.String(), borrowed.String())
 
 	ctx4 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth-1)))

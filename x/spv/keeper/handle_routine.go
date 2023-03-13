@@ -64,7 +64,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	poolInfo.TransferAccounts = []sdk.AccAddress{}
 
 	// borrowable is larger than the total required, so we can return the money to these investors
-	if poolInfo.BorrowableAmount.Amount.GTE(totalLockedAmount) {
+	if poolInfo.UsableAmount.Amount.GTE(totalLockedAmount) {
 		for _, el := range depositors {
 			interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.nftKeeper, true)
 			if err != nil {
@@ -84,7 +84,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		}
 
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, totalLockedAmount), false, nil, sdk.ZeroInt())
+		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, totalLockedAmount), false, nil, sdk.ZeroInt())
 		if err != nil {
 			panic(err)
 		}
@@ -109,11 +109,11 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdk.ZeroInt())
 		totalBorrowableFromPrevious = totalBorrowableFromPrevious.Add(el.WithdrawalAmount.Amount)
 	}
-	needToBorrowedFromPreviousInvestors := totalLockedAmount.Sub(poolInfo.BorrowableAmount.Amount)
+	needToBorrowedFromPreviousInvestors := totalLockedAmount.Sub(poolInfo.UsableAmount.Amount)
 	// we need to adjust the amount of the borrowed and borrowable for the pool as we borrow again from these investors
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.AddAmount(needToBorrowedFromPreviousInvestors)
-	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, needToBorrowedFromPreviousInvestors), false, depositors, totalBorrowableFromPrevious)
+	poolInfo.UsableAmount = poolInfo.UsableAmount.AddAmount(needToBorrowedFromPreviousInvestors)
+	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, needToBorrowedFromPreviousInvestors), false, depositors, totalBorrowableFromPrevious)
 	if err != nil {
 		panic(err)
 	}
@@ -128,7 +128,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		ctx.Logger().Info("zero borrowable money to borrow from")
 		return
 	}
-	err = k.doBorrow(ctx, poolInfo, poolInfo.BorrowableAmount, false, nil, sdk.ZeroInt())
+	err = k.doBorrow(ctx, poolInfo, poolInfo.UsableAmount, false, nil, sdk.ZeroInt())
 	if err != nil {
 		panic(err)
 	}
@@ -234,7 +234,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
 		poolInfo.PoolStatus = types.PoolInfo_CLOSING
 		ctx.Logger().Info(" the pool", "pool_ID:", poolInfo.Index)
-		poolInfo.BorrowedAmount = sdk.NewCoin(poolInfo.BorrowableAmount.Denom, sdkmath.ZeroInt())
+		poolInfo.BorrowedAmount = sdk.NewCoin(poolInfo.UsableAmount.Denom, sdkmath.ZeroInt())
 	} else {
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(poolInfo.WithdrawProposalAmount)
 	}

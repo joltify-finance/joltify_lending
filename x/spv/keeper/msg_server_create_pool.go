@@ -150,7 +150,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			ProjectLength:          targetProject.ProjectLength,
 			LastPaymentTime:        ctx.BlockTime(),
 			BorrowedAmount:         sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			BorrowableAmount:       sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			UsableAmount:           sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			TotalAmount:            sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			EscrowInterestAmount:   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			EscrowPrincipalAmount:  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),

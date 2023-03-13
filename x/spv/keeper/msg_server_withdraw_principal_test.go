@@ -112,7 +112,7 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().EqualValues(borrow.BorrowAmount.Amount, poolInfo.BorrowedAmount.Amount)
 
 	borrowable := sdk.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
-	suite.Require().EqualValues(borrowable, poolInfo.BorrowableAmount.Amount)
+	suite.Require().EqualValues(borrowable, poolInfo.UsableAmount.Amount)
 	suite.Require().EqualValues(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromUint64(1.34e5))
 
 	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
@@ -122,7 +122,7 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().True(found)
 
 	totalWithdrawbleFromInvestor := depositor1.WithdrawalAmount.Add(depositor2.WithdrawalAmount)
-	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
+	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.UsableAmount.Amount)
 
 	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
 	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
@@ -142,7 +142,7 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.Require().EqualValues(borrowable, poolInfo.BorrowableAmount.Amount)
+	suite.Require().EqualValues(borrowable, poolInfo.UsableAmount.Amount)
 
 	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
 	suite.Require().True(found)
@@ -150,7 +150,7 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	depositor2, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
 	suite.Require().True(found)
 	totalWithdrawbleFromInvestor = depositor1.WithdrawalAmount.Add(depositor2.WithdrawalAmount)
-	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
+	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.UsableAmount.Amount)
 	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
 	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)
 
@@ -180,13 +180,13 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
 	suite.Require().NoError(err)
 	before := depositor1.WithdrawalAmount.Amount
-	beforePool := poolInfo.BorrowableAmount.Amount
+	beforePool := poolInfo.UsableAmount.Amount
 	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
 	suite.Require().True(found)
 	suite.Require().True(before.Sub(depositor1.WithdrawalAmount.Amount).Equal(sdk.NewIntFromUint64(100)))
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
-	suite.Require().True(beforePool.Sub(poolInfo.BorrowableAmount.Amount).Equal(sdk.NewIntFromUint64(100)))
+	suite.Require().True(beforePool.Sub(poolInfo.UsableAmount.Amount).Equal(sdk.NewIntFromUint64(100)))
 
 }
 
@@ -304,7 +304,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	suite.Require().EqualValues(borrow.BorrowAmount.Amount, poolInfo.BorrowedAmount.Amount)
 
 	borrowable := sdk.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
-	suite.Require().EqualValues(borrowable, poolInfo.BorrowableAmount.Amount)
+	suite.Require().EqualValues(borrowable, poolInfo.UsableAmount.Amount)
 	suite.Require().EqualValues(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromUint64(1.34e5))
 
 	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
@@ -314,7 +314,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	suite.Require().True(found)
 
 	totalWithdrawbleFromInvestor := depositor1.WithdrawalAmount.Add(depositor2.WithdrawalAmount)
-	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.BorrowableAmount.Amount)
+	suite.Require().EqualValues(totalWithdrawbleFromInvestor.Amount, poolInfo.UsableAmount.Amount)
 
 	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.LockedAmount.Add(depositor1.WithdrawalAmount).Amount)
 	suite.Require().EqualValues(sdk.NewInt(2e5), depositor2.LockedAmount.Add(depositor2.WithdrawalAmount).Amount)

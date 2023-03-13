@@ -122,7 +122,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	samplePool.EscrowInterestAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(10e12))
 	k.SetPool(ctx, samplePool)
 
-	samplePool.BorrowableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))
+	samplePool.UsableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))
 	samplePool.PoolStatus = types.PoolInfo_ACTIVE
 	firstBorrowTime := ctx.BlockTime()
 	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)))

@@ -248,21 +248,21 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 }
 
 func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin, depositors []*types.DepositorInfo, borrowableFix sdkmath.Int) error {
-	if poolInfo.BorrowableAmount.IsLT(amount) {
+	if poolInfo.UsableAmount.IsLT(amount) {
 		return types.ErrInsufficientFund
 	}
 	var borrowable sdkmath.Int
 	if !borrowableFix.IsZero() {
 		borrowable = borrowableFix
 	} else {
-		borrowable = poolInfo.BorrowableAmount.Amount
+		borrowable = poolInfo.UsableAmount.Amount
 	}
 	utilization := sdk.NewDecFromInt(amount.Amount).Quo(sdk.NewDecFromInt(borrowable))
 
 	var err error
 	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Add(amount)
-	poolInfo.BorrowableAmount, err = poolInfo.BorrowableAmount.SafeSub(amount)
+	poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(amount)
 	if err != nil {
 		return types.ErrInsufficientFund
 	}
@@ -374,8 +374,8 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(depositor.WithdrawalAmount)
-	if poolInfo.BorrowableAmount.IsZero() {
+	poolInfo.UsableAmount = poolInfo.UsableAmount.Sub(depositor.WithdrawalAmount)
+	if poolInfo.UsableAmount.IsZero() {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		k.DelPool(ctx, poolInfo.Index)
 		k.SetHistoryPool(ctx, poolInfo)

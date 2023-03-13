@@ -91,11 +91,12 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return &types.MsgWithdrawPrincipalResponse{Amount: amountToSend.String()}, nil
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
 		if depositor.DepositType == types.DepositorInfo_unset {
-			poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
+			poolInfo.UsableAmount = poolInfo.UsableAmount.SubAmount(totalWithdraw.Amount)
 		}
 		if depositor.DepositType == types.DepositorInfo_processed {
-			poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(depositor.WithdrawalAmount).SubAmount(totalWithdraw.Amount)
+			poolInfo.UsableAmount = poolInfo.UsableAmount.Add(depositor.WithdrawalAmount).SubAmount(totalWithdraw.Amount)
 		}
+		depositor.DepositType = types.DepositorInfo_unset
 		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
 		if err != nil {
 			return nil, errors.New("withdraw amount too large")

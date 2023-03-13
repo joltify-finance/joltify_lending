@@ -7,11 +7,11 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgClaimUSDXMintingReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
-import { MsgClaimSwapReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
-import { MsgClaimJoltReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
-import { MsgClaimDelegatorReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
 import { MsgClaimSavingsReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
+import { MsgClaimSwapReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
+import { MsgClaimDelegatorReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
+import { MsgClaimUSDXMintingReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
+import { MsgClaimJoltReward } from "./types/joltify/third_party/incentive/v1beta1/tx";
 
 import { BaseClaim as typeBaseClaim} from "./types"
 import { BaseMultiClaim as typeBaseMultiClaim} from "./types"
@@ -37,10 +37,10 @@ import { MsgClaimDelegatorRewardResponse as typeMsgClaimDelegatorRewardResponse}
 import { MsgClaimSwapRewardResponse as typeMsgClaimSwapRewardResponse} from "./types"
 import { MsgClaimSavingsRewardResponse as typeMsgClaimSavingsRewardResponse} from "./types"
 
-export { MsgClaimUSDXMintingReward, MsgClaimSwapReward, MsgClaimJoltReward, MsgClaimDelegatorReward, MsgClaimSavingsReward };
+export { MsgClaimSavingsReward, MsgClaimSwapReward, MsgClaimDelegatorReward, MsgClaimUSDXMintingReward, MsgClaimJoltReward };
 
-type sendMsgClaimUSDXMintingRewardParams = {
-  value: MsgClaimUSDXMintingReward,
+type sendMsgClaimSavingsRewardParams = {
+  value: MsgClaimSavingsReward,
   fee?: StdFee,
   memo?: string
 };
@@ -51,43 +51,43 @@ type sendMsgClaimSwapRewardParams = {
   memo?: string
 };
 
-type sendMsgClaimJoltRewardParams = {
-  value: MsgClaimJoltReward,
-  fee?: StdFee,
-  memo?: string
-};
-
 type sendMsgClaimDelegatorRewardParams = {
   value: MsgClaimDelegatorReward,
   fee?: StdFee,
   memo?: string
 };
 
-type sendMsgClaimSavingsRewardParams = {
-  value: MsgClaimSavingsReward,
+type sendMsgClaimUSDXMintingRewardParams = {
+  value: MsgClaimUSDXMintingReward,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgClaimJoltRewardParams = {
+  value: MsgClaimJoltReward,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgClaimUSDXMintingRewardParams = {
-  value: MsgClaimUSDXMintingReward,
+type msgClaimSavingsRewardParams = {
+  value: MsgClaimSavingsReward,
 };
 
 type msgClaimSwapRewardParams = {
   value: MsgClaimSwapReward,
 };
 
-type msgClaimJoltRewardParams = {
-  value: MsgClaimJoltReward,
-};
-
 type msgClaimDelegatorRewardParams = {
   value: MsgClaimDelegatorReward,
 };
 
-type msgClaimSavingsRewardParams = {
-  value: MsgClaimSavingsReward,
+type msgClaimUSDXMintingRewardParams = {
+  value: MsgClaimUSDXMintingReward,
+};
+
+type msgClaimJoltRewardParams = {
+  value: MsgClaimJoltReward,
 };
 
 
@@ -120,17 +120,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgClaimUSDXMintingReward({ value, fee, memo }: sendMsgClaimUSDXMintingRewardParams): Promise<DeliverTxResponse> {
+		async sendMsgClaimSavingsReward({ value, fee, memo }: sendMsgClaimSavingsRewardParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgClaimUSDXMintingReward: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgClaimSavingsReward: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgClaimUSDXMintingReward({ value: MsgClaimUSDXMintingReward.fromPartial(value) })
+				let msg = this.msgClaimSavingsReward({ value: MsgClaimSavingsReward.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgClaimUSDXMintingReward: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgClaimSavingsReward: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -148,20 +148,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgClaimJoltReward({ value, fee, memo }: sendMsgClaimJoltRewardParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgClaimJoltReward: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgClaimJoltReward({ value: MsgClaimJoltReward.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgClaimJoltReward: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgClaimDelegatorReward({ value, fee, memo }: sendMsgClaimDelegatorRewardParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgClaimDelegatorReward: Unable to sign Tx. Signer is not present.')
@@ -176,26 +162,40 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgClaimSavingsReward({ value, fee, memo }: sendMsgClaimSavingsRewardParams): Promise<DeliverTxResponse> {
+		async sendMsgClaimUSDXMintingReward({ value, fee, memo }: sendMsgClaimUSDXMintingRewardParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgClaimSavingsReward: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgClaimUSDXMintingReward: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgClaimSavingsReward({ value: MsgClaimSavingsReward.fromPartial(value) })
+				let msg = this.msgClaimUSDXMintingReward({ value: MsgClaimUSDXMintingReward.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgClaimSavingsReward: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgClaimUSDXMintingReward: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgClaimJoltReward({ value, fee, memo }: sendMsgClaimJoltRewardParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgClaimJoltReward: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgClaimJoltReward({ value: MsgClaimJoltReward.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgClaimJoltReward: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgClaimUSDXMintingReward({ value }: msgClaimUSDXMintingRewardParams): EncodeObject {
+		msgClaimSavingsReward({ value }: msgClaimSavingsRewardParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.third_party.incentive.v1beta1.MsgClaimUSDXMintingReward", value: MsgClaimUSDXMintingReward.fromPartial( value ) }  
+				return { typeUrl: "/joltify.third_party.incentive.v1beta1.MsgClaimSavingsReward", value: MsgClaimSavingsReward.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgClaimUSDXMintingReward: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgClaimSavingsReward: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -207,14 +207,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgClaimJoltReward({ value }: msgClaimJoltRewardParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.third_party.incentive.v1beta1.MsgClaimJoltReward", value: MsgClaimJoltReward.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgClaimJoltReward: Could not create message: ' + e.message)
-			}
-		},
-		
 		msgClaimDelegatorReward({ value }: msgClaimDelegatorRewardParams): EncodeObject {
 			try {
 				return { typeUrl: "/joltify.third_party.incentive.v1beta1.MsgClaimDelegatorReward", value: MsgClaimDelegatorReward.fromPartial( value ) }  
@@ -223,11 +215,19 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgClaimSavingsReward({ value }: msgClaimSavingsRewardParams): EncodeObject {
+		msgClaimUSDXMintingReward({ value }: msgClaimUSDXMintingRewardParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.third_party.incentive.v1beta1.MsgClaimSavingsReward", value: MsgClaimSavingsReward.fromPartial( value ) }  
+				return { typeUrl: "/joltify.third_party.incentive.v1beta1.MsgClaimUSDXMintingReward", value: MsgClaimUSDXMintingReward.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgClaimSavingsReward: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgClaimUSDXMintingReward: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgClaimJoltReward({ value }: msgClaimJoltRewardParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.third_party.incentive.v1beta1.MsgClaimJoltReward", value: MsgClaimJoltReward.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgClaimJoltReward: Could not create message: ' + e.message)
 			}
 		},
 		

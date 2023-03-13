@@ -84,7 +84,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		if (previousDepositor.DepositType == types.DepositorInfo_unset) || (previousDepositor.DepositType == types.DepositorInfo_processed) {
 			previousDepositor.DepositType = types.DepositorInfo_unset
 			if previousDepositor.DepositType == types.DepositorInfo_processed {
-				poolInfo.BorrowableAmount = poolInfo.GetBorrowableAmount().Add(previousDepositor.WithdrawalAmount)
+				poolInfo.UsableAmount = poolInfo.GetUsableAmount().Add(previousDepositor.WithdrawalAmount)
 			}
 			previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
 			k.SetDepositor(ctx, previousDepositor)
@@ -94,8 +94,8 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	// now we update borrowable
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)
-	poolInfo.TotalAmount = poolInfo.BorrowedAmount.Add(poolInfo.BorrowableAmount)
+	poolInfo.UsableAmount = poolInfo.UsableAmount.Add(msg.Token)
+	poolInfo.TotalAmount = poolInfo.BorrowedAmount.Add(poolInfo.UsableAmount)
 	k.SetPool(ctx, poolInfo)
 
 	ctx.EventManager().EmitEvent(

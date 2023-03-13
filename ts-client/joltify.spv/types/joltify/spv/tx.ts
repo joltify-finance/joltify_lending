@@ -98,6 +98,7 @@ export interface MsgWithdrawPrincipal {
 }
 
 export interface MsgWithdrawPrincipalResponse {
+  amount: string;
 }
 
 export interface MsgSubmitWithdrawProposal {
@@ -1207,11 +1208,14 @@ export const MsgWithdrawPrincipal = {
 };
 
 function createBaseMsgWithdrawPrincipalResponse(): MsgWithdrawPrincipalResponse {
-  return {};
+  return { amount: "" };
 }
 
 export const MsgWithdrawPrincipalResponse = {
-  encode(_: MsgWithdrawPrincipalResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(message: MsgWithdrawPrincipalResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.amount !== "") {
+      writer.uint32(10).string(message.amount);
+    }
     return writer;
   },
 
@@ -1222,6 +1226,9 @@ export const MsgWithdrawPrincipalResponse = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          message.amount = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1230,17 +1237,19 @@ export const MsgWithdrawPrincipalResponse = {
     return message;
   },
 
-  fromJSON(_: any): MsgWithdrawPrincipalResponse {
-    return {};
+  fromJSON(object: any): MsgWithdrawPrincipalResponse {
+    return { amount: isSet(object.amount) ? String(object.amount) : "" };
   },
 
-  toJSON(_: MsgWithdrawPrincipalResponse): unknown {
+  toJSON(message: MsgWithdrawPrincipalResponse): unknown {
     const obj: any = {};
+    message.amount !== undefined && (obj.amount = message.amount);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<MsgWithdrawPrincipalResponse>, I>>(_: I): MsgWithdrawPrincipalResponse {
+  fromPartial<I extends Exact<DeepPartial<MsgWithdrawPrincipalResponse>, I>>(object: I): MsgWithdrawPrincipalResponse {
     const message = createBaseMsgWithdrawPrincipalResponse();
+    message.amount = object.amount ?? "";
     return message;
   },
 };

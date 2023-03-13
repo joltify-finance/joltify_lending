@@ -15,6 +15,7 @@ export enum DepositorInfoDEPOSITTYPE {
   DepositClose = "deposit_close",
   Unset = "unset",
   Processed = "processed",
+  Deactive = "deactive",
 }
 
 export enum PoolInfoPOOLSTATUS {
@@ -109,7 +110,9 @@ export interface SpvMsgTransferOwnershipResponse {
 
 export type SpvMsgUpdatePoolResponse = object;
 
-export type SpvMsgWithdrawPrincipalResponse = object;
+export interface SpvMsgWithdrawPrincipalResponse {
+  amount?: string;
+}
 
 /**
  * Params defines the parameters for the module.
@@ -170,7 +173,7 @@ export interface SpvPoolInfo {
    * NOTE: The amount field is an Int which implements the custom method
    * signatures required by gogoproto.
    */
-  borrowable_amount?: V1Beta1Coin;
+  usable_amount?: V1Beta1Coin;
 
   /**
    * Coin defines a token with a denomination and an amount.
@@ -511,12 +514,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryDepositor
-   * @request GET:/joltify/spv/depositor/{walletAddress}/{depositPoolIndex}
+   * @request GET:/joltify/spv/depositor/{walletAddress}
    */
-  queryDepositor = (walletAddress: string, depositPoolIndex: string, params: RequestParams = {}) =>
+  queryDepositor = (walletAddress: string, query?: { depositPoolIndex?: string }, params: RequestParams = {}) =>
     this.request<SpvQueryDepositorResponse, RpcStatus>({
-      path: `/joltify/spv/depositor/${walletAddress}/${depositPoolIndex}`,
+      path: `/joltify/spv/depositor/${walletAddress}`,
       method: "GET",
+      query: query,
       format: "json",
       ...params,
     });

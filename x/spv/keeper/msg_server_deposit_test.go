@@ -182,7 +182,7 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
 	suite.Require().True(pool.TotalAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
-	suite.Require().True(pool.BorrowableAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
+	suite.Require().True(pool.UsableAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(100))
 	msgDepositor := types.MsgDeposit{Creator: "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
@@ -198,7 +198,7 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	suite.Require().True(pool.TotalAmount.Equal(depositAmount))
 
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
-	suite.Require().True(pool.BorrowableAmount.Equal(depositAmount))
+	suite.Require().True(pool.UsableAmount.Equal(depositAmount))
 
 	depositerAddr, err := sdk.AccAddressFromBech32("jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl")
 	suite.Require().NoError(err)
@@ -221,7 +221,7 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	suite.Require().True(pool.TotalAmount.Equal(depositAmount.Add(depositAmount)))
 
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
-	suite.Require().True(pool.BorrowableAmount.Equal(depositAmount.Add(depositAmount)))
+	suite.Require().True(pool.UsableAmount.Equal(depositAmount.Add(depositAmount)))
 
 	depositorData, found = suite.keeper.GetDepositor(suite.ctx, resp.PoolIndex[0], depositerAddr)
 	suite.Require().True(found)

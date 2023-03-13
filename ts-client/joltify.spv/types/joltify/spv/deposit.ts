@@ -21,6 +21,7 @@ export enum DepositorInfo_DEPOSITTYPE {
   deposit_close = 2,
   unset = 3,
   processed = 4,
+  deactive = 5,
   UNRECOGNIZED = -1,
 }
 
@@ -41,6 +42,9 @@ export function depositorInfo_DEPOSITTYPEFromJSON(object: any): DepositorInfo_DE
     case 4:
     case "processed":
       return DepositorInfo_DEPOSITTYPE.processed;
+    case 5:
+    case "deactive":
+      return DepositorInfo_DEPOSITTYPE.deactive;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -60,6 +64,8 @@ export function depositorInfo_DEPOSITTYPEToJSON(object: DepositorInfo_DEPOSITTYP
       return "unset";
     case DepositorInfo_DEPOSITTYPE.processed:
       return "processed";
+    case DepositorInfo_DEPOSITTYPE.deactive:
+      return "deactive";
     case DepositorInfo_DEPOSITTYPE.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

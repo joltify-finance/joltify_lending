@@ -28,7 +28,7 @@ export interface PoolInfo {
   borrowedAmount: Coin | undefined;
   poolInterest: string;
   projectLength: number;
-  borrowableAmount: Coin | undefined;
+  usableAmount: Coin | undefined;
   targetAmount: Coin | undefined;
   poolType: PoolInfo_POOLTYPE;
   escrowInterestAmount: Coin | undefined;
@@ -154,7 +154,7 @@ function createBasePoolInfo(): PoolInfo {
     borrowedAmount: undefined,
     poolInterest: "",
     projectLength: 0,
-    borrowableAmount: undefined,
+    usableAmount: undefined,
     targetAmount: undefined,
     poolType: 0,
     escrowInterestAmount: undefined,
@@ -210,8 +210,8 @@ export const PoolInfo = {
     if (message.projectLength !== 0) {
       writer.uint32(112).uint64(message.projectLength);
     }
-    if (message.borrowableAmount !== undefined) {
-      Coin.encode(message.borrowableAmount, writer.uint32(122).fork()).ldelim();
+    if (message.usableAmount !== undefined) {
+      Coin.encode(message.usableAmount, writer.uint32(122).fork()).ldelim();
     }
     if (message.targetAmount !== undefined) {
       Coin.encode(message.targetAmount, writer.uint32(130).fork()).ldelim();
@@ -290,7 +290,7 @@ export const PoolInfo = {
           message.projectLength = longToNumber(reader.uint64() as Long);
           break;
         case 15:
-          message.borrowableAmount = Coin.decode(reader, reader.uint32());
+          message.usableAmount = Coin.decode(reader, reader.uint32());
           break;
         case 16:
           message.targetAmount = Coin.decode(reader, reader.uint32());
@@ -340,7 +340,7 @@ export const PoolInfo = {
       borrowedAmount: isSet(object.borrowedAmount) ? Coin.fromJSON(object.borrowedAmount) : undefined,
       poolInterest: isSet(object.poolInterest) ? String(object.poolInterest) : "",
       projectLength: isSet(object.projectLength) ? Number(object.projectLength) : 0,
-      borrowableAmount: isSet(object.borrowableAmount) ? Coin.fromJSON(object.borrowableAmount) : undefined,
+      usableAmount: isSet(object.usableAmount) ? Coin.fromJSON(object.usableAmount) : undefined,
       targetAmount: isSet(object.targetAmount) ? Coin.fromJSON(object.targetAmount) : undefined,
       poolType: isSet(object.poolType) ? poolInfo_POOLTYPEFromJSON(object.poolType) : 0,
       escrowInterestAmount: isSet(object.escrowInterestAmount) ? Coin.fromJSON(object.escrowInterestAmount) : undefined,
@@ -385,8 +385,8 @@ export const PoolInfo = {
       && (obj.borrowedAmount = message.borrowedAmount ? Coin.toJSON(message.borrowedAmount) : undefined);
     message.poolInterest !== undefined && (obj.poolInterest = message.poolInterest);
     message.projectLength !== undefined && (obj.projectLength = Math.round(message.projectLength));
-    message.borrowableAmount !== undefined
-      && (obj.borrowableAmount = message.borrowableAmount ? Coin.toJSON(message.borrowableAmount) : undefined);
+    message.usableAmount !== undefined
+      && (obj.usableAmount = message.usableAmount ? Coin.toJSON(message.usableAmount) : undefined);
     message.targetAmount !== undefined
       && (obj.targetAmount = message.targetAmount ? Coin.toJSON(message.targetAmount) : undefined);
     message.poolType !== undefined && (obj.poolType = poolInfo_POOLTYPEToJSON(message.poolType));
@@ -437,8 +437,8 @@ export const PoolInfo = {
       : undefined;
     message.poolInterest = object.poolInterest ?? "";
     message.projectLength = object.projectLength ?? 0;
-    message.borrowableAmount = (object.borrowableAmount !== undefined && object.borrowableAmount !== null)
-      ? Coin.fromPartial(object.borrowableAmount)
+    message.usableAmount = (object.usableAmount !== undefined && object.usableAmount !== null)
+      ? Coin.fromPartial(object.usableAmount)
       : undefined;
     message.targetAmount = (object.targetAmount !== undefined && object.targetAmount !== null)
       ? Coin.fromPartial(object.targetAmount)

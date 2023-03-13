@@ -53,7 +53,7 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 	depositor.DepositType = types.DepositorInfo_withdraw_proposal
 	poolInfo.WithdrawProposalAmount = poolInfo.WithdrawProposalAmount.Add(depositor.LockedAmount)
 	// since we can not borrow from this investor, we deduct the total borrowable amount
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Sub(depositor.WithdrawalAmount)
+	poolInfo.UsableAmount = poolInfo.UsableAmount.Sub(depositor.WithdrawalAmount)
 	poolInfo.WithdrawAccounts = append(poolInfo.WithdrawAccounts, depositor.DepositorAddress)
 	k.SetPool(ctx, poolInfo)
 	k.SetDepositor(ctx, depositor)

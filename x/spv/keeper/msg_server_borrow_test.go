@@ -199,7 +199,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	suite.Require().True(found)
 
 	totalBorrowable := msgDepositUser1.Token.Add(msgDepositUser1.Token).Add(msgDepositUser2.Token)
-	suite.Require().True(totalBorrowable.IsEqual(pool.BorrowableAmount))
+	suite.Require().True(totalBorrowable.IsEqual(pool.UsableAmount))
 
 	user1Ratio := sdk.NewDecFromInt(msgDepositUser1.Token.Amount.Mul(sdk.NewInt(2))).Quo(sdk.NewDecFromInt(totalBorrowable.Amount))
 
@@ -218,7 +218,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	poolNow, found := suite.keeper.GetPools(suite.ctx, depositorPool)
 	suite.Require().True(found)
 	suite.Require().True(poolNow.BorrowedAmount.IsEqual(borrow.BorrowAmount))
-	suite.Require().True(totalBorrowable.Sub(borrow.BorrowAmount).IsEqual(poolNow.BorrowableAmount))
+	suite.Require().True(totalBorrowable.Sub(borrow.BorrowAmount).IsEqual(poolNow.UsableAmount))
 
 	borrowedFromUser1 := sdk.NewDecFromInt(borrow.BorrowAmount.Amount).Mul(user1Ratio).TruncateInt()
 	borrowedFromUser2 := borrow.BorrowAmount.Amount.Sub(borrowedFromUser1)
@@ -285,13 +285,13 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	suite.Require().True(found)
 	suite.Require().True(p2.WithdrawalAmount.IsEqual(user2Cached.AddAmount(msgDepositUser2.Token.Amount)))
-	suite.Require().True(poolNow.GetBorrowableAmount().IsEqual(user1Cached.Add(user2Cached)))
+	suite.Require().True(poolNow.GetUsableAmount().IsEqual(user1Cached.Add(user2Cached)))
 	user2Cached = p2.WithdrawalAmount
 	newuser1Ratio1 := sdk.NewDecFromInt(user1Cached.Amount).Quo(sdk.NewDecFromInt(user1Cached.Add(user2Cached).Amount))
 
 	poolAfterUser2SecondDeposit, found := suite.keeper.GetPools(suite.ctx, depositorPool)
 	suite.Require().True(found)
-	suite.Require().True(poolAfterUser2SecondDeposit.BorrowableAmount.IsEqual(user2Cached.Add(user1Cached)))
+	suite.Require().True(poolAfterUser2SecondDeposit.UsableAmount.IsEqual(user2Cached.Add(user1Cached)))
 
 	// NOW we borrow
 	borrow.BorrowAmount = sdk.NewCoin(borrow.BorrowAmount.Denom, sdk.NewInt(1.2e5))
@@ -299,13 +299,13 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	suite.Require().NoError(err)
 
 	previousAmountBorrowed := poolNow.BorrowedAmount
-	previousBorrowAble := poolNow.BorrowableAmount
+	previousBorrowAble := poolNow.UsableAmount
 	poolNow, found = suite.keeper.GetPools(suite.ctx, depositorPool)
 	suite.Require().True(found)
 
 	suite.Require().True(poolNow.BorrowedAmount.Equal(borrow.BorrowAmount.AddAmount(previousAmountBorrowed.Amount)))
 
-	suite.Require().True(poolNow.BorrowableAmount.Equal(previousBorrowAble.Add(msgDepositUser2.Token).Sub(borrow.BorrowAmount)))
+	suite.Require().True(poolNow.UsableAmount.Equal(previousBorrowAble.Add(msgDepositUser2.Token).Sub(borrow.BorrowAmount)))
 
 	beforeLockedAmount := p1.LockedAmount
 	// now we check the nfts
