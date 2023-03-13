@@ -178,12 +178,29 @@ func (k Keeper) IteratePool(ctx sdk.Context, cb func(poolInfo types.PoolInfo) (s
 	}
 }
 
+// SetDepositorHistory sets the depositor to history store
+func (k Keeper) SetDepositorHistory(ctx sdk.Context, depositor types.DepositorInfo) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositorHistory+depositor.PoolIndex))
+	bz := k.cdc.MustMarshal(&depositor)
+	timeBytes, err := ctx.BlockTime().MarshalBinary()
+	if err != nil {
+		panic(err)
+	}
+	key := append(depositor.DepositorAddress.Bytes(), timeBytes...)
+	depositorPoolStore.Set(key, bz)
+}
+
 // SetDepositor sets the depositor
 func (k Keeper) SetDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))
-
 	bz := k.cdc.MustMarshal(&depositor)
 	depositorPoolStore.Set(depositor.GetDepositorAddress().Bytes(), bz)
+}
+
+// DelDepositor sets the depositor
+func (k Keeper) DelDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))
+	depositorPoolStore.Delete(depositor.GetDepositorAddress().Bytes())
 }
 
 func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types.DepositorInfo, found bool) {

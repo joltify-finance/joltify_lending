@@ -83,23 +83,15 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	} else {
 		if (previousDepositor.DepositType == types.DepositorInfo_unset) || (previousDepositor.DepositType == types.DepositorInfo_processed) {
 			previousDepositor.DepositType = types.DepositorInfo_unset
-			poolInfo.BorrowableAmount = poolInfo.GetBorrowableAmount().Add(previousDepositor.WithdrawalAmount)
+			if previousDepositor.DepositType == types.DepositorInfo_processed {
+				poolInfo.BorrowableAmount = poolInfo.GetBorrowableAmount().Add(previousDepositor.WithdrawalAmount)
+			}
 			previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
 			k.SetDepositor(ctx, previousDepositor)
 		} else {
 			return nil, coserrors.Wrapf(types.ErrDeposit, "you are not allow to deposit as %v", previousDepositor.DepositType)
 		}
 	}
-
-	// todo do we really need this??
-	//wallets, found := k.GetPoolDepositedWallets(ctx, poolInfo.Index)
-	//if !found {
-	//	depositorWallets := types.PoolDepositedInvestors{PoolIndex: poolInfo.Index, WalletAddress: []sdk.AccAddress{investor}}
-	//	k.SetPoolDepositedWallets(ctx, depositorWallets)
-	//} else {
-	//	wallets.WalletAddress = addAddrToList(wallets.WalletAddress, investor)
-	//	k.SetPoolDepositedWallets(ctx, wallets)
-	//}
 
 	// now we update borrowable
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(msg.Token)

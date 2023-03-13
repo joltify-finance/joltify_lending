@@ -2,9 +2,8 @@ package keeper
 
 import (
 	"context"
-	"errors"
-
 	coserrors "cosmossdk.io/errors"
+	"errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -70,7 +69,6 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 	switch depositor.DepositType {
 	case types.DepositorInfo_deposit_close:
 		depositor.DepositType = types.DepositorInfo_deactive
-		k.SetDepositor(ctx, depositor)
 		amountToSend := depositor.WithdrawalAmount
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(amountToSend))
 		if err != nil {
@@ -84,10 +82,19 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 				sdk.NewAttribute(types.AttributeAmount, amountToSend.String()),
 			),
 		)
+		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+		depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+		k.SetDepositorHistory(ctx, depositor)
+		k.DelDepositor(ctx, depositor)
 
 		return &types.MsgWithdrawPrincipalResponse{Amount: amountToSend.String()}, nil
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
-		poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
+		if depositor.DepositType == types.DepositorInfo_unset {
+			poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
+		}
+		if depositor.DepositType == types.DepositorInfo_processed {
+			poolInfo.BorrowedAmount = poolInfo.BorrowableAmount.Add(depositor.WithdrawalAmount).SubAmount(totalWithdraw.Amount)
+		}
 		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
 		if err != nil {
 			return nil, errors.New("withdraw amount too large")
@@ -97,9 +104,6 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 			return nil, err
 		}
 
-		k.SetDepositor(ctx, depositor)
-		k.SetPool(ctx, poolInfo)
-
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				types.EventTypeWithdrawPrincipal,
@@ -107,6 +111,9 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 				sdk.NewAttribute(types.AttributeAmount, totalWithdraw.String()),
 			),
 		)
+
+		k.SetDepositor(ctx, depositor)
+		k.SetPool(ctx, poolInfo)
 		return &types.MsgWithdrawPrincipalResponse{Amount: totalWithdraw.String()}, nil
 	default:
 		return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(types.ErrDeposit, "deposit type is %v", depositor.DepositType)

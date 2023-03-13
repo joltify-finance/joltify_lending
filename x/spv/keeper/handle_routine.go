@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -114,7 +113,6 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 	// we need to adjust the amount of the borrowed and borrowable for the pool as we borrow again from these investors
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
 	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.AddAmount(needToBorrowedFromPreviousInvestors)
-	fmt.Printf(">>>>>>>>>>borrowable now %v\n", poolInfo.BorrowableAmount)
 	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, needToBorrowedFromPreviousInvestors), false, depositors, totalBorrowableFromPrevious)
 	if err != nil {
 		panic(err)

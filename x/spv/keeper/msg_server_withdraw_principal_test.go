@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"fmt"
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"testing"
 	"time"
@@ -482,9 +481,6 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	depositorBeforeWithdraw1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
 	suite.Require().True(found)
 
-	fmt.Printf(">>>>WW2222WWWW>>>%v\n", depositorBeforeWithdraw2.WithdrawalAmount)
-	fmt.Printf(">>>>WW2222WWWW>>>%v\n", depositorBeforeWithdraw1.WithdrawalAmount)
-
 	withdraw.Creator = suite.investors[1]
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdraw)
 	suite.Require().NoError(err)
@@ -493,9 +489,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	suite.Require().True(found)
 
 	delta = depositor2.WithdrawalAmount.Sub(depositorBeforeWithdraw2.WithdrawalAmount)
-	fmt.Printf(">>>>delta1>>>%v\n", delta)
 
-	fmt.Printf(">>>>>>>>>>%v-----%v\n", depositor2.LockedAmount, depositor2.WithdrawalAmount)
 	suite.Require().True(depositor2.LockedAmount.Amount.Equal(sdk.ZeroInt()))
 	// the original v2 deposit is 2e5
 	suite.Require().True(depositor2.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(2e5)))

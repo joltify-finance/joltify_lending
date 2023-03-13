@@ -20,6 +20,7 @@ const (
 	HistoryProjectsKeyPrefix = "HistoryProjectsKeyPrefix-"
 	PoolInvestor             = "poolInvestorsPrefix-"
 	PoolDepositor            = "depositorPrefix-"
+	PoolDepositorHistory     = "depositorhistoryPrefix-"
 	PoolDeposited            = "depositedPrefix-"
 	Pool                     = "pool-"
 )

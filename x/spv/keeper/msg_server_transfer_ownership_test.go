@@ -980,6 +980,20 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	suite.Require().True(poolInfo.BorrowableAmount.Amount.IsZero())
 	// 4.28-1.65=2.94
 	suite.Require().True(totalBorrowable.Equal(sdk.NewIntFromUint64(2.63e5)))
+
+	for i := 0; i < 3; i++ {
+		req := types.NewMsgWithdrawPrincipal(suite.investors[i], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e3)))
+		resp, err := suite.app.WithdrawPrincipal(suite.ctx, req)
+		suite.Require().NoError(err)
+		parsed, err := sdk.ParseCoinsNormalized(resp.Amount)
+		suite.Require().NoError(err)
+		suite.Require().True(parsed[0].Amount.Equal(depositorAmounts[i].Amount))
+		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
+		suite.Require().NoError(err)
+		_, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
+		suite.Require().False(found)
+	}
+
 }
 
 func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowByMultipleEnoughMoneyAllHaveNFT() {
@@ -1086,6 +1100,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 		suite.Require().NoError(err)
 		depositor, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
 		suite.Require().True(found)
+		spew.Dump(depositor)
 
 		if i < 3 {
 			suite.Require().Len(depositor.LinkedNFT, 0)
@@ -1114,4 +1129,19 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	// 	93.99-1.65-3.6 =88.74
 	suite.Require().True(poolInfo.BorrowableAmount.Amount.Equal(sdk.NewIntFromUint64(88.74e5)))
 	suite.Require().True(totalBorrowable.Equal(sdk.NewIntFromUint64(88.74e5)))
+
+	// now we withdraw, it will send all the amount
+	for i := 0; i < 3; i++ {
+		req := types.NewMsgWithdrawPrincipal(suite.investors[i], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e3)))
+		resp, err := suite.app.WithdrawPrincipal(suite.ctx, req)
+		suite.Require().NoError(err)
+		parsed, err := sdk.ParseCoinsNormalized(resp.Amount)
+		suite.Require().NoError(err)
+		suite.Require().True(parsed[0].Amount.Equal(depositorAmounts[i].Amount))
+		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
+		suite.Require().NoError(err)
+		_, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
+		suite.Require().False(found)
+	}
+
 }
