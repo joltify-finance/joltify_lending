@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -84,7 +85,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		}
 
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, totalLockedAmount), false, nil)
+		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, totalLockedAmount), false, nil, sdk.ZeroInt())
 		if err != nil {
 			panic(err)
 		}
@@ -92,8 +93,8 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		return
 	}
 	// now we process the partial transfer
+	totalBorrowableFromPrevious := sdkmath.ZeroInt()
 	for i, el := range depositors {
-
 		interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.nftKeeper, true)
 		if err != nil {
 			panic(err)
@@ -107,12 +108,14 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		el.LinkedNFT = []string{}
 		el.WithdrawalAmount = el.WithdrawalAmount.Add(el.LockedAmount.AddAmount(interest))
 		el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdk.ZeroInt())
+		totalBorrowableFromPrevious = totalBorrowableFromPrevious.Add(el.WithdrawalAmount.Amount)
 	}
-	borrowedFromPreviousInvestors := totalLockedAmount.Sub(poolInfo.BorrowableAmount.Amount)
+	needToBorrowedFromPreviousInvestors := totalLockedAmount.Sub(poolInfo.BorrowableAmount.Amount)
 	// we need to adjust the amount of the borrowed and borrowable for the pool as we borrow again from these investors
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.AddAmount(borrowedFromPreviousInvestors)
-	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, borrowedFromPreviousInvestors), false, depositors)
+	poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.AddAmount(needToBorrowedFromPreviousInvestors)
+	fmt.Printf(">>>>>>>>>>borrowable now %v\n", poolInfo.BorrowableAmount)
+	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.BorrowableAmount.Denom, needToBorrowedFromPreviousInvestors), false, depositors, totalBorrowableFromPrevious)
 	if err != nil {
 		panic(err)
 	}
@@ -127,7 +130,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		ctx.Logger().Info("zero borrowable money to borrow from")
 		return
 	}
-	err = k.doBorrow(ctx, poolInfo, poolInfo.BorrowableAmount, false, nil)
+	err = k.doBorrow(ctx, poolInfo, poolInfo.BorrowableAmount, false, nil, sdk.ZeroInt())
 	if err != nil {
 		panic(err)
 	}

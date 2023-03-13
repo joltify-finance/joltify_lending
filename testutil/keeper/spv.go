@@ -27,6 +27,15 @@ import (
 
 type mockKycKeeper struct{}
 
+var Wallets = []string{"jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq",
+	"jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+	"jolt1z0y0zl0trsnuqmqf5v034pyv9sp39jg3rv6lsm",
+	"jolt1fcaa73cc9c2l3l2u57skddgd0zm749ncukx90g",
+	"jolt1ut358ywu78ztkt5m90dwmklz79rwau6vs8vhlp",
+	"jolt1v9ls99c83dst7x6xwwnsjcyp5zsa3acfhaxq5n",
+	"jolt169a92jz2rmxy0ll73kztlmtucswvvft78xeqne",
+	"jolt13xxls80rw3p036zyfy8hhtjyvft4ckg5a09agh"}
+
 func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmoduletypes.ProjectInfo) {
 
 	b := kycmoduletypes.BasicInfo{
@@ -91,10 +100,12 @@ func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.
 		WalletAddress: []string{req.Wallet},
 	}
 
-	inv2 := kycmoduletypes.Investor{InvestorId: "2", WalletAddress: []string{"jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq", "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"}}
+	inv2 := kycmoduletypes.Investor{InvestorId: "2", WalletAddress: Wallets}
 
-	if req.Wallet == "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl" || req.Wallet == "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq" {
-		return &kycmoduletypes.QueryByWalletResponse{Investor: &inv2}, nil
+	for _, el := range Wallets {
+		if req.Wallet == el {
+			return &kycmoduletypes.QueryByWalletResponse{Investor: &inv2}, nil
+		}
 	}
 
 	return &kycmoduletypes.QueryByWalletResponse{

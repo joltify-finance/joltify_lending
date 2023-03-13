@@ -171,7 +171,7 @@ func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types
 }
 */
 
-func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo) error {
+func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int) error {
 	if tokenAmount.IsZero() {
 		return nil
 	}
@@ -227,7 +227,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 		poolInfo.ProjectDueTime = ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.ProjectLength))
 	}
 
-	err = k.processBorrow(ctx, poolInfo, currentBorrowClass, tokenAmount, depositors)
+	err = k.processBorrow(ctx, poolInfo, currentBorrowClass, tokenAmount, depositors, borrowedFix)
 	if err != nil {
 		return err
 	}
@@ -247,11 +247,17 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 	return nil
 }
 
-func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin, depositors []*types.DepositorInfo) error {
+func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin, depositors []*types.DepositorInfo, borrowableFix sdkmath.Int) error {
 	if poolInfo.BorrowableAmount.IsLT(amount) {
 		return types.ErrInsufficientFund
 	}
-	utilization := sdk.NewDecFromInt(amount.Amount).Quo(sdk.NewDecFromInt(poolInfo.BorrowableAmount.Amount))
+	var borrowable sdkmath.Int
+	if !borrowableFix.IsZero() {
+		borrowable = borrowableFix
+	} else {
+		borrowable = poolInfo.BorrowableAmount.Amount
+	}
+	utilization := sdk.NewDecFromInt(amount.Amount).Quo(sdk.NewDecFromInt(borrowable))
 
 	var err error
 	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
@@ -316,8 +322,10 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 				firstDepositor = depositor
 				continue
 			}
+			fmt.Printf(">>>>>>withdrawable %v\n", depositor.WithdrawalAmount)
 			locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			k.doProcessInvestor(ctx, depositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
+			fmt.Printf(">>>>>>>>>>%v\n", locked)
 			totalLocked = totalLocked.Add(locked)
 			continue
 		}

@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"testing"
 	"time"
 
@@ -46,11 +47,12 @@ func setupPool(suite *withDrawPrincipalSuite) {
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
-	creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
-	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
+	//creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
+	//creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
+	//creator3 := "jolt1z0y0zl0trsnuqmqf5v034pyv9sp39jg3rv6lsm"
+	//creator4 := "jolt1fcaa73cc9c2l3l2u57skddgd0zm749ncukx90g"
 
-	suite.investors = []string{creator1, creator2}
-
+	suite.investors = keeper.Wallets
 }
 
 // The default state used by each test
@@ -518,5 +520,4 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 
 	allWithdraw = delta.Add(delta2)
 	suite.Require().True(allWithdraw.Amount.Sub(paid.Amount).Abs().LT(sdk.NewIntFromUint64(4)))
-
 }
