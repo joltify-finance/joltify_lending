@@ -2,8 +2,9 @@ package keeper
 
 import (
 	"context"
-	coserrors "cosmossdk.io/errors"
 	"errors"
+
+	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -93,7 +94,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 			poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.SubAmount(totalWithdraw.Amount)
 		}
 		if depositor.DepositType == types.DepositorInfo_processed {
-			poolInfo.BorrowedAmount = poolInfo.BorrowableAmount.Add(depositor.WithdrawalAmount).SubAmount(totalWithdraw.Amount)
+			poolInfo.BorrowableAmount = poolInfo.BorrowableAmount.Add(depositor.WithdrawalAmount).SubAmount(totalWithdraw.Amount)
 		}
 		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
 		if err != nil {

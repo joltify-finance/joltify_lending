@@ -1,10 +1,11 @@
 package keeper_test
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"fmt"
 	"strings"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/davecgh/go-spew/spew"
@@ -993,9 +994,9 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 
 	}
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
-	//3.6e5-2e3*3
-	fmt.Printf(">>>>>>>>%v\n", poolInfo.BorrowableAmount)
-	suite.Require().True(poolInfo.BorrowableAmount.Amount.Equal(sdk.NewIntFromUint64(3.6e5).Sub(sdk.NewIntFromUint64(6e3))))
+	//3.6e5-0.68e5-2e3*3
+	fmt.Printf(">>>>111111>>>>%v\n", poolInfo.BorrowableAmount)
+	suite.Require().True(poolInfo.BorrowableAmount.Amount.Equal(sdk.NewIntFromUint64(2.97e5).Sub(sdk.NewIntFromUint64(6e3))))
 
 	// now the first investor deposit and then withdraw all
 	for i := 0; i < 1; i++ {
