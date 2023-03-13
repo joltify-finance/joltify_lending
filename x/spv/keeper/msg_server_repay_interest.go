@@ -36,6 +36,9 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		// we need to pay the whole month
 		monthlyRatio := interestData.MonthlyRatio
 		paymentAmount := monthlyRatio.MulInt(lastBorrow.Amount).TruncateInt()
+		if paymentAmount.IsZero() {
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, nil
+		}
 		reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(reserve).TruncateInt()
 		toInvestors := paymentAmount.Sub(reservedAmount)
 		pReserve, found := k.GetReserve(ctx, denom)
@@ -50,6 +53,9 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	} else {
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+		if currentTimeTruncated.Before(latestPaymentTime) {
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, nil
+		}
 		deltaTruncated := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
 		interest := r.Power(uint64(deltaTruncated)).Sub(sdk.OneDec())
@@ -95,10 +101,13 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic(err)
 		}
-		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow)
 		firstBorrow = false
+		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow)
 		if err != nil {
 			return sdkmath.Int{}, err
+		}
+		if thisBorrowInterest.Amount.IsZero() {
+			continue
 		}
 		class.Data, err = types2.NewAnyWithValue(&borrowInterest)
 		if err != nil {
@@ -108,13 +117,6 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			return sdkmath.Int{}, err
 		}
-		saved, _ := k.nftKeeper.GetClass(ctx, class.GetId())
-
-		err = proto.Unmarshal(saved.Data.Value, &borrowInterest)
-		if err != nil {
-			panic(err)
-		}
-
 		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
 	}
 	return totalPayment, nil
