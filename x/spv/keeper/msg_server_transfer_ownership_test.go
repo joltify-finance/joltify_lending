@@ -987,12 +987,46 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 		suite.Require().NoError(err)
 		parsed, err := sdk.ParseCoinsNormalized(resp.Amount)
 		suite.Require().NoError(err)
+		suite.Require().True(parsed[0].Amount.Equal(sdk.NewIntFromUint64(2e3)))
+		//creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
+		//suite.Require().NoError(err)
+
+	}
+	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	//3.6e5-2e3*3
+	fmt.Printf(">>>>>>>>%v\n", poolInfo.BorrowableAmount)
+	suite.Require().True(poolInfo.BorrowableAmount.Amount.Equal(sdk.NewIntFromUint64(3.6e5).Sub(sdk.NewIntFromUint64(6e3))))
+
+	// now the first investor deposit and then withdraw all
+	for i := 0; i < 1; i++ {
+		msgDeposit := &types.MsgDeposit{Creator: suite.investors[i], PoolIndex: suite.investorPool, Token: depositorAmounts[i]}
+		_, err := suite.app.Deposit(suite.ctx, msgDeposit)
+		suite.Require().NoError(err)
+		totalDeposit = totalDeposit.Add(msgDeposit.Token.Amount)
+	}
+
+	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	//88.74-2e3*3
+	suite.Require().True(poolInfo.BorrowableAmount.Amount.Equal(sdk.NewIntFromUint64(88.74e5).Sub(sdk.NewIntFromUint64(6e3).Add(depositorAmounts[0].Amount))))
+
+	// now we withdraw, it will send all the amount
+	for i := 0; i < 3; i++ {
+		req := types.NewMsgWithdrawPrincipal(suite.investors[i], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e10)))
+		resp, err := suite.app.WithdrawPrincipal(suite.ctx, req)
+		suite.Require().NoError(err)
+		parsed, err := sdk.ParseCoinsNormalized(resp.Amount)
+		suite.Require().NoError(err)
 		suite.Require().True(parsed[0].Amount.Equal(depositorAmounts[i].Amount))
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
 		_, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
 		suite.Require().False(found)
 	}
+
+	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	//88.74-2e3*3
+	//suite.Require().True(poolInfo.BorrowableAmount.Amount.Equal(sdk.NewIntFromUint64(88.74e5).Sub(sdk.NewIntFromUint64(6e3).Add(depositorAmounts[0].Amount))))
+	fmt.Printf(">>>>>>>2222222222>>>>>>%v\n", poolInfo.BorrowableAmount)
 
 }
 
