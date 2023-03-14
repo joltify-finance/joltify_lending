@@ -7,11 +7,11 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgLiquidate } from "./types/joltify/third_party/jolt/v1beta1/tx";
-import { MsgBorrow } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgDeposit } from "./types/joltify/third_party/jolt/v1beta1/tx";
-import { MsgWithdraw } from "./types/joltify/third_party/jolt/v1beta1/tx";
+import { MsgBorrow } from "./types/joltify/third_party/jolt/v1beta1/tx";
 import { MsgRepay } from "./types/joltify/third_party/jolt/v1beta1/tx";
+import { MsgWithdraw } from "./types/joltify/third_party/jolt/v1beta1/tx";
+import { MsgLiquidate } from "./types/joltify/third_party/jolt/v1beta1/tx";
 
 import { GenesisAccumulationTime as typeGenesisAccumulationTime} from "./types"
 import { Params as typeParams} from "./types"
@@ -31,10 +31,10 @@ import { BorrowInterestFactorResponse as typeBorrowInterestFactorResponse} from 
 import { MoneyMarketInterestRate as typeMoneyMarketInterestRate} from "./types"
 import { InterestFactor as typeInterestFactor} from "./types"
 
-export { MsgLiquidate, MsgBorrow, MsgDeposit, MsgWithdraw, MsgRepay };
+export { MsgDeposit, MsgBorrow, MsgRepay, MsgWithdraw, MsgLiquidate };
 
-type sendMsgLiquidateParams = {
-  value: MsgLiquidate,
+type sendMsgDepositParams = {
+  value: MsgDeposit,
   fee?: StdFee,
   memo?: string
 };
@@ -45,8 +45,8 @@ type sendMsgBorrowParams = {
   memo?: string
 };
 
-type sendMsgDepositParams = {
-  value: MsgDeposit,
+type sendMsgRepayParams = {
+  value: MsgRepay,
   fee?: StdFee,
   memo?: string
 };
@@ -57,31 +57,31 @@ type sendMsgWithdrawParams = {
   memo?: string
 };
 
-type sendMsgRepayParams = {
-  value: MsgRepay,
+type sendMsgLiquidateParams = {
+  value: MsgLiquidate,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgLiquidateParams = {
-  value: MsgLiquidate,
+type msgDepositParams = {
+  value: MsgDeposit,
 };
 
 type msgBorrowParams = {
   value: MsgBorrow,
 };
 
-type msgDepositParams = {
-  value: MsgDeposit,
+type msgRepayParams = {
+  value: MsgRepay,
 };
 
 type msgWithdrawParams = {
   value: MsgWithdraw,
 };
 
-type msgRepayParams = {
-  value: MsgRepay,
+type msgLiquidateParams = {
+  value: MsgLiquidate,
 };
 
 
@@ -114,17 +114,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgLiquidate({ value, fee, memo }: sendMsgLiquidateParams): Promise<DeliverTxResponse> {
+		async sendMsgDeposit({ value, fee, memo }: sendMsgDepositParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgLiquidate: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgDeposit: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgLiquidate({ value: MsgLiquidate.fromPartial(value) })
+				let msg = this.msgDeposit({ value: MsgDeposit.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgLiquidate: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgDeposit: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -142,17 +142,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgDeposit({ value, fee, memo }: sendMsgDepositParams): Promise<DeliverTxResponse> {
+		async sendMsgRepay({ value, fee, memo }: sendMsgRepayParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgDeposit: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgRepay: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgDeposit({ value: MsgDeposit.fromPartial(value) })
+				let msg = this.msgRepay({ value: MsgRepay.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgDeposit: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgRepay: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -170,26 +170,26 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgRepay({ value, fee, memo }: sendMsgRepayParams): Promise<DeliverTxResponse> {
+		async sendMsgLiquidate({ value, fee, memo }: sendMsgLiquidateParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgRepay: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgLiquidate: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgRepay({ value: MsgRepay.fromPartial(value) })
+				let msg = this.msgLiquidate({ value: MsgLiquidate.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgRepay: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgLiquidate: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgLiquidate({ value }: msgLiquidateParams): EncodeObject {
+		msgDeposit({ value }: msgDepositParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgLiquidate", value: MsgLiquidate.fromPartial( value ) }  
+				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgDeposit", value: MsgDeposit.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgLiquidate: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgDeposit: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -201,11 +201,11 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgDeposit({ value }: msgDepositParams): EncodeObject {
+		msgRepay({ value }: msgRepayParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgDeposit", value: MsgDeposit.fromPartial( value ) }  
+				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgRepay", value: MsgRepay.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgDeposit: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgRepay: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -217,11 +217,11 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgRepay({ value }: msgRepayParams): EncodeObject {
+		msgLiquidate({ value }: msgLiquidateParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgRepay", value: MsgRepay.fromPartial( value ) }  
+				return { typeUrl: "/joltify.third_party.jolt.v1beta1.MsgLiquidate", value: MsgLiquidate.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgRepay: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgLiquidate: Could not create message: ' + e.message)
 			}
 		},
 		

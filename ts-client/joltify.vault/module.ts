@@ -7,9 +7,9 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgCreateOutboundTx } from "./types/joltify/vault/tx";
-import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
 import { MsgCreateIssueToken } from "./types/joltify/vault/tx";
+import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
+import { MsgCreateOutboundTx } from "./types/joltify/vault/tx";
 
 import { PoolProposal as typePoolProposal} from "./types"
 import { CreatePool as typeCreatePool} from "./types"
@@ -27,10 +27,10 @@ import { Validator as typeValidator} from "./types"
 import { StandbyPower as typeStandbyPower} from "./types"
 import { Validators as typeValidators} from "./types"
 
-export { MsgCreateOutboundTx, MsgCreateCreatePool, MsgCreateIssueToken };
+export { MsgCreateIssueToken, MsgCreateCreatePool, MsgCreateOutboundTx };
 
-type sendMsgCreateOutboundTxParams = {
-  value: MsgCreateOutboundTx,
+type sendMsgCreateIssueTokenParams = {
+  value: MsgCreateIssueToken,
   fee?: StdFee,
   memo?: string
 };
@@ -41,23 +41,23 @@ type sendMsgCreateCreatePoolParams = {
   memo?: string
 };
 
-type sendMsgCreateIssueTokenParams = {
-  value: MsgCreateIssueToken,
+type sendMsgCreateOutboundTxParams = {
+  value: MsgCreateOutboundTx,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgCreateOutboundTxParams = {
-  value: MsgCreateOutboundTx,
+type msgCreateIssueTokenParams = {
+  value: MsgCreateIssueToken,
 };
 
 type msgCreateCreatePoolParams = {
   value: MsgCreateCreatePool,
 };
 
-type msgCreateIssueTokenParams = {
-  value: MsgCreateIssueToken,
+type msgCreateOutboundTxParams = {
+  value: MsgCreateOutboundTx,
 };
 
 
@@ -90,17 +90,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgCreateOutboundTx({ value, fee, memo }: sendMsgCreateOutboundTxParams): Promise<DeliverTxResponse> {
+		async sendMsgCreateIssueToken({ value, fee, memo }: sendMsgCreateIssueTokenParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgCreateOutboundTx: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgCreateIssueToken: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCreateOutboundTx({ value: MsgCreateOutboundTx.fromPartial(value) })
+				let msg = this.msgCreateIssueToken({ value: MsgCreateIssueToken.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCreateOutboundTx: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgCreateIssueToken: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -118,26 +118,26 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgCreateIssueToken({ value, fee, memo }: sendMsgCreateIssueTokenParams): Promise<DeliverTxResponse> {
+		async sendMsgCreateOutboundTx({ value, fee, memo }: sendMsgCreateOutboundTxParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgCreateIssueToken: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgCreateOutboundTx: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCreateIssueToken({ value: MsgCreateIssueToken.fromPartial(value) })
+				let msg = this.msgCreateOutboundTx({ value: MsgCreateOutboundTx.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCreateIssueToken: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgCreateOutboundTx: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgCreateOutboundTx({ value }: msgCreateOutboundTxParams): EncodeObject {
+		msgCreateIssueToken({ value }: msgCreateIssueTokenParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.vault.MsgCreateOutboundTx", value: MsgCreateOutboundTx.fromPartial( value ) }  
+				return { typeUrl: "/joltify.vault.MsgCreateIssueToken", value: MsgCreateIssueToken.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgCreateOutboundTx: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgCreateIssueToken: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -149,11 +149,11 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgCreateIssueToken({ value }: msgCreateIssueTokenParams): EncodeObject {
+		msgCreateOutboundTx({ value }: msgCreateOutboundTxParams): EncodeObject {
 			try {
-				return { typeUrl: "/joltify.vault.MsgCreateIssueToken", value: MsgCreateIssueToken.fromPartial( value ) }  
+				return { typeUrl: "/joltify.vault.MsgCreateOutboundTx", value: MsgCreateOutboundTx.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgCreateIssueToken: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgCreateOutboundTx: Could not create message: ' + e.message)
 			}
 		},
 		
