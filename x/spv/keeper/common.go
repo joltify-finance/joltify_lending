@@ -380,7 +380,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		k.DelPool(ctx, poolInfo.Index)
 		k.SetHistoryPool(ctx, poolInfo)
 		// we transfer the leftover back to spv
-		totalReturn := poolInfo.EscrowPrincipalAmount.Add(poolInfo.EscrowInterestAmount)
+		totalReturn := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
 
 		err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalReturn))
 		if err != nil {

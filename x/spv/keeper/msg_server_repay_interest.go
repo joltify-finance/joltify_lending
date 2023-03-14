@@ -147,7 +147,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
 	}
 
-	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Add(msg.Token)
+	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Add(msg.Token.Amount)
 	k.SetPool(ctx, poolInfo)
 
 	return &types.MsgRepayInterestResponse{}, nil

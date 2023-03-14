@@ -38,20 +38,19 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 
 	claimed := sdk.NewCoin(depositor.LockedAmount.Denom, totalInterest)
 
-	// we pay the interesting and the principle
-	//if poolInfo.PoolStatus == types.PoolInfo_CLOSING {
-	//	lendNFTs := depositor.LinkedNFT
-	//
-	//	totalBorrowedNow, err := calculateTotalPrinciple(ctx, lendNFTs, k.nftKeeper)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	claimed = claimed.AddAmount(totalBorrowedNow)
-	//
-	//	/// we do the cleanup
-	//	k.cleanupDepositor(ctx, depositor)
-	//	k.cleanupPool(ctx, poolInfo)
-	//}
+	// we add the pending one
+	claimed = claimed.Add(depositor.PendingAmount)
+
+	depositor.PendingAmount = sdk.NewCoin(depositor.PendingAmount.Denom, sdk.ZeroInt())
+
+	poolInfo, found := k.GetPools(ctx, depositor.PoolIndex)
+	if !found {
+		panic("pool must be found")
+	}
+
+	if poolInfo.EscrowInterestAmount.IsNegative() {
+		return nil, coserrors.Wrapf(types.ErrClaimInterest, "not enough interest to be paid")
+	}
 
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investorAddress, sdk.NewCoins(claimed))
 	if err != nil {

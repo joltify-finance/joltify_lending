@@ -354,7 +354,6 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 		panic(err)
 	}
 
-	fmt.Printf(">>>>>>#########>>>>>>>%v----%v---%v\n", a1.String(), a2.String(), a1.Add(a2[0]))
 	suite.Require().True(a1.Add(a2[0])[0].IsEqual(borrowClassInfo1.InterestPaid))
 
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())

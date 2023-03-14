@@ -23,12 +23,7 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 		panic(err)
 	}
 
-	if poolInfo.EscrowInterestAmount.Amount.LT(totalAmountDue) {
-		ctx.Logger().Error("insufficient fund to pay the interest %v<%v", poolInfo.EscrowInterestAmount.String(), totalAmountDue.String())
-		return types.ErrInsufficientFund
-	}
-
-	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.SubAmount(totalAmountDue)
+	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(totalAmountDue)
 
 	// finally, we update the poolinfo
 	currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(poolInfo.PayFreq) * time.Second)
@@ -62,6 +57,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		totalLockedAmount = totalLockedAmount.Add(d.LockedAmount.Amount)
 	}
 	poolInfo.TransferAccounts = []sdk.AccAddress{}
+	ctx.BlockHeight()
 
 	// borrowable is larger than the total required, so we can return the money to these investors
 	if poolInfo.UsableAmount.Amount.GTE(totalLockedAmount) {
@@ -77,11 +73,13 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 			}
 
 			el.LinkedNFT = []string{}
-			el.WithdrawalAmount = el.WithdrawalAmount.Add(el.LockedAmount.AddAmount(interest))
+			el.PendingAmount = el.PendingAmount.AddAmount(interest)
 			el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdk.ZeroInt())
 			el.DepositType = types.DepositorInfo_deposit_close
 			k.SetDepositor(ctx, *el)
 		}
+
+		poolInfo.UsableAmount = sdk.NewCoin(poolInfo.UsableAmount.Denom, sdk.ZeroInt())
 
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
 		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, totalLockedAmount), false, nil, sdk.ZeroInt())
@@ -105,7 +103,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		}
 		depositors[i].DepositType = types.DepositorInfo_unset
 		el.LinkedNFT = []string{}
-		el.WithdrawalAmount = el.WithdrawalAmount.Add(el.LockedAmount.AddAmount(interest))
+		el.PendingAmount = el.PendingAmount.AddAmount(interest)
 		el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdk.ZeroInt())
 		totalBorrowableFromPrevious = totalBorrowableFromPrevious.Add(el.WithdrawalAmount.Amount)
 	}
@@ -259,8 +257,10 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 	}
 
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.BorrowedAmount)
+	// we also add the interest to be paid
+	totalPaid := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
 
-	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(poolInfo.EscrowInterestAmount))
+	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalPaid))
 	if err != nil {
 		ctx.Logger().Error("fail to send the leftover back to spv ", "err=", err.Error())
 		panic(err)
@@ -268,6 +268,6 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 
 	poolInfo.PoolStatus = types.PoolInfo_CLOSED
 	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdk.ZeroInt())
-	poolInfo.EscrowInterestAmount = sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdk.ZeroInt())
+	poolInfo.EscrowInterestAmount = sdk.ZeroInt()
 	k.SetPool(ctx, *poolInfo)
 }

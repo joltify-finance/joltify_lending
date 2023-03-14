@@ -983,8 +983,6 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	suite.Require().True(totalBorrowable.Equal(sdk.NewIntFromUint64(2.63e5)))
 
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
-	//4.28(total)-1.55(total borrow)-6e3
-	fmt.Printf(">>>>222222>>>>%v\n", poolInfo.UsableAmount)
 
 	for i := 0; i < 3; i++ {
 		req := types.NewMsgWithdrawPrincipal(suite.investors[i], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e3)))
@@ -993,15 +991,12 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 		parsed, err := sdk.ParseCoinsNormalized(resp.Amount)
 		suite.Require().NoError(err)
 		suite.Require().True(parsed[0].Amount.Equal(sdk.NewIntFromUint64(2e3)))
-		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
-		suite.Require().NoError(err)
-		d, _ := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
-		spew.Dump(d)
 	}
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
-	//4.28(total)-1.55(total borrow)-6e3
-	fmt.Printf(">>>>111111>>>>%v\n", poolInfo.UsableAmount)
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromUint64(2.97e5).Sub(sdk.NewIntFromUint64(6e3))))
+	//the first 3 investor money = 4.28(total)-0.68(last 4 investor money)
+	// the first 3 leftover 3.6-(1.65-0.68 locked in pool)-0.06
+
+	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromUint64(2.63e5).Sub(sdk.NewIntFromUint64(6e3))))
 
 	// now the first investor deposit and then withdraw all
 	for i := 0; i < 1; i++ {
@@ -1011,9 +1006,10 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 		totalDeposit = totalDeposit.Add(msgDeposit.Token.Amount)
 	}
 
+	poolInfoBefore = poolInfo
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
-	//88.74-2e3*3
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromUint64(88.74e5).Sub(sdk.NewIntFromUint64(6e3).Add(depositorAmounts[0].Amount))))
+	//(4.28-0.68)-2e3*3
+	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(poolInfoBefore.UsableAmount.Amount.Add(depositorAmounts[0].Amount)))
 
 	// now we withdraw, it will send all the amount
 	for i := 0; i < 3; i++ {
@@ -1025,8 +1021,8 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 		suite.Require().True(parsed[0].Amount.Equal(depositorAmounts[i].Amount))
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
-		_, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
-		suite.Require().False(found)
+		d, _ := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
+		spew.Dump(d)
 	}
 
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)

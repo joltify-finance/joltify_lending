@@ -74,6 +74,14 @@ export interface SpvDepositorInfo {
   incentive_amount?: V1Beta1Coin;
   linkedNFT?: string[];
   deposit_type?: DepositorInfoDEPOSITTYPE;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  pending_amount?: V1Beta1Coin;
 }
 
 export type SpvMsgActivePoolResponse = object;
@@ -183,14 +191,7 @@ export interface SpvPoolInfo {
    */
   target_amount?: V1Beta1Coin;
   pool_type?: PoolInfoPOOLTYPE;
-
-  /**
-   * Coin defines a token with a denomination and an amount.
-   *
-   * NOTE: The amount field is an Int which implements the custom method
-   * signatures required by gogoproto.
-   */
-  escrow_interest_amount?: V1Beta1Coin;
+  escrow_interest_amount?: string;
 
   /**
    * Coin defines a token with a denomination and an amount.

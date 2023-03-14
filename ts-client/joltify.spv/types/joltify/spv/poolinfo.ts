@@ -31,7 +31,7 @@ export interface PoolInfo {
   usableAmount: Coin | undefined;
   targetAmount: Coin | undefined;
   poolType: PoolInfo_POOLTYPE;
-  escrowInterestAmount: Coin | undefined;
+  escrowInterestAmount: string;
   escrowPrincipalAmount: Coin | undefined;
   withdrawProposalAmount: Coin | undefined;
   projectDueTime: Date | undefined;
@@ -157,7 +157,7 @@ function createBasePoolInfo(): PoolInfo {
     usableAmount: undefined,
     targetAmount: undefined,
     poolType: 0,
-    escrowInterestAmount: undefined,
+    escrowInterestAmount: "",
     escrowPrincipalAmount: undefined,
     withdrawProposalAmount: undefined,
     projectDueTime: undefined,
@@ -219,8 +219,8 @@ export const PoolInfo = {
     if (message.poolType !== 0) {
       writer.uint32(136).int32(message.poolType);
     }
-    if (message.escrowInterestAmount !== undefined) {
-      Coin.encode(message.escrowInterestAmount, writer.uint32(146).fork()).ldelim();
+    if (message.escrowInterestAmount !== "") {
+      writer.uint32(146).string(message.escrowInterestAmount);
     }
     if (message.escrowPrincipalAmount !== undefined) {
       Coin.encode(message.escrowPrincipalAmount, writer.uint32(154).fork()).ldelim();
@@ -299,7 +299,7 @@ export const PoolInfo = {
           message.poolType = reader.int32() as any;
           break;
         case 18:
-          message.escrowInterestAmount = Coin.decode(reader, reader.uint32());
+          message.escrowInterestAmount = reader.string();
           break;
         case 19:
           message.escrowPrincipalAmount = Coin.decode(reader, reader.uint32());
@@ -343,7 +343,7 @@ export const PoolInfo = {
       usableAmount: isSet(object.usableAmount) ? Coin.fromJSON(object.usableAmount) : undefined,
       targetAmount: isSet(object.targetAmount) ? Coin.fromJSON(object.targetAmount) : undefined,
       poolType: isSet(object.poolType) ? poolInfo_POOLTYPEFromJSON(object.poolType) : 0,
-      escrowInterestAmount: isSet(object.escrowInterestAmount) ? Coin.fromJSON(object.escrowInterestAmount) : undefined,
+      escrowInterestAmount: isSet(object.escrowInterestAmount) ? String(object.escrowInterestAmount) : "",
       escrowPrincipalAmount: isSet(object.escrowPrincipalAmount)
         ? Coin.fromJSON(object.escrowPrincipalAmount)
         : undefined,
@@ -390,9 +390,7 @@ export const PoolInfo = {
     message.targetAmount !== undefined
       && (obj.targetAmount = message.targetAmount ? Coin.toJSON(message.targetAmount) : undefined);
     message.poolType !== undefined && (obj.poolType = poolInfo_POOLTYPEToJSON(message.poolType));
-    message.escrowInterestAmount !== undefined && (obj.escrowInterestAmount = message.escrowInterestAmount
-      ? Coin.toJSON(message.escrowInterestAmount)
-      : undefined);
+    message.escrowInterestAmount !== undefined && (obj.escrowInterestAmount = message.escrowInterestAmount);
     message.escrowPrincipalAmount !== undefined && (obj.escrowPrincipalAmount = message.escrowPrincipalAmount
       ? Coin.toJSON(message.escrowPrincipalAmount)
       : undefined);
@@ -444,9 +442,7 @@ export const PoolInfo = {
       ? Coin.fromPartial(object.targetAmount)
       : undefined;
     message.poolType = object.poolType ?? 0;
-    message.escrowInterestAmount = (object.escrowInterestAmount !== undefined && object.escrowInterestAmount !== null)
-      ? Coin.fromPartial(object.escrowInterestAmount)
-      : undefined;
+    message.escrowInterestAmount = object.escrowInterestAmount ?? "";
     message.escrowPrincipalAmount =
       (object.escrowPrincipalAmount !== undefined && object.escrowPrincipalAmount !== null)
         ? Coin.fromPartial(object.escrowPrincipalAmount)

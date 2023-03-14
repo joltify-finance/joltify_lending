@@ -42,5 +42,9 @@ message DepositorInfo {
   }
   DEPOSITTYPE deposit_type = 8;
 
+  cosmos.base.v1beta1.Coin pending_amount = 9[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
 }
 
