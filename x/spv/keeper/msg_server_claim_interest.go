@@ -39,9 +39,9 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 	claimed := sdk.NewCoin(depositor.LockedAmount.Denom, totalInterest)
 
 	// we add the pending one
-	claimed = claimed.Add(depositor.PendingAmount)
+	claimed = claimed.Add(depositor.PendingInterest)
 
-	depositor.PendingAmount = sdk.NewCoin(depositor.PendingAmount.Denom, sdk.ZeroInt())
+	depositor.PendingInterest = sdk.NewCoin(depositor.GetPendingInterest().Denom, sdk.ZeroInt())
 
 	poolInfo, found := k.GetPools(ctx, depositor.PoolIndex)
 	if !found {

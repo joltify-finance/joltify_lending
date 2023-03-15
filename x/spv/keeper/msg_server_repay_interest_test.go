@@ -119,7 +119,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	samplePool, found := k.GetPools(ctx, poolIndex)
 	require.True(t, found)
 
-	samplePool.EscrowInterestAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(10e12))
+	samplePool.EscrowInterestAmount = sdk.NewIntFromUint64(10e12)
 	k.SetPool(ctx, samplePool)
 
 	samplePool.UsableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))

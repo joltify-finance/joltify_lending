@@ -44,7 +44,6 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 	poolInfo.TransferAccounts = append(poolInfo.TransferAccounts, caller)
 	d.DepositType = types.DepositorInfo_transfer_request
 	poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(d.WithdrawalAmount)
-
 	if err != nil {
 		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(err, "fail to update the borrowable")
 	}

@@ -18,25 +18,17 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipOneInvestor() {
 	setupPool(suite)
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
-	creator2 := suite.investors[1]
 	creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
 	suite.Require().NoError(err)
 	//creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
 	//suite.Require().NoError(err)
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
-	depositAmount2 := sdk.NewCoin("ausdc", sdk.NewInt(2e5))
 
 	//suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
 		PoolIndex: suite.investorPool,
 		Token:     depositAmount}
 
-	// user two deposit half of the amount of the user 1
-	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
-		PoolIndex: suite.investorPool,
-		Token:     depositAmount2}
-
-	_ = msgDepositUser2
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
 
@@ -80,15 +72,13 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipOneInvestor() {
 	suite.Require().True(found)
 	suite.Require().True(poolInfoBefore.BorrowedAmount.Equal(poolInfo.BorrowedAmount))
 	suite.Require().True(poolInfoBefore.UsableAmount.Equal(poolInfo.UsableAmount))
-	fmt.Printf(">>>>>>>>>%v\n", poolInfo.UsableAmount)
-	fmt.Printf(">>>>>>>>>%v\n", poolInfo.BorrowedAmount)
-	fmt.Printf(">>>>>>>>>%v\n", poolInfo.PoolNFTIds)
 
 	//fixme need to check the interest
 	borrowed := sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))
 	all1 := depositAmount
 	suite.Require().True(depositorAfterTransfer.LockedAmount.IsEqual(borrowed))
 	suite.Require().Equal(depositorAfterTransfer.DepositType, types.DepositorInfo_processed)
+	spew.Dump(depositorAfterTransfer)
 	suite.Require().True(depositorAfterTransfer.WithdrawalAmount.IsEqual(all1.Sub(borrowed)))
 
 	ids := strings.Split(depositorBefore.LinkedNFT[0], ":")
@@ -141,7 +131,6 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipTwoInvestor() {
 		PoolIndex: suite.investorPool,
 		Token:     depositAmount2}
 
-	_ = msgDepositUser2
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
 
@@ -625,10 +614,6 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByTwoInvestors()
 	// 1.5e5-1.34e5=0.16e5
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromUint64(0.16e5)))
 
-	//_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
-	//fmt.Printf(">>>>>>>>>>>%v\n", err)
-	//suite.Require().NoError(err)
-
 	return
 }
 
@@ -952,7 +937,6 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 		suite.Require().NoError(err)
 		depositor, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
 		suite.Require().True(found)
-		spew.Dump(depositor)
 		totalBorrowed2 = totalBorrowed2.Add(depositor.LockedAmount.Amount)
 		totalBorrowable = totalBorrowable.Add(depositor.WithdrawalAmount.Amount)
 		ids := strings.Split(depositor.LinkedNFT[0], ":")
@@ -1012,24 +996,37 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(poolInfoBefore.UsableAmount.Amount.Add(depositorAmounts[0].Amount)))
 
 	// now we withdraw, it will send all the amount
+	// first one deposit 26945
+	// second one deposit 32333
+	// the third deposit 37722
+	lockeds := []sdkmath.Int{sdk.NewIntFromUint64(26945), sdk.NewIntFromUint64(32333), sdk.NewIntFromUint64(37722)}
 	for i := 0; i < 3; i++ {
 		req := types.NewMsgWithdrawPrincipal(suite.investors[i], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e10)))
 		resp, err := suite.app.WithdrawPrincipal(suite.ctx, req)
 		suite.Require().NoError(err)
 		parsed, err := sdk.ParseCoinsNormalized(resp.Amount)
+		_ = parsed
 		suite.Require().NoError(err)
-		suite.Require().True(parsed[0].Amount.Equal(depositorAmounts[i].Amount))
+
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
 		d, _ := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr)
 		spew.Dump(d)
+		if i == 0 {
+			shouldGet := depositorAmounts[i].Amount.MulRaw(2).Sub(lockeds[i]).Sub(sdk.NewIntFromUint64(2e3))
+			suite.Require().True(parsed[0].Amount.Equal(shouldGet))
+			continue
+		}
+
+		shouldGet := depositorAmounts[i].Amount.Sub(lockeds[i]).Sub(sdk.NewIntFromUint64(2e3))
+		suite.Require().True(parsed[0].Amount.Equal(shouldGet))
 	}
 
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	//88.74-2e3*3
 	//suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromUint64(88.74e5).Sub(sdk.NewIntFromUint64(6e3).Add(depositorAmounts[0].Amount))))
-	fmt.Printf(">>>>>>>2222222222>>>>>>%v\n", poolInfo.UsableAmount)
-
+	suite.Require().True(poolInfo.UsableAmount.Amount.IsZero())
+	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromUint64(1.65e5)))
 }
 
 func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowByMultipleEnoughMoneyAllHaveNFT() {

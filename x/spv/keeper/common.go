@@ -171,6 +171,8 @@ func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types
 }
 */
 
+// tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
+// rather then all the usable money
 func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int) error {
 	if tokenAmount.IsZero() {
 		return nil
