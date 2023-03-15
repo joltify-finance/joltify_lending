@@ -28,6 +28,6 @@ message GenesisState {
 		(gogoproto.nullable) = false,
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
 	];
-	coinsQuota coinsQuota = 9[	(gogoproto.nullable) = false];
+	CoinsQuota coinsQuota = 9[	(gogoproto.nullable) = false];
 	bool exported = 4;
 }

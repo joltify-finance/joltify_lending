@@ -129,7 +129,7 @@ message QueryGetQuotaRequest {
 }
 
 message QueryGetQuotaResponse {
-	coinsQuota coinQuotaResponse=1  [(gogoproto.nullable) = false] ;
+	CoinsQuota coinQuotaResponse=1  [(gogoproto.nullable) = false] ;
 }
 
 // this line is used by starport scaffolding # 3
@@ -157,13 +157,13 @@ message QueryGetCreatePoolResponse {
 	PoolProposal CreatePool = 1;
 }
 
-message poolInfo {
+message PoolInfo {
 	string BlockHeight=1;
 	PoolProposal CreatePool = 2;
 }
 
 message QueryLastPoolResponse {
-	repeated poolInfo pools = 1;
+	repeated PoolInfo pools = 1;
 }
 
 message QueryAllCreatePoolRequest {

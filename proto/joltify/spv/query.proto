@@ -82,7 +82,7 @@ message QueryQueryPoolResponse {
 
 message QueryDepositorRequest {
   string walletAddress = 1;
-  string depositPoolIndex = 2;
+  string deposit_pool_index = 2;
 }
 
 message QueryDepositorResponse {
@@ -98,7 +98,7 @@ message QueryAllowedPoolsResponse {
 }
 message QueryClaimableInterestRequest {
   string wallet = 1;
-  string pool_index = 2;
+  string poolIndex = 2;
 }
 
 message QueryClaimableInterestResponse {
