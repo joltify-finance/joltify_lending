@@ -4,19 +4,19 @@ import { Coin } from "../../cosmos/base/v1beta1/coin";
 
 export const protobufPackage = "joltify.vault";
 
-export interface entity {
+export interface Entity {
   address: Uint8Array;
   feecoin: Coin[];
 }
 
-export interface proposals {
-  entry: entity[];
+export interface Proposals {
+  entry: Entity[];
 }
 
 export interface OutboundTx {
   index: string;
   processed: boolean;
-  items: { [key: string]: proposals };
+  items: { [key: string]: Proposals };
   chainType: string;
   inTxHash: string;
   receiverAddress: Uint8Array;
@@ -26,15 +26,15 @@ export interface OutboundTx {
 
 export interface OutboundTx_ItemsEntry {
   key: string;
-  value: proposals | undefined;
+  value: Proposals | undefined;
 }
 
-function createBaseentity(): entity {
+function createBaseEntity(): Entity {
   return { address: new Uint8Array(), feecoin: [] };
 }
 
-export const entity = {
-  encode(message: entity, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const Entity = {
+  encode(message: Entity, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.address.length !== 0) {
       writer.uint32(10).bytes(message.address);
     }
@@ -44,10 +44,10 @@ export const entity = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): entity {
+  decode(input: _m0.Reader | Uint8Array, length?: number): Entity {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseentity();
+    const message = createBaseEntity();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -65,14 +65,14 @@ export const entity = {
     return message;
   },
 
-  fromJSON(object: any): entity {
+  fromJSON(object: any): Entity {
     return {
       address: isSet(object.address) ? bytesFromBase64(object.address) : new Uint8Array(),
       feecoin: Array.isArray(object?.feecoin) ? object.feecoin.map((e: any) => Coin.fromJSON(e)) : [],
     };
   },
 
-  toJSON(message: entity): unknown {
+  toJSON(message: Entity): unknown {
     const obj: any = {};
     message.address !== undefined
       && (obj.address = base64FromBytes(message.address !== undefined ? message.address : new Uint8Array()));
@@ -84,35 +84,35 @@ export const entity = {
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<entity>, I>>(object: I): entity {
-    const message = createBaseentity();
+  fromPartial<I extends Exact<DeepPartial<Entity>, I>>(object: I): Entity {
+    const message = createBaseEntity();
     message.address = object.address ?? new Uint8Array();
     message.feecoin = object.feecoin?.map((e) => Coin.fromPartial(e)) || [];
     return message;
   },
 };
 
-function createBaseproposals(): proposals {
+function createBaseProposals(): Proposals {
   return { entry: [] };
 }
 
-export const proposals = {
-  encode(message: proposals, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const Proposals = {
+  encode(message: Proposals, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.entry) {
-      entity.encode(v!, writer.uint32(10).fork()).ldelim();
+      Entity.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): proposals {
+  decode(input: _m0.Reader | Uint8Array, length?: number): Proposals {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseproposals();
+    const message = createBaseProposals();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.entry.push(entity.decode(reader, reader.uint32()));
+          message.entry.push(Entity.decode(reader, reader.uint32()));
           break;
         default:
           reader.skipType(tag & 7);
@@ -122,23 +122,23 @@ export const proposals = {
     return message;
   },
 
-  fromJSON(object: any): proposals {
-    return { entry: Array.isArray(object?.entry) ? object.entry.map((e: any) => entity.fromJSON(e)) : [] };
+  fromJSON(object: any): Proposals {
+    return { entry: Array.isArray(object?.entry) ? object.entry.map((e: any) => Entity.fromJSON(e)) : [] };
   },
 
-  toJSON(message: proposals): unknown {
+  toJSON(message: Proposals): unknown {
     const obj: any = {};
     if (message.entry) {
-      obj.entry = message.entry.map((e) => e ? entity.toJSON(e) : undefined);
+      obj.entry = message.entry.map((e) => e ? Entity.toJSON(e) : undefined);
     } else {
       obj.entry = [];
     }
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<proposals>, I>>(object: I): proposals {
-    const message = createBaseproposals();
-    message.entry = object.entry?.map((e) => entity.fromPartial(e)) || [];
+  fromPartial<I extends Exact<DeepPartial<Proposals>, I>>(object: I): Proposals {
+    const message = createBaseProposals();
+    message.entry = object.entry?.map((e) => Entity.fromPartial(e)) || [];
     return message;
   },
 };
@@ -232,8 +232,8 @@ export const OutboundTx = {
       index: isSet(object.index) ? String(object.index) : "",
       processed: isSet(object.processed) ? Boolean(object.processed) : false,
       items: isObject(object.items)
-        ? Object.entries(object.items).reduce<{ [key: string]: proposals }>((acc, [key, value]) => {
-          acc[key] = proposals.fromJSON(value);
+        ? Object.entries(object.items).reduce<{ [key: string]: Proposals }>((acc, [key, value]) => {
+          acc[key] = Proposals.fromJSON(value);
           return acc;
         }, {})
         : {},
@@ -252,7 +252,7 @@ export const OutboundTx = {
     obj.items = {};
     if (message.items) {
       Object.entries(message.items).forEach(([k, v]) => {
-        obj.items[k] = proposals.toJSON(v);
+        obj.items[k] = Proposals.toJSON(v);
       });
     }
     message.chainType !== undefined && (obj.chainType = message.chainType);
@@ -274,9 +274,9 @@ export const OutboundTx = {
     const message = createBaseOutboundTx();
     message.index = object.index ?? "";
     message.processed = object.processed ?? false;
-    message.items = Object.entries(object.items ?? {}).reduce<{ [key: string]: proposals }>((acc, [key, value]) => {
+    message.items = Object.entries(object.items ?? {}).reduce<{ [key: string]: Proposals }>((acc, [key, value]) => {
       if (value !== undefined) {
-        acc[key] = proposals.fromPartial(value);
+        acc[key] = Proposals.fromPartial(value);
       }
       return acc;
     }, {});
@@ -299,7 +299,7 @@ export const OutboundTx_ItemsEntry = {
       writer.uint32(10).string(message.key);
     }
     if (message.value !== undefined) {
-      proposals.encode(message.value, writer.uint32(18).fork()).ldelim();
+      Proposals.encode(message.value, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -315,7 +315,7 @@ export const OutboundTx_ItemsEntry = {
           message.key = reader.string();
           break;
         case 2:
-          message.value = proposals.decode(reader, reader.uint32());
+          message.value = Proposals.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -328,14 +328,14 @@ export const OutboundTx_ItemsEntry = {
   fromJSON(object: any): OutboundTx_ItemsEntry {
     return {
       key: isSet(object.key) ? String(object.key) : "",
-      value: isSet(object.value) ? proposals.fromJSON(object.value) : undefined,
+      value: isSet(object.value) ? Proposals.fromJSON(object.value) : undefined,
     };
   },
 
   toJSON(message: OutboundTx_ItemsEntry): unknown {
     const obj: any = {};
     message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value ? proposals.toJSON(message.value) : undefined);
+    message.value !== undefined && (obj.value = message.value ? Proposals.toJSON(message.value) : undefined);
     return obj;
   },
 
@@ -343,7 +343,7 @@ export const OutboundTx_ItemsEntry = {
     const message = createBaseOutboundTx_ItemsEntry();
     message.key = object.key ?? "";
     message.value = (object.value !== undefined && object.value !== null)
-      ? proposals.fromPartial(object.value)
+      ? Proposals.fromPartial(object.value)
       : undefined;
     return message;
   },

@@ -1,5 +1,5 @@
 import { DepositorInfo } from "./types/joltify/spv/deposit"
-import { borrowDetail } from "./types/joltify/spv/nft"
+import { BorrowDetail } from "./types/joltify/spv/nft"
 import { NftInfo } from "./types/joltify/spv/nft"
 import { PaymentItem } from "./types/joltify/spv/nft"
 import { BorrowInterest } from "./types/joltify/spv/nft"
@@ -12,7 +12,7 @@ import { WalletsLinkPool } from "./types/joltify/spv/poolinfo"
 
 export {     
     DepositorInfo,
-    borrowDetail,
+    BorrowDetail,
     NftInfo,
     PaymentItem,
     BorrowInterest,

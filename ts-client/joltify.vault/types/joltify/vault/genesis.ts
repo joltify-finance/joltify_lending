@@ -4,7 +4,7 @@ import { Coin } from "../../cosmos/base/v1beta1/coin";
 import { CreatePool } from "./create_pool";
 import { IssueToken } from "./issue_token";
 import { OutboundTx } from "./outbound_tx";
-import { coinsQuota } from "./quota";
+import { CoinsQuota } from "./quota";
 import { Params, StandbyPower, Validators } from "./staking";
 
 export const protobufPackage = "joltify.vault";
@@ -23,7 +23,7 @@ export interface GenesisState {
   latestTwoPool: CreatePool[];
   standbypowerList: StandbyPower[];
   feeCollectedList: Coin[];
-  coinsQuota: coinsQuota | undefined;
+  coinsQuota: CoinsQuota | undefined;
   exported: boolean;
 }
 
@@ -69,7 +69,7 @@ export const GenesisState = {
       Coin.encode(v!, writer.uint32(66).fork()).ldelim();
     }
     if (message.coinsQuota !== undefined) {
-      coinsQuota.encode(message.coinsQuota, writer.uint32(74).fork()).ldelim();
+      CoinsQuota.encode(message.coinsQuota, writer.uint32(74).fork()).ldelim();
     }
     if (message.exported === true) {
       writer.uint32(32).bool(message.exported);
@@ -109,7 +109,7 @@ export const GenesisState = {
           message.feeCollectedList.push(Coin.decode(reader, reader.uint32()));
           break;
         case 9:
-          message.coinsQuota = coinsQuota.decode(reader, reader.uint32());
+          message.coinsQuota = CoinsQuota.decode(reader, reader.uint32());
           break;
         case 4:
           message.exported = reader.bool();
@@ -146,7 +146,7 @@ export const GenesisState = {
       feeCollectedList: Array.isArray(object?.feeCollectedList)
         ? object.feeCollectedList.map((e: any) => Coin.fromJSON(e))
         : [],
-      coinsQuota: isSet(object.coinsQuota) ? coinsQuota.fromJSON(object.coinsQuota) : undefined,
+      coinsQuota: isSet(object.coinsQuota) ? CoinsQuota.fromJSON(object.coinsQuota) : undefined,
       exported: isSet(object.exported) ? Boolean(object.exported) : false,
     };
   },
@@ -190,7 +190,7 @@ export const GenesisState = {
       obj.feeCollectedList = [];
     }
     message.coinsQuota !== undefined
-      && (obj.coinsQuota = message.coinsQuota ? coinsQuota.toJSON(message.coinsQuota) : undefined);
+      && (obj.coinsQuota = message.coinsQuota ? CoinsQuota.toJSON(message.coinsQuota) : undefined);
     message.exported !== undefined && (obj.exported = message.exported);
     return obj;
   },
@@ -208,7 +208,7 @@ export const GenesisState = {
     message.standbypowerList = object.standbypowerList?.map((e) => StandbyPower.fromPartial(e)) || [];
     message.feeCollectedList = object.feeCollectedList?.map((e) => Coin.fromPartial(e)) || [];
     message.coinsQuota = (object.coinsQuota !== undefined && object.coinsQuota !== null)
-      ? coinsQuota.fromPartial(object.coinsQuota)
+      ? CoinsQuota.fromPartial(object.coinsQuota)
       : undefined;
     message.exported = object.exported ?? false;
     return message;

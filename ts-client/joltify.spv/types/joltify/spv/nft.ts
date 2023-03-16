@@ -5,7 +5,7 @@ import { Timestamp } from "../../google/protobuf/timestamp";
 
 export const protobufPackage = "joltify.spv";
 
-export interface borrowDetail {
+export interface BorrowDetail {
   borrowedAmount: Coin | undefined;
   timeStamp: Date | undefined;
 }
@@ -34,19 +34,19 @@ export interface BorrowInterest {
    * 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
    * 		(gogoproto.nullable) = false];
    */
-  borrowDetails: borrowDetail[];
+  borrowDetails: BorrowDetail[];
   monthlyRatio: string;
   interestSPY: string;
   payments: PaymentItem[];
   interestPaid: Coin | undefined;
 }
 
-function createBaseborrowDetail(): borrowDetail {
+function createBaseBorrowDetail(): BorrowDetail {
   return { borrowedAmount: undefined, timeStamp: undefined };
 }
 
-export const borrowDetail = {
-  encode(message: borrowDetail, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const BorrowDetail = {
+  encode(message: BorrowDetail, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.borrowedAmount !== undefined) {
       Coin.encode(message.borrowedAmount, writer.uint32(10).fork()).ldelim();
     }
@@ -56,10 +56,10 @@ export const borrowDetail = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): borrowDetail {
+  decode(input: _m0.Reader | Uint8Array, length?: number): BorrowDetail {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseborrowDetail();
+    const message = createBaseBorrowDetail();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -77,14 +77,14 @@ export const borrowDetail = {
     return message;
   },
 
-  fromJSON(object: any): borrowDetail {
+  fromJSON(object: any): BorrowDetail {
     return {
       borrowedAmount: isSet(object.borrowedAmount) ? Coin.fromJSON(object.borrowedAmount) : undefined,
       timeStamp: isSet(object.timeStamp) ? fromJsonTimestamp(object.timeStamp) : undefined,
     };
   },
 
-  toJSON(message: borrowDetail): unknown {
+  toJSON(message: BorrowDetail): unknown {
     const obj: any = {};
     message.borrowedAmount !== undefined
       && (obj.borrowedAmount = message.borrowedAmount ? Coin.toJSON(message.borrowedAmount) : undefined);
@@ -92,8 +92,8 @@ export const borrowDetail = {
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<borrowDetail>, I>>(object: I): borrowDetail {
-    const message = createBaseborrowDetail();
+  fromPartial<I extends Exact<DeepPartial<BorrowDetail>, I>>(object: I): BorrowDetail {
+    const message = createBaseBorrowDetail();
     message.borrowedAmount = (object.borrowedAmount !== undefined && object.borrowedAmount !== null)
       ? Coin.fromPartial(object.borrowedAmount)
       : undefined;
@@ -270,7 +270,7 @@ export const BorrowInterest = {
       Timestamp.encode(toTimestamp(message.issueTime), writer.uint32(34).fork()).ldelim();
     }
     for (const v of message.borrowDetails) {
-      borrowDetail.encode(v!, writer.uint32(42).fork()).ldelim();
+      BorrowDetail.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     if (message.monthlyRatio !== "") {
       writer.uint32(50).string(message.monthlyRatio);
@@ -307,7 +307,7 @@ export const BorrowInterest = {
           message.issueTime = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           break;
         case 5:
-          message.borrowDetails.push(borrowDetail.decode(reader, reader.uint32()));
+          message.borrowDetails.push(BorrowDetail.decode(reader, reader.uint32()));
           break;
         case 6:
           message.monthlyRatio = reader.string();
@@ -336,7 +336,7 @@ export const BorrowInterest = {
       payFreq: isSet(object.payFreq) ? Number(object.payFreq) : 0,
       issueTime: isSet(object.issueTime) ? fromJsonTimestamp(object.issueTime) : undefined,
       borrowDetails: Array.isArray(object?.borrowDetails)
-        ? object.borrowDetails.map((e: any) => borrowDetail.fromJSON(e))
+        ? object.borrowDetails.map((e: any) => BorrowDetail.fromJSON(e))
         : [],
       monthlyRatio: isSet(object.monthlyRatio) ? String(object.monthlyRatio) : "",
       interestSPY: isSet(object.interestSPY) ? String(object.interestSPY) : "",
@@ -352,7 +352,7 @@ export const BorrowInterest = {
     message.payFreq !== undefined && (obj.payFreq = Math.round(message.payFreq));
     message.issueTime !== undefined && (obj.issueTime = message.issueTime.toISOString());
     if (message.borrowDetails) {
-      obj.borrowDetails = message.borrowDetails.map((e) => e ? borrowDetail.toJSON(e) : undefined);
+      obj.borrowDetails = message.borrowDetails.map((e) => e ? BorrowDetail.toJSON(e) : undefined);
     } else {
       obj.borrowDetails = [];
     }
@@ -374,7 +374,7 @@ export const BorrowInterest = {
     message.apy = object.apy ?? "";
     message.payFreq = object.payFreq ?? 0;
     message.issueTime = object.issueTime ?? undefined;
-    message.borrowDetails = object.borrowDetails?.map((e) => borrowDetail.fromPartial(e)) || [];
+    message.borrowDetails = object.borrowDetails?.map((e) => BorrowDetail.fromPartial(e)) || [];
     message.monthlyRatio = object.monthlyRatio ?? "";
     message.interestSPY = object.interestSPY ?? "";
     message.payments = object.payments?.map((e) => PaymentItem.fromPartial(e)) || [];

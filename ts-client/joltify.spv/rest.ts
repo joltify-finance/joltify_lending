@@ -81,13 +81,13 @@ export interface SpvDepositorInfo {
    * NOTE: The amount field is an Int which implements the custom method
    * signatures required by gogoproto.
    */
-  pending_amount?: V1Beta1Coin;
+  pending_interest?: V1Beta1Coin;
 }
 
 export type SpvMsgActivePoolResponse = object;
 
 export interface SpvMsgAddInvestorsResponse {
-  operationResult?: boolean;
+  operation_result?: boolean;
 }
 
 export interface SpvMsgBorrowResponse {
@@ -99,7 +99,7 @@ export interface SpvMsgClaimInterestResponse {
 }
 
 export interface SpvMsgCreatePoolResponse {
-  poolIndex?: string[];
+  pool_index?: string[];
 }
 
 export type SpvMsgDepositResponse = object;
@@ -109,11 +109,11 @@ export type SpvMsgPayPrincipalResponse = object;
 export type SpvMsgRepayInterestResponse = object;
 
 export interface SpvMsgSubmitWithdrawProposalResponse {
-  operationResult?: boolean;
+  operation_result?: boolean;
 }
 
 export interface SpvMsgTransferOwnershipResponse {
-  operationResult?: boolean;
+  operation_result?: boolean;
 }
 
 export type SpvMsgUpdatePoolResponse = object;
@@ -261,7 +261,7 @@ export interface SpvQueryParamsResponse {
 }
 
 export interface SpvQueryQueryPoolResponse {
-  poolInfo?: SpvPoolInfo;
+  pool_info?: SpvPoolInfo;
 }
 
 export interface SpvQuerywithdrawalPrincipalResponse {
@@ -482,7 +482,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QuerywithdrawalPrincipal
    * @summary Queries a list of withdrawalPrincipal items.
-   * @request GET:/joltify-finance/joltify_lending/spv/withdrawal_principal/{poolIndex}
+   * @request GET:/joltify-finance/joltify_lending/spv/withdrawal_principal/{pool_index}
    */
   querywithdrawalPrincipal = (poolIndex: string, query?: { walletAddress?: string }, params: RequestParams = {}) =>
     this.request<SpvQuerywithdrawalPrincipalResponse, RpcStatus>({
@@ -517,7 +517,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @name QueryDepositor
    * @request GET:/joltify/spv/depositor/{walletAddress}
    */
-  queryDepositor = (walletAddress: string, query?: { depositPoolIndex?: string }, params: RequestParams = {}) =>
+  queryDepositor = (walletAddress: string, query?: { deposit_pool_index?: string }, params: RequestParams = {}) =>
     this.request<SpvQueryDepositorResponse, RpcStatus>({
       path: `/joltify/spv/depositor/${walletAddress}`,
       method: "GET",
@@ -557,7 +557,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryOutstandingInterest
-   * @request GET:/joltify/spv/outstanding_interest/{wallet}/{poolIndex}
+   * @request GET:/joltify/spv/outstanding_interest/{wallet}/{pool_index}
    */
   queryOutstandingInterest = (wallet: string, poolIndex: string, params: RequestParams = {}) =>
     this.request<SpvQueryOutstandingInterestResponse, RpcStatus>({
@@ -573,7 +573,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryQueryPool
    * @summary Queries a list of QueryPool items.
-   * @request GET:/joltify/spv/query_pool/{poolIndex}
+   * @request GET:/joltify/spv/query_pool/{pool_index}
    */
   queryQueryPool = (poolIndex: string, params: RequestParams = {}) =>
     this.request<SpvQueryQueryPoolResponse, RpcStatus>({
@@ -589,7 +589,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryAllowedPools
    * @summary Queries a list of AllowedPools items.
-   * @request GET:/joltify/spve/allowed_pools/{walletAddress}
+   * @request GET:/joltify/spve/allowed_pools/{wallet_address}
    */
   queryAllowedPools = (walletAddress: string, params: RequestParams = {}) =>
     this.request<SpvQueryAllowedPoolsResponse, RpcStatus>({

@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"strings"
 	"testing"
 	"time"
@@ -15,8 +16,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/suite"
 )
-
-const month = 3600 * 24 * 30
 
 // Test suite used for all keeper tests
 type claimInterestSuite struct {
@@ -96,7 +95,8 @@ func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAd
 	}
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
-	interestOneYearWithReserve := sdk.NewDecFromInt(lastBorrow.Amount).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	period := spvkeeper.OneYear / spvkeeper.OneMonth
+	interestOneYearWithReserve := sdk.NewDecFromInt(lastBorrow.Amount).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
 	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	dat = strings.Split(depositor2.LinkedNFT[nftIndex], ":")
@@ -197,10 +197,10 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
 	req := types.MsgClaimInterest{
@@ -225,7 +225,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
 	req.Creator = suite.investors[0]
@@ -247,7 +247,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	// for the rest of 9 month
 
 	for i := 0; i < 9; i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	}
 
@@ -267,8 +267,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	amount2 = a2.AmountOf("ausdc").Quo(sdk.NewInt(9))
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, amount1.String(), amount2.String())
 
-	expectedInterest := sdk.NewDecFromInt(investor1Borrowd).Mul(sdk.MustNewDecFromStr("0.15")).Mul(sdk.MustNewDecFromStr("0.85")).TruncateInt()
-	fmt.Printf(">>>>>%v===%v\n", investor1TotalClaimed.String(), expectedInterest.String())
+	expectedInterest := sdk.NewDecFromInt(investor1Borrowd).Mul(sdk.MustNewDecFromStr("0.15")).Mul(sdk.MustNewDecFromStr("1")).TruncateInt()
+	fmt.Printf(">>>>>>>%v>>>>%v---%v\n", poolInfo.Apy, expectedInterest, investor1TotalClaimed)
 	suite.Require().True(expectedInterest.Equal(investor1TotalClaimed))
 }
 
@@ -316,7 +316,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
 	req := types.MsgClaimInterest{
@@ -331,8 +331,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	result2, err := suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-	//interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
-	//interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+	spew.Dump(poolInfo)
 
 	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
 
@@ -375,7 +374,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
 	// this payfreq is from the testutil spv.go
-	payFreq := 2592000
+	payFreq := spvkeeper.OneMonth
 	r := spvkeeper.CalculateInterestRate(sdk.MustNewDecFromStr("0.15"), payFreq)
 	delta := suite.ctx.BlockTime().Truncate(time.Second * time.Duration(payFreq)).Sub(borroweTime).Seconds()
 
@@ -440,7 +439,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	suite.Require().Equal(result1.Amount, expectedToUser1.String()+"ausdc")
 	suite.Require().Equal(result2.Amount, expectedToUser2.String()+"ausdc")
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
 	req.Creator = suite.investors[0]
@@ -464,7 +463,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 1, newIncome1.Amount.String(), newIncome2.Amount.String())
 
 	for i := 0; i < 9; i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	}
 
@@ -524,7 +523,7 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
 	req := types.MsgClaimInterest{
@@ -532,7 +531,7 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 		PoolIndex: suite.investorPool,
 	}
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	result1, err := suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -564,13 +563,13 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	suite.Require().True(result1.Amount == "0ausdc")
 
 	// we add less than a month, so the amount should still be zero
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month-101)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth-101)))
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 	suite.Require().True(result1.Amount == "0ausdc")
 
 	// since the spv not paid the interest, we cannont claim the interest
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month+150)))
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth+150)))
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 	suite.Require().True(result1.Amount == "0ausdc")

@@ -74,6 +74,8 @@ userKeyName="user"
 printf "$userMnemonic\n" | $BINARY keys add $userKeyName --recover
 $BINARY add-genesis-account $userKeyName  200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
 
+$BINARY add-genesis-account jolt1kdgjxwdk4w5pexwhtvek009pnp4qw07f4s89ea   200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
+
 relayerKeyName="relayer"
 printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
 $BINARY add-genesis-account $relayerKeyName 1000000000ujolt

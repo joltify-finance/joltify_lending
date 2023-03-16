@@ -13,7 +13,7 @@ export interface DepositorInfo {
   incentiveAmount: Coin | undefined;
   linkedNFT: string[];
   depositType: DepositorInfo_DEPOSITTYPE;
-  pendingAmount: Coin | undefined;
+  pendingInterest: Coin | undefined;
 }
 
 export enum DepositorInfo_DEPOSITTYPE {
@@ -83,7 +83,7 @@ function createBaseDepositorInfo(): DepositorInfo {
     incentiveAmount: undefined,
     linkedNFT: [],
     depositType: 0,
-    pendingAmount: undefined,
+    pendingInterest: undefined,
   };
 }
 
@@ -113,8 +113,8 @@ export const DepositorInfo = {
     if (message.depositType !== 0) {
       writer.uint32(64).int32(message.depositType);
     }
-    if (message.pendingAmount !== undefined) {
-      Coin.encode(message.pendingAmount, writer.uint32(74).fork()).ldelim();
+    if (message.pendingInterest !== undefined) {
+      Coin.encode(message.pendingInterest, writer.uint32(74).fork()).ldelim();
     }
     return writer;
   },
@@ -151,7 +151,7 @@ export const DepositorInfo = {
           message.depositType = reader.int32() as any;
           break;
         case 9:
-          message.pendingAmount = Coin.decode(reader, reader.uint32());
+          message.pendingInterest = Coin.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -171,7 +171,7 @@ export const DepositorInfo = {
       incentiveAmount: isSet(object.incentiveAmount) ? Coin.fromJSON(object.incentiveAmount) : undefined,
       linkedNFT: Array.isArray(object?.linkedNFT) ? object.linkedNFT.map((e: any) => String(e)) : [],
       depositType: isSet(object.depositType) ? depositorInfo_DEPOSITTYPEFromJSON(object.depositType) : 0,
-      pendingAmount: isSet(object.pendingAmount) ? Coin.fromJSON(object.pendingAmount) : undefined,
+      pendingInterest: isSet(object.pendingInterest) ? Coin.fromJSON(object.pendingInterest) : undefined,
     };
   },
 
@@ -195,8 +195,8 @@ export const DepositorInfo = {
       obj.linkedNFT = [];
     }
     message.depositType !== undefined && (obj.depositType = depositorInfo_DEPOSITTYPEToJSON(message.depositType));
-    message.pendingAmount !== undefined
-      && (obj.pendingAmount = message.pendingAmount ? Coin.toJSON(message.pendingAmount) : undefined);
+    message.pendingInterest !== undefined
+      && (obj.pendingInterest = message.pendingInterest ? Coin.toJSON(message.pendingInterest) : undefined);
     return obj;
   },
 
@@ -216,8 +216,8 @@ export const DepositorInfo = {
       : undefined;
     message.linkedNFT = object.linkedNFT?.map((e) => e) || [];
     message.depositType = object.depositType ?? 0;
-    message.pendingAmount = (object.pendingAmount !== undefined && object.pendingAmount !== null)
-      ? Coin.fromPartial(object.pendingAmount)
+    message.pendingInterest = (object.pendingInterest !== undefined && object.pendingInterest !== null)
+      ? Coin.fromPartial(object.pendingInterest)
       : undefined;
     return message;
   },

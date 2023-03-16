@@ -122,8 +122,6 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	samplePool.EscrowInterestAmount = sdk.NewIntFromUint64(10e12)
 	k.SetPool(ctx, samplePool)
 
-	fmt.Printf(">>>>>>>>%v\n", ctx.BlockTime())
-
 	samplePool.UsableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))
 	samplePool.PoolStatus = types.PoolInfo_ACTIVE
 	firstBorrowTime := ctx.BlockTime()
@@ -134,8 +132,6 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth-1)))
 	err = k.HandleInterest(ctx, &samplePool)
 	require.ErrorContains(t, err, "pay interest too early")
-
-	fmt.Printf(">>>>>>>>%v\n", ctx.BlockTime())
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 2))
 	err = k.HandleInterest(ctx, &samplePool)
@@ -151,7 +147,8 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 		panic(err)
 	}
 
-	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(samplePool.Apy).QuoInt64(12).TruncateInt()
+	period := spvkeeper.OneYear / spvkeeper.OneMonth
+	interestOneYearWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(samplePool.Apy).QuoInt64(int64(period)).TruncateInt()
 	interestOneYear := interestOneYearWithReserve.Sub(sdk.NewDecFromInt(interestOneYearWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
 	paymentTime := borrowInterest.Payments[1].PaymentTime
@@ -192,7 +189,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	}
 	paymentTime = borrowInterest.Payments[1].PaymentTime
 
-	delta := firstBorrowTime.Add(time.Second * month * 2).Sub(secondBorrowTime)
+	delta := firstBorrowTime.Add(time.Second * spvkeeper.OneMonth * 2).Sub(secondBorrowTime)
 
 	r := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	interest := r.Power(uint64(delta.Seconds())).Sub(sdk.OneDec())
@@ -238,7 +235,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	err = k.HandleInterest(ctx, &samplePool)
 	require.NoError(t, err)
 
-	delta = firstBorrowTime.Add(time.Second * month * 4).Sub(thirdBorrowTime)
+	delta = firstBorrowTime.Add(time.Second * spvkeeper.OneMonth * 4).Sub(thirdBorrowTime)
 
 	interest = r.Power(uint64(delta.Seconds())).Sub(sdk.OneDec())
 	paymentAmount = interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()

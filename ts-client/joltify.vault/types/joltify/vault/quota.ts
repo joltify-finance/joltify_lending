@@ -5,22 +5,22 @@ import { Coin } from "../../cosmos/base/v1beta1/coin";
 
 export const protobufPackage = "joltify.vault";
 
-export interface historicalAmount {
+export interface HistoricalAmount {
   blockHeight: number;
   amount: Coin[];
 }
 
-export interface coinsQuota {
-  history: historicalAmount[];
+export interface CoinsQuota {
+  history: HistoricalAmount[];
   CoinsSum: Coin[];
 }
 
-function createBasehistoricalAmount(): historicalAmount {
+function createBaseHistoricalAmount(): HistoricalAmount {
   return { blockHeight: 0, amount: [] };
 }
 
-export const historicalAmount = {
-  encode(message: historicalAmount, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const HistoricalAmount = {
+  encode(message: HistoricalAmount, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.blockHeight !== 0) {
       writer.uint32(8).int64(message.blockHeight);
     }
@@ -30,10 +30,10 @@ export const historicalAmount = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): historicalAmount {
+  decode(input: _m0.Reader | Uint8Array, length?: number): HistoricalAmount {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasehistoricalAmount();
+    const message = createBaseHistoricalAmount();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -51,14 +51,14 @@ export const historicalAmount = {
     return message;
   },
 
-  fromJSON(object: any): historicalAmount {
+  fromJSON(object: any): HistoricalAmount {
     return {
       blockHeight: isSet(object.blockHeight) ? Number(object.blockHeight) : 0,
       amount: Array.isArray(object?.amount) ? object.amount.map((e: any) => Coin.fromJSON(e)) : [],
     };
   },
 
-  toJSON(message: historicalAmount): unknown {
+  toJSON(message: HistoricalAmount): unknown {
     const obj: any = {};
     message.blockHeight !== undefined && (obj.blockHeight = Math.round(message.blockHeight));
     if (message.amount) {
@@ -69,22 +69,22 @@ export const historicalAmount = {
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<historicalAmount>, I>>(object: I): historicalAmount {
-    const message = createBasehistoricalAmount();
+  fromPartial<I extends Exact<DeepPartial<HistoricalAmount>, I>>(object: I): HistoricalAmount {
+    const message = createBaseHistoricalAmount();
     message.blockHeight = object.blockHeight ?? 0;
     message.amount = object.amount?.map((e) => Coin.fromPartial(e)) || [];
     return message;
   },
 };
 
-function createBasecoinsQuota(): coinsQuota {
+function createBaseCoinsQuota(): CoinsQuota {
   return { history: [], CoinsSum: [] };
 }
 
-export const coinsQuota = {
-  encode(message: coinsQuota, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const CoinsQuota = {
+  encode(message: CoinsQuota, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.history) {
-      historicalAmount.encode(v!, writer.uint32(18).fork()).ldelim();
+      HistoricalAmount.encode(v!, writer.uint32(18).fork()).ldelim();
     }
     for (const v of message.CoinsSum) {
       Coin.encode(v!, writer.uint32(26).fork()).ldelim();
@@ -92,15 +92,15 @@ export const coinsQuota = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): coinsQuota {
+  decode(input: _m0.Reader | Uint8Array, length?: number): CoinsQuota {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasecoinsQuota();
+    const message = createBaseCoinsQuota();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 2:
-          message.history.push(historicalAmount.decode(reader, reader.uint32()));
+          message.history.push(HistoricalAmount.decode(reader, reader.uint32()));
           break;
         case 3:
           message.CoinsSum.push(Coin.decode(reader, reader.uint32()));
@@ -113,17 +113,17 @@ export const coinsQuota = {
     return message;
   },
 
-  fromJSON(object: any): coinsQuota {
+  fromJSON(object: any): CoinsQuota {
     return {
-      history: Array.isArray(object?.history) ? object.history.map((e: any) => historicalAmount.fromJSON(e)) : [],
+      history: Array.isArray(object?.history) ? object.history.map((e: any) => HistoricalAmount.fromJSON(e)) : [],
       CoinsSum: Array.isArray(object?.CoinsSum) ? object.CoinsSum.map((e: any) => Coin.fromJSON(e)) : [],
     };
   },
 
-  toJSON(message: coinsQuota): unknown {
+  toJSON(message: CoinsQuota): unknown {
     const obj: any = {};
     if (message.history) {
-      obj.history = message.history.map((e) => e ? historicalAmount.toJSON(e) : undefined);
+      obj.history = message.history.map((e) => e ? HistoricalAmount.toJSON(e) : undefined);
     } else {
       obj.history = [];
     }
@@ -135,9 +135,9 @@ export const coinsQuota = {
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<coinsQuota>, I>>(object: I): coinsQuota {
-    const message = createBasecoinsQuota();
-    message.history = object.history?.map((e) => historicalAmount.fromPartial(e)) || [];
+  fromPartial<I extends Exact<DeepPartial<CoinsQuota>, I>>(object: I): CoinsQuota {
+    const message = createBaseCoinsQuota();
+    message.history = object.history?.map((e) => HistoricalAmount.fromPartial(e)) || [];
     message.CoinsSum = object.CoinsSum?.map((e) => Coin.fromPartial(e)) || [];
     return message;
   },

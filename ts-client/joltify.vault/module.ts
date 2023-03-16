@@ -7,36 +7,36 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgCreateIssueToken } from "./types/joltify/vault/tx";
 import { MsgCreateCreatePool } from "./types/joltify/vault/tx";
+import { MsgCreateIssueToken } from "./types/joltify/vault/tx";
 import { MsgCreateOutboundTx } from "./types/joltify/vault/tx";
 
 import { PoolProposal as typePoolProposal} from "./types"
 import { CreatePool as typeCreatePool} from "./types"
 import { IssueToken as typeIssueToken} from "./types"
-import { entity as typeentity} from "./types"
-import { proposals as typeproposals} from "./types"
+import { Entity as typeEntity} from "./types"
+import { Proposals as typeProposals} from "./types"
 import { OutboundTx as typeOutboundTx} from "./types"
-import { addressV16 as typeaddressV16} from "./types"
+import { AddressV16 as typeAddressV16} from "./types"
 import { OutboundTxV16 as typeOutboundTxV16} from "./types"
-import { poolInfo as typepoolInfo} from "./types"
-import { historicalAmount as typehistoricalAmount} from "./types"
-import { coinsQuota as typecoinsQuota} from "./types"
+import { PoolInfo as typePoolInfo} from "./types"
+import { HistoricalAmount as typeHistoricalAmount} from "./types"
+import { CoinsQuota as typeCoinsQuota} from "./types"
 import { Params as typeParams} from "./types"
 import { Validator as typeValidator} from "./types"
 import { StandbyPower as typeStandbyPower} from "./types"
 import { Validators as typeValidators} from "./types"
 
-export { MsgCreateIssueToken, MsgCreateCreatePool, MsgCreateOutboundTx };
+export { MsgCreateCreatePool, MsgCreateIssueToken, MsgCreateOutboundTx };
 
-type sendMsgCreateIssueTokenParams = {
-  value: MsgCreateIssueToken,
+type sendMsgCreateCreatePoolParams = {
+  value: MsgCreateCreatePool,
   fee?: StdFee,
   memo?: string
 };
 
-type sendMsgCreateCreatePoolParams = {
-  value: MsgCreateCreatePool,
+type sendMsgCreateIssueTokenParams = {
+  value: MsgCreateIssueToken,
   fee?: StdFee,
   memo?: string
 };
@@ -48,12 +48,12 @@ type sendMsgCreateOutboundTxParams = {
 };
 
 
-type msgCreateIssueTokenParams = {
-  value: MsgCreateIssueToken,
-};
-
 type msgCreateCreatePoolParams = {
   value: MsgCreateCreatePool,
+};
+
+type msgCreateIssueTokenParams = {
+  value: MsgCreateIssueToken,
 };
 
 type msgCreateOutboundTxParams = {
@@ -90,20 +90,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgCreateIssueToken({ value, fee, memo }: sendMsgCreateIssueTokenParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgCreateIssueToken: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCreateIssueToken({ value: MsgCreateIssueToken.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCreateIssueToken: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgCreateCreatePool({ value, fee, memo }: sendMsgCreateCreatePoolParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgCreateCreatePool: Unable to sign Tx. Signer is not present.')
@@ -115,6 +101,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
 				throw new Error('TxClient:sendMsgCreateCreatePool: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgCreateIssueToken({ value, fee, memo }: sendMsgCreateIssueTokenParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgCreateIssueToken: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgCreateIssueToken({ value: MsgCreateIssueToken.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgCreateIssueToken: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -133,19 +133,19 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 		},
 		
 		
-		msgCreateIssueToken({ value }: msgCreateIssueTokenParams): EncodeObject {
-			try {
-				return { typeUrl: "/joltify.vault.MsgCreateIssueToken", value: MsgCreateIssueToken.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgCreateIssueToken: Could not create message: ' + e.message)
-			}
-		},
-		
 		msgCreateCreatePool({ value }: msgCreateCreatePoolParams): EncodeObject {
 			try {
 				return { typeUrl: "/joltify.vault.MsgCreateCreatePool", value: MsgCreateCreatePool.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgCreateCreatePool: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgCreateIssueToken({ value }: msgCreateIssueTokenParams): EncodeObject {
+			try {
+				return { typeUrl: "/joltify.vault.MsgCreateIssueToken", value: MsgCreateIssueToken.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgCreateIssueToken: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -182,14 +182,14 @@ class SDKModule {
 						PoolProposal: getStructure(typePoolProposal.fromPartial({})),
 						CreatePool: getStructure(typeCreatePool.fromPartial({})),
 						IssueToken: getStructure(typeIssueToken.fromPartial({})),
-						entity: getStructure(typeentity.fromPartial({})),
-						proposals: getStructure(typeproposals.fromPartial({})),
+						Entity: getStructure(typeEntity.fromPartial({})),
+						Proposals: getStructure(typeProposals.fromPartial({})),
 						OutboundTx: getStructure(typeOutboundTx.fromPartial({})),
-						addressV16: getStructure(typeaddressV16.fromPartial({})),
+						AddressV16: getStructure(typeAddressV16.fromPartial({})),
 						OutboundTxV16: getStructure(typeOutboundTxV16.fromPartial({})),
-						poolInfo: getStructure(typepoolInfo.fromPartial({})),
-						historicalAmount: getStructure(typehistoricalAmount.fromPartial({})),
-						coinsQuota: getStructure(typecoinsQuota.fromPartial({})),
+						PoolInfo: getStructure(typePoolInfo.fromPartial({})),
+						HistoricalAmount: getStructure(typeHistoricalAmount.fromPartial({})),
+						CoinsQuota: getStructure(typeCoinsQuota.fromPartial({})),
 						Params: getStructure(typeParams.fromPartial({})),
 						Validator: getStructure(typeValidator.fromPartial({})),
 						StandbyPower: getStructure(typeStandbyPower.fromPartial({})),

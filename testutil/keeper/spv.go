@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/gogo/protobuf/proto"
@@ -23,6 +24,12 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmdb "github.com/tendermint/tm-db"
+)
+
+const (
+	oneWeek  = 7 * 24 * 3600
+	oneMonth = oneWeek * 4
+	oneYear  = oneWeek * 52
 )
 
 type mockKycKeeper struct{}
@@ -84,8 +91,8 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		SPVName:             "defaultSPV3",
 		ProjectOwner:        acc,
 		BasicInfo:           &b2,
-		ProjectLength:       31536000, //1 year
-		PayFreq:             "2592000",
+		ProjectLength:       oneYear, //1 year
+		PayFreq:             strconv.Itoa(oneMonth),
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
 		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
 	}

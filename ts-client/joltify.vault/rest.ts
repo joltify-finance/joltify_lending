@@ -103,6 +103,23 @@ export interface V1Beta1PageResponse {
   total?: string;
 }
 
+export interface VaultCoinsQuota {
+  history?: VaultHistoricalAmount[];
+  Coins_sum?: V1Beta1Coin[];
+}
+
+export interface VaultEntity {
+  /** @format byte */
+  address?: string;
+  feecoin?: V1Beta1Coin[];
+}
+
+export interface VaultHistoricalAmount {
+  /** @format int64 */
+  blockHeight?: string;
+  amount?: V1Beta1Coin[];
+}
+
 export interface VaultIssueToken {
   /** @format byte */
   creator?: string;
@@ -130,7 +147,7 @@ export interface VaultMsgCreateOutboundTxResponse {
 export interface VaultOutboundTx {
   index?: string;
   processed?: boolean;
-  items?: Record<string, Vaultproposals>;
+  items?: Record<string, VaultProposals>;
   chainType?: string;
   inTxHash?: string;
 
@@ -140,12 +157,21 @@ export interface VaultOutboundTx {
   feecoin?: V1Beta1Coin[];
 }
 
+export interface VaultPoolInfo {
+  BlockHeight?: string;
+  CreatePool?: VaultPoolProposal;
+}
+
 export interface VaultPoolProposal {
-  poolPubKey?: string;
+  pool_pubKey?: string;
 
   /** @format byte */
-  poolAddr?: string;
+  pool_addr?: string;
   nodes?: string[];
+}
+
+export interface VaultProposals {
+  entry?: VaultEntity[];
 }
 
 export interface VaultQueryAllCreatePoolResponse {
@@ -221,7 +247,7 @@ export interface VaultQueryGetOutboundTxResponse {
 }
 
 export interface VaultQueryGetQuotaResponse {
-  coinQuotaResponse?: VaultcoinsQuota;
+  coinQuotaResponse?: VaultCoinsQuota;
 }
 
 export interface VaultQueryGetValidatorsResponse {
@@ -229,7 +255,7 @@ export interface VaultQueryGetValidatorsResponse {
 }
 
 export interface VaultQueryLastPoolResponse {
-  pools?: VaultpoolInfo[];
+  pools?: VaultPoolInfo[];
 }
 
 export interface VaultQueryPendingFeeResponse {
@@ -260,32 +286,6 @@ export interface VaultValidators {
 
   /** @format int64 */
   height?: string;
-}
-
-export interface VaultcoinsQuota {
-  history?: VaulthistoricalAmount[];
-  CoinsSum?: V1Beta1Coin[];
-}
-
-export interface Vaultentity {
-  /** @format byte */
-  address?: string;
-  feecoin?: V1Beta1Coin[];
-}
-
-export interface VaulthistoricalAmount {
-  /** @format int64 */
-  blockHeight?: string;
-  amount?: V1Beta1Coin[];
-}
-
-export interface VaultpoolInfo {
-  BlockHeight?: string;
-  CreatePool?: VaultPoolProposal;
-}
-
-export interface Vaultproposals {
-  entry?: Vaultentity[];
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
