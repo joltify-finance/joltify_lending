@@ -80,15 +80,15 @@ func request_Query_QueryPool_0(ctx context.Context, marshaler runtime.Marshaler,
 		_   = err
 	)
 
-	val, ok = pathParams["poolIndex"]
+	val, ok = pathParams["pool_index"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "poolIndex")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "pool_index")
 	}
 
 	protoReq.PoolIndex, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "poolIndex", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pool_index", err)
 	}
 
 	msg, err := client.QueryPool(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -107,15 +107,15 @@ func local_request_Query_QueryPool_0(ctx context.Context, marshaler runtime.Mars
 		_   = err
 	)
 
-	val, ok = pathParams["poolIndex"]
+	val, ok = pathParams["pool_index"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "poolIndex")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "pool_index")
 	}
 
 	protoReq.PoolIndex, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "poolIndex", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pool_index", err)
 	}
 
 	msg, err := server.QueryPool(ctx, &protoReq)
@@ -206,15 +206,15 @@ func request_Query_AllowedPools_0(ctx context.Context, marshaler runtime.Marshal
 		_   = err
 	)
 
-	val, ok = pathParams["walletAddress"]
+	val, ok = pathParams["wallet_address"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "walletAddress")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "wallet_address")
 	}
 
 	protoReq.WalletAddress, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "walletAddress", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "wallet_address", err)
 	}
 
 	msg, err := client.AllowedPools(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -233,15 +233,15 @@ func local_request_Query_AllowedPools_0(ctx context.Context, marshaler runtime.M
 		_   = err
 	)
 
-	val, ok = pathParams["walletAddress"]
+	val, ok = pathParams["wallet_address"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "walletAddress")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "wallet_address")
 	}
 
 	protoReq.WalletAddress, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "walletAddress", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "wallet_address", err)
 	}
 
 	msg, err := server.AllowedPools(ctx, &protoReq)
@@ -271,15 +271,15 @@ func request_Query_OutstandingInterest_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "wallet", err)
 	}
 
-	val, ok = pathParams["poolIndex"]
+	val, ok = pathParams["pool_index"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "poolIndex")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "pool_index")
 	}
 
 	protoReq.PoolIndex, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "poolIndex", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pool_index", err)
 	}
 
 	msg, err := client.OutstandingInterest(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -309,15 +309,15 @@ func local_request_Query_OutstandingInterest_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "wallet", err)
 	}
 
-	val, ok = pathParams["poolIndex"]
+	val, ok = pathParams["pool_index"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "poolIndex")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "pool_index")
 	}
 
 	protoReq.PoolIndex, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "poolIndex", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pool_index", err)
 	}
 
 	msg, err := server.OutstandingInterest(ctx, &protoReq)
@@ -398,7 +398,7 @@ func local_request_Query_ClaimableInterest_0(ctx context.Context, marshaler runt
 }
 
 var (
-	filter_Query_WithdrawalPrincipal_0 = &utilities.DoubleArray{Encoding: map[string]int{"poolIndex": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+	filter_Query_WithdrawalPrincipal_0 = &utilities.DoubleArray{Encoding: map[string]int{"pool_index": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 )
 
 func request_Query_WithdrawalPrincipal_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -412,15 +412,15 @@ func request_Query_WithdrawalPrincipal_0(ctx context.Context, marshaler runtime.
 		_   = err
 	)
 
-	val, ok = pathParams["poolIndex"]
+	val, ok = pathParams["pool_index"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "poolIndex")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "pool_index")
 	}
 
 	protoReq.PoolIndex, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "poolIndex", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pool_index", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -446,15 +446,15 @@ func local_request_Query_WithdrawalPrincipal_0(ctx context.Context, marshaler ru
 		_   = err
 	)
 
-	val, ok = pathParams["poolIndex"]
+	val, ok = pathParams["pool_index"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "poolIndex")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "pool_index")
 	}
 
 	protoReq.PoolIndex, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "poolIndex", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pool_index", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -823,17 +823,17 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 var (
 	pattern_Query_ListPools_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"joltify", "spv", "list_pools"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_QueryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spv", "query_pool", "poolIndex"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_QueryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spv", "query_pool", "pool_index"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_Depositor_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spv", "depositor", "walletAddress"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_AllowedPools_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spve", "allowed_pools", "walletAddress"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_AllowedPools_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spve", "allowed_pools", "wallet_address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_OutstandingInterest_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"joltify", "spv", "outstanding_interest", "wallet", "poolIndex"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_OutstandingInterest_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"joltify", "spv", "outstanding_interest", "wallet", "pool_index"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_ClaimableInterest_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"joltify", "spv", "claimable_interest", "wallet"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_WithdrawalPrincipal_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"joltify-finance", "joltify_lending", "spv", "withdrawal_principal", "poolIndex"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_WithdrawalPrincipal_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"joltify-finance", "joltify_lending", "spv", "withdrawal_principal", "pool_index"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

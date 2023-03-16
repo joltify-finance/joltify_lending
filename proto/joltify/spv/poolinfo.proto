@@ -114,12 +114,12 @@ message PoolInfo {
 }
 
 message PoolWithInvestors {
-  string poolIndex =1;
+  string pool_index =1;
   repeated string investors    = 2;
 }
 
 message PoolDepositedInvestors {
-  string poolIndex = 1;
+  string pool_index = 1;
   repeated  bytes wallet_address     = 4
   [(cosmos_proto.scalar) = "cosmos.AddressBytes",
     (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"

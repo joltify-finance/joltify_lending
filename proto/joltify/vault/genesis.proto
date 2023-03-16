@@ -16,15 +16,15 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/vault/types";
 message GenesisState {
 	// params defines all the paramaters of related to deposit.
 	Params params = 1 [(gogoproto.nullable) = false];
-	repeated OutboundTx outboundTxList = 5 [(gogoproto.nullable) = false];
+	repeated OutboundTx outbound_tx_list = 5 [(gogoproto.nullable) = false];
   // this line is used by starport scaffolding # genesis/proto/state
-	repeated IssueToken issueTokenList = 2; // this line is used by starport scaffolding # genesis/proto/stateField
-	repeated CreatePool createPoolList = 3; // this line is used by starport scaffolding # genesis/proto/stateField
+	repeated IssueToken issue_token_list = 2; // this line is used by starport scaffolding # genesis/proto/stateField
+	repeated CreatePool create_pool_list = 3; // this line is used by starport scaffolding # genesis/proto/stateField
     // this line is used by starport scaffolding # ibc/genesis/proto
-	repeated Validators  validatorinfoList = 6;
-	repeated CreatePool latestTwoPool = 10;
-	repeated StandbyPower standbypowerList=7;
-	repeated cosmos.base.v1beta1.Coin feeCollectedList= 8 [
+	repeated Validators  validatorinfo_list = 6;
+	repeated CreatePool latest_twoPool = 10;
+	repeated StandbyPower standbypower_list=7;
+	repeated cosmos.base.v1beta1.Coin feeCollected_list= 8 [
 		(gogoproto.nullable) = false,
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
 	];

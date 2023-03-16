@@ -7,13 +7,13 @@ import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
 
 message PoolProposal {
-  string poolPubKey = 1 ;
-  bytes poolAddr = 2 [(cosmos_proto.scalar) = "cosmos.AddressBytes",(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string pool_pubKey = 1 ;
+  bytes pool_addr = 2 [(cosmos_proto.scalar) = "cosmos.AddressBytes",(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
   repeated bytes nodes = 3 [(cosmos_proto.scalar) = "cosmos.AddressBytes",(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
 }
 
 message CreatePool {
-  string blockHeight = 1;
+  string block_height = 1;
   repeated bytes validators = 2  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/staking/types.Validator", (gogoproto.nullable) = false];
   repeated PoolProposal proposal = 3;
 }

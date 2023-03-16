@@ -26,7 +26,7 @@ service Query {
 
   // Queries a list of QueryPool items.
   rpc QueryPool(QueryQueryPoolRequest) returns (QueryQueryPoolResponse) {
-    option (google.api.http).get = "/joltify/spv/query_pool/{poolIndex}";
+    option (google.api.http).get = "/joltify/spv/query_pool/{pool_index}";
   }
 
   rpc Depositor(QueryDepositorRequest) returns (QueryDepositorResponse) {
@@ -35,10 +35,10 @@ service Query {
 
   // Queries a list of AllowedPools items.
   rpc AllowedPools(QueryAllowedPoolsRequest) returns (QueryAllowedPoolsResponse) {
-    option (google.api.http).get = "/joltify/spve/allowed_pools/{walletAddress}";}
+    option (google.api.http).get = "/joltify/spve/allowed_pools/{wallet_address}";}
 
    rpc OutstandingInterest(QueryOutstandingInterestRequest) returns (QueryOutstandingInterestResponse) {
-		option (google.api.http).get = "/joltify/spv/outstanding_interest/{wallet}/{poolIndex}";}
+		option (google.api.http).get = "/joltify/spv/outstanding_interest/{wallet}/{pool_index}";}
 
 
   // Queries a list of ClaimableInterest items.
@@ -48,7 +48,7 @@ service Query {
 
   // Queries a list of withdrawalPrincipal items.
   rpc withdrawalPrincipal(QuerywithdrawalPrincipalRequest) returns (QuerywithdrawalPrincipalResponse) {
-    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/withdrawal_principal/{poolIndex}";
+    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/withdrawal_principal/{pool_index}";
   }
 
 }
@@ -73,11 +73,11 @@ message QueryListPoolsResponse {
 }
 
 message QueryQueryPoolRequest {
-  string poolIndex = 1;
+  string pool_index = 1;
 }
 
 message QueryQueryPoolResponse {
-  PoolInfo poolInfo = 1;
+  PoolInfo pool_info = 1;
 }
 
 message QueryDepositorRequest {
@@ -90,7 +90,7 @@ message QueryDepositorResponse {
 }
 
 message QueryAllowedPoolsRequest {
-  string walletAddress = 1;
+  string wallet_address = 1;
 }
 
 message QueryAllowedPoolsResponse {
@@ -98,7 +98,7 @@ message QueryAllowedPoolsResponse {
 }
 message QueryClaimableInterestRequest {
   string wallet = 1;
-  string poolIndex = 2;
+  string pool_index = 2;
 }
 
 message QueryClaimableInterestResponse {
@@ -110,7 +110,7 @@ message QueryClaimableInterestResponse {
 
 message QueryOutstandingInterestRequest {
   string wallet = 1;
-  string poolIndex = 2;
+  string pool_index = 2;
 }
 
 message QueryOutstandingInterestResponse {
@@ -119,7 +119,7 @@ message QueryOutstandingInterestResponse {
 
 
 message QuerywithdrawalPrincipalRequest {
-  string poolIndex = 1;
+  string pool_index = 1;
   string walletAddress = 2;
 }
 
