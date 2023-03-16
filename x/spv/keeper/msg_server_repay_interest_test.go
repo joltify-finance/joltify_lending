@@ -122,6 +122,8 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	samplePool.EscrowInterestAmount = sdk.NewIntFromUint64(10e12)
 	k.SetPool(ctx, samplePool)
 
+	fmt.Printf(">>>>>>>>%v\n", ctx.BlockTime())
+
 	samplePool.UsableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))
 	samplePool.PoolStatus = types.PoolInfo_ACTIVE
 	firstBorrowTime := ctx.BlockTime()
@@ -132,6 +134,8 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth-1)))
 	err = k.HandleInterest(ctx, &samplePool)
 	require.ErrorContains(t, err, "pay interest too early")
+
+	fmt.Printf(">>>>>>>>%v\n", ctx.BlockTime())
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 2))
 	err = k.HandleInterest(ctx, &samplePool)

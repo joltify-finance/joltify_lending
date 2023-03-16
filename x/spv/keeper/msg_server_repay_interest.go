@@ -101,7 +101,6 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic(err)
 		}
-		firstBorrow = false
 		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow)
 		if err != nil {
 			return sdkmath.Int{}, err
@@ -118,6 +117,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 			return sdkmath.Int{}, err
 		}
 		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
+		firstBorrow = false
 	}
 	return totalPayment, nil
 }
@@ -138,7 +138,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, types.ErrPoolNotActive
 	}
 
-	if msg.Token.Denom != poolInfo.TotalAmount.Denom {
+	if msg.Token.Denom != poolInfo.BorrowedAmount.Denom {
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
 	}
 

@@ -95,7 +95,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	// now we update borrowable
 	poolInfo.UsableAmount = poolInfo.UsableAmount.Add(msg.Token)
-	poolInfo.TotalAmount = poolInfo.BorrowedAmount.Add(poolInfo.UsableAmount)
+	poolInfo.TotalAmount = poolInfo.TotalAmount.Add(msg.Token)
 	k.SetPool(ctx, poolInfo)
 
 	ctx.EventManager().EmitEvent(
