@@ -1,0 +1,19 @@
+syntax = "proto3";
+package joltify.mint;
+
+import "gogoproto/gogo.proto";
+import "joltify/mint/params.proto";
+import "joltify/mint/dist.proto";
+
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/mint/types";
+
+// GenesisState defines the joltmint module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  HistoricalDistInfo historical_dist_info =2 [
+    (gogoproto.jsontag) = "historical_dist_info,omitempty",
+    (gogoproto.moretags) = "yaml:\"historical_dist_info\""
+  ];
+}

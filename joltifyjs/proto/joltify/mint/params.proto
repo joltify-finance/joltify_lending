@@ -1,0 +1,31 @@
+syntax = "proto3";
+package joltify.mint;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/mint/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+
+  uint64 halfCount = 1 [(gogoproto.moretags) = "yaml:\"half_Count\""];
+  string first_provisions = 2 [
+    (gogoproto.moretags) = "yaml:\"each_provisions\"",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  string current_provisions = 3 [
+    (gogoproto.moretags) = "yaml:\"each_provisions\"",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+
+  string unit=4;
+  string community_provisions = 5[
+  (gogoproto.moretags) = "yaml:\"each_provisions\"",
+  (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+  (gogoproto.nullable) = false
+  ];
+}

@@ -1,0 +1,43 @@
+syntax = "proto3";
+package joltify.vault;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/vault/types";
+
+message Params{
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_stringer) = false;
+  int64  block_churn_interval = 1 [(gogoproto.moretags) = "yaml:\"block_churn_interval\""];
+  int64  power = 2 [(gogoproto.moretags) = "yaml:\"power\""];
+  int64  step = 3 [(gogoproto.moretags) = "yaml:\"step\""];
+
+  string candidate_ratio= 4 [
+    (gogoproto.moretags)   = "yaml:\"candidate_ratio\"",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  repeated cosmos.base.v1beta1.Coin target_quota= 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.moretags) = "yaml:\"target_quota\""
+  ];
+  int32 history_length=6 [(gogoproto.moretags) = "yaml:\"history_length\""];
+}
+
+message Validator{
+  bytes pubkey = 1;
+  int64 power = 2;
+}
+
+message StandbyPower{
+  string addr =1;
+  int64 power=2;
+}
+
+message Validators {
+  repeated Validator all_validators=1;
+  int64 height = 2;
+}

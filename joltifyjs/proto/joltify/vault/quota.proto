@@ -1,0 +1,26 @@
+syntax = "proto3";
+package joltify.vault;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/vault/types";
+
+
+  message HistoricalAmount{
+    int64 blockHeight = 1;
+    repeated cosmos.base.v1beta1.Coin amount = 2 [
+      (gogoproto.nullable) = false,
+      (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+    ];
+  }
+
+
+
+message CoinsQuota {
+    repeated HistoricalAmount history = 2;
+    repeated cosmos.base.v1beta1.Coin Coins_sum= 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  }

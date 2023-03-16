@@ -1,0 +1,17 @@
+syntax = "proto3";
+package joltify.third_party.pricefeed.v1beta1;
+
+import "joltify/third_party/pricefeed/v1beta1/store.proto";
+import "gogoproto/gogo.proto";
+
+option go_package                    = "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types";
+option (gogoproto.equal_all)         = true;
+option (gogoproto.verbose_equal_all) = true;
+
+// GenesisState defines the pricefeed module's genesis state.
+message GenesisState {
+  // params defines all the paramaters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+
+  repeated PostedPrice posted_prices = 2 [(gogoproto.castrepeated) = "PostedPrices", (gogoproto.nullable) = false];
+}

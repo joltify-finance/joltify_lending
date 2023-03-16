@@ -1,0 +1,33 @@
+syntax = "proto3";
+package joltify.vault;
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/vault/types";
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+message Entity{
+  bytes address= 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  repeated cosmos.base.v1beta1.Coin feecoin = 2 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+message Proposals{
+  repeated Entity entry= 1 ;
+}
+
+message OutboundTx {
+  string index = 1;
+  bool processed = 2;
+  map<string, Proposals> items = 3 [(gogoproto.nullable) = false];
+  string chainType = 4;
+  string inTxHash = 5;
+  bytes receiverAddress= 6 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  bool needMint=7;
+  repeated cosmos.base.v1beta1.Coin feecoin = 8 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}

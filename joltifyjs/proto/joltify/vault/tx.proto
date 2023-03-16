@@ -1,0 +1,56 @@
+syntax = "proto3";
+package joltify.vault;
+
+import "joltify/vault/outbound_tx.proto";
+// this line is used by starport scaffolding # proto/tx/import
+//import "vault/create_pool.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/vault/types";
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+// Msg defines the Msg service.
+service Msg {
+  rpc CreateOutboundTx(MsgCreateOutboundTx) returns (MsgCreateOutboundTxResponse);
+// this line is used by starport scaffolding # proto/tx/rpc
+  rpc CreateIssueToken(MsgCreateIssueToken) returns (MsgCreateIssueTokenResponse);
+  rpc CreateCreatePool(MsgCreateCreatePool) returns (MsgCreateCreatePoolResponse);
+}
+
+message MsgCreateOutboundTx {
+  bytes creator = 1  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string request_iD = 2;
+  string outbound_tx = 3;
+  string block_height = 4;
+  repeated cosmos.base.v1beta1.Coin feecoin = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  string chain_type= 6;
+  bool need_mint= 7;
+  string in_tx_hash= 8;
+  bytes receiver_address= 9 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}
+
+
+message MsgCreateOutboundTxResponse {bool successful = 1;}
+
+// this line is used by starport scaffolding # proto/tx/message
+message MsgCreateIssueToken {
+  bytes creator = 1  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string index = 2;
+  bytes coin = 3  [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
+  bytes receiver = 4  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}
+message MsgCreateIssueTokenResponse {
+  bool successful = 1;
+}
+
+message MsgCreateCreatePool {
+  bytes creator = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string pool_pub_key = 2;
+  string block_height = 3;
+}
+message MsgCreateCreatePoolResponse {
+  bool successful = 1;
+}

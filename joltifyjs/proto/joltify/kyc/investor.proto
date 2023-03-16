@@ -1,0 +1,9 @@
+syntax = "proto3";
+package joltifyfinance.joltify_lending.kyc;
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/kyc/types";
+
+message Investor {
+  string investorId = 1;
+  repeated string walletAddress = 2;
+}
