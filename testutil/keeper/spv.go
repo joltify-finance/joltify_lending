@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"strconv"
 	"testing"
 
@@ -97,7 +98,21 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
 	}
 
-	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3}
+	base := new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)
+	amount := new(big.Int).Mul(big.NewInt(1000000), base)
+	projectTargetAmount := sdk.NewIntFromBigInt(amount)
+	pi4 := kycmoduletypes.ProjectInfo{
+		Index:               4,
+		SPVName:             "defaultSPV3",
+		ProjectOwner:        acc,
+		BasicInfo:           &b2,
+		ProjectLength:       oneYear, //1 year
+		PayFreq:             strconv.Itoa(oneWeek),
+		BaseApy:             sdk.NewDecWithPrec(10, 2),
+		ProjectTargetAmount: sdk.NewCoin("ausdc", projectTargetAmount),
+	}
+
+	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4}
 }
 
 func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.QueryByWalletRequest) (*kycmoduletypes.QueryByWalletResponse, error) {

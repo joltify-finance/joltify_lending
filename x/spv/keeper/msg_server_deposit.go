@@ -13,10 +13,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) checkAcceptNewDeposit(poolInfo types.PoolInfo, newAmount sdk.Coin) bool {
-	return poolInfo.TotalAmount.Add(newAmount).IsLT(poolInfo.TargetAmount)
-}
-
 func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types.MsgDepositResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -36,11 +32,6 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	if msg.Token.GetDenom() != poolInfo.GetTotalAmount().Denom {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidCoins, "we only accept %v", poolInfo.GetTotalAmount().Denom)
-	}
-
-	acceptFund := k.checkAcceptNewDeposit(poolInfo, msg.Token)
-	if !acceptFund {
-		return nil, types.ErrPoolFull
 	}
 
 	req := kyctypes.QueryByWalletRequest{

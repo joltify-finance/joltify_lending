@@ -38,6 +38,10 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, types.ErrInsufficientFund
 	}
 
+	if poolInfo.TargetAmount.IsLT(poolInfo.BorrowedAmount.Add(msg.BorrowAmount)) {
+		return nil, types.ErrPoolFull
+	}
+
 	k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt())
 
 	ctx.EventManager().EmitEvent(
