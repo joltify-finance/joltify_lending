@@ -21,6 +21,7 @@ message Proposals{
 message OutboundTx {
   string index = 1;
   bool processed = 2;
+  repeated string outboundTxs = 3;
   string chainType = 4;
   string inTxHash = 5;
   bytes receiverAddress= 6 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];

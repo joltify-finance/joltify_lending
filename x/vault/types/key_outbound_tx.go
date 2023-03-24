@@ -6,7 +6,9 @@ var _ binary.ByteOrder
 
 const (
 	// OutboundTxKeyPrefix is the prefix to retrieve all OutboundTx
-	OutboundTxKeyPrefix = "OutboundTx/value/"
+	// fixme when migrate, the previous key is  "OutboundTx/value/"
+	OutboundTxKeyPrefix         = "OutboundTx/value/outboundtx-"
+	OutboundTxProposalKeyPrefix = "OutboundTx/value/proposal-"
 )
 
 // OutboundTxKey returns the store key to retrieve a OutboundTx from the index fields
