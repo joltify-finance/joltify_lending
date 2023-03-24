@@ -87,6 +87,8 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 		// we create the new entry
 		thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
 		proposal = types.Proposals{Entry: []*types.Entity{&thisProposal}}
+		// we add this entry
+		info.OutboundTxs = append(info.OutboundTxs, msg.OutboundTx)
 		k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
 		k.SetOutboundTx(ctx, info)
 		return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
@@ -101,6 +103,7 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 		ChainType:       msg.ChainType,
 		InTxHash:        msg.InTxHash,
 		NeedMint:        msg.NeedMint,
+		OutboundTxs:     []string{msg.OutboundTx},
 	}
 	k.SetOutboundTx(ctx, newInfo)
 	k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
@@ -132,6 +135,7 @@ func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, info 
 	if len(proposal.Entry) < candidateNum {
 		return
 	}
+	// we need only to check this proposal as at least one submit will run the check for that list of proposals
 	feeCoinMap := make(map[string]int)
 	for _, el := range proposal.Entry {
 		feeCoinMap[el.Feecoin.String()]++
