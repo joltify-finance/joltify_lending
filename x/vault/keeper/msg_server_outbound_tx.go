@@ -66,7 +66,7 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 	}
 	info, isFound := k.GetOutboundTx(ctx, msg.RequestID)
 	if isFound {
-		proposal, ok := info.Items[msg.OutboundTx]
+		proposal, ok := k.GetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx)
 		if ok {
 			for _, el := range proposal.Entry {
 				if el.Address.Equals(msg.Creator) {
@@ -76,49 +76,38 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 			}
 			thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
 			proposal.Entry = append(proposal.Entry, &thisProposal)
-			info.Items[msg.OutboundTx] = proposal
 
 			// here we check whether we need to send the fee to the validator module
-			k.sendFeeToStakes(ctx, len(validators), msg.OutboundTx, &info)
-
-			k.SetOutboundTx(
-				ctx,
-				info,
-			)
+			k.sendFeeToStakes(ctx, len(validators), &info, proposal)
+			k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
+			k.SetOutboundTx(ctx, info)
 			return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
 		}
 
+		// we create the new entry
 		thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
-		info.Items[msg.OutboundTx] = types.Proposals{Entry: []*types.Entity{&thisProposal}}
-		k.SetOutboundTx(
-			ctx,
-			info,
-		)
+		proposal = types.Proposals{Entry: []*types.Entity{&thisProposal}}
+		k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
+		k.SetOutboundTx(ctx, info)
 		return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
 	}
 
-	items := make(map[string]types.Proposals)
-
 	thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
-	items[msg.OutboundTx] = types.Proposals{Entry: []*types.Entity{&thisProposal}}
+	proposal := types.Proposals{Entry: []*types.Entity{&thisProposal}}
 	newInfo := types.OutboundTx{
 		Index:           msg.RequestID,
-		Items:           items,
 		Processed:       false,
 		ReceiverAddress: msg.ReceiverAddress,
 		ChainType:       msg.ChainType,
 		InTxHash:        msg.InTxHash,
 		NeedMint:        msg.NeedMint,
 	}
-
-	k.SetOutboundTx(
-		ctx,
-		newInfo,
-	)
+	k.SetOutboundTx(ctx, newInfo)
+	k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
 	return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
 }
 
-func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, outboundTx string, info *types.OutboundTx) {
+func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, info *types.OutboundTx, proposal types.Proposals) {
 	if info.Processed {
 		return
 	}
@@ -140,7 +129,6 @@ func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, outbo
 	candidateNumDec := candidateDec.Mul(params.CandidateRatio).MulTruncate(sdk.MustNewDecFromStr("0.6667"))
 	candidateNum := int(candidateNumDec.TruncateInt64())
 
-	proposal := info.Items[outboundTx]
 	if len(proposal.Entry) < candidateNum {
 		return
 	}
@@ -148,6 +136,7 @@ func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, outbo
 	for _, el := range proposal.Entry {
 		feeCoinMap[el.Feecoin.String()]++
 		if feeCoinMap[el.Feecoin.String()] >= candidateNum {
+
 			// transfer
 			previousFee := k.GetAllFeeAmount(ctx)
 			previousFee.Sort()

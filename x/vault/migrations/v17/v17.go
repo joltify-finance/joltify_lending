@@ -1,3 +1,5 @@
+// these codes are only for migration and may out of date
+
 package keeper
 
 import (
@@ -26,7 +28,7 @@ func convertOutboundTx(old types.OutboundTxV16) types.OutboundTx {
 	return types.OutboundTx{
 		Index:     index,
 		Processed: true,
-		Items:     items,
+		//Items:     items,
 	}
 }
 

@@ -6,7 +6,7 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/vault/types";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-message Entity{
+message EntityV04{
   bytes address= 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
   repeated cosmos.base.v1beta1.Coin feecoin = 2 [
     (gogoproto.nullable) = false,
@@ -14,13 +14,14 @@ message Entity{
   ];
 }
 
-message Proposals{
-  repeated Entity entry= 1 ;
+message ProposalsV04{
+  repeated EntityV04 entry= 1 ;
 }
 
-message OutboundTx {
+message OutboundTxV04 {
   string index = 1;
   bool processed = 2;
+  map<string, ProposalsV04> items = 3 [(gogoproto.nullable) = false];
   string chainType = 4;
   string inTxHash = 5;
   bytes receiverAddress= 6 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
