@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -22,6 +23,7 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 		}
 		panic(err)
 	}
+	fmt.Printf(">>>>%v:%v\n", poolInfo.PoolType, totalAmountDue.String())
 
 	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(totalAmountDue)
 

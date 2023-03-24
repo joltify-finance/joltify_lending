@@ -35,7 +35,8 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	if int32(delta) >= interestData.PayFreq*BASE {
 		// we need to pay the whole month
 		monthlyRatio := interestData.MonthlyRatio
-		paymentAmount := monthlyRatio.MulInt(lastBorrow.Amount).TruncateInt()
+		fmt.Printf(">>>>>>monthly ratio %v\n", monthlyRatio)
+		paymentAmount := monthlyRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
 		if paymentAmount.IsZero() {
 			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, nil
 		}

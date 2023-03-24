@@ -48,7 +48,8 @@ func CalculateInterestAmount(apy sdk.Dec, payFreq int) (sdk.Dec, error) {
 		return sdk.Dec{}, errors.New("payFreq cannot be zero")
 	}
 	seconds := BASE * payFreq
-	monthAPY := apy.Quo(sdk.NewDec(OneYear / int64(seconds)))
+	monthAPY := apy.QuoTruncate(sdk.NewDec(OneYear / int64(seconds)))
+
 	return monthAPY, nil
 }
 
