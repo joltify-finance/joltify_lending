@@ -31,3 +31,7 @@ message OutboundTx {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
 }
+
+message ConsensusMap{
+  map<string, int64> items =1   [(gogoproto.nullable) = false];
+}

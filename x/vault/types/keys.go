@@ -39,4 +39,6 @@ const (
 	FeeStoreKey = "fee_collected"
 
 	QuotaStoreKey = "quota-vaule-"
+
+	DebugKey = "debug-"
 )
