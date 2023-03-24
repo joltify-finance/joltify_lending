@@ -70,11 +70,9 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 		OutboundTxList: []types.OutboundTx{
 			{
 				Index: "0",
-				Items: ss1,
 			},
 			{
 				Index: "1",
-				Items: ss2,
 			},
 		},
 		// this line is used by starport scaffolding # simapp/module/genesisState

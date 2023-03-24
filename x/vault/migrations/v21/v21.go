@@ -1,3 +1,4 @@
+// these codes are only for migration and may out of date
 package v21
 
 import (
@@ -45,7 +46,6 @@ func MigrateStore(ctx types.Context, storeKey types2.StoreKey, cdc codec.BinaryC
 
 func convertOutboundTx(old types3.OutboundTxV120) types3.OutboundTx {
 	index := old.Index
-	items := make(map[string]types3.Proposals)
 	for txID, info := range old.Items {
 		entities := make([]*types3.Entity, len(info.Entry))
 		for i, el := range info.Entry {
@@ -56,12 +56,13 @@ func convertOutboundTx(old types3.OutboundTxV120) types3.OutboundTx {
 			entities[i] = &e
 		}
 		proposals := types3.Proposals{Entry: entities}
-		items[txID] = proposals
+		_ = proposals
+		_ = txID
+		//items[txID] = proposals
 	}
 	return types3.OutboundTx{
 		Index:     index,
 		Processed: true,
-		Items:     items,
 		ChainType: "",
 		InTxHash:  "",
 		NeedMint:  false,
