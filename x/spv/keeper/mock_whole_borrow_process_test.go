@@ -1,21 +1,28 @@
 package keeper_test
 
 import (
+	"fmt"
+	"math/big"
+	"math/rand"
+	"testing"
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/utils"
+	"github.com/joltify-finance/joltify_lending/x/spv"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/suite"
-	"math/big"
-	"math/rand"
-	"testing"
-	"time"
 )
 
-const oneWeek = 7 * 24 * 3600
+const (
+	oneWeek  = 7 * 24 * 3600
+	oneMonth = oneWeek * 4
+	oneYear  = oneWeek * 52
+)
 
 // Test suite used for all keeper tests
 type mockWholeProcessSuite struct {
@@ -99,7 +106,7 @@ func generateRandomIntegersWithSum(n int, targetSum int) []int {
 	return result
 }
 
-func (suite *mockWholeProcessSuite) TestWithdrawProposalTooEarlyOrLate() {
+func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	setupMockPool(suite)
 
 	// Seed the random number generator
@@ -166,19 +173,87 @@ func (suite *mockWholeProcessSuite) TestWithdrawProposalTooEarlyOrLate() {
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base)))}
 	suite.app.Borrow(suite.ctx, &msgSenior)
 
-	// 1 minutes, borrow another one
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
-	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base)))}
-	suite.app.Borrow(suite.ctx, &msgJunior)
+	// we simulate 6 seconds for each block
+	startTime := suite.ctx.BlockTime()
+	firstTime := true
+	deltaTime := time.Second * time.Duration(60)
+	checkPoints := []time.Duration{
+		time.Duration(oneMonth) * time.Second,
+		//time.Duration(oneMonth*2) * time.Second,
+		//time.Duration(oneMonth*3) * time.Second,
+		//time.Duration(oneMonth*4) * time.Second,
+		//time.Duration(oneMonth*5) * time.Second,
+		time.Duration(oneMonth*6) * time.Second,
+	}
 
-	poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
-	suite.Require().True(ok)
-	spew.Dump(poolInfo)
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
-	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
-	suite.Require().True(ok)
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(100000), base))))
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
+	checkPointCounter := 0
+
+	allCoinsSenior := make(map[int]sdk.Coins)
+	allCoinsJunior := make(map[int]sdk.Coins)
+	for {
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
+
+		spv.EndBlock(suite.ctx, *suite.keeper)
+
+		if suite.ctx.BlockTime().After(startTime.Add(time.Minute)) && firstTime {
+			firstTime = false
+			// 1 minutes, borrow another one
+			suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
+			msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base)))}
+			suite.app.Borrow(suite.ctx, &msgJunior)
+
+			poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
+			suite.Require().True(ok)
+			spew.Dump(poolInfo)
+			suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
+			suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
+			poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
+			suite.Require().True(ok)
+			suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(100000), base))))
+			suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
+		}
+
+		if startTime.Add(checkPoints[checkPointCounter]).Before(suite.ctx.BlockTime()) {
+			coins := suite.getAllInvestorInterest(seniorPool, suite.investors[:6])
+			allCoinsSenior[checkPointCounter] = coins
+			coins2 := suite.getAllInvestorInterest(juniorPool, suite.investors[:6])
+			allCoinsJunior[checkPointCounter] = coins2
+			checkPointCounter++
+			if checkPointCounter == len(checkPoints) {
+				break
+			}
+		}
+	}
+
+	sumJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	sumSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+
+	// we check the first month
+	firstMonthJuniorCoins := allCoinsJunior[0]
+	for _, el := range firstMonthJuniorCoins {
+		sumJunior = sumJunior.Add(el)
+	}
+
+	firstMonthSeniorCoins := allCoinsSenior[0]
+	for _, el := range firstMonthSeniorCoins {
+		sumSenior = sumSenior.Add(el)
+	}
+
+	// now we borrow 200,000 and 800,000
+
+	fmt.Printf(">>>>>>%v\n", sumSenior.Amount.MulRaw(12))
+	fmt.Printf(">>>>>>%v\n", sumJunior.Amount.MulRaw(12))
+
+}
+
+func (suite *mockWholeProcessSuite) getAllInvestorInterest(poolType string, investors []string) sdk.Coins {
+
+	interests := make(sdk.Coins, len(investors))
+	for i, el := range investors {
+		resp, err := suite.keeper.ClaimableInterest(suite.ctx, &types.QueryClaimableInterestRequest{el, poolType})
+		suite.Require().NoError(err)
+		interests[i] = resp.ClaimableInterestAmount
+	}
+	return interests
 
 }
