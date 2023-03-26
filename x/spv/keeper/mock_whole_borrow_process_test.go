@@ -89,21 +89,23 @@ func TestMockWholeProcess(t *testing.T) {
 }
 
 // generateRandomIntegersWithSum generates n random integers with a given sum
-func generateRandomIntegersWithSum(n int, targetSum int) []int {
+func generateRandomIntegersWithSum(n int, targetSum int) ([]int, []sdk.Dec) {
 	result := make([]int, n)
+	ratio := make([]sdk.Dec, n)
 	remainingSum := targetSum
 
 	for i := 0; i < n-1; i++ {
 		// Generate a random integer between 0 and remainingSum
 		randomInt := rand.Intn(remainingSum)
 		result[i] = randomInt
+		ratio[i] = sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(randomInt))).QuoTruncate(sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(targetSum))))
 		remainingSum -= randomInt
 	}
 
 	// Set the last integer to the remaining sum
 	result[n-1] = remainingSum
-
-	return result
+	ratio[n-1] = sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(result[n-1]))).QuoTruncate(sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(targetSum))))
+	return result, ratio
 }
 
 func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
@@ -113,10 +115,9 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	rand.Seed(time.Now().UnixNano())
 	// Generate  random integer for junior pool
 
-	juniorAmounts := generateRandomIntegersWithSum(6, 300000)
-	seniorAmounts := generateRandomIntegersWithSum(6, 1000000)
+	juniorAmounts, ratioJunior := generateRandomIntegersWithSum(6, 300000)
+	seniorAmounts, ratioSenior := generateRandomIntegersWithSum(6, 1000000)
 
-	_ = seniorAmounts
 	// we have 8 users, and the last two will be used as the transfer one
 
 	// senior 0x8083eaa3584b60c163fe63e5ab6937526022cd47c35f9cb1e0790005c3ae9d00
@@ -243,6 +244,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	sumSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
 
 	// we check the first month
+	// total junior is interest is
 	firstMonthJuniorCoins := allCoinsJunior[0]
 	for _, el := range firstMonthJuniorCoins {
 		sumJunior = sumJunior.Add(el)
@@ -259,7 +261,22 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	suite.Require().True(ok)
 	totalInterest := totalToInvestor.Add(reserve)
 
+	for i, el := range firstMonthJuniorCoins {
+		ratioGet := sdk.NewDecFromInt(el.Amount).QuoTruncate(sdk.NewDecFromInt(sumJunior.Amount))
+		suite.Require().True(ratioGet.Sub(ratioJunior[i]).Abs().LT(sdk.NewDecFromBigInt(big.NewInt(100))))
+	}
+
+	for i, el := range firstMonthSeniorCoins {
+		ratioGet := sdk.NewDecFromInt(el.Amount).QuoTruncate(sdk.NewDecFromInt(sumSenior.Amount))
+		suite.Require().True(ratioGet.Sub(ratioSenior[i]).Abs().LT(sdk.NewDecFromBigInt(big.NewInt(100))))
+	}
+
+	//so the total interest should be 100000, we calcualte the 4 weeks' interest, and one year we have 52/4=13 payments
 	fmt.Printf(">>>>total interest we paid>>%v\n", sdk.NewDecFromIntWithPrec(totalInterest.Amount.MulRaw(13), 18))
+	suite.Require().True(sdk.NewIntFromUint64(100000).Sub(totalInterest.Amount).LTE(sdk.NewIntFromUint64(1000000)))
+
+	// ratio of each node
+	// senior ratio
 
 }
 
