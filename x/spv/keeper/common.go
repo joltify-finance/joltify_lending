@@ -15,17 +15,17 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func seekCorrectBorrow(borrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
-	var borrowAmount sdk.Coin
-	for _, el := range borrowDetails {
-		if el.TimeStamp.Before(eachPayment.PaymentTime) || el.TimeStamp.Equal(eachPayment.PaymentTime) {
-			borrowAmount = el.BorrowedAmount
-			continue
-		}
-		break
-	}
-	return borrowAmount
-}
+//func seekCorrectBorrow(borrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
+//	var borrowAmount sdk.Coin
+//	for _, el := range borrowDetails {
+//		if el.TimeStamp.Before(eachPayment.PaymentTime) || el.TimeStamp.Equal(eachPayment.PaymentTime) {
+//			borrowAmount = el.BorrowedAmount
+//			continue
+//		}
+//		break
+//	}
+//	return borrowAmount
+//}
 
 func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
 
@@ -57,6 +57,7 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		latestTimeStamp := time.Time{}
 		lastPaymentSet := false
 		for _, eachPayment := range allPayments {
+
 			// if the latest payment  this spv has is smaller than the spv that paid to all the investor, we claim the interest
 			if eachPayment.PaymentTime.Before(interestData.LastPayment) || eachPayment.PaymentTime.Equal(interestData.LastPayment) {
 				continue
@@ -64,9 +65,9 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 			if eachPayment.PaymentAmount.Amount.IsZero() {
 				continue
 			}
-			classBorrowedAmount := seekCorrectBorrow(borrowClassInfo.BorrowDetails, eachPayment)
+			classBorrowedAmount := eachPayment.BorrowedAmount
 			paymentAmount := eachPayment.PaymentAmount
-			// todo there may be the case that because of the trucate, the total payment is larger than the interest paid to investors
+			// todo there may be the case that because of the tucate, the total payment is larger than the interest paid to investors
 			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDecFromInt(interestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
 			totalInterest = totalInterest.Add(interest)
 			latestTimeStamp = eachPayment.PaymentTime

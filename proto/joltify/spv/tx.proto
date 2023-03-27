@@ -27,6 +27,8 @@ service Msg {
 
   rpc PayPrincipal(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
 
+  rpc PayPrincipalForWithdrawalRequests(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
+
   rpc WithdrawPrincipal(MsgWithdrawPrincipal) returns (MsgWithdrawPrincipalResponse);
 
   rpc SubmitWithdrawProposal(MsgSubmitWithdrawProposal) returns (MsgSubmitWithdrawProposalResponse);

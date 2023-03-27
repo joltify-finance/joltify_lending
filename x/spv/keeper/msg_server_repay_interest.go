@@ -34,8 +34,8 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	var thisPaymentTime time.Time
 	if int32(delta) >= interestData.PayFreq*BASE {
 		// we need to pay the whole month
-		monthlyRatio := interestData.MonthlyRatio
-		paymentAmount := monthlyRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
+		freqRatio := interestData.MonthlyRatio
+		paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
 		if paymentAmount.IsZero() {
 			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, nil
 		}
@@ -77,7 +77,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	}
 
 	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
-	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor}
+	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
 	interestData.Payments = append(interestData.Payments, &currentPayment)
 	ctx.Logger().Info(fmt.Sprintf(">>>total Interest:>>>%v and %v to investor\n", payment.String(), paymentToInvestor.String()))
 	return payment, nil

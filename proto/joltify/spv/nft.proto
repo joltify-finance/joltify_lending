@@ -31,6 +31,10 @@ message PaymentItem {
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
 
+	cosmos.base.v1beta1.Coin borrowed_amount = 3[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+
 }
 message BorrowInterest{
 	string pool_index  =1 ;

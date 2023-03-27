@@ -225,9 +225,6 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		depositor.DepositType = types.DepositorInfo_deposit_close
 		k.SetDepositor(ctx, depositor)
 	}
-	if !poolInfo.WithdrawProposalAmount.Equal(totalPaidAmount) {
-		panic("withdrawble amount is not equal as the total paid!")
-	}
 
 	// incase we have some rounding
 	if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
@@ -237,12 +234,11 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	} else {
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(poolInfo.WithdrawProposalAmount)
 	}
+	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.WithdrawProposalAmount)
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
 
 	k.SetPool(ctx, *poolInfo)
-	return
-
 }
 
 // not supported yet

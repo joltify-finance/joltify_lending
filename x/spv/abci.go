@@ -20,9 +20,10 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 				err := k.HandleInterest(ctx, &poolInfo)
 				if err != nil {
 					ctx.Logger().Error(err.Error())
+					return false
 				}
 				k.HandleTransfer(ctx, &poolInfo)
-				if poolInfo.ProjectDueTime.Before(currentTime) {
+				if poolInfo.ProjectDueTime.Truncate(time.Duration(poolInfo.PayFreq) * time.Second).Before(currentTime) {
 					// we pay the partial of the interest
 					k.HandlePartialPrincipalPayment(ctx, &poolInfo, poolInfo.GetWithdrawAccounts())
 				}
@@ -32,6 +33,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 			}
 			k.SetPool(ctx, poolInfo)
 		}
+
 		return false
 	})
 }
