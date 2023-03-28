@@ -766,7 +766,7 @@ func NewApp(
 		SigGasConsumer:  cosante.DefaultSigVerificationGasConsumer,
 	}
 
-	anteHandler, err := ante.NewAnteHandler(app.ibcKeeper, baseAnte, fetchers)
+	anteHandler, err := ante.NewAnteHandler(app.VaultKeeper, baseAnte, fetchers)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}
