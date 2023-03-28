@@ -5,12 +5,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
-
-	ibckeeper "github.com/cosmos/ibc-go/v5/modules/core/keeper"
+	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
 )
 
 // NewAnteHandler returns an 'AnteHandler' that will run actions before a tx is sent to a module's handler.
-func NewAnteHandler(channelKeeper *ibckeeper.Keeper, options ante.HandlerOptions, addressFetchers []AddressFetcher) (sdk.AnteHandler, error) {
+func NewAnteHandler(vaultKeeper vaultmodulekeeper.Keeper, options ante.HandlerOptions, addressFetchers []AddressFetcher) (sdk.AnteHandler, error) {
 	if options.AccountKeeper == nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "account keeper is required for ante builder")
 	}
@@ -35,7 +34,7 @@ func NewAnteHandler(channelKeeper *ibckeeper.Keeper, options ante.HandlerOptions
 		// handle as totally normal Cosmos SDK tx
 		switch tx.(type) {
 		case sdk.Tx:
-			anteHandler = newCosmosAnteHandler(channelKeeper, options, addressFetchers)
+			anteHandler = newCosmosAnteHandler(vaultKeeper, options, addressFetchers)
 		default:
 			return ctx, errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "invalid transaction type: %T", tx)
 		}
@@ -44,7 +43,7 @@ func NewAnteHandler(channelKeeper *ibckeeper.Keeper, options ante.HandlerOptions
 	}, nil
 }
 
-func newCosmosAnteHandler(channelKeeper *ibckeeper.Keeper, options ante.HandlerOptions, addressFetchers []AddressFetcher) sdk.AnteHandler {
+func newCosmosAnteHandler(vaultKeeper vaultmodulekeeper.Keeper, options ante.HandlerOptions, addressFetchers []AddressFetcher) sdk.AnteHandler {
 	decorators := []sdk.AnteDecorator{
 		ante.NewSetUpContextDecorator(), // second decorator. SetUpContext must be called before other decorators
 		ante.NewExtensionOptionsDecorator(options.ExtensionOptionChecker),
@@ -59,6 +58,7 @@ func newCosmosAnteHandler(channelKeeper *ibckeeper.Keeper, options ante.HandlerO
 		ante.NewSigGasConsumeDecorator(options.AccountKeeper, options.SigGasConsumer),
 		ante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),
 		ante.NewIncrementSequenceDecorator(options.AccountKeeper), // innermost AnteDecorator
+		vaultmodulekeeper.NewVaultQuotaDecorate(vaultKeeper),
 	}
 	return sdk.ChainAnteDecorators(decorators...)
 }
