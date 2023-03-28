@@ -371,6 +371,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 
 	totalPaidAmount := depositor.LockedAmount.Amount.Add(interest)
 	totalPaidAmount = totalPaidAmount.Add(depositor.WithdrawalAmount.Amount)
+	totalPaidAmount = totalPaidAmount.Add(depositor.PendingInterest.Amount)
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
 

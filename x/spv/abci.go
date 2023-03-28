@@ -16,12 +16,14 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 	k.IteratePool(ctx, func(poolInfo types.PoolInfo) (stop bool) {
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		if dueTime.Before(currentTime) {
-			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE {
+			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_CLOSING {
 				err := k.HandleInterest(ctx, &poolInfo)
 				if err != nil {
 					ctx.Logger().Error(err.Error())
 					return false
 				}
+			}
+			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE {
 				k.HandleTransfer(ctx, &poolInfo)
 				if poolInfo.ProjectDueTime.Truncate(time.Duration(poolInfo.PayFreq) * time.Second).Before(currentTime) {
 					// we pay the partial of the interest
