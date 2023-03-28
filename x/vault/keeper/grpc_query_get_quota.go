@@ -24,8 +24,9 @@ func (k Keeper) GetQuota(goCtx context.Context, req *types.QueryGetQuotaRequest)
 	if !found {
 		return nil, status.Error(codes.InvalidArgument, "Coin quota data is not ready")
 	}
-
+	if req.QueryLength > int32(len(result.History)) {
+		return &types.QueryGetQuotaResponse{CoinQuotaResponse: result}, nil
+	}
 	result.History = result.History[:req.QueryLength]
-
 	return &types.QueryGetQuotaResponse{CoinQuotaResponse: result}, nil
 }
