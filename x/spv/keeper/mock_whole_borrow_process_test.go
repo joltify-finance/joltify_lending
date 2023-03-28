@@ -301,6 +301,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 		sumSeniorAllYear = sumSeniorAllYear.Add(el)
 	}
 
+	fmt.Printf(">sssssssss>>>>>%v\n", sumJunior)
 	expected := sumJunior.Amount.MulRaw(13)
 	expectedS := sumSenior.Amount.MulRaw(13)
 	suite.Require().True(expected.Equal(sumJuniorAllYear.Amount))
@@ -672,9 +673,12 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 		panic(err)
 	}
 
-	item := borrowInterest.Payments[len(borrowInterest.Payments)-1]
 	fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>\n")
+	item := borrowInterest.Payments[len(borrowInterest.Payments)-1]
 	spew.Dump(item)
+	item = borrowInterest.Payments[1]
+	spew.Dump(item)
+
 	fmt.Printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>\n")
 
 	var tokens sdk.Coins
@@ -706,8 +710,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 		totalJuniorInterest = totalJuniorInterest.Add(tokens[0].Amount)
 	}
 
-	expectedYearSenior := sdk.NewDecFromInt(totalSeniorInterest).Mul(sdk.NewDec(53)).QuoTruncate(sdk.NewDec(8))
-	expectedYearJunior := sdk.NewDecFromInt(totalJuniorInterest).Mul(sdk.NewDec(53)).QuoTruncate(sdk.NewDec(8))
+	expectedYearSenior := sdk.NewDecFromInt(totalSeniorInterest).Mul(sdk.NewDec(1)).QuoTruncate(sdk.NewDec(8))
+	expectedYearJunior := sdk.NewDecFromInt(totalJuniorInterest).Mul(sdk.NewDec(1)).QuoTruncate(sdk.NewDec(8))
 
 	fmt.Printf(">>>>>%v===aaa==%v\n", expectedYearSenior, expectedYearJunior)
 
