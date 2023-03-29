@@ -1,12 +1,11 @@
 package keeper_test
 
 import (
+	"fmt"
 	"math/big"
 	"math/rand"
 	"testing"
 	"time"
-
-	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -331,11 +330,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	rand.Seed(time.Now().UnixNano())
 	// Generate  random integer for junior pool
 
-	juniorAmounts, ratioJunior := generateRandomIntegersWithSum(6, 300000)
-	seniorAmounts, ratioSenior := generateRandomIntegersWithSum(6, 1000000)
-
-	_ = ratioSenior
-	_ = ratioJunior
+	juniorAmounts, _ := generateRandomIntegersWithSum(6, 300000)
+	seniorAmounts, _ := generateRandomIntegersWithSum(6, 1000000)
 
 	// we have 8 users, and the last two will be used as the transfer one
 
@@ -559,13 +555,17 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 	token, _ := sdk.ParseCoinNormalized(resp.Amount)
-	suite.Require().True(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base)).Equal(token.Amount))
+	suite.Require().True(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base)).Equal(token.Amount.Sub(allCoinsSenior[1][0].Amount)))
 	totalWithdrawal = totalWithdrawal.Add(token.Amount)
 	resp, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 	token, _ = sdk.ParseCoinNormalized(resp.Amount)
-	suite.Require().True(sdk.NewIntFromUint64(uint64(seniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base)).Equal(token.Amount))
+	suite.Require().True(sdk.NewIntFromUint64(uint64(seniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base)).Equal(token.Amount.Sub(allCoinsSenior[1][1].Amount)))
 	totalWithdrawal = totalWithdrawal.Add(token.Amount)
+
+	// total withdrawal should exclude the interest
+	totalWithdrawal = totalWithdrawal.Sub(allCoinsSenior[1][0].Amount)
+	totalWithdrawal = totalWithdrawal.Sub(allCoinsSenior[1][1].Amount)
 
 	addr, err = sdk.AccAddressFromBech32(suite.investors[0])
 	suite.Require().NoError(err)
@@ -654,15 +654,6 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 		}
 	}
 
-	p2, _ = suite.keeper.GetPools(suite.ctx, juniorPool)
-	class, found := suite.nftKeeper.GetClass(suite.ctx, p2.PoolNFTIds[0])
-	suite.Require().True(found)
-	var borrowInterest types.BorrowInterest
-	err = proto.Unmarshal(class.Data.Value, &borrowInterest)
-	if err != nil {
-		panic(err)
-	}
-
 	var tokens sdk.Coins
 	for _, el := range suite.investors[2:6] {
 		resp, err := suite.app.ClaimInterest(suite.ctx, &types.MsgClaimInterest{
@@ -696,6 +687,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	expectedYearJunior := sdk.NewDecFromInt(totalJuniorInterest).Mul(sdk.NewDec(52)).Quo(sdk.NewDec(8)).QuoTruncate(sdk.NewDecWithPrec(85, 2))
 
 	oneWeekTotal := sdk.NewDecFromInt(totalSeniorInterest).Quo(sdk.NewDec(8)).Add(sdk.NewDecFromInt(totalJuniorInterest).Quo(sdk.NewDec(8)))
+	fmt.Printf(">>>>>>>>.one week total>>>>>>%v\n", oneWeekTotal.String())
 
 	suite.Require().True(seniorInterest.Sub(expectedYearSenior).LT(sdk.NewDecWithPrec(1e8, 0)))
 	suite.Require().True(juniorInterest.Sub(expectedYearJunior).LT(sdk.NewDecWithPrec(1e8, 0)))
@@ -732,10 +724,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 		totalWithdrawal = totalWithdrawal.Add(tokens[0].Amount)
 		_, found = suite.keeper.GetDepositor(suite.ctx, juniorPool, addr)
 		suite.Require().False(found)
-		suite.Require().NoError(err)
 	}
 
-	// we need to add the principal for the first two investors in the junior pool
 	resp, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{
 		Creator:   suite.investors[0],
 		PoolIndex: juniorPool,
@@ -757,7 +747,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	//deltaPrincipal := totalWithdrawal.Sub(sdk.NewIntFromUint64(1300000).Mul(sdk.NewIntFromBigInt(base)).Add(oneWeekTotal.TruncateInt()))
 	suite.Require().True(totalWithdrawal.Equal(sdk.NewIntFromUint64(1300000).Mul(sdk.NewIntFromBigInt(base)).Add(oneWeekTotal.TruncateInt())))
 
-	_, found = suite.keeper.GetPools(suite.ctx, seniorPool)
+	_, found := suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().False(found)
 	_, found = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().False(found)
