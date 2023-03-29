@@ -2,11 +2,12 @@ package keeper_test
 
 import (
 	"fmt"
-	"github.com/gogo/protobuf/proto"
 	"math/big"
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -840,7 +841,6 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", token2)}
 	suite.app.Borrow(suite.ctx, &msgJunior)
 
-	// senior apy is
 	seniorInterest := sdk.NewDecFromInt(token1).Mul(sdk.NewDecWithPrec(875, 4)).Mul(sdk.NewDecWithPrec(85, 2))
 	juniorInterest := sdk.NewDecFromInt(token2).Mul(sdk.NewDecWithPrec(15, 2)).Mul(sdk.NewDecWithPrec(85, 2))
 
@@ -1004,14 +1004,16 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 
 	currentStartTime := suite.ctx.BlockTime()
 	checkPointCounter = 0
+
+	// after we have transfer the ownership, we calculate the interest again
 	for {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
 		if currentStartTime.Add(checkPoints[checkPointCounter]).Before(suite.ctx.BlockTime()) {
-			coins := suite.getAllInvestorInterest(seniorPool, suite.investors[:8])
-			allCoinsSenior[checkPointCounter] = coins
-			coins2 := suite.getAllInvestorInterest(juniorPool, suite.investors[:8])
-			allCoinsJunior[checkPointCounter] = coins2
+			//coins := suite.getAllInvestorInterest(seniorPool, suite.investors[:8])
+			//allCoinsSenior[checkPointCounter] = coins
+			//coins2 := suite.getAllInvestorInterest(juniorPool, suite.investors[:8])
+			//allCoinsJunior[checkPointCounter] = coins2
 			checkPointCounter++
 			if checkPointCounter == 1 {
 				break
@@ -1019,25 +1021,36 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 		}
 	}
 
+	//for i := 0; i < 2; i++ {
+	//	p22, _ := suite.keeper.GetPools(suite.ctx, juniorPool)
+	//	class, found := suite.nftKeeper.GetClass(suite.ctx, p22.PoolNFTIds[i])
+	//	suite.Require().True(found)
+	//
+	//	var borrowInterestt types.BorrowInterest
+	//	err = proto.Unmarshal(class.Data.Value, &borrowInterestt)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	spew.Dump(borrowInterestt.BorrowDetails)
+	//}
 	//suite.Require().True(newinvestor2.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(uint64(seniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base))))
 
 	// total 59499999999999975519844
-	coins := suite.getAllInvestorInterest(seniorPool, suite.investors[:6])
-	allCoinsSenior[checkPointCounter] = coins
+	allSeniorsInterest := suite.getAllInvestorInterest(seniorPool, suite.investors[:8])
+	allJuniorInterest := suite.getAllInvestorInterest(juniorPool, suite.investors[:8])
 
 	sumSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
 	sumJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	allMonthSeniorCoins := allCoinsSenior[1]
-	for _, el := range allMonthSeniorCoins {
+	for _, el := range allSeniorsInterest {
 		sumSenior = sumSenior.Add(el)
 	}
 
-	allMonthJuniorCoins := allCoinsJunior[1]
-	for _, el := range allMonthJuniorCoins {
+	for _, el := range allJuniorInterest {
 		sumJunior = sumJunior.Add(el)
 	}
-	fmt.Printf(">bbbb>>>>%v\n", sumSenior)
-	fmt.Printf(">>>aaaaaa>>%v\n", sumJunior)
+
+	fmt.Printf(">bbbb>>>>%v\n", sumSenior.Amount.MulRaw(13))
+	fmt.Printf(">>>aaaaaa>>%v\n", sumJunior.Amount.MulRaw(13))
 
 	return
 
@@ -1140,15 +1153,15 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 			break
 		}
 	}
-
-	p2, _ = suite.keeper.GetPools(suite.ctx, juniorPool)
-	class, found := suite.nftKeeper.GetClass(suite.ctx, p2.PoolNFTIds[0])
-	suite.Require().True(found)
-	var borrowInterest types.BorrowInterest
-	err = proto.Unmarshal(class.Data.Value, &borrowInterest)
-	if err != nil {
-		panic(err)
-	}
+	//
+	//p2, _ = suite.keeper.GetPools(suite.ctx, juniorPool)
+	//class, found := suite.nftKeeper.GetClass(suite.ctx, p2.PoolNFTIds[0])
+	//suite.Require().True(found)
+	//var borrowInterest types.BorrowInterest
+	//err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	var tokens sdk.Coins
 	for _, el := range suite.investors[2:6] {
@@ -1244,7 +1257,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	//deltaPrincipal := totalWithdrawal.Sub(sdk.NewIntFromUint64(1300000).Mul(sdk.NewIntFromBigInt(base)).Add(oneWeekTotal.TruncateInt()))
 	suite.Require().True(totalWithdrawal.Equal(sdk.NewIntFromUint64(1300000).Mul(sdk.NewIntFromBigInt(base)).Add(oneWeekTotal.TruncateInt())))
 
-	_, found = suite.keeper.GetPools(suite.ctx, seniorPool)
+	_, found := suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().False(found)
 	_, found = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().False(found)
