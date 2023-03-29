@@ -71,6 +71,11 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 	case types.DepositorInfo_deposit_close:
 		depositor.DepositType = types.DepositorInfo_deactive
 		amountToSend := depositor.WithdrawalAmount
+		interest, err := k.claimInterest(ctx, &depositor)
+		if err != nil {
+			return nil, err
+		}
+		amountToSend = amountToSend.Add(interest)
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(amountToSend))
 		if err != nil {
 			return nil, err

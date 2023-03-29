@@ -30,10 +30,34 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 		return nil, coserrors.Wrapf(types.ErrUnauthorized, "your deposit has been closed")
 	}
 
+	claimed, err := k.claimInterest(ctx, &depositor)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investorAddress, sdk.NewCoins(claimed))
+	if err != nil {
+		return nil, err
+	}
+
+	k.SetDepositor(ctx, depositor)
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeClaimInterest,
+			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+			sdk.NewAttribute("amount", claimed.String()),
+		),
+	)
+
+	return &types.MsgClaimInterestResponse{Amount: claimed.String()}, nil
+}
+
+func (k Keeper) claimInterest(ctx sdk.Context, depositor *types.DepositorInfo) (sdk.Coin, error) {
+
 	// for each lending NFT this owner has
 	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
-		return nil, err
+		return sdk.Coin{}, err
 	}
 
 	claimed := sdk.NewCoin(depositor.LockedAmount.Denom, totalInterest)
@@ -49,21 +73,8 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 	}
 
 	if poolInfo.EscrowInterestAmount.IsNegative() {
-		return nil, coserrors.Wrapf(types.ErrClaimInterest, "not enough interest to be paid")
+		return sdk.Coin{}, coserrors.Wrapf(types.ErrClaimInterest, "not enough interest to be paid")
 	}
+	return claimed, nil
 
-	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investorAddress, sdk.NewCoins(claimed))
-	if err != nil {
-		return nil, err
-	}
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeClaimInterest,
-			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
-			sdk.NewAttribute("amount", claimed.String()),
-		),
-	)
-
-	return &types.MsgClaimInterestResponse{Amount: claimed.String()}, nil
 }
