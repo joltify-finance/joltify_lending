@@ -154,6 +154,7 @@ format:
 ###############################################################################
 # Launch a new single validator chain
 start:
+	rm -rf ~/.joltify
 	./contrib/devnet/init-new-chain.sh
 	joltify start
 test:

@@ -187,7 +187,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	})
 	suite.Require().NoError(err)
 
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipal{
+	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
 		Creator:   suite.creator,
 		PoolIndex: juniorPool,
 		Token: sdk.Coin{
@@ -204,7 +204,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	})
 	suite.Require().NoError(err)
 
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipal{
+	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
 		Creator:   suite.creator,
 		PoolIndex: seniorPool,
 		Token: sdk.Coin{
@@ -402,7 +402,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	})
 	suite.Require().NoError(err)
 
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipal{
+	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
 		Creator:   suite.creator,
 		PoolIndex: juniorPool,
 		Token: sdk.Coin{
@@ -419,7 +419,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	})
 	suite.Require().NoError(err)
 
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipal{
+	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
 		Creator:   suite.creator,
 		PoolIndex: seniorPool,
 		Token: sdk.Coin{
@@ -834,7 +834,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	})
 	suite.Require().NoError(err)
 
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipal{
+	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
 		Creator:   suite.creator,
 		PoolIndex: juniorPool,
 		Token: sdk.Coin{
@@ -851,7 +851,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	})
 	suite.Require().NoError(err)
 
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipal{
+	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
 		Creator:   suite.creator,
 		PoolIndex: seniorPool,
 		Token: sdk.Coin{
