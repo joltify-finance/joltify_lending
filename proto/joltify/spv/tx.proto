@@ -27,7 +27,7 @@ service Msg {
 
   rpc PayPrincipal(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
 
-  rpc PayPrincipalForWithdrawalRequests(MsgPayPrincipal) returns (MsgPayPrincipalResponse);
+  rpc PayPrincipalForWithdrawalRequests(MsgPayPrincipalPartial) returns (MsgPayPrincipalPartialResponse);
 
   rpc WithdrawPrincipal(MsgWithdrawPrincipal) returns (MsgWithdrawPrincipalResponse);
 
@@ -126,6 +126,15 @@ message MsgPayPrincipal {
 }
 
 message MsgPayPrincipalResponse {
+}
+
+message MsgPayPrincipalPartial {
+  string creator = 1;
+  string pool_index = 2;
+  cosmos.base.v1beta1.Coin token= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
+}
+
+message MsgPayPrincipalPartialResponse {
 }
 
 message MsgWithdrawPrincipal {

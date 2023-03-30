@@ -33,6 +33,8 @@ func NewParams() Params {
 		"ABC123",
 		[]byte("reserved"),
 		"This is the Test Project 1",
+		"example@example.com",
+		"example",
 	}
 	amount, _ := sdkmath.NewIntFromString("100000000000000000000000")
 	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")

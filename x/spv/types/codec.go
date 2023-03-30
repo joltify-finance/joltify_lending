@@ -17,6 +17,7 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgUpdatePool{}, "joltify.spv/UpdatePool", nil)
 	cdc.RegisterConcrete(&MsgActivePool{}, "joltify.spv/ActivePool", nil)
 	cdc.RegisterConcrete(&MsgPayPrincipal{}, "spv/PayPrincipal", nil)
+	cdc.RegisterConcrete(&MsgPayPrincipalPartial{}, "spv/PayPrincipalForWithdrawalRequests", nil)
 	cdc.RegisterConcrete(&MsgWithdrawPrincipal{}, "spv/WithdrawPrincipal", nil)
 	cdc.RegisterConcrete(&MsgSubmitWithdrawProposal{}, "spv/SubmitWithdrawProposal", nil)
 	cdc.RegisterConcrete(&MsgTransferOwnership{}, "spv/TransferOwnership", nil)
@@ -59,6 +60,9 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgPayPrincipal{},
+	)
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgPayPrincipalPartial{},
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgWithdrawPrincipal{},

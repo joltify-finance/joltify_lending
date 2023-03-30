@@ -66,7 +66,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 	return &types.MsgPayPrincipalResponse{}, nil
 }
 
-func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg *types.MsgPayPrincipal) (*types.MsgPayPrincipalResponse, error) {
+func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg *types.MsgPayPrincipalPartial) (*types.MsgPayPrincipalPartialResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	spv, err := sdk.AccAddressFromBech32(msg.Creator)
@@ -98,5 +98,5 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		),
 	)
 
-	return &types.MsgPayPrincipalResponse{}, nil
+	return &types.MsgPayPrincipalPartialResponse{}, nil
 }
