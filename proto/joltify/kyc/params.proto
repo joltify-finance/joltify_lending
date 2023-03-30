@@ -15,6 +15,8 @@ message BasicInfo{
   string business_number= 4 ;
   bytes reserved = 5;
   string project_name = 6;
+  string email = 7;
+  string name = 8;
 }
 
 // Market defines an asset in the pricefeed.
