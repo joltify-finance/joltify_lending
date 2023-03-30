@@ -36,7 +36,7 @@ func NewParams() Params {
 		"example@example.com",
 		"example",
 	}
-	amount, _ := sdkmath.NewIntFromString("100000000000000000000000")
+	amount, _ := sdkmath.NewIntFromString("1000000000000000000000000")
 	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 	if err != nil {
 		panic(err)
@@ -46,10 +46,10 @@ func NewParams() Params {
 		SPVName:             "defaultSPV",
 		ProjectOwner:        acc,
 		BasicInfo:           &b,
-		ProjectLength:       31536000, //1 year
+		ProjectLength:       3600, //4 hours
 		ProjectTargetAmount: types.NewCoin("ausdc", amount),
-		BaseApy:             types.NewDecWithPrec(15, 2),
-		PayFreq:             "60",
+		BaseApy:             types.NewDecWithPrec(10, 2),
+		PayFreq:             "300",
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }

@@ -226,7 +226,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		k.SetDepositor(ctx, depositor)
 	}
 
-	// incase we have some rounding
+	// in case we have some rounding
 	if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
 		poolInfo.PoolStatus = types.PoolInfo_CLOSING
 		ctx.Logger().Info(" the pool", "pool_ID:", poolInfo.Index)

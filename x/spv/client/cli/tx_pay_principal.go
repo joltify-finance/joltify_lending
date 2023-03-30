@@ -17,7 +17,7 @@ func CmdPayPrincipal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pay-principal [pool-index] [amount]",
 		Short: "Broadcast message pay-principal",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPoolIndex := args[0]
 

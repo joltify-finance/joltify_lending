@@ -18,7 +18,7 @@ func (k Keeper) Depositor(goCtx context.Context, req *types.QueryDepositorReques
 
 	investor, err := sdk.AccAddressFromBech32(req.GetWalletAddress())
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", req.GetDepositPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", req.GetWalletAddress())
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)

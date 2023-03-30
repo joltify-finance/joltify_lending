@@ -1,25 +1,25 @@
 package cli
 
 import (
-    "strconv"
-	
-	"github.com/spf13/cobra"
-    "github.com/cosmos/cosmos-sdk/client"
+	"strconv"
+
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
+	"github.com/spf13/cobra"
 )
 
 var _ = strconv.Itoa(0)
 
 func CmdSubmitWitdrawProposal() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "submit-witdraw-proposal [pool-index]",
-		Short: "Broadcast message submit-witdraw-proposal",
+		Use:   "submit-withdrawal-proposal [pool-index]",
+		Short: "Broadcast message submit-withdrawal-proposal",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-      		 argPoolIndex := args[0]
-            
+			argPoolIndex := args[0]
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -28,7 +28,6 @@ func CmdSubmitWitdrawProposal() *cobra.Command {
 			msg := types.NewMsgSubmitWitdrawProposal(
 				clientCtx.GetFromAddress().String(),
 				argPoolIndex,
-				
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -39,5 +38,5 @@ func CmdSubmitWitdrawProposal() *cobra.Command {
 
 	flags.AddTxFlagsToCmd(cmd)
 
-    return cmd
+	return cmd
 }

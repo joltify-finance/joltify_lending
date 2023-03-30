@@ -15,7 +15,7 @@ var _ = strconv.Itoa(0)
 
 func CmdWithdrawPrincipal() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "withdraw-principal [pool-index]",
+		Use:   "withdraw-principal [pool-index] [token]",
 		Short: "Broadcast message withdraw-principal",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {

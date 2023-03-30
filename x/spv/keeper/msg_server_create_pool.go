@@ -2,15 +2,16 @@ package keeper
 
 import (
 	"context"
-	coserrors "cosmossdk.io/errors"
 	"errors"
 	"fmt"
+	"strconv"
+
+	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
-	"strconv"
 )
 
 func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {
@@ -107,6 +108,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	}
 
 	var indexHashResp []string
+	var typePrefix string
 	for poolType, amount := range poolsInfoAmount {
 
 		poolApy := poolsInfoAPY[poolType]
@@ -114,6 +116,9 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		enuPoolType := types.PoolInfo_JUNIOR
 		if poolType == "senior" {
 			enuPoolType = types.PoolInfo_SENIOR
+			typePrefix = "senior"
+		} else {
+			typePrefix = "junior"
 		}
 
 		indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))
@@ -128,7 +133,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		nftClassID := fmt.Sprintf("class-%v", indexHash.String()[2:])
 		poolNFTClass := nft.Class{
 			Id:          nftClassID,
-			Name:        msg.PoolName,
+			Name:        msg.PoolName + "-" + typePrefix,
 			Symbol:      "asset-" + indexHash.Hex(),
 			Description: targetProject.BasicInfo.Description,
 			Uri:         targetProject.BasicInfo.ProjectsUrl,
@@ -137,7 +142,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 
 		poolInfo := types.PoolInfo{
 			Index:                  indexHash.Hex(),
-			PoolName:               msg.PoolName,
+			PoolName:               msg.PoolName + "-" + typePrefix,
 			LinkedProject:          msg.ProjectIndex,
 			OwnerAddress:           spvAddress,
 			Apy:                    poolApy,

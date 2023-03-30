@@ -17,8 +17,8 @@ func CmdDepositor() *cobra.Command {
 		Short: "Query depositor",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			reqWalletAddress := args[0]
-			reqDepositor := args[1]
+			reqPoolIndex := args[0]
+			reqWalletAddress := args[1]
 
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -29,7 +29,7 @@ func CmdDepositor() *cobra.Command {
 
 			params := &types.QueryDepositorRequest{
 				WalletAddress:    reqWalletAddress,
-				DepositPoolIndex: reqDepositor,
+				DepositPoolIndex: reqPoolIndex,
 			}
 
 			res, err := queryClient.Depositor(cmd.Context(), params)

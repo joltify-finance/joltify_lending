@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	sdkmath "cosmossdk.io/math"
 
 	coserrors "cosmossdk.io/errors"
