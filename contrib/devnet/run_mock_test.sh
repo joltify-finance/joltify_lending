@@ -3,6 +3,7 @@
 # loop function to generate n cosmos accounts
 base=1000000000000000000
 total_investors=2
+all_keys=5
 cecho(){
     RED="\033[0;31m"
     GREEN="\033[0;32m"  # <-- [0 means not bold
@@ -20,7 +21,7 @@ rm -rf ~/.joltify
 bash init-new-chain-run.sh
 
 
-for (( c=1; c<=$total_investors; c++ ))
+for (( c=1; c<=$all_keys; c++ ))
 do
   ret=$(joltify keys show key_$c --keyring-backend test --output json)
   # get the address from the json
@@ -116,8 +117,8 @@ function deposit() {
   # get the index of the pool
   indexSenior=$(echo $ret | jq -r '.pools_info[0].index')
   indexJunior=$(echo $ret | jq -r '.pools_info[1].index')
-  ./run_deposit $indexJunior 2 300000
-  ./run_deposit $indexSenior 2 1000000
+  ./run_deposit $indexJunior 2 0 300000
+  ./run_deposit $indexSenior 2 0 1000000
 }
 
 #function deposit() {

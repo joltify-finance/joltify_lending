@@ -41,7 +41,15 @@ func main() {
 		os.Exit(-1)
 		return
 	}
-	totalAmount, err := strconv.Atoi(os.Args[3])
+
+	offset, err := strconv.Atoi(os.Args[3])
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		os.Exit(-1)
+		return
+	}
+
+	totalAmount, err := strconv.Atoi(os.Args[4])
 	if err != nil {
 		fmt.Printf("error: %v", err)
 		os.Exit(-1)
@@ -55,7 +63,7 @@ func main() {
 			defer wg.Done()
 
 			// run the shell scripts
-			cmd := exec.Command("./deposit.sh", poolIndex, strconv.Itoa(value), strconv.Itoa(index+1))
+			cmd := exec.Command("./deposit.sh", poolIndex, strconv.Itoa(value), strconv.Itoa(offset+index+1))
 
 			// pipe the commands output to the applications
 			// standard output

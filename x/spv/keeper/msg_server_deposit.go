@@ -38,7 +38,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	resp, err := k.kycKeeper.QueryByWallet(goCtx, &req)
-	if err != nil {
+	if err != nil || resp.Investor == nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "the investor cannot be found %v", msg.Creator)
 	}
 
