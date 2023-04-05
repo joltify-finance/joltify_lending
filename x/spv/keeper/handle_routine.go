@@ -228,7 +228,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 
 	// in case we have some rounding
 	if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
-		poolInfo.PoolStatus = types.PoolInfo_CLOSING
+		poolInfo.PoolStatus = types.PoolInfo_FREEZING
 		ctx.Logger().Info(" the pool", "pool_ID:", poolInfo.Index)
 		poolInfo.BorrowedAmount = sdk.NewCoin(poolInfo.UsableAmount.Denom, sdkmath.ZeroInt())
 	} else {
@@ -263,7 +263,7 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 		panic(err)
 	}
 
-	poolInfo.PoolStatus = types.PoolInfo_CLOSED
+	poolInfo.PoolStatus = types.PoolInfo_FROZEN
 	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdk.ZeroInt())
 	poolInfo.EscrowInterestAmount = sdk.ZeroInt()
 	k.SetPool(ctx, *poolInfo)

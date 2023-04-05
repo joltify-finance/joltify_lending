@@ -42,14 +42,17 @@ func NewParams() Params {
 		panic(err)
 	}
 	pi := ProjectInfo{
-		Index:               1,
-		SPVName:             "defaultSPV",
-		ProjectOwner:        acc,
-		BasicInfo:           &b,
-		ProjectLength:       3600, //4 hours
-		ProjectTargetAmount: types.NewCoin("ausdc", amount),
-		BaseApy:             types.NewDecWithPrec(10, 2),
-		PayFreq:             "300",
+		Index:                        1,
+		SPVName:                      "defaultSPV",
+		ProjectOwner:                 acc,
+		BasicInfo:                    &b,
+		ProjectLength:                600, //10 mins
+		ProjectTargetAmount:          types.NewCoin("ausdc", amount),
+		BaseApy:                      types.NewDecWithPrec(10, 2),
+		PayFreq:                      "120",
+		PoolLockedSeconds:            60,
+		PoolTotalBorrowLimit:         100,
+		WithdrawRequestWindowSeconds: 300,
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }

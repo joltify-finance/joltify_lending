@@ -38,15 +38,15 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 	}
 
 	dueDate := poolInfo.ProjectDueTime
-	oneMonthBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(OneMonth))
-	twoMonthBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(OneMonth*2))
+	firstTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds))
+	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2))
 
 	currentTime := ctx.BlockTime()
-	if currentTime.Before(twoMonthBeforeProjectDueDate) {
+	if currentTime.Before(secondTimeStampBeforeProjectDueDate) {
 		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too early")
 	}
 
-	if currentTime.After(oneMonthBeforeProjectDueDate) {
+	if currentTime.After(firstTimeStampBeforeProjectDueDate) {
 		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too late")
 	}
 

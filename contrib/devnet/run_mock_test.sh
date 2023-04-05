@@ -117,8 +117,9 @@ function deposit() {
   # get the index of the pool
   indexSenior=$(echo $ret | jq -r '.pools_info[0].index')
   indexJunior=$(echo $ret | jq -r '.pools_info[1].index')
-  ./run_deposit $indexJunior 2 0 300000
-  ./run_deposit $indexSenior 2 0 1000000
+                # poolindex total_investors offset amount whether withdraw
+  ./run_deposit $indexJunior 2 0 300000 false
+  ./run_deposit $indexSenior 2 0 1000000 false
 }
 
 #function deposit() {

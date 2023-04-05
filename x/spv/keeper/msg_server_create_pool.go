@@ -2,16 +2,15 @@ package keeper
 
 import (
 	"context"
+	coserrors "cosmossdk.io/errors"
 	"errors"
 	"fmt"
-	"strconv"
-
-	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
+	"strconv"
 )
 
 func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {
@@ -141,27 +140,32 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		}
 
 		poolInfo := types.PoolInfo{
-			Index:                  indexHash.Hex(),
-			PoolName:               msg.PoolName + "-" + typePrefix,
-			LinkedProject:          msg.ProjectIndex,
-			OwnerAddress:           spvAddress,
-			Apy:                    poolApy,
-			TargetAmount:           amount,
-			PayFreq:                payfreq,
-			ReserveFactor:          types.RESERVEFACTOR,
-			PoolNFTIds:             []string{},
-			PoolStatus:             types.PoolInfo_PREPARE,
-			PoolType:               enuPoolType,
-			ProjectLength:          targetProject.ProjectLength,
-			LastPaymentTime:        ctx.BlockTime(),
-			BorrowedAmount:         sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			UsableAmount:           sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			TotalAmount:            sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			EscrowInterestAmount:   sdk.NewInt(0),
-			EscrowPrincipalAmount:  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			WithdrawProposalAmount: sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			WithdrawAccounts:       make([]sdk.AccAddress, 0, 200),
-			TransferAccounts:       make([]sdk.AccAddress, 0, 200),
+			Index:                         indexHash.Hex(),
+			PoolName:                      msg.PoolName + "-" + typePrefix,
+			LinkedProject:                 msg.ProjectIndex,
+			OwnerAddress:                  spvAddress,
+			Apy:                           poolApy,
+			TargetAmount:                  amount,
+			PayFreq:                       payfreq,
+			ReserveFactor:                 types.RESERVEFACTOR,
+			PoolNFTIds:                    []string{},
+			PoolStatus:                    types.PoolInfo_PREPARE,
+			PoolType:                      enuPoolType,
+			ProjectLength:                 targetProject.ProjectLength,
+			LastPaymentTime:               ctx.BlockTime(),
+			BorrowedAmount:                sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			UsableAmount:                  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			TotalAmount:                   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			EscrowInterestAmount:          sdk.NewInt(0),
+			EscrowPrincipalAmount:         sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			WithdrawProposalAmount:        sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
+			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
+			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
+			PoolLockedSeconds:             targetProject.PoolLockedSeconds,
+			PoolTotalBorrowLimit:          targetProject.PoolTotalBorrowLimit,
+			CurrentPoolTotalBorrowCounter: 0,
+			PoolCreatedTime:               ctx.BlockTime(),
 		}
 
 		k.SetPool(ctx, poolInfo)

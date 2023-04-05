@@ -16,7 +16,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 	k.IteratePool(ctx, func(poolInfo types.PoolInfo) (stop bool) {
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		if dueTime.Before(currentTime) {
-			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_CLOSING {
+			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_FREEZING {
 				err := k.HandleInterest(ctx, &poolInfo)
 				if err != nil {
 					ctx.Logger().Error(err.Error())
@@ -30,7 +30,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 					k.HandlePartialPrincipalPayment(ctx, &poolInfo, poolInfo.GetWithdrawAccounts())
 				}
 			}
-			if poolInfo.PoolStatus == types.PoolInfo_CLOSING {
+			if poolInfo.PoolStatus == types.PoolInfo_FREEZING {
 				k.HandlePrincipalPayment(ctx, &poolInfo)
 			}
 			k.SetPool(ctx, poolInfo)

@@ -69,11 +69,6 @@ while true; do
   sleep 30 # wait for a second before running the command again
 done
 
-echo "we will transfer owner"
-exit
-#now we call the transfer owner function
-
-
 echo "we need to wait for 10 seconds to submit the transfer command"
 sleep 10
 

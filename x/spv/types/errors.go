@@ -27,4 +27,7 @@ var (
 	ErrTime               = coserrors.Register(ModuleName, 17, "invalid time stamp")
 	ErrDeposit            = coserrors.Register(ModuleName, 18, "fail to deposit")
 	ErrClaimInterest      = coserrors.Register(ModuleName, 19, "fail to claim interest")
+	ErrPoolBorrowLimit    = coserrors.Register(ModuleName, 20, "pool reached borrow limit")
+	ErrPoolBorrowExpire   = coserrors.Register(ModuleName, 21, "pool borrow time window expired")
+	ErrPoolWithdrawLocked = coserrors.Register(ModuleName, 22, "pool withdraw locked")
 )

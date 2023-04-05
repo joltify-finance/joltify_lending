@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"errors"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -54,12 +55,16 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, errors.New("pool cannot be found")
 	}
 
+	if ctx.BlockTime().Before(poolInfo.PoolCreatedTime.Add(time.Second * time.Duration(poolInfo.PoolLockedSeconds))) {
+		return nil, types.ErrPoolWithdrawLocked
+	}
+
 	totalWithdraw := msg.Token
 	if msg.Token.IsGTE(depositor.GetWithdrawalAmount()) {
 		totalWithdraw = depositor.GetWithdrawalAmount()
 	}
 
-	if poolInfo.PoolStatus == types.PoolInfo_CLOSED {
+	if poolInfo.PoolStatus == types.PoolInfo_FROZEN {
 		tokenSend, err := k.handlerPoolClose(ctx, poolInfo, depositor)
 		if err != nil {
 			return nil, err

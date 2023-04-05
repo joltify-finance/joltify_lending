@@ -55,15 +55,27 @@ func main() {
 		os.Exit(-1)
 		return
 	}
+
+	withdraw, err := strconv.ParseBool(os.Args[5])
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		os.Exit(-1)
+		return
+	}
+
 	values, _ := generateRandomIntegersWithSum(investorsNum, totalAmount)
 	wg := sync.WaitGroup{}
 	wg.Add(len(values))
 	for i, v := range values {
 		go func(index int, value int) {
 			defer wg.Done()
-
-			// run the shell scripts
-			cmd := exec.Command("./deposit.sh", poolIndex, strconv.Itoa(value), strconv.Itoa(offset+index+1))
+			var cmd *exec.Cmd
+			if withdraw {
+				cmd = exec.Command("./withdraw_after_close.sh", poolIndex, "10ausdc", strconv.Itoa(offset+index+1))
+			} else {
+				// run the shell scripts
+				cmd = exec.Command("./deposit.sh", poolIndex, strconv.Itoa(value), strconv.Itoa(offset+index+1))
+			}
 
 			// pipe the commands output to the applications
 			// standard output

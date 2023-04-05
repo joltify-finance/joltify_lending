@@ -1,5 +1,4 @@
 #! /bin/bash
-
 base=1000000000000000000
 
 validatorMnemonic="equip town gesture square tomorrow volume nephew minute witness beef rich gadget actress egg sing secret pole winter alarm law today check violin uncover"

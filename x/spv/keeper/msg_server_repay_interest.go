@@ -134,7 +134,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 	if !found {
 		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool %v not found", msg.PoolIndex)
 	}
-	if poolInfo.PoolStatus == types.PoolInfo_CLOSED || poolInfo.PoolStatus == types.PoolInfo_INACTIVE || poolInfo.PoolStatus == types.PoolInfo_CLOSING {
+	if poolInfo.PoolStatus == types.PoolInfo_FROZEN || poolInfo.PoolStatus == types.PoolInfo_INACTIVE || poolInfo.PoolStatus == types.PoolInfo_FREEZING {
 		return nil, types.ErrPoolNotActive
 	}
 
