@@ -50,7 +50,7 @@ func TestMsgRepayInterest(t *testing.T) {
 
 	poolInfo, found := k.GetPools(ctx, poolIndex[0])
 	require.True(t, found)
-	poolInfo.PoolStatus = types.PoolInfo_CLOSED
+	poolInfo.PoolStatus = types.PoolInfo_FROZEN
 	_, err = app.RepayInterest(ctx, &reqRePayInterest)
 	require.NoError(t, err, "pool is not active")
 

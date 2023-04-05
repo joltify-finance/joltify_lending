@@ -1,6 +1,8 @@
 #!/bin/bash
 
+set -x
 ret=$(joltify tx spv withdraw-principal $1 $2 --from key_$3 --output json -y --gas 100000000)
+set +x
 # get the code from json
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0

@@ -33,7 +33,7 @@ read total_amount
 
 
 offset=$total_investors
-./run_deposit $indexSenior $number_investors $offset $total_amount
+./run_deposit $indexSenior $number_investors $offset $total_amount false
 
 
 
@@ -61,7 +61,7 @@ while true; do
 	done < <(./sub_commands/get_class.sh)
 	payment_count=$(echo "$payments_number" | grep -oE '[0-9]+' | awk '{print $1}')
   # your command goes here
-  if [[ $payment_count -gt 154 ]]; then
+  if [[ $payment_count -gt 2 ]]; then
       echo  "chain is ready for transfer owner"
       break
   fi
@@ -75,9 +75,7 @@ sleep 10
 
 for (( c=1; c<=$total_investors; c++ ))
 do
-set -x
 ret=$( joltify tx spv transfer-ownership  $indexSenior   --from key_$c  -y --output json)
-set +x
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0
 if [ $code -eq 0 ]; then

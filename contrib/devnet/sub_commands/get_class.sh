@@ -16,7 +16,7 @@ indexSeniorRemove=$(echo $indexSenior | cut -c3-)
 # remove the leading 0x in the indexJunior
 indexJuniorRemove=$(echo $indexJunior | cut -c3-)
 # get the nft class of the senior pool
-id=class-$indexSeniorRemove-0
+id=class-$indexSeniorRemove-$3
 class1=$(joltify q nft class $id --output json)
 #echo $class1
 
@@ -29,7 +29,7 @@ echo "payment count:" $paymentsCount
 sumPaymentsSenior=$(echo $class1 | jq '[.class.data.payments[].payment_amount.amount | tonumber] | add')
 echo "senior payment total:" $sumPaymentsSenior
 
-id=class-$indexJuniorRemove-0
+id=class-$indexJuniorRemove-$3
 class2=$(joltify q nft class $id --output json)
 
 #the jq filter to extract the payment amounts from the class1

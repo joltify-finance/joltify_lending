@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+# http://localhost:1317/cosmos/nft/v1beta1/nfts?owner=jolt1ur5k3vmwt2dw0r0f4zu4lz08c8p6rmwv0f3xkh
+
 ret=$(joltify q spv list-pools --output json)
 # get the index of the pool
 indexSenior=$(echo $ret | jq -r '.pools_info[0].index')

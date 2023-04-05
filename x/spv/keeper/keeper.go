@@ -165,6 +165,21 @@ func (k Keeper) GetReserve(ctx sdk.Context, denom string) (amount sdk.Coin, ok b
 }
 
 // IteratePool iterates over all deposit objects in the store and performs a callback function
+func (k Keeper) IterateReserve(ctx sdk.Context, cb func(coin sdk.Coin) (stop bool)) {
+	storeKey := fmt.Sprintf("%v%v", types.ProjectsKeyPrefix, "reserve")
+	reserveStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(storeKey))
+	iterator := sdk.KVStorePrefixIterator(reserveStore, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var coin sdk.Coin
+		k.cdc.MustUnmarshal(iterator.Value(), &coin)
+		if cb(coin) {
+			break
+		}
+	}
+}
+
+// IteratePool iterates over all deposit objects in the store and performs a callback function
 func (k Keeper) IteratePool(ctx sdk.Context, cb func(poolInfo types.PoolInfo) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.Pool))
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})

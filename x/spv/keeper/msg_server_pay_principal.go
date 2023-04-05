@@ -51,6 +51,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 
 	// we only close the pool when the escrow principal is later than the total borrowed and the project pass the project length
 	if poolInfo.EscrowPrincipalAmount.IsGTE(poolInfo.BorrowedAmount) && ctx.BlockTime().After(poolInfo.ProjectDueTime) {
+		// once we are in the freezing state, the usable amount will not be accurate any longer
 		poolInfo.PoolStatus = types.PoolInfo_FREEZING
 	}
 

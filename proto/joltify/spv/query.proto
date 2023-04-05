@@ -51,6 +51,11 @@ service Query {
     option (google.api.http).get = "/joltify-finance/joltify_lending/spv/withdrawal_principal/{pool_index}";
   }
 
+  // Queries a list of TotalReserve items.
+  rpc TotalReserve (QueryTotalReserveRequest) returns (QueryTotalReserveResponse) {
+    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/total_reserve";
+  }
+
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -125,4 +130,11 @@ message QuerywithdrawalPrincipalRequest {
 
 message QuerywithdrawalPrincipalResponse {
   string amount = 1;
+}
+
+message QueryTotalReserveRequest {
+}
+
+message QueryTotalReserveResponse {
+  string coins = 1;
 }
