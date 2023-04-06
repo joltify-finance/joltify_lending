@@ -56,6 +56,12 @@ service Query {
     option (google.api.http).get = "/joltify-finance/joltify_lending/spv/total_reserve";
   }
 
+  // Queries a list of investors 
+  rpc PoolInvestors (QueryPoolInvestorsRequest) returns (QueryPoolInvestorsResponse) {
+    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/pool_investors/{poolIndex}";
+  
+  }
+
 }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -138,3 +144,11 @@ message QueryTotalReserveRequest {
 message QueryTotalReserveResponse {
   string coins = 1;
 }
+
+message QueryPoolInvestorsRequest {
+  string poolIndex = 1;
+}
+
+message QueryPoolInvestorsResponse {
+  repeated string investors = 1;
+  }
