@@ -58,7 +58,7 @@ while true; do
 	while read line; do
 		payments_number=$line
 		break
-	done < <(./sub_commands/get_class.sh)
+	done < <(./sub_commands/get_class.sh 0) 
 	payment_count=$(echo "$payments_number" | grep -oE '[0-9]+' | awk '{print $1}')
   # your command goes here
   if [[ $payment_count -gt 2 ]]; then

@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # if $1 and $2 are not empty, then use the $1 and $2
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ -z "$2" ] || [ -z "$3" ]; then
 	ret=$(joltify q spv list-pools --output json)
 	# get the index of the pool
 	indexSenior=$(echo $ret | jq -r '.pools_info[0].index')
 	indexJunior=$(echo $ret | jq -r '.pools_info[1].index')
 else
-	indexSenior=$1
-	indexJunior=$2
+	indexSenior=$2
+	indexJunior=$3
 fi
 
 # remove the leading 0x in the indexSenior
@@ -16,26 +16,51 @@ indexSeniorRemove=$(echo $indexSenior | cut -c3-)
 # remove the leading 0x in the indexJunior
 indexJuniorRemove=$(echo $indexJunior | cut -c3-)
 # get the nft class of the senior pool
-id=class-$indexSeniorRemove-$3
+id=class-$indexSeniorRemove-$1
 class1=$(joltify q nft class $id --output json)
-#echo $class1
 
-#the jq filter to extract the payment amounts from the class1
-paymentsSenior=$(echo $class1 | jq '.class.data.payments[].payment_amount.amount')
 
 paymentsCount=$(echo $(echo $class1 | jq '.class.data.payments|length')-"1" | bc)
 echo "payment count:" $paymentsCount
 
-sumPaymentsSenior=$(echo $class1 | jq '[.class.data.payments[].payment_amount.amount | tonumber] | add')
+#the jq filter to extract the payment amounts from the class1
+data=$(echo $class1 | jq '.class.data.payments[].payment_amount.amount')
+
+output_data=$(echo $data | tr -d '"')
+
+# Split the string into an array
+readarray -t array <<< "$output_data"
+
+sumPaymentsSenior=0
+for payment in  $array
+do
+  sumPaymentsSenior=$(echo $sumPaymentsSenior+$payment |bc)
+done
 echo "senior payment total:" $sumPaymentsSenior
 
-id=class-$indexJuniorRemove-$3
+id=class-$indexJuniorRemove-$1
 class2=$(joltify q nft class $id --output json)
 
 #the jq filter to extract the payment amounts from the class1
-paymentsJunior=$(echo $class2 | jq '.class.data.payments[].payment_amount.amount')
-sumPaymentsJunior=$(echo $class2 | jq '[.class.data.payments[].payment_amount.amount | tonumber] | add')
-echo "junior payments total:" $sumPaymentsJunior
+
+#the jq filter to extract the payment amounts from the class1
+data=$(echo $class2 | jq '.class.data.payments[].payment_amount.amount')
+
+output_data=$(echo $data | tr -d '"')
+
+# Split the string into an array
+readarray -t array <<< "$output_data"
+
+sumPaymentsJunior=0
+for payment in  $array
+do
+  sumPaymentsJunior=$(echo $sumPaymentsJunior+$payment |bc)
+done
+echo "junior payment total:" $sumPaymentsJunior
+
+
+
+
 
 sum=$(echo $sumPaymentsJunior+$sumPaymentsSenior | bc)
 echo "sum of the total payment:" $sum

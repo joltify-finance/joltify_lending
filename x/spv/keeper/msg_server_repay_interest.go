@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
@@ -79,7 +78,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
 	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
 	interestData.Payments = append(interestData.Payments, &currentPayment)
-	ctx.Logger().Info(fmt.Sprintf(">>>total Interest:>>>%v and %v to investor\n", payment.String(), paymentToInvestor.String()))
+	interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
 	return payment, nil
 
 }

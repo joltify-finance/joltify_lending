@@ -68,4 +68,9 @@ message BorrowInterest{
 	cosmos.base.v1beta1.Coin interestPaid = 9[
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
+
+	cosmos.base.v1beta1.Coin acc_interest = 10[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+
 }
