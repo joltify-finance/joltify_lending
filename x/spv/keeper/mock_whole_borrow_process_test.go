@@ -695,9 +695,9 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(oneWeek)))
 	spv.EndBlock(suite.ctx, *suite.keeper)
 	p, _ := suite.keeper.GetPools(suite.ctx, seniorPool)
-	suite.Require().Equal(p.PoolStatus, types.PoolInfo_CLOSED)
+	suite.Require().Equal(p.PoolStatus, types.PoolInfo_FROZEN)
 	p, _ = suite.keeper.GetPools(suite.ctx, juniorPool)
-	suite.Require().Equal(p.PoolStatus, types.PoolInfo_CLOSED)
+	suite.Require().Equal(p.PoolStatus, types.PoolInfo_FROZEN)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second))
 
