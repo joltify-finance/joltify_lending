@@ -43,11 +43,11 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 
 	currentTime := ctx.BlockTime()
 	if currentTime.Before(secondTimeStampBeforeProjectDueDate) {
-		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too early")
+		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too early with time  %v:%v", secondTimeStampBeforeProjectDueDate.Local(), currentTime.Local())
 	}
 
 	if currentTime.After(firstTimeStampBeforeProjectDueDate) {
-		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too late")
+		return nil, coserrors.Wrapf(types.ErrTime, "submit the proposal too late with time gap %v%v", firstTimeStampBeforeProjectDueDate.Local(), currentTime.Local())
 	}
 
 	depositor.DepositType = types.DepositorInfo_withdraw_proposal

@@ -238,7 +238,6 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
 
-	k.SetPool(ctx, *poolInfo)
 }
 
 // not supported yet

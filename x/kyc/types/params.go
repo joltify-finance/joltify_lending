@@ -46,13 +46,13 @@ func NewParams() Params {
 		SPVName:                      "defaultSPV",
 		ProjectOwner:                 acc,
 		BasicInfo:                    &b,
-		ProjectLength:                600, //10 mins
+		ProjectLength:                300, //5 mins
 		ProjectTargetAmount:          types.NewCoin("ausdc", amount),
 		BaseApy:                      types.NewDecWithPrec(10, 2),
 		PayFreq:                      "120",
-		PoolLockedSeconds:            60,
+		PoolLockedSeconds:            120,
 		PoolTotalBorrowLimit:         100,
-		WithdrawRequestWindowSeconds: 300,
+		WithdrawRequestWindowSeconds: 20,
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }

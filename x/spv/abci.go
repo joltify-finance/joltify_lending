@@ -25,9 +25,12 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 			}
 			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE {
 				k.HandleTransfer(ctx, &poolInfo)
-				if poolInfo.ProjectDueTime.Truncate(time.Duration(poolInfo.PayFreq) * time.Second).Before(currentTime) {
+				if poolInfo.ProjectDueTime.Before(currentTime) {
 					// we pay the partial of the interest
 					k.HandlePartialPrincipalPayment(ctx, &poolInfo, poolInfo.GetWithdrawAccounts())
+					// we update the project due time to the next cycle
+					poolInfo.ProjectDueTime = poolInfo.ProjectDueTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
+					k.SetPool(ctx, poolInfo)
 				}
 			}
 			if poolInfo.PoolStatus == types.PoolInfo_FREEZING {

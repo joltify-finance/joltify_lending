@@ -2,15 +2,16 @@ package keeper
 
 import (
 	"context"
-	coserrors "cosmossdk.io/errors"
 	"errors"
 	"fmt"
+	"strconv"
+
+	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
-	"strconv"
 )
 
 func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {

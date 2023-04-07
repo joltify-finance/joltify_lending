@@ -229,6 +229,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 	// we start the project
 	if len(poolInfo.PoolNFTIds) == 1 {
 		poolInfo.ProjectDueTime = ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.ProjectLength))
+		poolInfo.PoolFirstDueTime = poolInfo.ProjectDueTime
 	}
 
 	err = k.processBorrow(ctx, poolInfo, currentBorrowClass, tokenAmount, depositors, borrowedFix)

@@ -2,8 +2,9 @@ package keeper
 
 import (
 	"context"
-	coserrors "cosmossdk.io/errors"
 	"errors"
+
+	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
