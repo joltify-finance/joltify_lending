@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -167,6 +168,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			PoolTotalBorrowLimit:          targetProject.PoolTotalBorrowLimit,
 			CurrentPoolTotalBorrowCounter: 0,
 			PoolCreatedTime:               ctx.BlockTime(),
+			GraceTime:                     time.Hour * 24 * 7,
 		}
 
 		k.SetPool(ctx, poolInfo)

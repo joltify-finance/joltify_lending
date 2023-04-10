@@ -55,7 +55,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		return nil, errors.New("pool cannot be found")
 	}
 
-	if ctx.BlockTime().Before(poolInfo.PoolCreatedTime.Add(time.Second * time.Duration(poolInfo.PoolLockedSeconds))) {
+	if ctx.BlockTime().Before(poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds) + poolInfo.GraceTime)) {
 		return nil, types.ErrPoolWithdrawLocked
 	}
 

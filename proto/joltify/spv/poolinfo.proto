@@ -5,6 +5,8 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
 
@@ -118,6 +120,7 @@ message PoolInfo {
   int32 current_pool_total_borrow_counter= 27;
   google.protobuf.Timestamp pool_created_time = 28 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
   google.protobuf.Timestamp pool_first_due_time= 29 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Duration grace_time= 30 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
 }
 
 message PoolWithInvestors {

@@ -20,7 +20,7 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo) error {
 		return types.ErrPoolBorrowLimit
 	}
 
-	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds)).Before(blockTime) {
+	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds)+poolInfo.GraceTime).Before(blockTime) {
 		return types.ErrPoolBorrowExpire
 	}
 

@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	sdkmath "cosmossdk.io/math"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -27,6 +28,10 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
 		return nil, coserrors.Wrapf(types.ErrPoolNotActive, "pool is not active")
+	}
+
+	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && ctx.BlockTime().After(poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds))) {
+		return nil, types.ErrPoolNotAcceptNewFund
 	}
 
 	if msg.Token.GetDenom() != poolInfo.GetTotalAmount().Denom {
