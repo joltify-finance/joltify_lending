@@ -64,6 +64,10 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		totalWithdraw = depositor.GetWithdrawalAmount()
 	}
 
+	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && ctx.BlockTime().After(poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds)+poolInfo.GraceTime)) {
+		poolInfo.PoolStatus = types.PoolInfo_FROZEN
+	}
+
 	if poolInfo.PoolStatus == types.PoolInfo_FROZEN {
 		tokenSend, err := k.handlerPoolClose(ctx, poolInfo, depositor)
 		if err != nil {
