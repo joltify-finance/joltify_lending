@@ -24,6 +24,14 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	}
 
 	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(totalAmountDue)
+	if poolInfo.EscrowInterestAmount.IsNegative() {
+		poolInfo.NegativeInterestCounter++
+	} else {
+		poolInfo.NegativeInterestCounter = 0
+	}
+	if poolInfo.NegativeInterestCounter > types.MaxLiquidattion {
+		poolInfo.PoolStatus = types.PoolInfo_Liquidation
+	}
 
 	// finally, we update the poolinfo
 	currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(poolInfo.PayFreq) * time.Second)
@@ -192,6 +200,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	token := poolInfo.EscrowPrincipalAmount
 	if token.IsLT(poolInfo.WithdrawProposalAmount) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
+		poolInfo.PoolStatus = types.PoolInfo_Liquidation
 		return
 	}
 

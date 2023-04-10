@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -33,6 +34,8 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 	}
 
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
+	poolInfo.PoolCreatedTime = ctx.BlockTime()
+	poolInfo.LastPaymentTime = ctx.BlockTime()
 	k.SetPool(ctx, poolInfo)
 
 	return &types.MsgActivePoolResponse{}, nil

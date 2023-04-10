@@ -34,6 +34,8 @@ service Msg {
   rpc SubmitWithdrawProposal(MsgSubmitWithdrawProposal) returns (MsgSubmitWithdrawProposalResponse);
 
   rpc TransferOwnership(MsgTransferOwnership) returns (MsgTransferOwnershipResponse);
+
+  rpc Liquidate (MsgLiquidate) returns (MsgLiquidateResponse);
 }
 
 message MsgCreatePool {
@@ -165,3 +167,13 @@ message MsgTransferOwnership {
 message MsgTransferOwnershipResponse {
   bool operation_result = 1;
 }
+
+// this line is used by starport scaffolding # proto/tx/message
+message MsgLiquidate {
+  string creator   = 1;
+  string poolIndex = 2;
+  cosmos.base.v1beta1.Coin amount= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
+}
+
+message MsgLiquidateResponse {}
+

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gogo/protobuf/proto"
@@ -91,16 +92,55 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 			name: "inconsistency toekn denom",
 			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "token to be borrowed is inconsistency"},
 		},
+		{
+			name: "reach borrow limit",
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "pool reached borrow limit"},
+		},
+		{
+			name: "not enough to borrow",
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "insufficient tokens"},
+		},
+		{
+			name: "expire borrow time",
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "pool borrow time window expired"},
+		},
+
+		{
+			name: "not enough to borrow",
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "pool borrow time window expired"},
+		},
 	}
 
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
+			poolInfo, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+			suite.Require().True(found)
+			poolInfo.CurrentPoolTotalBorrowCounter = 0
+			poolInfo.PoolTotalBorrowLimit = 1
+			poolInfo.UsableAmount = poolInfo.TargetAmount
+
+			if tc.name == "reach borrow limit" {
+				poolInfo.PoolTotalBorrowLimit = 0
+			}
+			if tc.name == "not enough to borrow" {
+				poolInfo.UsableAmount = sdk.NewCoin("ausdc", sdk.NewInt(100))
+			}
+
+			if tc.name == "expire borrow time" {
+				expiredTime := poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds) + poolInfo.GraceTime + time.Second)
+				suite.ctx = suite.ctx.WithBlockTime(expiredTime)
+			}
+
+			if tc.name == "not " {
+
+			}
+
+			suite.keeper.SetPool(suite.ctx, poolInfo)
 			_, err := suite.app.Borrow(suite.ctx, tc.args.msgBorrow)
 			if tc.args.expectedErr != "" {
 				suite.Require().ErrorContains(err, tc.args.expectedErr)
 			} else {
 				suite.Require().NoError(err)
-
 			}
 		})
 	}
@@ -121,9 +161,15 @@ func compareDepositor(suite suite.Suite, expected, actual types.DepositorInfo) {
 func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: "0.15", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: "0.15", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(1*1e6))}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+	poolInfo.CurrentPoolTotalBorrowCounter = 0
+	poolInfo.PoolTotalBorrowLimit = 10
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	depositorPool := resp.PoolIndex[0]
 
@@ -247,7 +293,6 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
 	suite.True(lastBorrow.IsEqual(borrow.BorrowAmount))
-	fmt.Printf(">>>>apy>>>%v\n", borrowClassInfo.Apy)
 	suite.Require().True(borrowClassInfo.Apy.Equal(sdk.NewDecWithPrec(15, 2)))
 
 	// nft ID is the hash(nft class ID, investorWallet)
