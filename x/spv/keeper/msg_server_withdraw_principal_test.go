@@ -1,9 +1,10 @@
 package keeper_test
 
 import (
-	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"testing"
 	"time"
+
+	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
@@ -238,7 +239,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Duration(poolInfo.PayFreq) * time.Second))
-	suite.Require().EqualValues(poolInfo.PoolStatus, types.PoolInfo_CLOSING)
+	suite.Require().EqualValues(poolInfo.PoolStatus, types.PoolInfo_FREEZING)
 	suite.keeper.HandlePrincipalPayment(suite.ctx, &poolInfo)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 200))

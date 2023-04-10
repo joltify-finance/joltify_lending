@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	Maxfreq = 31536000
-	Minfreq = 60
+	Maxfreq         = 31536000
+	Minfreq         = 60
+	MaxLiquidattion = 12
 )
 
 var (

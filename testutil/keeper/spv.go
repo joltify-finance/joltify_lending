@@ -53,6 +53,8 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		"ABC123",
 		[]byte("reserved"),
 		"This is the test info",
+		"email address",
+		"example.com",
 	}
 
 	acc, _ := sdk.AccAddressFromBech32("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0")
@@ -74,6 +76,8 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		"ABC123-2",
 		[]byte("reserved"),
 		"This is the test info2",
+		"example.com2",
+		"email address2",
 	}
 
 	pi2 := kycmoduletypes.ProjectInfo{
