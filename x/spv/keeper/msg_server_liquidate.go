@@ -95,7 +95,7 @@ func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*t
 	}
 
 	if msg.Amount.IsZero() {
-		return nil, coserrors.Wrapf(types.ErrInvalidLengthTx, "the amount cannot be zero")
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the amount cannot be zero")
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
