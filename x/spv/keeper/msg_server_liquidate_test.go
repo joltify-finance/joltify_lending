@@ -1,7 +1,10 @@
 package keeper_test
 
 import (
-	"fmt"
+	"math/rand"
+	"testing"
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -9,9 +12,6 @@ import (
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/suite"
-	"math/rand"
-	"testing"
-	"time"
 )
 
 // Test suite used for all keeper tests
@@ -168,7 +168,51 @@ func (suite *liquidateTestSuite) TestLiquidate() {
 	}
 }
 
-func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheck() {
+func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
+	setupLiquidateEnv(suite)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	samples := make([]int, 20)
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < 20; i++ {
+		// Generate a random integer between 0 and remainingSum
+		randomInt := rand.Intn(9) + 1
+		samples[i] = randomInt
+	}
+
+	for i := 0; i < 20; i++ {
+		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
+		suite.Require().NoError(err)
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	}
+
+	histories := make([][]*types.LiquidationItem, 1)
+	for i, el := range poolInfo.PoolNFTIds {
+		class, found := suite.nftKeeper.GetClass(suite.ctx, el)
+		if !found {
+			panic(found)
+		}
+		var borrowInterest types.BorrowInterest
+		var err error
+		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+		if err != nil {
+			panic(err)
+		}
+		history := borrowInterest.LiquidationItems
+		histories[i] = history
+	}
+
+	for i := 0; i < 20; i++ {
+		total := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		suite.Require().True(total.Equal(histories[0][i].Amount.Amount))
+	}
+
+}
+
+func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	setupLiquidateEnv(suite)
 
 	depositorPool := suite.investorPool
@@ -206,7 +250,6 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheck() {
 
 	for i := 0; i < 20; i++ {
 		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
-		fmt.Printf(">>>>amount>?>>>>%v\n", amount.String())
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
@@ -230,12 +273,10 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheck() {
 
 	for i := 0; i < 20; i++ {
 		total := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
-
-		v2 := sdk.NewDecFromInt(total.Mul(sdk.NewIntFromUint64(1.34e5))).Quo(sdk.NewDecFromInt(sdk.NewIntFromUint64(3.34e5))).TruncateInt()
-
-		fmt.Printf(">>v2>>%v\n", v2.String())
-		fmt.Printf(">>>>>>>>.%v\n", histories[1][i].Amount.String())
-
+		v2 := sdk.NewDecFromInt(total.Mul(sdk.NewIntFromUint64(2e5))).Quo(sdk.NewDecFromInt(sdk.NewIntFromUint64(3.34e5))).TruncateInt()
+		suite.Require().True(v2.Equal(histories[1][i].Amount.Amount))
+		v1 := total.Sub(v2)
+		suite.Require().True(v1.Equal(histories[0][i].Amount.Amount))
 	}
 
 }

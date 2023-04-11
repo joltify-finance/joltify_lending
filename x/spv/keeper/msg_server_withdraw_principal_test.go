@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"math/rand"
 	"testing"
 	"time"
 
@@ -31,6 +32,12 @@ func setupPool(suite *withDrawPrincipalSuite) {
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: "0.15", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(6*1e5))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	depositorPool := resp.PoolIndex[0]
 
@@ -191,8 +198,301 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 
 }
 
-func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
+func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipleBorrow() {
+	setupPool(suite)
+	creator1 := suite.investors[0]
+	creator2 := suite.investors[1]
+	creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
+	suite.Require().NoError(err)
+	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
+	suite.Require().NoError(err)
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	//suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount}
 
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.Require().NoError(err)
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	//now we borrow 1.34e5
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	// we borrow again
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
+
+	poolInfo.PoolStatus = types.PoolInfo_Liquidation
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
+	samples := make([]int, 20)
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < 20; i++ {
+		// Generate a random integer between 0 and remainingSum
+		randomInt := rand.Intn(9) + 1
+		samples[i] = randomInt
+	}
+
+	amount := sdk.NewIntFromUint64(uint64(samples[0])).Mul(sdk.NewIntFromUint64(1e2))
+	_, err = suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
+	suite.Require().NoError(err)
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+
+	depositorInfo1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+
+	depositorInfo2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
+	suite.Require().True(found)
+
+	expectedLiquidationToUser1 := sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+	expectedLiquidationToUser2 := sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+
+	totalExpected1 := depositorInfo1.WithdrawalAmount.AddAmount(expectedLiquidationToUser1)
+	totalExpected2 := depositorInfo2.WithdrawalAmount.AddAmount(expectedLiquidationToUser2)
+
+	resp1, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	suite.Require().NoError(err)
+
+	resp2, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	suite.Require().NoError(err)
+
+	// start from 1
+	real1, err := sdk.ParseCoinNormalized(resp1.Amount)
+	suite.Require().NoError(err)
+	real2, err := sdk.ParseCoinNormalized(resp2.Amount)
+	suite.Require().NoError(err)
+
+	suite.Require().True(totalExpected1.Amount.Sub(real1.Amount).Abs().LT(sdk.NewIntFromUint64(10)))
+	suite.Require().True(totalExpected2.Amount.Sub(real2.Amount).Abs().LT(sdk.NewIntFromUint64(10)))
+
+	expectedLiquidationToUser1 = sdk.ZeroInt()
+	expectedLiquidationToUser2 = sdk.ZeroInt()
+	for i := 1; i < 5; i++ {
+		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
+		suite.Require().NoError(err)
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+	}
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	suite.Require().NoError(err)
+
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	suite.Require().NoError(err)
+
+	// start from 1
+	real1, err = sdk.ParseCoinNormalized(resp1.Amount)
+	suite.Require().NoError(err)
+	real2, err = sdk.ParseCoinNormalized(resp2.Amount)
+	suite.Require().NoError(err)
+
+	suite.Require().True(expectedLiquidationToUser1.Sub(real1.Amount).Abs().LT(sdk.NewIntFromUint64(10)))
+	suite.Require().True(expectedLiquidationToUser2.Sub(real2.Amount).Abs().LT(sdk.NewIntFromUint64(10)))
+
+	expectedLiquidationToUser1 = sdk.ZeroInt()
+	expectedLiquidationToUser2 = sdk.ZeroInt()
+	for i := 5; i < 20; i++ {
+		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
+		suite.Require().NoError(err)
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+	}
+
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	suite.Require().NoError(err)
+
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	suite.Require().NoError(err)
+
+	// start from 1
+	real1, err = sdk.ParseCoinNormalized(resp1.Amount)
+	suite.Require().NoError(err)
+	real2, err = sdk.ParseCoinNormalized(resp2.Amount)
+	suite.Require().NoError(err)
+
+	suite.Require().True(expectedLiquidationToUser1.Sub(real1.Amount).Abs().LT(sdk.NewIntFromUint64(10)))
+	suite.Require().True(expectedLiquidationToUser2.Sub(real2.Amount).Abs().LT(sdk.NewIntFromUint64(10)))
+}
+
+func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
+	setupPool(suite)
+	creator1 := suite.investors[0]
+	creator2 := suite.investors[1]
+	creatorAddr1, err := sdk.AccAddressFromBech32(creator1)
+	suite.Require().NoError(err)
+	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
+	suite.Require().NoError(err)
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	//suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount}
+
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.Require().NoError(err)
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	//now we borrow 1.34e5
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
+
+	poolInfo.PoolStatus = types.PoolInfo_Liquidation
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
+	realPaid := sdk.ZeroInt()
+
+	samples := make([]int, 20)
+	rand.Seed(time.Now().UnixNano())
+	a := 0
+	for i := 0; i < 20; i++ {
+		// Generate a random integer between 0 and remainingSum
+		randomInt := rand.Intn(9) + 1
+		samples[i] = randomInt
+		a += randomInt
+	}
+
+	amount := sdk.NewIntFromUint64(uint64(samples[0])).Mul(sdk.NewIntFromUint64(1e2))
+	_, err = suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
+	suite.Require().NoError(err)
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+
+	depositorInfo1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+
+	depositorInfo2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
+	suite.Require().True(found)
+
+	expectedLiquidationToUser1 := sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+	expectedLiquidationToUser2 := sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+
+	totalExpected1 := depositorInfo1.WithdrawalAmount.AddAmount(expectedLiquidationToUser1)
+	totalExpected2 := depositorInfo2.WithdrawalAmount.AddAmount(expectedLiquidationToUser2)
+
+	resp1, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	suite.Require().NoError(err)
+
+	resp2, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	suite.Require().NoError(err)
+
+	// start from 1
+	real1, err := sdk.ParseCoinNormalized(resp1.Amount)
+	suite.Require().NoError(err)
+
+	// we cannot use the resp1 as it includes the withdrawal amount
+	realPaid = realPaid.Add(expectedLiquidationToUser1)
+	real2, err := sdk.ParseCoinNormalized(resp2.Amount)
+	suite.Require().NoError(err)
+	realPaid = realPaid.Add(expectedLiquidationToUser2)
+	suite.Require().True(totalExpected1.Amount.Equal(real1.Amount))
+	suite.Require().True(totalExpected2.Amount.Equal(real2.Amount))
+
+	expectedLiquidationToUser1 = sdk.ZeroInt()
+	expectedLiquidationToUser2 = sdk.ZeroInt()
+	for i := 1; i < 5; i++ {
+		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
+		suite.Require().NoError(err)
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+	}
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	suite.Require().NoError(err)
+
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	suite.Require().NoError(err)
+
+	// start from 1
+	real1, err = sdk.ParseCoinNormalized(resp1.Amount)
+	suite.Require().NoError(err)
+	real2, err = sdk.ParseCoinNormalized(resp2.Amount)
+	suite.Require().NoError(err)
+	realPaid = realPaid.Add(real1.Amount)
+	realPaid = realPaid.Add(real2.Amount)
+
+	suite.Require().True(expectedLiquidationToUser1.Equal(real1.Amount))
+	suite.Require().True(expectedLiquidationToUser2.Equal(real2.Amount))
+
+	expectedLiquidationToUser1 = sdk.ZeroInt()
+	expectedLiquidationToUser2 = sdk.ZeroInt()
+	for i := 5; i < 20; i++ {
+		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
+		suite.Require().NoError(err)
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+	}
+
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	suite.Require().NoError(err)
+
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	suite.Require().NoError(err)
+
+	// start from 1
+	real1, err = sdk.ParseCoinNormalized(resp1.Amount)
+	suite.Require().NoError(err)
+	real2, err = sdk.ParseCoinNormalized(resp2.Amount)
+	suite.Require().NoError(err)
+
+	realPaid = realPaid.Add(real1.Amount)
+	realPaid = realPaid.Add(real2.Amount)
+
+	suite.Require().True(expectedLiquidationToUser1.Equal(real1.Amount))
+	suite.Require().True(expectedLiquidationToUser2.Equal(real2.Amount))
+
+	nfts := poolInfo.PoolNFTIds[0]
+	class, found := suite.nftKeeper.GetClass(suite.ctx, nfts)
+	if !found {
+		panic(found)
+	}
+	var borrowInterest types.BorrowInterest
+	err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+	if err != nil {
+		panic(err)
+	}
+
+	suite.Require().True(borrowInterest.TotalPaidLiquidationAmount.Equal(realPaid))
+}
+
+func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 	setupPool(suite)
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
