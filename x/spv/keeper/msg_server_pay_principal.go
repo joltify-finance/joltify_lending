@@ -28,6 +28,10 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
 	}
 
+	if spv.Equals(poolInfo.OwnerAddress) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "only pool owner can pay the principal")
+	}
+
 	class, found := k.nftKeeper.GetClass(ctx, poolInfo.PoolNFTIds[0])
 	if !found {
 		panic(found)
