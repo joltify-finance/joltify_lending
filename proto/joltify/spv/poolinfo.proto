@@ -60,7 +60,7 @@ message PoolInfo {
   }
   POOLSTATUS pool_status = 11;
 
-  cosmos.base.v1beta1.Coin borrowed_amount = 12[
+  cosmos.base.v1beta1.Coin borrowed_amount = 12[    // this variable is frozen after pool is in luquidation
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 
@@ -134,6 +134,14 @@ message PoolInfo {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+
+
+  string total_liquidation_amount = 34 [
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+
 }
 
 message PoolWithInvestors {
@@ -147,14 +155,4 @@ message PoolDepositedInvestors {
   [(cosmos_proto.scalar) = "cosmos.AddressBytes",
     (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
   ];
-}
-
-
-
-
-message LiquidationInfo {
-  string pool_index = 1;
-  repeated cosmos.base.v1beta1.Coin escrow_principal_amount = 2[
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false];
 }

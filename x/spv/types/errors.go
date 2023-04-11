@@ -31,4 +31,6 @@ var (
 	ErrPoolBorrowExpire     = coserrors.Register(ModuleName, 21, "pool borrow time window expired")
 	ErrPoolWithdrawLocked   = coserrors.Register(ModuleName, 22, "pool withdraw locked")
 	ErrPoolNotAcceptNewFund = coserrors.Register(ModuleName, 23, "pool does not accept new fund")
+	ErrPoolNotInLiquidation = coserrors.Register(ModuleName, 24, "pool is not in liquidation")
+	ErrLiquidation          = coserrors.Register(ModuleName, 25, "failed in luquidation")
 )

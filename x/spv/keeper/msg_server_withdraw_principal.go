@@ -29,6 +29,34 @@ func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	return tokenSend, err
 }
 
+func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
+
+	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	totalRedeem, err := k.doProcessLiquidationForInvestor(ctx, depositor.LinkedNFT)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	depositor.TotalPaidLiquidationAmount = depositor.TotalPaidLiquidationAmount.Add(totalRedeem)
+	totalWithdraw := depositor.WithdrawalAmount.AddAmount(interest).AddAmount(totalRedeem)
+	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+	k.SetDepositor(ctx, depositor)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeWithdrawPrincipal,
+			sdk.NewAttribute(types.AttributeCreator, depositor.DepositorAddress.String()),
+			sdk.NewAttribute(types.AttributeAmount, totalWithdraw.String()),
+		),
+	)
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(totalWithdraw))
+	return totalWithdraw, err
+}
+
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -66,6 +94,14 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 
 	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && ctx.BlockTime().After(poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds)+poolInfo.GraceTime)) {
 		poolInfo.PoolStatus = types.PoolInfo_FROZEN
+	}
+
+	if poolInfo.PoolStatus == types.PoolInfo_Liquidation {
+		tokenSend, err := k.handlerPoolLiquidation(ctx, depositor)
+		if err != nil {
+			return nil, err
+		}
+		return &types.MsgWithdrawPrincipalResponse{Amount: tokenSend.String()}, nil
 	}
 
 	if poolInfo.PoolStatus == types.PoolInfo_FROZEN {

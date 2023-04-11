@@ -83,10 +83,14 @@ func (m *BorrowDetail) GetTimeStamp() time.Time {
 }
 
 type NftInfo struct {
-	Issuer      string     `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	Receiver    string     `protobuf:"bytes,2,opt,name=receiver,proto3" json:"receiver,omitempty"`
-	Borrowed    types.Coin `protobuf:"bytes,3,opt,name=borrowed,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed"`
-	LastPayment time.Time  `protobuf:"bytes,4,opt,name=last_payment,json=lastPayment,proto3,stdtime" json:"last_payment"`
+	Issuer                     string                                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	Receiver                   string                                 `protobuf:"bytes,2,opt,name=receiver,proto3" json:"receiver,omitempty"`
+	Borrowed                   types.Coin                             `protobuf:"bytes,3,opt,name=borrowed,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed"`
+	LastPayment                time.Time                              `protobuf:"bytes,4,opt,name=last_payment,json=lastPayment,proto3,stdtime" json:"last_payment"`
+	TotalLiquidationAmount     github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,5,opt,name=total_liquidation_amount,json=totalLiquidationAmount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"total_liquidation_amount"`
+	LastLiquidationPaymentTime time.Time                              `protobuf:"bytes,6,opt,name=last_liquidation_payment_time,json=lastLiquidationPaymentTime,proto3,stdtime" json:"last_liquidation_payment_time"`
+	PaymentOffset              uint32                                 `protobuf:"varint,7,opt,name=payment_offset,json=paymentOffset,proto3" json:"payment_offset,omitempty"`
+	LiquidationPaymentOffset   uint32                                 `protobuf:"varint,8,opt,name=liquidation_payment_offset,json=liquidationPaymentOffset,proto3" json:"liquidation_payment_offset,omitempty"`
 }
 
 func (m *NftInfo) Reset()         { *m = NftInfo{} }
@@ -150,6 +154,27 @@ func (m *NftInfo) GetLastPayment() time.Time {
 	return time.Time{}
 }
 
+func (m *NftInfo) GetLastLiquidationPaymentTime() time.Time {
+	if m != nil {
+		return m.LastLiquidationPaymentTime
+	}
+	return time.Time{}
+}
+
+func (m *NftInfo) GetPaymentOffset() uint32 {
+	if m != nil {
+		return m.PaymentOffset
+	}
+	return 0
+}
+
+func (m *NftInfo) GetLiquidationPaymentOffset() uint32 {
+	if m != nil {
+		return m.LiquidationPaymentOffset
+	}
+	return 0
+}
+
 type PaymentItem struct {
 	PaymentTime    time.Time  `protobuf:"bytes,1,opt,name=payment_time,json=paymentTime,proto3,stdtime" json:"payment_time"`
 	PaymentAmount  types.Coin `protobuf:"bytes,2,opt,name=payment_amount,json=paymentAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"payment_amount"`
@@ -211,16 +236,18 @@ func (m *PaymentItem) GetBorrowedAmount() types.Coin {
 }
 
 type BorrowInterest struct {
-	PoolIndex     string                                 `protobuf:"bytes,1,opt,name=pool_index,json=poolIndex,proto3" json:"pool_index,omitempty"`
-	Apy           github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=apy,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"apy"`
-	PayFreq       int32                                  `protobuf:"varint,3,opt,name=pay_freq,json=payFreq,proto3" json:"pay_freq,omitempty"`
-	IssueTime     time.Time                              `protobuf:"bytes,4,opt,name=issue_time,json=issueTime,proto3,stdtime" json:"issue_time"`
-	BorrowDetails []BorrowDetail                         `protobuf:"bytes,5,rep,name=borrow_details,json=borrowDetails,proto3" json:"borrow_details"`
-	MonthlyRatio  github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=monthly_ratio,json=monthlyRatio,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"monthly_ratio"`
-	InterestSPY   github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,7,opt,name=interest_sPY,json=interestSPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"interest_sPY"`
-	Payments      []*PaymentItem                         `protobuf:"bytes,8,rep,name=payments,proto3" json:"payments,omitempty"`
-	InterestPaid  types.Coin                             `protobuf:"bytes,9,opt,name=interestPaid,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"interestPaid"`
-	AccInterest   types.Coin                             `protobuf:"bytes,10,opt,name=acc_interest,json=accInterest,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"acc_interest"`
+	PoolIndex                  string                                 `protobuf:"bytes,1,opt,name=pool_index,json=poolIndex,proto3" json:"pool_index,omitempty"`
+	Apy                        github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=apy,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"apy"`
+	PayFreq                    int32                                  `protobuf:"varint,3,opt,name=pay_freq,json=payFreq,proto3" json:"pay_freq,omitempty"`
+	IssueTime                  time.Time                              `protobuf:"bytes,4,opt,name=issue_time,json=issueTime,proto3,stdtime" json:"issue_time"`
+	BorrowDetails              []BorrowDetail                         `protobuf:"bytes,5,rep,name=borrow_details,json=borrowDetails,proto3" json:"borrow_details"`
+	MonthlyRatio               github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=monthly_ratio,json=monthlyRatio,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"monthly_ratio"`
+	InterestSPY                github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,7,opt,name=interest_sPY,json=interestSPY,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"interest_sPY"`
+	Payments                   []*PaymentItem                         `protobuf:"bytes,8,rep,name=payments,proto3" json:"payments,omitempty"`
+	InterestPaid               types.Coin                             `protobuf:"bytes,9,opt,name=interestPaid,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"interestPaid"`
+	AccInterest                types.Coin                             `protobuf:"bytes,10,opt,name=acc_interest,json=accInterest,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"acc_interest"`
+	LiquidationItems           []*LiquidationItem                     `protobuf:"bytes,11,rep,name=liquidation_items,json=liquidationItems,proto3" json:"liquidation_items,omitempty"`
+	TotalPaidLiquidationAmount github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,35,opt,name=total_paid_liquidation_amount,json=totalPaidLiquidationAmount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"total_paid_liquidation_amount"`
 }
 
 func (m *BorrowInterest) Reset()         { *m = BorrowInterest{} }
@@ -305,60 +332,131 @@ func (m *BorrowInterest) GetAccInterest() types.Coin {
 	return types.Coin{}
 }
 
+func (m *BorrowInterest) GetLiquidationItems() []*LiquidationItem {
+	if m != nil {
+		return m.LiquidationItems
+	}
+	return nil
+}
+
+type LiquidationItem struct {
+	Amount                 types.Coin `protobuf:"bytes,1,opt,name=amount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coin" json:"amount"`
+	LiquidationPaymentTime time.Time  `protobuf:"bytes,2,opt,name=liquidation_payment_time,json=liquidationPaymentTime,proto3,stdtime" json:"liquidation_payment_time"`
+}
+
+func (m *LiquidationItem) Reset()         { *m = LiquidationItem{} }
+func (m *LiquidationItem) String() string { return proto.CompactTextString(m) }
+func (*LiquidationItem) ProtoMessage()    {}
+func (*LiquidationItem) Descriptor() ([]byte, []int) {
+	return fileDescriptor_e522259423be67f7, []int{4}
+}
+func (m *LiquidationItem) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *LiquidationItem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_LiquidationItem.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *LiquidationItem) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LiquidationItem.Merge(m, src)
+}
+func (m *LiquidationItem) XXX_Size() int {
+	return m.Size()
+}
+func (m *LiquidationItem) XXX_DiscardUnknown() {
+	xxx_messageInfo_LiquidationItem.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LiquidationItem proto.InternalMessageInfo
+
+func (m *LiquidationItem) GetAmount() types.Coin {
+	if m != nil {
+		return m.Amount
+	}
+	return types.Coin{}
+}
+
+func (m *LiquidationItem) GetLiquidationPaymentTime() time.Time {
+	if m != nil {
+		return m.LiquidationPaymentTime
+	}
+	return time.Time{}
+}
+
 func init() {
 	proto.RegisterType((*BorrowDetail)(nil), "joltify.spv.BorrowDetail")
 	proto.RegisterType((*NftInfo)(nil), "joltify.spv.NftInfo")
 	proto.RegisterType((*PaymentItem)(nil), "joltify.spv.PaymentItem")
 	proto.RegisterType((*BorrowInterest)(nil), "joltify.spv.BorrowInterest")
+	proto.RegisterType((*LiquidationItem)(nil), "joltify.spv.liquidation_item")
 }
 
 func init() { proto.RegisterFile("joltify/spv/nft.proto", fileDescriptor_e522259423be67f7) }
 
 var fileDescriptor_e522259423be67f7 = []byte{
-	// 674 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0xc1, 0x6e, 0xd3, 0x4c,
-	0x10, 0x8e, 0x9b, 0x36, 0x4d, 0x36, 0x69, 0x7f, 0x69, 0xf5, 0x83, 0xdc, 0x48, 0x38, 0x55, 0x0e,
-	0xa8, 0x97, 0xda, 0x14, 0x10, 0x27, 0x2e, 0xa4, 0x55, 0x51, 0x2e, 0x55, 0xe4, 0x72, 0x29, 0x97,
-	0xd5, 0xda, 0x59, 0xbb, 0x0b, 0xf6, 0xae, 0xeb, 0xdd, 0x84, 0xfa, 0xca, 0x13, 0xf4, 0x39, 0x38,
-	0xf3, 0x00, 0x1c, 0xcb, 0xad, 0xe2, 0x84, 0x38, 0xb4, 0xa8, 0x7d, 0x00, 0x5e, 0x01, 0xed, 0x7a,
-	0x1d, 0x52, 0x89, 0x43, 0x2b, 0x85, 0x53, 0x3c, 0x33, 0x9e, 0xef, 0x9b, 0xf9, 0xf6, 0x5b, 0x07,
-	0x3c, 0x78, 0xc7, 0x13, 0x49, 0xa3, 0xc2, 0x13, 0xd9, 0xd4, 0x63, 0x91, 0x74, 0xb3, 0x9c, 0x4b,
-	0x0e, 0xdb, 0x26, 0xed, 0x8a, 0x6c, 0xda, 0xed, 0xc5, 0x9c, 0xc7, 0x09, 0xf1, 0x74, 0x29, 0x98,
-	0x44, 0x9e, 0xa4, 0x29, 0x11, 0x12, 0xa7, 0x59, 0xf9, 0x76, 0xf7, 0xff, 0x98, 0xc7, 0x5c, 0x3f,
-	0x7a, 0xea, 0xc9, 0x64, 0x9d, 0x90, 0x8b, 0x94, 0x0b, 0x2f, 0xc0, 0x82, 0x78, 0xd3, 0x9d, 0x80,
-	0x48, 0xbc, 0xe3, 0x85, 0x9c, 0x32, 0x53, 0xdf, 0x28, 0xeb, 0xa8, 0x6c, 0x2c, 0x83, 0xb2, 0xd4,
-	0xff, 0x6a, 0x81, 0xce, 0x80, 0xe7, 0x39, 0xff, 0xb0, 0x47, 0x24, 0xa6, 0x09, 0x94, 0xe0, 0xbf,
-	0x40, 0xc7, 0x64, 0x8c, 0x70, 0xca, 0x27, 0x4c, 0xda, 0xd6, 0xa6, 0xb5, 0xd5, 0x7e, 0xba, 0xe1,
-	0x9a, 0x46, 0xc5, 0xe2, 0x1a, 0x16, 0x77, 0x97, 0x53, 0x36, 0x78, 0x72, 0x7e, 0xd9, 0xab, 0x7d,
-	0xba, 0xea, 0x6d, 0xc5, 0x54, 0x1e, 0x4f, 0x02, 0x37, 0xe4, 0xa9, 0x61, 0x31, 0x3f, 0xdb, 0x62,
-	0xfc, 0xde, 0x93, 0x45, 0x46, 0x84, 0x6e, 0x10, 0xfe, 0x7a, 0xc5, 0xf1, 0x4a, 0x53, 0xc0, 0x5d,
-	0x00, 0xd4, 0xaa, 0x48, 0xef, 0x6a, 0x2f, 0x69, 0xc2, 0xae, 0x5b, 0xaa, 0xe1, 0x56, 0x6a, 0xb8,
-	0x6f, 0x2a, 0x35, 0x06, 0x4d, 0xc5, 0x78, 0x76, 0xd5, 0xb3, 0xfc, 0x96, 0xea, 0x3b, 0x54, 0xc9,
-	0xfe, 0x2f, 0x0b, 0xac, 0x1e, 0x44, 0x72, 0xc8, 0x22, 0x0e, 0x1f, 0x82, 0x06, 0x15, 0x62, 0x42,
-	0x72, 0x3d, 0x7d, 0xcb, 0x37, 0x11, 0xec, 0x82, 0x66, 0x4e, 0x42, 0x42, 0xa7, 0x24, 0xd7, 0x34,
-	0x2d, 0x7f, 0x16, 0xc3, 0x18, 0x34, 0xab, 0xb1, 0xec, 0xfa, 0xe2, 0x77, 0x9e, 0x81, 0xc3, 0xd7,
-	0xa0, 0x93, 0x60, 0x21, 0x51, 0x86, 0x8b, 0x94, 0x30, 0x69, 0x2f, 0xdf, 0x63, 0xdf, 0xb6, 0xea,
-	0x1c, 0x95, 0x8d, 0xfd, 0x2f, 0x4b, 0xa0, 0x6d, 0x9e, 0x87, 0x92, 0xa4, 0x0a, 0xd8, 0x60, 0x22,
-	0x25, 0x8b, 0x39, 0xb9, 0x3b, 0x02, 0x9b, 0x4e, 0x55, 0x83, 0x39, 0x58, 0xaf, 0x80, 0x8c, 0x09,
-	0x96, 0x16, 0x2f, 0xc8, 0x9a, 0xa1, 0x30, 0x1e, 0xf8, 0x8b, 0xf3, 0xea, 0xff, 0xdc, 0x79, 0xfd,
-	0x8f, 0x0d, 0xb0, 0x5e, 0x5e, 0x80, 0x21, 0x93, 0x24, 0x27, 0x42, 0xc2, 0x47, 0x00, 0x64, 0x9c,
-	0x27, 0x88, 0xb2, 0x31, 0x39, 0x35, 0xfe, 0x69, 0xa9, 0xcc, 0x50, 0x25, 0xe0, 0x01, 0xa8, 0xe3,
-	0xac, 0x28, 0xdd, 0x33, 0x78, 0xa9, 0x06, 0xf8, 0x71, 0xd9, 0x7b, 0x7c, 0x87, 0x01, 0xf6, 0x48,
-	0xf8, 0xed, 0xf3, 0x36, 0x30, 0xcb, 0xec, 0x91, 0xd0, 0x57, 0x40, 0x70, 0x03, 0x34, 0x33, 0x5c,
-	0xa0, 0x28, 0x27, 0x27, 0x7a, 0xe1, 0x15, 0x7f, 0x35, 0xc3, 0xc5, 0x7e, 0x4e, 0x4e, 0xd4, 0xb5,
-	0xd0, 0xbe, 0x2d, 0x4f, 0xf3, 0x3e, 0x36, 0x69, 0xe9, 0x3e, 0x7d, 0x96, 0xfb, 0xc0, 0xec, 0x8c,
-	0xc6, 0xfa, 0x8a, 0x0b, 0x7b, 0x65, 0xb3, 0xae, 0x65, 0x9d, 0xfb, 0xf4, 0xb8, 0xf3, 0x1f, 0x81,
-	0xc1, 0xb2, 0xc2, 0xf1, 0xd7, 0x82, 0xb9, 0x9c, 0x80, 0x18, 0xac, 0xa5, 0x9c, 0xc9, 0xe3, 0xa4,
-	0x40, 0x39, 0x96, 0x94, 0xdb, 0x8d, 0x05, 0x28, 0xd0, 0x31, 0x90, 0xbe, 0x42, 0x84, 0x08, 0x74,
-	0xa8, 0x39, 0x05, 0x24, 0x46, 0x47, 0xf6, 0xea, 0x02, 0x18, 0xda, 0x15, 0xe2, 0xe1, 0xe8, 0x08,
-	0x3e, 0xd7, 0x5a, 0x2b, 0xd3, 0x09, 0xbb, 0xa9, 0x55, 0xb0, 0x6f, 0xa9, 0x30, 0x77, 0x99, 0xfc,
-	0xd9, 0x9b, 0x90, 0xff, 0x19, 0x6b, 0x84, 0xe9, 0xd8, 0x6e, 0x2d, 0xde, 0x96, 0xb7, 0x08, 0x20,
-	0x03, 0x1d, 0x1c, 0x86, 0xa8, 0xca, 0xd9, 0x60, 0xf1, 0x84, 0x6d, 0x1c, 0x86, 0x95, 0xe3, 0x07,
-	0xa3, 0xf3, 0x6b, 0xc7, 0xba, 0xb8, 0x76, 0xac, 0x9f, 0xd7, 0x8e, 0x75, 0x76, 0xe3, 0xd4, 0x2e,
-	0x6e, 0x9c, 0xda, 0xf7, 0x1b, 0xa7, 0xf6, 0xf6, 0xc5, 0x1c, 0xa0, 0x11, 0x6a, 0x3b, 0xa2, 0x0c,
-	0xb3, 0x90, 0x54, 0x31, 0x4a, 0x08, 0x1b, 0x53, 0x16, 0x7b, 0xa7, 0xfa, 0xaf, 0x4d, 0x93, 0x04,
-	0x0d, 0xed, 0xce, 0x67, 0xbf, 0x03, 0x00, 0x00, 0xff, 0xff, 0x4a, 0xe0, 0x00, 0x2c, 0xf6, 0x06,
-	0x00, 0x00,
+	// 857 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0x4f, 0x6f, 0xe3, 0x44,
+	0x14, 0x8f, 0x9b, 0x36, 0x7f, 0x26, 0x49, 0x59, 0x46, 0x50, 0xb9, 0x91, 0x92, 0x54, 0x41, 0x40,
+	0x2f, 0xb5, 0x59, 0x40, 0x9c, 0xf6, 0x42, 0xb6, 0x5a, 0x14, 0x84, 0x96, 0xc8, 0xcb, 0x65, 0x39,
+	0x60, 0x8d, 0xed, 0xb1, 0x77, 0xc0, 0x9e, 0x71, 0x3d, 0x93, 0xb0, 0x39, 0xf1, 0x15, 0xfa, 0x39,
+	0x38, 0xc3, 0x9d, 0x63, 0x39, 0x51, 0x71, 0x40, 0x88, 0x43, 0x8b, 0xda, 0x2f, 0x82, 0x66, 0x3c,
+	0x4e, 0x9d, 0x36, 0x48, 0x8d, 0x9a, 0x3d, 0x25, 0xf3, 0x3c, 0xef, 0xfd, 0xde, 0xef, 0xf7, 0xfe,
+	0xd8, 0xe0, 0xdd, 0xef, 0x59, 0x2c, 0x48, 0x38, 0xb7, 0x79, 0x3a, 0xb3, 0x69, 0x28, 0xac, 0x34,
+	0x63, 0x82, 0xc1, 0x96, 0x36, 0x5b, 0x3c, 0x9d, 0x75, 0x07, 0x11, 0x63, 0x51, 0x8c, 0x6d, 0xf5,
+	0xc8, 0x9b, 0x86, 0xb6, 0x20, 0x09, 0xe6, 0x02, 0x25, 0x69, 0x7e, 0xbb, 0xfb, 0x4e, 0xc4, 0x22,
+	0xa6, 0xfe, 0xda, 0xf2, 0x9f, 0xb6, 0xf6, 0x7d, 0xc6, 0x13, 0xc6, 0x6d, 0x0f, 0x71, 0x6c, 0xcf,
+	0x1e, 0x7b, 0x58, 0xa0, 0xc7, 0xb6, 0xcf, 0x08, 0xd5, 0xcf, 0xf7, 0xf3, 0xe7, 0x6e, 0xee, 0x98,
+	0x1f, 0xf2, 0x47, 0xc3, 0xdf, 0x0d, 0xd0, 0x1e, 0xb1, 0x2c, 0x63, 0x3f, 0x1e, 0x63, 0x81, 0x48,
+	0x0c, 0x05, 0x78, 0xcb, 0x53, 0x67, 0x1c, 0xb8, 0x28, 0x61, 0x53, 0x2a, 0x4c, 0xe3, 0xc0, 0x38,
+	0x6c, 0x7d, 0xbc, 0x6f, 0x69, 0x47, 0x89, 0x62, 0x69, 0x14, 0xeb, 0x29, 0x23, 0x74, 0xf4, 0xd1,
+	0xd9, 0xc5, 0xa0, 0xf2, 0xf3, 0xe5, 0xe0, 0x30, 0x22, 0xe2, 0xd5, 0xd4, 0xb3, 0x7c, 0x96, 0x68,
+	0x14, 0xfd, 0x73, 0xc4, 0x83, 0x1f, 0x6c, 0x31, 0x4f, 0x31, 0x57, 0x0e, 0xdc, 0xd9, 0x2d, 0x30,
+	0x3e, 0x57, 0x10, 0xf0, 0x29, 0x00, 0x92, 0xaa, 0xab, 0xb8, 0x9a, 0x5b, 0x0a, 0xb0, 0x6b, 0xe5,
+	0x6a, 0x58, 0x85, 0x1a, 0xd6, 0x37, 0x85, 0x1a, 0xa3, 0x86, 0x44, 0x3c, 0xbd, 0x1c, 0x18, 0x4e,
+	0x53, 0xfa, 0xbd, 0x90, 0xc6, 0xe1, 0xaf, 0xdb, 0xa0, 0xfe, 0x3c, 0x14, 0x63, 0x1a, 0x32, 0xb8,
+	0x07, 0x6a, 0x84, 0xf3, 0x29, 0xce, 0x54, 0xf6, 0x4d, 0x47, 0x9f, 0x60, 0x17, 0x34, 0x32, 0xec,
+	0x63, 0x32, 0xc3, 0x99, 0x82, 0x69, 0x3a, 0x8b, 0x33, 0x8c, 0x40, 0xa3, 0x48, 0xcb, 0xac, 0x6e,
+	0x9e, 0xf3, 0x22, 0x38, 0xfc, 0x02, 0xb4, 0x63, 0xc4, 0x85, 0x9b, 0xa2, 0x79, 0x82, 0xa9, 0x30,
+	0xb7, 0xd7, 0xe0, 0xdb, 0x92, 0x9e, 0x93, 0xdc, 0x11, 0xce, 0x80, 0x29, 0x98, 0x40, 0xb1, 0x1b,
+	0x93, 0x93, 0x29, 0x09, 0x90, 0x20, 0x8c, 0x16, 0x55, 0xdb, 0x91, 0xec, 0x46, 0x4f, 0xa4, 0xe3,
+	0x3f, 0x17, 0x83, 0x0f, 0xee, 0x91, 0xe6, 0x98, 0x8a, 0x3f, 0x7f, 0x39, 0x02, 0x9a, 0xf2, 0x98,
+	0x0a, 0x67, 0x4f, 0x45, 0xff, 0xea, 0x26, 0xb8, 0x2e, 0x57, 0x04, 0x7a, 0x8a, 0x40, 0x19, 0x56,
+	0x93, 0x71, 0x65, 0x3d, 0xcc, 0xda, 0x1a, 0x8c, 0xba, 0x32, 0x54, 0x09, 0x43, 0x93, 0x93, 0x57,
+	0xe1, 0xfb, 0x60, 0xb7, 0x88, 0xcb, 0xc2, 0x90, 0x63, 0x61, 0xd6, 0x0f, 0x8c, 0xc3, 0x8e, 0xd3,
+	0xd1, 0xd6, 0xaf, 0x95, 0x11, 0x3e, 0x01, 0xdd, 0x55, 0xa9, 0x68, 0x97, 0x86, 0x72, 0x31, 0xe3,
+	0x3b, 0x10, 0xb9, 0xf7, 0xf0, 0xb7, 0x2d, 0xd0, 0xd2, 0x96, 0xb1, 0xc0, 0x89, 0x2c, 0xcf, 0x12,
+	0x19, 0x63, 0x9d, 0xf2, 0xa4, 0xa5, 0xec, 0xb3, 0x9b, 0xec, 0x75, 0x51, 0xb6, 0x36, 0xdf, 0x56,
+	0x85, 0x14, 0xba, 0x34, 0x2b, 0xe6, 0xb7, 0xfa, 0xc6, 0xe7, 0x77, 0xf8, 0x47, 0x1d, 0xec, 0xe6,
+	0x6b, 0x64, 0x4c, 0x05, 0xce, 0x30, 0x17, 0xb0, 0x07, 0x40, 0xca, 0x58, 0xec, 0x12, 0x1a, 0xe0,
+	0xd7, 0x7a, 0x0a, 0x9b, 0xd2, 0x32, 0x96, 0x06, 0xf8, 0x1c, 0x54, 0x51, 0x3a, 0xcf, 0x67, 0x70,
+	0xad, 0x2e, 0x3d, 0xc6, 0x7e, 0xa9, 0x4b, 0x8f, 0xb1, 0xef, 0xc8, 0x40, 0x70, 0x1f, 0x34, 0x52,
+	0x34, 0x77, 0xc3, 0x0c, 0x9f, 0x28, 0xc2, 0x3b, 0x4e, 0x3d, 0x45, 0xf3, 0x67, 0x19, 0x3e, 0x91,
+	0xcb, 0x45, 0x4d, 0x7f, 0x5e, 0xcd, 0x75, 0x86, 0xad, 0xa9, 0xfc, 0x54, 0x2d, 0x9f, 0x01, 0xcd,
+	0xd9, 0x0d, 0xd4, 0xa2, 0xe4, 0xe6, 0xce, 0x41, 0x55, 0xc9, 0x5a, 0x5a, 0xe0, 0x56, 0x79, 0x95,
+	0x8e, 0xb6, 0x65, 0x1c, 0xa7, 0xe3, 0x95, 0x6c, 0x1c, 0x22, 0xd0, 0x49, 0x18, 0x15, 0xaf, 0xe2,
+	0xb9, 0x9b, 0xc9, 0x5e, 0x54, 0xa3, 0xf2, 0x50, 0x05, 0xda, 0x3a, 0xa4, 0x23, 0x23, 0x42, 0x17,
+	0xb4, 0x89, 0xae, 0x82, 0xcb, 0x27, 0x2f, 0xd5, 0xc8, 0x3c, 0x14, 0xa1, 0x55, 0x44, 0x7c, 0x31,
+	0x79, 0x09, 0x3f, 0x55, 0x5a, 0xcb, 0xa6, 0xe3, 0x66, 0x43, 0xa9, 0x60, 0x2e, 0xa9, 0x50, 0x1a,
+	0x26, 0x67, 0x71, 0x13, 0xb2, 0x9b, 0xb4, 0x26, 0x88, 0x04, 0x66, 0x73, 0xf3, 0x6d, 0xb9, 0x04,
+	0x00, 0x29, 0x68, 0x23, 0xdf, 0x77, 0x0b, 0x9b, 0x09, 0x36, 0x0f, 0xd8, 0x42, 0xbe, 0xbf, 0xe8,
+	0xf8, 0x2f, 0xc1, 0xdb, 0xe5, 0x2d, 0x44, 0x04, 0x4e, 0xb8, 0xd9, 0x52, 0xfa, 0xf4, 0x96, 0xf4,
+	0xb9, 0x7d, 0xcb, 0x79, 0x54, 0xb2, 0x48, 0xd5, 0x38, 0xfc, 0x09, 0xf4, 0xf2, 0xcd, 0x9e, 0x22,
+	0x12, 0xac, 0x5a, 0xef, 0xef, 0x6d, 0x60, 0xbd, 0x77, 0x15, 0x84, 0xd4, 0xea, 0xce, 0x8a, 0x1f,
+	0xfe, 0x65, 0x80, 0x47, 0xb7, 0xf3, 0x84, 0x1e, 0xa8, 0xdd, 0xf7, 0x9b, 0xc0, 0xd6, 0x5a, 0x7e,
+	0x78, 0x4f, 0x2d, 0x1d, 0x1d, 0x19, 0x7e, 0x07, 0xcc, 0xff, 0x7d, 0xad, 0xac, 0xf3, 0x61, 0xb0,
+	0x17, 0xaf, 0x7c, 0xa5, 0x8c, 0x26, 0x67, 0x57, 0x7d, 0xe3, 0xfc, 0xaa, 0x6f, 0xfc, 0x7b, 0xd5,
+	0x37, 0x4e, 0xaf, 0xfb, 0x95, 0xf3, 0xeb, 0x7e, 0xe5, 0xef, 0xeb, 0x7e, 0xe5, 0xdb, 0xcf, 0x4a,
+	0xa9, 0xea, 0x72, 0x1d, 0x85, 0x84, 0x22, 0xea, 0xe3, 0xe2, 0xec, 0xc6, 0x98, 0x06, 0x84, 0x46,
+	0xf6, 0x6b, 0xf5, 0x19, 0xa7, 0xd2, 0xf7, 0x6a, 0x2a, 0x8f, 0x4f, 0xfe, 0x0b, 0x00, 0x00, 0xff,
+	0xff, 0xf1, 0xde, 0xdb, 0xc4, 0xe2, 0x09, 0x00, 0x00,
 }
 
 func (m *BorrowDetail) Marshal() (dAtA []byte, err error) {
@@ -422,12 +520,40 @@ func (m *NftInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.LastPayment, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.LastPayment):])
+	if m.LiquidationPaymentOffset != 0 {
+		i = encodeVarintNft(dAtA, i, uint64(m.LiquidationPaymentOffset))
+		i--
+		dAtA[i] = 0x40
+	}
+	if m.PaymentOffset != 0 {
+		i = encodeVarintNft(dAtA, i, uint64(m.PaymentOffset))
+		i--
+		dAtA[i] = 0x38
+	}
+	n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.LastLiquidationPaymentTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.LastLiquidationPaymentTime):])
 	if err3 != nil {
 		return 0, err3
 	}
 	i -= n3
 	i = encodeVarintNft(dAtA, i, uint64(n3))
+	i--
+	dAtA[i] = 0x32
+	{
+		size := m.TotalLiquidationAmount.Size()
+		i -= size
+		if _, err := m.TotalLiquidationAmount.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintNft(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
+	n4, err4 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.LastPayment, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.LastPayment):])
+	if err4 != nil {
+		return 0, err4
+	}
+	i -= n4
+	i = encodeVarintNft(dAtA, i, uint64(n4))
 	i--
 	dAtA[i] = 0x22
 	{
@@ -497,12 +623,12 @@ func (m *PaymentItem) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	i--
 	dAtA[i] = 0x12
-	n7, err7 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.PaymentTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.PaymentTime):])
-	if err7 != nil {
-		return 0, err7
+	n8, err8 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.PaymentTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.PaymentTime):])
+	if err8 != nil {
+		return 0, err8
 	}
-	i -= n7
-	i = encodeVarintNft(dAtA, i, uint64(n7))
+	i -= n8
+	i = encodeVarintNft(dAtA, i, uint64(n8))
 	i--
 	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
@@ -528,6 +654,32 @@ func (m *BorrowInterest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size := m.TotalPaidLiquidationAmount.Size()
+		i -= size
+		if _, err := m.TotalPaidLiquidationAmount.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintNft(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2
+	i--
+	dAtA[i] = 0x9a
+	if len(m.LiquidationItems) > 0 {
+		for iNdEx := len(m.LiquidationItems) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.LiquidationItems[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintNft(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x5a
+		}
+	}
 	{
 		size, err := m.AccInterest.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
@@ -596,12 +748,12 @@ func (m *BorrowInterest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x2a
 		}
 	}
-	n10, err10 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.IssueTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.IssueTime):])
-	if err10 != nil {
-		return 0, err10
+	n11, err11 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.IssueTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.IssueTime):])
+	if err11 != nil {
+		return 0, err11
 	}
-	i -= n10
-	i = encodeVarintNft(dAtA, i, uint64(n10))
+	i -= n11
+	i = encodeVarintNft(dAtA, i, uint64(n11))
 	i--
 	dAtA[i] = 0x22
 	if m.PayFreq != 0 {
@@ -626,6 +778,47 @@ func (m *BorrowInterest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0xa
 	}
+	return len(dAtA) - i, nil
+}
+
+func (m *LiquidationItem) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *LiquidationItem) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *LiquidationItem) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	n12, err12 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.LiquidationPaymentTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.LiquidationPaymentTime):])
+	if err12 != nil {
+		return 0, err12
+	}
+	i -= n12
+	i = encodeVarintNft(dAtA, i, uint64(n12))
+	i--
+	dAtA[i] = 0x12
+	{
+		size, err := m.Amount.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintNft(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -671,6 +864,16 @@ func (m *NftInfo) Size() (n int) {
 	n += 1 + l + sovNft(uint64(l))
 	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.LastPayment)
 	n += 1 + l + sovNft(uint64(l))
+	l = m.TotalLiquidationAmount.Size()
+	n += 1 + l + sovNft(uint64(l))
+	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.LastLiquidationPaymentTime)
+	n += 1 + l + sovNft(uint64(l))
+	if m.PaymentOffset != 0 {
+		n += 1 + sovNft(uint64(m.PaymentOffset))
+	}
+	if m.LiquidationPaymentOffset != 0 {
+		n += 1 + sovNft(uint64(m.LiquidationPaymentOffset))
+	}
 	return n
 }
 
@@ -725,6 +928,27 @@ func (m *BorrowInterest) Size() (n int) {
 	l = m.InterestPaid.Size()
 	n += 1 + l + sovNft(uint64(l))
 	l = m.AccInterest.Size()
+	n += 1 + l + sovNft(uint64(l))
+	if len(m.LiquidationItems) > 0 {
+		for _, e := range m.LiquidationItems {
+			l = e.Size()
+			n += 1 + l + sovNft(uint64(l))
+		}
+	}
+	l = m.TotalPaidLiquidationAmount.Size()
+	n += 2 + l + sovNft(uint64(l))
+	return n
+}
+
+func (m *LiquidationItem) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.Amount.Size()
+	n += 1 + l + sovNft(uint64(l))
+	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.LiquidationPaymentTime)
 	n += 1 + l + sovNft(uint64(l))
 	return n
 }
@@ -1010,6 +1234,111 @@ func (m *NftInfo) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TotalLiquidationAmount", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthNft
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthNft
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TotalLiquidationAmount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastLiquidationPaymentTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthNft
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthNft
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.LastLiquidationPaymentTime, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PaymentOffset", wireType)
+			}
+			m.PaymentOffset = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PaymentOffset |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LiquidationPaymentOffset", wireType)
+			}
+			m.LiquidationPaymentOffset = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LiquidationPaymentOffset |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipNft(dAtA[iNdEx:])
@@ -1526,6 +1855,190 @@ func (m *BorrowInterest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.AccInterest.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LiquidationItems", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthNft
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthNft
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.LiquidationItems = append(m.LiquidationItems, &LiquidationItem{})
+			if err := m.LiquidationItems[len(m.LiquidationItems)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 35:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TotalPaidLiquidationAmount", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthNft
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthNft
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TotalPaidLiquidationAmount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipNft(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthNft
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *LiquidationItem) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowNft
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: liquidation_item: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: liquidation_item: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthNft
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthNft
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LiquidationPaymentTime", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowNft
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthNft
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthNft
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.LiquidationPaymentTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -15,18 +15,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-//func seekCorrectBorrow(borrowDetails []types.BorrowDetail, eachPayment *types.PaymentItem) sdk.Coin {
-//	var borrowAmount sdk.Coin
-//	for _, el := range borrowDetails {
-//		if el.TimeStamp.Before(eachPayment.PaymentTime) || el.TimeStamp.Equal(eachPayment.PaymentTime) {
-//			borrowAmount = el.BorrowedAmount
-//			continue
-//		}
-//		break
-//	}
-//	return borrowAmount
-//}
-
 func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
 
 	totalInterest := sdk.NewInt(0)
@@ -36,8 +24,8 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		if !found {
 			return sdkmath.Int{}, coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", ids[1])
 		}
-		var interestData types.NftInfo
-		err := proto.Unmarshal(thisNFT.Data.Value, &interestData)
+		var investorInterestData types.NftInfo
+		err := proto.Unmarshal(thisNFT.Data.Value, &investorInterestData)
 		if err != nil {
 			panic(err)
 		}
@@ -56,27 +44,32 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 		allPayments := borrowClassInfo.Payments
 		latestTimeStamp := time.Time{}
 		lastPaymentSet := false
-		for _, eachPayment := range allPayments {
 
-			// if the latest payment  this spv has is smaller than the spv that paid to all the investor, we claim the interest
-			if eachPayment.PaymentTime.Before(interestData.LastPayment) || eachPayment.PaymentTime.Equal(interestData.LastPayment) {
-				continue
-			}
+		// no new interest payment
+		if len(allPayments) <= int(investorInterestData.PaymentOffset) {
+			return sdk.ZeroInt(), nil
+		}
+		counter := 0
+		allNewPayments := allPayments[investorInterestData.PaymentOffset:]
+		for _, eachPayment := range allNewPayments {
+			counter++
 			if eachPayment.PaymentAmount.Amount.IsZero() {
 				continue
 			}
 			classBorrowedAmount := eachPayment.BorrowedAmount
 			paymentAmount := eachPayment.PaymentAmount
 			// todo there may be the case that because of the tucate, the total payment is larger than the interest paid to investors
-			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDecFromInt(interestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
+			// fixme we should NEVER calculate the interest after the pool status is in luquidation as the user ratio is not correct any more
+			interest := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
 			totalInterest = totalInterest.Add(interest)
 			latestTimeStamp = eachPayment.PaymentTime
 			lastPaymentSet = true
 			borrowClassInfo.InterestPaid = borrowClassInfo.InterestPaid.AddAmount(interest)
 		}
 		if updateNFT && lastPaymentSet {
-			interestData.LastPayment = latestTimeStamp
-			data, err := types2.NewAnyWithValue(&interestData)
+			investorInterestData.PaymentOffset += uint32(counter)
+			investorInterestData.LastPayment = latestTimeStamp
+			data, err := types2.NewAnyWithValue(&investorInterestData)
 			if err != nil {
 				panic("pack class any data failed")
 			}
@@ -136,41 +129,6 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 	}
 	return totalInterest, nil
 }
-
-/*
-func calculateTotalPrinciple(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper) (sdkmath.Int, error) {
-	totalBorrowed := sdk.NewInt(0)
-	for _, el := range lendNFTs {
-		ids := strings.Split(el, ":")
-
-		thisClass, found := nftKeeper.GetClass(ctx, ids[0])
-		if !found {
-			return sdkmath.Int{}, coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
-		}
-
-		var borrowClassInfo types.BorrowInterest
-		err := proto.Unmarshal(thisClass.Data.Value, &borrowClassInfo)
-		if err != nil {
-			panic(err)
-		}
-		borrowed := borrowClassInfo.Borrowed
-
-		thisNFT, found := nftKeeper.GetNFT(ctx, ids[0], ids[1])
-		if !found {
-			return sdkmath.Int{}, coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", ids[1])
-		}
-		var interestData types.NftInfo
-		err = proto.Unmarshal(thisNFT.Data.Value, &interestData)
-		if err != nil {
-			panic(err)
-		}
-
-		thisNFTBorrowed := sdk.NewDecFromInt(borrowed.Amount).Mul(interestData.Ratio).TruncateInt()
-		totalBorrowed = totalBorrowed.Add(thisNFTBorrowed)
-	}
-	return totalBorrowed, nil
-}
-*/
 
 // tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
 // rather then all the usable money
@@ -327,10 +285,8 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 				firstDepositor = depositor
 				continue
 			}
-			fmt.Printf(">>>>>>withdrawable %v\n", depositor.WithdrawalAmount)
 			locked := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			k.doProcessInvestor(ctx, depositor, locked, totalBorrow, nftTemplate, nftClass.Id, poolInfo, errGlobal)
-			fmt.Printf(">>>>>>>>>>%v\n", locked)
 			totalLocked = totalLocked.Add(locked)
 			continue
 		}
@@ -432,4 +388,75 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	k.DelDepositor(ctx, depositor)
 	k.SetDepositorHistory(ctx, depositor)
 	return totalPaidAmount, nil
+}
+
+func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []string) (sdkmath.Int, error) {
+	totalRedeem := sdk.NewInt(0)
+	for _, el := range lendNFTs {
+		ids := strings.Split(el, ":")
+		thisNFT, found := k.nftKeeper.GetNFT(ctx, ids[0], ids[1])
+		if !found {
+			return sdkmath.Int{}, coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", ids[1])
+		}
+		var investorInterestData types.NftInfo
+		err := proto.Unmarshal(thisNFT.Data.Value, &investorInterestData)
+		if err != nil {
+			panic(err)
+		}
+
+		borrowClass, found := k.nftKeeper.GetClass(ctx, ids[0])
+		if !found {
+			panic("it should never fail to find the class")
+		}
+
+		var borrowClassInfo types.BorrowInterest
+		err = proto.Unmarshal(borrowClass.Data.Value, &borrowClassInfo)
+		if err != nil {
+			panic(err)
+		}
+
+		allLiquidationPayments := borrowClassInfo.LiquidationItems
+		latestTimeStamp := time.Time{}
+
+		if len(allLiquidationPayments) <= int(investorInterestData.LiquidationPaymentOffset) {
+			return sdk.ZeroInt(), nil
+		}
+		counter := 0
+		allNewLiquidationPayments := allLiquidationPayments[investorInterestData.LiquidationPaymentOffset:]
+
+		classLastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
+		for _, eachLiquidationPayment := range allNewLiquidationPayments {
+			counter++
+			if eachLiquidationPayment.Amount.Amount.IsZero() {
+				continue
+			}
+			liquidationPaymentAmount := eachLiquidationPayment.Amount
+			// todo there may be the case that because of the tucate, the total payment is larger than the interest paid to investors
+			// fixme we should NEVER calculate the interest after the pool status is in luquidation as the user ratio is not correct any more
+			investorRedeemAmount := sdk.NewDecFromInt(liquidationPaymentAmount.Amount).Mul(sdk.NewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classLastBorrow.Amount)).TruncateInt()
+			totalRedeem = totalRedeem.Add(investorRedeemAmount)
+			latestTimeStamp = eachLiquidationPayment.LiquidationPaymentTime
+			borrowClassInfo.TotalPaidLiquidationAmount = borrowClassInfo.TotalPaidLiquidationAmount.Add(investorRedeemAmount)
+		}
+		investorInterestData.LastPayment = latestTimeStamp
+		investorInterestData.LiquidationPaymentOffset += uint32(counter)
+		data, err := types2.NewAnyWithValue(&investorInterestData)
+		if err != nil {
+			panic("pack class any data failed")
+		}
+		thisNFT.Data = data
+		k.nftKeeper.Update(ctx, thisNFT)
+
+		data, err = types2.NewAnyWithValue(&borrowClassInfo)
+		if err != nil {
+			panic("pack class any data failed")
+		}
+		borrowClass.Data = data
+		err = k.nftKeeper.UpdateClass(ctx, borrowClass)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	return totalRedeem, nil
 }
