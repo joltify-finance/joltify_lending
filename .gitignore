@@ -21,6 +21,7 @@ build
 node_modules
 docs/node_modules
 docs/.vuepress/dist
-
+contrib/devnet/run_deposit
 # Ignore macOS file system metadata
 .DS_Store
+config.yml

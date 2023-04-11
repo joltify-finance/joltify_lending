@@ -121,25 +121,6 @@ func (k Keeper) IterateInvestorPools(ctx sdk.Context, cb func(poolWithInvestors 
 	}
 }
 
-// AddPoolToInvestor add pools to the wallet
-func (k Keeper) AddPoolToInvestor(ctx sdk.Context, walletsToPools *types.WalletsLinkPool) {
-	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolInvestor))
-	key := types.KeyPrefix(walletsToPools.WalletAddress.String())
-	bz := k.cdc.MustMarshal(walletsToPools)
-	poolsStore.Set(key, bz)
-}
-
-func (k Keeper) GetPoolToWallet(ctx sdk.Context, walletAddr string) (walletsWithPool types.WalletsLinkPool, found bool) {
-	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolInvestor))
-	key := types.KeyPrefix(walletAddr)
-	bz := poolsStore.Get(key)
-	if bz == nil {
-		return walletsWithPool, false
-	}
-	k.cdc.MustUnmarshal(bz, &walletsWithPool)
-	return walletsWithPool, true
-}
-
 // GetPools gets the poolInfo with given pool index
 func (k Keeper) GetPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo, ok bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.Pool))
