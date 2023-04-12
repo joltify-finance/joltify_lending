@@ -229,13 +229,13 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	}
 
 	// in case we have some rounding
-	if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
-		poolInfo.PoolStatus = types.PoolInfo_FREEZING
-		ctx.Logger().Info(" the pool", "pool_ID:", poolInfo.Index)
-		poolInfo.BorrowedAmount = sdk.NewCoin(poolInfo.UsableAmount.Denom, sdkmath.ZeroInt())
-	} else {
-		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(poolInfo.WithdrawProposalAmount)
-	}
+	//if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
+	//	poolInfo.PoolStatus = types.PoolInfo_FREEZING
+	//	ctx.Logger().Info(" the pool", "pool_ID:", poolInfo.Index)
+	//	poolInfo.BorrowedAmount = sdk.NewCoin(poolInfo.UsableAmount.Denom, sdkmath.ZeroInt())
+	//} else {
+	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(poolInfo.WithdrawProposalAmount)
+	//}
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.WithdrawProposalAmount)
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
