@@ -27,7 +27,7 @@ message PoolInfo {
   ];
 
 
-
+  bool principal_paid = 6;
 
   int32 pay_freq = 7;
 

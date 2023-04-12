@@ -49,12 +49,12 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 
 // HandleTransfer if the pool have enough withdrawal amount, we can return the full amount of the investors
 // otherwise, we can only return the partial of the principal
-func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
+func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	var err error
 	var depositors []*types.DepositorInfo
 	totalLockedAmount := sdkmath.ZeroInt()
 	if len(poolInfo.TransferAccounts) == 0 {
-		return
+		return false
 	}
 	for _, el := range poolInfo.TransferAccounts {
 		d, found := k.GetDepositor(ctx, poolInfo.Index, el)
@@ -92,8 +92,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		if err != nil {
 			panic(err)
 		}
-		k.SetPool(ctx, *poolInfo)
-		return
+		return true
 	}
 	// now we process the partial transfer
 	totalBorrowableFromPrevious := sdkmath.ZeroInt()
@@ -128,16 +127,11 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) {
 		depositors[i].DepositType = types.DepositorInfo_processed
 		k.SetDepositor(ctx, *depositors[i])
 	}
-
-	if poolInfo.BorrowedAmount.IsZero() {
-		ctx.Logger().Info("zero borrowable money to borrow from")
-		return
-	}
 	err = k.doBorrow(ctx, poolInfo, poolInfo.UsableAmount, false, nil, sdk.ZeroInt())
 	if err != nil {
 		panic(err)
 	}
-
+	return true
 }
 
 func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string) error {
@@ -196,16 +190,15 @@ func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.Deposito
 	return nil
 }
 
-func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo, withdrawAccounts []sdk.AccAddress) {
+func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo, withdrawAccounts []sdk.AccAddress) bool {
+	if len(withdrawAccounts) == 0 {
+		return true
+	}
 	token := poolInfo.EscrowPrincipalAmount
 	if token.IsLT(poolInfo.WithdrawProposalAmount) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
 		poolInfo.PoolStatus = types.PoolInfo_Liquidation
-		return
-	}
-
-	if len(withdrawAccounts) == 0 {
-		return
+		return false
 	}
 
 	totalPaidAmount := sdkmath.ZeroInt()
@@ -246,11 +239,12 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.WithdrawProposalAmount)
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
+	return true
 
 }
 
 // not supported yet
-func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) {
+func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	//fixme this means the pool is empty
 	if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
 		k.SetHistoryPool(ctx, *poolInfo)
@@ -259,7 +253,7 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 	escrowAmount := poolInfo.EscrowPrincipalAmount
 	if escrowAmount.Amount.LT(poolInfo.BorrowedAmount.Amount) {
 		ctx.Logger().Error("not enough money to pay the total principal")
-		return
+		return false
 	}
 
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.BorrowedAmount)
@@ -275,4 +269,5 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdk.ZeroInt())
 	poolInfo.EscrowInterestAmount = sdk.ZeroInt()
 	k.SetPool(ctx, *poolInfo)
+	return true
 }

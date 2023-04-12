@@ -154,6 +154,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			PoolType:                      enuPoolType,
 			ProjectLength:                 targetProject.ProjectLength,
 			LastPaymentTime:               ctx.BlockTime(),
+			PrincipalPaid:                 false,
 			BorrowedAmount:                sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			UsableAmount:                  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			EscrowInterestAmount:          sdk.NewInt(0),
