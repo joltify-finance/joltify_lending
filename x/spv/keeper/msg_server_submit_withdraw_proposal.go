@@ -38,8 +38,8 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 	}
 
 	dueDate := poolInfo.ProjectDueTime
-	firstTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds))
-	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2))
+	firstTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2))
+	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*3))
 
 	currentTime := ctx.BlockTime()
 	if currentTime.Before(secondTimeStampBeforeProjectDueDate) {

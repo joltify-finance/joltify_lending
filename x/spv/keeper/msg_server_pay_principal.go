@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"errors"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,8 +25,26 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
+	if poolInfo.PrincipalPaid {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal already paid")
+	}
+
+	// we do not allow the spv to pay principal at the time fram [due-3*withdrawWindow, due]
+
+	dueDate := poolInfo.ProjectDueTime
+	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*3+10))
+
+	currentTime := ctx.BlockTime()
+	if currentTime.After(secondTimeStampBeforeProjectDueDate) && currentTime.Before(dueDate) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal can not be paid between %v <-> %v", secondTimeStampBeforeProjectDueDate, dueDate)
+	}
+
 	if msg.Token.Denom != poolInfo.BorrowedAmount.Denom {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
+	}
+
+	if msg.Token.IsLT(poolInfo.BorrowedAmount) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay the full principal %v", poolInfo.BorrowedAmount)
 	}
 
 	if spv.Equals(poolInfo.OwnerAddress) {
@@ -59,6 +78,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		// once we are in the freezing state, the usable amount will not be accurate any longer
 		poolInfo.PoolStatus = types.PoolInfo_FREEZING
 	}
+	poolInfo.PrincipalPaid = true
 
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
@@ -85,8 +105,29 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
+	if poolInfo.WithdrawProposalAmount.IsZero() {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "no withdraw proposal to be paid")
+	}
+
+	if poolInfo.PrincipalPaid {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal already paid")
+	}
+
+	currentTime := ctx.BlockTime()
+	dueDate := poolInfo.ProjectDueTime
+	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2-10))
+
+	condition := currentTime.After(secondTimeStampBeforeProjectDueDate) && currentTime.Before(dueDate)
+	if !condition {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal can only  be paid between %v <-> %v", secondTimeStampBeforeProjectDueDate, dueDate)
+	}
+
 	if msg.Token.Denom != poolInfo.BorrowedAmount.Denom {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
+	}
+
+	if !msg.Token.Equal(poolInfo.GetWithdrawProposalAmount()) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay the full principal %v", poolInfo.BorrowedAmount)
 	}
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
@@ -95,6 +136,7 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 	}
 
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
+	poolInfo.PrincipalPaid = true
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
