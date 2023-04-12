@@ -137,8 +137,8 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, types.ErrPoolNotActive
 	}
 
-	if msg.Token.Denom != poolInfo.BorrowedAmount.Denom {
-		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TotalAmount.Denom, msg.Token.Denom)
+	if msg.Token.Denom != poolInfo.TargetAmount.Denom {
+		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TargetAmount.Denom, msg.Token.Denom)
 	}
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{msg.Token})

@@ -156,7 +156,6 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			LastPaymentTime:               ctx.BlockTime(),
 			BorrowedAmount:                sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			UsableAmount:                  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			TotalAmount:                   sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			EscrowInterestAmount:          sdk.NewInt(0),
 			EscrowPrincipalAmount:         sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			WithdrawProposalAmount:        sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),

@@ -134,7 +134,6 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		)
 		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
 		depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
-		poolInfo.TotalAmount = poolInfo.TotalAmount.Sub(depositor.WithdrawalAmount)
 		k.SetDepositorHistory(ctx, depositor)
 		k.DelDepositor(ctx, depositor)
 		k.SetPool(ctx, poolInfo)
@@ -147,7 +146,6 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		if depositor.DepositType == types.DepositorInfo_processed {
 			poolInfo.UsableAmount = poolInfo.UsableAmount.Add(depositor.WithdrawalAmount).SubAmount(totalWithdraw.Amount)
 		}
-		poolInfo.TotalAmount = poolInfo.TotalAmount.Sub(totalWithdraw)
 		depositor.DepositType = types.DepositorInfo_unset
 		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
 		if err != nil {
