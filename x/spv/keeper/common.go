@@ -343,7 +343,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		panic(err)
 	}
 
-	err = k.processEachWithdrawReq(ctx, depositor)
+	err = k.processEachWithdrawReq(ctx, depositor, true)
 	if err != nil {
 		ctx.Logger().Error("fail to pay partial principal", err.Error())
 		return sdk.ZeroInt(), err

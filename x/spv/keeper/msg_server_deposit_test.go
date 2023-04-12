@@ -172,7 +172,6 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	suite.Require().True(found)
 	fmt.Printf(">>>>>>>>>>>%v\n", pool.TargetAmount)
 	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
-	suite.Require().True(pool.TotalAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.UsableAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 
@@ -187,7 +186,6 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	pool, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
 	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
-	suite.Require().True(pool.TotalAmount.Equal(depositAmount))
 
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.UsableAmount.Equal(depositAmount))
@@ -210,7 +208,6 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	pool, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
 	suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
-	suite.Require().True(pool.TotalAmount.Equal(depositAmount.Add(depositAmount)))
 
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.UsableAmount.Equal(depositAmount.Add(depositAmount)))

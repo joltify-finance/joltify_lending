@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -55,6 +56,18 @@ func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.Deposito
 	)
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(totalWithdraw))
 	return totalWithdraw, err
+}
+
+func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
+	if !poolInfo.BorrowedAmount.IsZero() {
+		return false
+	}
+	for _, el := range poolInfo.PoolNFTIds {
+		if k.nftKeeper.GetTotalSupply(ctx, el) > 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
@@ -134,10 +147,26 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		)
 		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
 		depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+
+		// burn the nft if it is existed
+		for _, el := range depositor.LinkedNFT {
+			ids := strings.Split(el, ":")
+			_, found := k.nftKeeper.GetNFT(ctx, ids[0], ids[1])
+			if !found {
+				continue
+			}
+			err := k.nftKeeper.Burn(ctx, ids[0], ids[1])
+			if err != nil {
+				return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(err, "burn nft failed")
+			}
+		}
 		k.SetDepositorHistory(ctx, depositor)
 		k.DelDepositor(ctx, depositor)
-		k.SetPool(ctx, poolInfo)
 
+		if k.isEmptyPool(ctx, poolInfo) {
+			k.DelPool(ctx, poolInfo.Index)
+			k.SetHistoryPool(ctx, poolInfo)
+		}
 		return &types.MsgWithdrawPrincipalResponse{Amount: amountToSend.String()}, nil
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
 		if depositor.DepositType == types.DepositorInfo_unset {

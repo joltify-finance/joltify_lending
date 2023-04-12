@@ -74,7 +74,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 				panic(err)
 			}
 
-			err = k.processEachWithdrawReq(ctx, *el)
+			err = k.processEachWithdrawReq(ctx, *el, true)
 			if err != nil {
 				panic(err)
 			}
@@ -102,7 +102,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 			panic(err)
 		}
 
-		err = k.processEachWithdrawReq(ctx, *el)
+		err = k.processEachWithdrawReq(ctx, *el, true)
 		if err != nil {
 			panic(err)
 		}
@@ -134,7 +134,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	return true
 }
 
-func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string) error {
+func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, burnNFT bool) error {
 	thisClass, found := k.nftKeeper.GetClass(ctx, classID)
 	if !found {
 		return coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
@@ -171,18 +171,19 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string) er
 	if err != nil {
 		return coserrors.Wrapf(err, "fail to update the class")
 	}
-	err = k.nftKeeper.Burn(ctx, classID, nftID)
-	if err != nil {
-		return coserrors.Wrapf(err, "fail to burn the nft")
+	if burnNFT {
+		err = k.nftKeeper.Burn(ctx, classID, nftID)
+		if err != nil {
+			return coserrors.Wrapf(err, "fail to burn the nft")
+		}
 	}
-
 	return nil
 }
 
-func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo) error {
+func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo, burnNFT bool) error {
 	for _, el := range depositor.LinkedNFT {
 		ids := strings.Split(el, ":")
-		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1])
+		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], burnNFT)
 		if err != nil {
 			panic(err)
 		}
@@ -201,7 +202,6 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		return false
 	}
 
-	totalPaidAmount := sdkmath.ZeroInt()
 	for _, el := range withdrawAccounts {
 		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
@@ -213,14 +213,12 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 			panic(err)
 		}
 
-		err = k.processEachWithdrawReq(ctx, depositor)
+		err = k.processEachWithdrawReq(ctx, depositor, false)
 		if err != nil {
 			ctx.Logger().Error("fail to pay partial principal", err.Error())
 			panic(err)
 		}
 
-		totalPaidAmount = totalPaidAmount.Add(depositor.LockedAmount.Amount.Add(interest))
-		depositor.LinkedNFT = []string{}
 		depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
 		depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(depositor.LockedAmount)
 		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
@@ -228,14 +226,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		k.SetDepositor(ctx, depositor)
 	}
 
-	// in case we have some rounding
-	//if poolInfo.BorrowedAmount.IsLTE(poolInfo.WithdrawProposalAmount) {
-	//	poolInfo.PoolStatus = types.PoolInfo_FREEZING
-	//	ctx.Logger().Info(" the pool", "pool_ID:", poolInfo.Index)
-	//	poolInfo.BorrowedAmount = sdk.NewCoin(poolInfo.UsableAmount.Denom, sdkmath.ZeroInt())
-	//} else {
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(poolInfo.WithdrawProposalAmount)
-	//}
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.WithdrawProposalAmount)
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
@@ -243,7 +234,6 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 
 }
 
-// not supported yet
 func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	//fixme this means the pool is empty
 	if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {

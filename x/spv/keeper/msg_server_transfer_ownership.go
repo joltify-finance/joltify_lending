@@ -2,12 +2,13 @@ package keeper
 
 import (
 	"context"
-	coserrors "cosmossdk.io/errors"
 	"fmt"
+	"time"
+
+	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
-	"time"
 )
 
 // TransferOwnership will allow the investor to submit the request to transfer/update their ratio in the pool
