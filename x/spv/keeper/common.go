@@ -358,7 +358,12 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
-	if poolInfo.BorrowedAmount.IsZero() {
+	poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(depositor.WithdrawalAmount)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		// we transfer the leftover back to spv
 		totalReturn := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
