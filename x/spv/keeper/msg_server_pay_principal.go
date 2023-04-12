@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -18,6 +17,11 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 	spv, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+	}
+
+	exchangeRatio, err := sdk.NewDecFromStr(msg.ExchangeRatio)
+	if err != nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid exchange ratio %v", msg.ExchangeRatio)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
@@ -43,8 +47,9 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
 	}
 
-	if msg.Token.IsLT(poolInfo.BorrowedAmount) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay the full principal %v", poolInfo.BorrowedAmount)
+	adjAmount := sdk.NewCoin(msg.Token.Denom, exchangeRatio.MulInt(msg.Token.Amount).TruncateInt())
+	if !adjAmount.Equal(poolInfo.BorrowedAmount) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay exact full principal %v", poolInfo.BorrowedAmount)
 	}
 
 	if !spv.Equals(poolInfo.OwnerAddress) {
@@ -63,7 +68,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 	paymentAmount := borrowInterest.MonthlyRatio.Mul(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
 
 	if poolInfo.EscrowInterestAmount.LT(paymentAmount) {
-		return nil, errors.New("not enough interest to be paid to close the pool")
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed", paymentAmount)
 	}
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
@@ -71,7 +76,26 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(err, "fail to pay all the principal")
 	}
 
-	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
+	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(adjAmount)
+
+	exchange, found := k.GetExchangeInfo(ctx, poolInfo.Index)
+	item := types.ExchangeItem{
+		ExchangeRatio:          exchangeRatio,
+		ActualPrincipalPayment: msg.Token.Amount,
+		Proof:                  msg.ProofUrl,
+	}
+	if !found {
+		items := make([]*types.ExchangeItem, 0, 10)
+		exchange = types.ExchangeInfo{
+			PoolIndex:                      poolInfo.Index,
+			ExchangeItemsForPartialPayment: items,
+			ExchangeItemForFullPayment:     &item,
+		}
+		k.SetExchangeInfo(ctx, exchange)
+	} else {
+		exchange.ExchangeItemForFullPayment = &item
+		k.SetExchangeInfo(ctx, exchange)
+	}
 
 	// we only close the pool when the escrow principal is later than the total borrowed and the project pass the project length
 	if poolInfo.EscrowPrincipalAmount.IsGTE(poolInfo.BorrowedAmount) && ctx.BlockTime().After(poolInfo.ProjectDueTime) {
@@ -79,6 +103,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		poolInfo.PoolStatus = types.PoolInfo_FREEZING
 	}
 	poolInfo.PrincipalPaid = true
+	poolInfo.ExchangeRatio = exchangeRatio
 
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
@@ -98,6 +123,11 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 	spv, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+	}
+
+	exchangeRatio, err := sdk.NewDecFromStr(msg.ExchangeRatio)
+	if err != nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid exchange ratio %v", msg.ExchangeRatio)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
@@ -130,8 +160,29 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
 	}
 
-	if !msg.Token.Equal(poolInfo.GetWithdrawProposalAmount()) {
+	adjAmount := sdk.NewCoin(msg.Token.Denom, exchangeRatio.MulInt(msg.Token.Amount).TruncateInt())
+	if !adjAmount.Equal(poolInfo.GetWithdrawProposalAmount()) {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay the full principal %v", poolInfo.BorrowedAmount)
+	}
+
+	exchange, found := k.GetExchangeInfo(ctx, poolInfo.Index)
+	item := types.ExchangeItem{
+		ExchangeRatio:          exchangeRatio,
+		ActualPrincipalPayment: msg.Token.Amount,
+		Proof:                  msg.ProofUrl,
+	}
+	if !found {
+		items := make([]*types.ExchangeItem, 1, 10)
+		items[0] = &item
+		exchange = types.ExchangeInfo{
+			PoolIndex:                      poolInfo.Index,
+			ExchangeItemsForPartialPayment: items,
+			ExchangeItemForFullPayment:     nil,
+		}
+		k.SetExchangeInfo(ctx, exchange)
+	} else {
+		exchange.ExchangeItemsForPartialPayment = append(exchange.ExchangeItemsForPartialPayment, &item)
+		k.SetExchangeInfo(ctx, exchange)
 	}
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
@@ -139,7 +190,7 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, coserrors.Wrapf(err, "fail to pay all the principal")
 	}
 
-	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
+	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(adjAmount)
 	poolInfo.PrincipalPaid = true
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(

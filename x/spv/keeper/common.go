@@ -349,7 +349,14 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		return sdk.ZeroInt(), err
 	}
 
-	totalPaidAmount := depositor.LockedAmount.Amount.Add(interest)
+	exchange, found := k.GetExchangeInfo(ctx, poolInfo.Index)
+	if !found {
+		panic("exchange not found")
+	}
+	item := exchange.ExchangeItemForFullPayment
+
+	adjLocked := item.ExchangeRatio.MulInt(depositor.LockedAmount.Amount).TruncateInt()
+	totalPaidAmount := adjLocked.Add(interest)
 	totalPaidAmount = totalPaidAmount.Add(depositor.WithdrawalAmount.Amount)
 	totalPaidAmount = totalPaidAmount.Add(depositor.PendingInterest.Amount)
 

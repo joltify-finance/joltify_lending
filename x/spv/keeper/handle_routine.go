@@ -202,7 +202,15 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		return false
 	}
 
-	for _, el := range withdrawAccounts {
+	exchangeInfo, found := k.GetExchangeInfo(ctx, poolInfo.Index)
+	if !found {
+		panic("should never fail to find the exchange info")
+	}
+
+	// get the last element from exchangeitemsforpartialpayment
+	item := exchangeInfo.ExchangeItemsForPartialPayment[len(exchangeInfo.ExchangeItemsForPartialPayment)-1]
+	total := sdk.ZeroInt()
+	for _, el := range withdrawAccounts[1:] {
 		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
 			panic("should never fail to find the depositor")
@@ -220,11 +228,36 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		}
 
 		depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
-		depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(depositor.LockedAmount)
+		adjAmount := item.ExchangeRatio.MulInt(depositor.LockedAmount.Amount).TruncateInt()
+		total = total.Add(adjAmount)
+		depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(adjAmount)
 		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
 		depositor.DepositType = types.DepositorInfo_deposit_close
 		k.SetDepositor(ctx, depositor)
 	}
+	// now we process the first investor
+	depositor, found := k.GetDepositor(ctx, poolInfo.Index, withdrawAccounts[0])
+	if !found {
+		panic("should never fail to find the depositor")
+	}
+
+	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.processEachWithdrawReq(ctx, depositor, false)
+	if err != nil {
+		ctx.Logger().Error("fail to pay partial principal", err.Error())
+		panic(err)
+	}
+
+	depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
+	adjAmount := item.ActualPrincipalPayment.Sub(total)
+	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(adjAmount)
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	depositor.DepositType = types.DepositorInfo_deposit_close
+	k.SetDepositor(ctx, depositor)
 
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(poolInfo.WithdrawProposalAmount)
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.WithdrawProposalAmount)
@@ -241,13 +274,14 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 		k.DelPool(ctx, poolInfo.Index)
 	}
 	escrowAmount := poolInfo.EscrowPrincipalAmount
-	if escrowAmount.Amount.LT(poolInfo.BorrowedAmount.Amount) {
-		ctx.Logger().Error("not enough money to pay the total principal")
+	if !escrowAmount.Amount.Equal(poolInfo.BorrowedAmount.Amount) {
+		ctx.Logger().Error("total principal is not equal to total borrowed")
 		return false
 	}
 
-	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.BorrowedAmount)
-	totalPaid := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
+	//poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.BorrowedAmount)
+	//totalPaid := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
+	totalPaid := sdk.NewCoin(poolInfo.BorrowedAmount.Denom, poolInfo.EscrowInterestAmount)
 
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalPaid))
 	if err != nil {

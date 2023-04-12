@@ -23,6 +23,7 @@ const (
 	PoolDepositorHistory     = "depositorhistoryPrefix-"
 	PoolDeposited            = "depositedPrefix-"
 	Pool                     = "pool-"
+	ExchangeHistory          = "exchangeHistory"
 )
 
 func KeyPrefix(p string) []byte {
