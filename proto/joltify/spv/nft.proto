@@ -14,6 +14,12 @@ message BorrowDetail{
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
 	google.protobuf.Timestamp time_stamp = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+	string exchange_ratio= 3 [
+		(cosmos_proto.scalar)  = "cosmos.Dec",
+		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.nullable)   = false
+	];
 }
 
 message NftInfo{

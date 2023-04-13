@@ -132,10 +132,18 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 
 // tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
 // rather then all the usable money
-func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int) error {
-	if tokenAmount.IsZero() {
+func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int) error {
+	if usdTokenAmount.IsZero() {
 		return nil
 	}
+
+	marketID := denomConvertToMarketID(poolInfo.PoolDenomPrefix)
+	poolToken, ratio, err := k.inboundConvertFromUSD(ctx, marketID, usdTokenAmount.Amount)
+	if err != nil {
+		return err
+	}
+	localToken := sdk.NewCoin(poolInfo.PoolDenomPrefix, poolToken)
+
 	// create the new nft class for this borrow event
 	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
 	poolClass, found := k.nftKeeper.GetClass(ctx, classID)
@@ -156,8 +164,8 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 	rate := CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	paymentTime := ctx.BlockTime()
 	borrowDetails := make([]types.BorrowDetail, 1, 10)
-	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: tokenAmount, TimeStamp: paymentTime}
-	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(tokenAmount.Denom, sdk.NewInt(0))}
+	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: localToken, TimeStamp: paymentTime, ExchangeRatio: ratio}
+	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(localToken.Denom, sdk.NewInt(0))}
 	bi := types.BorrowInterest{
 		PoolIndex:     poolInfo.Index,
 		Apy:           poolInfo.Apy,
@@ -167,8 +175,8 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 		MonthlyRatio:  i,
 		InterestSPY:   rate,
 		Payments:      []*types.PaymentItem{&firstPayment},
-		InterestPaid:  sdk.NewCoin(tokenAmount.Denom, sdk.ZeroInt()),
-		AccInterest:   sdk.NewCoin(tokenAmount.Denom, sdk.ZeroInt()),
+		InterestPaid:  sdk.NewCoin(localToken.Denom, sdk.ZeroInt()),
+		AccInterest:   sdk.NewCoin(localToken.Denom, sdk.ZeroInt()),
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)
@@ -190,7 +198,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 		poolInfo.PoolFirstDueTime = poolInfo.ProjectDueTime
 	}
 
-	err = k.processBorrow(ctx, poolInfo, currentBorrowClass, tokenAmount, depositors, borrowedFix)
+	err = k.processBorrow(ctx, poolInfo, currentBorrowClass, usdTokenAmount, localToken, depositors, borrowedFix)
 	if err != nil {
 		return err
 	}
@@ -202,7 +210,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 
 	if needBankTransfer {
 		// we transfer the fund from the module to the spv
-		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(tokenAmount))
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(usdTokenAmount))
 		if err != nil {
 			return err
 		}
@@ -210,7 +218,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, tokenAmount 
 	return nil
 }
 
-func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount sdk.Coin, depositors []*types.DepositorInfo, borrowableFix sdkmath.Int) error {
+func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, amount, localToken sdk.Coin, depositors []*types.DepositorInfo, borrowableFix sdkmath.Int) error {
 	if poolInfo.UsableAmount.IsLT(amount) {
 		return types.ErrInsufficientFund
 	}
@@ -224,7 +232,7 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 
 	var err error
 	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
-	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Add(amount)
+	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Add(localToken)
 	poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(amount)
 	if err != nil {
 		return types.ErrInsufficientFund
