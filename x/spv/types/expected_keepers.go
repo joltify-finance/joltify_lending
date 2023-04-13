@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -46,4 +47,8 @@ type NFTKeeper interface {
 	Burn(ctx sdk.Context, classID string, nftID string) error
 	Transfer(ctx sdk.Context, classID string, nftID string, receiver sdk.AccAddress) error
 	GetTotalSupply(ctx sdk.Context, classID string) uint64
+}
+
+type PriceFeedKeeper interface {
+	GetCurrentPrice(ctx sdk.Context, marketID string) (types2.CurrentPrice, error)
 }

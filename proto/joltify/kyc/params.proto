@@ -42,6 +42,7 @@ message ProjectInfo {
   int32  pool_locked_seconds = 10;
   int32  pool_total_borrow_limit= 11;
   google.protobuf.Duration grace_time= 12 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  string market_id = 13;
 }
 
 // Params defines the parameters for the module.

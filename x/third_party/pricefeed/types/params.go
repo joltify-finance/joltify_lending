@@ -50,7 +50,15 @@ func GenDefaultMarket() Markets {
 		Oracles:    []types.AccAddress{acc},
 	}
 
-	return []Market{m, m2, m3, m4}
+	m5 := Market{
+		MarketID:   "aud:usd",
+		BaseAsset:  "usdc",
+		QuoteAsset: "aud",
+		Active:     true,
+		Oracles:    []types.AccAddress{acc},
+	}
+
+	return []Market{m, m2, m3, m4, m5}
 }
 
 // NewParams creates a new AssetParams object

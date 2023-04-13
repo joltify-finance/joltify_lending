@@ -54,7 +54,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to borrow money", msg.Creator)
 	}
 
-	if msg.BorrowAmount.Denom != poolInfo.TargetAmount.Denom {
+	if msg.BorrowAmount.Denom != denomConvert(poolInfo.TargetAmount.Denom) {
 		return nil, coserrors.Wrap(types.ErrInconsistencyToken, "token to be borrowed is inconsistency")
 	}
 

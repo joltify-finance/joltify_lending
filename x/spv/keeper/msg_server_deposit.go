@@ -34,7 +34,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, types.ErrPoolNotAcceptNewFund
 	}
 
-	if msg.Token.GetDenom() != poolInfo.TargetAmount.Denom {
+	if msg.Token.GetDenom() != denomConvert(poolInfo.TargetAmount.Denom) {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidCoins, "we only accept %v", poolInfo.TargetAmount.Denom)
 	}
 

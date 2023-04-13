@@ -144,6 +144,7 @@ message PoolInfo {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+  string pool_denom_prefix = 36;
 }
 
 message PoolWithInvestors {
