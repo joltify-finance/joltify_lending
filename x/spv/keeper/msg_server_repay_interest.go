@@ -15,7 +15,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool) (sdk.Coin, error) {
+func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, error) {
 	var payment, paymentToInvestor sdk.Coin
 	// as the payment canot be happed at exact payfreq time, so we need to round down to the latest payment time
 	//currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
@@ -38,8 +38,10 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		if paymentAmount.IsZero() {
 			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, nil
 		}
-		reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(reserve).TruncateInt()
-		toInvestors := paymentAmount.Sub(reservedAmount)
+
+		paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
+		reservedAmount := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+		toInvestors := paymentAmountUsd.Sub(reservedAmount)
 		pReserve, found := k.GetReserve(ctx, denom)
 		if !found {
 			k.SetReserve(ctx, sdk.NewCoin(denom, reservedAmount))
@@ -59,19 +61,20 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
 		interest := r.Power(uint64(deltaTruncated)).Sub(sdk.OneDec())
 
-		paymentAmount := interest.MulInt(lastBorrow.Amount).TruncateInt()
-		reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(reserve).TruncateInt()
-		toInvestors := paymentAmount.Sub(reservedAmount)
+		usdInterest := interest.Mul(exchangeRatio)
+		paymentAmountUsd := usdInterest.MulInt(lastBorrow.Amount).TruncateInt()
+		reservedAmountUsd := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+		toInvestors := paymentAmountUsd.Sub(reservedAmountUsd)
 
 		pReserve, found := k.GetReserve(ctx, denom)
 		if !found {
-			k.SetReserve(ctx, sdk.NewCoin(denom, reservedAmount))
+			k.SetReserve(ctx, sdk.NewCoin(denom, reservedAmountUsd))
 		} else {
-			pReserve = pReserve.AddAmount(reservedAmount)
+			pReserve = pReserve.AddAmount(reservedAmountUsd)
 			k.SetReserve(ctx, pReserve)
 		}
 		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
-		payment = sdk.NewCoin(denom, paymentAmount)
+		payment = sdk.NewCoin(denom, paymentAmountUsd)
 		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	}
 
@@ -83,12 +86,30 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 
 }
 
+// getAllinterestToBePaid returns the total interest to be paid for all the borrows in the pool using the
+// LOCAL currency
 func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) (sdkmath.Int, error) {
 
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
 	totalPayment := sdkmath.NewInt(0)
 	firstBorrow := true
+	var exchangeRatio sdk.Dec
+	if poolInfo.InterestPrepayment == nil || poolInfo.InterestPrepayment.Counter == 0 {
+		a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+		price, err := k.priceFeedKeeper.GetCurrentPrice(ctx, denomConvertToMarketID(a))
+		if err != nil {
+			panic(err)
+		}
+		exchangeRatio = price.Price
+	} else {
+		exchangeRatio = poolInfo.InterestPrepayment.ExchangeRatio
+		poolInfo.InterestPrepayment.Counter--
+		if poolInfo.InterestPrepayment.Counter == 0 {
+			poolInfo.InterestPrepayment = nil
+		}
+	}
+
 	for _, el := range nftClasses {
 		class, found := k.nftKeeper.GetClass(ctx, el)
 		if !found {
@@ -100,7 +121,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic(err)
 		}
-		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow)
+		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow, exchangeRatio)
 		if err != nil {
 			return sdkmath.Int{}, err
 		}
@@ -119,6 +140,20 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		firstBorrow = false
 	}
 	return totalPayment, nil
+}
+
+func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdk.Dec, error) {
+
+	paymentAmount, err := k.calculateTotalDueInterest(ctx, poolInfo)
+	if err != nil {
+		return 0, sdkmath.ZeroInt(), sdk.ZeroDec(), err
+	}
+	usdEachMonth, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, marketId, paymentAmount)
+	if err != nil {
+		return 0, sdkmath.ZeroInt(), sdk.ZeroDec(), err
+	}
+	counter := totalPaid.Quo(usdEachMonth)
+	return int32(counter.Int64()), usdEachMonth.Mul(counter), ratio, nil
 }
 
 func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
@@ -141,14 +176,75 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "pool denom %v and repay is %v", poolInfo.TargetAmount.Denom, msg.Token.Denom)
 	}
 
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{msg.Token})
+	if poolInfo.BorrowedAmount.IsZero() || msg.Token.Amount.IsZero() {
+		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "borrow amount is zero, no interest to be paid or interest paid is zero")
+	}
+
+	if poolInfo.InterestPrepayment != nil {
+		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "we have the prepayment interest, not accepting new interest payment")
+	}
+
+	if !poolInfo.EscrowInterestAmount.IsNegative() {
+
+		a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+		marketID := denomConvertToMarketID(a)
+		counter, interestReceived, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, msg.Token.Amount)
+		if err != nil {
+			return nil, coserrors.Wrapf(err, "calculate payment month failed")
+		}
+
+		if counter < 1 {
+			return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay at least one interest cycle")
+		}
+
+		poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Add(interestReceived)
+		prepayment := types.InterestPrepayment{
+			Counter:       counter,
+			ExchangeRatio: ratio,
+		}
+
+		poolInfo.InterestPrepayment = &prepayment
+
+		err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{sdk.NewCoin(msg.Token.Denom, interestReceived)})
+		if err != nil {
+			return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
+		}
+
+		k.SetPool(ctx, poolInfo)
+		return &types.MsgRepayInterestResponse{}, nil
+	}
+
+	leftover := poolInfo.EscrowInterestAmount.Add(msg.Token.Amount)
+	if leftover.IsNegative() {
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay all the outstanding interest")
+	}
+
+	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+	marketID := denomConvertToMarketID(a)
+	counter, interestReceived, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, leftover)
+	if err != nil {
+		return nil, coserrors.Wrapf(err, "calculate payment month failed")
+	}
+
+	if counter < 1 {
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay at least one interest cycle")
+	}
+	poolInfo.EscrowInterestAmount = interestReceived
+	prepayment := types.InterestPrepayment{
+		Counter:       counter,
+		ExchangeRatio: ratio,
+	}
+
+	poolInfo.InterestPrepayment = &prepayment
+
+	totalGetFromSPV := poolInfo.EscrowPrincipalAmount.Amount.Abs().Add(interestReceived)
+
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{sdk.NewCoin(msg.Token.Denom, totalGetFromSPV)})
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
 	}
 
-	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Add(msg.Token.Amount)
 	k.SetPool(ctx, poolInfo)
-
 	return &types.MsgRepayInterestResponse{}, nil
 
 }

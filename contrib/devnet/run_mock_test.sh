@@ -211,6 +211,16 @@ while true; do
   sleep 1 # wait for a second before running the command again
 done
 
+ret=$(joltify tx pricefeed postprice aud:usd 0.7 253402300799 -y --from validator --output json)
+ code=$(echo $ret | jq -r '.code')
+  # check whether the return value of the function is 0
+  if [ $code -eq 0 ]; then
+    cecho "GREEN" "submit price done"
+  else
+    cecho "READ" "submit price failed with $ret"
+    exit 1
+  fi
+
 
 prepareInvestment
 deposit

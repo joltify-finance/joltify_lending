@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -14,14 +15,15 @@ import (
 
 type (
 	Keeper struct {
-		cdc        codec.BinaryCodec
-		storeKey   storetypes.StoreKey
-		memKey     storetypes.StoreKey
-		paramstore paramtypes.Subspace
-		kycKeeper  types.KycKeeper
-		bankKeeper types.BankKeeper
-		accKeeper  types.AccountKeeper
-		nftKeeper  types.NFTKeeper
+		cdc             codec.BinaryCodec
+		storeKey        storetypes.StoreKey
+		memKey          storetypes.StoreKey
+		paramstore      paramtypes.Subspace
+		kycKeeper       types.KycKeeper
+		bankKeeper      types.BankKeeper
+		accKeeper       types.AccountKeeper
+		nftKeeper       types.NFTKeeper
+		priceFeedKeeper pricefeedkeeper.Keeper
 	}
 )
 
@@ -34,26 +36,23 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	accKeeper types.AccountKeeper,
 	nftKeeper types.NFTKeeper,
+	pricefeedkeeper pricefeedkeeper.Keeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
 		ps = ps.WithKeyTable(types.ParamKeyTable())
 	}
 
-	// ensure nft module account is set
-	//if addr := accKeeper.GetModuleAddress(types.ModuleName); addr == nil {
-	//	panic("the spv module account has not been set")
-	//}
-
 	return &Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		memKey:     memKey,
-		paramstore: ps,
-		kycKeeper:  kycKeeper,
-		bankKeeper: bankKeeper,
-		accKeeper:  accKeeper,
-		nftKeeper:  nftKeeper,
+		cdc:             cdc,
+		storeKey:        storeKey,
+		memKey:          memKey,
+		paramstore:      ps,
+		kycKeeper:       kycKeeper,
+		bankKeeper:      bankKeeper,
+		accKeeper:       accKeeper,
+		nftKeeper:       nftKeeper,
+		priceFeedKeeper: pricefeedkeeper,
 	}
 }
 
@@ -210,25 +209,6 @@ func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sd
 
 	k.cdc.MustUnmarshal(bz, &depositor)
 	return depositor, true
-}
-
-// SetExchangeInfo sets the depositor
-func (k Keeper) SetExchangeInfo(ctx sdk.Context, exchange types.ExchangeInfo) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ExchangeHistory))
-	bz := k.cdc.MustMarshal(&exchange)
-	depositorPoolStore.Set([]byte(exchange.PoolIndex), bz)
-}
-
-func (k Keeper) GetExchangeInfo(ctx sdk.Context, poolIndex string) (exchange types.ExchangeInfo, found bool) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ExchangeHistory))
-
-	bz := depositorPoolStore.Get([]byte(poolIndex))
-	if bz == nil {
-		return exchange, found
-	}
-
-	k.cdc.MustUnmarshal(bz, &exchange)
-	return exchange, true
 }
 
 // IterateDepositors iterates over all deposit objects in the store and performs a callback function

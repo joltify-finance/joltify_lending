@@ -31,10 +31,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 				}
 				if poolInfo.ProjectDueTime.Before(currentTime) {
 					// we pay the partial of the interest
-					processed := k.HandlePartialPrincipalPayment(ctx, &poolInfo, poolInfo.GetWithdrawAccounts())
-					if processed {
-						poolInfo.PrincipalPaid = false
-					}
+					k.HandlePartialPrincipalPayment(ctx, &poolInfo, poolInfo.GetWithdrawAccounts())
 					// we update the project due time to the next cycle
 					poolInfo.ProjectDueTime = poolInfo.ProjectDueTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 				}
@@ -42,10 +39,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 				return false
 			}
 			if poolInfo.PoolStatus == types.PoolInfo_FREEZING {
-				processed := k.HandlePrincipalPayment(ctx, &poolInfo)
-				if processed {
-					poolInfo.PrincipalPaid = false
-				}
+				k.HandlePrincipalPayment(ctx, &poolInfo)
 			}
 			k.SetPool(ctx, poolInfo)
 		}

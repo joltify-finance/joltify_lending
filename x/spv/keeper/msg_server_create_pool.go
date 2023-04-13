@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -82,6 +83,10 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	}
 
 	targetProject := allProjects[msg.ProjectIndex-1]
+	_, err := k.priceFeedKeeper.GetCurrentPrice(ctx, targetProject.MarketId)
+	if err != nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given marketID %v cannot be found", targetProject.MarketId)
+	}
 
 	if targetProject.ProjectTargetAmount.IsLT(msg.TargetTokenAmount) {
 		return nil, coserrors.Wrap(sdkerrors.ErrInvalidRequest, "the junior amout is larger than the project target amount")
@@ -140,6 +145,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			UriHash:     urlHash.Hex(),
 		}
 
+		denomPrefix := strings.Split(targetProject.MarketId, ":")[0] + "-"
 		poolInfo := types.PoolInfo{
 			Index:                         indexHash.Hex(),
 			PoolName:                      msg.PoolName + "-" + typePrefix,
@@ -154,12 +160,11 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			PoolType:                      enuPoolType,
 			ProjectLength:                 targetProject.ProjectLength,
 			LastPaymentTime:               ctx.BlockTime(),
-			PrincipalPaid:                 false,
-			BorrowedAmount:                sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			BorrowedAmount:                sdk.NewCoin(denomPrefix+msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			UsableAmount:                  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			EscrowInterestAmount:          sdk.NewInt(0),
 			EscrowPrincipalAmount:         sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			WithdrawProposalAmount:        sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
 			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
@@ -168,6 +173,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			CurrentPoolTotalBorrowCounter: 0,
 			PoolCreatedTime:               ctx.BlockTime(),
 			GraceTime:                     targetProject.GraceTime,
+			PoolDenomPrefix:               denomPrefix,
 		}
 
 		k.SetPool(ctx, poolInfo)
