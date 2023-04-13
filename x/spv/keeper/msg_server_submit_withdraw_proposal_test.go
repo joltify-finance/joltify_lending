@@ -74,6 +74,12 @@ func setupWithdrawProposal(suite *withdrawProposalSuite) {
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
 
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
 
 	_, err = suite.app.Borrow(suite.ctx, borrow)
@@ -85,6 +91,7 @@ func setupWithdrawProposal(suite *withdrawProposalSuite) {
 
 func (suite *withdrawProposalSuite) TestWithdrawProposal() {
 	setupWithdrawProposal(suite)
+
 	type args struct {
 		msgWithdraw *types.MsgSubmitWithdrawProposal
 		expectedErr string
@@ -132,12 +139,12 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 
 	currentBlockTime := suite.ctx.BlockTime()
 
-	ctx1 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth*2-1)))
+	ctx1 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*3-1)))
 	req := types.MsgSubmitWithdrawProposal{Creator: suite.investors[0], PoolIndex: suite.investorPool}
 	_, err := suite.app.SubmitWithdrawProposal(ctx1, &req)
 	suite.Require().ErrorContains(err, "submit the proposal too early")
 
-	ctx2 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth+1)))
+	ctx2 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*2+1)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx2, &req)
 	suite.Require().ErrorContains(err, "submit the proposal too late")
 
@@ -148,7 +155,7 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 	suite.Require().True(poolInfo.WithdrawProposalAmount.Amount.IsZero())
 	withdrawable := poolInfo.UsableAmount
 	borrowed := poolInfo.BorrowedAmount
-	ctx3 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth)))
+	ctx3 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*3)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx3, &req)
 	suite.Require().NoError(err)
 

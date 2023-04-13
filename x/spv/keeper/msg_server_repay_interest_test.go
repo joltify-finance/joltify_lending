@@ -92,6 +92,7 @@ func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.Pool
 		MonthlyRatio:  i,
 		InterestSPY:   rate,
 		Payments:      []*types.PaymentItem{&firstPayment},
+		AccInterest:   sdk.NewCoin(borrowAmount.Denom, sdk.ZeroInt()),
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)

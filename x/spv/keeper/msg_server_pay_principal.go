@@ -69,7 +69,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 
 	adjAmount := sdk.NewCoin(msg.Token.Denom, exchangeRatio.MulInt(msg.Token.Amount).TruncateInt())
 	if !adjAmount.Equal(poolInfo.BorrowedAmount) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay exact full principal %v", poolInfo.BorrowedAmount)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay exact full principal %v(adjust amount %v)", poolInfo.BorrowedAmount, adjAmount)
 	}
 
 	if !spv.Equals(poolInfo.OwnerAddress) {
@@ -185,7 +185,7 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 
 	adjAmount := sdk.NewCoin(msg.Token.Denom, exchangeRatio.MulInt(msg.Token.Amount).TruncateInt())
 	if !adjAmount.Equal(poolInfo.GetWithdrawProposalAmount()) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay the full principal %v", poolInfo.BorrowedAmount)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay exact full principal %v(adjust amount %v)", poolInfo.BorrowedAmount, adjAmount)
 	}
 
 	exchange, found := k.GetExchangeInfo(ctx, poolInfo.Index)

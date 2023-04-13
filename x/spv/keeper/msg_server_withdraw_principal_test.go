@@ -59,6 +59,8 @@ func setupPool(suite *withDrawPrincipalSuite) {
 	//creator3 := "jolt1z0y0zl0trsnuqmqf5v034pyv9sp39jg3rv6lsm"
 	//creator4 := "jolt1fcaa73cc9c2l3l2u57skddgd0zm749ncukx90g"
 
+	suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+
 	suite.investors = keeper.Wallets
 }
 

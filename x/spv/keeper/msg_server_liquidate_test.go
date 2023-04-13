@@ -173,6 +173,9 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	samples := make([]int, 20)
 	rand.Seed(time.Now().UnixNano())
@@ -215,6 +218,12 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	setupLiquidateEnv(suite)
 
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	depositorPool := suite.investorPool
 
 	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
@@ -222,7 +231,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	_, err := suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().ErrorContains(err, "pool is not in active status")
 
-	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
 	poolInfo.PoolTotalBorrowLimit = 100

@@ -147,6 +147,13 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 
 	investor1TotalClaimed := sdk.OneInt()
 	SetupPool(suite)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
@@ -186,7 +193,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
 	suite.Require().NoError(err)
 
-	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
@@ -267,6 +274,13 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 
 	investor1TotalClaimed := sdk.OneInt()
 	SetupPool(suite)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
@@ -304,7 +318,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
 	suite.Require().NoError(err)
 
-	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
@@ -477,6 +491,13 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 func (suite *claimInterestSuite) TestClaimInterest() {
 
 	SetupPool(suite)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
@@ -511,7 +532,7 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
 	suite.Require().NoError(err)
 
-	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
@@ -758,6 +779,12 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 func (suite *claimInterestSuite) TestCalimInterestNoAuthorized() {
 
 	SetupPool(suite)
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
@@ -792,7 +819,7 @@ func (suite *claimInterestSuite) TestCalimInterestNoAuthorized() {
 	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
 	suite.Require().NoError(err)
 
-	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
 	month := 3600 * 24 * 30

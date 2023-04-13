@@ -72,10 +72,17 @@ func TestPayPrincipalInterest(t *testing.T) {
 func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	setupPools(suite)
 
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(200000))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	req := types.MsgPayPrincipal{
-		Creator:   "invalid",
-		PoolIndex: suite.investorPool,
-		Token:     sdk.NewCoin("abc", sdk.OneInt()),
+		Creator:       "invalid",
+		PoolIndex:     suite.investorPool,
+		Token:         sdk.NewCoin("abc", sdk.OneInt()),
+		ExchangeRatio: "1",
 	}
 
 	_, err := suite.app.PayPrincipal(suite.ctx, &req)
@@ -105,14 +112,15 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
-	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(211))
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
-	suite.Require().ErrorContains(err, "not enough interest to be paid to close the pool")
+	suite.Require().ErrorContains(err, "you must pay exact full principal")
 
 	suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.2e5))})
-	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))
+	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(12e4))
+	req.Creator = "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0"
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().NoError(err)
 
