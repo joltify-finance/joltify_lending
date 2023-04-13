@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	sdkmath "cosmossdk.io/math"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -10,6 +11,25 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
+
+func (k msgServer) calulatetotalDueInterest(ctx sdk.Context, poolInfo types.PoolInfo) (sdkmath.Int, error) {
+
+	totalAmount := sdk.ZeroInt()
+	for _, el := range poolInfo.PoolNFTIds {
+		class, found := k.nftKeeper.GetClass(ctx, el)
+		if !found {
+			panic(found)
+		}
+		var borrowInterest types.BorrowInterest
+		err := proto.Unmarshal(class.Data.Value, &borrowInterest)
+		if err != nil {
+			return sdkmath.ZeroInt(), coserrors.Wrapf(err, "invalid unmarshal of the borrow interest")
+		}
+		paymentAmount := borrowInterest.MonthlyRatio.Mul(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+		totalAmount = totalAmount.Add(paymentAmount)
+	}
+	return totalAmount, nil
+}
 
 func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipal) (*types.MsgPayPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
@@ -40,7 +60,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 
 	currentTime := ctx.BlockTime()
 	if currentTime.After(secondTimeStampBeforeProjectDueDate) && currentTime.Before(dueDate) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal can not be paid between %v <-> %v", secondTimeStampBeforeProjectDueDate, dueDate)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "%v: principal can not be paid between %v <-> %v", currentTime, secondTimeStampBeforeProjectDueDate, dueDate)
 	}
 
 	if msg.Token.Denom != poolInfo.BorrowedAmount.Denom {
@@ -56,16 +76,10 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "only pool owner can pay the principal")
 	}
 
-	class, found := k.nftKeeper.GetClass(ctx, poolInfo.PoolNFTIds[0])
-	if !found {
-		panic(found)
-	}
-	var borrowInterest types.BorrowInterest
-	err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+	paymentAmount, err := k.calulatetotalDueInterest(ctx, poolInfo)
 	if err != nil {
-		return nil, coserrors.Wrapf(err, "invalid unmarshal of the borrow interest")
+		return nil, err
 	}
-	paymentAmount := borrowInterest.MonthlyRatio.Mul(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
 
 	if poolInfo.EscrowInterestAmount.LT(paymentAmount) {
 		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed", paymentAmount)
@@ -145,6 +159,15 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 
 	if !spv.Equals(poolInfo.OwnerAddress) {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "only pool owner can pay the principal")
+	}
+
+	paymentAmount, err := k.calulatetotalDueInterest(ctx, poolInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	if poolInfo.EscrowInterestAmount.LT(paymentAmount) {
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed", paymentAmount)
 	}
 
 	currentTime := ctx.BlockTime()

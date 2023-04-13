@@ -198,7 +198,9 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	token := poolInfo.EscrowPrincipalAmount
 	if token.IsLT(poolInfo.WithdrawProposalAmount) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
-		poolInfo.PoolStatus = types.PoolInfo_Liquidation
+		if ctx.BlockTime().After(poolInfo.ProjectDueTime.Add(time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds))) {
+			poolInfo.PoolStatus = types.PoolInfo_Liquidation
+		}
 		return false
 	}
 
