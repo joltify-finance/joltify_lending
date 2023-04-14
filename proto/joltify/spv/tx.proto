@@ -125,9 +125,6 @@ message MsgPayPrincipal {
   string creator = 1;
   string pool_index = 2;
   cosmos.base.v1beta1.Coin token= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
-  string      exchange_ratio      = 4;
-  string proof_url = 5;
-
 }
 
 message MsgPayPrincipalResponse {
@@ -137,9 +134,6 @@ message MsgPayPrincipalPartial {
   string creator = 1;
   string pool_index = 2;
   cosmos.base.v1beta1.Coin token= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
-
-  string exchange_ratio   = 4 ;
-  string proof_url = 5;
 }
 
 message MsgPayPrincipalPartialResponse {

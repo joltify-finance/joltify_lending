@@ -27,7 +27,6 @@ message PoolInfo {
   ];
 
 
-  bool principal_paid = 6;
 
   int32 pay_freq = 7;
 
@@ -126,25 +125,25 @@ message PoolInfo {
     (gogoproto.nullable)   = false
   ];
 
-  string      convert_ratio      = 33 [
-    (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-
-
   string total_liquidation_amount = 34 [
     (cosmos_proto.scalar)  = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
 
-  string      exchange_ratio      = 35 [
+  string      principal_payment_exchange_ratio      = 35 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  string pool_denom_prefix = 36;
+
+  string      principal_withdrawal_request_payment_ratio     = 36 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  string pool_denom_prefix = 37;
 }
 
 message PoolWithInvestors {
@@ -158,24 +157,4 @@ message PoolDepositedInvestors {
   [(cosmos_proto.scalar) = "cosmos.AddressBytes",
     (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
   ];
-}
-
-message exchange_item{
-  string      exchange_ratio      = 1 [
-    (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-  string actual_principal_payment = 2 [
-    (cosmos_proto.scalar)  = "cosmos.Int",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
-    (gogoproto.nullable)   = false
-  ];
-  string proof = 3;
-}
-
-message exchange_info {
-  string pool_index=1;
-  repeated exchange_item exchange_items_for_partial_payment = 2;
-  exchange_item exchange_item_for_full_payment = 3;
 }

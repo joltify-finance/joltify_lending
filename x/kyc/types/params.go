@@ -51,6 +51,7 @@ func NewParams() Params {
 		PayFreq:                      "120",
 		PoolLockedSeconds:            120,
 		PoolTotalBorrowLimit:         100,
+		MarketId:                     "aud:usd",
 		WithdrawRequestWindowSeconds: 20,
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}

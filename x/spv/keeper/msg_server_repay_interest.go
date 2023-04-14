@@ -74,9 +74,15 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		payment = sdk.NewCoin(denom, paymentAmount)
 		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	}
+	a, _ := denomConvertToLocalAndUsd(denom)
+	exchangeRatio, err := k.priceFeedKeeper.GetCurrentPrice(ctx, denomConvertToMarketID(a))
+	if err != nil {
+		// should never fail to get the exchange ratio
+		panic(err)
+	}
 
 	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
-	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
+	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow, ExchangeRatio: exchangeRatio.Price}
 	interestData.Payments = append(interestData.Payments, &currentPayment)
 	interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
 	return payment, nil

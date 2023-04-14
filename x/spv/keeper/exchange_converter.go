@@ -10,7 +10,7 @@ func (k Keeper) inboundConvertFromUSDWithMarketID(ctx sdk.Context, marketID stri
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroDec(), err
 	}
-	outAmount := currencyPrice.Price.Quo(sdk.NewDecFromInt(amount)).TruncateInt()
+	outAmount := sdk.NewDecFromInt(amount).Quo(currencyPrice.Price).TruncateInt()
 	return outAmount, currencyPrice.Price, nil
 }
 
@@ -23,12 +23,12 @@ func (k Keeper) outboundConvertToUSDWithMarketID(ctx sdk.Context, marketID strin
 	return outAmount, currencyPrice.Price, nil
 }
 
-func (k Keeper) inboundConvertFromUSD(inAmount sdkmath.Int, ratio sdk.Dec) sdkmath.Int {
-	outAmount := ratio.Quo(sdk.NewDecFromInt(inAmount)).TruncateInt()
+func inboundConvertFromUSD(inAmount sdkmath.Int, ratio sdk.Dec) sdkmath.Int {
+	outAmount := sdk.NewDecFromInt(inAmount).Quo(ratio).TruncateInt()
 	return outAmount
 }
 
-func (k Keeper) outboundConvertToUSD(inAmount sdkmath.Int, ratio sdk.Dec) sdkmath.Int {
+func outboundConvertToUSD(inAmount sdkmath.Int, ratio sdk.Dec) sdkmath.Int {
 	outAmount := ratio.Mul(sdk.NewDecFromInt(inAmount)).TruncateInt()
 	return outAmount
 }

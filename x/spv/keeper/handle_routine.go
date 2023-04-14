@@ -23,7 +23,12 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 		panic(err)
 	}
 
-	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(totalAmountDue)
+	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+	usdInterest, _, err := k.outboundConvertToUSDWithMarketID(ctx, denomConvertToMarketID(a), totalAmountDue)
+	if err != nil {
+		panic("should never fail to convert to usd")
+	}
+	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(usdInterest)
 	if poolInfo.EscrowInterestAmount.IsNegative() {
 		poolInfo.NegativeInterestCounter++
 	} else {

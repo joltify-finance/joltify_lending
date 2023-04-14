@@ -211,25 +211,6 @@ func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sd
 	return depositor, true
 }
 
-// SetExchangeInfo sets the depositor
-func (k Keeper) SetExchangeInfo(ctx sdk.Context, exchange types.ExchangeInfo) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ExchangeHistory))
-	bz := k.cdc.MustMarshal(&exchange)
-	depositorPoolStore.Set([]byte(exchange.PoolIndex), bz)
-}
-
-func (k Keeper) GetExchangeInfo(ctx sdk.Context, poolIndex string) (exchange types.ExchangeInfo, found bool) {
-	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ExchangeHistory))
-
-	bz := depositorPoolStore.Get([]byte(poolIndex))
-	if bz == nil {
-		return exchange, found
-	}
-
-	k.cdc.MustUnmarshal(bz, &exchange)
-	return exchange, true
-}
-
 // IterateDepositors iterates over all deposit objects in the store and performs a callback function
 func (k Keeper) IterateDepositors(ctx sdk.Context, poolIndex string, cb func(depositor types.DepositorInfo) (stop bool)) {
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+poolIndex))

@@ -13,7 +13,7 @@ var (
 )
 
 func GenDefaultMarket() Markets {
-	acc, err := types.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
+	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 	if err != nil {
 		panic(err)
 	}
