@@ -2,8 +2,9 @@ package keeper
 
 import (
 	"context"
-	sdkmath "cosmossdk.io/math"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -65,13 +66,20 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "only pool owner can pay the principal")
 	}
 
-	paymentAmount, err := k.calulatetotalDueInterest(ctx, poolInfo)
+	interestPaymentAmount, err := k.calulatetotalDueInterest(ctx, poolInfo)
 	if err != nil {
 		return nil, err
 	}
+	// to assure the interest is enough, we ask the spv to pay at least the 1.3 interest ahead, will be refund if it has leftover
+	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+	paymentAmountUsd, _, err := k.outboundConvertToUSDWithMarketID(ctx, a, interestPaymentAmount)
+	if err != nil {
+		return nil, coserrors.Wrapf(err, "fail to convert to USD")
+	}
 
-	if poolInfo.EscrowInterestAmount.LT(paymentAmount) {
-		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed", paymentAmount)
+	paymentAmountUsd = sdk.NewDecFromInt(paymentAmountUsd).Mul(sdk.NewDecWithPrec(13, 1)).TruncateInt()
+	if poolInfo.EscrowInterestAmount.LT(paymentAmountUsd) {
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed", interestPaymentAmount)
 	}
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
@@ -81,14 +89,14 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
 
-	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+	a, _ = denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, a, poolInfo.EscrowPrincipalAmount.Amount)
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "fail to convert to USD")
 	}
 
 	// we only close the pool when the escrow principal is later than the total borrowed and the project pass the project length
-	if principalEscrowAmountLocal.Equal(poolInfo.BorrowedAmount.Amount) && ctx.BlockTime().After(poolInfo.ProjectDueTime) {
+	if principalEscrowAmountLocal.GTE(poolInfo.BorrowedAmount.Amount) && ctx.BlockTime().After(poolInfo.ProjectDueTime) {
 		// once we are in the freezing state, the usable amount will not be accurate any longer
 		poolInfo.PoolStatus = types.PoolInfo_FREEZING
 		poolInfo.PrincipalPaymentExchangeRatio = ratio
@@ -135,7 +143,19 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, err
 	}
 
-	if poolInfo.EscrowInterestAmount.LT(paymentAmount) {
+	// to assure the interest is enough, we ask the spv to pay at least the 1.3 interest ahead, will be refund if it has leftover
+	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+	paymentAmountUsd, _, err := k.outboundConvertToUSDWithMarketID(ctx, a, paymentAmount)
+	if err != nil {
+		return nil, coserrors.Wrapf(err, "fail to convert to USD")
+	}
+
+	paymentAmountUsd = sdk.NewDecFromInt(paymentAmountUsd).Mul(sdk.NewDecWithPrec(13, 1)).TruncateInt()
+	if poolInfo.EscrowInterestAmount.LT(paymentAmountUsd) {
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed", paymentAmount)
+	}
+
+	if poolInfo.EscrowInterestAmount.LT(paymentAmountUsd) {
 		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed", paymentAmount)
 	}
 
@@ -152,22 +172,23 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
 	}
 
-	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
-	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, a, poolInfo.EscrowPrincipalAmount.Amount)
-	if err != nil {
-		return nil, coserrors.Wrapf(err, "fail to convert to USD")
-	}
-
-	if !principalEscrowAmountLocal.Equal(poolInfo.WithdrawProposalAmount.Amount) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay exact %v( current amount %v)", poolInfo.WithdrawProposalAmount, principalEscrowAmountLocal)
-	}
+	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "fail to pay all the principal")
 	}
 
-	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
+	a, _ = denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, a, poolInfo.EscrowPrincipalAmount.Amount)
+	if err != nil {
+		return nil, coserrors.Wrapf(err, "fail to convert to USD")
+	}
+
+	if principalEscrowAmountLocal.LT(poolInfo.WithdrawProposalAmount.Amount) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay at least %v( current amount %v)", poolInfo.WithdrawProposalAmount, principalEscrowAmountLocal)
+	}
+
 	poolInfo.PrincipalWithdrawalRequestPaymentRatio = ratio
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
