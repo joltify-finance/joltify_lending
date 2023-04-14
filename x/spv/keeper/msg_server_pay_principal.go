@@ -134,6 +134,10 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "no withdraw proposal to be paid")
 	}
 
+	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "pool is not active")
+	}
+
 	if !spv.Equals(poolInfo.OwnerAddress) {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "only pool owner can pay the principal")
 	}

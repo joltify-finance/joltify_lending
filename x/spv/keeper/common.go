@@ -356,7 +356,7 @@ func (k Keeper) handleClassLeftover(ctx sdk.Context, poolinfo types.PoolInfo) sd
 
 func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
 
-	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	interestUsd, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
 		panic(err)
 	}
@@ -367,19 +367,13 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		return sdk.ZeroInt(), err
 	}
 
-	exchange, found := k.GetExchangeInfo(ctx, poolInfo.Index)
-	if !found {
-		panic("exchange not found")
-	}
-	item := exchange.ExchangeItemForFullPayment
+	lockedUsd := outboundConvertToUSD(depositor.LockedAmount.Amount, poolInfo.PrincipalPaymentExchangeRatio)
 
-	adjLocked := item.ExchangeRatio.MulInt(depositor.LockedAmount.Amount).TruncateInt()
-	totalPaidAmount := adjLocked.Add(interest)
+	totalPaidAmount := lockedUsd.Add(interestUsd)
 	totalPaidAmount = totalPaidAmount.Add(depositor.WithdrawalAmount.Amount)
 	totalPaidAmount = totalPaidAmount.Add(depositor.PendingInterest.Amount)
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
-
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -391,7 +385,6 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		// we transfer the leftover back to spv
-		totalReturn := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
 
 		// we handle the leftover of each class
 		leftover := k.handleClassLeftover(ctx, poolInfo)
@@ -401,10 +394,6 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		}
 		reserve = reserve.Add(leftover)
 		k.SetReserve(ctx, reserve)
-		err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalReturn))
-		if err != nil {
-			return totalPaidAmount, err
-		}
 		k.DelPool(ctx, poolInfo.Index)
 		k.SetHistoryPool(ctx, poolInfo)
 

@@ -281,15 +281,17 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 		k.DelPool(ctx, poolInfo.Index)
 	}
 	escrowAmount := poolInfo.EscrowPrincipalAmount
-	if !escrowAmount.Amount.Equal(poolInfo.BorrowedAmount.Amount) {
+
+	escrowAmountLocal := inboundConvertFromUSD(escrowAmount.Amount, poolInfo.PrincipalPaymentExchangeRatio)
+
+	if !escrowAmountLocal.Equal(poolInfo.BorrowedAmount.Amount) {
 		ctx.Logger().Error("total principal is not equal to total borrowed")
 		return false
 	}
 
 	//poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.BorrowedAmount)
 	//totalPaid := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
-	totalPaid := sdk.NewCoin(poolInfo.BorrowedAmount.Denom, poolInfo.EscrowInterestAmount)
-
+	totalPaid := sdk.NewCoin(poolInfo.TargetAmount.Denom, poolInfo.EscrowInterestAmount)
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalPaid))
 	if err != nil {
 		ctx.Logger().Error("fail to send the leftover back to spv ", "err=", err.Error())
