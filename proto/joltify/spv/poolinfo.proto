@@ -159,7 +159,7 @@ message PoolDepositedInvestors {
   ];
 }
 
-message exchange_item{
+message Exchange_item{
   string      exchange_ratio      = 1 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -173,8 +173,8 @@ message exchange_item{
   string proof = 3;
 }
 
-message exchange_info {
+message Exchange_info {
   string pool_index=1;
-  repeated exchange_item exchange_items_for_partial_payment = 2;
-  exchange_item exchange_item_for_full_payment = 3;
+  repeated Exchange_item exchange_items_for_partial_payment = 2;
+  Exchange_item exchange_item_for_full_payment = 3;
 }

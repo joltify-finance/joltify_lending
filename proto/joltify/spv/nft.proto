@@ -86,7 +86,7 @@ message BorrowInterest{
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
 
-	repeated liquidation_item liquidation_items= 11;
+	repeated Liquidation_item liquidation_items= 11;
 
 	string total_paid_liquidation_amount = 35 [
 		(cosmos_proto.scalar)  = "cosmos.Int",
@@ -97,7 +97,7 @@ message BorrowInterest{
 
 }
 
-message liquidation_item{
+message Liquidation_item{
 	cosmos.base.v1beta1.Coin amount = 1[
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin",
 		(gogoproto.nullable) = false];
