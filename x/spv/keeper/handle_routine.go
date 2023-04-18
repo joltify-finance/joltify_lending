@@ -88,7 +88,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 				panic(err)
 			}
 
-			err = k.processEachWithdrawReq(ctx, *el, true)
+			err = k.processEachWithdrawReq(ctx, *el, true, ratio)
 			if err != nil {
 				panic(err)
 			}
@@ -118,7 +118,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 			panic(err)
 		}
 
-		err = k.processEachWithdrawReq(ctx, *el, true)
+		err = k.processEachWithdrawReq(ctx, *el, true, ratio)
 		if err != nil {
 			panic(err)
 		}
@@ -153,7 +153,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	return true
 }
 
-func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, burnNFT bool) error {
+func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, burnNFT bool, exchangeRatio sdk.Dec) error {
 	thisClass, found := k.nftKeeper.GetClass(ctx, classID)
 	if !found {
 		return coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
@@ -178,7 +178,7 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, bu
 	thisNFTBorrowed := interestData.Borrowed
 
 	newBorrowAmount := lastBorrow.BorrowedAmount.Sub(thisNFTBorrowed)
-	newBorrow := types.BorrowDetail{BorrowedAmount: newBorrowAmount, TimeStamp: ctx.BlockTime()}
+	newBorrow := types.BorrowDetail{BorrowedAmount: newBorrowAmount, TimeStamp: ctx.BlockTime(), ExchangeRatio: exchangeRatio}
 	borrowClassInfo.BorrowDetails = append(borrowClassInfo.BorrowDetails, newBorrow)
 
 	data, err := types2.NewAnyWithValue(&borrowClassInfo)
@@ -199,10 +199,10 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, bu
 	return nil
 }
 
-func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo, burnNFT bool) error {
+func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo, burnNFT bool, exchangeRatio sdk.Dec) error {
 	for _, el := range depositor.LinkedNFT {
 		ids := strings.Split(el, ":")
-		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], burnNFT)
+		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], burnNFT, exchangeRatio)
 		if err != nil {
 			panic(err)
 		}
@@ -237,7 +237,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 			panic(err)
 		}
 
-		err = k.processEachWithdrawReq(ctx, depositor, false)
+		err = k.processEachWithdrawReq(ctx, depositor, false, exchangeRatio)
 		if err != nil {
 			ctx.Logger().Error("fail to pay partial principal", err.Error())
 			panic(err)
@@ -262,7 +262,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		panic(err)
 	}
 
-	err = k.processEachWithdrawReq(ctx, depositor, false)
+	err = k.processEachWithdrawReq(ctx, depositor, false, exchangeRatio)
 	if err != nil {
 		ctx.Logger().Error("fail to pay partial principal", err.Error())
 		panic(err)
@@ -305,9 +305,8 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 		return false
 	}
 
-	//poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Sub(poolInfo.BorrowedAmount)
-	//totalPaid := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
 	totalPaid := poolInfo.EscrowPrincipalAmount.SubAmount(borrowedUSD)
+	totalPaid = totalPaid.AddAmount(poolInfo.EscrowInterestAmount)
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalPaid))
 	if err != nil {
 		ctx.Logger().Error("fail to send the leftover back to spv ", "err=", err.Error())

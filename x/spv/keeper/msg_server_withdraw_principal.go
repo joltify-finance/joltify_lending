@@ -17,7 +17,7 @@ func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	if err != nil {
 		return sdk.Coin{}, err
 	}
-	tokenSend := sdk.NewCoin(depositor.LockedAmount.Denom, amount)
+	tokenSend := sdk.NewCoin(poolInfo.TargetAmount.Denom, amount)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(

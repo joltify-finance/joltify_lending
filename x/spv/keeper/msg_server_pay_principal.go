@@ -61,7 +61,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "%v: principal can not be paid between %v <-> %v", currentTime, secondTimeStampBeforeProjectDueDate, dueDate)
 	}
 
-	if msg.Token.Denom != poolInfo.BorrowedAmount.Denom {
+	if msg.Token.Denom != poolInfo.TargetAmount.Denom {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid token demo, want %v", poolInfo.BorrowedAmount.Denom)
 	}
 
@@ -70,7 +70,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 	}
 
 	if poolInfo.InterestPrepayment == nil {
-		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed")
+		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "you need to pay interest firstly")
 	}
 
 	if poolInfo.EscrowInterestAmount.IsNegative() {
@@ -85,13 +85,13 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
-	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, a, poolInfo.EscrowPrincipalAmount.Amount)
+	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, denomConvertToMarketID(a), poolInfo.EscrowPrincipalAmount.Amount)
 	if err != nil {
-		return nil, coserrors.Wrapf(err, "fail to convert to USD")
+		return nil, coserrors.Wrapf(err, "fail to convert to USD with market id %v", denomConvertToMarketID(a))
 	}
 
 	// we only close the pool when the escrow principal is later than the total borrowed and the project pass the project length
-	if principalEscrowAmountLocal.GTE(poolInfo.BorrowedAmount.Amount) && ctx.BlockTime().After(poolInfo.ProjectDueTime) {
+	if principalEscrowAmountLocal.GTE(poolInfo.BorrowedAmount.Amount) {
 		// once we are in the freezing state, the usable amount will not be accurate any longer
 		poolInfo.PoolStatus = types.PoolInfo_FREEZING
 		poolInfo.PrincipalPaymentExchangeRatio = ratio
@@ -107,8 +107,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 
 		return &types.MsgPayPrincipalResponse{}, nil
 	}
-	b := outboundConvertToUSD(poolInfo.BorrowedAmount.Amount, ratio)
-	return &types.MsgPayPrincipalResponse{}, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal is not fully paid. you have paid %v and borrowed %v", poolInfo.EscrowPrincipalAmount, b)
+	return &types.MsgPayPrincipalResponse{}, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal is not fully paid. you have paid %v and borrowed %v", principalEscrowAmountLocal, poolInfo.BorrowedAmount)
 
 }
 

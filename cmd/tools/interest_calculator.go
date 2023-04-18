@@ -36,7 +36,7 @@ func main() {
 		return
 	}
 
-	var interestToUser sdk.Dec
+	var interestToUser, interestToReserve sdk.Dec
 	if len(os.Args) == 4 {
 		userAmount := os.Args[3]
 		amount, ok := sdk.NewIntFromString(userAmount)
@@ -46,10 +46,12 @@ func main() {
 			return
 		}
 		// 85% of the interest is paid to the user, 15% is to the pool
-		interestToUser = apyToPayFreq.MulInt(amount).Mul(sdk.MustNewDecFromStr("0.85"))
+		a := apyToPayFreq.MulInt(amount)
+		interestToReserve = a.Mul(sdk.MustNewDecFromStr("0.15"))
+		interestToUser = a.Sub(interestToReserve)
 	}
 
-	fmt.Printf("apy: %s, payFreq: %d, apyToPayFreq: %s, interest_to_user: %s\n", apy, payFreq, apyToPayFreq, interestToUser)
+	fmt.Printf("apy: %s, payFreq: %d, apyToPayFreq: %s, interest_to_user: %s interest_to_reserve %s\n", apy, payFreq, apyToPayFreq, interestToUser, interestToReserve)
 	return
 
 }
