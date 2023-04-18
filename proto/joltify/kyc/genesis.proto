@@ -1,5 +1,5 @@
 syntax = "proto3";
-package joltifyfinance.joltify_lending.kyc;
+package joltify.kyc;
 
 import "gogoproto/gogo.proto";
 import "joltify/kyc/params.proto";

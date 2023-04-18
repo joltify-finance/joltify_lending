@@ -12,13 +12,13 @@ import (
 // RegisterLegacyAminoCodec registers all the necessary types and interfaces for the
 // governance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgPlaceBid{}, "auction/MsgPlaceBid", nil)
+	cdc.RegisterConcrete(&MsgPlaceBid{}, "/joltify.third_party.auction.v1beta1.MsgPlaceBid", nil)
 
 	cdc.RegisterInterface((*GenesisAuction)(nil), nil)
 	cdc.RegisterInterface((*Auction)(nil), nil)
-	cdc.RegisterConcrete(&SurplusAuction{}, "auction/SurplusAuction", nil)
-	cdc.RegisterConcrete(&DebtAuction{}, "auction/DebtAuction", nil)
-	cdc.RegisterConcrete(&CollateralAuction{}, "auction/CollateralAuction", nil)
+	cdc.RegisterConcrete(&SurplusAuction{}, "/joltify.third_party.auction.v1beta1.SurplusAuction", nil)
+	cdc.RegisterConcrete(&DebtAuction{}, "/joltify.third_party.auction.v1beta1.DebtAuction", nil)
+	cdc.RegisterConcrete(&CollateralAuction{}, "/joltify.third_party.auction.v1beta1.CollateralAuction", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

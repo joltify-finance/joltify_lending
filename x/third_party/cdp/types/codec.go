@@ -12,12 +12,12 @@ import (
 // RegisterLegacyAminoCodec registers all the necessary types and interfaces for the
 // governance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgCreateCDP{}, "cdp/MsgCreateCDP", nil)
-	cdc.RegisterConcrete(&MsgDeposit{}, "cdp/MsgDeposit", nil)
-	cdc.RegisterConcrete(&MsgWithdraw{}, "cdp/MsgWithdraw", nil)
-	cdc.RegisterConcrete(&MsgDrawDebt{}, "cdp/MsgDrawDebt", nil)
-	cdc.RegisterConcrete(&MsgRepayDebt{}, "cdp/MsgRepayDebt", nil)
-	cdc.RegisterConcrete(&MsgLiquidate{}, "cdp/MsgLiquidate", nil)
+	cdc.RegisterConcrete(&MsgCreateCDP{}, "/joltify.third_party.cdp.v1beta1.MsgCreateCDP", nil)
+	cdc.RegisterConcrete(&MsgDeposit{}, "/joltify.third_party.cdp.v1beta1.MsgDeposit", nil)
+	cdc.RegisterConcrete(&MsgWithdraw{}, "/joltify.third_party.cdp.v1beta1.MsgWithdraw", nil)
+	cdc.RegisterConcrete(&MsgDrawDebt{}, "/joltify.third_party.cdp.v1beta1.MsgDrawDebt", nil)
+	cdc.RegisterConcrete(&MsgRepayDebt{}, "/joltify.third_party.cdp.v1beta1.MsgRepayDebt", nil)
+	cdc.RegisterConcrete(&MsgLiquidate{}, "/joltify.third_party.cdp.v1beta1.MsgLiquidate", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

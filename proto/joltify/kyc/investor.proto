@@ -1,5 +1,5 @@
 syntax = "proto3";
-package joltifyfinance.joltify_lending.kyc;
+package joltify.kyc;
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/kyc/types";
 

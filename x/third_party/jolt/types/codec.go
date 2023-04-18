@@ -10,11 +10,11 @@ import (
 )
 
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgDeposit{}, "jolt/MsgDeposit", nil)
-	cdc.RegisterConcrete(&MsgWithdraw{}, "jolt/MsgWithdraw", nil)
-	cdc.RegisterConcrete(&MsgBorrow{}, "jolt/MsgBorrow", nil)
-	cdc.RegisterConcrete(&MsgLiquidate{}, "jolt/MsgLiquidate", nil)
-	cdc.RegisterConcrete(&MsgRepay{}, "jolt/MsgRepay", nil)
+	cdc.RegisterConcrete(&MsgDeposit{}, "/joltify.third_party.jolt.v1beta1.MsgDeposit", nil)
+	cdc.RegisterConcrete(&MsgWithdraw{}, "/joltify.third_party.jolt.v1beta1.MsgWithdraw", nil)
+	cdc.RegisterConcrete(&MsgBorrow{}, "/joltify.third_party.jolt.v1beta1.MsgBorrow", nil)
+	cdc.RegisterConcrete(&MsgLiquidate{}, "/joltify.third_party.jolt.v1beta1.MsgLiquidate", nil)
+	cdc.RegisterConcrete(&MsgRepay{}, "/joltify.third_party.jolt.v1beta1.MsgRepay", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {
