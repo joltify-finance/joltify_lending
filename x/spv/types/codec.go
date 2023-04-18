@@ -27,13 +27,13 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
-	//registry.RegisterInterface(
-	//	"joltify.spv.BorrowInterest",
-	//	(*NFTBorrowInterest)(nil),
-	//	(*NftInfo)(nil),
-	//)
+	registry.RegisterInterface(
+		"joltify.spv.BorrowInterest",
+		(*NFTBorrowInterest)(nil),
+		(*NftInfo)(nil),
+	)
 
-	//registry.RegisterImplementations((*NFTBorrowInterest)(nil), &BorrowInterest{})
+	registry.RegisterImplementations((*NFTBorrowInterest)(nil), &BorrowInterest{})
 
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgCreatePool{},
