@@ -17,6 +17,7 @@ import (
 
 func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, error) {
 	var payment, paymentToInvestor sdk.Coin
+	var thisPaymentTime time.Time
 	// as the payment canot be happed at exact payfreq time, so we need to round down to the latest payment time
 	//currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 	currentTime := ctx.BlockTime()
@@ -30,7 +31,6 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	delta := currentTime.Sub(latestPaymentTime).Seconds()
 	denom := interestData.Payments[0].PaymentAmount.Denom
 	lastBorrow := interestData.BorrowDetails[len(interestData.BorrowDetails)-1].BorrowedAmount
-	var thisPaymentTime time.Time
 	if int32(delta) >= interestData.PayFreq*BASE {
 		// we need to pay the whole month
 		freqRatio := interestData.MonthlyRatio
@@ -50,7 +50,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 			k.SetReserve(ctx, pReserve)
 		}
 		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
-		payment = sdk.NewCoin(denom, paymentAmount)
+		payment = sdk.NewCoin(denom, paymentAmountUsd)
 		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	} else {
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
@@ -214,7 +214,9 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return &types.MsgRepayInterestResponse{}, nil
 	}
 
-	leftover := poolInfo.EscrowInterestAmount.Add(msg.Token.Amount)
+	//leftover := poolInfo.EscrowInterestAmount.Add(msg.Token.Amount)
+	ownInterest := poolInfo.EscrowInterestAmount.Abs()
+	leftover := msg.Token.Amount.Sub(ownInterest)
 	if leftover.IsNegative() {
 		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay all the outstanding interest")
 	}
@@ -236,8 +238,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 	}
 
 	poolInfo.InterestPrepayment = &prepayment
-
-	totalGetFromSPV := poolInfo.EscrowPrincipalAmount.Amount.Abs().Add(interestReceived)
+	totalGetFromSPV := ownInterest.Add(interestReceived)
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{sdk.NewCoin(msg.Token.Denom, totalGetFromSPV)})
 	if err != nil {

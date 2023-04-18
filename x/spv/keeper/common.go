@@ -61,7 +61,6 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 			// todo there may be the case that because of the truncate, the total payment is larger than the interest paid to investors
 			// fixme we should NEVER calculate the interest after the pool status is in luquidation as the user ratio is not correct any more
 			interestUsd := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
-
 			totalInterestUsd = totalInterestUsd.Add(interestUsd)
 			latestTimeStamp = eachPayment.PaymentTime
 			lastPaymentSet = true
@@ -360,7 +359,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		panic(err)
 	}
 
-	err = k.processEachWithdrawReq(ctx, depositor, true)
+	err = k.processEachWithdrawReq(ctx, depositor, true, poolInfo.PrincipalPaymentExchangeRatio)
 	if err != nil {
 		ctx.Logger().Error("fail to pay partial principal", err.Error())
 		return sdk.ZeroInt(), err
@@ -368,9 +367,8 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 
 	exchange := poolInfo.PrincipalPaymentExchangeRatio
 	usdLocked := outboundConvertToUSD(depositor.LockedAmount.Amount, exchange)
-
-	totalPaidAmount := usdLocked.Add(interest)
-	totalPaidAmount = totalPaidAmount.Add(depositor.WithdrawalAmount.Amount)
+	totalPaidAmount := usdLocked.Add(depositor.WithdrawalAmount.Amount)
+	totalPaidAmount = totalPaidAmount.Add(interest)
 	totalPaidAmount = totalPaidAmount.Add(depositor.PendingInterest.Amount)
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
@@ -407,7 +405,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	}
 	depositor.DepositType = types.DepositorInfo_deactive
 	depositor.LinkedNFT = []string{}
-	depositor.WithdrawalAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	depositor.WithdrawalAmount = sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.ZeroInt())
 	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
 	k.DelDepositor(ctx, depositor)
 	k.SetDepositorHistory(ctx, depositor)

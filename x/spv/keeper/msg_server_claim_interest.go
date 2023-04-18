@@ -60,7 +60,7 @@ func (k Keeper) claimInterest(ctx sdk.Context, depositor *types.DepositorInfo) (
 		return sdk.Coin{}, err
 	}
 
-	claimed := sdk.NewCoin(depositor.LockedAmount.Denom, totalInterest)
+	claimed := sdk.NewCoin(depositor.WithdrawalAmount.Denom, totalInterest)
 
 	// we add the pending one
 	claimed = claimed.Add(depositor.PendingInterest)
