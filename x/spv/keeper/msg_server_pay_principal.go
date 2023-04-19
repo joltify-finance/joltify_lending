@@ -25,7 +25,8 @@ func (k msgServer) calculateTotalDueInterest(ctx sdk.Context, poolInfo types.Poo
 		if err != nil {
 			return sdkmath.ZeroInt(), coserrors.Wrapf(err, "invalid unmarshal of the borrow interest")
 		}
-		paymentAmount := borrowInterest.MonthlyRatio.Mul(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+		borrow := borrowInterest.BorrowDetails[len(borrowInterest.BorrowDetails)-1].BorrowedAmount
+		paymentAmount := borrowInterest.MonthlyRatio.Mul(sdk.NewDecFromInt(borrow.Amount)).TruncateInt()
 		totalAmount = totalAmount.Add(paymentAmount)
 	}
 	return totalAmount, nil
@@ -107,7 +108,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 
 		return &types.MsgPayPrincipalResponse{}, nil
 	}
-	return &types.MsgPayPrincipalResponse{}, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal is not fully paid. you have paid %v and borrowed %v", principalEscrowAmountLocal, poolInfo.BorrowedAmount)
+	return &types.MsgPayPrincipalResponse{}, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal is not fully paid. you have paid %v and borrowed %v", principalEscrowAmountLocal, outboundConvertToUSD(poolInfo.BorrowedAmount.Amount, ratio))
 
 }
 
@@ -137,7 +138,7 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 	}
 
 	if poolInfo.InterestPrepayment == nil {
-		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool, at least %v is needed")
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "not enough interest to be paid to close the pool")
 	}
 
 	if poolInfo.EscrowInterestAmount.IsNegative() {
@@ -150,7 +151,7 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 
 	condition := currentTime.After(secondTimeStampBeforeProjectDueDate) && currentTime.Before(dueDate)
 	if !condition {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal can only  be paid between %v <-> %v", secondTimeStampBeforeProjectDueDate, dueDate)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal can only  be paid between %v <-> %v (current time %v)", secondTimeStampBeforeProjectDueDate, dueDate, currentTime)
 	}
 
 	if msg.Token.Denom != poolInfo.TargetAmount.Denom {

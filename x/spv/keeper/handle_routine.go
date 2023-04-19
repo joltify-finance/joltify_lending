@@ -104,7 +104,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 		}
 
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, totalLockedAmount), false, nil, sdk.ZeroInt())
+		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, usdTotalLocked), false, nil, sdk.ZeroInt())
 		if err != nil {
 			panic(err)
 		}
@@ -216,10 +216,14 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	}
 	token := poolInfo.EscrowPrincipalAmount
 
-	exchangeRatio := poolInfo.PrincipalPaymentExchangeRatio
-	usdWithdrawalTotal := exchangeRatio.MulInt(poolInfo.WithdrawProposalAmount.Amount).TruncateInt()
+	exchangeRatio := poolInfo.PrincipalWithdrawalRequestPaymentRatio
+	if exchangeRatio.IsZero() {
+		ctx.Logger().Info("exchange ratio is zero, cannot process partial principal payment")
+		return false
+	}
+	usdWithdrawalTotal := sdk.NewCoin(poolInfo.TargetAmount.Denom, exchangeRatio.MulInt(poolInfo.WithdrawProposalAmount.Amount).TruncateInt())
 
-	if token.Amount.LT(usdWithdrawalTotal) {
+	if token.IsLT(usdWithdrawalTotal) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
 		if ctx.BlockTime().After(poolInfo.ProjectDueTime.Add(time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds))) {
 			poolInfo.PoolStatus = types.PoolInfo_Liquidation
@@ -246,7 +250,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		}
 
 		depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
-		usdWithdrawal := exchangeRatio.MulInt(depositor.LockedAmount.Amount).TruncateInt()
+		usdWithdrawal := sdk.NewDecFromInt(depositor.LockedAmount.Amount).Mul(exchangeRatio).TruncateInt()
 		total = total.Add(usdWithdrawal)
 		depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(usdWithdrawal)
 		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
@@ -271,14 +275,14 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	}
 
 	depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
-	usdAmount := usdWithdrawalTotal.Sub(total)
-	depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(usdAmount)
+	usdAmount := usdWithdrawalTotal.SubAmount(total)
+	depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(usdAmount)
 	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
 	depositor.DepositType = types.DepositorInfo_deposit_close
 	k.SetDepositor(ctx, depositor)
 
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.Sub(poolInfo.WithdrawProposalAmount)
-	returnToSPV := poolInfo.EscrowPrincipalAmount.SubAmount(usdWithdrawalTotal)
+	returnToSPV := poolInfo.EscrowPrincipalAmount.Sub(usdWithdrawalTotal)
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(returnToSPV))
 	if err != nil {
 		ctx.Logger().Error("fail to send the leftover back to spv ", "err=", err.Error())

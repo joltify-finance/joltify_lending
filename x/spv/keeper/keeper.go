@@ -2,7 +2,7 @@ package keeper
 
 import (
 	"fmt"
-	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -23,7 +23,7 @@ type (
 		bankKeeper      types.BankKeeper
 		accKeeper       types.AccountKeeper
 		nftKeeper       types.NFTKeeper
-		priceFeedKeeper pricefeedkeeper.Keeper
+		priceFeedKeeper types.PriceFeedKeeper
 	}
 )
 
@@ -36,7 +36,7 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	accKeeper types.AccountKeeper,
 	nftKeeper types.NFTKeeper,
-	pricefeedkeeper pricefeedkeeper.Keeper,
+	pricefeedkeeper types.PriceFeedKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -184,6 +184,23 @@ func (k Keeper) SetDepositorHistory(ctx sdk.Context, depositor types.DepositorIn
 	}
 	key := append(depositor.DepositorAddress.Bytes(), timeBytes...)
 	depositorPoolStore.Set(key, bz)
+}
+
+// GetDepositorHistory sets the depositor to history store
+func (k Keeper) GetDepositorHistory(ctx sdk.Context, timeStamp time.Time, poolIndex string, addr sdk.AccAddress) (types.DepositorInfo, bool) {
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositorHistory+poolIndex))
+	var depositor types.DepositorInfo
+	timeBytes, err := timeStamp.MarshalBinary()
+	if err != nil {
+		panic(err)
+	}
+	key := append(addr.Bytes(), timeBytes...)
+	bz := depositorPoolStore.Get(key)
+	if bz == nil {
+		return depositor, false
+	}
+	k.cdc.MustUnmarshal(bz, &depositor)
+	return depositor, true
 }
 
 // SetDepositor sets the depositor

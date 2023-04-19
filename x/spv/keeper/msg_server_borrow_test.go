@@ -38,7 +38,6 @@ func (suite *addBorrowSuite) SetupTest() {
 
 	app, k, nftKeeper, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
-
 	suite.ctx = ctx
 	suite.keeper = k
 	suite.nftKeeper = nftKeeper
@@ -169,6 +168,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	suite.Require().True(found)
 	poolInfo.CurrentPoolTotalBorrowCounter = 0
 	poolInfo.PoolTotalBorrowLimit = 10
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(1*1e6))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	depositorPool := resp.PoolIndex[0]
@@ -220,7 +220,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 		InvestorId:       "2",
 		DepositorAddress: creatorAddr1,
 		PoolIndex:        depositorPool,
-		LockedAmount:     sdk.NewCoin("ausdc", sdk.ZeroInt()),
+		LockedAmount:     sdk.NewCoin("aud-ausdc", sdk.ZeroInt()),
 		WithdrawalAmount: depositAmount,
 		LinkedNFT:        []string{},
 	}
@@ -263,20 +263,21 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	poolNow, found := suite.keeper.GetPools(suite.ctx, depositorPool)
 	suite.Require().True(found)
-	suite.Require().True(poolNow.BorrowedAmount.IsEqual(borrow.BorrowAmount))
-	suite.Require().True(totalBorrowable.Sub(borrow.BorrowAmount).IsEqual(poolNow.UsableAmount))
+
+	suite.Require().True(checkValueEqualWithExchange(poolNow.BorrowedAmount.Amount, borrow.BorrowAmount.Amount))
+	suite.Require().True(checkValueWithRangeTwo(totalBorrowable.Amount, poolNow.UsableAmount.Amount.Add(borrow.BorrowAmount.Amount)))
 
 	borrowedFromUser1 := sdk.NewDecFromInt(borrow.BorrowAmount.Amount).Mul(user1Ratio).TruncateInt()
 	borrowedFromUser2 := borrow.BorrowAmount.Amount.Sub(borrowedFromUser1)
 
 	borrowedFromUser2Ratio := sdk.NewDecFromInt(borrow.BorrowAmount.Amount).Mul(user2Ratio).TruncateInt()
 
-	suite.Require().True(p1.LockedAmount.Amount.Equal(borrowedFromUser1))
-	suite.Require().True(p2.LockedAmount.Amount.Equal(borrowedFromUser2))
-	suite.Require().True(borrowedFromUser2Ratio.Equal(borrowedFromUser2))
+	suite.Require().True(checkValueEqualWithExchange(p1.LockedAmount.Amount, borrowedFromUser1))
+	suite.Require().True(checkValueEqualWithExchange(p2.LockedAmount.Amount, borrowedFromUser2))
+	suite.Require().True(checkValueWithRangeTwo(borrowedFromUser2Ratio, borrowedFromUser2))
 
 	// total amount shoube be locked+withdrawable
-	suite.Require().True(p1.LockedAmount.Add(p1.WithdrawalAmount).IsEqual(msgDepositUser1.Token.Add(msgDepositUser1.Token)))
+	suite.Require().True(p1.WithdrawalAmount.AddAmount(borrowedFromUser1).IsEqual(msgDepositUser1.Token.Add(msgDepositUser1.Token)))
 
 	nftUser1 := p1.LinkedNFT[0]
 	nftUser2 := p2.LinkedNFT[0]
@@ -292,7 +293,8 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	}
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
-	suite.True(lastBorrow.IsEqual(borrow.BorrowAmount))
+	suite.True(checkValueEqualWithExchange(lastBorrow.Amount, borrow.BorrowAmount.Amount))
+	fmt.Printf(">>>>>>apy %v\n", borrowClassInfo.Apy)
 	suite.Require().True(borrowClassInfo.Apy.Equal(sdk.NewDecWithPrec(15, 2)))
 
 	// nft ID is the hash(nft class ID, investorWallet)
@@ -317,7 +319,8 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	lastBorrow = borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
 	ration1 := sdk.NewDecFromInt(nftInfo.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.Amount))
 
-	suite.Require().True(ration1.Equal(user1Ratio))
+	fmt.Printf(">>>>%v===%v\n", ration1, user1Ratio)
+	suite.Require().True(ration1.Sub(user1Ratio).Abs().LTE(sdk.MustNewDecFromStr("0.0001")))
 
 	// now, user 2 deposits more money and then, the spv borrow more. the ratio should  be changed.
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
@@ -348,7 +351,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	poolNow, found = suite.keeper.GetPools(suite.ctx, depositorPool)
 	suite.Require().True(found)
 
-	suite.Require().True(poolNow.BorrowedAmount.Equal(borrow.BorrowAmount.AddAmount(previousAmountBorrowed.Amount)))
+	suite.Require().True(checkValueEqualWithExchange(poolNow.BorrowedAmount.Amount, borrow.BorrowAmount.AddAmount(convertBorrowToUsd(previousAmountBorrowed.Amount)).Amount))
 
 	suite.Require().True(poolNow.UsableAmount.Equal(previousBorrowAble.Add(msgDepositUser2.Token).Sub(borrow.BorrowAmount)))
 
@@ -362,10 +365,10 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	lockedThistime := p1.LockedAmount.Sub(beforeLockedAmount)
 	shouldLocked := newuser1Ratio1.Mul(sdk.NewDecFromInt(borrow.BorrowAmount.Amount)).TruncateInt()
-	suite.Require().True(lockedThistime.Amount.Equal(shouldLocked))
+	suite.Require().True(checkValueEqualWithExchange(lockedThistime.Amount, shouldLocked))
 
 	// we check the total deposit of the user1 is correct
-	suite.Require().True(p1.LockedAmount.Add(p1.WithdrawalAmount).IsEqual(msgDepositUser1.Token.Add(msgDepositUser1.Token)))
+	suite.Require().True(checkValueWithRangeTwo(convertBorrowToUsd(p1.LockedAmount.Amount).Add(p1.WithdrawalAmount.Amount), msgDepositUser1.Token.Add(msgDepositUser1.Token).Amount))
 
 	nft2User1 := p1.LinkedNFT[1]
 	nft2User2 := p2.LinkedNFT[1]
@@ -380,7 +383,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	}
 
 	lastBorrow = borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
-	suite.True(lastBorrow.IsEqual(borrow.BorrowAmount))
+	suite.True(checkValueEqualWithExchange(lastBorrow.Amount, borrow.BorrowAmount.Amount))
 
 	//nft ID is the hash(nft class ID, investorWallet)
 	indexHash = crypto.Keccak256Hash([]byte(nftClassID), p1.DepositorAddress)
@@ -401,6 +404,5 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	}
 
 	// this calculates the ratio that user1 contribute to this borrow
-	suite.Require().True(nftInfo.Borrowed.Amount.Equal(shouldLocked))
-
+	suite.Require().True(checkValueEqualWithExchange(nftInfo.Borrowed.Amount, shouldLocked))
 }

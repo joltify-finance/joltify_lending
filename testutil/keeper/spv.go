@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"testing"
 
+	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
+
 	"github.com/gogo/protobuf/proto"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -66,6 +68,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		ProjectLength:       31536000, //1 year
 		PayFreq:             "15768000",
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
+		MarketId:            "aud:usd",
 		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100000000)),
 	}
 
@@ -88,6 +91,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		ProjectLength:       31536000, //1 year
 		PayFreq:             "15768000",
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
+		MarketId:            "aud:usd",
 		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e12)),
 	}
 
@@ -99,6 +103,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		ProjectLength:       oneYear, //1 year
 		PayFreq:             strconv.Itoa(oneMonth),
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
+		MarketId:            "aud:usd",
 		ProjectTargetAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
 	}
 
@@ -113,6 +118,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		ProjectLength:       oneYear, //1 year
 		PayFreq:             strconv.Itoa(oneWeek),
 		BaseApy:             sdk.NewDecWithPrec(10, 2),
+		MarketId:            "aud:usd",
 		ProjectTargetAmount: sdk.NewCoin("ausdc", projectTargetAmount),
 	}
 
@@ -279,6 +285,12 @@ func (m mockbankKeeper) BurnCoins(ctx sdk.Context, name string, amt sdk.Coins) e
 	panic("implement me")
 }
 
+type mockPriceFeedKeeper struct{}
+
+func (m mockPriceFeedKeeper) GetCurrentPrice(ctx sdk.Context, marketID string) (types2.CurrentPrice, error) {
+	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdk.MustNewDecFromStr("0.7")}, nil
+}
+
 func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
@@ -305,6 +317,7 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, sdk.Context) {
 		nfts:            make(map[string]*nft.NFT),
 		nftsWithClassID: make(map[string]*nft.NFT),
 	}
+	priceFeedKeeper := mockPriceFeedKeeper{}
 	bankKeeper := mockbankKeeper{make(map[string]sdk.Coins)}
 
 	k := keeper.NewKeeper(
@@ -316,6 +329,7 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, sdk.Context) {
 		bankKeeper,
 		accKeeper,
 		nftKeeper,
+		priceFeedKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())

@@ -4,25 +4,25 @@ import (
 	"testing"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/stretchr/testify/require"
 	"github.com/joltify-finance/joltify_lending/testutil/sample"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMsgSubmitWitdrawProposal_ValidateBasic(t *testing.T) {
 	tests := []struct {
 		name string
-		msg  MsgSubmitWitdrawProposal
+		msg  MsgSubmitWithdrawProposal
 		err  error
 	}{
 		{
 			name: "invalid address",
-			msg: MsgSubmitWitdrawProposal{
+			msg: MsgSubmitWithdrawProposal{
 				Creator: "invalid_address",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
-			msg: MsgSubmitWitdrawProposal{
+			msg: MsgSubmitWithdrawProposal{
 				Creator: sample.AccAddress(),
 			},
 		},

@@ -46,17 +46,21 @@ func TestMsgRepayInterest(t *testing.T) {
 		Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
 	}
 	_, err = app.RepayInterest(ctx, &reqRePayInterest)
-	require.NoError(t, err)
+	require.ErrorContains(t, err, "borrow amount is zero, no interest to be paid or interest paid is zero")
 
 	poolInfo, found := k.GetPools(ctx, poolIndex[0])
 	require.True(t, found)
 	poolInfo.PoolStatus = types.PoolInfo_FROZEN
+	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdk.NewInt(100))
+	k.SetPool(ctx, poolInfo)
 	_, err = app.RepayInterest(ctx, &reqRePayInterest)
-	require.NoError(t, err, "pool is not active")
+	require.ErrorContains(t, err, "pool is not active")
 
 	poolInfo.PoolStatus = types.PoolInfo_INACTIVE
+	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdk.NewInt(100))
+	k.SetPool(ctx, poolInfo)
 	_, err = app.RepayInterest(ctx, &reqRePayInterest)
-	require.NoError(t, err, "pool is not active")
+	require.ErrorContains(t, err, "pool is not active")
 
 }
 
@@ -154,7 +158,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 
 	paymentTime := borrowInterest.Payments[1].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), interestOneYear.String())
+	require.True(t, checkValueEqualWithExchange(interestOneYear, borrowInterest.Payments[1].PaymentAmount.Amount))
 
 	// at the middle of the month, we borrow
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 15 * 24 * 3600))
@@ -175,7 +179,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	}
 	paymentTime = borrowInterest.Payments[2].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*2), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), interestOneYear.String())
+	require.True(t, checkValueEqualWithExchange(interestOneYear, borrowInterest.Payments[1].PaymentAmount.Amount))
 
 	b2 := poolInfo.PoolNFTIds[1]
 	nclass, _ = nftKeeper.GetClass(ctx, b2)
@@ -206,7 +210,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 
 	paymentTime = borrowInterest.Payments[1].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*2), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), toInvestors.String())
+	require.True(t, checkValueEqualWithExchange(toInvestors, borrowInterest.Payments[1].PaymentAmount.Amount))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 30 * 24 * 3600))
 	err = k.HandleInterest(ctx, &samplePool)
@@ -218,7 +222,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 
 	paymentTime = borrowInterest.Payments[3].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*3), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[3].PaymentAmount.Amount.String(), interestOneYear.String())
+	require.True(t, checkValueEqualWithExchange(interestOneYear, borrowInterest.Payments[3].PaymentAmount.Amount))
 
 	nclass2, _ := nftKeeper.GetClass(ctx, b2)
 	err = proto.Unmarshal(nclass2.Data.Value, &borrowInterest)
@@ -226,7 +230,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 
 	paymentTime = borrowInterest.Payments[2].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*3), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[2].PaymentAmount.Amount.String(), interestOneYear.String())
+	require.True(t, checkValueEqualWithExchange(interestOneYear, borrowInterest.Payments[2].PaymentAmount.Amount))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(24*3600*13)))
 	thirdBorrowTime := ctx.BlockTime()
@@ -254,7 +258,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 
 	paymentTime = borrowInterest.Payments[1].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*4), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[1].PaymentAmount.Amount.String(), toInvestors.String())
+	require.True(t, checkValueEqualWithExchange(toInvestors, borrowInterest.Payments[1].PaymentAmount.Amount))
 
 	nclass2, _ = nftKeeper.GetClass(ctx, b2)
 	err = proto.Unmarshal(nclass2.Data.Value, &borrowInterest)
@@ -263,7 +267,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	}
 	paymentTime = borrowInterest.Payments[3].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*4), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[3].PaymentAmount.Amount.String(), interestOneYear.String())
+	require.True(t, checkValueEqualWithExchange(interestOneYear, borrowInterest.Payments[3].PaymentAmount.Amount))
 
 	nclass1, _ = nftKeeper.GetClass(ctx, b1)
 	err = proto.Unmarshal(nclass1.Data.Value, &borrowInterest)
@@ -272,6 +276,6 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	}
 	paymentTime = borrowInterest.Payments[4].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*4), paymentTime)
-	require.EqualValues(t, borrowInterest.Payments[4].PaymentAmount.Amount.String(), interestOneYear.String())
+	require.True(t, checkValueEqualWithExchange(interestOneYear, borrowInterest.Payments[4].PaymentAmount.Amount))
 
 }

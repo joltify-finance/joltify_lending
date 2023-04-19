@@ -112,8 +112,11 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger than target")
 	}
 
-	var indexHashResp []string
+	indexHashResp := make([]string, 2)
 	var typePrefix string
+
+	// sort the pool and returned otherwise the test may fail as it assume the pool comes with senior first
+
 	for poolType, amount := range poolsInfoAmount {
 
 		poolApy := poolsInfoAPY[poolType]
@@ -130,6 +133,12 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
 
 		indexHashResp = append(indexHashResp, indexHash.Hex())
+		if poolType == "junior" {
+			indexHashResp[0] = indexHash.Hex()
+		}
+		if poolType == "senior" {
+			indexHashResp[1] = indexHash.Hex()
+		}
 		_, found := k.GetPools(ctx, indexHash.Hex())
 		if found {
 			return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
