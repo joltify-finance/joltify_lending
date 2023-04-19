@@ -103,7 +103,7 @@ func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*t
 		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
-	if msg.Amount.Denom != poolInfo.BorrowedAmount.Denom {
+	if msg.Amount.Denom != poolInfo.TargetAmount.Denom {
 		return nil, coserrors.Wrapf(types.ErrInconsistencyToken, "the token is not the same as the borrowed token %v", msg.Amount.Denom)
 	}
 

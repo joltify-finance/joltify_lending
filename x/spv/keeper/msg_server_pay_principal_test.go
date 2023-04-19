@@ -79,10 +79,9 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	req := types.MsgPayPrincipal{
-		Creator:       "invalid",
-		PoolIndex:     suite.investorPool,
-		Token:         sdk.NewCoin("abc", sdk.OneInt()),
-		ExchangeRatio: "1",
+		Creator:   "invalid",
+		PoolIndex: suite.investorPool,
+		Token:     sdk.NewCoin("abc", sdk.OneInt()),
 	}
 
 	_, err := suite.app.PayPrincipal(suite.ctx, &req)
@@ -116,7 +115,17 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	suite.Require().True(found)
 	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(211))
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
-	suite.Require().ErrorContains(err, "you must pay exact full principal")
+	suite.Require().ErrorContains(err, "only pool owner can pay the principal")
+
+	req.Creator = "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0"
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().ErrorContains(err, "you need to pay interest firstly")
+
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.2e5))})
+
+	req.Creator = "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0"
+	_, err = suite.app.PayPrincipal(suite.ctx, &req)
+	suite.Require().ErrorContains(err, "principal is not fully paid")
 
 	suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.2e5))})
 	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(12e4))

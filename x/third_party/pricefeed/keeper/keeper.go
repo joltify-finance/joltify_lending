@@ -16,6 +16,17 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
+//// Keeper struct for pricefeed module
+//type Keeper interface {
+//
+//	// key used to access the stores from Context
+//	key storetypes.StoreKey
+//// Codec for binary encoding/decoding
+//cdc codec.Codec
+//// The reference to the Paramstore to get and set pricefeed specific params
+//paramSubspace paramtypes.Subspace
+//}
+
 // Keeper struct for pricefeed module
 type Keeper struct {
 	// key used to access the stores from Context

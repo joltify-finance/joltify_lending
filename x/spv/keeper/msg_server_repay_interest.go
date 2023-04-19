@@ -142,18 +142,18 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 	return totalPayment, nil
 }
 
-func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdk.Dec, error) {
+func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdk.Dec, error) {
 
 	paymentAmount, err := k.calculateTotalDueInterest(ctx, poolInfo)
 	if err != nil {
-		return 0, sdkmath.ZeroInt(), sdk.ZeroDec(), err
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err
 	}
 	usdEachMonth, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, marketId, paymentAmount)
 	if err != nil {
-		return 0, sdkmath.ZeroInt(), sdk.ZeroDec(), err
+		return 0, sdkmath.ZeroInt(), sdk.ZeroInt(), sdk.ZeroDec(), err
 	}
 	counter := totalPaid.Quo(usdEachMonth)
-	return int32(counter.Int64()), usdEachMonth.Mul(counter), ratio, nil
+	return int32(counter.Int64()), usdEachMonth.Mul(counter), usdEachMonth, ratio, nil
 }
 
 func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
@@ -188,13 +188,13 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 
 		a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 		marketID := denomConvertToMarketID(a)
-		counter, interestReceived, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, msg.Token.Amount)
+		counter, interestReceived, eachMonth, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, msg.Token.Amount)
 		if err != nil {
 			return nil, coserrors.Wrapf(err, "calculate payment month failed")
 		}
 
 		if counter < 1 {
-			return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay at least one interest cycle")
+			return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay at least one interest cycle (%v)", eachMonth)
 		}
 
 		poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Add(interestReceived)
@@ -223,13 +223,13 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 	marketID := denomConvertToMarketID(a)
-	counter, interestReceived, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, leftover)
+	counter, interestReceived, eachMonthPayment, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, leftover)
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "calculate payment month failed")
 	}
 
 	if counter < 1 {
-		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay at least one interest cycle")
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay at least one interest cycle (%v)", eachMonthPayment)
 	}
 	poolInfo.EscrowInterestAmount = interestReceived
 	prepayment := types.InterestPrepayment{

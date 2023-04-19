@@ -43,5 +43,5 @@ func (k Keeper) ClaimableInterest(goCtx context.Context, req *types.QueryClaimab
 
 	totalInterest = totalInterest.Add(depositor.PendingInterest.Amount)
 
-	return &types.QueryClaimableInterestResponse{ClaimableInterestAmount: sdk.NewCoin(poolInfo.BorrowedAmount.Denom, totalInterest)}, nil
+	return &types.QueryClaimableInterestResponse{ClaimableInterestAmount: sdk.NewCoin(poolInfo.TargetAmount.Denom, totalInterest)}, nil
 }

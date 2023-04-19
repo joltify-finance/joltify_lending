@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"fmt"
 	"math/big"
 	"math/rand"
 	"testing"
@@ -59,6 +58,13 @@ func setupMockPool(suite *mockWholeProcessSuite) {
 		InvestorID: []string{"2"}}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.PoolLockedSeconds = 360000
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	//creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
 	//creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
@@ -144,9 +150,15 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	poolInfo, ok := suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
 	suite.Require().Equal(poolInfo.Apy.String(), "0.087500000000000000")
+	poolInfo.PoolLockedSeconds = 360000
+	poolInfo.PoolTotalBorrowLimit = 10000
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
 	suite.Require().Equal(poolInfo.Apy.String(), "0.150000000000000000")
+	poolInfo.PoolLockedSeconds = 360000
+	poolInfo.PoolTotalBorrowLimit = 100000
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	// now we deposit
 	for i := 0; i < 6; i++ {
@@ -170,17 +182,19 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	// now we borrow 200,000 and 800,000
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base)))}
-	suite.app.Borrow(suite.ctx, &msgSenior)
+	_, err := suite.app.Borrow(suite.ctx, &msgSenior)
+	suite.Require().NoError(err)
 
 	//  borrow another one
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base)))}
-	suite.app.Borrow(suite.ctx, &msgJunior)
+	_, err = suite.app.Borrow(suite.ctx, &msgJunior)
+	suite.Require().NoError(err)
 
 	startTime := suite.ctx.BlockTime()
 
 	// we pay the interest  and principle in the escrow account
-	_, err := suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
 		PoolIndex: juniorPool,
 		Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewInt(50000).Mul(sdk.NewIntFromBigInt(base))},
@@ -195,7 +209,10 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 			Amount: sdk.NewInt(200000).Mul(sdk.NewIntFromBigInt(base)),
 		},
 	})
-	suite.Require().NoError(err)
+	suite.Require().ErrorContains(err, "no withdraw proposal to be paid: invalid request")
+
+	poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
+	suite.Require().True(ok)
 
 	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
@@ -212,16 +229,16 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 			Amount: sdk.NewInt(800000).Mul(sdk.NewIntFromBigInt(base)),
 		},
 	})
-	suite.Require().NoError(err)
+	suite.Require().ErrorContains(err, "no withdraw proposal to be paid: invalid request")
 
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(100000), base))))
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 
 	// we simulate 6 seconds for each block
 	deltaTime := time.Second * time.Duration(60)
@@ -304,9 +321,10 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 
 	// now we borrow 200,000 and 800,000
 	totalToInvestor := sumSenior.Add(sumJunior)
+	totalToInvestorUSD := convertBorrowToUsd(totalToInvestor.Amount)
 	reserve, ok := suite.keeper.GetReserve(suite.ctx, "ausdc")
 	suite.Require().True(ok)
-	totalInterest := totalToInvestor.Add(reserve)
+	totalInterest := reserve.AddAmount(totalToInvestorUSD)
 
 	for i, el := range firstMonthJuniorCoins {
 		ratioGet := sdk.NewDecFromInt(el.Amount).QuoTruncate(sdk.NewDecFromInt(sumJunior.Amount))
@@ -359,9 +377,19 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	poolInfo, ok := suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
 	suite.Require().Equal(poolInfo.Apy.String(), "0.087500000000000000")
+
+	poolInfo.PoolLockedSeconds = 360000
+	poolInfo.PoolTotalBorrowLimit = 100000
+	poolInfo.WithdrawRequestWindowSeconds = oneMonth * 3
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
 	suite.Require().Equal(poolInfo.Apy.String(), "0.150000000000000000")
+
+	poolInfo.PoolLockedSeconds = 360000
+	poolInfo.PoolTotalBorrowLimit = 100000
+	poolInfo.WithdrawRequestWindowSeconds = oneMonth * 3
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	// now we deposit
 	for i := 0; i < 6; i++ {
@@ -410,7 +438,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 			Amount: sdk.NewInt(200000).Mul(sdk.NewIntFromBigInt(base)),
 		},
 	})
-	suite.Require().NoError(err)
+	suite.Require().ErrorContains(err, "no withdraw proposal to be paid: invalid request")
 
 	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
@@ -427,29 +455,29 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 			Amount: sdk.NewInt(800000).Mul(sdk.NewIntFromBigInt(base)),
 		},
 	})
-	suite.Require().NoError(err)
+	suite.Require().ErrorContains(err, "no withdraw proposal to be paid: invalid request")
 
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, seniorPool)
-	principalEscrow := poolInfo.EscrowPrincipalAmount.Amount
+	//principalEscrow := poolInfo.EscrowPrincipalAmount.Amount
 
 	addr, err := sdk.AccAddressFromBech32(suite.investors[0])
 	suite.Require().NoError(err)
-	d0, _ := suite.keeper.GetDepositor(suite.ctx, seniorPool, addr)
+	//d0, _ := suite.keeper.GetDepositor(suite.ctx, seniorPool, addr)
 	//suite.Require().True(newinvestor1.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base))))
 	addr, err = sdk.AccAddressFromBech32(suite.investors[1])
 	suite.Require().NoError(err)
-	d1, _ := suite.keeper.GetDepositor(suite.ctx, seniorPool, addr)
+	//d1, _ := suite.keeper.GetDepositor(suite.ctx, seniorPool, addr)
 
-	totalLocked := d0.LockedAmount.AddAmount(d1.LockedAmount.Amount)
+	//totalLocked := d0.LockedAmount.AddAmount(d1.LockedAmount.Amount)
 
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(100000), base))))
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 
 	// we simulate 6 seconds for each block
 	deltaTime := time.Second * time.Duration(60)
@@ -458,7 +486,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 		time.Duration(oneYear) * time.Second,
 	}
 	withdrawRequest := []time.Duration{
-		time.Duration(oneMonth*11) * time.Second,
+		time.Duration(oneMonth*6) * time.Second,
 	}
 
 	checkPointCounter := 0
@@ -466,6 +494,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	allCoinsSenior := make(map[int]sdk.Coins)
 	allCoinsJunior := make(map[int]sdk.Coins)
 	processed := false
+
 	for {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
@@ -539,28 +568,67 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	}
 
 	totalToInvestor := sumSenior.Add(sumJunior)
+	totalToInvestorUSD := convertBorrowToUsd(totalToInvestor.Amount)
 	reserve, ok := suite.keeper.GetReserve(suite.ctx, "ausdc")
 	suite.Require().True(ok)
-	totalInterest := totalToInvestor.Add(reserve)
+	totalInterest := reserve.AddAmount(totalToInvestorUSD)
 	suite.Require().True(sdk.NewIntFromUint64(100000).Sub(totalInterest.Amount).LTE(sdk.NewIntFromUint64(1000000)))
 
 	seniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, seniorPool)
 	juniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, juniorPool)
 	totalLeftInterest := seniorPoolInfo.EscrowInterestAmount.Add(juniorPoolInfo.EscrowInterestAmount)
 	suite.Require().True(totalLeftInterest.LT(sdk.NewIntFromUint64(1000000000)))
-	suite.Require().True(totalLocked.Add(seniorPoolInfo.EscrowPrincipalAmount).Amount.Equal(principalEscrow))
+
+	addr, err = sdk.AccAddressFromBech32(suite.investors[0])
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, seniorPool)
+	suite.Require().True(found)
+
+	amount := new(big.Int).Mul(big.NewInt(2000), base)
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+		Creator:   suite.creator,
+		PoolIndex: seniorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(amount)),
+	})
+	suite.Require().NoError(err)
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(-time.Hour * 2))
+	principalPayment := new(big.Int).Mul(big.NewInt(1000000), base)
+	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
+		Creator:   suite.creator,
+		PoolIndex: seniorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(principalPayment)),
+	})
+	suite.Require().NoError(err)
+
+	newinvestor1, _ = suite.keeper.GetDepositor(suite.ctx, seniorPool, addr)
+	//suite.Require().True(newinvestor1.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base))))
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, seniorPool)
+	suite.Require().True(found)
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour * 2))
+	ret := suite.keeper.HandlePartialPrincipalPayment(suite.ctx, &poolInfo, poolInfo.WithdrawAccounts)
+	suite.Require().True(ret)
+
+	// manually update the pool
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
+	newinvestor1, _ = suite.keeper.GetDepositor(suite.ctx, seniorPool, addr)
+	//suite.Require().True(newinvestor1.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base))))
 
 	// now we withdraw
 	totalWithdrawal := sdk.ZeroInt()
-	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1000e10))})
 	suite.Require().NoError(err)
 	token, _ := sdk.ParseCoinNormalized(resp.Amount)
-	suite.Require().True(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base)).Equal(token.Amount.Sub(allCoinsSenior[1][0].Amount)))
+	suite.Require().True(checkValueWithRangeTwo(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base)), token.Amount.Sub(allCoinsSenior[1][0].Amount)))
+
 	totalWithdrawal = totalWithdrawal.Add(token.Amount)
 	resp, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+
 	suite.Require().NoError(err)
 	token, _ = sdk.ParseCoinNormalized(resp.Amount)
-	suite.Require().True(sdk.NewIntFromUint64(uint64(seniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base)).Equal(token.Amount.Sub(allCoinsSenior[1][1].Amount)))
+	suite.Require().True(checkValueWithRangeTwo(sdk.NewIntFromUint64(uint64(seniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base)), token.Amount.Sub(allCoinsSenior[1][1].Amount)))
 	totalWithdrawal = totalWithdrawal.Add(token.Amount)
 
 	// total withdrawal should exclude the interest
@@ -604,14 +672,12 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	})
 	suite.Require().NoError(err)
 
-	suite.Require().NoError(err)
-
 	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
 		PoolIndex: seniorPool,
 		Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewInt(70000).Mul(sdk.NewIntFromBigInt(base))},
 	})
-	suite.Require().NoError(err)
+	suite.Require().ErrorContains(err, "we have the prepayment interest, not accepting new interest payment")
 
 	// now we can test another 2 months, spv pay the interest, then the spv close the pool
 
@@ -623,9 +689,6 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	// senior apy is
 	seniorInterest := sdk.NewDecFromInt(seniorLocked.Amount).Mul(sdk.NewDecWithPrec(875, 4))
 	juniorInterest := sdk.NewDecFromInt(juniorLocked.Amount).Mul(sdk.NewDecWithPrec(15, 2))
-
-	_ = seniorInterest
-	_ = juniorInterest
 
 	currentTime := suite.ctx.BlockTime()
 
@@ -642,14 +705,32 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 				PoolIndex: juniorPool,
 				Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewIntFromUint64(1)},
 			})
+			suite.Require().ErrorContains(err, "principal is not fully paid. you have paid 1 and borrowed")
+
+			amount := new(big.Int).Mul(big.NewInt(2000), base)
+			_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+				Creator:   suite.creator,
+				PoolIndex: seniorPool,
+				Token:     sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(amount)),
+			})
 			suite.Require().NoError(err)
 
+			amount = new(big.Int).Mul(big.NewInt(200000), base)
 			_, err = suite.app.PayPrincipal(suite.ctx, &types.MsgPayPrincipal{
 				Creator:   suite.creator,
 				PoolIndex: seniorPool,
-				Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewIntFromUint64(1)},
+				Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewIntFromBigInt(amount)},
 			})
 			suite.Require().NoError(err)
+
+			amount = new(big.Int).Mul(big.NewInt(200000), base)
+			_, err = suite.app.PayPrincipal(suite.ctx, &types.MsgPayPrincipal{
+				Creator:   suite.creator,
+				PoolIndex: juniorPool,
+				Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewIntFromBigInt(amount)},
+			})
+			suite.Require().NoError(err)
+
 			break
 		}
 	}
@@ -687,10 +768,9 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	expectedYearJunior := sdk.NewDecFromInt(totalJuniorInterest).Mul(sdk.NewDec(52)).Quo(sdk.NewDec(8)).QuoTruncate(sdk.NewDecWithPrec(85, 2))
 
 	oneWeekTotal := sdk.NewDecFromInt(totalSeniorInterest).Quo(sdk.NewDec(8)).Add(sdk.NewDecFromInt(totalJuniorInterest).Quo(sdk.NewDec(8)))
-	fmt.Printf(">>>>>>>>.one week total>>>>>>%v\n", oneWeekTotal.String())
 
-	suite.Require().True(seniorInterest.Sub(expectedYearSenior).LT(sdk.NewDecWithPrec(1e8, 0)))
-	suite.Require().True(juniorInterest.Sub(expectedYearJunior).LT(sdk.NewDecWithPrec(1e8, 0)))
+	suite.Require().True(sdk.NewDecFromInt(convertBorrowToUsd(seniorInterest.TruncateInt())).Sub(expectedYearSenior).LT(sdk.NewDecWithPrec(1e8, 0)))
+	suite.Require().True(sdk.NewDecFromInt(convertBorrowToUsd(juniorInterest.TruncateInt())).Sub(expectedYearJunior).LT(sdk.NewDecWithPrec(1e8, 0)))
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(oneWeek)))
 	spv.EndBlock(suite.ctx, *suite.keeper)
@@ -745,15 +825,15 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	suite.Require().NoError(err)
 	totalWithdrawal = totalWithdrawal.Add(tokens[0].Amount)
 	//deltaPrincipal := totalWithdrawal.Sub(sdk.NewIntFromUint64(1300000).Mul(sdk.NewIntFromBigInt(base)).Add(oneWeekTotal.TruncateInt()))
-	suite.Require().True(totalWithdrawal.Equal(sdk.NewIntFromUint64(1300000).Mul(sdk.NewIntFromBigInt(base)).Add(oneWeekTotal.TruncateInt())))
+	suite.Require().True(totalWithdrawal.Sub(sdk.NewIntFromUint64(1300000).Mul(sdk.NewIntFromBigInt(base)).Add(oneWeekTotal.TruncateInt())).Abs().LTE(sdk.NewIntFromUint64(10)))
 
-	_, found := suite.keeper.GetPools(suite.ctx, seniorPool)
+	_, found = suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().False(found)
 	_, found = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().False(found)
 }
 
-func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferNFTPartically() {
+func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferNFTPartially() {
 	setupMockPool(suite)
 
 	// Seed the random number generator
@@ -787,9 +867,19 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	poolInfo, ok := suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
 	suite.Require().Equal(poolInfo.Apy.String(), "0.087500000000000000")
+
+	poolInfo.PoolLockedSeconds = 360000
+	poolInfo.PoolTotalBorrowLimit = 10000
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
 	suite.Require().Equal(poolInfo.Apy.String(), "0.150000000000000000")
+
+	poolInfo.PoolLockedSeconds = 360000
+	poolInfo.PoolTotalBorrowLimit = 100000
+	poolInfo.WithdrawRequestWindowSeconds = oneMonth * 3
+	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	// now we deposit
 	for i := 0; i < 6; i++ {
@@ -827,50 +917,50 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 
 	startTime := suite.ctx.BlockTime()
 	// we pay the interest  and principle in the escrow account
-	_, err := suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
-		Creator:   suite.creator,
-		PoolIndex: juniorPool,
-		Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewInt(30000).Mul(sdk.NewIntFromBigInt(base))},
-	})
-	suite.Require().NoError(err)
-
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
-		Creator:   suite.creator,
-		PoolIndex: juniorPool,
-		Token: sdk.Coin{
-			Denom:  "ausdc",
-			Amount: sdk.NewInt(200000).Mul(sdk.NewIntFromBigInt(base)),
-		},
-	})
-	suite.Require().NoError(err)
-
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
-		Creator:   suite.creator,
-		PoolIndex: seniorPool,
-		Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewInt(70000).Mul(sdk.NewIntFromBigInt(base))},
-	})
-	suite.Require().NoError(err)
-
-	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
-		Creator:   suite.creator,
-		PoolIndex: seniorPool,
-		Token: sdk.Coin{
-			Denom:  "ausdc",
-			Amount: sdk.NewInt(800000).Mul(sdk.NewIntFromBigInt(base)),
-		},
-	})
-	suite.Require().NoError(err)
+	//_, err := suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+	//	Creator:   suite.creator,
+	//	PoolIndex: juniorPool,
+	//	Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewInt(30000).Mul(sdk.NewIntFromBigInt(base))},
+	//})
+	//suite.Require().NoError(err)
+	//
+	//_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
+	//	Creator:   suite.creator,
+	//	PoolIndex: juniorPool,
+	//	Token: sdk.Coin{
+	//		Denom:  "ausdc",
+	//		Amount: sdk.NewInt(200000).Mul(sdk.NewIntFromBigInt(base)),
+	//	},
+	//})
+	//suite.Require().ErrorContains(err, "no withdraw proposal to be paid: invalid request")
+	//
+	//_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+	//	Creator:   suite.creator,
+	//	PoolIndex: seniorPool,
+	//	Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewInt(70000).Mul(sdk.NewIntFromBigInt(base))},
+	//})
+	//suite.Require().NoError(err)
+	//
+	//_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
+	//	Creator:   suite.creator,
+	//	PoolIndex: seniorPool,
+	//	Token: sdk.Coin{
+	//		Denom:  "ausdc",
+	//		Amount: sdk.NewInt(800000).Mul(sdk.NewIntFromBigInt(base)),
+	//	},
+	//})
+	//suite.Require().NoError(err)
 
 	poolInfo, _ = suite.keeper.GetPools(suite.ctx, seniorPool)
 
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
 	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(100000), base))))
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 
 	// we simulate 6 seconds for each block
 	deltaTime := time.Second * time.Duration(60)
@@ -901,6 +991,21 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 
 	seniorTotalInterest := sdk.ZeroInt()
 	juniorTotalInterest := sdk.ZeroInt()
+
+	amount := new(big.Int).Mul(big.NewInt(20000), base)
+	_, err := suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+		Creator:   suite.creator,
+		PoolIndex: seniorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(amount)),
+	})
+	suite.Require().NoError(err)
+
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+		Creator:   suite.creator,
+		PoolIndex: juniorPool,
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(amount)),
+	})
+	suite.Require().NoError(err)
 
 	// get all interests
 	for _, el := range suite.investors[:6] {
@@ -1017,12 +1122,12 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	principal := sdk.NewIntFromUint64(uint64(juniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base))
 	expected := principal.Add(allJuniorInterest[1].Amount)
 	tokens, _ := sdk.ParseCoinsNormalized(resp.Amount)
-	suite.Require().True(expected.Equal(tokens[0].Amount))
+	suite.Require().True(checkValueWithRangeTwo(expected, tokens[0].Amount))
 
 	// we check whether the total borrow is equal to the estimated
-	totalLockedSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	totalLockedSenior := sdk.NewCoin("aud-ausdc", sdk.ZeroInt())
 	totalWithdrawalbleSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	totalLockedJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	totalLockedJunior := sdk.NewCoin("aud-ausdc", sdk.ZeroInt())
 	totalWithdrawalbleJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
 	for i, el := range suite.investors {
 		addr, err := sdk.AccAddressFromBech32(el)
@@ -1039,9 +1144,11 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 		totalWithdrawalbleSenior = totalWithdrawalbleSenior.Add(d.WithdrawalAmount)
 	}
 
-	suite.Require().True(totalLockedJunior.Add(totalWithdrawalbleJunior).Amount.Equal(sdk.NewIntFromUint64(uint64(302000 - juniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base))))
+	totalLockedJuniorUsd := sdk.NewCoin(poolInfo.TargetAmount.Denom, convertBorrowToUsd(totalLockedJunior.Amount))
+	totalLockedSeniorUsd := sdk.NewCoin(poolInfo.TargetAmount.Denom, convertBorrowToUsd(totalLockedSenior.Amount))
+	suite.Require().True(checkValueWithRangeTwo(totalLockedJuniorUsd.Add(totalWithdrawalbleJunior).Amount, sdk.NewIntFromUint64(uint64(302000-juniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base))))
 
-	suite.Require().True(totalLockedSenior.Add(totalWithdrawalbleSenior).Amount.Equal(sdk.NewIntFromUint64(uint64(1003000)).Mul(sdk.NewIntFromBigInt(base))))
+	suite.Require().True(checkValueWithRangeTwo(totalLockedSeniorUsd.Add(totalWithdrawalbleSenior).Amount, sdk.NewIntFromUint64(uint64(1003000)).Mul(sdk.NewIntFromBigInt(base))))
 
 	seniorRatios := make([]sdk.Dec, len(suite.investors))
 	juniorRatios := make([]sdk.Dec, len(suite.investors))

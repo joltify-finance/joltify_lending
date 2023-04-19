@@ -80,6 +80,7 @@ func setupLiquidateEnv(suite *liquidateTestSuite) {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(4e5))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
@@ -243,7 +244,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
-	suite.Require().True(poolInfo.BorrowedAmount.Amount.Equal(sdk.NewIntFromUint64(3.34e5)))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromUint64(3.34e5)))
 	poolInfo.PoolStatus = types.PoolInfo_Liquidation
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
