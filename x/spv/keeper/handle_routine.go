@@ -215,7 +215,11 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		return true
 	}
 	token := poolInfo.EscrowPrincipalAmount
-	if token.IsLT(poolInfo.WithdrawProposalAmount) {
+
+	exchangeRatio := poolInfo.PrincipalPaymentExchangeRatio
+	usdWithdrawalTotal := exchangeRatio.MulInt(poolInfo.WithdrawProposalAmount.Amount).TruncateInt()
+
+	if token.Amount.LT(usdWithdrawalTotal) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
 		if ctx.BlockTime().After(poolInfo.ProjectDueTime.Add(time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds))) {
 			poolInfo.PoolStatus = types.PoolInfo_Liquidation
@@ -223,8 +227,6 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		return false
 	}
 
-	exchangeRatio := poolInfo.PrincipalPaymentExchangeRatio
-	usdWithdrawalTotal := exchangeRatio.MulInt(poolInfo.WithdrawProposalAmount.Amount).TruncateInt()
 	total := sdk.ZeroInt()
 	for _, el := range withdrawAccounts[1:] {
 		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
