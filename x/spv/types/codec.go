@@ -18,7 +18,7 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgUpdatePool{}, "/joltify.spv.MsgUpdatePool", nil)
 	cdc.RegisterConcrete(&MsgActivePool{}, "/joltify.spv.MsgActivePool", nil)
 	cdc.RegisterConcrete(&MsgPayPrincipal{}, "/joltify.spv.MsgPayPrincipal", nil)
-	cdc.RegisterConcrete(&MsgPayPrincipalPartial{}, "/joltify.spv.MsgPayPrincipalForWithdrawalRequests", nil)
+	cdc.RegisterConcrete(&MsgPayPrincipalPartial{}, "/joltify.spv.MsgPayPrincipalPartial", nil)
 	cdc.RegisterConcrete(&MsgWithdrawPrincipal{}, "/joltify.spv.MsgWithdrawPrincipal", nil)
 	cdc.RegisterConcrete(&MsgSubmitWithdrawProposal{}, "/joltify.spv.MsgSubmitWithdrawProposal", nil)
 	cdc.RegisterConcrete(&MsgTransferOwnership{}, "/joltify.spv.MsgTransferOwnership", nil)
