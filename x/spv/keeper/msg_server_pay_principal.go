@@ -160,9 +160,9 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.WithdrawProposalAmount.Denom)
-	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, a, poolInfo.EscrowPrincipalAmount.Amount)
+	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, denomConvertToMarketID(a), poolInfo.EscrowPrincipalAmount.Amount)
 	if err != nil {
-		return nil, coserrors.Wrapf(err, "fail to convert to USD")
+		return nil, coserrors.Wrapf(err, "fail to convert to USD with market id %v", denomConvertToMarketID(a))
 	}
 
 	if !principalEscrowAmountLocal.LT(poolInfo.WithdrawProposalAmount.Amount) {
