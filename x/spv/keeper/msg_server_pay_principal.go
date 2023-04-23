@@ -160,13 +160,13 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 	poolInfo.EscrowPrincipalAmount = poolInfo.EscrowPrincipalAmount.Add(msg.Token)
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.WithdrawProposalAmount.Denom)
-	principalEscrowAmountLocal, ratio, err := k.inboundConvertFromUSDWithMarketID(ctx, denomConvertToMarketID(a), poolInfo.EscrowPrincipalAmount.Amount)
+	withdrawProposalAmountUsd, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, denomConvertToMarketID(a), poolInfo.WithdrawProposalAmount.Amount)
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "fail to convert to USD with market id %v", denomConvertToMarketID(a))
 	}
 
-	if !principalEscrowAmountLocal.LT(poolInfo.WithdrawProposalAmount.Amount) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay at least %v( current amount %v)", poolInfo.WithdrawProposalAmount, principalEscrowAmountLocal)
+	if poolInfo.EscrowPrincipalAmount.Amount.LT(withdrawProposalAmountUsd) {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "you must pay at least %v( current amount in escrow %v)", withdrawProposalAmountUsd, poolInfo.EscrowPrincipalAmount)
 	}
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spv, types.ModuleAccount, sdk.NewCoins(msg.Token))
