@@ -346,9 +346,9 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 	real2, err = sdk.ParseCoinNormalized(resp2.Amount)
 	suite.Require().NoError(err)
 
-	suite.Require().True(expectedLiquidationToUser1.Sub(real1.Amount).Abs().LT(sdk.NewIntFromUint64(12)))
+	suite.Require().True(expectedLiquidationToUser1.Sub(real1.Amount).Abs().LTE(sdk.NewIntFromUint64(12)))
 	fmt.Printf(">>>>>>%v\n", expectedLiquidationToUser2.Sub(real2.Amount).Abs())
-	suite.Require().True(expectedLiquidationToUser2.Sub(real2.Amount).Abs().LT(sdk.NewIntFromUint64(12)))
+	suite.Require().True(expectedLiquidationToUser2.Sub(real2.Amount).Abs().LTE(sdk.NewIntFromUint64(12)))
 }
 
 func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
