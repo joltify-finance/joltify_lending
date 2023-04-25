@@ -30,31 +30,6 @@ junior=$(echo 200000*$base|bc)
 senior=$(echo 800000*$base|bc)
 interest=$(echo 8000*$base|bc)
 
-# repay the  interest of junior pool
-ret=$(joltify tx spv repay-interest $indexJunior $interest"ausdc" --from validator --output json -y)
-
-# check the return code of ret
-code=$(echo $ret | jq -r '.code')
-if [ $code -eq 0 ]; then
-  cecho "GREEN" "Repay interest junior successful"
-else
-  cecho "READ" "Repay interest junior failed with $ret"
-  exit 1
-fi
-
-
-# repay the  interest of senior pool
-ret=$(joltify tx spv repay-interest $indexSenior $interest"ausdc" --from validator --output json -y)
-# check the return code of ret
-code=$(echo $ret | jq -r '.code')
-if [ $code -eq 0 ]; then
-  cecho "GREEN" "Repay interest junior successful"
-else
-  cecho "READ" "Repay interest junior failed with $ret"
-  exit 1
-fi
-
-
 
 while true; do
 

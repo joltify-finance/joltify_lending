@@ -48,11 +48,11 @@ func NewParams() Params {
 		ProjectLength:                300, //5 mins
 		ProjectTargetAmount:          types.NewCoin("ausdc", amount),
 		BaseApy:                      types.NewDecWithPrec(10, 2),
-		PayFreq:                      "120",
+		PayFreq:                      "240",
 		PoolLockedSeconds:            120,
 		PoolTotalBorrowLimit:         100,
 		MarketId:                     "aud:usd",
-		WithdrawRequestWindowSeconds: 20,
+		WithdrawRequestWindowSeconds: 30,
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }
