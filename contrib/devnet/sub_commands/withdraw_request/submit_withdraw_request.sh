@@ -36,3 +36,19 @@ fi
 
 done
 
+
+while true; do
+# repay the  interest of junior pool
+ret=$(joltify tx spv submit-withdrawal-proposal $indexJunior  --from key_2 --output json -y)
+# check the return code of ret
+code=$(echo $ret | jq -r '.code')
+if [ $code -eq 0 ]; then
+  cecho "GREEN" "submit withdraw request successful"
+  break
+else
+  cecho "RED" "fail with submit the withdraw request with $ret"
+  sleep 1
+fi
+
+done
+

@@ -124,7 +124,7 @@ func TestListOutboundTx(t *testing.T) {
 			require.NoError(t, err)
 			var resp types.QueryAllOutboundTxResponse
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
-			require.LessOrEqual(t, len(resp.OutboundTx), step)
+			require.LessOrEqual(t, len(resp.AllOutbound), step)
 
 			var a []string
 			for _, el := range objs {
@@ -132,7 +132,7 @@ func TestListOutboundTx(t *testing.T) {
 			}
 
 			var b []string
-			for _, el := range resp.OutboundTx {
+			for _, el := range resp.AllOutbound {
 				b = append(b, el.String())
 			}
 			require.Subset(t, a, b)
@@ -147,7 +147,7 @@ func TestListOutboundTx(t *testing.T) {
 			require.NoError(t, err)
 			var resp types.QueryAllOutboundTxResponse
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
-			require.LessOrEqual(t, len(resp.OutboundTx), step)
+			require.LessOrEqual(t, len(resp.AllOutbound), step)
 
 			var a []string
 			for _, el := range objs {
@@ -155,7 +155,7 @@ func TestListOutboundTx(t *testing.T) {
 			}
 
 			var b []string
-			for _, el := range resp.OutboundTx {
+			for _, el := range resp.GetAllOutbound() {
 				b = append(b, el.String())
 			}
 
@@ -178,7 +178,7 @@ func TestListOutboundTx(t *testing.T) {
 		}
 
 		var b []string
-		for _, el := range resp.OutboundTx {
+		for _, el := range resp.AllOutbound {
 			b = append(b, el.String())
 		}
 

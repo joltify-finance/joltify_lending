@@ -164,8 +164,20 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		k.DelDepositor(ctx, depositor)
 
 		if k.isEmptyPool(ctx, poolInfo) {
+			// fix the bug that interest not return to spv when all the investor submit the withdraw request, the princicpal is paid in the handle partial payment routine
+			if !poolInfo.EscrowInterestAmount.IsZero() {
+				err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(sdk.NewCoin(poolInfo.TargetAmount.Denom, poolInfo.EscrowInterestAmount)))
+				if err != nil {
+					return nil, err
+				}
+			}
 			k.DelPool(ctx, poolInfo.Index)
 			k.SetHistoryPool(ctx, poolInfo)
+			ctx.EventManager().EmitEvent(
+				sdk.NewEvent(
+					types.EventTypeWithdrawPrincipal,
+				),
+			)
 		}
 		return &types.MsgWithdrawPrincipalResponse{Amount: amountToSend.String()}, nil
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:

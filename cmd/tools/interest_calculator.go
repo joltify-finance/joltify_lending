@@ -52,6 +52,5 @@ func main() {
 	}
 
 	fmt.Printf("apy: %s, payFreq: %d, apyToPayFreq: %s, interest_to_user: %s interest_to_reserve %s\n", apy, payFreq, apyToPayFreq, interestToUser, interestToReserve)
-	return
 
 }
