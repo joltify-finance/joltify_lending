@@ -133,8 +133,8 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "no withdraw proposal to be paid")
 	}
 
-	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "pool is not active current status is %v", poolInfo.PoolStatus)
+	if poolInfo.PoolStatus != types.PoolInfo_PooLPayPartially {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "pool is not in request to pay partiallly status current status is %v", poolInfo.PoolStatus)
 	}
 
 	if !spv.Equals(poolInfo.OwnerAddress) {
