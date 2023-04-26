@@ -116,7 +116,7 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 	if k.isEmptyPool(ctx, poolInfo) {
 		// fix the bug that interest not return to spv when all the investor submit the withdraw request, the princicpal is paid in the handle partial payment routine
 		if !poolInfo.EscrowInterestAmount.IsZero() {
-			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(sdk.NewCoin(poolInfo.TargetAmount.Denom, poolInfo.EscrowInterestAmount)))
+			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(sdk.NewCoin(poolInfo.TargetAmount.Denom, poolInfo.EscrowInterestAmount)))
 			if err != nil {
 				return nil, err
 			}
