@@ -13,7 +13,9 @@ import (
 func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo) error {
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
-		return coserrors.Wrap(types.ErrPoolNotActive, "pool is not in active status")
+		if poolInfo.PoolStatus != types.PoolInfo_INACTIVE {
+			return coserrors.Wrapf(types.ErrPoolNotActive, "pool is not in active status or partially paid status, current: %v", poolInfo.PoolStatus)
+		}
 	}
 
 	if poolInfo.CurrentPoolTotalBorrowCounter >= poolInfo.PoolTotalBorrowLimit {

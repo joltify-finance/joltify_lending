@@ -28,7 +28,9 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
-		return nil, coserrors.Wrapf(types.ErrPoolNotActive, "pool is not active")
+		if poolInfo.PoolStatus != types.PoolInfo_PooLPayPartially {
+			return nil, coserrors.Wrapf(types.ErrPoolNotActive, "pool is not active or in partially paid status, current: %v", poolInfo.PoolStatus)
+		}
 	}
 
 	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && ctx.BlockTime().After(poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds))) {

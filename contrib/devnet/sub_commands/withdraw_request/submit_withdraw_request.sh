@@ -30,7 +30,9 @@ if [ $code -eq 0 ]; then
   cecho "GREEN" "submit withdraw request successful"
   break
 else
-  cecho "RED" "fail with submit the withdraw request with $ret"
+	# get raw log from ret
+	rawlog=$(echo $ret| jq -r '.raw_log')
+  cecho "RED" "fail with submit the withdraw request with $rawlog"
   sleep 1
 fi
 
@@ -46,7 +48,8 @@ if [ $code -eq 0 ]; then
   cecho "GREEN" "submit withdraw request successful"
   break
 else
-  cecho "RED" "fail with submit the withdraw request with $ret"
+	rawlog=$(echo $ret| jq -r '.raw_log')
+  cecho "RED" "fail with submit the withdraw request with $rawlog"
   sleep 1
 fi
 

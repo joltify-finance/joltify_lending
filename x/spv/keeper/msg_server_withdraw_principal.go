@@ -70,6 +70,68 @@ func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
 	return true
 }
 
+func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
+
+	depositor.DepositType = types.DepositorInfo_deactive
+	amountToSend := depositor.WithdrawalAmount
+	interest, err := k.claimInterest(ctx, &depositor)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", depositor.DepositorAddress.String())
+	}
+
+	amountToSend = amountToSend.Add(interest)
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(amountToSend))
+	if err != nil {
+		return nil, err
+	}
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeWithdrawPrincipal,
+			sdk.NewAttribute(types.AttributeCreator, depositor.DepositorAddress.String()),
+			sdk.NewAttribute(types.AttributeAmount, amountToSend.String()),
+		),
+	)
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+
+	// burn the nft if it is existed
+	for _, el := range depositor.LinkedNFT {
+		ids := strings.Split(el, ":")
+		_, found := k.nftKeeper.GetNFT(ctx, ids[0], ids[1])
+		if !found {
+			continue
+		}
+		err := k.nftKeeper.Burn(ctx, ids[0], ids[1])
+		if err != nil {
+			return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(err, "burn nft failed")
+		}
+	}
+	k.SetDepositorHistory(ctx, depositor)
+	k.DelDepositor(ctx, depositor)
+
+	if k.isEmptyPool(ctx, poolInfo) {
+		// fix the bug that interest not return to spv when all the investor submit the withdraw request, the princicpal is paid in the handle partial payment routine
+		if !poolInfo.EscrowInterestAmount.IsZero() {
+			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, depositor.DepositorAddress, sdk.NewCoins(sdk.NewCoin(poolInfo.TargetAmount.Denom, poolInfo.EscrowInterestAmount)))
+			if err != nil {
+				return nil, err
+			}
+		}
+		k.DelPool(ctx, poolInfo.Index)
+		k.SetHistoryPool(ctx, poolInfo)
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeWithdrawPrincipal,
+			),
+		)
+	}
+	return &types.MsgWithdrawPrincipalResponse{Amount: amountToSend.String()}, nil
+}
+
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -118,6 +180,11 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 	}
 
 	if poolInfo.PoolStatus == types.PoolInfo_FROZEN {
+		if depositor.DepositType == types.DepositorInfo_deposit_close {
+			ret, err := k.handleDepositClose(ctx, depositor, poolInfo)
+			return ret, err
+		}
+
 		tokenSend, err := k.handlerPoolClose(ctx, poolInfo, depositor)
 		if err != nil {
 			return nil, err
@@ -127,59 +194,9 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 
 	switch depositor.DepositType {
 	case types.DepositorInfo_deposit_close:
-		depositor.DepositType = types.DepositorInfo_deactive
-		amountToSend := depositor.WithdrawalAmount
-		interest, err := k.claimInterest(ctx, &depositor)
-		if err != nil {
-			return nil, err
-		}
-		amountToSend = amountToSend.Add(interest)
-		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(amountToSend))
-		if err != nil {
-			return nil, err
-		}
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeWithdrawPrincipal,
-				sdk.NewAttribute(types.AttributeCreator, msg.Creator),
-				sdk.NewAttribute(types.AttributeAmount, amountToSend.String()),
-			),
-		)
-		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
-		depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+		ret, err := k.handleDepositClose(ctx, depositor, poolInfo)
+		return ret, err
 
-		// burn the nft if it is existed
-		for _, el := range depositor.LinkedNFT {
-			ids := strings.Split(el, ":")
-			_, found := k.nftKeeper.GetNFT(ctx, ids[0], ids[1])
-			if !found {
-				continue
-			}
-			err := k.nftKeeper.Burn(ctx, ids[0], ids[1])
-			if err != nil {
-				return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(err, "burn nft failed")
-			}
-		}
-		k.SetDepositorHistory(ctx, depositor)
-		k.DelDepositor(ctx, depositor)
-
-		if k.isEmptyPool(ctx, poolInfo) {
-			// fix the bug that interest not return to spv when all the investor submit the withdraw request, the princicpal is paid in the handle partial payment routine
-			if !poolInfo.EscrowInterestAmount.IsZero() {
-				err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(sdk.NewCoin(poolInfo.TargetAmount.Denom, poolInfo.EscrowInterestAmount)))
-				if err != nil {
-					return nil, err
-				}
-			}
-			k.DelPool(ctx, poolInfo.Index)
-			k.SetHistoryPool(ctx, poolInfo)
-			ctx.EventManager().EmitEvent(
-				sdk.NewEvent(
-					types.EventTypeWithdrawPrincipal,
-				),
-			)
-		}
-		return &types.MsgWithdrawPrincipalResponse{Amount: amountToSend.String()}, nil
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
 		if depositor.DepositType == types.DepositorInfo_unset {
 			poolInfo.UsableAmount = poolInfo.UsableAmount.SubAmount(totalWithdraw.Amount)

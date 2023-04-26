@@ -2,10 +2,8 @@ package keeper
 
 import (
 	"context"
-	"fmt"
-	"time"
-
 	coserrors "cosmossdk.io/errors"
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -42,11 +40,11 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(types.ErrUNEXPECTEDSTATUS, "pool current status is %v", poolInfo.PoolStatus)
 	}
 
-	dueDate := poolInfo.ProjectDueTime
-	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2))
-	if ctx.BlockTime().After(secondTimeStampBeforeProjectDueDate.Add(-time.Minute)) && ctx.BlockTime().Before(dueDate.Add(time.Minute)) {
-		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(types.ErrUNEXPECTEDSTATUS, "you can not transfer the nft in the request to withdraw window")
-	}
+	//dueDate := poolInfo.ProjectDueTime
+	//secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2))
+	//if ctx.BlockTime().After(secondTimeStampBeforeProjectDueDate.Add(-time.Minute)) && ctx.BlockTime().Before(dueDate.Add(time.Minute)) {
+	//	return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(types.ErrUNEXPECTEDSTATUS, "you can not transfer the nft in the request during the spv principal preparation window")
+	//}
 
 	poolInfo.TransferAccounts = append(poolInfo.TransferAccounts, caller)
 	d.DepositType = types.DepositorInfo_transfer_request

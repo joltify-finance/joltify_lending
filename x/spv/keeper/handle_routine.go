@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -222,7 +223,6 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		return false
 	}
 	usdWithdrawalTotal := sdk.NewCoin(poolInfo.TargetAmount.Denom, exchangeRatio.MulInt(poolInfo.WithdrawProposalAmount.Amount).TruncateInt())
-
 	if token.IsLT(usdWithdrawalTotal) {
 		ctx.Logger().Info("not enough escrow account balance to pay withdrawal proposal amount")
 		if ctx.BlockTime().After(poolInfo.ProjectDueTime.Add(time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds))) {
@@ -294,6 +294,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
 	// clear the flag
 	poolInfo.PrincipalPaid = false
+	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
 	return true
 
 }
@@ -313,6 +314,7 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 
 	totalPaid := poolInfo.EscrowPrincipalAmount.SubAmount(borrowedUSD)
 	totalPaid = totalPaid.AddAmount(poolInfo.EscrowInterestAmount)
+	fmt.Printf(">>>>>>>>we send back to spv %s\n", totalPaid.String())
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalPaid))
 	if err != nil {
 		ctx.Logger().Error("fail to send the leftover back to spv ", "err=", err.Error())

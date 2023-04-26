@@ -53,6 +53,7 @@ message PoolInfo {
     PREPARE = 3;
     FREEZING  =4;
     Liquidation = 5;
+    PooLPayPartially = 6;
   }
   POOLSTATUS pool_status = 11;
 

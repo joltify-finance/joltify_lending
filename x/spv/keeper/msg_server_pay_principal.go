@@ -50,7 +50,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 	}
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "pool is not active")
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "pool is not active current status is %v", poolInfo.PoolStatus)
 	}
 
 	// we do not allow the spv to pay principal at the time fram [due-3*withdrawWindow, due]
@@ -131,6 +131,10 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 
 	if poolInfo.WithdrawProposalAmount.IsZero() {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "no withdraw proposal to be paid")
+	}
+
+	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "pool is not active current status is %v", poolInfo.PoolStatus)
 	}
 
 	if !spv.Equals(poolInfo.OwnerAddress) {

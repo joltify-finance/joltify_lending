@@ -27,8 +27,8 @@ withdrawal_amount_junior=$(echo $ret | jq -r '.depositor.withdrawal_amount.amoun
 
 # add all the values together
 total_amount=$(echo $balance+$locked_amount_senior+$locked_amount_junior+$withdrawal_amount_senior+$withdrawal_amount_junior | bc)
-echo $total_amount
-expected=5000000000000000000000000
+#echo $total_amount
+#expected=5000000000000000000000000
 
 # check the total_amount is equal to the expected value
 #if [[ $total_amount -eq $expected ]]; then
@@ -41,11 +41,10 @@ expected=5000000000000000000000000
 # calculate total locked amount
 total_locked=$(echo $locked_amount_senior+$locked_amount_junior | bc)
 # print the total locked amount
-echo "total locked amount is $total_locked"
-echo "senior locked is" $locked_amount_senior
-echo "senior withdrawal_amount is" $withdrawal_amount_senior
-echo "junior withdrawal_amount is" $withdrawal_amount_junior
-echo "junior locked is" $locked_amount_junior
-echo "balance of $1 is" $balance
+echo  "user total locked amount is $total_locked"
+echo  "senior locked is" $locked_amount_senior
+echo  "senior withdrawal_amount is" $withdrawal_amount_senior
+echo  "junior locked is" $locked_amount_junior
+echo  "junior withdrawal_amount is" $withdrawal_amount_junior
+echo  "balance of $1 is" $balance
 
-echo "$1:" $balance >>balance.txt

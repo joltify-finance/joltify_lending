@@ -30,7 +30,6 @@ last_junior_interest=$(echo ${lines_balance_interest_before[2]} | awk '{print $N
 
 # total is last_balance+last_senior_interest+last_junior_interest
 total=$(echo $last_balance+$last_senior_interest+$last_junior_interest | bc)
-
 ret=$(joltify tx spv claim-interest $indexSenior --output json --from key_$1 -y --gas 800000)
 
 # get the code from ret

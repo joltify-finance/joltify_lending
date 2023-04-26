@@ -41,12 +41,13 @@ while true; do
 	cecho "GREEN" "pay partial principal junior successful"
 	break
   else
-	cecho "RED" "pay partial principal junior failed with $ret"
+  	rawlog=$(echo $ret| jq -r '.raw_log')
+	cecho "RED" "pay partial principal junior failed with $rawlog"
   fi
 
 done
 
-
+exit 0
 while true; do
   # repay the  principal of senior pool
   ret=$(joltify tx spv  pay-principal-partial $indexSenior $senior"ausdc" --from validator --output json -y)
@@ -56,6 +57,7 @@ while true; do
 	cecho "GREEN" "Pay partial principal senior successful"
 	break
   else
-	cecho "RED" "Pay partial principal senior failed with $ret"
+  	rawlog=$(echo $ret| jq -r '.raw_log')
+	cecho "RED" "Pay partial principal senior failed with $rawlog"
   fi
 done
