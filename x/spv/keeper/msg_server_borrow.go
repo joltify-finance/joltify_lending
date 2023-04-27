@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	sdkmath "cosmossdk.io/math"
+	"github.com/gogo/protobuf/proto"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -10,10 +12,34 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
+func (k msgServer) getAllBorrowed(ctx sdk.Context, poolInfo types.PoolInfo) sdkmath.Int {
+	var err error
+	sum := sdk.ZeroInt()
+	for _, el := range poolInfo.PoolNFTIds {
+
+		class, found := k.nftKeeper.GetClass(ctx, el)
+		if !found {
+			panic(found)
+		}
+		var borrowInterest types.BorrowInterest
+		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+		if err != nil {
+			panic(err)
+		}
+		lastBorrow := borrowInterest.BorrowDetails[len(borrowInterest.BorrowDetails)-1]
+
+		amount := lastBorrow.BorrowedAmount
+		ratio := lastBorrow.ExchangeRatio
+		usdTotal := outboundConvertToUSD(amount.Amount, ratio)
+		sum = sum.Add(usdTotal)
+	}
+	return sum
+}
+
 func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo) error {
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
-		if poolInfo.PoolStatus != types.PoolInfo_INACTIVE {
+		if poolInfo.PoolStatus != types.PoolInfo_PooLPayPartially {
 			return coserrors.Wrapf(types.ErrPoolNotActive, "pool is not in active status or partially paid status, current: %v", poolInfo.PoolStatus)
 		}
 	}
@@ -47,6 +73,12 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+	}
+
+	allBorrowed := k.getAllBorrowed(ctx, poolInfo)
+
+	if allBorrowed.Add(msg.BorrowAmount.Amount).GT(poolInfo.TargetAmount.Amount) {
+		return nil, coserrors.Wrapf(types.ErrPoolFull, "pool reached its borrow limit with current borrowed %v", allBorrowed)
 	}
 
 	err = checkEligibility(ctx.BlockTime(), poolInfo)
