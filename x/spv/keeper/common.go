@@ -376,12 +376,17 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
-	poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(depositor.WithdrawalAmount)
-	if err != nil {
-		return sdk.ZeroInt(), err
+
+	// fix the issue 10. since we have not to add the transfer owner withdrawal amount to the pool, we do not need to deducted it here.
+	if depositor.DepositType != types.DepositorInfo_processed {
+		poolInfo.TransferAccountsNumber--
+		poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(depositor.WithdrawalAmount)
+		if err != nil {
+			return sdk.ZeroInt(), err
+		}
 	}
 
-	if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
+	if k.isEmptyPool(ctx, poolInfo) && poolInfo.TransferAccountsNumber == 0 {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		// we transfer the leftover back to spv
 		totalReturn := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)

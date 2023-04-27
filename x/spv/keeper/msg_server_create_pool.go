@@ -176,6 +176,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
+			TransferAccountsNumber:        0,
 			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
 			PoolLockedSeconds:             targetProject.PoolLockedSeconds,
 			PoolTotalBorrowLimit:          targetProject.PoolTotalBorrowLimit,

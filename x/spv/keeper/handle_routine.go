@@ -72,7 +72,9 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	if totalLockedAmount.Equal(poolInfo.WithdrawProposalAmount.Amount) {
 		panic("the total locked of each a")
 	}
-	poolInfo.TransferAccounts = []sdk.AccAddress{}
+
+	poolInfo.TransferAccountsNumber = int32(len(poolInfo.TransferAccounts))
+	poolInfo.TransferAccounts = make([]sdk.AccAddress, 0, 200)
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.WithdrawProposalAmount.Denom)
 	usdTotalLocked, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, denomConvertToMarketID(a), totalLockedAmount)

@@ -145,6 +145,8 @@ message PoolInfo {
 
   string pool_denom_prefix = 37;
   Interest_prepayment interest_prepayment = 38;
+
+  int32 transfer_accounts_number =39;
 }
 
 message Interest_prepayment{
