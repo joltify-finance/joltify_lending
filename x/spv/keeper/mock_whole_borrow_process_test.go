@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"fmt"
 	"math/big"
 	"math/rand"
 	"testing"
@@ -577,7 +578,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	seniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, seniorPool)
 	juniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, juniorPool)
 	totalLeftInterest := seniorPoolInfo.EscrowInterestAmount.Add(juniorPoolInfo.EscrowInterestAmount)
-	suite.Require().True(totalLeftInterest.LT(sdk.NewIntFromUint64(1000000000)))
+	suite.Require().True(totalLeftInterest.LT(sdk.NewIntFromUint64(100)))
 
 	addr, err = sdk.AccAddressFromBech32(suite.investors[0])
 	suite.Require().NoError(err)
@@ -594,6 +595,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	suite.Require().NoError(err)
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(-time.Hour * 2))
 	principalPayment := new(big.Int).Mul(big.NewInt(1000000), base)
+
+	// here we pay the partial principal
 	_, err = suite.app.PayPrincipalForWithdrawalRequests(suite.ctx, &types.MsgPayPrincipalPartial{
 		Creator:   suite.creator,
 		PoolIndex: seniorPool,
@@ -617,6 +620,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	//suite.Require().True(newinvestor1.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(uint64(seniorAmounts[0])).Mul(sdk.NewIntFromBigInt(base))))
 
 	// now we withdraw
+	// ####################withdraw principal for investor who submit the withdrawal proposal##################################
 	totalWithdrawal := sdk.ZeroInt()
 	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1000e10))})
 	suite.Require().NoError(err)
@@ -625,8 +629,9 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 
 	totalWithdrawal = totalWithdrawal.Add(token.Amount)
 	resp, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
-
 	suite.Require().NoError(err)
+	// ######################################################
+
 	token, _ = sdk.ParseCoinNormalized(resp.Amount)
 	suite.Require().True(checkValueWithRangeTwo(sdk.NewIntFromUint64(uint64(seniorAmounts[1])).Mul(sdk.NewIntFromBigInt(base)), token.Amount.Sub(allCoinsSenior[1][1].Amount)))
 	totalWithdrawal = totalWithdrawal.Add(token.Amount)
@@ -781,8 +786,11 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second))
 
-	for _, el := range suite.investors[2:6] {
-
+	for i, el := range suite.investors[2:6] {
+		fmt.Printf(">>>>>>index %v\n", i)
+		if i == 3 {
+			fmt.Printf("for debug#####\n")
+		}
 		resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{
 			Creator:   el,
 			PoolIndex: seniorPool,

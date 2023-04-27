@@ -170,7 +170,6 @@ type mockNFTKeeper struct {
 }
 
 func (m mockNFTKeeper) Burn(ctx sdk.Context, classID string, nftID string) error {
-	//TODO implement me
 	key := fmt.Sprintf("%v:%v", classID, nftID)
 	delete(m.nftsWithClassID, key)
 	return nil
@@ -181,8 +180,13 @@ func (m mockNFTKeeper) Transfer(ctx sdk.Context, classID string, nftID string, r
 }
 
 func (m mockNFTKeeper) GetTotalSupply(ctx sdk.Context, classID string) uint64 {
-	//TODO implement me
-	panic("implement me")
+	counter := 0
+	for k := range m.nftsWithClassID {
+		if classID == k {
+			counter++
+		}
+	}
+	return uint64(counter)
 }
 
 func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, bool) {

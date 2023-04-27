@@ -361,7 +361,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 
 	err = k.processEachWithdrawReq(ctx, depositor, true, poolInfo.PrincipalPaymentExchangeRatio)
 	if err != nil {
-		ctx.Logger().Error("fail to pay partial principal", err.Error())
+		ctx.Logger().Error("fail to process partial principal", err.Error())
 		return sdk.ZeroInt(), err
 	}
 
@@ -379,11 +379,12 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 
 	// fix the issue 10. since we have not to add the transfer owner withdrawal amount to the pool, we do not need to deducted it here.
 	if depositor.DepositType != types.DepositorInfo_processed {
-		poolInfo.TransferAccountsNumber--
 		poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(depositor.WithdrawalAmount)
 		if err != nil {
 			return sdk.ZeroInt(), err
 		}
+	} else {
+		poolInfo.TransferAccountsNumber--
 	}
 
 	if k.isEmptyPool(ctx, poolInfo) && poolInfo.TransferAccountsNumber == 0 {

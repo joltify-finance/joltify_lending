@@ -255,6 +255,11 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
+	failedBorrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100.34e5))}
+	// pool reached the limit test
+	_, err = suite.app.Borrow(suite.ctx, failedBorrow)
+	suite.Require().ErrorContains(err, "pool reached its borrow limit with current borrowed")
+
 	p1, found := suite.keeper.GetDepositor(suite.ctx, depositorPool, creatorAddr1)
 	suite.Require().True(found)
 
@@ -294,7 +299,6 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
 	suite.True(checkValueEqualWithExchange(lastBorrow.Amount, borrow.BorrowAmount.Amount))
-	fmt.Printf(">>>>>>apy %v\n", borrowClassInfo.Apy)
 	suite.Require().True(borrowClassInfo.Apy.Equal(sdk.NewDecWithPrec(15, 2)))
 
 	// nft ID is the hash(nft class ID, investorWallet)
