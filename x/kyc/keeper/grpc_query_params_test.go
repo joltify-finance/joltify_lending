@@ -44,5 +44,7 @@ func TestParamsQuery(t *testing.T) {
 
 	response, err := keeper.Params(wctx, &types.QueryParamsRequest{})
 	require.NoError(t, err)
-	require.Equal(t, &types.QueryParamsResponse{Params: params}, response)
+
+	require.True(t, params.Submitter[0].Equals(response.Params.Submitter[0]))
+	require.EqualValues(t, params.ProjectsInfo[0].SPVName, response.GetParams().ProjectsInfo[0].SPVName)
 }

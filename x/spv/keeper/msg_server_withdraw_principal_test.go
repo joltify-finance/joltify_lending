@@ -245,7 +245,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 	suite.Require().NoError(err)
 
 	// we borrow again
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 

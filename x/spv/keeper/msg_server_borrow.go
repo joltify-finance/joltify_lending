@@ -77,13 +77,13 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	allBorrowed := k.getAllBorrowed(ctx, poolInfo)
 
-	if allBorrowed.Add(msg.BorrowAmount.Amount).GT(poolInfo.TargetAmount.Amount) {
-		return nil, coserrors.Wrapf(types.ErrPoolFull, "pool reached its borrow limit with current borrowed %v", allBorrowed)
-	}
-
 	err = checkEligibility(ctx.BlockTime(), poolInfo)
 	if err != nil {
 		return nil, err
+	}
+
+	if allBorrowed.Add(msg.BorrowAmount.Amount).GT(poolInfo.TargetAmount.Amount) {
+		return nil, coserrors.Wrapf(types.ErrPoolFull, "pool reached its borrow limit with current borrowed %v", allBorrowed)
 	}
 
 	poolInfo.CurrentPoolTotalBorrowCounter += 1

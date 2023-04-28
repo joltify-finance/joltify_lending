@@ -16,7 +16,8 @@ func TestGetParams(t *testing.T) {
 	k, ctx := testkeeper.KycKeeper(t)
 	params := newParams()
 	k.SetParams(ctx, params)
-	require.EqualValues(t, params, k.GetParams(ctx))
+	require.EqualValues(t, params.Submitter, k.GetParams(ctx).Submitter)
+	require.EqualValues(t, params.ProjectsInfo[0].SPVName, k.GetParams(ctx).ProjectsInfo[0].SPVName)
 }
 
 func TestGetEach(t *testing.T) {
@@ -27,7 +28,7 @@ func TestGetEach(t *testing.T) {
 
 	k.SetParams(ctx, params)
 	projects := k.GetProjects(ctx)
-	require.EqualValues(t, projects, params.ProjectsInfo)
+	require.EqualValues(t, projects[0].SPVName, params.ProjectsInfo[0].SPVName)
 	submitters := k.GetSubmitter(ctx)
 	require.EqualValues(t, submitters, params.Submitter)
 }

@@ -394,11 +394,10 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		// we handle the leftover of each class
 		leftover := k.handleClassLeftover(ctx, poolInfo)
 		reserve, found := k.GetReserve(ctx, "ausdc")
-		if !found {
-			panic("reserve not found")
+		if found {
+			reserve = reserve.Add(leftover)
+			k.SetReserve(ctx, reserve)
 		}
-		reserve = reserve.Add(leftover)
-		k.SetReserve(ctx, reserve)
 		err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalReturn))
 		if err != nil {
 			return totalPaidAmount, err

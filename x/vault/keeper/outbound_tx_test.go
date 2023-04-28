@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -28,10 +27,8 @@ func createNOutboundTx(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.Ou
 	accs := simulation.RandomAccounts(r, n)
 	for i := range items {
 		items[i].Index = strconv.Itoa(i)
-		iitems := make(map[string]types.Proposals)
-		entry := types.Entity{Address: accs[0].Address, Feecoin: []sdk.Coin{{Denom: "mock", Amount: sdk.NewInt(1)}}}
-		iitems[fmt.Sprintf("index%d", i)] = types.Proposals{Entry: []*types.Entity{&entry}}
-		items[i].Items = iitems
+		items[i].Feecoin = []sdk.Coin{{Denom: "mock", Amount: sdk.NewInt(1)}}
+		items[i].ReceiverAddress = accs[i].Address
 		keeper.SetOutboundTx(ctx, items[i])
 	}
 	return items

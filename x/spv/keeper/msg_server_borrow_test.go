@@ -84,12 +84,12 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 		},
 		{
 			name: "is not authorised to borrow",
-			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j", PoolIndex: resp.PoolIndex[0]}, expectedErr: "not authorized to borrow money"},
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(100))}, expectedErr: "not authorized to borrow money"},
 		},
 
 		{
 			name: "inconsistency toekn denom",
-			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "token to be borrowed is inconsistency"},
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2))}, expectedErr: "token to be borrowed is inconsistency"},
 		},
 		{
 			name: "reach borrow limit",

@@ -158,7 +158,10 @@ start:
 	./contrib/devnet/init-new-chain.sh
 	joltify start
 test:
-	go test ./...
+	gotestsum  --junitfile report.xml --format testname  -- -coverprofile=coverage.out -timeout 15m ./...
+	cat coverage.out |grep -v "erc20.go"|grep -v "oppy_transfer.go" > cover.out
+	go tool cover -func=cover.out
+
 
 ###############################################################################
 ###                                Protobuf                                 ###

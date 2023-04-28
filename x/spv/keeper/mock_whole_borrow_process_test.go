@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"fmt"
 	"math/big"
 	"math/rand"
 	"testing"
@@ -786,11 +785,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second))
 
-	for i, el := range suite.investors[2:6] {
-		fmt.Printf(">>>>>>index %v\n", i)
-		if i == 3 {
-			fmt.Printf("for debug#####\n")
-		}
+	for _, el := range suite.investors[2:6] {
 		resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{
 			Creator:   el,
 			PoolIndex: seniorPool,
