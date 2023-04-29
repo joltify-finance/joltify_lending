@@ -59,9 +59,10 @@ func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.Deposito
 }
 
 func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
-	if !poolInfo.BorrowedAmount.IsZero() {
+	if !poolInfo.BorrowedAmount.IsZero() || !poolInfo.UsableAmount.IsZero() {
 		return false
 	}
+
 	for _, el := range poolInfo.PoolNFTIds {
 		if k.nftKeeper.GetTotalSupply(ctx, el) > 0 {
 			return false

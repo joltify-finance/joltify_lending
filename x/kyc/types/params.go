@@ -3,8 +3,11 @@ package types
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	sdkmath "cosmossdk.io/math"
+	"github.com/ethereum/go-ethereum/crypto"
+	tmrand "github.com/tendermint/tendermint/libs/rand"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -26,37 +29,51 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	b := BasicInfo{
-		"This is the test info",
-		"empty",
-		"ABC",
-		"ABC123",
-		[]byte("reserved"),
-		"This is the Test Project 1",
-		"example@example.com",
-		"example",
-	}
+
 	amount, _ := sdkmath.NewIntFromString("1000000000000000000000000")
 	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 	if err != nil {
 		panic(err)
 	}
-	pi := ProjectInfo{
-		Index:                        1,
-		SPVName:                      "defaultSPV",
-		ProjectOwner:                 acc,
-		BasicInfo:                    &b,
-		ProjectLength:                300, // 5 mins
-		ProjectTargetAmount:          types.NewCoin("ausdc", amount),
-		BaseApy:                      types.NewDecWithPrec(10, 2),
-		PayFreq:                      "240",
-		PoolLockedSeconds:            120,
-		PoolTotalBorrowLimit:         100,
-		MarketId:                     "aud:usd",
-		WithdrawRequestWindowSeconds: 30,
-		JuniorMinRatio:               types.NewDecWithPrec(10, 2),
+	var out []string
+	allProjects := make([]*ProjectInfo, 100)
+	for i := 0; i < 100; i++ {
+		b := BasicInfo{
+			"This is the test info",
+			"empty",
+			"ABC",
+			"ABC123",
+			[]byte("reserved"),
+			"This is the Test Project 1",
+			"example@example.com",
+			"example",
+		}
+		pi := ProjectInfo{
+			Index:                        int32(i + 1),
+			SPVName:                      strconv.Itoa(i) + ":" + tmrand.NewRand().Str(10),
+			ProjectOwner:                 acc,
+			BasicInfo:                    &b,
+			ProjectLength:                300, //5 mins
+			ProjectTargetAmount:          types.NewCoin("ausdc", amount),
+			BaseApy:                      types.NewDecWithPrec(10, 2),
+			PayFreq:                      "240",
+			PoolLockedSeconds:            120,
+			PoolTotalBorrowLimit:         100,
+			MarketId:                     "aud:usd",
+			WithdrawRequestWindowSeconds: 30,
+			JuniorMinRatio:               types.NewDecWithPrec(10, 2),
+		}
+		pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
+		allProjects[i] = &pi
+
+		indexHash := crypto.Keccak256Hash([]byte(pi.BasicInfo.ProjectName), acc.Bytes(), []byte("junior"))
+		out = append(out, indexHash.Hex())
 	}
-	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
+	for _, el := range out {
+		fmt.Printf("%v,", el)
+	}
+	fmt.Printf("\n")
+	return Params{allProjects, []types.AccAddress{acc}}
 }
 
 // DefaultParams returns a default set of parameters

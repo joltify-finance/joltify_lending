@@ -9,7 +9,12 @@ do
   total_amount=$(echo $total_amount+$balance | bc)
   echo $ret
 done
+
 echo $total_amount
+
+validator_ret=$(joltify q bank balances  $(joltify keys show validator -a)  --output json)
+echo $validator_ret
+
 
 # now we check the payment ?= recevied
 ret=$(joltify q spv total-reserve --output json)
