@@ -28,7 +28,7 @@ indexJunior=$thispool
 # each node deposit 150000usdc into the junior pool
 
 amount=$(echo 150000*$base|bc)
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_1 -y --output json --gas 800000)
+ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_3 -y --output json --gas 800000)
 code=$(echo $ret | jq -r '.code')
 if [ $code -eq 0 ]; then
 	cecho "GREEN" "deposit successful"
@@ -38,7 +38,7 @@ fi
 
 
 
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_2 -y --output json --gas 800000)
+ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_4 -y --output json --gas 800000)
 code=$(echo $ret | jq -r '.code')
 if [ $code -eq 0 ]; then
 	cecho "GREEN" "deposit successful"

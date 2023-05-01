@@ -18,9 +18,9 @@ import (
 func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, error) {
 	var payment, paymentToInvestor sdk.Coin
 	var thisPaymentTime time.Time
-	// as the payment canot be happed at exact payfreq time, so we need to round down to the latest payment time
+	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
 	//currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
-	currentTime := ctx.BlockTime()
+	currentTime := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 
 	latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 	if firstBorrow {
@@ -51,7 +51,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		}
 		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
 		payment = sdk.NewCoin(denom, paymentAmountUsd)
-		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second)
+		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 	} else {
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 		if currentTimeTruncated.Before(latestPaymentTime) {
@@ -109,7 +109,6 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 			poolInfo.InterestPrepayment = nil
 		}
 	}
-
 	for _, el := range nftClasses {
 		class, found := k.nftKeeper.GetClass(ctx, el)
 		if !found {

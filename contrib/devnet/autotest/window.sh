@@ -1,6 +1,10 @@
 #!/bin/bash
-
+# generate n cosmos accounts
+# loop function to generate n cosmos accounts
 base=1000000000000000000
+total_investors=2
+all_keys=5
+project_index=1
 cecho(){
     RED="\033[0;31m"
     GREEN="\033[0;32m"  # <-- [0 means not bold
@@ -20,56 +24,69 @@ allpoolindex="0x7e92c40bccd50c240fc4bca3262102dc85f20b4b40b1733470285f0645ad0f48
 IFS=',' read -ra arr <<< "$allpoolindex"
 thispool=${arr[1]}
 indexJunior=$thispool
-# index of the pool, pool name, list pool index senior, list pool index junior
-./prepare.sh 2 "normal_borrow" $thispool
-#
+
+# we get the pool pay freq
+ret=$(joltify query spv query-pool $indexJunior --output json)
+pool_pay_freq=$(echo $ret |   jq -r '.pool_info.pay_freq')
+project_length=$(echo $ret |   jq -r '.pool_info.project_length')
+project_due_time=$(echo $ret |   jq -r '.pool_info.project_due_time')
+last_payment_time=$(echo $ret |   jq -r '.pool_info.last_payment_time')
+#echo "pool pay freq $pool_pay_freq"
+#echo "project due time $project_due_time"
+echo "#### last payment time $last_payment_time"
+echo "#### project length $project_length"
+# Input duration in seconds
+duration=$pool_pay_freq
+
+# Convert last_payment_time and duration to Unix timestamps
+last_payment_timestamp_seconds=$(date -u -d "$last_payment_time" +%s)
+duration_seconds=$duration
+
+# Add duration to last_payment_time
+next_payment_seconds=$((last_payment_timestamp_seconds + duration_seconds))
+
+# Convert result back to ISO 8601 format
+result=$(date -u -d "@$next_payment_seconds" +"%Y-%m-%dT%H:%M:%SZ")
+
+# Output result
+echo "Next payment time: $result"
 
 
-# each node deposit 150000usdc into the junior pool
+# check the time difference between result and current time
+# Input duration in seconds
+current_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+echo "current time $current_time"
 
-amount=$(echo 150000*$base|bc)
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_1 -y --output json --gas 800000)
-code=$(echo $ret | jq -r '.code')
-if [ $code -eq 0 ]; then
-	cecho "GREEN" "deposit successful"
-  else
-	cecho "RED" "deposit failed with $ret"
-fi
+current_time_seconds=$(date -u -d "$current_time" +%s)
 
-
-
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_2 -y --output json --gas 800000)
-code=$(echo $ret | jq -r '.code')
-if [ $code -eq 0 ]; then
-	cecho "GREEN" "deposit successful"
-  else
-	cecho "RED" "deposit failed with $ret"
-fi
-
-
-amount=$(echo 200000*$base|bc)
-# run the borrow for junior
-ret=$(joltify tx spv  borrow $indexJunior $amount"ausdc" --from validator -y --output json --gas 800000)
-# get the code from json
-code=$(echo $ret | jq -r '.code')
-# check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
-    cecho "GREEN" "Borrow junior successful"
-  else
-    cecho "RED" "Borrow junior failed with $ret"
-fi
-
-
-ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 800000)
-# get the code from json
-code=$(echo $ret | jq -r '.code')
-# check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
-    cecho "RED" "Borrow junior should not successful"
-  else
-    cecho "GREEN" "Borrow junior failed with $ret"
-fi
+gap=$((next_payment_seconds - current_time_seconds))
 
 
 
+project_due_time_seconds=$(date -u -d "$project_due_time" +%s)
+withdrawal_start_duration=$(echo $pool_pay_freq*3 | bc)
+pay_partial_start_duration=$(echo $pool_pay_freq*2 | bc)
+
+proposal_start_time=$((project_due_time_seconds - withdrawal_start_duration))
+pay_partial_start_time=$((project_due_time_seconds - pay_partial_start_duration))
+
+
+gap2=$(echo $proposal_start_time + $project_length - $current_time_seconds |bc)
+
+gap3=$((pay_partial_start_time + project_length - current_time_seconds))
+
+echo "project due time: $project_due_time"
+
+echo "#### proposal start time $proposal_start_time"
+echo "#### pay partial start time $pay_partial_start_time"
+
+
+cecho "GREEN" "Next interest payment in : $gap seconds"
+cecho "GREEN" "Next submit principal request in : $gap2 seconds"
+cecho "GREEN" "Next pay partial in : $gap3 seconds"
+echo "$gap,$gap2,$gap3"
+
+
+
+# check the time difference
 
