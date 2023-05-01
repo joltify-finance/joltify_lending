@@ -21,6 +21,9 @@ func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {
 		return sdk.Dec{}, 0, err
 	}
 	payFreq, err := strconv.ParseInt(payFreqStr, 10, 64)
+	if err != nil {
+		panic("incorrect payfreq format")
+	}
 	if payFreq > types.Maxfreq || payFreq < types.Minfreq {
 		return sdk.Dec{}, 0, errors.New("pay frequency is invalid")
 	}
@@ -48,7 +51,7 @@ func calculateApys(targetAmount, pool1Amount sdk.Coin, baseApy, pool1Apy sdk.Dec
 		return nil, nil, errors.New("one pool has less than 0 amount")
 	}
 
-	// ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
+	//ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
 	ij := pool1Apy.MulInt(pool1Amount.Amount)
 	it := baseApy.MulInt(targetAmount.Amount)
 	pool2Apy := it.Sub(ij).QuoTruncate(sdk.NewDecFromInt(pool2Amount.Amount))
@@ -120,11 +123,11 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		poolApy := poolsInfoAPY[poolType]
 
 		enuPoolType := types.PoolInfo_JUNIOR
-		if poolType == "senior" {
+		if poolType == types.Senior {
 			enuPoolType = types.PoolInfo_SENIOR
-			typePrefix = "senior"
+			typePrefix = types.Senior
 		} else {
-			typePrefix = "junior"
+			typePrefix = types.Junior
 		}
 
 		indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))

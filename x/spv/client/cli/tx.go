@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -11,14 +10,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-var (
-	DefaultRelativePacketTimeoutTimestamp = uint64((time.Duration(10) * time.Minute).Nanoseconds())
-)
-
-const (
-	flagPacketTimeoutTimestamp = "packet-timeout-timestamp"
-	listSeparator              = ","
-)
+// var (
+//	DefaultRelativePacketTimeoutTimestamp = uint64((time.Duration(10) * time.Minute).Nanoseconds())
+// )
 
 // GetTxCmd returns the transaction commands for this module
 func GetTxCmd() *cobra.Command {
@@ -44,7 +38,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(CmdSubmitWitdrawProposal())
 	cmd.AddCommand(CmdTransferOwnership())
 	cmd.AddCommand(CmdLiquidate())
-// this line is used by starport scaffolding # 1
+	// this line is used by starport scaffolding # 1
 
 	return cmd
 }

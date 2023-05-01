@@ -1,14 +1,15 @@
 package keeper_test
 
 import (
+	"testing"
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/suite"
-	"testing"
-	"time"
 )
 
 // Test suite used for all keeper tests
@@ -28,7 +29,6 @@ func TestWithdrawProposalSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *withdrawProposalSuite) SetupTest() {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
@@ -57,8 +57,10 @@ func setupWithdrawProposal(suite *withdrawProposalSuite) {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
@@ -66,10 +68,12 @@ func setupWithdrawProposal(suite *withdrawProposalSuite) {
 	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
 
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
-	//suite.Require().NoError(err)
-	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+	// suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   creator1,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount}
+		Token:     depositAmount,
+	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
@@ -86,7 +90,6 @@ func setupWithdrawProposal(suite *withdrawProposalSuite) {
 	suite.Require().NoError(err)
 
 	suite.investors = []string{creator1, creator2}
-
 }
 
 func (suite *withdrawProposalSuite) TestWithdrawProposal() {
@@ -125,7 +128,6 @@ func (suite *withdrawProposalSuite) TestWithdrawProposal() {
 				suite.Require().ErrorContains(err, tc.args.expectedErr)
 			} else {
 				suite.Require().NoError(err)
-
 			}
 		})
 	}
@@ -177,5 +179,4 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 	ctx4 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth-1)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx4, &req)
 	suite.Require().ErrorContains(err, "you are in the unexpected status")
-
 }

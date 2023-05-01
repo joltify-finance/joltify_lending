@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	sdkmath "cosmossdk.io/math"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 
@@ -29,7 +30,6 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-
 	amount, _ := sdkmath.NewIntFromString("1000000000000000000000000")
 	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 	if err != nil {
@@ -53,7 +53,7 @@ func NewParams() Params {
 			SPVName:                      strconv.Itoa(i) + ":" + tmrand.NewRand().Str(10),
 			ProjectOwner:                 acc,
 			BasicInfo:                    &b,
-			ProjectLength:                540, //5 mins
+			ProjectLength:                540, // 5 mins
 			ProjectTargetAmount:          types.NewCoin("ausdc", amount),
 			BaseApy:                      types.NewDecWithPrec(10, 2),
 			PayFreq:                      "120",
@@ -61,7 +61,6 @@ func NewParams() Params {
 			PoolTotalBorrowLimit:         100,
 			MarketId:                     "aud:usd",
 			WithdrawRequestWindowSeconds: 30,
-			JuniorMinRatio:               types.NewDecWithPrec(10, 2),
 		}
 		pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
 		allProjects[i] = &pi

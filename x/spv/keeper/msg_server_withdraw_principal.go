@@ -31,7 +31,6 @@ func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depos
 }
 
 func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
-
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -72,7 +71,6 @@ func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
 }
 
 func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
-
 	depositor.DepositType = types.DepositorInfo_deactive
 	amountToSend := depositor.WithdrawalAmount
 	interest, err := k.claimInterest(ctx, &depositor)

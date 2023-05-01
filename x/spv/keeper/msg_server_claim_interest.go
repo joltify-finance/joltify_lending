@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -53,7 +54,6 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 }
 
 func (k Keeper) claimInterest(ctx sdk.Context, depositor *types.DepositorInfo) (sdk.Coin, error) {
-
 	// for each lending NFT this owner has
 	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
@@ -76,5 +76,4 @@ func (k Keeper) claimInterest(ctx sdk.Context, depositor *types.DepositorInfo) (
 		return sdk.Coin{}, coserrors.Wrapf(types.ErrClaimInterest, "not enough interest to be paid")
 	}
 	return claimed, nil
-
 }

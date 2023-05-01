@@ -1,9 +1,10 @@
 package keeper_test
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"strconv"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -101,7 +102,7 @@ func TestOutboundTxQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.AllOutbound), step)
 
-			//returned := make([]types.QueryGetOutboundTxResponse, len(resp.AllOutbound))
+			// returned := make([]types.QueryGetOutboundTxResponse, len(resp.AllOutbound))
 
 			spew.Dump(resp.AllOutbound)
 			spew.Dump(expected)

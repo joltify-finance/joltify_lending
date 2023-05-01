@@ -9,7 +9,6 @@ import (
 )
 
 func EndBlock(ctx sdk.Context, k keeper.Keeper) {
-
 	currentTime := ctx.BlockTime()
 	// we firstly handle the interest
 

@@ -28,7 +28,7 @@ func convertOutboundTx(old types.OutboundTxV16) types.OutboundTx {
 	return types.OutboundTx{
 		Index:     index,
 		Processed: true,
-		//Items:     items,
+		// Items:     items,
 	}
 }
 

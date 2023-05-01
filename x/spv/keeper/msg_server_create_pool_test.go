@@ -63,7 +63,6 @@ func TestMsgSERvCreatePool(t *testing.T) {
 }
 
 func TestMsgSERvCreatePoolApyCheck(t *testing.T) {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, k, _, wctx := setupMsgServer(t)

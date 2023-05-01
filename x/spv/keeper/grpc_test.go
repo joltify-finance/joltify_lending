@@ -1,13 +1,14 @@
 package keeper_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/stretchr/testify/suite"
-	"testing"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -41,8 +42,10 @@ func setupPoolForQueryTest(suite *querySuite) {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
@@ -60,7 +63,6 @@ func setupPoolForQueryTest(suite *querySuite) {
 
 // The default state used by each test
 func (suite *querySuite) SetupTest() {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, k, nftKeeper, wctx := setupMsgServer(suite.T())
@@ -72,6 +74,7 @@ func (suite *querySuite) SetupTest() {
 	suite.app = app
 	suite.nftKeeper = nftKeeper
 }
+
 func TestQuerySuitTestSuite(t *testing.T) {
 	suite.Run(t, new(querySuite))
 }
@@ -135,15 +138,19 @@ func (suite *querySuite) TestAllQuery() {
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
-	//suite.Require().NoError(err)
-	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+	// suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   creator1,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount}
+		Token:     depositAmount,
+	}
 
 	// user two deposit half of the amount of the user 1
-	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
+	msgDepositUser2 := &types.MsgDeposit{
+		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
@@ -153,7 +160,7 @@ func (suite *querySuite) TestAllQuery() {
 
 	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
 
-	//now we borrow 1.34e5
+	// now we borrow 1.34e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 

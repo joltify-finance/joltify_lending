@@ -3,15 +3,15 @@ package spv
 import (
 	"math/rand"
 
-	"github.com/joltify-finance/joltify_lending/testutil/sample"
-	spvsimulation "github.com/joltify-finance/joltify_lending/x/spv/simulation"
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"github.com/joltify-finance/joltify_lending/testutil/sample"
+	spvsimulation "github.com/joltify-finance/joltify_lending/x/spv/simulation"
+	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
 // avoid unused import issue
@@ -24,55 +24,55 @@ var (
 )
 
 const (
-    opWeightMsgCreatePool = "op_weight_msg_create_pool"
+	opWeightMsgCreatePool = "op_weight_msg_create_pool" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgCreatePool int = 100
 
-	opWeightMsgAddInvestors = "op_weight_msg_add_investors"
+	opWeightMsgAddInvestors = "op_weight_msg_add_investors" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgAddInvestors int = 100
 
-	opWeightMsgDeposit = "op_weight_msg_deposit"
+	opWeightMsgDeposit = "op_weight_msg_deposit" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgDeposit int = 100
 
-	opWeightMsgBorrow = "op_weight_msg_borrow"
+	opWeightMsgBorrow = "op_weight_msg_borrow" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgBorrow int = 100
 
-	opWeightMsgRepayInterest = "op_weight_msg_repay_interest"
+	opWeightMsgRepayInterest = "op_weight_msg_repay_interest" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgRepayInterest int = 100
 
-	opWeightMsgClaimInterest = "op_weight_msg_claim_interest"
+	opWeightMsgClaimInterest = "op_weight_msg_claim_interest" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgClaimInterest int = 100
 
-	opWeightMsgUpdatePool = "op_weight_msg_update_pool"
+	opWeightMsgUpdatePool = "op_weight_msg_update_pool" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgUpdatePool int = 100
 
-	opWeightMsgActivePool = "op_weight_msg_active_pool"
+	opWeightMsgActivePool = "op_weight_msg_active_pool" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgActivePool int = 100
 
-	opWeightMsgPayPrincipal = "op_weight_msg_pay_principal"
+	opWeightMsgPayPrincipal = "op_weight_msg_pay_principal" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgPayPrincipal int = 100
 
-	opWeightMsgWithdrawPrincipal = "op_weight_msg_withdraw_principal"
+	opWeightMsgWithdrawPrincipal = "op_weight_msg_withdraw_principal" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgWithdrawPrincipal int = 100
 
-	opWeightMsgSubmitWitdrawProposal = "op_weight_msg_submit_witdraw_proposal"
+	opWeightMsgSubmitWitdrawProposal = "op_weight_msg_submit_witdraw_proposal" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgSubmitWitdrawProposal int = 100
 
-	opWeightMsgTransferOwnership = "op_weight_msg_transfer_ownership"
+	opWeightMsgTransferOwnership = "op_weight_msg_transfer_ownership" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgTransferOwnership int = 100
 
-	opWeightMsgLiquidate = "op_weight_msg_liquidate"
+	opWeightMsgLiquidate = "op_weight_msg_liquidate" //nolint:gosec
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgLiquidate int = 100
 
@@ -86,7 +86,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 		accs[i] = acc.Address.String()
 	}
 	spvGenesis := types.GenesisState{
-		Params:	types.DefaultParams(),
+		Params: types.DefaultParams(),
 		// this line is used by starport scaffolding # simapp/module/genesisState
 	}
 	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(&spvGenesis)
@@ -99,9 +99,7 @@ func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedP
 
 // RandomizedParams creates randomized  param changes for the simulator
 func (am AppModule) RandomizedParams(_ *rand.Rand) []simtypes.ParamChange {
-	
-	return []simtypes.ParamChange{
-	}
+	return []simtypes.ParamChange{}
 }
 
 // RegisterStoreDecoder registers a decoder

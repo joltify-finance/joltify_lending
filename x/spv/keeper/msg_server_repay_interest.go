@@ -19,7 +19,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	var payment, paymentToInvestor sdk.Coin
 	var thisPaymentTime time.Time
 	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
-	//currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+	// currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 	currentTime := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 
 	latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
@@ -83,13 +83,11 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	interestData.Payments = append(interestData.Payments, &currentPayment)
 	interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
 	return payment, nil
-
 }
 
 // getAllinterestToBePaid returns the total interest to be paid for all the borrows in the pool using the
 // LOCAL currency
 func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) (sdkmath.Int, error) {
-
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
 	totalPayment := sdkmath.NewInt(0)
@@ -142,7 +140,6 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 }
 
 func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdk.Dec, error) {
-
 	paymentAmount, err := k.calculateTotalDueInterest(ctx, poolInfo)
 	if err != nil {
 		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err
@@ -213,7 +210,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return &types.MsgRepayInterestResponse{}, nil
 	}
 
-	//leftover := poolInfo.EscrowInterestAmount.Add(msg.Token.Amount)
+	// leftover := poolInfo.EscrowInterestAmount.Add(msg.Token.Amount)
 	ownInterest := poolInfo.EscrowInterestAmount.Abs()
 	leftover := msg.Token.Amount.Sub(ownInterest)
 	if leftover.IsNegative() {
@@ -246,5 +243,4 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 
 	k.SetPool(ctx, poolInfo)
 	return &types.MsgRepayInterestResponse{}, nil
-
 }

@@ -1,16 +1,16 @@
 package keeper_test
 
 import (
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestActivatePool(t *testing.T) {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, _, _, wctx := setupMsgServer(t)
@@ -21,7 +21,7 @@ func TestActivatePool(t *testing.T) {
 	resp, err := app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
-	//test not the owner
+	// test not the owner
 	_, err = app.ActivePool(ctx, &types.MsgActivePool{
 		PoolIndex: resp.PoolIndex[0],
 		Creator:   "jolt10nsg95f7geuhf9dm8v2r4d7jxvnjk23aaufq3p",
@@ -52,5 +52,4 @@ func TestActivatePool(t *testing.T) {
 		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 	})
 	require.ErrorContains(t, err, "unexpected pool status")
-
 }

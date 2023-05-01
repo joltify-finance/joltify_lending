@@ -98,7 +98,6 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 			total := (accumulate.Sub(sdk.OneDec())).Mul(sdk.NewDec(OneYear / int64(accTime)))
 			gap := total.Sub(tc.args.apy)
 			suite.Require().True(gap.LT(sdk.NewDecFromIntWithPrec(sdk.NewInt(1), 8)))
-
 		})
 	}
 }
@@ -108,7 +107,6 @@ func checkPayFreqApy(oneYearApy sdk.Dec, freqApy sdk.Dec, circle uint64) bool {
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestAmount() {
-
 	testapy := sdk.MustNewDecFromStr("0.15")
 	_, err := CalculateInterestAmount(testapy, 0)
 	suite.Require().ErrorContains(err, "payFreq cannot be zero")
@@ -122,7 +120,6 @@ func (suite *InterestTestSuite) TestCalculateInterestAmount() {
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestFactor() {
-
 	testapy := sdk.MustNewDecFromStr("0.25")
 	payfreq := OneWeek * 8
 

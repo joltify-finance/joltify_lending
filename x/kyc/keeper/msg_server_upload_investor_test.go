@@ -74,7 +74,6 @@ func TestSubmitInvestor(t *testing.T) {
 	msg.WalletAddress = addresses
 	_, err = app.UploadInvestor(wctx, &msg)
 	require.Error(t, err)
-
 }
 
 func TestUpdateWallets(t *testing.T) {

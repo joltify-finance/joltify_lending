@@ -242,7 +242,7 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 	return nil
 }
 
-func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, errGlobal error) {
+func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo) error {
 	depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(poolInfo.BorrowedAmount.Denom, lockedLocal))
 
 	if depositor.WithdrawalAmount.Amount.LT(lockedUsd) {
@@ -267,13 +267,13 @@ func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInf
 	nftTemplate.Data = data
 	err = k.nftKeeper.Mint(ctx, nftTemplate, depositor.DepositorAddress)
 	if err != nil {
-		errGlobal = types.ErrMINTNFT
-		return
+		return err
 	}
 
 	classIDAndNFTID := fmt.Sprintf("%v:%v", nftTemplate.ClassId, nftTemplate.Id)
 	depositor.LinkedNFT = append(depositor.LinkedNFT, classIDAndNFTID)
 	k.SetDepositor(ctx, *depositor)
+	return nil
 }
 
 func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, usdBorrowed, localAmount sdkmath.Int, ratio sdk.Dec, nftClass nfttypes.Class, depositors []*types.DepositorInfo) error {
@@ -284,7 +284,6 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	}
 
 	// now we update the depositor's withdrawal amount and locked amount
-	var errGlobal error
 	var firstDepositor *types.DepositorInfo
 	totalLocked := sdk.ZeroInt()
 	totalLockedLocal := sdk.ZeroInt()
@@ -301,7 +300,10 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 			}
 			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
-			k.doProcessInvestor(ctx, depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, errGlobal)
+			err := k.doProcessInvestor(ctx, depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo)
+			if err != nil {
+				return err
+			}
 			totalLocked = totalLocked.Add(lockedUsd)
 			totalLockedLocal = totalLockedLocal.Add(lockedLocal)
 			continue
@@ -319,7 +321,11 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 			}
 			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
-			k.doProcessInvestor(ctx, &depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, errGlobal)
+			err := k.doProcessInvestor(ctx, &depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo)
+			if err != nil {
+				ctx.Logger().Error(err.Error(), "error msg:", "failed to process investor")
+				return false
+			}
 			totalLocked = totalLocked.Add(lockedUsd)
 			totalLockedLocal = totalLockedLocal.Add(lockedLocal)
 
@@ -329,9 +335,9 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	// now we process the last one
 	lockedUsd := usdBorrowed.Sub(totalLocked)
 	lockedLocal := localAmount.Sub(totalLockedLocal)
-	k.doProcessInvestor(ctx, firstDepositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, errGlobal)
+	err := k.doProcessInvestor(ctx, firstDepositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo)
 
-	return errGlobal
+	return err
 }
 
 func (k Keeper) handleClassLeftover(ctx sdk.Context, poolinfo types.PoolInfo) sdk.Coin {

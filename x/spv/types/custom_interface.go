@@ -1,4 +1,3 @@
 package types
 
-type NFTBorrowInterest interface {
-}
+type NFTBorrowInterest interface{}

@@ -138,7 +138,6 @@ func TestQueryByWallets(t *testing.T) {
 			},
 		},
 	} {
-
 		t.Run(tc.desc, func(t *testing.T) {
 			var args []string
 			args = append(tc.fields, tc.args...)

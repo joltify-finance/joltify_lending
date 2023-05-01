@@ -32,7 +32,6 @@ func TestBorrowTestSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *addBorrowSuite) SetupTest() {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
@@ -45,7 +44,6 @@ func (suite *addBorrowSuite) SetupTest() {
 }
 
 func (suite *addBorrowSuite) TestAddBorrow() {
-
 	type args struct {
 		msgBorrow   *types.MsgBorrow
 		expectedErr string
@@ -67,8 +65,10 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
@@ -131,7 +131,6 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 			}
 
 			if tc.name == "not " {
-
 			}
 
 			suite.keeper.SetPool(suite.ctx, poolInfo)
@@ -146,7 +145,6 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 }
 
 func compareDepositor(suite suite.Suite, expected, actual types.DepositorInfo) {
-
 	suite.Require().Equal(expected.InvestorId, actual.InvestorId)
 	suite.Require().True(expected.DepositorAddress.Equals(actual.DepositorAddress))
 	suite.Require().True(expected.LockedAmount.IsEqual(actual.LockedAmount))
@@ -155,10 +153,9 @@ func compareDepositor(suite suite.Suite, expected, actual types.DepositorInfo) {
 	for i, el := range expected.LinkedNFT {
 		suite.Require().Equal(el, actual.LinkedNFT[i])
 	}
-
 }
-func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
+func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	// create the first pool apy 7.8%
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: "0.15", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(1*1e6))}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
@@ -179,8 +176,10 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
@@ -198,14 +197,18 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	suite.Require().NoError(err)
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
 	suite.Require().NoError(err)
-	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   creator1,
 		PoolIndex: depositorPool,
-		Token:     depositAmount}
+		Token:     depositAmount,
+	}
 
 	// user two deposit half of the amount of the user 1
-	msgDepositUser2 := &types.MsgDeposit{Creator: creator2,
+	msgDepositUser2 := &types.MsgDeposit{
+		Creator:   creator2,
 		PoolIndex: depositorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5))}
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
@@ -251,7 +254,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	user2Ratio := sdk.NewDecFromInt(msgDepositUser2.Token.Amount).Quo(sdk.NewDecFromInt(totalBorrowable.Amount))
 
-	//now we borrow 2e5
+	// now we borrow 2e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
@@ -389,7 +392,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	lastBorrow = borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
 	suite.True(checkValueEqualWithExchange(lastBorrow.Amount, borrow.BorrowAmount.Amount))
 
-	//nft ID is the hash(nft class ID, investorWallet)
+	// nft ID is the hash(nft class ID, investorWallet)
 	indexHash = crypto.Keccak256Hash([]byte(nftClassID), p1.DepositorAddress)
 	expectedID1 = fmt.Sprintf("%v:invoice-%v", nftClassID, indexHash.String()[2:])
 	suite.Require().Equal(nft2User1, expectedID1)

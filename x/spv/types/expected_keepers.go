@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -33,7 +34,6 @@ type BankKeeper interface {
 
 type KycKeeper interface {
 	GetProjects(ctx sdk.Context) (projectsInfo []*kyctypes.ProjectInfo)
-	//QueryInvestorWallets(goCtx context.Context, req *kyctypes.QueryInvestorWalletsRequest) (*kyctypes.QueryInvestorWalletsResponse, error)
 	QueryByWallet(goCtx context.Context, req *kyctypes.QueryByWalletRequest) (*kyctypes.QueryByWalletResponse, error)
 }
 

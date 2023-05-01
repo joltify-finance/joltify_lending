@@ -37,26 +37,27 @@ const (
 
 type mockKycKeeper struct{}
 
-var Wallets = []string{"jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq",
+var Wallets = []string{
+	"jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq",
 	"jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
 	"jolt1z0y0zl0trsnuqmqf5v034pyv9sp39jg3rv6lsm",
 	"jolt1fcaa73cc9c2l3l2u57skddgd0zm749ncukx90g",
 	"jolt1ut358ywu78ztkt5m90dwmklz79rwau6vs8vhlp",
 	"jolt1v9ls99c83dst7x6xwwnsjcyp5zsa3acfhaxq5n",
 	"jolt169a92jz2rmxy0ll73kztlmtucswvvft78xeqne",
-	"jolt13xxls80rw3p036zyfy8hhtjyvft4ckg5a09agh"}
+	"jolt13xxls80rw3p036zyfy8hhtjyvft4ckg5a09agh",
+}
 
 func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmoduletypes.ProjectInfo) {
-
 	b := kycmoduletypes.BasicInfo{
-		"This is the test info",
-		"empty",
-		"ABC",
-		"ABC123",
-		[]byte("reserved"),
-		"This is the test info",
-		"email address",
-		"example.com",
+		Description:    "This is the test info",
+		ProjectsUrl:    "empty",
+		ProjectCountry: "ABC",
+		BusinessNumber: "ABC123",
+		Reserved:       []byte("reserved"),
+		ProjectName:    "This is the test info",
+		Email:          "email address",
+		Name:           "example.com",
 	}
 
 	acc, _ := sdk.AccAddressFromBech32("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0")
@@ -65,7 +66,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		SPVName:             "defaultSPV",
 		ProjectOwner:        acc,
 		BasicInfo:           &b,
-		ProjectLength:       31536000, //1 year
+		ProjectLength:       31536000, // 1 year
 		PayFreq:             "15768000",
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
 		MarketId:            "aud:usd",
@@ -73,14 +74,14 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 	}
 
 	b2 := kycmoduletypes.BasicInfo{
-		"This is the test info2",
-		"empty2",
-		"ABC2",
-		"ABC123-2",
-		[]byte("reserved"),
-		"This is the test info2",
-		"example.com2",
-		"email address2",
+		Description:    "This is the test info2",
+		ProjectsUrl:    "empty2",
+		ProjectCountry: "ABC2",
+		BusinessNumber: "ABC123-2",
+		Reserved:       []byte("reserved"),
+		ProjectName:    "This is the test info2",
+		Email:          "example.com2",
+		Name:           "email address2",
 	}
 
 	pi2 := kycmoduletypes.ProjectInfo{
@@ -88,7 +89,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		SPVName:             "defaultSPV2",
 		ProjectOwner:        acc,
 		BasicInfo:           &b2,
-		ProjectLength:       31536000, //1 year
+		ProjectLength:       31536000, // 1 year
 		PayFreq:             "15768000",
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
 		MarketId:            "aud:usd",
@@ -100,7 +101,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		SPVName:             "defaultSPV3",
 		ProjectOwner:        acc,
 		BasicInfo:           &b2,
-		ProjectLength:       oneYear, //1 year
+		ProjectLength:       oneYear, // 1 year
 		PayFreq:             strconv.Itoa(oneMonth),
 		BaseApy:             sdk.NewDecWithPrec(12, 2),
 		MarketId:            "aud:usd",
@@ -115,7 +116,7 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		SPVName:             "defaultSPV3",
 		ProjectOwner:        acc,
 		BasicInfo:           &b2,
-		ProjectLength:       oneYear, //1 year
+		ProjectLength:       oneYear, // 1 year
 		PayFreq:             strconv.Itoa(oneWeek),
 		BaseApy:             sdk.NewDecWithPrec(10, 2),
 		MarketId:            "aud:usd",
@@ -126,7 +127,6 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 }
 
 func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.QueryByWalletRequest) (*kycmoduletypes.QueryByWalletResponse, error) {
-
 	inv := kycmoduletypes.Investor{
 		InvestorId:    "1",
 		WalletAddress: []string{req.Wallet},
@@ -148,7 +148,7 @@ func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.
 type mockAccKeeper struct{}
 
 func (m mockAccKeeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -159,7 +159,7 @@ func (m mockAccKeeper) GetModuleAccount(ctx sdk.Context, name string) authtypes.
 }
 
 func (m mockAccKeeper) GetModuleAddress(name string) sdk.AccAddress {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -207,7 +207,6 @@ func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, 
 		panic(err)
 	}
 	return returnNFT, true
-
 }
 
 func (m mockNFTKeeper) Update(ctx sdk.Context, nftToken nft.NFT) error {
@@ -222,7 +221,6 @@ func (m mockNFTKeeper) Mint(ctx sdk.Context, nft nft.NFT, receiver sdk.AccAddres
 	key := fmt.Sprintf("%v:%v", nft.ClassId, nft.Id)
 	m.nftsWithClassID[key] = &nft
 	return nil
-
 }
 
 func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
@@ -231,7 +229,6 @@ func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
 }
 
 func (m mockNFTKeeper) UpdateClass(ctx sdk.Context, class nft.Class) error {
-
 	var borrowInterest types.BorrowInterest
 	err := proto.Unmarshal(class.Data.Value, &borrowInterest)
 	if err != nil {
@@ -266,7 +263,7 @@ func (m mockbankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModu
 }
 
 func (m mockbankKeeper) GetSupply(ctx sdk.Context, denom string) sdk.Coin {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -275,17 +272,17 @@ func (m mockbankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom s
 }
 
 func (m mockbankKeeper) GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m mockbankKeeper) SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (m mockbankKeeper) BurnCoins(ctx sdk.Context, name string, amt sdk.Coins) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 

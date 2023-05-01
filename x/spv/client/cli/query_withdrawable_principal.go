@@ -27,7 +27,6 @@ func CmdwithdrawalPrincipal() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			params := &types.QuerywithdrawalPrincipalRequest{
-
 				PoolIndex:     reqPoolIndex,
 				WalletAddress: args[1],
 			}

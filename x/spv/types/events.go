@@ -12,6 +12,7 @@ const (
 	EventTypeWithdrawPrincipal   = "withdraw_principal"
 	EventTypePoolDelete          = "pool deleted"
 )
+
 const (
 	AttributeCreator = "creator"
 	AttributeAmount  = "token"

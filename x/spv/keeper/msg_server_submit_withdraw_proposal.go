@@ -37,6 +37,12 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 		return nil, coserrors.Wrapf(types.ErrUnexpectedEndOfGroupNft, "no borrow can be found")
 	}
 
+	if poolInfo.PoolStatus != types.PoolInfo_PooLPayPartially {
+		if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
+			return nil, coserrors.Wrapf(types.ErrPoolNotActive, "pool status is %v not in submit withdraw request or active status", poolInfo.PoolStatus)
+		}
+	}
+
 	dueDate := poolInfo.ProjectDueTime
 	firstTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2))
 	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*3))

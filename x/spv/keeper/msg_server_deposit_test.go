@@ -26,7 +26,6 @@ func TestDepositTestSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *DepositTestSuite) SetupTest() {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
@@ -41,7 +40,6 @@ func (suite *DepositTestSuite) SetupTest() {
 }
 
 func (suite *DepositTestSuite) TestDeposit() {
-
 	type args struct {
 		msgDeposit  *types.MsgDeposit
 		expectedErr error
@@ -62,8 +60,10 @@ func (suite *DepositTestSuite) TestDeposit() {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
@@ -80,52 +80,71 @@ func (suite *DepositTestSuite) TestDeposit() {
 
 		{
 			name: "not on white list",
-			args: args{msgDeposit: &types.MsgDeposit{Creator: "jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j",
-				PoolIndex: resp.PoolIndex[1],
-				Token:     sdk.NewCoin("ausdc", sdk.NewInt(100))},
-				expectedErr: errors.New("the given investor is not allowed to invest jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j: unauthorized operation")},
+			args: args{
+				msgDeposit: &types.MsgDeposit{
+					Creator:   "jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j",
+					PoolIndex: resp.PoolIndex[1],
+					Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
+				},
+				expectedErr: errors.New("the given investor is not allowed to invest jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j: unauthorized operation"),
+			},
 		},
 
 		{
 			name: "can deposit as expected",
-			args: args{msgDeposit: &types.MsgDeposit{Creator: "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq",
-				PoolIndex: resp.PoolIndex[1],
-				Token:     sdk.NewCoin("ausdc", sdk.NewInt(100))},
+			args: args{
+				msgDeposit: &types.MsgDeposit{
+					Creator:   "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq",
+					PoolIndex: resp.PoolIndex[1],
+					Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
+				},
 				expectedErr: nil,
 			},
 		},
 		{
 			name: "can deposit as expected with the second investor",
-			args: args{msgDeposit: &types.MsgDeposit{Creator: "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
-				PoolIndex: resp.PoolIndex[1],
-				Token:     sdk.NewCoin("ausdc", sdk.NewInt(100))},
+			args: args{
+				msgDeposit: &types.MsgDeposit{
+					Creator:   "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+					PoolIndex: resp.PoolIndex[1],
+					Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
+				},
 				expectedErr: nil,
 			},
 		},
 
 		{
 			name: "incorrect denom",
-			args: args{msgDeposit: &types.MsgDeposit{Creator: "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
-				PoolIndex: resp.PoolIndex[1],
-				Token:     sdk.NewCoin("usdd", sdk.NewInt(100))},
+			args: args{
+				msgDeposit: &types.MsgDeposit{
+					Creator:   "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+					PoolIndex: resp.PoolIndex[1],
+					Token:     sdk.NewCoin("usdd", sdk.NewInt(100)),
+				},
 				expectedErr: errors.New("we only accept ausdc: invalid coins"),
 			},
 		},
 
 		{
 			name: "can deposit the second time",
-			args: args{msgDeposit: &types.MsgDeposit{Creator: "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
-				PoolIndex: resp.PoolIndex[1],
-				Token:     sdk.NewCoin("ausdc", sdk.NewInt(100))},
+			args: args{
+				msgDeposit: &types.MsgDeposit{
+					Creator:   "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+					PoolIndex: resp.PoolIndex[1],
+					Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
+				},
 				expectedErr: nil,
 			},
 		},
 
 		{
 			name: "can deposit in both pools",
-			args: args{msgDeposit: &types.MsgDeposit{Creator: "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
-				PoolIndex: resp.PoolIndex[0],
-				Token:     sdk.NewCoin("ausdc", sdk.NewInt(100))},
+			args: args{
+				msgDeposit: &types.MsgDeposit{
+					Creator:   "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+					PoolIndex: resp.PoolIndex[0],
+					Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
+				},
 				expectedErr: nil,
 			},
 		},
@@ -138,14 +157,12 @@ func (suite *DepositTestSuite) TestDeposit() {
 				suite.Require().Equal(tc.args.expectedErr.Error(), err.Error())
 			} else {
 				suite.Require().NoError(err)
-
 			}
 		})
 	}
 }
 
 func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
-
 	// create the first pool apy 7.8%
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("usdc", sdk.NewInt(0))}
 	_, err := suite.app.CreatePool(suite.ctx, &req)
@@ -162,21 +179,25 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[1],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[1],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
 	pool, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
-	//suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
+	// suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
 	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("aud-ausdc", sdk.NewInt(0))))
 	suite.Require().True(pool.UsableAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
 
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(100))
-	msgDepositor := types.MsgDeposit{Creator: "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+	msgDepositor := types.MsgDeposit{
+		Creator:   "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
 		PoolIndex: resp.PoolIndex[0],
-		Token:     depositAmount}
+		Token:     depositAmount,
+	}
 
 	_, err = suite.app.Deposit(suite.ctx, &msgDepositor)
 	suite.Require().NoError(err)
@@ -216,5 +237,4 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	suite.Require().True(depositorData.LockedAmount.Equal(sdk.NewCoin("aud-ausdc", sdk.NewInt(0))))
 
 	suite.Require().True(depositorData.WithdrawalAmount.Equal(depositAmount.Add(depositAmount)))
-
 }

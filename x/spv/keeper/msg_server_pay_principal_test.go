@@ -38,8 +38,10 @@ func setupPools(suite *payPrincipalSuite) {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
@@ -47,12 +49,10 @@ func setupPools(suite *payPrincipalSuite) {
 	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
 
 	suite.investors = []string{creator1, creator2}
-
 }
 
 // The default state used by each test
 func (suite *payPrincipalSuite) SetupTest() {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, k, nftKeeper, wctx := setupMsgServer(suite.T())
@@ -63,8 +63,8 @@ func (suite *payPrincipalSuite) SetupTest() {
 	suite.keeper = k
 	suite.app = app
 	suite.nftKeeper = nftKeeper
-
 }
+
 func TestPayPrincipalInterest(t *testing.T) {
 	suite.Run(t, new(payPrincipalSuite))
 }
@@ -98,9 +98,11 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	suite.Require().ErrorContains(err, "invalid token demo, want")
 
 	req.PoolIndex = suite.investorPool
-	msgDepositUser1 := &types.MsgDeposit{Creator: suite.investors[1],
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   suite.investors[1],
 		PoolIndex: suite.investorPool,
-		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))}
+		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5)),
+	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
@@ -136,5 +138,4 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	suite.Require().EqualValues(poolInfo.GetEscrowPrincipalAmount().Amount, req.Token.Amount)
-
 }

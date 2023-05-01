@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -12,7 +13,6 @@ import (
 )
 
 func (k Keeper) WithdrawalPrincipal(goCtx context.Context, req *types.QuerywithdrawalPrincipalRequest) (*types.QuerywithdrawalPrincipalResponse, error) {
-
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}

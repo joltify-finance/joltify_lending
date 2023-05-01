@@ -3,11 +3,11 @@ package simulation
 import (
 	"math/rand"
 
-	"github.com/joltify-finance/joltify_lending/x/spv/keeper"
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/joltify-finance/joltify_lending/x/spv/keeper"
+	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
 func SimulateMsgCreatePool(

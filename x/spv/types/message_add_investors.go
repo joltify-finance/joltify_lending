@@ -42,7 +42,7 @@ func (msg *MsgAddInvestors) GetSignBytes() []byte {
 func (msg *MsgAddInvestors) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 	if len(msg.InvestorID) == 0 {
 		return coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "empty investors")

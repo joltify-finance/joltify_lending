@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -49,9 +50,9 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 	allProjects := k.kycKeeper.GetProjects(ctx)
 	targetProject := allProjects[pool.LinkedProject-1]
 
-	poolType := "senior"
+	poolType := types.Senior
 	if pool.PoolType == types.PoolInfo_SENIOR {
-		poolType = "junior"
+		poolType = types.Junior
 	}
 
 	indexHashreq := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))

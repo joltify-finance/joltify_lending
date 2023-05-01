@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
@@ -52,11 +53,9 @@ func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLi
 	}
 
 	return paidAmount, nil
-
 }
 
 func (k Keeper) handleLiquidation(ctx sdk.Context, poolInfo types.PoolInfo, amount sdk.Coin) error {
-
 	nftClasses := poolInfo.PoolNFTIds
 	totalBorrowed := poolInfo.BorrowedAmount
 	// the first element is the pool class, we skip it

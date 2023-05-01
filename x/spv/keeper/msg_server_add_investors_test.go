@@ -1,13 +1,14 @@
 package keeper_test
 
 import (
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 // Test suite used for all keeper tests
@@ -25,7 +26,6 @@ func TestAddInvestorTestSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *addInvestorSuite) SetupTest() {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
@@ -43,7 +43,6 @@ func (suite *addInvestorSuite) SetupTest() {
 }
 
 func (suite *addInvestorSuite) TestAddInvestor() {
-
 	type args struct {
 		msgAddInvestor *types.MsgAddInvestors
 		expectedErr    string
@@ -83,14 +82,12 @@ func (suite *addInvestorSuite) TestAddInvestor() {
 				suite.Require().ErrorContains(err, tc.args.expectedErr)
 			} else {
 				suite.Require().NoError(err)
-
 			}
 		})
 	}
 }
 
 func (suite *addInvestorSuite) TestAddDuplicateInvestors() {
-
 	req := &types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.poolIndexs[0], InvestorID: []string{"123", "324"}}
 
 	_, err := suite.app.AddInvestors(suite.ctx, req)
@@ -126,5 +123,4 @@ func (suite *addInvestorSuite) TestAddDuplicateInvestors() {
 	suite.Require().True(found)
 
 	suite.Require().EqualValues(r.Investors, []string{"123", "324", "444", "555"})
-
 }

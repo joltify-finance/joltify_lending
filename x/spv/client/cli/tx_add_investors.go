@@ -19,7 +19,6 @@ func CmdAddInvestors() *cobra.Command {
 		Short: "Broadcast message add-investors",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-
 			investorID := strings.Split(args[1], ",")
 
 			clientCtx, err := client.GetClientTxContext(cmd)

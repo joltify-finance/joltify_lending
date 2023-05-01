@@ -72,7 +72,6 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 	isJunior := poolInfo.PoolType == types.PoolInfo_JUNIOR
 
 	poolsInfoAPY, poolsInfoAmount, err := calculateApys(targetProject.ProjectTargetAmount, msg.TargetTokenAmount, targetProject.BaseApy, apy, isJunior)
-
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger than target")
 	}

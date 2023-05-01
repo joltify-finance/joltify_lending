@@ -166,7 +166,7 @@ func TestOutboundTxMsgServerCreate(t *testing.T) {
 	)
 	require.True(t, found)
 	require.Equal(t, rst.Processed, true)
-	//require.Equal(t, 2, len(rst.Items["123"].Entry))
+	// require.Equal(t, 2, len(rst.Items["123"].Entry))
 
 	fee := k.GetAllFeeAmount(ctx)
 	expectedFee := sdk.Coin{Denom: "mock", Amount: sdk.NewInt(12)}

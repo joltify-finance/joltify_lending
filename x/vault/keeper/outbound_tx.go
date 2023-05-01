@@ -2,10 +2,11 @@ package keeper
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
-	"strings"
 )
 
 // SetOutboundTx set a specific outboundTx in the store from its index

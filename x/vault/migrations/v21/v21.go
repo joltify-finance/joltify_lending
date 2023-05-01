@@ -58,7 +58,7 @@ func convertOutboundTx(old types3.OutboundTxV120) types3.OutboundTx {
 		proposals := types3.Proposals{Entry: entities}
 		_ = proposals
 		_ = txID
-		//items[txID] = proposals
+		// items[txID] = proposals
 	}
 	return types3.OutboundTx{
 		Index:     index,

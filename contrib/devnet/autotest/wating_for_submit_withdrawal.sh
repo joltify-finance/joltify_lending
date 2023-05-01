@@ -21,7 +21,7 @@ cecho(){
 
 # call function prepare investment
 while true; do
-
+	break
 	ret=$(./window.sh |tail -n 1)
 	echo $ret
 
@@ -32,7 +32,7 @@ while true; do
 	third=${ADDR[2]}
 	echo "need to wait for $second to submit withdraw request"
 	#if second is less than 10
-	if [ $second -lt 100 ]; then
+	if [ $second -lt 300 ]; then
 		#submit the withdrawal request
 		while true; do
 		# repay the  interest of junior pool
@@ -77,17 +77,22 @@ while true; do
 
 	echo "need to wait for $third to submit pay principal request"
 	#if second is less than 10
-	if [ $third -lt 60 ]; then
+	if [ $third -lt 300 ]; then
 		# repay the  interest of junior pool
+
+  			while true; do
   		ret=$(joltify tx spv  pay-principal-partial $indexJunior $junior"ausdc" --from validator --output json -y)
 		# check the return code of ret
 		code=$(echo $ret | jq -r '.code')
 		if [ $code -eq 0 ]; then
   			cecho "GREEN" "Repay interest junior successful"
+  			break
 		else
   			cecho "RED" "Repay interest junior failed with $ret"
 		fi
+		sleep 1
 
+	done
 	fi
 
 	sleep 10

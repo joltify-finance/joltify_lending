@@ -30,6 +30,7 @@ ret=$(joltify query spv query-pool $indexJunior --output json)
 pool_pay_freq=$(echo $ret |   jq -r '.pool_info.pay_freq')
 project_length=$(echo $ret |   jq -r '.pool_info.project_length')
 project_due_time=$(echo $ret |   jq -r '.pool_info.project_due_time')
+withdraw_window=$(echo $ret |   jq -r '.pool_info.withdraw_request_window_seconds')
 last_payment_time=$(echo $ret |   jq -r '.pool_info.last_payment_time')
 #echo "pool pay freq $pool_pay_freq"
 #echo "project due time $project_due_time"
@@ -64,8 +65,8 @@ gap=$((next_payment_seconds - current_time_seconds))
 
 
 project_due_time_seconds=$(date -u -d "$project_due_time" +%s)
-withdrawal_start_duration=$(echo $pool_pay_freq*3 | bc)
-pay_partial_start_duration=$(echo $pool_pay_freq*2 | bc)
+withdrawal_start_duration=$(echo $withdrawal_withdraw_request_window_seconds*3 | bc)
+pay_partial_start_duration=$(echo $withdraw_request_window_seconds*2 | bc)
 
 proposal_start_time=$((project_due_time_seconds - withdrawal_start_duration))
 pay_partial_start_time=$((project_due_time_seconds - pay_partial_start_duration))
@@ -77,8 +78,10 @@ gap3=$((pay_partial_start_time + project_length - current_time_seconds))
 
 echo "project due time: $project_due_time"
 
-echo "#### proposal start time $proposal_start_time"
-echo "#### pay partial start time $pay_partial_start_time"
+result=$(date -u -d "@$proposal_start_time" +"%Y-%m-%dT%H:%M:%SZ")
+echo "#### proposal start time $result"
+result=$(date -u -d "@$pay_partial_start_time" +"%Y-%m-%dT%H:%M:%SZ")
+echo "#### pay partial start time $result"
 
 
 cecho "GREEN" "Next interest payment in : $gap seconds"

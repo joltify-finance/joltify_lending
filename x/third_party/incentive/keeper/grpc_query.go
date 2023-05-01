@@ -144,7 +144,7 @@ func (s queryServer) RewardFactors(
 		DelegatorRewardFactors:   delegatorFactors,
 		SwapRewardFactors:        swapFactors,
 		SavingsRewardFactors:     savingsFactors,
-		//EarnRewardFactors:        earnFactors,
+		// EarnRewardFactors:        earnFactors,
 	}, nil
 }
 
@@ -257,9 +257,9 @@ func (s queryServer) synchronizeRewards(
 func rewardTypeIsValid(rewardType string) bool {
 	return rewardType == "" ||
 		rewardType == RewardTypeJolt
-	//rewardType == RewardTypeUSDXMinting ||
-	//rewardType == RewardTypeDelegator ||
-	//rewardType == RewardTypeSwap ||
-	//rewardType == RewardTypeSavings ||
-	//rewardType == RewardTypeEarn
+	// rewardType == RewardTypeUSDXMinting ||
+	// rewardType == RewardTypeDelegator ||
+	// rewardType == RewardTypeSwap ||
+	// rewardType == RewardTypeSavings ||
+	// rewardType == RewardTypeEarn
 }

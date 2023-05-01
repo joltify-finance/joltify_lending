@@ -20,7 +20,6 @@ func verifyInterest(t *testing.T, bApy, apy1, apy2 sdk.Dec, totalAmount, apy1Amo
 }
 
 func TestMsgSERvUpdatePool(t *testing.T) {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, k, _, wctx := setupMsgServer(t)
@@ -82,7 +81,6 @@ func TestMsgSERvUpdatePool(t *testing.T) {
 }
 
 func TestMsgSERvUpdatePoolWithError(t *testing.T) {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, _, _, wctx := setupMsgServer(t)
@@ -104,8 +102,8 @@ func TestMsgSERvUpdatePoolWithError(t *testing.T) {
 	}
 
 	_, err = app.UpdatePool(ctx, &reqUpdate)
-	//fmt.Println(err)
-	//require.Error(t, err)
+	// fmt.Println(err)
+	// require.Error(t, err)
 	require.Error(t, err, "invalid address invalid: invalid address")
 
 	reqUpdate = types.MsgUpdatePool{
@@ -129,5 +127,4 @@ func TestMsgSERvUpdatePoolWithError(t *testing.T) {
 
 	_, err = app.UpdatePool(ctx, &reqUpdate)
 	require.ErrorContains(t, err, "is not authorized to update the pool")
-
 }

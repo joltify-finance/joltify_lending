@@ -31,7 +31,6 @@ func TestLiquidateSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *liquidateTestSuite) SetupTest() {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
@@ -60,8 +59,10 @@ func setupLiquidateEnv(suite *liquidateTestSuite) {
 	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
 	suite.Require().NoError(err)
 
-	req2 := types.MsgAddInvestors{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
-		InvestorID: []string{"2"}}
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
 	_, err = suite.app.AddInvestors(suite.ctx, &req2)
 	suite.Require().NoError(err)
 
@@ -69,10 +70,12 @@ func setupLiquidateEnv(suite *liquidateTestSuite) {
 	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
 
 	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
-	//suite.Require().NoError(err)
-	msgDepositUser1 := &types.MsgDeposit{Creator: creator1,
+	// suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   creator1,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount}
+		Token:     depositAmount,
+	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
@@ -95,7 +98,6 @@ func setupLiquidateEnv(suite *liquidateTestSuite) {
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	suite.investors = []string{creator1, creator2}
-
 }
 
 func (suite *liquidateTestSuite) TestLiquidate() {
@@ -142,7 +144,6 @@ func (suite *liquidateTestSuite) TestLiquidate() {
 
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-
 			if tc.name == "pool is not in liquidation" {
 				poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 				suite.Require().True(found)
@@ -154,7 +155,6 @@ func (suite *liquidateTestSuite) TestLiquidate() {
 					suite.Require().ErrorContains(err, tc.args.expectedErr)
 				} else {
 					suite.Require().NoError(err)
-
 				}
 			}
 
@@ -163,7 +163,6 @@ func (suite *liquidateTestSuite) TestLiquidate() {
 				suite.Require().ErrorContains(err, tc.args.expectedErr)
 			} else {
 				suite.Require().NoError(err)
-
 			}
 		})
 	}
@@ -213,7 +212,6 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 		total := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		suite.Require().True(total.Equal(histories[0][i].Amount.Amount))
 	}
-
 }
 
 func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
@@ -288,5 +286,4 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 		v1 := total.Sub(v2)
 		suite.Require().True(v1.Equal(histories[0][i].Amount.Amount))
 	}
-
 }

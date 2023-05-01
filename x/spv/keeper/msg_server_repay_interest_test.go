@@ -16,7 +16,6 @@ import (
 )
 
 func TestMsgRepayInterest(t *testing.T) {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, k, _, wctx := setupMsgServer(t)
@@ -61,11 +60,9 @@ func TestMsgRepayInterest(t *testing.T) {
 	k.SetPool(ctx, poolInfo)
 	_, err = app.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "pool is not active")
-
 }
 
 func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.PoolInfo, borrowAmount sdk.Coin) {
-
 	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
 	poolClass, found := nftKeeper.GetClass(ctx, classID)
 	if !found {
@@ -109,7 +106,6 @@ func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.Pool
 }
 
 func TestGetAllInterestToBePaid(t *testing.T) {
-
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	app, k, nftKeeper, wctx := setupMsgServer(t)
@@ -277,5 +273,4 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	paymentTime = borrowInterest.Payments[4].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth*4), paymentTime)
 	require.True(t, checkValueEqualWithExchange(interestOneYear, borrowInterest.Payments[4].PaymentAmount.Amount))
-
 }

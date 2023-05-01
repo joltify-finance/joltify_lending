@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/joltify-finance/joltify_lending/x/spv/keeper"
-	"os"
-	"strconv"
 )
 
 func main() {
-
 	if len(os.Args) < 3 {
 		fmt.Printf("use : cmd apy payfreq(seconds) userAmount(optional)\n")
 		return
@@ -52,5 +52,4 @@ func main() {
 	}
 
 	fmt.Printf("apy: %s, payFreq: %d, apyToPayFreq: %s, interest_to_user: %s interest_to_reserve %s\n", apy, payFreq, apyToPayFreq, interestToUser, interestToReserve)
-
 }

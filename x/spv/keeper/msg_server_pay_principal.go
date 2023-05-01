@@ -13,7 +13,6 @@ import (
 )
 
 func (k msgServer) calculateTotalDueInterest(ctx sdk.Context, poolInfo types.PoolInfo) (sdkmath.Int, error) {
-
 	totalAmount := sdk.ZeroInt()
 	for _, el := range poolInfo.PoolNFTIds {
 		class, found := k.nftKeeper.GetClass(ctx, el)
@@ -109,7 +108,6 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return &types.MsgPayPrincipalResponse{}, nil
 	}
 	return &types.MsgPayPrincipalResponse{}, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "principal is not fully paid. you have paid %v and borrowed %v", principalEscrowAmountLocal, outboundConvertToUSD(poolInfo.BorrowedAmount.Amount, ratio))
-
 }
 
 func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg *types.MsgPayPrincipalPartial) (*types.MsgPayPrincipalPartialResponse, error) {

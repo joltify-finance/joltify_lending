@@ -298,11 +298,10 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	poolInfo.PrincipalPaid = false
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
 	return true
-
 }
 
 func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
-	//fixme this means the pool is empty
+	// fixme this means the pool is empty
 	if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
 		k.SetHistoryPool(ctx, *poolInfo)
 		k.DelPool(ctx, poolInfo.Index)

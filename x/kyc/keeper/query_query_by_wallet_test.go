@@ -1,9 +1,10 @@
 package keeper_test
 
 import (
-	types2 "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
 	"testing"
+
+	types2 "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
@@ -84,5 +85,4 @@ func TestQueryByWalletTwoInvestorIDWithSameWallet(t *testing.T) {
 	msg.WalletAddress = []string{addresses[99]}
 	_, err = app.UploadInvestor(wctx, &msg)
 	require.Error(t, err)
-
 }
