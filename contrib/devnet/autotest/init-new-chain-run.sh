@@ -81,7 +81,7 @@ printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
 $BINARY add-genesis-account $relayerKeyName 1000000000ujolt
 
 
-for i in {1..5}
+for i in {1..100}
 do
   a=$(joltify keys add key_$i --keyring-backend test --output json)
   # get the address from the json

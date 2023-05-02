@@ -3,7 +3,7 @@
 base=1000000000000000000
 junior=$(echo 200000*$base|bc)
 senior=$(echo 800000*$base|bc)
-all_keys=5
+all_keys=100
 
 cecho(){
     RED="\033[0;31m"

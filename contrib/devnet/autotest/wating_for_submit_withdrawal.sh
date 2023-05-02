@@ -21,10 +21,8 @@ cecho(){
 
 # call function prepare investment
 while true; do
-	break
 	ret=$(./window.sh |tail -n 1)
 	echo $ret
-
 	# split the ret with comma
 	IFS=',' read -ra ADDR <<< "$ret"
 	# get the second element
@@ -32,26 +30,32 @@ while true; do
 	third=${ADDR[2]}
 	echo "need to wait for $second to submit withdraw request"
 	#if second is less than 10
-	if [ $second -lt 300 ]; then
+	#if [ $second -lt 300 ]; then
 		#submit the withdrawal request
-		while true; do
+#		while true; do
 		# repay the  interest of junior pool
-		ret=$(joltify tx spv submit-withdrawal-proposal $indexJunior  --from key_1 --output json -y)
+		ret=$(joltify tx spv submit-withdrawal-proposal $indexJunior  --from key_$1 --output json -y)
 		# check the return code of ret
 		code=$(echo $ret | jq -r '.code')
 		if [ $code -eq 0 ]; then
   		cecho "GREEN" "submit withdraw request successful"
-  			break
+	done=1
+  		break
 		else
 			# get raw log from ret
 			rawlog=$(echo $ret| jq -r '.raw_log')
   		cecho "RED" "fail with submit the withdraw request with $rawlog"
   		sleep 1
 		fi
-		done
+#		done
+	#fi
+
+
+	if [ $done -eq 1 ]; then
+		break
 	fi
 
-	sleep 10
+	sleep 5
 done
 
 
@@ -77,25 +81,24 @@ while true; do
 
 	echo "need to wait for $third to submit pay principal request"
 	#if second is less than 10
-	if [ $third -lt 300 ]; then
+	#if [ $third -lt 300 ]; then
 		# repay the  interest of junior pool
 
-  			while true; do
+#  			while true; do
   		ret=$(joltify tx spv  pay-principal-partial $indexJunior $junior"ausdc" --from validator --output json -y)
 		# check the return code of ret
 		code=$(echo $ret | jq -r '.code')
 		if [ $code -eq 0 ]; then
-  			cecho "GREEN" "Repay interest junior successful"
+  			cecho "GREEN" "pay principal junior successful"
   			break
 		else
-  			cecho "RED" "Repay interest junior failed with $ret"
+  			cecho "RED" "pay principal junior failed with $ret"
 		fi
-		sleep 1
 
-	done
-	fi
+#	done
+	#fi
 
-	sleep 10
+	sleep 5
 done
 
 echo "done@!!!"

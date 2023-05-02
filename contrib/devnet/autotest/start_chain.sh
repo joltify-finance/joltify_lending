@@ -3,7 +3,7 @@
 # loop function to generate n cosmos accounts
 base=1000000000000000000
 total_investors=2
-all_keys=5
+all_keys=100
 project_index=1
 cecho(){
     RED="\033[0;31m"

@@ -3,34 +3,35 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"os/exec"
 	"strconv"
 	"sync"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// generateRandomIntegersWithSum generates n random integers with a given sum
-func generateRandomIntegersWithSum(n int, targetSum int) ([]int, []sdk.Dec) {
-	result := make([]int, n)
-	ratio := make([]sdk.Dec, n)
-	remainingSum := targetSum
-
+func generateRandomIntegersWithSum(n int, sum int) []float64 {
 	rand.Seed(100)
-	for i := 0; i < n-1; i++ {
-		// Generate a random integer between 0 and remainingSum
-		randomInt := rand.Intn(remainingSum)
-		result[i] = randomInt
-		ratio[i] = sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(randomInt))).QuoTruncate(sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(targetSum))))
-		remainingSum -= randomInt
+	mean := float64(sum) / float64(n) // mean of the normal distribution
+	stdDev := math.Sqrt(mean)         // standard deviation of the normal distribution
+
+	// generate random values with a normal distribution
+	values := make([]float64, n)
+	for i := range values {
+		values[i] = rand.NormFloat64()*stdDev + mean
 	}
 
-	// Set the last integer to the remaining sum
-	result[n-1] = remainingSum
-	ratio[n-1] = sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(result[n-1]))).QuoTruncate(sdk.NewDecFromInt(sdk.NewIntFromUint64(uint64(targetSum))))
-	return result, ratio
+	// adjust values to ensure their sum is equal to the given sum
+	currentSum := 0.0
+	for _, v := range values {
+		currentSum += v
+	}
+	scaleFactor := float64(sum) / currentSum
+	for i := range values {
+		values[i] *= scaleFactor
+	}
+	return values
 }
 
 func main() {
@@ -63,18 +64,21 @@ func main() {
 		return
 	}
 
-	values, _ := generateRandomIntegersWithSum(investorsNum, totalAmount)
+	values := generateRandomIntegersWithSum(investorsNum, totalAmount)
+	// fmt.Println("values: ", values)
+	// return
 	wg := sync.WaitGroup{}
 	wg.Add(len(values))
 	for i, v := range values {
-		go func(index int, value int) {
+		go func(index int, value float64) {
 			defer wg.Done()
 			var cmd *exec.Cmd
 			if withdraw {
-				cmd = exec.Command("./withdraw_after_close.sh", poolIndex, "10ausdc", strconv.Itoa(offset+index+1))
+				cmd = exec.Command("./withdraw_after_close.sh", poolIndex, "1000000000000000000000000ausdc", strconv.Itoa(offset+index+1))
 			} else {
+				valueStr := strconv.FormatFloat(value, 'f', 6, 64)
 				// run the shell scripts
-				cmd = exec.Command("./deposit.sh", poolIndex, strconv.Itoa(value), strconv.Itoa(offset+index+1))
+				cmd = exec.Command("./deposit.sh", poolIndex, valueStr, strconv.Itoa(offset+index+1))
 			}
 
 			// pipe the commands output to the applications

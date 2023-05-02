@@ -202,6 +202,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		}
 		if depositor.DepositType == types.DepositorInfo_processed {
 			poolInfo.UsableAmount = poolInfo.UsableAmount.Add(depositor.WithdrawalAmount).SubAmount(totalWithdraw.Amount)
+			poolInfo.TransferAccountsNumber--
 		}
 		depositor.DepositType = types.DepositorInfo_unset
 		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)

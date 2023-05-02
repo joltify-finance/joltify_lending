@@ -53,7 +53,7 @@ func NewParams() Params {
 			SPVName:                      strconv.Itoa(i) + ":" + tmrand.NewRand().Str(10),
 			ProjectOwner:                 acc,
 			BasicInfo:                    &b,
-			ProjectLength:                540, // 5 mins
+			ProjectLength:                480, // 5 mins
 			ProjectTargetAmount:          types.NewCoin("ausdc", amount),
 			BaseApy:                      types.NewDecWithPrec(10, 2),
 			PayFreq:                      "120",

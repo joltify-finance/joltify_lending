@@ -28,7 +28,7 @@ indexJunior=$thispool
 # each node deposit 150000usdc into the junior pool
 
 amount=$(echo 150000*$base|bc)
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_1 -y --output json --gas 800000)
+ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_1 -y --output json --gas 80000000)
 code=$(echo $ret | jq -r '.code')
 if [ $code -eq 0 ]; then
 	cecho "GREEN" "deposit successful"
@@ -38,7 +38,7 @@ fi
 
 
 
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_2 -y --output json --gas 800000)
+ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_2 -y --output json --gas 80000000)
 code=$(echo $ret | jq -r '.code')
 if [ $code -eq 0 ]; then
 	cecho "GREEN" "deposit successful"
@@ -49,7 +49,7 @@ fi
 
 amount=$(echo 200000*$base|bc)
 # run the borrow for junior
-ret=$(joltify tx spv  borrow $indexJunior $amount"ausdc" --from validator -y --output json --gas 800000)
+ret=$(joltify tx spv  borrow $indexJunior $amount"ausdc" --from validator -y --output json --gas 80000000)
 # get the code from json
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0
@@ -60,7 +60,7 @@ if [ $code -eq 0 ]; then
 fi
 
 
-ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 800000)
+ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 80000000)
 # get the code from json
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0

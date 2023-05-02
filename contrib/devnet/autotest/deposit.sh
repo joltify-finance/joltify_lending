@@ -1,7 +1,7 @@
 #!/bin/bash
 
 base=1000000000000000000
-amount=$(echo $2*$base | bc)
+amount=$(echo $2*$base/1 | bc)
 set -x
 ret=$(joltify tx spv deposit $1 $amount"ausdc" --from key_$3 --output json -y)
 set +x
@@ -9,7 +9,7 @@ set +x
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0
 if [ $code -eq 0 ]; then
-	echo " Deposit $1 successful"
+	echo " Deposit $1 successful with amount $amount"
 else
 	echo "Deposit $1 failed with $ret"
 	exit 1
