@@ -4,17 +4,19 @@
 *.dll
 *.so
 *.dylib
-
+*.xlsx
 # Test binary, build with `go test -c`
 *.test
-
+*.log
+config.toml
 # Output of the go coverage tool
 *.out
+runtest
 
 # Exclude build files
 vendor
 build
-
+.~lock*
 # IDE files
 *.vscode
 *.idea
