@@ -43,6 +43,11 @@ message ProjectInfo {
   int32  pool_total_borrow_limit= 11;
   google.protobuf.Duration grace_time= 12 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
   string market_id = 13;
+  string junior_min_ratio = 14[
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // Params defines the parameters for the module.

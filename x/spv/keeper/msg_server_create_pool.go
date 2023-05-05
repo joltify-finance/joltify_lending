@@ -48,7 +48,7 @@ func calculateApys(targetAmount, pool1Amount sdk.Coin, baseApy, pool1Apy sdk.Dec
 		return nil, nil, errors.New("one pool has less than 0 amount")
 	}
 
-	//ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
+	// ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
 	ij := pool1Apy.MulInt(pool1Amount.Amount)
 	it := baseApy.MulInt(targetAmount.Amount)
 	pool2Apy := it.Sub(ij).QuoTruncate(sdk.NewDecFromInt(pool2Amount.Amount))
@@ -66,7 +66,6 @@ func calculateApys(targetAmount, pool1Amount sdk.Coin, baseApy, pool1Apy sdk.Dec
 	}
 
 	return poolsInfoAPY, poolsInfoAmount, nil
-
 }
 
 func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (*types.MsgCreatePoolResponse, error) {
@@ -107,7 +106,6 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	}
 
 	poolsInfoAPY, poolsInfoAmount, err := calculateApys(targetProject.ProjectTargetAmount, msg.TargetTokenAmount, targetProject.BaseApy, apy, true)
-
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger than target")
 	}
@@ -158,6 +156,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		poolInfo := types.PoolInfo{
 			Index:                         indexHash.Hex(),
 			PoolName:                      msg.PoolName + "-" + typePrefix,
+			ProjectName:                   targetProject.BasicInfo.ProjectName,
 			LinkedProject:                 msg.ProjectIndex,
 			OwnerAddress:                  spvAddress,
 			Apy:                           poolApy,

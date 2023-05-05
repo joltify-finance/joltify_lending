@@ -147,6 +147,7 @@ message PoolInfo {
   Interest_prepayment interest_prepayment = 38;
 
   int32 transfer_accounts_number =39;
+  string project_name = 40;
 }
 
 message Interest_prepayment{

@@ -1,9 +1,10 @@
 package types
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -45,7 +46,7 @@ func NewParams() Params {
 		SPVName:                      "defaultSPV",
 		ProjectOwner:                 acc,
 		BasicInfo:                    &b,
-		ProjectLength:                300, //5 mins
+		ProjectLength:                300, // 5 mins
 		ProjectTargetAmount:          types.NewCoin("ausdc", amount),
 		BaseApy:                      types.NewDecWithPrec(10, 2),
 		PayFreq:                      "240",
@@ -53,6 +54,7 @@ func NewParams() Params {
 		PoolTotalBorrowLimit:         100,
 		MarketId:                     "aud:usd",
 		WithdrawRequestWindowSeconds: 30,
+		JuniorMinRatio:               types.NewDecWithPrec(10, 2),
 	}
 	return Params{[]*ProjectInfo{&pi}, []types.AccAddress{acc}}
 }

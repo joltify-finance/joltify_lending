@@ -2,9 +2,11 @@ package keeper
 
 import (
 	"context"
-	sdkmath "cosmossdk.io/math"
-	"github.com/gogo/protobuf/proto"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/gogo/protobuf/proto"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -37,7 +39,6 @@ func (k msgServer) getAllBorrowed(ctx sdk.Context, poolInfo types.PoolInfo) sdkm
 }
 
 func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo) error {
-
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
 		if poolInfo.PoolStatus != types.PoolInfo_PooLPayPartially {
 			return coserrors.Wrapf(types.ErrPoolNotActive, "pool is not in active status or partially paid status, current: %v", poolInfo.PoolStatus)
@@ -73,6 +74,20 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+	}
+
+	// check that junior pool must meet its target amount before senior pool can borrow
+	if poolInfo.PoolType == types.PoolInfo_SENIOR {
+		juniorPoolIndex := crypto.Keccak256Hash([]byte(poolInfo.ProjectName), poolInfo.OwnerAddress.Bytes(), []byte("junior"))
+
+		juniorInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
+		if !found {
+			return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		}
+		allBorrowed := k.getAllBorrowed(ctx, juniorInfo)
+		if allBorrowed.LT(juniorInfo.TargetAmount.Amount) {
+			return nil, coserrors.Wrapf(types.ErrPoolNotActive, "junior pool has not met its target amount, cannot borrow from senior pool")
+		}
 	}
 
 	allBorrowed := k.getAllBorrowed(ctx, poolInfo)
