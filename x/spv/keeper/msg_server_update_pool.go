@@ -85,12 +85,14 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 	if isJunior {
 		poolSenior.Apy = poolsInfoAPY["senior"]
 		poolSenior.TargetAmount = poolsInfoAmount["senior"]
-		poolSenior.PoolName = msg.PoolName
+		poolSenior.PoolName = msg.PoolName + "-senior"
+		poolInfo.PoolName = msg.PoolName + "-junior"
 		k.SetPool(ctx, *poolSenior)
 	} else {
 		poolJunior.Apy = poolsInfoAPY["junior"]
 		poolJunior.TargetAmount = poolsInfoAmount["junior"]
-		poolJunior.PoolName = msg.PoolName
+		poolJunior.PoolName = msg.PoolName + "-junior"
+		poolInfo.PoolName = msg.PoolName + "-junior"
 		k.SetPool(ctx, *poolJunior)
 	}
 
