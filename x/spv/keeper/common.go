@@ -16,7 +16,6 @@ import (
 )
 
 func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
-
 	totalInterestUsd := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -92,7 +91,6 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 }
 
 func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdk.Dec) (sdkmath.Int, error) {
-
 	totalInterestUsd := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -246,6 +244,14 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 
 func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, errGlobal error) {
 	depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(poolInfo.BorrowedAmount.Denom, lockedLocal))
+
+	if depositor.WithdrawalAmount.Amount.LT(lockedUsd) {
+		if lockedUsd.Sub(depositor.WithdrawalAmount.Amount).GT(sdk.NewIntFromUint64(5)) {
+			panic("withdraw amount is small than the locked amount")
+		}
+		lockedUsd = depositor.WithdrawalAmount.Amount
+	}
+
 	depositor.WithdrawalAmount = depositor.WithdrawalAmount.SubAmount(lockedUsd)
 
 	// nft ID is the hash(nft class ID, investorWallet)
@@ -268,11 +274,9 @@ func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInf
 	classIDAndNFTID := fmt.Sprintf("%v:%v", nftTemplate.ClassId, nftTemplate.Id)
 	depositor.LinkedNFT = append(depositor.LinkedNFT, classIDAndNFTID)
 	k.SetDepositor(ctx, *depositor)
-
 }
 
 func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, usdBorrowed, localAmount sdkmath.Int, ratio sdk.Dec, nftClass nfttypes.Class, depositors []*types.DepositorInfo) error {
-
 	nftTemplate := nfttypes.NFT{
 		ClassId: nftClass.Id,
 		Uri:     nftClass.Uri,
@@ -353,7 +357,6 @@ func (k Keeper) handleClassLeftover(ctx sdk.Context, poolinfo types.PoolInfo) sd
 }
 
 func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
-
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
 	if err != nil {
 		panic(err)
