@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"html"
 	"math/big"
@@ -24,11 +25,14 @@ import (
 )
 
 var (
-	logger       = log.With().Logger()
-	needWrite    = false
-	inputTimeout = time.Second * 5
-	base         = new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)
-	ratio        = sdk.MustNewDecFromStr("0.7")
+	logger         = log.With().Logger()
+	needWrite      = false
+	inputTimeout   = time.Second * 5
+	base           = new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)
+	ratio          = sdk.MustNewDecFromStr("0.7")
+	transferAmount = sdk.NewInt(0)
+	wrong          = html.UnescapeString("&#" + "10060" + ";")
+	correct        = html.UnescapeString("&#" + "9989" + ";")
 )
 
 type Window struct {
@@ -37,28 +41,31 @@ type Window struct {
 	payPartialStartTime int
 }
 
-func getTimeWindow(poolIndex string) Window {
-	out, err := common.RunCommandWithOutput("./window.sh", poolIndex)
-	if err != nil {
-		logger.Error().Err(err).Msgf("fail to get the window")
-	}
-	out = strings.Trim(out, "\n")
-	outs := strings.Split(out, ",")
-	paymentDue, _ := strconv.Atoi(outs[0])
-	withdrawStartTime, _ := strconv.Atoi(outs[1])
-	payPartialStartTime, _ := strconv.Atoi(outs[2])
+func getTimeWindow(poolInfo common.SPV) Window {
+	projectDueTime := poolInfo.PoolInfo.ProjectDueTime
 
-	window := Window{
+	proposalDate := projectDueTime.Add(-time.Second * time.Duration(poolInfo.PoolInfo.WithdrawRequestWindowSeconds*3))
+
+	payPrincipalDueDate := projectDueTime.Add(-time.Second * time.Duration(poolInfo.PoolInfo.WithdrawRequestWindowSeconds*2-10))
+	currentTime := time.Now()
+	withdrawStart := proposalDate.Sub(currentTime).Seconds()
+	payPrincipalStart := payPrincipalDueDate.Sub(currentTime).Seconds()
+
+	paymentDate := poolInfo.PoolInfo.LastPaymentTime.Add(time.Duration(poolInfo.PoolInfo.PayFreq) * time.Second)
+
+	paymentDue := int(paymentDate.Sub(currentTime).Seconds())
+
+	w := Window{
 		paymentDue:          paymentDue,
-		withdrawStartTime:   withdrawStartTime,
-		payPartialStartTime: payPartialStartTime,
+		withdrawStartTime:   int(withdrawStart),
+		payPartialStartTime: int(payPrincipalStart),
 	}
 
-	return window
+	return w
 }
 
-func printMenu(poolIndex string) {
-	window := getTimeWindow(poolIndex)
+func printMenu(poolInfo common.SPV) {
+	window := getTimeWindow(poolInfo)
 
 	color.Green.Printf("\n#####payment: %v(s)  submit proposal in %v(s) pay partial in %v(s) #########\n", window.paymentDue, window.withdrawStartTime, window.payPartialStartTime)
 	color.Green.Println("1. deposit")
@@ -82,12 +89,25 @@ func runService(ctx context.Context, poolIndex string, totalInvestors int, wg *s
 		case <-ctx.Done():
 			return
 		case <-time.After(2 * time.Second):
+
+			out, err := common.RunCommandWithOutput("joltify", "q", "spv", "query-pool", poolIndex, "--output", "json")
+			if err != nil {
+				color.Red.Printf("error in run command")
+			}
+
+			var poolInfo common.SPV
+			err = json.Unmarshal([]byte(out), &poolInfo)
+			if err != nil {
+				color.Red.Printf("fail to unmarshal")
+			}
+
 			if requestWithdrawnums > 0 {
-				w := getTimeWindow(poolIndex)
-				color.Gray.Printf("time to submit withdraw request: %v and time to pay principal %v\n", w.withdrawStartTime, w.payPartialStartTime)
+				printMenu(poolInfo)
+				color.Gray.Println("we are in submit withdraw request phase, not allow to do other operations")
 				continue
 			}
-			printMenu(poolIndex)
+
+			printMenu(poolInfo)
 			fmt.Printf("input the choice:     ")
 			var input string
 			select {
@@ -355,6 +375,7 @@ func runService(ctx context.Context, poolIndex string, totalInvestors int, wg *s
 					}
 				}
 				color.Cyan.Printf("total transfer: %v\n", totalTransfer.String())
+				transferAmount = totalTransfer
 
 			case 5:
 				if requestWithdrawnums > 0 {
@@ -384,7 +405,7 @@ func runService(ctx context.Context, poolIndex string, totalInvestors int, wg *s
 			case 6:
 				baseName := time.Now().Format("2006-01-02 15-04")
 				fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-				common.DumpAll(poolIndex, fileName, needWrite)
+				common.DumpAll(poolIndex, fileName, true)
 
 			case 7:
 				withdrawOrDeposit(poolIndex, totalInvestors, totalInvestors, true, true)
@@ -395,7 +416,6 @@ func runService(ctx context.Context, poolIndex string, totalInvestors int, wg *s
 			}
 
 		case option := <-wNotify:
-			fmt.Printf(">>>>>>>>>>>process notice %v\n", option)
 			switch option {
 			case common.WITHDRAW:
 				if requestWithdrawnums == -1 {
@@ -425,14 +445,10 @@ func runService(ctx context.Context, poolIndex string, totalInvestors int, wg *s
 				}
 
 			case common.PAYPRINCIPAL:
-				if requestWithdrawnums == -1 {
-					logger.Info().Msgf("no users withdraw request")
-					continue
-				}
 				baseName := time.Now().Format("2006-01-02 15-04")
 				fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
 				common.DumpAll(poolIndex, fileName, needWrite)
-				payPrincipalPartial(poolIndex, totalInvestors)
+				payPrincipalPartial(poolIndex)
 				fileName = fmt.Sprintf("%s-%s.xlsx", baseName, "after")
 				common.DumpAll(poolIndex, fileName, needWrite)
 				requestWithdrawnums = -1
@@ -443,63 +459,72 @@ func runService(ctx context.Context, poolIndex string, totalInvestors int, wg *s
 	}
 }
 
+// false means it exceeds the tolerance
+func compareWithinError(a, b, e *big.Int) bool {
+	delta := new(big.Int).Sub(new(big.Int).Abs(a), new(big.Int).Abs(b))
+	if delta.CmpAbs(e) == 1 {
+		return false
+	}
+	return true
+}
+
 func runWindowMonitor(ctx context.Context, poolIndex string, wg *sync.WaitGroup, wNotify chan int) {
 	done1 := false
-	done2 := false
 
-	set1 := false
-	set2 := false
 	var depositorsb []common.SPV
 	var depositorsa []common.SPV
-	var err error
 	defer wg.Done()
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-time.After(5 * time.Second):
-			w := getTimeWindow(poolIndex)
+
+			out, err := common.RunCommandWithOutput("joltify", "q", "spv", "query-pool", poolIndex, "--output", "json")
+			if err != nil {
+				color.Red.Printf("error in run command")
+			}
+
+			var poolInfo common.SPV
+			err = json.Unmarshal([]byte(out), &poolInfo)
+			if err != nil {
+				color.Red.Printf("fail to unmarshal")
+			}
+
+			w := getTimeWindow(poolInfo)
 			if w.withdrawStartTime <= 0 && w.withdrawStartTime > -10 && !done1 {
 				color.Green.Printf("send withdraw notify\n")
 				wNotify <- common.WITHDRAW
-				color.Green.Println("done Withdarw notification")
+				color.Green.Println("done withdrawal notification")
 				done1 = true
-				done2 = false
+
 			}
-			if w.payPartialStartTime <= 0 && w.payPartialStartTime > -10 && !done2 {
+			if w.payPartialStartTime <= 0 && w.payPartialStartTime > -10 {
 				color.Green.Printf("send pay principal notify\n")
-				wNotify <- common.PAYPRINCIPAL
-				color.Green.Println("done P")
-				done2 = true
-				done1 = false
+
+				if len(poolInfo.PoolInfo.WithdrawAccounts) != 0 {
+					wNotify <- common.PAYPRINCIPAL
+					done1 = false
+				}
 			}
-			set1 = false
-			set2 = false
-			if w.paymentDue <= 6 && !done1 {
+
+			if w.paymentDue <= 6 {
 				color.Yellow.Println("\nwe take dump before payment")
 				done1 = true
-				done2 = false
 				_, depositorsb, _, err = common.DumpAll(poolIndex, "before.xlsx", false)
 				if err != nil {
 					logger.Error().Err(err).Msgf("error dumnp all")
 				}
-				set1 = true
 			}
-			if w.paymentDue > 100 && !done2 {
+			if w.paymentDue > 100 {
 				done1 = false
-				done2 = true
 				color.Yellow.Println("we take dump after payment")
 				_, depositorsa, _, err = common.DumpAll(poolIndex, "after.xlsx", false)
 				if err != nil {
 					logger.Error().Err(err).Msgf("error dumnp all")
 				}
-				set2 = true
 			}
 			// if set1 && set2 {
-			set1 = false
-			set2 = false
-			_ = set1
-			_ = set2
 
 			withdrawChangeMap := make(map[int]*big.Int)
 			lockedChangeMap := make(map[int]*big.Int)
@@ -548,8 +573,7 @@ func runWindowMonitor(ctx context.Context, poolIndex string, wg *sync.WaitGroup,
 				}
 
 				if len(withdrawChangeMap) != 0 {
-					for i, v := range withdrawChangeMap {
-						fmt.Printf(">>>>>>>>>>>>>>>>>>>>>%v===%v\n", i, v.String())
+					for _, v := range withdrawChangeMap {
 						if v.Cmp(big.NewInt(0)) == 1 {
 							totalTransferedWithdrawed = totalTransferedWithdrawed.Add(totalTransferedWithdrawed, v)
 						}
@@ -571,11 +595,18 @@ func runWindowMonitor(ctx context.Context, poolIndex string, wg *sync.WaitGroup,
 			lockedUsd := ratio.MulInt(sdk.NewIntFromBigInt(totalTransferedLocked)).TruncateInt()
 			delta := lockedUsd.Sub(sdk.NewIntFromBigInt(totalTransferedWithdrawed)).Abs()
 
-			//if totalTransferedWithdrawed.Cmp(big.NewInt(0)) != 0 {
-			color.HiGreen.Printf(">>>>>transfer amount is %v and delta is %v\n", totalTransferedWithdrawed.String(), delta.String())
-			//}
+			if totalTransferedWithdrawed.Cmp(big.NewInt(0)) != 0 {
+				color.Yellow.Printf(">>>>>transfer amount is %v and difference between total locked change and withdrawalable change is %v\n", totalTransferedWithdrawed.String(), delta.String())
+				if !transferAmount.IsZero() {
+					if transferAmount.Equal(sdk.NewIntFromBigInt(totalTransferedWithdrawed)) {
+						color.Yellow.Printf("%v transfer amount is equal to total transfer request", correct)
+					} else {
+						color.Red.Printf("%v transfer amount is NOT equal to total transfer request", wrong)
+					}
+				}
+			}
 
-			if totalWithdrawChange.Cmp(big.NewInt(0)) != 0 || new(big.Int).Abs(totalLockedChange).Cmp(big.NewInt(10)) == 1 {
+			if !compareWithinError(totalWithdrawChange, big.NewInt(0), big.NewInt(10)) || !compareWithinError(totalLockedChange, big.NewInt(0), big.NewInt(10)) {
 				tick := html.UnescapeString("&#" + "10060" + ";")
 				color.HiBlue.Printf("%v total withdraw change %v and total locked %v\n", tick, totalWithdrawChange.String(), totalLockedChange.String())
 			}
@@ -585,6 +616,7 @@ func runWindowMonitor(ctx context.Context, poolIndex string, wg *sync.WaitGroup,
 
 func main() {
 	poolIndex := "0x43ce7e072884180e125328e727911ad83fcaba1cc487ece1ccc3e19376f51118"
+	zlog.SetGlobalLevel(zlog.InfoLevel)
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -592,18 +624,17 @@ func main() {
 		return
 	}
 
-	//startChain()
-	//depositAndBorrow()
-	//payInterest(poolIndex)
-	//return
-	//out, err := common.RunCommandWithOutput("./repay_interest.sh", poolIndex, "2000")
-	//if err != nil {
-	//	logger.Error().Err(err).Msgf("fail to repay interest %v", out)
-	//	return
-	//}
-	// return
-	zlog.SetGlobalLevel(zlog.InfoLevel)
-	// zlog.SetGlobalLevel(zlog.DebugLevel)
+	color.Cyan.Printf("need to run brand new chain? (y/n): ")
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	input = strings.Trim(input, "\n")
+	switch input {
+	case "y":
+		startChain()
+		depositAndBorrow()
+		payInterest(poolIndex)
+	default:
+	}
 
 	allInvestors := os.Getenv("ALL_INVESTORS")
 	n, err := strconv.Atoi(allInvestors)
@@ -618,7 +649,6 @@ func main() {
 	windowNotify := make(chan int, 1)
 	wg.Add(3)
 
-	reader := bufio.NewReader(os.Stdin)
 	ch := make(chan string)
 	go func() {
 		for {

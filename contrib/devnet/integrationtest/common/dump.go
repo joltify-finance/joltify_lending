@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"math/big"
 	"os"
 	"strconv"
 	"strings"
@@ -132,7 +133,7 @@ func dumpBorrowNFT(poolIndex, fileName string, needWrite bool) ([]SPV, error) {
 	nfts := poolInfo.PoolInfo.PoolNFTIds
 
 	data := make([][]string, len(nfts)+1)
-	data[0] = []string{"nft-id", "borrowed amount", "borrowed time", "exchange ratio", "total interest paid ", "accumulate interest", "interest paid"}
+	data[0] = []string{"nft-id", "borrowed amount", "borrowed time", "exchange ratio", "total interest paid counter", "accumulate interest", "interest paid", "delta interest"}
 	nftsResult := make([]SPV, len(nfts))
 	for i, el := range nfts {
 		out, err := RunCommandWithOutput("joltify", "q", "nft", "class", el, "--output", "json")
@@ -146,7 +147,17 @@ func dumpBorrowNFT(poolIndex, fileName string, needWrite bool) ([]SPV, error) {
 		borrow := nft.Class.Data.BorrowDetails[len(nft.Class.Data.BorrowDetails)-1]
 		paidCounter := len(nft.Class.Data.Payments)
 		counter := strconv.Itoa(paidCounter)
-		data[i+1] = []string{nft.Class.ID, borrow.BorrowedAmount.Amount, borrow.TimeStamp.String(), borrow.ExchangeRatio, counter, nft.Class.Data.AccInterest.Amount, nft.Class.Data.InterestPaid.Amount}
+
+		acc, ok := new(big.Int).SetString(nft.Class.Data.AccInterest.Amount, 10)
+		if !ok {
+			panic("accInterest is not a number")
+		}
+		paid, ok := new(big.Int).SetString(nft.Class.Data.InterestPaid.Amount, 10)
+		if !ok {
+			panic("paid is not a number")
+		}
+
+		data[i+1] = []string{nft.Class.ID, borrow.BorrowedAmount.Amount, borrow.TimeStamp.String(), borrow.ExchangeRatio, counter, nft.Class.Data.AccInterest.Amount, nft.Class.Data.InterestPaid.Amount, new(big.Int).Sub(acc, paid).String()}
 		nftsResult[i] = nft
 	}
 	if needWrite {

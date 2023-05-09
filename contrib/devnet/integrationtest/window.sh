@@ -69,6 +69,7 @@ current_time_seconds=$(date -u -d "$current_time" +%s)
 gap=$((next_payment_seconds - current_time_seconds))
 
 
+set -x
 project_due_time_seconds=$(date -u -d "$project_due_time" +%s)
 withdrawal_start_duration=$(echo $withdraw_window*3 | bc)
 pay_partial_start_duration=$(echo $withdraw_window*2 | bc)
@@ -82,9 +83,9 @@ gap3=$(( current_time_seconds - pay_partial_start_time ))
 
 #echo "project due time: $project_due_time"
 
-result=$(date -u -d "@$proposal_start_time" +"%Y-%m-%dT%H:%M:%SZ")
+#result=$(date -u -d "@$proposal_start_time" +"%Y-%m-%dT%H:%M:%SZ")
 #echo "#### proposal start time $result"
-result=$(date -u -d "@$pay_partial_start_time" +"%Y-%m-%dT%H:%M:%SZ")
+#result=$(date -u -d "@$pay_partial_start_time" +"%Y-%m-%dT%H:%M:%SZ")
 #echo "#### pay partial start time $result"
 
 

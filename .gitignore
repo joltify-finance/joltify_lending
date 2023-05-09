@@ -16,7 +16,7 @@ runtest
 # Exclude build files
 vendor
 build
-
+.~lock*
 # IDE files
 *.vscode
 *.idea

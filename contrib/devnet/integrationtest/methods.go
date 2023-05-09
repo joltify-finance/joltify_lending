@@ -75,7 +75,7 @@ func withdrawOrDeposit(poolIndex string, claimUsersNum, totalInvestors int, all,
 				out, err = common.RunCommandWithOutput("./deposit.sh", poolIndex, strconv.Itoa(amount), strconv.Itoa(userIndex))
 			}
 			if err != nil {
-				logger.Debug().Msgf("we got error %v when claim interest for user %d, %v", err, userIndex, out)
+				logger.Error().Err(err).Msgf("we got error %v when call withdraw for user %d, %v", err, userIndex, out)
 				return
 			}
 			locker.Lock()
@@ -110,7 +110,7 @@ func transferOwnership(poolIndex string, claimUsersNum, totalInvestors int) {
 			_, err := common.RunCommandWithOutput("./transfer.sh", poolIndex, strconv.Itoa(userIndex))
 			_ = err // we ignore the err here as some account may not have deposit
 			if err != nil {
-				logger.Debug().Msgf("we got error %v when claim interest for user %d", err, userIndex)
+				logger.Debug().Msgf("we got error %v when transfer for user %d", err, userIndex)
 				return
 			}
 			locker.Lock()
@@ -130,6 +130,7 @@ func submitWithdraw(poolIndex string, claimUsersNum, totalInvestors int) {
 		usersClaim[i] = num
 	}
 	logger.Info().Msgf("we do the submit withdraw with users %v", usersClaim)
+
 	var actuallydone []int
 	locker := sync.RWMutex{}
 	wg := sync.WaitGroup{}
@@ -137,10 +138,11 @@ func submitWithdraw(poolIndex string, claimUsersNum, totalInvestors int) {
 	for _, user := range usersClaim {
 		go func(userIndex int) {
 			defer wg.Done()
-			_, err := common.RunCommandWithOutput("./partial_withdraw.sh", poolIndex, strconv.Itoa(userIndex))
+			out, err := common.RunCommandWithOutput("./partial_withdraw.sh", poolIndex, strconv.Itoa(userIndex))
 			_ = err // we ignore the err here as some account may not have deposit
 			if err != nil {
-				logger.Debug().Msgf("we got error %v when claim interest for user %d", err, userIndex)
+				// logger.Debug().Msgf("we got error %v when claim interest for user %d", err, userIndex)
+				logger.Error().Err(err).Msgf("we got error %v when call partial withdraw  for user %d %v", err, userIndex, out)
 				return
 			}
 			locker.Lock()
@@ -152,10 +154,10 @@ func submitWithdraw(poolIndex string, claimUsersNum, totalInvestors int) {
 	logger.Info().Msgf("we actually done the withdraw request with users %v", actuallydone)
 }
 
-func payPrincipalPartial(poolIndex string, userIndex int) {
-	_, err := common.RunCommandWithOutput("./pay_partial_principal.sh", poolIndex, "200000")
+func payPrincipalPartial(poolIndex string) {
+	out, err := common.RunCommandWithOutput("./pay_partial_principal.sh", poolIndex, "200000")
 	if err != nil {
-		logger.Debug().Msgf("we got error %v when claim interest for user %d", err, userIndex)
+		logger.Error().Err(err).Msgf("we get error when pay partial principal with error %v", out)
 		return
 	}
 	logger.Info().Msgf("pay partial principal successfully")
