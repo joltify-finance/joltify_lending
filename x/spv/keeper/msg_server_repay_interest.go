@@ -15,7 +15,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, error) {
+func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, time.Time, error) {
 	var payment, paymentToInvestor sdk.Coin
 	var thisPaymentTime time.Time
 	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
@@ -25,7 +25,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 	if firstBorrow {
 		if ctx.BlockTime().Before(latestPaymentTime.Add(time.Duration(interestData.PayFreq) * time.Second)) {
-			return sdk.Coin{}, errors.New("pay interest too early")
+			return sdk.Coin{}, time.Time{}, errors.New("pay interest too early")
 		}
 	}
 	delta := currentTime.Sub(latestPaymentTime).Seconds()
@@ -36,7 +36,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		freqRatio := interestData.MonthlyRatio
 		paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
 		if paymentAmount.IsZero() {
-			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, nil
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
 		}
 
 		paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
@@ -55,7 +55,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	} else {
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 		if currentTimeTruncated.Before(latestPaymentTime) {
-			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, nil
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
 		}
 		deltaTruncated := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
@@ -82,12 +82,12 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
 	interestData.Payments = append(interestData.Payments, &currentPayment)
 	interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
-	return payment, nil
+	return payment, thisPaymentTime, nil
 }
 
 // getAllinterestToBePaid returns the total interest to be paid for all the borrows in the pool using the
 // LOCAL currency
-func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) (sdkmath.Int, error) {
+func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) (sdkmath.Int, time.Time, error) {
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
 	totalPayment := sdkmath.NewInt(0)
@@ -107,6 +107,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 			poolInfo.InterestPrepayment = nil
 		}
 	}
+	var poolLatestPaymentTime time.Time
 	for _, el := range nftClasses {
 		class, found := k.nftKeeper.GetClass(ctx, el)
 		if !found {
@@ -118,9 +119,9 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic(err)
 		}
-		thisBorrowInterest, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow, exchangeRatio)
+		thisBorrowInterest, thisNFTPaymentTime, err := k.updateInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow, exchangeRatio)
 		if err != nil {
-			return sdkmath.Int{}, err
+			return sdkmath.Int{}, time.Time{}, err
 		}
 		if thisBorrowInterest.Amount.IsZero() {
 			continue
@@ -131,12 +132,15 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		}
 		err = k.nftKeeper.UpdateClass(ctx, class)
 		if err != nil {
-			return sdkmath.Int{}, err
+			return sdkmath.Int{}, time.Time{}, err
 		}
 		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
 		firstBorrow = false
+		if thisNFTPaymentTime.After(poolLatestPaymentTime) {
+			poolLatestPaymentTime = thisNFTPaymentTime
+		}
 	}
-	return totalPayment, nil
+	return totalPayment, poolLatestPaymentTime, nil
 }
 
 func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdk.Dec, error) {

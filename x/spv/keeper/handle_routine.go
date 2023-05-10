@@ -15,7 +15,7 @@ import (
 )
 
 func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error {
-	totalAmountDue, err := k.getAllInterestToBePaid(ctx, poolInfo)
+	totalAmountDue, poolLatestPaymentTime, err := k.getAllInterestToBePaid(ctx, poolInfo)
 	if err != nil {
 		ctx.Logger().Info(err.Error())
 		if err.Error() == "pay interest too early" {
@@ -38,8 +38,7 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	}
 
 	// finally, we update the poolinfo
-	currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(poolInfo.PayFreq) * time.Second)
-	poolInfo.LastPaymentTime = currentTimeTruncated
+	poolInfo.LastPaymentTime = poolLatestPaymentTime
 	k.SetPool(ctx, *poolInfo)
 
 	ctx.EventManager().EmitEvent(
