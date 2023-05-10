@@ -6,16 +6,15 @@ for (( c=1; c<=$all_keys; c++ ))
 do
   ret=$(joltify q bank balances  $(joltify keys show key_$c -a)  --output json)
   balance=$(echo $ret | jq -r '.balances[0].amount')
-  total_amount=$(echo $total_amount+$balance | bc)
-  echo $ret
+  interest=$(echo $balance - 5000000000000000000000000 | bc)
+  total_amount=$(echo $total_amount+ $interest | bc)
+  echo ">>>$balance"
 done
 
 
 validator_ret=$(joltify q bank balances  $(joltify keys show validator -a)  --output json)
 echo $validator_ret
 
-all_balance=$(echo 5000000000000000000000000*$all_keys | bc)
-echo "#################$all_balance"
 # now we check the payment ?= recevied
 ret=$(joltify q spv total-reserve --output json)
 coins=$(echo $ret | jq -r '.coins')
@@ -23,12 +22,11 @@ amount_reserved=${coins%ausdc}
 ret=$(joltify q bank balances  $(joltify keys show validator -a)  --output json)
 balance_validator=$(echo $ret | jq -r '.balances[1].amount')
 
-sum_all=$(echo $total_amount-$all_balance+$amount_reserved+$balance_validator| bc)
+sum_all=$(echo $total_amount+$amount_reserved+$balance_validator| bc)
 
-interest=$(echo $total_amount-$all_balance|bc)
 
 echo "recovered total amount of validator is  $sum_all"
-echo "interest $interest"
+echo "interest $total_amount"
 echo "total $total_amount"
 echo "all balance $all_balance"
 echo "reserved $amount_reserved"

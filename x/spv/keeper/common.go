@@ -129,6 +129,13 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 	return totalInterestUsd, nil
 }
 
+func (k Keeper) QueryModuleBalance(ctx sdk.Context) {
+	acc := k.accKeeper.GetModuleAddress(types.ModuleAccount)
+
+	coins := k.bankKeeper.GetAllBalances(ctx, acc)
+	fmt.Printf(">>>>>>>>>>>>%v\n", coins)
+}
+
 // tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
 // rather then all the usable money
 func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int) error {
