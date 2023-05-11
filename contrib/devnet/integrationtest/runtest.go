@@ -29,7 +29,6 @@ var (
 	needWrite      = false
 	inputTimeout   = time.Second * 5
 	base           = new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)
-	ratio          = sdk.MustNewDecFromStr("0.7")
 	transferAmount = sdk.NewInt(0)
 	wrong          = html.UnescapeString("&#" + "10060" + ";")
 	correct        = html.UnescapeString("&#" + "9989" + ";")
@@ -359,6 +358,8 @@ func runService(ctx context.Context, poolIndex string, totalInvestors int, wg *s
 					logger.Error().Err(err).Msgf("error dumnp all")
 				}
 				totalTransfer := sdk.NewIntFromUint64(0)
+				price := getprice()
+				ratio := sdk.MustNewDecFromStr(price.Price.Price)
 				for i, el := range depositorb {
 					before := el.Depositor.DepositType
 					after := depositora[i].Depositor.DepositType
@@ -592,6 +593,8 @@ func runWindowMonitor(ctx context.Context, poolIndex string, wg *sync.WaitGroup,
 				depositorsa = nil
 			}
 
+			price := getprice()
+			ratio := sdk.MustNewDecFromStr(price.Price.Price)
 			lockedUsd := ratio.MulInt(sdk.NewIntFromBigInt(totalTransferedLocked)).TruncateInt()
 			delta := lockedUsd.Sub(sdk.NewIntFromBigInt(totalTransferedWithdrawed)).Abs()
 
@@ -612,6 +615,17 @@ func runWindowMonitor(ctx context.Context, poolIndex string, wg *sync.WaitGroup,
 			}
 		}
 	}
+}
+
+func getprice() common.SPV {
+	result, err := common.RunCommandWithOutput("joltify", "q", "pricefeed", "price", "aud:usd", "--output", "json")
+	if err != nil {
+		panic(err)
+	}
+
+	var price common.SPV
+	json.Unmarshal([]byte(result), &price)
+	return price
 }
 
 func main() {

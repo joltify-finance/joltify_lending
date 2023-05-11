@@ -51,7 +51,7 @@ func calculateApys(targetAmount, pool1Amount sdk.Coin, baseApy, pool1Apy sdk.Dec
 		return nil, nil, errors.New("one pool has less than 0 amount")
 	}
 
-	//ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
+	// ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
 	ij := pool1Apy.MulInt(pool1Amount.Amount)
 	it := baseApy.MulInt(targetAmount.Amount)
 	pool2Apy := it.Sub(ij).QuoTruncate(sdk.NewDecFromInt(pool2Amount.Amount))
@@ -178,7 +178,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
 			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
-			TransferAccountsNumber:        0, // this is used to track when we close the pool
+			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track when we close the pool
 			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
 			PoolLockedSeconds:             targetProject.PoolLockedSeconds,
 			PoolTotalBorrowLimit:          targetProject.PoolTotalBorrowLimit,

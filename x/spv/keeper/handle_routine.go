@@ -68,7 +68,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 		totalLockedAmount = totalLockedAmount.Add(d.LockedAmount.Amount)
 	}
 
-	poolInfo.TransferAccountsNumber = int32(len(poolInfo.TransferAccounts))
+	poolInfo.ProcessedTransferAccounts = append(poolInfo.ProcessedTransferAccounts, poolInfo.TransferAccounts...)
 	poolInfo.TransferAccounts = make([]sdk.AccAddress, 0, 200)
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)

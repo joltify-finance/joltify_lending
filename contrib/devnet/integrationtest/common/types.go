@@ -147,4 +147,9 @@ type SPV struct {
 		Denom  string `json:"denom"`
 		Amount string `json:"amount"`
 	} `json:"balances"`
+
+	Price struct {
+		MarketID string `json:"market_id"`
+		Price    string `json:"price"`
+	} `json:"price"`
 }

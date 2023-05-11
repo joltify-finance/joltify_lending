@@ -17,14 +17,24 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 	k.IteratePool(ctx, func(poolInfo types.PoolInfo) (stop bool) {
 		// it means we need to catchup, we give extra 30 seconds to allow the delay caused by block process time
 		// currently, the block process time is 5 seconds
+
 		for int32(currentTime.Sub(poolInfo.LastPaymentTime).Seconds()) > poolInfo.PayFreq*2 {
+
+			if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
+				break
+			}
+
+			// the pool has been stop too long
+			if currentTime.Sub(poolInfo.LastPaymentTime).Hours() > 28*24*time.Hour.Hours() {
+				break
+			}
+
 			err := k.HandleInterest(ctx, &poolInfo)
 			if err != nil {
 				panic(err)
 			}
 			ctx.Logger().Info("####process interest", "pool Index:", poolInfo.Index, "latest payment", poolInfo.LastPaymentTime.Local().String())
 		}
-
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		poolReady := poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_FREEZING || poolInfo.PoolStatus == types.PoolInfo_PooLPayPartially
 		if dueTime.Before(currentTime) && poolReady {

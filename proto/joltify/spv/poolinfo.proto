@@ -146,7 +146,12 @@ message PoolInfo {
   string pool_denom_prefix = 37;
   Interest_prepayment interest_prepayment = 38;
 
-  int32 transfer_accounts_number =39;
+  repeated bytes processed_transfer_accounts     = 39
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+
+
   string project_name = 40;
 }
 
