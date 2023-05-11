@@ -66,6 +66,10 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 				return false
 			}
 			if poolInfo.PoolStatus == types.PoolInfo_FREEZING {
+				processed := k.HandleTransfer(ctx, &poolInfo)
+				if processed {
+					ctx.Logger().Info("handler transfer", "pool status", poolInfo.PoolStatus)
+				}
 				k.HandlePrincipalPayment(ctx, &poolInfo)
 			}
 			k.SetPool(ctx, poolInfo)
