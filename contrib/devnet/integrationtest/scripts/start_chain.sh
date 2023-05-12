@@ -18,7 +18,8 @@ cecho(){
 }
 
 rm -rf ~/.joltify
-bash init-new-chain-run.sh
+
+bash scripts/init-new-chain-run.sh
 
 
 # call function prepare investment

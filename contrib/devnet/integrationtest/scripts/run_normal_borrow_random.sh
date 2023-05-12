@@ -21,35 +21,37 @@ IFS=',' read -ra arr <<< "$allpoolindex"
 thispool=${arr[1]}
 indexJunior=$thispool
 # index of the pool, pool name, list pool index senior, list pool index junior
-./prepare.sh 2 "normal_borrow" $thispool
+./scripts/prepare.sh 2 "normal_borrow" $thispool
 #
-
-
 # each node deposit 150000usdc into the junior pool
-
-amount=$(echo 150000*$base|bc)
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_3 -y --output json --gas 800000)
-code=$(echo $ret | jq -r '.code')
-if [ $code -eq 0 ]; then
-	cecho "GREEN" "deposit successful"
-  else
-	cecho "RED" "deposit failed with $ret"
-fi
+./run_deposit $indexJunior $1 0 300000 false
 
 
 
-ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_4 -y --output json --gas 800000)
-code=$(echo $ret | jq -r '.code')
-if [ $code -eq 0 ]; then
-	cecho "GREEN" "deposit successful"
-  else
-	cecho "RED" "deposit failed with $ret"
-fi
+
+#amount=$(echo 150000*$base|bc)
+#ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_1 -y --output json --gas 800000)
+#code=$(echo $ret | jq -r '.code')
+#if [ $code -eq 0 ]; then
+#	cecho "GREEN" "deposit successful"
+#  else
+#	cecho "RED" "deposit failed with $ret"
+#fi
+#
+#
+#
+#ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_2 -y --output json --gas 800000)
+#code=$(echo $ret | jq -r '.code')
+#if [ $code -eq 0 ]; then
+#	cecho "GREEN" "deposit successful"
+#  else
+#	cecho "RED" "deposit failed with $ret"
+#fi
 
 
 amount=$(echo 200000*$base|bc)
 # run the borrow for junior
-ret=$(joltify tx spv  borrow $indexJunior $amount"ausdc" --from validator -y --output json --gas 800000)
+ret=$(joltify tx spv  borrow $indexJunior $amount"ausdc" --from validator -y --output json --gas 800000000)
 # get the code from json
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0
@@ -60,7 +62,7 @@ if [ $code -eq 0 ]; then
 fi
 
 
-ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 800000)
+ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 800000000)
 # get the code from json
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0

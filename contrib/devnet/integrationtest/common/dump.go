@@ -3,7 +3,6 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"html"
 	"math/big"
 	"os"
 	"strconv"
@@ -40,11 +39,6 @@ func dumpPool(poolIndex, fileName string, needWrite bool) (SPV, error) {
 }
 
 func dumpInvestorsAndInterest(poolIndex, fileName string, needWrite bool) ([]SPV, error) {
-	//err := godotenv.Load("../.env")
-	//if err != nil {
-	//	return err
-	//}
-
 	ret := os.Getenv("ALL_INVESTORS")
 	initInvestors, err := strconv.Atoi(ret)
 	if err != nil {
@@ -170,25 +164,21 @@ func DumpAll(poolIndex, fileName string, needWrite bool) (SPV, []SPV, []SPV, err
 	if fileName == "" {
 		fileName = time.Now().Format("2006-01-02 15-04") + ".xlsx"
 	}
-	tick := html.UnescapeString("&#" + "9989" + ";")
 	var err error
 	poolSPV, err := dumpPool("0x43ce7e072884180e125328e727911ad83fcaba1cc487ece1ccc3e19376f51118", fileName, needWrite)
 	if err != nil {
-		fmt.Printf(">>>>error in dump pool %v\n", err)
+		log.Error().Err(err).Msg(">>>>error in dump pool")
 		return SPV{}, nil, nil, err
 	}
-	fmt.Printf("%v finished dump pool info\n", tick)
 	depositors, err := dumpInvestorsAndInterest(poolIndex, fileName, needWrite)
 	if err != nil {
 		logger.Error().Err(err).Msg(">>>>error in dump depositor n")
 		return SPV{}, nil, nil, err
 	}
-	fmt.Printf("%v finished dump depositor info\n", tick)
 	nftsSPV, err := dumpBorrowNFT(poolIndex, fileName, needWrite)
 	if err != nil {
 		logger.Error().Err(err).Msg(">>>>error in dump dump")
 		return SPV{}, nil, nil, err
 	}
-	fmt.Printf("%v finished dump borrow nft info\n", tick)
 	return poolSPV, depositors, nftsSPV, nil
 }

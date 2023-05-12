@@ -1,6 +1,8 @@
 tool:
 	go build -o run_deposit ./run_deposit.go
 
-build:
-	go build -o runtest ./runtest.go ./methods.go
+binary:
+	go build -o gui gui.go methods.go commands.go
 
+build: tool binary
+	echo "compile the gui"

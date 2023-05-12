@@ -74,11 +74,11 @@ func main() {
 			defer wg.Done()
 			var cmd *exec.Cmd
 			if withdraw {
-				cmd = exec.Command("./withdraw_after_close.sh", poolIndex, "1000000000000000000000000ausdc", strconv.Itoa(offset+index+1))
+				cmd = exec.Command("./withdraw_principal.sh", poolIndex, "1000000000000000000000000ausdc", strconv.Itoa(offset+index+1))
 			} else {
 				valueStr := strconv.FormatFloat(value, 'f', 6, 64)
 				// run the shell scripts
-				cmd = exec.Command("./deposit.sh", poolIndex, valueStr, strconv.Itoa(offset+index+1))
+				cmd = exec.Command("./scripts/deposit.sh", poolIndex, valueStr, strconv.Itoa(offset+index+1))
 			}
 
 			// pipe the commands output to the applications
@@ -90,8 +90,7 @@ func main() {
 			// Run still runs the command and waits for completion
 			// but the output is instantly piped to Stdout
 			if err := cmd.Run(); err != nil {
-				fmt.Println("could not run command: ", err)
-				fmt.Println(errb.String())
+				fmt.Printf("could not run command: %v", outb.String())
 				return
 			} else {
 				fmt.Println(outb.String())

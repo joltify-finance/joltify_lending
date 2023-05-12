@@ -12,8 +12,9 @@ config.toml
 # Output of the go coverage tool
 *.out
 runtest
-
+gui
 # Exclude build files
+contrib/devnet/integrationtest/run_deposit
 vendor
 build
 .~lock*
