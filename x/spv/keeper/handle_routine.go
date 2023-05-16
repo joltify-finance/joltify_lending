@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -310,7 +309,6 @@ func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo
 
 	totalPaid := poolInfo.EscrowPrincipalAmount.SubAmount(borrowedUSD)
 	totalPaid = totalPaid.AddAmount(poolInfo.EscrowInterestAmount)
-	fmt.Printf(">>>>>>>>we send back to spv %s\n", totalPaid.String())
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalPaid))
 	if err != nil {
 		ctx.Logger().Error("fail to send the leftover back to spv ", "err=", err.Error())

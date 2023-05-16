@@ -33,30 +33,30 @@ func TestMsgSERvCreatePool(t *testing.T) {
 	ctx := sdk.UnwrapSDKContext(wctx)
 	_ = k
 
-	req := types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 4, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req := types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 4, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
-	req = types.MsgCreatePool{Creator: "invalid address", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: "invalid address", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
-	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
 	// invalid pay freq
-	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: acc.String(), ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
 	// create the first pool apy 7.8%
-	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	_, err = app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
 	// duplicate pool
-	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello2", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(4322))}
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello2", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(4322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	_, err = app.CreatePool(ctx, &req)
 	fmt.Printf(">>>%v\n", err)
 	require.Error(t, err)
@@ -69,26 +69,17 @@ func TestMsgSERvCreatePoolApyCheck(t *testing.T) {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
-	_, err := app.CreatePool(ctx, &req)
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
+	resp, err := app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
-	poolsIndex := []string{"0x907ef9f3822d51da01347e81d1d859b95caf42b18ccc8a266044f5900b8c1371", "0x69da3ffa942f73a8bc9751541c8675cf28a4ffb68ef89559502391e06d37804a"}
-
-	p1, ok := k.GetPools(ctx, poolsIndex[0])
+	p1, ok := k.GetPools(ctx, resp.PoolIndex[0])
 	require.True(t, ok)
 
-	p2, ok := k.GetPools(ctx, poolsIndex[1])
+	p2, ok := k.GetPools(ctx, resp.PoolIndex[1])
 	require.True(t, ok)
 
-	bapy := sdk.NewDecWithPrec(12, 2)
-	coin := sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100000000))
+	require.Equal(t, p1.Apy, sdk.MustNewDecFromStr("7.8"))
+	require.Equal(t, p2.Apy, sdk.MustNewDecFromStr("7.2"))
 
-	interest1 := bapy.MulInt(coin.Amount)
-
-	interest2 := p1.Apy.MulInt(p1.TargetAmount.Amount)
-	interest3 := p2.Apy.MulInt(p2.TargetAmount.Amount)
-
-	total := interest2.Add(interest3)
-	require.True(t, total.Sub(interest1).Abs().LT(sdk.NewDecWithPrec(1, 8)))
 }

@@ -77,7 +77,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	// check that junior pool must meet its target amount before senior pool can borrow
-	if poolInfo.PoolType == types.PoolInfo_SENIOR {
+	if poolInfo.PoolType == types.PoolInfo_SENIOR && !poolInfo.SeparatePool {
 		juniorPoolIndex := crypto.Keccak256Hash([]byte(poolInfo.ProjectName), poolInfo.OwnerAddress.Bytes(), []byte("junior"))
 
 		juniorInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())

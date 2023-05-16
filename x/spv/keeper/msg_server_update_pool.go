@@ -5,7 +5,6 @@ import (
 
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/ethereum/go-ethereum/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -31,33 +30,13 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 
 	targetProject := allProjects[poolInfo.LinkedProject-1]
 
-	apy, _, err := parameterSanitize(targetProject.PayFreq, msg.PoolApy)
+	// we use the second one as the mock apy
+	apy, _, err := parameterSanitize(targetProject.PayFreq, []string{msg.PoolApy, "0"})
 	if err != nil {
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
-	var poolJunior, poolSenior *types.PoolInfo
-	queryType := "junior"
-	if poolInfo.PoolType == types.PoolInfo_JUNIOR {
-		queryType = "senior"
-	}
-
-	indexHash2 := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), poolInfo.OwnerAddress.Bytes(), []byte(queryType))
-
-	poolInfo2, found := k.GetPools(ctx, indexHash2.Hex())
-	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
-	}
-
-	if poolInfo.PoolType == types.PoolInfo_JUNIOR {
-		poolJunior = &poolInfo
-		poolSenior = &poolInfo2
-	} else {
-		poolJunior = &poolInfo2
-		poolSenior = &poolInfo
-	}
-
-	if poolInfo.PoolStatus != types.PoolInfo_PREPARE || poolInfo2.PoolStatus != types.PoolInfo_PREPARE {
+	if poolInfo.PoolStatus != types.PoolInfo_PREPARE {
 		return nil, types.ErrUNEXPECTEDSTATUS
 	}
 
@@ -65,35 +44,15 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to update the pool", msg.Creator)
 	}
 
-	if !poolInfo2.OwnerAddress.Equals(caller) {
-		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to update the pool", msg.Creator)
+	pType := "-senior"
+	if poolInfo.PoolType == types.PoolInfo_JUNIOR {
+		pType = "-junior"
 	}
 
-	isJunior := poolInfo.PoolType == types.PoolInfo_JUNIOR
-
-	poolsInfoAPY, poolsInfoAmount, err := calculateApys(targetProject.ProjectTargetAmount, msg.TargetTokenAmount, targetProject.BaseApy, apy, isJunior)
-	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger than target")
-	}
-
-	poolInfo.PoolName = msg.PoolName
-	poolInfo.Apy = apy
+	poolInfo.PoolName = msg.PoolName + pType
+	poolInfo.Apy = apy[0]
 	poolInfo.TargetAmount = msg.TargetTokenAmount
 	k.SetPool(ctx, poolInfo)
-
-	if isJunior {
-		poolSenior.Apy = poolsInfoAPY["senior"]
-		poolSenior.TargetAmount = poolsInfoAmount["senior"]
-		poolSenior.PoolName = msg.PoolName + "-senior"
-		poolInfo.PoolName = msg.PoolName + "-junior"
-		k.SetPool(ctx, *poolSenior)
-	} else {
-		poolJunior.Apy = poolsInfoAPY["junior"]
-		poolJunior.TargetAmount = poolsInfoAmount["junior"]
-		poolJunior.PoolName = msg.PoolName + "-junior"
-		poolInfo.PoolName = msg.PoolName + "-junior"
-		k.SetPool(ctx, *poolJunior)
-	}
 
 	return &types.MsgUpdatePoolResponse{}, nil
 }

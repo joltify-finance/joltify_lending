@@ -18,43 +18,34 @@ var (
 
 func compareWithinError(a, b, e *big.Int) bool {
 	delta := new(big.Int).Sub(new(big.Int).Abs(a), new(big.Int).Abs(b))
-	if delta.CmpAbs(e) == 1 {
-		return false
-	}
-	return true
+	return delta.CmpAbs(e) != 1
 }
 
 func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error {
-	done1 := false
-
 	w, poolInfo, err := common.GetWindow(poolIndex)
 	if err != nil {
 		return err
 	}
-	if w.WithdrawStartTime <= 0 && w.WithdrawStartTime > -10 && !done1 {
+	if w.WithdrawStartTime <= 0 && w.WithdrawStartTime > -10 {
 		display.showOutput("send withdraw notify", BLUE)
 		wNotify <- common.WITHDRAW
-		done1 = true
 	}
 	if w.PayPartialStartTime <= 0 && w.PayPartialStartTime > -10 {
 		display.showOutput("send pay principal notify", BLUE)
 
 		if len(poolInfo.PoolInfo.WithdrawAccounts) != 0 {
 			wNotify <- common.PAYPRINCIPAL
-			done1 = false
 		}
 	}
 
 	if w.PaymentDue <= 6 && len(depositorsb) == 0 {
 		display.showOutput("we take dump before payment", YELLOW)
-		done1 = true
 		_, depositorsb, _, err = common.DumpAll(poolIndex, "before.xlsx", false)
 		if err != nil {
 			return fmt.Errorf("error dumnp all: %v", err)
 		}
 	}
 	if w.PaymentDue > 100 && len(depositorsa) == 0 {
-		done1 = false
 		display.showOutput("we take dump after payment", YELLOW)
 		_, depositorsa, _, err = common.DumpAll(poolIndex, "after.xlsx", false)
 		if err != nil {

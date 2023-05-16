@@ -10,7 +10,7 @@ const TypeMsgCreatePool = "create_pool"
 
 var _ sdk.Msg = &MsgCreatePool{}
 
-func NewMsgCreatePool(creator, poolName string, projectIndex int32, apy string, target sdk.Coin) *MsgCreatePool {
+func NewMsgCreatePool(creator, poolName string, projectIndex int32, apy []string, target sdk.Coins) *MsgCreatePool {
 	return &MsgCreatePool{
 		Creator:           creator,
 		PoolName:          poolName,

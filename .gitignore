@@ -14,7 +14,7 @@ config.toml
 runtest
 gui
 # Exclude build files
-contrib/devnet/integrationtest/run_deposit
+contrib/devnet/integrationtest/scripts/run_deposit
 vendor
 build
 .~lock*

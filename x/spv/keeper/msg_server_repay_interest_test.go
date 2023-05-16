@@ -22,7 +22,7 @@ func TestMsgRepayInterest(t *testing.T) {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	resp, err := app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
@@ -112,7 +112,7 @@ func TestGetAllInterestToBePaid(t *testing.T) {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	resp, err := app.CreatePool(ctx, &req)
 	require.NoError(t, err)
 

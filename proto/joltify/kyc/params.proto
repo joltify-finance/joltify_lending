@@ -29,10 +29,7 @@ message ProjectInfo {
   BasicInfo basic_info = 3;
   bytes project_owner     = 4 [   (cosmos_proto.scalar) = "cosmos.AddressBytes",   (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
   uint64 project_length = 5;
-  cosmos.base.v1beta1.Coin project_target_amount = 6[
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin",
-    (gogoproto.nullable) = false];
-
+  bool separate_pool = 6;
   string      base_apy      = 7 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",

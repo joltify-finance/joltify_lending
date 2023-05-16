@@ -15,60 +15,25 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func parameterSanitize(payFreqStr, apyStr string) (sdk.Dec, int32, error) {
-	apy, err := sdk.NewDecFromStr(apyStr)
+func parameterSanitize(payFreqStr string, apyStr []string) ([]sdk.Dec, int32, error) {
+	apyJunior, err := sdk.NewDecFromStr(apyStr[0])
 	if err != nil {
-		return sdk.Dec{}, 0, err
+		return nil, 0, err
 	}
+
+	apySenior, err := sdk.NewDecFromStr(apyStr[1])
+	if err != nil {
+		return nil, 0, err
+	}
+
 	payFreq, err := strconv.ParseInt(payFreqStr, 10, 64)
 	if err != nil {
 		panic("incorrect payfreq format")
 	}
 	if payFreq > types.Maxfreq || payFreq < types.Minfreq {
-		return sdk.Dec{}, 0, errors.New("pay frequency is invalid")
+		return nil, 0, errors.New("pay frequency is invalid")
 	}
-	return apy, int32(payFreq), nil
-}
-
-func calculateApys(targetAmount, pool1Amount sdk.Coin, baseApy, pool1Apy sdk.Dec, isJunior bool) (map[string]sdk.Dec, map[string]sdk.Coin, error) {
-	poolsInfoAPY := make(map[string]sdk.Dec)
-	poolsInfoAmount := make(map[string]sdk.Coin)
-
-	if targetAmount.IsLTE(pool1Amount) {
-		return nil, nil, errors.New("amount incorrect")
-	}
-
-	pool2Amount := targetAmount.Sub(pool1Amount)
-	if isJunior {
-		poolsInfoAmount["junior"] = pool1Amount
-		poolsInfoAmount["senior"] = pool2Amount
-	} else {
-		poolsInfoAmount["junior"] = pool2Amount
-		poolsInfoAmount["senior"] = pool1Amount
-	}
-
-	if pool1Amount.Amount.LT(sdk.ZeroInt()) || pool2Amount.Amount.LT(sdk.ZeroInt()) {
-		return nil, nil, errors.New("one pool has less than 0 amount")
-	}
-
-	// ij := sdk.NewDecFromInt(pool1Amount.Amount).Mul(pool1Apy)
-	ij := pool1Apy.MulInt(pool1Amount.Amount)
-	it := baseApy.MulInt(targetAmount.Amount)
-	pool2Apy := it.Sub(ij).QuoTruncate(sdk.NewDecFromInt(pool2Amount.Amount))
-
-	if isJunior {
-		poolsInfoAPY["junior"] = pool1Apy
-		poolsInfoAPY["senior"] = pool2Apy
-	} else {
-		poolsInfoAPY["junior"] = pool2Apy
-		poolsInfoAPY["senior"] = pool1Apy
-	}
-
-	if pool1Apy.LT(sdk.ZeroDec()) || pool2Apy.LT(sdk.ZeroDec()) {
-		return nil, nil, errors.New("one apy has less than 0 ")
-	}
-
-	return poolsInfoAPY, poolsInfoAmount, nil
+	return []sdk.Dec{apyJunior, apySenior}, int32(payFreq), nil
 }
 
 func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (*types.MsgCreatePoolResponse, error) {
@@ -90,10 +55,6 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given marketID %v cannot be found", targetProject.MarketId)
 	}
 
-	if targetProject.ProjectTargetAmount.IsLT(msg.TargetTokenAmount) {
-		return nil, coserrors.Wrap(sdkerrors.ErrInvalidRequest, "the junior amout is larger than the project target amount")
-	}
-
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
@@ -103,43 +64,28 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized address %v", msg.Creator)
 	}
 
-	apy, payfreq, err := parameterSanitize(targetProject.PayFreq, msg.Apy)
+	apys, payfreq, err := parameterSanitize(targetProject.PayFreq, msg.Apy)
 	if err != nil {
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
-	poolsInfoAPY, poolsInfoAmount, err := calculateApys(targetProject.ProjectTargetAmount, msg.TargetTokenAmount, targetProject.BaseApy, apy, true)
-	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "junior pool amount larger than target")
-	}
-
-	indexHashResp := make([]string, 2)
+	poolTypes := []string{types.Junior, types.Senior}
+	indexHashResp := make([]string, 0, 2)
 	var typePrefix string
-
 	// sort the pool and returned otherwise the test may fail as it assume the pool comes with senior first
-
-	for poolType, amount := range poolsInfoAmount {
-
-		poolApy := poolsInfoAPY[poolType]
-
-		enuPoolType := types.PoolInfo_JUNIOR
-		if poolType == types.Senior {
-			enuPoolType = types.PoolInfo_SENIOR
-			typePrefix = types.Senior
-		} else {
-			typePrefix = types.Junior
+	for index, targetAmount := range msg.TargetTokenAmount {
+		typePrefix = poolTypes[index]
+		poolApy := apys[index]
+		poolType := poolTypes[index]
+		ePoolType := types.PoolInfo_SENIOR
+		if poolType == types.Junior {
+			ePoolType = types.PoolInfo_JUNIOR
 		}
 
 		indexHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), spvAddress.Bytes(), []byte(poolType))
 		urlHash := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectsUrl))
 
 		indexHashResp = append(indexHashResp, indexHash.Hex())
-		if poolType == "junior" {
-			indexHashResp[0] = indexHash.Hex()
-		}
-		if poolType == "senior" {
-			indexHashResp[1] = indexHash.Hex()
-		}
 		_, found := k.GetPools(ctx, indexHash.Hex())
 		if found {
 			return nil, coserrors.Wrapf(types.ErrPoolExisted, "pool existed")
@@ -163,19 +109,19 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			LinkedProject:                 msg.ProjectIndex,
 			OwnerAddress:                  spvAddress,
 			Apy:                           poolApy,
-			TargetAmount:                  amount,
+			TargetAmount:                  targetAmount,
 			PayFreq:                       payfreq,
 			ReserveFactor:                 types.RESERVEFACTOR,
 			PoolNFTIds:                    []string{},
 			PoolStatus:                    types.PoolInfo_PREPARE,
-			PoolType:                      enuPoolType,
+			PoolType:                      ePoolType,
 			ProjectLength:                 targetProject.ProjectLength,
 			LastPaymentTime:               ctx.BlockTime(),
-			BorrowedAmount:                sdk.NewCoin(denomPrefix+msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			UsableAmount:                  sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			BorrowedAmount:                sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.NewInt(0)),
+			UsableAmount:                  sdk.NewCoin(targetAmount.Denom, sdk.NewInt(0)),
 			EscrowInterestAmount:          sdk.NewInt(0),
-			EscrowPrincipalAmount:         sdk.NewCoin(msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
-			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+msg.TargetTokenAmount.Denom, sdk.NewInt(0)),
+			EscrowPrincipalAmount:         sdk.NewCoin(targetAmount.Denom, sdk.NewInt(0)),
+			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.NewInt(0)),
 			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
 			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track when we close the pool
@@ -186,6 +132,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			PoolCreatedTime:               ctx.BlockTime(),
 			GraceTime:                     targetProject.GraceTime,
 			PoolDenomPrefix:               denomPrefix,
+			SeparatePool:                  targetProject.SeparatePool,
 		}
 
 		k.SetPool(ctx, poolInfo)

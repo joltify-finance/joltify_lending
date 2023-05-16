@@ -50,7 +50,7 @@ func (suite *DepositTestSuite) TestDeposit() {
 		args args
 	}
 
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -164,12 +164,12 @@ func (suite *DepositTestSuite) TestDeposit() {
 
 func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("usdc", sdk.NewInt(0))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.NewCoins(sdk.NewCoin("usdc", sdk.NewInt(0)), sdk.NewCoin("usdc", sdk.NewInt(0)))}
 	_, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().ErrorContains(err, "the amount cannot be 0")
 
 	// create the first pool apy 8.8%
-	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "8.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"8.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 

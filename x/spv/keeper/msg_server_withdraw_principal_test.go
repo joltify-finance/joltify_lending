@@ -30,7 +30,7 @@ type withDrawPrincipalSuite struct {
 
 func setupPool(suite *withDrawPrincipalSuite) {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: "0.15", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 

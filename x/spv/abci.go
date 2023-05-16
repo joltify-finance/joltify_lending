@@ -11,9 +11,6 @@ import (
 func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 	currentTime := ctx.BlockTime()
 	// we firstly handle the interest
-
-	k.QueryModuleBalance(ctx)
-
 	k.IteratePool(ctx, func(poolInfo types.PoolInfo) (stop bool) {
 		// it means we need to catchup, we give extra 30 seconds to allow the delay caused by block process time
 		// currently, the block process time is 5 seconds
