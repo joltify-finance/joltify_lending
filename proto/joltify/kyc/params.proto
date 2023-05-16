@@ -18,6 +18,8 @@ message BasicInfo{
   string project_name = 6;
   string email = 7;
   string name = 8;
+  string project_logo = 9;
+  string project_brief = 10;
 }
 
 // Market defines an asset in the pricefeed.

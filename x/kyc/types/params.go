@@ -47,6 +47,8 @@ func NewParams() Params {
 			"This is the Test Project 1",
 			"example@example.com",
 			"example",
+			"empty logo url",
+			"empty project Brief",
 		}
 		pi := ProjectInfo{
 			Index:                        int32(i + 1),
