@@ -1,0 +1,12 @@
+{
+  "title": "parameter change: increase gov voting period",
+  "description": "parameter change: increase gov voting period",
+  "changes": [
+    {
+      "subspace": "gov",
+      "key": "votingparams",
+      "value": { "voting_period": "3600000000000" }
+    }
+  ],
+  "deposit": "1000000000ujolt"
+}

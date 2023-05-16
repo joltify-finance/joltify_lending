@@ -1,0 +1,12 @@
+{
+  "title": "parameter change: increase gov min deposit to 1000jolt (i.e., 1000000000ujolt)",
+  "description": "parameter change: increase gov min deposit to 1000jolt (i.e., 1000000000ujolt)",
+  "changes": [
+    {
+      "subspace": "gov",
+      "key": "depositparams",
+      "value": {"min_deposit":[{"denom":"ujolt","amount":"1000000000"}]}
+    }
+  ],
+  "deposit": "1000000000ujolt"
+}
