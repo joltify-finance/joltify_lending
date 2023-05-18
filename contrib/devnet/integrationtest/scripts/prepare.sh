@@ -33,7 +33,7 @@ done
 # remove the first comma of all investors
 allInvestors=${allInvestors:1}
 
-ret=$(joltify tx spv create-pool $2 $1 0.15 $junior"ausdc"  --from validator --gas 8000000 --output json -y)
+ret=$(joltify tx spv create-pool $2 $1 0.15 0.0875 $junior"ausdc" $senior"ausdc"  --from validator --gas 8000000 --output json -y)
 
 # get the code from the json
 code=$(echo $ret | jq -r '.code')

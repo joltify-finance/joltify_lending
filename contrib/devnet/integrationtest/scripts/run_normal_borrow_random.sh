@@ -24,7 +24,7 @@ indexJunior=$thispool
 ./scripts/prepare.sh 2 "normal_borrow" $thispool
 #
 # each node deposit 150000usdc into the junior pool
-./run_deposit $indexJunior $1 0 300000 false
+./scripts/run_deposit $indexJunior $1 0 300000 false
 
 
 

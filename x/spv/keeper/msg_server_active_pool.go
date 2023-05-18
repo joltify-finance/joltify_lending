@@ -43,40 +43,24 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 
 	targetProject := allProjects[poolInfo1.LinkedProject-1]
 
-	var t string
-	if poolInfo1.PoolType == types.PoolInfo_JUNIOR {
-		t = "senior"
-	} else {
-		t = "junior"
+	if poolInfo1.SeparatePool || poolInfo1.PoolType == types.PoolInfo_JUNIOR {
+		k.SetPool(ctx, poolInfo1)
+		return &types.MsgActivePoolResponse{}, nil
 	}
 
-	secondPoolIndex := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), poolInfo1.OwnerAddress.Bytes(), []byte(t))
+	juniorPoolIndex := crypto.Keccak256Hash([]byte(targetProject.BasicInfo.ProjectName), poolInfo1.OwnerAddress.Bytes(), []byte("junior"))
 
-	poolInfo2, found := k.GetPools(ctx, secondPoolIndex.Hex())
+	juniorPoolInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
 	if !found {
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
-	if poolInfo2.PoolStatus != types.PoolInfo_PREPARE {
-		return nil, types.ErrUNEXPECTEDSTATUS
+	if juniorPoolInfo.PoolStatus != types.PoolInfo_ACTIVE {
+		return nil, coserrors.Wrapf(types.ErrUNEXPECTEDSTATUS, "junior pool must be activated firstly")
 	}
 
-	if !poolInfo2.OwnerAddress.Equals(caller) {
-		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to active the pool", msg.Creator)
-	}
-
-	poolInfo2.PoolStatus = types.PoolInfo_ACTIVE
-	poolInfo2.PoolCreatedTime = ctx.BlockTime()
-	poolInfo2.LastPaymentTime = ctx.BlockTime()
-
-	totalTarget := poolInfo1.TargetAmount.Add(poolInfo2.TargetAmount)
-
-	var poolAmount sdk.Dec
-	if poolInfo1.PoolType == types.PoolInfo_JUNIOR {
-		poolAmount = sdk.NewDecFromInt(poolInfo1.TargetAmount.Amount)
-	} else {
-		poolAmount = sdk.NewDecFromInt(poolInfo2.TargetAmount.Amount)
-	}
+	totalTarget := poolInfo1.TargetAmount.Add(juniorPoolInfo.TargetAmount)
+	poolAmount := sdk.NewDecFromInt(juniorPoolInfo.TargetAmount.Amount)
 
 	ratio := poolAmount.QuoInt(totalTarget.Amount)
 
@@ -85,7 +69,5 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 	}
 
 	k.SetPool(ctx, poolInfo1)
-	k.SetPool(ctx, poolInfo2)
-
 	return &types.MsgActivePoolResponse{}, nil
 }

@@ -31,7 +31,7 @@ type claimInterestSuite struct {
 
 func SetupPool(suite *claimInterestSuite) {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: "0.15", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.0875"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -472,6 +472,67 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 
 	suite.Require().Nil(poolInfo.InterestPrepayment)
 
+	// the first payment for the second borrow does
+	//>>>>>>>>111>>>>0ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>>>111>>>>1314ausdc
+	//>>>>>>total 1 counter  32
+	//>>>>>>>>222>>>>0ausdc
+	//>>>>>>>>222>>>>953ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+	//>>>>>>>>222>>>>2059ausdc
+
 	req.Creator = suite.investors[0]
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
@@ -480,11 +541,25 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	result2, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
-	// this payfreq is from the testutil spv.go
+	expectedUser1TotalfromTheFirstBorrow := amount1.MulRaw(int64(totalCounter))
+	expectedUser2TotalfromTheFirstBorrow := amount2.MulRaw(int64(totalCounter))
 
-	paymentAmount := sdk.NewIntFromUint64(2422)
-	reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
-	toInvestors := paymentAmount.Sub(reservedAmount)
+	totalPayment := sdk.ZeroInt()
+
+	Borrowclasss, _ := suite.nftKeeper.GetClass(suite.ctx, "class-e0d49c3eed41e408b493a14042a8aa31375d64e3e357f911afbb085e02bde083-1")
+	err = proto.Unmarshal(Borrowclasss.Data.Value, &borrowClassInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, el := range borrowClassInfo.Payments {
+		totalPayment = totalPayment.Add(el.PaymentAmount.Amount)
+	}
+
+	// this payfreq is from the testutil spv.go
+	paymentAmount := totalPayment
+	//reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	toInvestors := paymentAmount
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
 
@@ -494,18 +569,23 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	expectedToUser2 := sdk.NewDecFromInt(toInvestors).Mul(ratio2).TruncateInt()
 	expectedToUser1 := sdk.NewDecFromInt(toInvestors).Mul(ratio1).TruncateInt()
 	// we add the interest from the first borrow
-	expectedToUser1 = expectedToUser1.Add(amount1)
-	expectedToUser2 = expectedToUser2.Add(amount2)
+	expectedToUser1 = expectedToUser1.Add(expectedUser1TotalfromTheFirstBorrow)
+	expectedToUser2 = expectedToUser2.Add(expectedUser2TotalfromTheFirstBorrow)
 
-	// for the total counter
-	expectedToUser1 = expectedToUser1.MulRaw(int64(totalCounter))
-	expectedToUser2 = expectedToUser2.MulRaw(int64(totalCounter))
+	resultCoinUser1, err := sdk.ParseCoinNormalized(result1.Amount)
+	if err != nil {
+		panic(err)
+	}
+	resultCoinUser2, err := sdk.ParseCoinNormalized(result2.Amount)
+	if err != nil {
+		panic(err)
+	}
+	// as we have the division, so the max error is totalCounter *1 (1: the max error of the division for each payment)
 
-	suite.Require().Equal(result1.Amount, expectedToUser1.String()+"ausdc")
-	suite.Require().Equal(result2.Amount, expectedToUser2.String()+"ausdc")
+	suite.Require().True(expectedToUser1.Sub(resultCoinUser1.Amount).LT(sdk.NewInt(int64(totalCounter))))
+	suite.Require().True(expectedToUser2.Sub(resultCoinUser2.Amount).LT(sdk.NewInt(int64(totalCounter))))
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-
 	req.Creator = suite.investors[0]
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)

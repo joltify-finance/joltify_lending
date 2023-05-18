@@ -33,7 +33,7 @@ func (suite *addInvestorSuite) SetupTest() {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: "7.8", TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(322))}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.NewCoins(sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("audsc", sdk.NewInt(322)))}
 	resp, err := app.CreatePool(ctx, &req)
 	suite.Require().NoError(err)
 	suite.poolIndexs = resp.PoolIndex

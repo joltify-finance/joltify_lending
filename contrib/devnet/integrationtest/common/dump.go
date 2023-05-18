@@ -31,7 +31,7 @@ func dumpPool(poolIndex, fileName string, needWrite bool) (SPV, error) {
 	data[0] = []string{"pool name", "pool index", "usable amount", "borrowed amount", "pool status", "project length", "pay freq", "last payment time"}
 	data[1] = []string{
 		poolInfo.PoolInfo.PoolName, poolInfo.PoolInfo.Index, poolInfo.PoolInfo.UsableAmount.Amount, poolInfo.PoolInfo.BorrowedAmount.Amount, poolInfo.PoolInfo.PoolStatus, poolInfo.PoolInfo.ProjectLength, strconv.Itoa(poolInfo.PoolInfo.PayFreq), poolInfo.PoolInfo.LastPaymentTime.String(),
-	} //nolint:gofumpt
+	}
 	if needWrite {
 		WritePoolToExcel("pool_info", data, fileName)
 	}

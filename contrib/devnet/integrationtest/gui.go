@@ -33,6 +33,7 @@ const (
 	BLUE      = "blue"
 	YELLOW    = "yellow"
 	WHITE     = "white"
+	denom     = "ausdc"
 )
 
 var (
@@ -52,10 +53,10 @@ type outputData struct {
 
 func newPaymentGauge() *widgets.Gauge {
 	g := widgets.NewGauge()
-	g.Title = "      Time for next Payment"
+	g.Title = "      Time for the next Payment"
 	g.SetRect(45, 0, 145, 5)
 	g.Percent = 50
-	g.Label = "Gauge with custom highlighted label"
+	g.Label = "Time for the next payment"
 	g.BarColor = ui.ColorGreen
 	g.LabelStyle = ui.NewStyle(ui.ColorYellow)
 	return g
@@ -318,7 +319,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 
 						var bb, ba *big.Int
 						for _, el := range depositorsa[i].Balances {
-							if el.Denom == "ausdc" {
+							if el.Denom == denom {
 								bb, ok = new(big.Int).SetString(el.Amount, 10)
 								if !ok {
 									panic("should never fail")
@@ -327,7 +328,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 						}
 
 						for _, el := range depositorsb[i].Balances {
-							if el.Denom == "ausdc" {
+							if el.Denom == denom {
 								ba, ok = new(big.Int).SetString(el.Amount, 10)
 								if !ok {
 									panic("should never fail")
@@ -593,7 +594,7 @@ func main() {
 
 	inputChan := make(chan string, 100)
 	var cache bytes.Buffer
-	// we listen to the keyboad input
+	// we listen to the keyboard input
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

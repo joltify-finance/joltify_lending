@@ -1,5 +1,5 @@
 tool:
-	go build -o run_deposit ./run_deposit.go
+	go build -o ./scripts/run_deposit ./scripts/run_deposit.go
 
 binary:
 	go build -o gui gui.go methods.go commands.go
