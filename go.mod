@@ -1,6 +1,6 @@
 module github.com/joltify-finance/joltify_lending
 
-go 1.18
+go 1.20
 
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
@@ -10,7 +10,7 @@ require (
 	github.com/cosmos/gogoproto v1.4.3
 	github.com/cosmos/ibc-go/v5 v5.1.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/ethereum/go-ethereum v1.10.17
+	github.com/ethereum/go-ethereum v1.10.22
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.5.2
