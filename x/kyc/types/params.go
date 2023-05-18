@@ -46,6 +46,7 @@ func NewParams() Params {
 			"example",
 			"empty logo url",
 			"empty project Brief",
+			"empty project description",
 		}
 		pi := ProjectInfo{
 			Index:                        int32(i + 1),
