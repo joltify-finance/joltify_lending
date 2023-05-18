@@ -25,21 +25,21 @@ func WritePoolToExcel(sheetName string, data [][]string, fileName string) {
 	if err != nil {
 		fmt.Printf("shee already exist %v\n", err)
 	}
-	for idx, rowData := range data {
+	for idx := range data {
 		cell, err := excelize.CoordinatesToCellName(1, idx+1)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf(">>>>set coordinates cell name error %v\n", err)
 			return
 		}
-		err = f.SetSheetRow(sheetName, cell, rowData)
+		err = f.SetSheetRow(sheetName, cell, &data[idx])
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf(">>>>set sheet row error %v\n", err)
 			return
 		}
 	}
 	// Set value of a cell.
 	// Save spreadsheet by the given path.
 	if err := f.SaveAs(fileName); err != nil {
-		fmt.Println(err)
+		fmt.Printf(">>>>save excel file error %v\n", err)
 	}
 }

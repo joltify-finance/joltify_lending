@@ -8,7 +8,7 @@ do
   balance=$(echo $ret | jq -r '.balances[0].amount')
   interest=$(echo $balance - 5000000000000000000000000 | bc)
   total_amount=$(echo $total_amount+ $interest | bc)
-  echo ">>>$balance"
+  echo ">>$c>$balance"
 done
 
 
@@ -26,8 +26,7 @@ sum_all=$(echo $total_amount+$amount_reserved+$balance_validator| bc)
 
 
 echo "recovered total amount of validator is  $sum_all"
-echo "interest $total_amount"
-echo "total $total_amount"
+echo " total interest $total_amount"
 echo "all balance $all_balance"
 echo "reserved $amount_reserved"
 echo "balance validator $balance_validator"

@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	zlog "github.com/rs/zerolog"
+
 	"github.com/gookit/color"
 )
 
@@ -38,7 +40,7 @@ func RunCommandWithOutput(cmdStr string, parameters ...string) (string, error) {
 	cmd.Stderr = &errb
 
 	if err := cmd.Run(); err != nil {
-		return errb.String(), err
+		return outb.String() + errb.String(), err
 	}
 	return outb.String(), nil
 }
@@ -91,22 +93,26 @@ func GetTimeWindow(poolInfo SPV) Window {
 	return w
 }
 
-func WithdrawOrDeposit(poolIndex string, claimUsersNum, totalInvestors int, all, withdraw bool) map[int]int {
-	rand.Seed(time.Now().UnixNano()) // seed the random number generator
+func WithdrawOrDeposit(poolIndex string, claimUsersNum, totalInvestors int, all, withdraw bool, logger zlog.Logger) map[int]int {
 	usersClaimData := make(map[int]int)
 	actuallyDone := make(map[int]int)
-	for i := 0; i < claimUsersNum; i++ {
-		num := rand.Intn(totalInvestors) + 1 // generate a random number between 1 and y
-		amount := rand.Intn(100) + 1         // generate a random number between 1 and y
-		if all {
-			amount = 100000 // generate a random number between 1 and y
-		}
-		if all {
-			usersClaimData[i] = amount
-		} else {
-			usersClaimData[num] = amount
-		}
+
+	if all {
+		claimUsersNum = totalInvestors
 	}
+
+	usersList := rand.Perm(totalInvestors)[:claimUsersNum]
+
+	for _, el := range usersList {
+		var amount int
+		if all {
+			amount = 100000
+		} else {
+			amount = rand.Intn(100) + 1 // generate a random number between 1 and y
+		}
+		usersClaimData[el+1] = amount
+	}
+
 	locker := sync.RWMutex{}
 	wg := sync.WaitGroup{}
 	wg.Add(claimUsersNum)
@@ -115,13 +121,14 @@ func WithdrawOrDeposit(poolIndex string, claimUsersNum, totalInvestors int, all,
 			defer wg.Done()
 			// var out string
 			var err error
+			var out string
 			if withdraw {
-				_, err = RunCommandWithOutput("./scripts/withdraw.sh", poolIndex, strconv.Itoa(amount), strconv.Itoa(userIndex))
+				out, err = RunCommandWithOutput("./scripts/withdraw.sh", poolIndex, strconv.Itoa(amount), strconv.Itoa(userIndex))
 			} else {
-				_, err = RunCommandWithOutput("./scripts/deposit.sh", poolIndex, strconv.Itoa(amount), strconv.Itoa(userIndex))
+				out, err = RunCommandWithOutput("./scripts/deposit.sh", poolIndex, strconv.Itoa(amount), strconv.Itoa(userIndex))
 			}
 			if err != nil {
-				// logger.Error().Err(err).Msgf("we got error %v when call withdraw for user %d, %v", err, userIndex, out)
+				logger.Error().Err(err).Msgf("we got error %v when call withdraw for user %d, %v", err, userIndex, out)
 				return
 			}
 			locker.Lock()

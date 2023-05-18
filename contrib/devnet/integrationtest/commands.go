@@ -40,14 +40,14 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 
 	if w.PaymentDue <= 6 && len(depositorsb) == 0 {
 		display.showOutput("we take dump before payment", YELLOW)
-		_, depositorsb, _, err = common.DumpAll(poolIndex, "before.xlsx", false)
+		_, depositorsb, _, err = common.DumpAll(poolIndex, "before.xlsx", false, logger)
 		if err != nil {
 			return fmt.Errorf("error dumnp all: %v", err)
 		}
 	}
 	if w.PaymentDue > 100 && len(depositorsa) == 0 {
 		display.showOutput("we take dump after payment", YELLOW)
-		_, depositorsa, _, err = common.DumpAll(poolIndex, "after.xlsx", false)
+		_, depositorsa, _, err = common.DumpAll(poolIndex, "after.xlsx", false, logger)
 		if err != nil {
 			return fmt.Errorf("error dumnp all: %v", err)
 		}

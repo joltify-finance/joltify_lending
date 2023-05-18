@@ -301,7 +301,11 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 				// since you have submitted the withdrawal/transfer request, we skipp the borrow from it
 				continue
 			}
-			if firstDepositor == nil {
+
+			// this fix the bug that if we have 3 nodes with amount 0, 2,2. if we have 3 usd to be  withdrawal, it will
+			// have the error as 2 2 because the first one despositor will not be involved in the borrow.
+			// the correct way is to have the first non-zero withdrawal as the first depositor to be borrowed from
+			if firstDepositor == nil && !depositor.WithdrawalAmount.IsZero() {
 				firstDepositor = depositor
 				continue
 			}
@@ -322,7 +326,10 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 				return false
 			}
 
-			if firstDepositor == nil {
+			// this fix the bug that if we have 3 nodes with amount 0, 2,2. if we have 3 usd to be  withdrawal, it will
+			// have the error as 2 2 because the first one despositor will not be involved in the borrow.
+			// the correct way is to have the first non-zero withdrawal as the first depositor to be borrowed from
+			if firstDepositor == nil && !depositor.WithdrawalAmount.IsZero() {
 				firstDepositor = &depositor
 				return false
 			}
@@ -342,6 +349,7 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	// now we process the last one
 	lockedUsd := usdBorrowed.Sub(totalLocked)
 	lockedLocal := localAmount.Sub(totalLockedLocal)
+
 	err := k.doProcessInvestor(ctx, firstDepositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo)
 
 	return err
@@ -388,7 +396,6 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	totalPaidAmount = totalPaidAmount.Add(depositor.PendingInterest.Amount)
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
-
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -399,7 +406,11 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		if err != nil {
 			return sdk.ZeroInt(), err
 		}
+
 	}
+
+	poolInfo.ProcessedTransferAccounts = deleteElement(poolInfo.ProcessedTransferAccounts, depositor.DepositorAddress)
+
 	if k.isEmptyPool(ctx, poolInfo) && len(poolInfo.ProcessedTransferAccounts) == 0 {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		// we transfer the leftover back to spv

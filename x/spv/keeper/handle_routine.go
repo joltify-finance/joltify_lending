@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -12,6 +13,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
+
+func (k Keeper) Getbalance() {
+	addr := k.accKeeper.GetModuleAddress(types.ModuleName)
+	fmt.Printf(">>>>>>>>>>>>>%v\n", addr.String())
+}
 
 func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error {
 	totalAmountDue, poolLatestPaymentTime, err := k.getAllInterestToBePaid(ctx, poolInfo)
@@ -239,12 +245,12 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 			panic(err)
 		}
 
-		err = k.processEachWithdrawReq(ctx, depositor, false, exchangeRatio)
+		err = k.processEachWithdrawReq(ctx, depositor, true, exchangeRatio)
 		if err != nil {
 			ctx.Logger().Error("fail to pay partial principal", err.Error())
 			panic(err)
 		}
-
+		depositor.LinkedNFT = []string{}
 		depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
 		usdWithdrawal := sdk.NewDecFromInt(depositor.LockedAmount.Amount).Mul(exchangeRatio).TruncateInt()
 		total = total.Add(usdWithdrawal)
@@ -264,11 +270,13 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		panic(err)
 	}
 
-	err = k.processEachWithdrawReq(ctx, depositor, false, exchangeRatio)
+	err = k.processEachWithdrawReq(ctx, depositor, true, exchangeRatio)
 	if err != nil {
 		ctx.Logger().Error("fail to pay partial principal", err.Error())
 		panic(err)
 	}
+
+	depositor.LinkedNFT = []string{}
 
 	depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
 	usdAmount := usdWithdrawalTotal.SubAmount(total)
