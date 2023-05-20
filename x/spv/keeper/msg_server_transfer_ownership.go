@@ -55,6 +55,13 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(err, "fail to update the borrowable")
 	}
 
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, caller, sdk.NewCoins(d.WithdrawalAmount))
+	if err != nil {
+		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(err, "fail to send the leftover withdrawable to investor")
+	}
+
+	d.WithdrawalAmount = d.WithdrawalAmount.SubAmount(d.WithdrawalAmount.Amount)
+
 	k.SetDepositor(ctx, d)
 	k.SetPool(ctx, poolInfo)
 
