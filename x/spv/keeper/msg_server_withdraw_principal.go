@@ -62,6 +62,10 @@ func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
 		return false
 	}
 
+	if len(poolInfo.ProcessedTransferAccounts) != 0 || len(poolInfo.ProcessedWithdrawAccounts) != 0 {
+		return false
+	}
+
 	for _, el := range poolInfo.PoolNFTIds {
 		if k.nftKeeper.GetTotalSupply(ctx, el) > 0 {
 			return false
@@ -112,8 +116,9 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 	k.SetDepositorHistory(ctx, depositor)
 	k.DelDepositor(ctx, depositor)
 	poolInfo.ProcessedTransferAccounts = deleteElement(poolInfo.ProcessedTransferAccounts, depositor.DepositorAddress)
+	poolInfo.ProcessedWithdrawAccounts = deleteElement(poolInfo.ProcessedWithdrawAccounts, depositor.DepositorAddress)
 
-	if k.isEmptyPool(ctx, poolInfo) && len(poolInfo.ProcessedTransferAccounts) == 0 {
+	if k.isEmptyPool(ctx, poolInfo) {
 		totalReturn := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)
 		if !totalReturn.IsZero() {
 			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.NewCoins(totalReturn))

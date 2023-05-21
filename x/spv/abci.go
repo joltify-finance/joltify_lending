@@ -15,7 +15,6 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		// it means we need to catchup, we give extra 30 seconds to allow the delay caused by block process time
 		// currently, the block process time is 5 seconds
 
-		k.Getbalance()
 		for int32(currentTime.Sub(poolInfo.LastPaymentTime).Seconds()) > poolInfo.PayFreq*2 {
 
 			if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {

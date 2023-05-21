@@ -153,6 +153,11 @@ message PoolInfo {
 
   string project_name = 40;
   bool separate_pool = 41;
+
+  repeated bytes processed_withdraw_accounts     = 42
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
 }
 
 message Interest_prepayment{

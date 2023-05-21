@@ -137,6 +137,7 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 		}
 	}
 
+	totalLockedChange = new(big.Int).Mul(totalLockedChange, big.NewInt(-1))
 	if !compareWithinError(totalWithdrawChange, big.NewInt(0), big.NewInt(10)) || !compareWithinError(totalLockedChange, big.NewInt(0), big.NewInt(10)) {
 		tick := html.UnescapeString("&#" + "10060" + ";")
 		msg := fmt.Sprintf("%v total withdraw change %v and total locked %v\n", tick, totalWithdrawChange.String(), totalLockedChange.String())

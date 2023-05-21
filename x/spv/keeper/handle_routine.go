@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -13,11 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
-
-func (k Keeper) Getbalance() {
-	addr := k.accKeeper.GetModuleAddress(types.ModuleName)
-	fmt.Printf(">>>>>>>>>>>>>%v\n", addr.String())
-}
 
 func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error {
 	totalAmountDue, poolLatestPaymentTime, err := k.getAllInterestToBePaid(ctx, poolInfo)
@@ -295,6 +289,8 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 
 	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.EscrowPrincipalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
+
+	poolInfo.ProcessedWithdrawAccounts = append(poolInfo.ProcessedWithdrawAccounts, poolInfo.WithdrawAccounts...)
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
 	// clear the flag
 	poolInfo.PrincipalPaid = false
