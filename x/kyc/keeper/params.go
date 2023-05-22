@@ -1,7 +1,10 @@
 package keeper
 
 import (
+	"encoding/base64"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 )
 
@@ -22,7 +25,17 @@ func (k Keeper) GetSubmitter(ctx sdk.Context) (submitters []sdk.AccAddress) {
 	return submitters
 }
 
-func (k Keeper) GetProjects(ctx sdk.Context) (projectsInfo []*types.ProjectInfo) {
-	k.paramstore.Get(ctx, types.KeyProjects, &projectsInfo)
-	return projectsInfo
+func (k Keeper) GetProjects(ctx sdk.Context) []*types.ProjectInfo {
+	var projectsEncoded string
+	k.paramstore.Get(ctx, types.KeyProjects, &projectsEncoded)
+
+	val, err := base64.StdEncoding.DecodeString(projectsEncoded)
+	if err != nil {
+		panic("invalid encoded string")
+	}
+
+	var projects types.Projects
+	proto.Unmarshal(val, &projects)
+
+	return projects.Items
 }

@@ -50,9 +50,11 @@ message ProjectInfo {
   ];
 }
 
+message Projects{
+  repeated ProjectInfo items = 1;
+}
 // Params defines the parameters for the module.
 message Params {
-  option (gogoproto.goproto_stringer) = false;
-  repeated ProjectInfo projects_info = 1;
+  string project_info  = 1;
   repeated bytes submitter     = 4 [   (cosmos_proto.scalar) = "cosmos.AddressBytes",   (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
 }

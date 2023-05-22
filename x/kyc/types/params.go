@@ -1,16 +1,17 @@
 package types
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/gogo/protobuf/proto"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"gopkg.in/yaml.v2"
 )
 
 var _ paramtypes.ParamSet = (*Params)(nil)
@@ -33,7 +34,9 @@ func NewParams() Params {
 		panic(err)
 	}
 	var out []string
+	var projects Projects
 	allProjects := make([]*ProjectInfo, 100)
+	projects.Items = allProjects
 	for i := 0; i < 100; i++ {
 		b := BasicInfo{
 			"This is the test info",
@@ -68,11 +71,14 @@ func NewParams() Params {
 		indexHash := crypto.Keccak256Hash([]byte(pi.BasicInfo.ProjectName), acc.Bytes(), []byte("junior"))
 		out = append(out, indexHash.Hex())
 	}
-	for _, el := range out {
-		fmt.Printf("%v,", el)
+
+	b, err := proto.Marshal(&projects)
+	if err != nil {
+		panic("invalid parameter")
 	}
-	fmt.Printf("\n")
-	return Params{allProjects, []types.AccAddress{acc}}
+
+	data := base64.StdEncoding.EncodeToString(b)
+	return Params{data, []types.AccAddress{acc}}
 }
 
 // DefaultParams returns a default set of parameters
@@ -83,14 +89,14 @@ func DefaultParams() Params {
 // ParamSetPairs get the params.ParamSet
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyProjects, &p.ProjectsInfo, validateProjectInfo),
+		paramtypes.NewParamSetPair(KeyProjects, &p.ProjectInfo, validateProjectInfo),
 		paramtypes.NewParamSetPair(KeyKycSubmitter, &p.Submitter, validateSubmitter),
 	}
 }
 
 // Validate validates the set of params
 func (p Params) Validate() error {
-	err := validateProjectInfo(p.ProjectsInfo)
+	err := validateProjectInfo(p.ProjectInfo)
 	if err != nil {
 		return err
 	}
@@ -109,21 +115,26 @@ func validateSubmitter(i interface{}) error {
 }
 
 func validateProjectInfo(i interface{}) error {
-	projects, ok := i.([]*ProjectInfo)
+	projectsStr, ok := i.(string)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	for _, el := range projects {
+	out, err := base64.StdEncoding.DecodeString(projectsStr)
+	if err != nil {
+		return fmt.Errorf("fail to decode the project base64 string: %v", err)
+	}
+
+	var projects Projects
+	err = proto.Unmarshal(out, &projects)
+	if err != nil {
+		return err
+	}
+
+	for _, el := range projects.Items {
 		if len(el.SPVName) == 0 {
 			return errors.New("spv name cannot be nil")
 		}
 	}
 	return nil
-}
-
-// String implements the Stringer interface.
-func (p Params) String() string {
-	out, _ := yaml.Marshal(p)
-	return string(out)
 }
