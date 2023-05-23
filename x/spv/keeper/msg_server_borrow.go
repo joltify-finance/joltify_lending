@@ -57,7 +57,9 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo) error {
 		return types.ErrPoolBorrowExpire
 	}
 
-	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && poolInfo.UsableAmount.IsLT(poolInfo.TargetAmount) {
+	token := sdk.NewDecFromIntWithPrec(sdkmath.NewInt(1000), 0)
+	minToken := sdk.NewCoin(poolInfo.TargetAmount.Denom, token.RoundInt())
+	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && poolInfo.UsableAmount.IsLT(minToken) {
 		return coserrors.Wrapf(types.ErrInsufficientFund, "pool target is %v and we have %v usable", poolInfo.TargetAmount, poolInfo.UsableAmount)
 	}
 	return nil
