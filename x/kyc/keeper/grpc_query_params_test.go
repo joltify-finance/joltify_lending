@@ -1,7 +1,10 @@
 package keeper_test
 
 import (
+	"encoding/base64"
 	"testing"
+
+	"github.com/gogo/protobuf/proto"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
@@ -31,7 +34,17 @@ func newParams() types.Params {
 		BasicInfo:    &b,
 		ProjectOwner: acc,
 	}
-	return types.Params{ProjectsInfo: []*types.ProjectInfo{&pi}, Submitter: []sdk.AccAddress{acc}}
+
+	projects := types.Projects{Items: []*types.ProjectInfo{&pi}}
+
+	mProjects, err := proto.Marshal(&projects)
+	if err != nil {
+		panic("invalid parameter")
+	}
+
+	data := base64.StdEncoding.EncodeToString(mProjects)
+
+	return types.Params{ProjectInfo: data, Submitter: []sdk.AccAddress{acc}}
 }
 
 func TestParamsQuery(t *testing.T) {
@@ -46,5 +59,13 @@ func TestParamsQuery(t *testing.T) {
 	require.NoError(t, err)
 
 	require.True(t, params.Submitter[0].Equals(response.Params.Submitter[0]))
-	require.EqualValues(t, params.ProjectsInfo[0].SPVName, response.GetParams().ProjectsInfo[0].SPVName)
+
+	mb, err := base64.StdEncoding.DecodeString(params.ProjectInfo)
+	require.NoError(t, err)
+
+	var projects types.Projects
+	err = proto.Unmarshal(mb, &projects)
+	require.NoError(t, err)
+
+	require.EqualValues(t, params.ProjectInfo, response.GetParams().ProjectInfo)
 }

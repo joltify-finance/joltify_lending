@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gogo/protobuf/proto"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 
@@ -33,7 +32,6 @@ func NewParams() Params {
 	if err != nil {
 		panic(err)
 	}
-	var out []string
 	var projects Projects
 	allProjects := make([]*ProjectInfo, 100)
 	projects.Items = allProjects
@@ -68,8 +66,7 @@ func NewParams() Params {
 		pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
 		allProjects[i] = &pi
 
-		indexHash := crypto.Keccak256Hash([]byte(pi.BasicInfo.ProjectName), acc.Bytes(), []byte("junior"))
-		out = append(out, indexHash.Hex())
+		// indexHash := crypto.Keccak256Hash([]byte(pi.BasicInfo.ProjectName), acc.Bytes(), []byte("junior"))
 	}
 
 	b, err := proto.Marshal(&projects)
