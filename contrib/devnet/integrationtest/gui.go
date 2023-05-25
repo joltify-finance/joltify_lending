@@ -229,13 +229,23 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 			case "6":
 				baseName := time.Now().Format("2006-01-02 15-04")
 				fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-				common.DumpAll(poolIndex, fileName, true)
+				common.DumpAll(poolIndex, fileName, true, logger)
 				display.showOutput("finish dumping the status", GREEN)
 
 			case "7":
 				display.showOutput("start withdraw all", GREEN)
-				common.WithdrawOrDeposit(poolIndex, totalInvestors, totalInvestors, true, true)
-				display.showOutput("withdraw all complete", GREEN)
+				actuallyDone := common.WithdrawOrDeposit(poolIndex, totalInvestors, totalInvestors, true, true, logger)
+				var missed []int
+				for k := 0; k < totalInvestors; k++ {
+					_, ok := actuallyDone[k+1]
+					if ok {
+						continue
+					}
+					missed = append(missed, k+1)
+				}
+
+				msg := fmt.Sprintf("withdraw complete with failed users %v", missed)
+				display.showOutput(msg, GREEN)
 
 			default:
 				identifier := input[0]
@@ -259,20 +269,20 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 
 					baseName := time.Now().Format("2006-01-02 15-04")
 					fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-					poolb, depositorsb, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+					poolb, depositorsb, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 					if err != nil {
 						emsg := fmt.Errorf("error dumnp all %w", err)
 						display.showOutput(emsg.Error(), RED)
 					}
 					if choice == 1 {
-						actuallyDone = common.WithdrawOrDeposit(poolIndex, numAccounts, totalInvestors, false, false)
+						actuallyDone = common.WithdrawOrDeposit(poolIndex, numAccounts, totalInvestors, false, false, logger)
 					} else {
-						actuallyDone = common.WithdrawOrDeposit(poolIndex, numAccounts, totalInvestors, false, true)
+						actuallyDone = common.WithdrawOrDeposit(poolIndex, numAccounts, totalInvestors, false, true, logger)
 					}
 					choice = -1
 					msg := fmt.Sprintf("we actually done the withdraw with users %v", actuallyDone)
 					display.showOutput(msg, GREEN)
-					poola, depositorsa, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+					poola, depositorsa, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 					if err != nil {
 						msg := fmt.Errorf("error dumnp all after %w", err)
 						display.showOutput(msg.Error(), RED)
@@ -365,7 +375,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 
 					baseName := time.Now().Format("2006-01-02 15-04")
 					fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-					_, depositorsb, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+					_, depositorsb, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 					if err != nil {
 						logger.Error().Err(err).Msgf("error dumnp all")
 					}
@@ -374,7 +384,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 					msg := fmt.Sprintf("we actually done the withdraw interest with users %v", actuallyDone)
 					display.showOutput(msg, GREEN)
 					fileName = fmt.Sprintf("%s-%s.xlsx", baseName, "after")
-					_, depositorsa, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+					_, depositorsa, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 					if err != nil {
 						logger.Error().Err(err).Msgf("error dumnp all")
 					}
@@ -441,7 +451,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 
 					baseName := time.Now().Format("2006-01-02 15-04")
 					fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-					_, depositorb, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+					_, depositorb, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 					if err != nil {
 						logger.Error().Err(err).Msgf("error dumnp all")
 					}
@@ -451,7 +461,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 					display.showOutput(msg, GREEN)
 
 					fileName = fmt.Sprintf("%s-%s.xlsx", baseName, "after")
-					_, depositora, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+					_, depositora, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 					if err != nil {
 						logger.Error().Err(err).Msgf("error dumnp all")
 					}
@@ -499,7 +509,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 				display.showOutput("we are about to submit the withdraw request", YELLOW)
 				baseName := time.Now().Format("2006-01-02 15-04")
 				fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-				_, depositorb, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+				_, depositorb, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 				if err != nil {
 					logger.Error().Err(err).Msgf("error dumnp all")
 				}
@@ -507,7 +517,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 				msg := fmt.Sprintf("we actually done the withdraw with users %v", actualDone)
 				display.showOutput(msg, GREEN)
 				fileName = fmt.Sprintf("%s-%s.xlsx", baseName, "after")
-				_, depositora, _, err := common.DumpAll(poolIndex, fileName, needWrite)
+				_, depositora, _, err := common.DumpAll(poolIndex, fileName, needWrite, logger)
 				if err != nil {
 					logger.Error().Err(err).Msgf("error dumnp all")
 				}
@@ -523,10 +533,10 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 			case common.PAYPRINCIPAL:
 				baseName := time.Now().Format("2006-01-02 15-04")
 				fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-				common.DumpAll(poolIndex, fileName, needWrite)
+				common.DumpAll(poolIndex, fileName, needWrite, logger)
 				payPrincipalPartial(poolIndex)
 				fileName = fmt.Sprintf("%s-%s.xlsx", baseName, "after")
-				common.DumpAll(poolIndex, fileName, needWrite)
+				common.DumpAll(poolIndex, fileName, needWrite, logger)
 				guiWithdrawAmount = -1
 				display.showOutput("we have processed the withdraw request and pay the principal", BLUE)
 
@@ -537,6 +547,20 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 
 func main() {
 	zlog.SetGlobalLevel(zlog.InfoLevel)
+
+	file, err := os.OpenFile(
+		"gui.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0o664,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	logger = zlog.New(file).With().Timestamp().Logger()
+
 	fmt.Printf("Do you want to start the chain? (y/n):")
 	reader := bufio.NewReader(os.Stdin)
 	input, _ := reader.ReadString('\n')
@@ -567,7 +591,7 @@ func main() {
 		outPannel: output,
 	}
 
-	err := updateGauge(g1, g2, g3)
+	err = updateGauge(g1, g2, g3)
 	if err != nil {
 		fmt.Printf(">>>%v\n", err)
 		return

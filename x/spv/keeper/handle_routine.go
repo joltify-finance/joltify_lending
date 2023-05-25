@@ -101,7 +101,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 		}
 
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, usdTotalLocked), false, nil, sdk.ZeroInt())
+		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, usdTotalLocked), false, nil, sdk.ZeroInt(), true)
 		if err != nil {
 			panic(err)
 		}
@@ -133,7 +133,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	// we need to adjust the amount of the borrowed and borrowable for the pool as we borrow again from these investors
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
 	poolInfo.UsableAmount = poolInfo.UsableAmount.AddAmount(needToBorrowedFromPreviousInvestorsUsd)
-	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, needToBorrowedFromPreviousInvestorsUsd), false, depositors, totalBorrowableFromPrevious)
+	err = k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, needToBorrowedFromPreviousInvestorsUsd), false, depositors, totalBorrowableFromPrevious, true)
 	if err != nil {
 		panic(err)
 	}
@@ -143,7 +143,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 		depositors[i].DepositType = types.DepositorInfo_processed
 		k.SetDepositor(ctx, *depositors[i])
 	}
-	err = k.doBorrow(ctx, poolInfo, poolInfo.UsableAmount, false, nil, sdk.ZeroInt())
+	err = k.doBorrow(ctx, poolInfo, poolInfo.UsableAmount, false, nil, sdk.ZeroInt(), true)
 	if err != nil {
 		panic(err)
 	}
@@ -239,12 +239,12 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 			panic(err)
 		}
 
-		err = k.processEachWithdrawReq(ctx, depositor, false, exchangeRatio)
+		err = k.processEachWithdrawReq(ctx, depositor, true, exchangeRatio)
 		if err != nil {
 			ctx.Logger().Error("fail to pay partial principal", err.Error())
 			panic(err)
 		}
-
+		depositor.LinkedNFT = []string{}
 		depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
 		usdWithdrawal := sdk.NewDecFromInt(depositor.LockedAmount.Amount).Mul(exchangeRatio).TruncateInt()
 		total = total.Add(usdWithdrawal)
@@ -264,11 +264,13 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		panic(err)
 	}
 
-	err = k.processEachWithdrawReq(ctx, depositor, false, exchangeRatio)
+	err = k.processEachWithdrawReq(ctx, depositor, true, exchangeRatio)
 	if err != nil {
 		ctx.Logger().Error("fail to pay partial principal", err.Error())
 		panic(err)
 	}
+
+	depositor.LinkedNFT = []string{}
 
 	depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
 	usdAmount := usdWithdrawalTotal.SubAmount(total)
@@ -287,6 +289,8 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 
 	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.EscrowPrincipalAmount.Denom, sdk.ZeroInt())
 	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
+
+	poolInfo.ProcessedWithdrawAccounts = append(poolInfo.ProcessedWithdrawAccounts, poolInfo.WithdrawAccounts...)
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
 	// clear the flag
 	poolInfo.PrincipalPaid = false

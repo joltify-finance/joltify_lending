@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
+	zlog "github.com/rs/zerolog"
+
 	"github.com/rs/zerolog/log"
 )
-
-var logger = log.With().Logger()
 
 func dumpPool(poolIndex, fileName string, needWrite bool) (SPV, error) {
 	out, err := RunCommandWithOutput("joltify", "q", "spv", "query-pool", poolIndex, "--output", "json")
@@ -38,7 +38,7 @@ func dumpPool(poolIndex, fileName string, needWrite bool) (SPV, error) {
 	return poolInfo, nil
 }
 
-func dumpInvestorsAndInterest(poolIndex, fileName string, needWrite bool) ([]SPV, error) {
+func dumpInvestorsAndInterest(poolIndex, fileName string, needWrite bool, logger zlog.Logger) ([]SPV, error) {
 	ret := os.Getenv("ALL_INVESTORS")
 	initInvestors, err := strconv.Atoi(ret)
 	if err != nil {
@@ -65,13 +65,13 @@ func dumpInvestorsAndInterest(poolIndex, fileName string, needWrite bool) ([]SPV
 			address = strings.Trim(address, "\n")
 			out, err := RunCommandWithOutput("joltify", "q", "spv", "depositor", poolIndex, address, "--output", "json")
 			if err != nil {
-				logger.Debug().Msgf(">>> no deposit found for key %v at pool %v\n", index, poolIndex)
+				logger.Error().Err(err).Msgf(">>> no deposit found for key %v at pool %v", index, poolIndex)
 			}
 
 			out2, err := RunCommandWithOutput("joltify", "q", "spv", "claimable-interest", address, poolIndex, "--output", "json")
 			if err != nil {
 				// this means the depositor cannot be found
-				logger.Debug().Msgf(">>> no interest found for key %v at pool %v\n", index, poolIndex)
+				logger.Debug().Msgf(">>> no interest found for key %v at pool %v", index, poolIndex)
 			}
 
 			out3, err := RunCommandWithOutput("joltify", "q", "bank", "balances", address, "--output", "json")
@@ -113,7 +113,7 @@ func dumpInvestorsAndInterest(poolIndex, fileName string, needWrite bool) ([]SPV
 	return depositorsInterest, errG
 }
 
-func dumpBorrowNFT(poolIndex, fileName string, needWrite bool) ([]SPV, error) {
+func dumpBorrowNFT(poolIndex, fileName string, needWrite bool, logger zlog.Logger) ([]SPV, error) {
 	out, err := RunCommandWithOutput("joltify", "q", "spv", "query-pool", poolIndex, "--output", "json")
 	if err != nil {
 		fmt.Printf("error(%v) is %v\n", err, out)
@@ -160,7 +160,7 @@ func dumpBorrowNFT(poolIndex, fileName string, needWrite bool) ([]SPV, error) {
 	return nftsResult, nil
 }
 
-func DumpAll(poolIndex, fileName string, needWrite bool) (SPV, []SPV, []SPV, error) {
+func DumpAll(poolIndex, fileName string, needWrite bool, logger zlog.Logger) (SPV, []SPV, []SPV, error) {
 	if fileName == "" {
 		fileName = time.Now().Format("2006-01-02 15-04") + ".xlsx"
 	}
@@ -170,12 +170,12 @@ func DumpAll(poolIndex, fileName string, needWrite bool) (SPV, []SPV, []SPV, err
 		log.Error().Err(err).Msg(">>>>error in dump pool")
 		return SPV{}, nil, nil, err
 	}
-	depositors, err := dumpInvestorsAndInterest(poolIndex, fileName, needWrite)
+	depositors, err := dumpInvestorsAndInterest(poolIndex, fileName, needWrite, logger)
 	if err != nil {
 		logger.Error().Err(err).Msg(">>>>error in dump depositor n")
 		return SPV{}, nil, nil, err
 	}
-	nftsSPV, err := dumpBorrowNFT(poolIndex, fileName, needWrite)
+	nftsSPV, err := dumpBorrowNFT(poolIndex, fileName, needWrite, logger)
 	if err != nil {
 		logger.Error().Err(err).Msg(">>>>error in dump dump")
 		return SPV{}, nil, nil, err

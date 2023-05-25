@@ -43,6 +43,8 @@ sed -i -E 's|enabled-unsafe-cors = false|enabled-unsafe-cors = true |g' $DATA/co
 
 sed -i -E 's|tcp://127.0.0.1:26657|tcp://0.0.0.0:26657|g' $DATA/config/config.toml
 
+sed -i -E 's|max_subscription_clients = 100|max_subscription_clients = 1000|g' $DATA/config/config.toml
+
 sed -i -E 's|cors_allowed_origins = \[\]|cors_allowed_origins = \[\"*\"\]|g' $DATA/config/config.toml
 
 

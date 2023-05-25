@@ -138,7 +138,7 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 
 // tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
 // rather then all the usable money
-func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int) error {
+func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int, userPoolLastPaymentTime bool) error {
 	if usdTokenAmount.IsZero() {
 		return nil
 	}
@@ -168,7 +168,14 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmou
 	}
 
 	rate := CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
-	paymentTime := ctx.BlockTime()
+
+	var paymentTime time.Time
+	if userPoolLastPaymentTime {
+		paymentTime = poolInfo.LastPaymentTime
+	} else {
+		paymentTime = ctx.BlockTime()
+	}
+
 	borrowDetails := make([]types.BorrowDetail, 1, 10)
 	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: localToken, TimeStamp: paymentTime, ExchangeRatio: ratio}
 	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.NewInt(0))}
@@ -211,7 +218,9 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmou
 
 	// we finally update the pool info
 	poolInfo.PoolStatus = types.PoolInfo_ACTIVE
-	poolInfo.LastPaymentTime = paymentTime
+	if !userPoolLastPaymentTime {
+		poolInfo.LastPaymentTime = paymentTime
+	}
 	k.SetPool(ctx, *poolInfo)
 
 	if needBankTransfer {
@@ -249,7 +258,7 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 	return nil
 }
 
-func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo) error {
+func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, useLastPaymentTime bool) error {
 	depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(poolInfo.BorrowedAmount.Denom, lockedLocal))
 
 	if depositor.WithdrawalAmount.Amount.LT(lockedUsd) {
@@ -265,8 +274,15 @@ func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInf
 	indexHash := crypto.Keccak256Hash([]byte(nftClassId), depositor.DepositorAddress)
 	nftTemplate.Id = fmt.Sprintf("invoice-%v", indexHash.String()[2:])
 
+	var paymentTime time.Time
+	if useLastPaymentTime {
+		paymentTime = poolInfo.LastPaymentTime
+	} else {
+		paymentTime = ctx.BlockTime()
+	}
+
 	lockedCoin := sdk.NewCoin(depositor.LockedAmount.Denom, lockedLocal)
-	userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: depositor.DepositorAddress.String(), Borrowed: lockedCoin, LastPayment: ctx.BlockTime()}
+	userData := types.NftInfo{Issuer: poolInfo.PoolName, Receiver: depositor.DepositorAddress.String(), Borrowed: lockedCoin, LastPayment: paymentTime}
 	data, err := types2.NewAnyWithValue(&userData)
 	if err != nil {
 		panic("should never fail")
@@ -301,13 +317,17 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 				// since you have submitted the withdrawal/transfer request, we skipp the borrow from it
 				continue
 			}
-			if firstDepositor == nil {
+
+			// this fix the bug that if we have 3 nodes with amount 0, 2,2. if we have 3 usd to be  withdrawal, it will
+			// have the error as 2 2 because the first one despositor will not be involved in the borrow.
+			// the correct way is to have the first non-zero withdrawal as the first depositor to be borrowed from
+			if firstDepositor == nil && !depositor.WithdrawalAmount.IsZero() {
 				firstDepositor = depositor
 				continue
 			}
 			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
-			err := k.doProcessInvestor(ctx, depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo)
+			err := k.doProcessInvestor(ctx, depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, true)
 			if err != nil {
 				return err
 			}
@@ -322,13 +342,16 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 				return false
 			}
 
-			if firstDepositor == nil {
+			// this fix the bug that if we have 3 nodes with amount 0, 2,2. if we have 3 usd to be  withdrawal, it will
+			// have the error as 2 2 because the first one despositor will not be involved in the borrow.
+			// the correct way is to have the first non-zero withdrawal as the first depositor to be borrowed from
+			if firstDepositor == nil && !depositor.WithdrawalAmount.IsZero() {
 				firstDepositor = &depositor
 				return false
 			}
 			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
-			err := k.doProcessInvestor(ctx, &depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo)
+			err := k.doProcessInvestor(ctx, &depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, true)
 			if err != nil {
 				ctx.Logger().Error(err.Error(), "error msg:", "failed to process investor")
 				return false
@@ -342,7 +365,12 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	// now we process the last one
 	lockedUsd := usdBorrowed.Sub(totalLocked)
 	lockedLocal := localAmount.Sub(totalLockedLocal)
-	err := k.doProcessInvestor(ctx, firstDepositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo)
+
+	// we do not need to borrow from this investor
+	if lockedLocal.IsNegative() {
+		return nil
+	}
+	err := k.doProcessInvestor(ctx, firstDepositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, true)
 
 	return err
 }
@@ -388,7 +416,6 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	totalPaidAmount = totalPaidAmount.Add(depositor.PendingInterest.Amount)
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
-
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -399,8 +426,12 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		if err != nil {
 			return sdk.ZeroInt(), err
 		}
+
 	}
-	if k.isEmptyPool(ctx, poolInfo) && len(poolInfo.ProcessedTransferAccounts) == 0 {
+
+	poolInfo.ProcessedTransferAccounts = deleteElement(poolInfo.ProcessedTransferAccounts, depositor.DepositorAddress)
+
+	if k.isEmptyPool(ctx, poolInfo) {
 		ctx.Logger().Info("we delete the pool as it is empty")
 		// we transfer the leftover back to spv
 		totalReturn := poolInfo.EscrowPrincipalAmount.AddAmount(poolInfo.EscrowInterestAmount)

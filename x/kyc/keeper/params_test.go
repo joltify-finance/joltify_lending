@@ -1,7 +1,11 @@
 package keeper_test
 
 import (
+	"encoding/base64"
 	"testing"
+
+	"github.com/gogo/protobuf/proto"
+	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/utils"
@@ -17,7 +21,7 @@ func TestGetParams(t *testing.T) {
 	params := newParams()
 	k.SetParams(ctx, params)
 	require.EqualValues(t, params.Submitter, k.GetParams(ctx).Submitter)
-	require.EqualValues(t, params.ProjectsInfo[0].SPVName, k.GetParams(ctx).ProjectsInfo[0].SPVName)
+	require.EqualValues(t, params.ProjectInfo, k.GetParams(ctx).ProjectInfo)
 }
 
 func TestGetEach(t *testing.T) {
@@ -28,7 +32,14 @@ func TestGetEach(t *testing.T) {
 
 	k.SetParams(ctx, params)
 	projects := k.GetProjects(ctx)
-	require.EqualValues(t, projects[0].SPVName, params.ProjectsInfo[0].SPVName)
+
+	mb, err := base64.StdEncoding.DecodeString(params.ProjectInfo)
+	require.NoError(t, err)
+	var decodedProjects types.Projects
+	err = proto.Unmarshal(mb, &decodedProjects)
+	require.NoError(t, err)
+
+	require.EqualValues(t, projects[0].SPVName, decodedProjects.Items[0].SPVName)
 	submitters := k.GetSubmitter(ctx)
 	require.EqualValues(t, submitters, params.Submitter)
 }

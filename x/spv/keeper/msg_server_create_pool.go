@@ -124,7 +124,8 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.NewInt(0)),
 			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
-			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track when we close the pool
+			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track transferred accounts when we close the pool
+			ProcessedWithdrawAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track the withdrawal accounts when we close the pool
 			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
 			PoolLockedSeconds:             targetProject.PoolLockedSeconds,
 			PoolTotalBorrowLimit:          targetProject.PoolTotalBorrowLimit,

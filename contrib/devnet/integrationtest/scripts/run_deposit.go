@@ -9,10 +9,12 @@ import (
 	"os/exec"
 	"strconv"
 	"sync"
+	// rand2 "github.com/tendermint/tendermint/libs/rand"
 )
 
+// the random here is pre-determined order
 func generateRandomIntegersWithSum(n int, sum int) []float64 {
-	rand.Seed(100)
+	rand.New(rand.NewSource(100))
 	mean := float64(sum) / float64(n) // mean of the normal distribution
 	stdDev := math.Sqrt(mean)         // standard deviation of the normal distribution
 

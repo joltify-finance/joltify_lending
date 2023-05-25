@@ -40,14 +40,14 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 
 	if w.PaymentDue <= 6 && len(depositorsb) == 0 {
 		display.showOutput("we take dump before payment", YELLOW)
-		_, depositorsb, _, err = common.DumpAll(poolIndex, "before.xlsx", false)
+		_, depositorsb, _, err = common.DumpAll(poolIndex, "before.xlsx", false, logger)
 		if err != nil {
 			return fmt.Errorf("error dumnp all: %v", err)
 		}
 	}
 	if w.PaymentDue > 100 && len(depositorsa) == 0 {
 		display.showOutput("we take dump after payment", YELLOW)
-		_, depositorsa, _, err = common.DumpAll(poolIndex, "after.xlsx", false)
+		_, depositorsa, _, err = common.DumpAll(poolIndex, "after.xlsx", false, logger)
 		if err != nil {
 			return fmt.Errorf("error dumnp all: %v", err)
 		}
@@ -137,6 +137,7 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 		}
 	}
 
+	totalLockedChange = new(big.Int).Mul(totalLockedChange, big.NewInt(-1))
 	if !compareWithinError(totalWithdrawChange, big.NewInt(0), big.NewInt(10)) || !compareWithinError(totalLockedChange, big.NewInt(0), big.NewInt(10)) {
 		tick := html.UnescapeString("&#" + "10060" + ";")
 		msg := fmt.Sprintf("%v total withdraw change %v and total locked %v\n", tick, totalWithdrawChange.String(), totalLockedChange.String())

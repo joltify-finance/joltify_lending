@@ -117,7 +117,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, types.ErrInsufficientFund
 	}
 
-	k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt())
+	k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
