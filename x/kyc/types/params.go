@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/gogo/protobuf/proto"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 
@@ -62,6 +64,7 @@ func NewParams() Params {
 			PoolTotalBorrowLimit:         100,
 			MarketId:                     "aud:usd",
 			WithdrawRequestWindowSeconds: 30,
+			MinBorrowAmount:              sdkmath.NewInt(100),
 		}
 		pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
 		allProjects[i] = &pi

@@ -84,7 +84,7 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 		},
 		{
 			name: "is not authorised to borrow",
-			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(100))}, expectedErr: "not authorized to borrow money"},
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}, expectedErr: "not authorized to borrow money"},
 		},
 
 		{
@@ -93,20 +93,26 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 		},
 		{
 			name: "reach borrow limit",
-			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "pool reached borrow limit"},
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2233))}, expectedErr: "pool reached borrow limit"},
 		},
 		{
 			name: "not enough to borrow",
-			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "insufficient tokens"},
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2233))}, expectedErr: "insufficient tokens"},
 		},
+
+		{
+			name: "not reach the minimum borrow amount",
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2))}, expectedErr: "pool minimal borrow is 100ausdc and you try to borrow 2ausdc: invalid parameter"},
+		},
+
 		{
 			name: "expire borrow time",
-			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "pool borrow time window expired"},
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2233))}, expectedErr: "pool borrow time window expired"},
 		},
 
 		{
 			name: "not enough to borrow",
-			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("aaa", sdk.NewIntFromUint64(2233))}, expectedErr: "pool borrow time window expired"},
+			args: args{msgBorrow: &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0], BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2233))}, expectedErr: "pool borrow time window expired"},
 		},
 	}
 
@@ -117,6 +123,7 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 			poolInfo.CurrentPoolTotalBorrowCounter = 0
 			poolInfo.PoolTotalBorrowLimit = 1
 			poolInfo.UsableAmount = poolInfo.TargetAmount
+			poolInfo.MinBorrowAmount = sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.NewIntFromUint64(100))
 
 			if tc.name == "reach borrow limit" {
 				poolInfo.PoolTotalBorrowLimit = 0
@@ -128,9 +135,6 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 			if tc.name == "expire borrow time" {
 				expiredTime := poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds) + poolInfo.GraceTime + time.Second)
 				suite.ctx = suite.ctx.WithBlockTime(expiredTime)
-			}
-
-			if tc.name == "not " {
 			}
 
 			suite.keeper.SetPool(suite.ctx, poolInfo)
@@ -261,7 +265,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	failedBorrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100.34e5))}
 	// pool reached the limit test
 	_, err = suite.app.Borrow(suite.ctx, failedBorrow)
-	suite.Require().ErrorContains(err, "pool reached its borrow limit with current borrowed")
+	suite.Require().ErrorContains(err, "insufficient tokens")
 
 	p1, found := suite.keeper.GetDepositor(suite.ctx, depositorPool, creatorAddr1)
 	suite.Require().True(found)

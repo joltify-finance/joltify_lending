@@ -38,7 +38,7 @@ func (k msgServer) getAllBorrowed(ctx sdk.Context, poolInfo types.PoolInfo) sdkm
 	return sum
 }
 
-func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo) error {
+func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo, borrowAmount sdk.Coin) error {
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
 		if poolInfo.PoolStatus != types.PoolInfo_PooLPayPartially {
 			return coserrors.Wrapf(types.ErrPoolNotActive, "pool is not in active status or partially paid status, current: %v", poolInfo.PoolStatus)
@@ -57,10 +57,12 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo) error {
 		return types.ErrPoolBorrowExpire
 	}
 
-	token := sdk.NewDecFromIntWithPrec(sdkmath.NewInt(1000), 0)
-	minToken := sdk.NewCoin(poolInfo.TargetAmount.Denom, token.RoundInt())
-	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && poolInfo.UsableAmount.IsLT(minToken) {
-		return coserrors.Wrapf(types.ErrInsufficientFund, "pool target is %v and we have %v usable", poolInfo.TargetAmount, poolInfo.UsableAmount)
+	if poolInfo.UsableAmount.IsLT(borrowAmount) {
+		return types.ErrInsufficientFund
+	}
+
+	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && borrowAmount.IsLT(poolInfo.MinBorrowAmount) {
+		return coserrors.Wrapf(types.ErrInvalidParameter, "pool minimal borrow is %v and you try to borrow %v", poolInfo.MinBorrowAmount, borrowAmount)
 	}
 	return nil
 }
@@ -76,6 +78,10 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+	}
+
+	if msg.BorrowAmount.Denom != poolInfo.TargetAmount.Denom {
+		return nil, coserrors.Wrap(types.ErrInconsistencyToken, "token to be borrowed is inconsistency")
 	}
 
 	// check that junior pool must meet its target amount before senior pool can borrow
@@ -94,7 +100,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	allBorrowed := k.getAllBorrowed(ctx, poolInfo)
 
-	err = checkEligibility(ctx.BlockTime(), poolInfo)
+	err = checkEligibility(ctx.BlockTime(), poolInfo, msg.BorrowAmount)
 	if err != nil {
 		return nil, err
 	}
@@ -107,14 +113,6 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	if !poolInfo.OwnerAddress.Equals(caller) {
 		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to borrow money", msg.Creator)
-	}
-
-	if msg.BorrowAmount.Denom != poolInfo.TargetAmount.Denom {
-		return nil, coserrors.Wrap(types.ErrInconsistencyToken, "token to be borrowed is inconsistency")
-	}
-
-	if poolInfo.UsableAmount.IsLT(msg.BorrowAmount) {
-		return nil, types.ErrInsufficientFund
 	}
 
 	k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
