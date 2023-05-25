@@ -158,6 +158,16 @@ message PoolInfo {
   [(cosmos_proto.scalar) = "cosmos.AddressBytes",
     (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
   ];
+
+
+  cosmos.base.v1beta1.Coin total_transfer_ownership_amount = 43[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  // the minimum amount of coins that can be withdrawn from the pool for the first time
+  cosmos.base.v1beta1.Coin min_borrow_amount = 44[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
 }
 
 message Interest_prepayment{

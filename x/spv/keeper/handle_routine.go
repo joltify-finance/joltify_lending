@@ -69,6 +69,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 
 	poolInfo.ProcessedTransferAccounts = append(poolInfo.ProcessedTransferAccounts, poolInfo.TransferAccounts...)
 	poolInfo.TransferAccounts = make([]sdk.AccAddress, 0, 200)
+	poolInfo.TotalTransferOwnershipAmount = sdk.NewCoin(poolInfo.TotalTransferOwnershipAmount.Denom, sdk.ZeroInt())
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 	usdTotalLocked, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, denomConvertToMarketID(a), totalLockedAmount)
