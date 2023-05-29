@@ -189,8 +189,8 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "we have the prepayment interest, not accepting new interest payment")
 	}
 
+	// we have enough interest in the escrow account
 	if !poolInfo.EscrowInterestAmount.IsNegative() {
-
 		a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 		marketID := denomConvertToMarketID(a)
 		counter, interestReceived, eachMonth, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, msg.Token.Amount)

@@ -13,7 +13,7 @@ import (
 func TestMsgSERvUpdatePool(t *testing.T) {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, _, wctx := setupMsgServer(t)
+	app, k, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
@@ -64,7 +64,7 @@ func TestMsgSERvUpdatePool(t *testing.T) {
 func TestMsgSERvUpdatePoolWithError(t *testing.T) {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, _, _, wctx := setupMsgServer(t)
+	app, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%

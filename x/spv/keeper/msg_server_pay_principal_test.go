@@ -55,7 +55,7 @@ func setupPools(suite *payPrincipalSuite) {
 func (suite *payPrincipalSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, wctx := setupMsgServer(suite.T())
+	app, k, nftKeeper, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 

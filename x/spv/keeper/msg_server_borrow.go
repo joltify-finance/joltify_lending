@@ -49,10 +49,6 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo, borrowAmount
 		return types.ErrPoolBorrowLimit
 	}
 
-	if poolInfo.InterestPrepayment != nil {
-		return coserrors.Wrapf(types.ErrInvalidParameter, "we have the prepayment interest, not accepting new interest payment")
-	}
-
 	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds)+poolInfo.GraceTime).Before(blockTime) {
 		return types.ErrPoolBorrowExpire
 	}
@@ -116,6 +112,41 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	}
 
 	k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
+
+	// now we need to update the interest prepaid
+	if poolInfo.InterestPrepayment != nil {
+		currentInterest := poolInfo.EscrowInterestAmount
+		a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+		marketID := denomConvertToMarketID(a)
+		counter, interestReceived, _, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, currentInterest)
+		if err != nil {
+			return nil, coserrors.Wrapf(err, "calculate payment month failed")
+		}
+
+		if counter < 1 {
+			// we return the leftover interest to the spv if it cannot be covered one round
+			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.Coins{sdk.NewCoin(poolInfo.TargetAmount.Denom, currentInterest)})
+			if err != nil {
+				return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
+			}
+			poolInfo.EscrowInterestAmount = sdk.ZeroInt()
+			poolInfo.InterestPrepayment = nil
+			k.SetPool(ctx, poolInfo)
+		} else {
+			prepayment := types.InterestPrepayment{
+				Counter:       counter,
+				ExchangeRatio: ratio,
+			}
+			poolInfo.InterestPrepayment = &prepayment
+			needToReturn := poolInfo.EscrowInterestAmount.Sub(interestReceived)
+			err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, poolInfo.OwnerAddress, sdk.Coins{sdk.NewCoin(poolInfo.TargetAmount.Denom, needToReturn)})
+			if err != nil {
+				return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
+			}
+			poolInfo.EscrowInterestAmount = interestReceived
+			k.SetPool(ctx, poolInfo)
+		}
+	}
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
