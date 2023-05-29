@@ -135,6 +135,30 @@ func validateProjectInfo(i interface{}) error {
 		if len(el.SPVName) == 0 {
 			return errors.New("spv name cannot be nil")
 		}
+
+		if el.PoolLockedSeconds < 0 {
+			return errors.New("project time related setting cannot be negative")
+		}
+
+		if el.WithdrawRequestWindowSeconds < 0 {
+			return errors.New("project time related setting cannot be negative")
+		}
+		if el.GraceTime.Seconds() < 0 {
+			return errors.New("project time related setting cannot be negative")
+		}
+
+		if el.MinBorrowAmount.IsNegative() {
+			return errors.New("min borrow amount cannot be negative")
+		}
+
+		freq, err := strconv.ParseInt(el.PayFreq, 10, 64)
+		if err != nil {
+			return err
+		}
+		if freq < 0 {
+			return errors.New("pay freq cannot be negative")
+		}
+
 	}
 	return nil
 }
