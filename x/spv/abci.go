@@ -42,9 +42,10 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		poolReady := poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_FREEZING || poolInfo.PoolStatus == types.PoolInfo_PooLPayPartially
 		if dueTime.Before(currentTime) && poolReady {
 			err := k.HandleInterest(ctx, &poolInfo)
-			if err != nil {
+			if err != nil && (err.Error() != "no interest to be paid" && err.Error() != "pay interest too early") {
 				panic(err)
 			}
+
 			ctx.Logger().Info("process interest", "pool Index:", poolInfo.Index, "latest payment", poolInfo.LastPaymentTime.Local().String())
 
 			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_PooLPayPartially {
