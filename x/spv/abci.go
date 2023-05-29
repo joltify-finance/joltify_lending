@@ -37,9 +37,6 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		if dueTime.Before(currentTime) && poolReady {
 			err := k.HandleInterest(ctx, &poolInfo)
 			if err != nil {
-				if err.Error() == "pay interest too early" {
-					return false
-				}
 				panic(err)
 			}
 			ctx.Logger().Info("process interest", "pool Index:", poolInfo.Index, "latest payment", poolInfo.LastPaymentTime.Local().String())

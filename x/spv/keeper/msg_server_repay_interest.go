@@ -93,6 +93,11 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 	totalPayment := sdkmath.NewInt(0)
 	firstBorrow := true
 	var exchangeRatio sdk.Dec
+
+	if poolInfo.PoolStatus == types.PoolInfo_INACTIVE {
+		return sdk.ZeroInt(), time.Time{}, errors.New("no interest to be paid")
+	}
+
 	if poolInfo.InterestPrepayment == nil || poolInfo.InterestPrepayment.Counter == 0 {
 		a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 		price, err := k.priceFeedKeeper.GetCurrentPrice(ctx, denomConvertToMarketID(a))

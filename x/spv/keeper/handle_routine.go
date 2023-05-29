@@ -18,14 +18,19 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	if err != nil {
 		ctx.Logger().Info(err.Error())
 		if err.Error() == "pay interest too early" {
-			return err
+			return nil
+		}
+		if err.Error() == "no interest to be paid" {
+			return nil
 		}
 		panic(err)
 	}
 
-	if err != nil {
-		panic("should never fail to convert to usd")
+	if totalAmountDue.IsZero() {
+		// no interest to be paid
+		return nil
 	}
+
 	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(totalAmountDue)
 	if poolInfo.EscrowInterestAmount.IsNegative() {
 		poolInfo.NegativeInterestCounter++
