@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"errors"
 	"strings"
 	"time"
 
@@ -18,17 +19,17 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	if err != nil {
 		ctx.Logger().Info(err.Error())
 		if err.Error() == "pay interest too early" {
-			return nil
+			return err
 		}
 		if err.Error() == "no interest to be paid" {
-			return nil
+			return err
 		}
 		panic(err)
 	}
 
 	if totalAmountDue.IsZero() {
 		// no interest to be paid
-		return nil
+		return errors.New("no interest to be paid")
 	}
 
 	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(totalAmountDue)

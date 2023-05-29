@@ -27,6 +27,12 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 			}
 
 			err := k.HandleInterest(ctx, &poolInfo)
+			if err.Error() == "pay interest too early" {
+				break
+			}
+			if err.Error() == "no interest to be paid" {
+				break
+			}
 			if err != nil {
 				panic(err)
 			}
@@ -47,6 +53,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 					k.SetPool(ctx, poolInfo)
 					return false
 				}
+				poolInfo.ProjectLength = 1641
 				ctx.Logger().Info("pool due time update", "index", poolInfo.Index, "due time", poolInfo.ProjectDueTime.Local().String())
 				if poolInfo.ProjectDueTime.Before(currentTime) {
 					// we pay the partial of the interest
