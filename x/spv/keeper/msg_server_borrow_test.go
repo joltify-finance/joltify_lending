@@ -2,10 +2,14 @@ package keeper_test
 
 import (
 	"fmt"
+	"math/big"
 	"strings"
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gogo/protobuf/proto"
 
@@ -20,10 +24,11 @@ import (
 // Test suite used for all keeper tests
 type addBorrowSuite struct {
 	suite.Suite
-	keeper    *spvkeeper.Keeper
-	nftKeeper types.NFTKeeper
-	app       types.MsgServer
-	ctx       sdk.Context
+	keeper     *spvkeeper.Keeper
+	nftKeeper  types.NFTKeeper
+	bankKeeper types.BankKeeper
+	app        types.MsgServer
+	ctx        sdk.Context
 }
 
 func TestBorrowTestSuite(t *testing.T) {
@@ -35,11 +40,12 @@ func (suite *addBorrowSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
-	app, k, nftKeeper, wctx := setupMsgServer(suite.T())
+	app, k, nftKeeper, bankKeeper, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	suite.ctx = ctx
 	suite.keeper = k
 	suite.nftKeeper = nftKeeper
+	suite.bankKeeper = bankKeeper
 	suite.app = app
 }
 
@@ -416,4 +422,231 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	// this calculates the ratio that user1 contribute to this borrow
 	suite.Require().True(checkValueEqualWithExchange(nftInfo.Borrowed.Amount, shouldLocked))
+}
+
+func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
+	// create the first pool apy 7.8%
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: []string{"0.15", "0.15"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(1*1e6)), sdk.NewCoin("ausdc", sdk.NewInt(1e6))}}
+	resp, err := suite.app.CreatePool(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+	poolInfo.CurrentPoolTotalBorrowCounter = 0
+	poolInfo.PoolTotalBorrowLimit = 10
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(1*1e6))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
+	depositorPool := resp.PoolIndex[0]
+
+	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[0]))
+	suite.Require().NoError(err)
+
+	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
+	suite.Require().NoError(err)
+
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
+	_, err = suite.app.AddInvestors(suite.ctx, &req2)
+	suite.Require().NoError(err)
+
+	// now we deposit some token and it should be enough to borrow
+	creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
+	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   creator1,
+		PoolIndex: depositorPool,
+		Token:     depositAmount,
+	}
+
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{
+		Creator:   creator2,
+		PoolIndex: depositorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+	}
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.app.Deposit(suite.ctx, msgDepositUser2)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+
+	period := spvkeeper.OneYear / poolInfo.PayFreq
+	interestWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
+
+	for i := 0; i < 10; i++ {
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
+		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		if i == 0 {
+			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdk.NewIntFromBigInt(big.NewInt(-1)))))
+		}
+	}
+
+	totalInterestOwn := interestWithReserve.MulRaw(10)
+	_, err = suite.app.RepayInterest(suite.ctx, types.NewMsgRepayInterest("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", depositorPool, sdk.NewCoin("ausdc", totalInterestOwn.SubRaw(100))))
+	suite.Require().ErrorContains(err, "you must pay all the outstanding interest: insufficient tokens")
+
+	addr := authtypes.NewModuleAddress("spv")
+	coinBefore := suite.bankKeeper.GetBalance(suite.ctx, addr, "ausdc")
+
+	planToPay := interestWithReserve.MulRaw(11).AddRaw(101)
+	_, err = suite.app.RepayInterest(suite.ctx, types.NewMsgRepayInterest("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", depositorPool, sdk.NewCoin("ausdc", planToPay)))
+	suite.Require().NoError(err)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+
+	coinAfter := suite.bankKeeper.GetBalance(suite.ctx, addr, "ausdc")
+
+	delta := coinAfter.Sub(coinBefore)
+	oneInterest := poolInfo.EscrowInterestAmount
+	suite.Require().True(delta.Amount.Equal(oneInterest.MulRaw(11)))
+
+	half := poolInfo.PayFreq / 2
+
+	borrower, err := sdk.AccAddressFromBech32(borrow.Creator)
+	suite.Require().NoError(err)
+	userCoinBefore := suite.bankKeeper.GetBalance(suite.ctx, borrower, "ausdc")
+	ctx := suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(half)))
+	// now we borrow again
+	_, err = suite.app.Borrow(ctx, borrow)
+	suite.Require().NoError(err)
+	userCoinAfter := suite.bankKeeper.GetBalance(suite.ctx, borrower, "ausdc")
+
+	p, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+	// now we return the escrow interest as it is not enough to pay the interest
+	suite.Require().True(p.EscrowInterestAmount.IsZero())
+	suite.Require().Nil(p.InterestPrepayment)
+
+	deltaUser := userCoinAfter.Sub(userCoinBefore).Amount.Sub(sdk.NewIntFromUint64(1.34e5))
+	suite.Require().True(checkValueWithRangeTwo(deltaUser, oneInterest))
+	fmt.Printf(">>1111>>>%v\n", deltaUser)
+}
+
+func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
+	// create the first pool apy 7.8%
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: []string{"0.15", "0.15"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(1*1e6)), sdk.NewCoin("ausdc", sdk.NewInt(1e6))}}
+	resp, err := suite.app.CreatePool(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+	poolInfo.CurrentPoolTotalBorrowCounter = 0
+	poolInfo.PoolTotalBorrowLimit = 10
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(1*1e6))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
+	depositorPool := resp.PoolIndex[0]
+
+	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[0]))
+	suite.Require().NoError(err)
+
+	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[1]))
+	suite.Require().NoError(err)
+
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[0],
+		InvestorID: []string{"2"},
+	}
+	_, err = suite.app.AddInvestors(suite.ctx, &req2)
+	suite.Require().NoError(err)
+
+	// now we deposit some token and it should be enough to borrow
+	creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
+	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   creator1,
+		PoolIndex: depositorPool,
+		Token:     depositAmount,
+	}
+
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{
+		Creator:   creator2,
+		PoolIndex: depositorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+	}
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.app.Deposit(suite.ctx, msgDepositUser2)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+
+	period := spvkeeper.OneYear / poolInfo.PayFreq
+	interestWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdk.MustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
+
+	var oneInterest sdkmath.Int
+	for i := 0; i < 10; i++ {
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
+		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		if i == 0 {
+			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdk.NewIntFromBigInt(big.NewInt(-1)))))
+			oneInterest = poolInfo.EscrowInterestAmount.MulRaw(-1)
+		}
+	}
+
+	totalInterestOwn := interestWithReserve.MulRaw(10)
+	_, err = suite.app.RepayInterest(suite.ctx, types.NewMsgRepayInterest("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", depositorPool, sdk.NewCoin("ausdc", totalInterestOwn.SubRaw(100))))
+	suite.Require().ErrorContains(err, "you must pay all the outstanding interest: insufficient tokens")
+
+	addr := authtypes.NewModuleAddress("spv")
+	coinBefore := suite.bankKeeper.GetBalance(suite.ctx, addr, "ausdc")
+
+	planToPay := interestWithReserve.MulRaw(15).AddRaw(101)
+	_, err = suite.app.RepayInterest(suite.ctx, types.NewMsgRepayInterest("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", depositorPool, sdk.NewCoin("ausdc", planToPay)))
+	suite.Require().NoError(err)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+
+	coinAfter := suite.bankKeeper.GetBalance(suite.ctx, addr, "ausdc")
+
+	delta := coinAfter.Sub(coinBefore)
+	suite.Require().Equal(poolInfo.InterestPrepayment.Counter, int32(5))
+
+	suite.Require().True(delta.Amount.Equal(oneInterest.MulRaw(15)))
+	suite.Require().True(poolInfo.EscrowInterestAmount.Equal(oneInterest.MulRaw(5)))
+
+	escrowInterestBefore := poolInfo.EscrowInterestAmount
+
+	half := poolInfo.PayFreq / 2
+	ctx := suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(half)))
+	// now we borrow again
+
+	borrower, err := sdk.AccAddressFromBech32(borrow.Creator)
+	suite.Require().NoError(err)
+	userCoinBefore := suite.bankKeeper.GetBalance(suite.ctx, borrower, "ausdc")
+	_, err = suite.app.Borrow(ctx, borrow)
+	suite.Require().NoError(err)
+	userCoinAfter := suite.bankKeeper.GetBalance(suite.ctx, borrower, "ausdc")
+	currentInterest := oneInterest.MulRaw(2)
+
+	p, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+	// now the interest is doubled after second borrow
+	counter := p.EscrowInterestAmount.Quo(currentInterest)
+	suite.Require().Equal(p.InterestPrepayment.Counter, int32(counter.Int64()))
+
+	returned := escrowInterestBefore.Sub(currentInterest.Mul(counter))
+
+	spvReturned := userCoinAfter.Sub(userCoinBefore).Amount.Sub(sdk.NewIntFromUint64(1.34e5))
+
+	suite.Require().True(checkValueWithRangeTwo(returned, spvReturned))
 }

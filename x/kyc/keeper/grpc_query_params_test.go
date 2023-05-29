@@ -33,6 +33,7 @@ func newParams() types.Params {
 		SPVName:      "defaultSPV",
 		BasicInfo:    &b,
 		ProjectOwner: acc,
+		PayFreq:      "123",
 	}
 
 	projects := types.Projects{Items: []*types.ProjectInfo{&pi}}

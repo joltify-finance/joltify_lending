@@ -20,6 +20,7 @@ type querySuite struct {
 	suite.Suite
 	keeper       *spvkeeper.Keeper
 	nftKeeper    types.NFTKeeper
+	bankKeeper   types.BankKeeper
 	app          types.MsgServer
 	ctx          sdk.Context
 	investors    []string
@@ -65,7 +66,7 @@ func setupPoolForQueryTest(suite *querySuite) {
 func (suite *querySuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, wctx := setupMsgServer(suite.T())
+	app, k, nftKeeper, bankKeeper, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
@@ -73,6 +74,7 @@ func (suite *querySuite) SetupTest() {
 	suite.keeper = k
 	suite.app = app
 	suite.nftKeeper = nftKeeper
+	suite.bankKeeper = bankKeeper
 }
 
 func TestQuerySuitTestSuite(t *testing.T) {

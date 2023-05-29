@@ -17,7 +17,7 @@ func TestGenesis(t *testing.T) {
 		// this line is used by starport scaffolding # genesis/test/state
 	}
 
-	k, _, ctx := keepertest.SpvKeeper(t)
+	k, _, _, ctx := keepertest.SpvKeeper(t)
 	spv.InitGenesis(ctx, *k, genesisState)
 	got := spv.ExportGenesis(ctx, *k)
 	require.NotNil(t, got)

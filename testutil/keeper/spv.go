@@ -248,21 +248,24 @@ func (m mockNFTKeeper) GetClass(ctx sdk.Context, classID string) (nft.Class, boo
 }
 
 type mockbankKeeper struct {
-	bankData map[string]sdk.Coins
+	BankData map[string]sdk.Coins
 }
 
 func (m mockbankKeeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error {
-	m.bankData[recipientModule] = m.bankData[recipientModule].Add(amt...)
+	m.BankData[recipientModule] = m.BankData[recipientModule].Add(amt...)
 	return nil
 }
 
 func (m mockbankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
-	m.bankData[recipientModule] = m.bankData[recipientModule].Add(amt...)
+	addr := authtypes.NewModuleAddress(recipientModule)
+	m.BankData[addr.String()] = m.BankData[addr.String()].Add(amt...)
 	return nil
 }
 
 func (m mockbankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
-	m.bankData[recipientAddr.String()] = m.bankData[recipientAddr.String()].Add(amt...)
+	// addr := authtypes.NewModuleAddress(senderModule)
+	m.BankData[recipientAddr.String()] = m.BankData[recipientAddr.String()].Add(amt...)
+	// m.BankData[addr.String()]= m.BankData[addr.String()].Sub(amt...)
 	return nil
 }
 
@@ -272,7 +275,17 @@ func (m mockbankKeeper) GetSupply(ctx sdk.Context, denom string) sdk.Coin {
 }
 
 func (m mockbankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	return sdk.NewCoin("usdc", sdk.NewInt(0))
+	coins, ok := m.BankData[addr.String()]
+	if !ok {
+		panic("address cannot be found")
+	}
+
+	ok, coin := coins.Find(denom)
+	if !ok {
+		panic("denom cannot be found")
+	}
+
+	return coin
 }
 
 func (m mockbankKeeper) GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
@@ -296,7 +309,7 @@ func (m mockPriceFeedKeeper) GetCurrentPrice(ctx sdk.Context, marketID string) (
 	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdk.MustNewDecFromStr("0.7")}, nil
 }
 
-func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, sdk.Context) {
+func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
@@ -342,5 +355,5 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, sdk.Context) {
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
 
-	return k, &nftKeeper, ctx
+	return k, &nftKeeper, &bankKeeper, ctx
 }
