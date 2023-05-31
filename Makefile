@@ -60,6 +60,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=joltify\
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
 		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_PKG_VERSION)
 
+
 # DB backend selection
 ifeq (cleveldb,$(findstring cleveldb,$(COSMOS_BUILD_OPTIONS)))
   ldflags += -X github.com/cosmos/cosmos-sdk/types.DBBackend=cleveldb
@@ -80,19 +81,32 @@ ifeq (boltdb,$(findstring boltdb,$(COSMOS_BUILD_OPTIONS)))
   ldflags += -X github.com/cosmos/cosmos-sdk/types.DBBackend=boltdb
 endif
 
+
+ldflagsdev = $(ldflags) -X github.com/joltify-finance/joltify_lending/x/kyc/types.MAINNETFLAG=false
+ldflagsmainnet = $(ldflags) -X github.com/joltify-finance/joltify_lending/x/kyc/types.MAINNETFLAG=true
+
+
+
 ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
-  ldflags += -w -s
+  ldflagsdev += -w -s
+  ldflagsmainnet += -w -s
 endif
-ldflags += $(LDFLAGS)
-ldflags := $(strip $(ldflags))
+#ldflags += $(LDFLAGS)
+ldflagsmainnet := $(strip $(ldflagsmainnet))
+ldflagsdev := $(strip $(ldflagsdev))
+
+
 
 build_tags += $(BUILD_TAGS)
 build_tags := $(strip $(build_tags))
 
-BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
+BUILD_FLAGS_MAINNET := -tags "$(build_tags)" -ldflags '$(ldflagsmainnet)'
+BUILD_FLAGS_DEV := -tags "$(build_tags)" -ldflags '$(ldflagsdev)'
+
 # check for nostrip option
 ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
   BUILD_FLAGS += -trimpath
+  BUILD_FLAGS_DEV += -trimpath
 endif
 
 all: install
@@ -108,7 +122,10 @@ build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
 install: go.sum
-	go install -mod=readonly $(BUILD_FLAGS) ./cmd/joltify
+	go install -mod=readonly $(BUILD_FLAGS_MAINNET) ./cmd/joltify
+
+dev: go.sum
+	go install -mod=readonly $(BUILD_FLAGS_DEV) ./cmd/joltify
 
 ########################################
 ### Tools & dependencies
