@@ -108,12 +108,9 @@ func (p Params) Validate() error {
 }
 
 func validateSubmitter(i interface{}) error {
-	submitter, ok := i.([]types.AccAddress)
+	_, ok := i.([]types.AccAddress)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-	if len(submitter) == 0 {
-		return errors.New("empty submitter")
 	}
 	return nil
 }

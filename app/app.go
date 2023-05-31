@@ -776,16 +776,16 @@ func NewApp(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
+	app.ScopedIBCKeeper = scopedIBCKeeper
+	app.ScopedTransferKeeper = scopedTransferKeeper
+	app.setupUpgradeHandlers()
+
 	// load store
 	if !options.SkipLoadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			panic(fmt.Sprintf("failed to load latest version: %s", err))
 		}
 	}
-
-	app.ScopedIBCKeeper = scopedIBCKeeper
-	app.ScopedTransferKeeper = scopedTransferKeeper
-	app.setupUpgradeHandlers()
 
 	return app
 }
@@ -890,4 +890,18 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V003UpgradeName, v1.CreateUpgradeHandlerForV003Upgrade(app.mm, &app.VaultKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V004UpgradeName, v1.CreateUpgradeHandlerForV004Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V005UpgradeName, v1.CreateUpgradeHandlerForV005Upgrade(app.mm, app.configurator))
+
+	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Name == v1.V005UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{kycmoduletypes.StoreKey, nftmoduletypes.StoreKey, spvmoduletypes.StoreKey},
+		}
+
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
 }

@@ -5,8 +5,6 @@ import "encoding/binary"
 var _ binary.ByteOrder
 
 const (
-	// OutboundTxKeyPrefix is the prefix to retrieve all OutboundTx
-	// fixme when migrate, the previous key is  "OutboundTx/value/"
 	OutboundTxKeyPrefix         = "OutboundTx/value/outboundtx-"
 	OutboundTxProposalKeyPrefix = "OutboundTx/value/proposal-"
 )
