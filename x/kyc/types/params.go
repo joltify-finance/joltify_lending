@@ -15,7 +15,10 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
-var _ paramtypes.ParamSet = (*Params)(nil)
+var (
+	_           paramtypes.ParamSet = (*Params)(nil)
+	MAINNETFLAG                     = "false"
+)
 
 // Parameter keys
 var (
@@ -30,55 +33,56 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
-	if err != nil {
-		panic(err)
-	}
-	var projects Projects
-	allProjects := make([]*ProjectInfo, 100)
-	projects.Items = allProjects
-	for i := 0; i < 100; i++ {
-		b := BasicInfo{
-			"This is the test info",
-			"empty",
-			"ABC",
-			"ABC123",
-			[]byte("reserved"),
-			"This is the Test Project 1",
-			"example@example.com",
-			"example",
-			"empty logo url",
-			"empty project Brief",
-			"empty project description",
+	if MAINNETFLAG == "false" {
+		acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
+		if err != nil {
+			panic(err)
 		}
-		pi := ProjectInfo{
-			Index:                        int32(i + 1),
-			SPVName:                      strconv.Itoa(i) + ":" + tmrand.NewRand().Str(10),
-			ProjectOwner:                 acc,
-			BasicInfo:                    &b,
-			ProjectLength:                480, // 5 mins
-			SeparatePool:                 true,
-			BaseApy:                      types.NewDecWithPrec(10, 2),
-			PayFreq:                      "120",
-			PoolLockedSeconds:            100,
-			PoolTotalBorrowLimit:         100,
-			MarketId:                     "aud:usd",
-			WithdrawRequestWindowSeconds: 30,
-			MinBorrowAmount:              sdkmath.NewInt(100),
+		var projects Projects
+		allProjects := make([]*ProjectInfo, 100)
+		projects.Items = allProjects
+		for i := 0; i < 100; i++ {
+			b := BasicInfo{
+				"This is the test info",
+				"empty",
+				"ABC",
+				"ABC123",
+				[]byte("reserved"),
+				"This is the Test Project 1",
+				"example@example.com",
+				"example",
+				"empty logo url",
+				"empty project Brief",
+				"empty project description",
+			}
+			pi := ProjectInfo{
+				Index:                        int32(i + 1),
+				SPVName:                      strconv.Itoa(i) + ":" + tmrand.NewRand().Str(10),
+				ProjectOwner:                 acc,
+				BasicInfo:                    &b,
+				ProjectLength:                480, // 5 mins
+				SeparatePool:                 true,
+				BaseApy:                      types.NewDecWithPrec(10, 2),
+				PayFreq:                      "120",
+				PoolLockedSeconds:            100,
+				PoolTotalBorrowLimit:         100,
+				MarketId:                     "aud:usd",
+				WithdrawRequestWindowSeconds: 30,
+				MinBorrowAmount:              sdkmath.NewInt(100),
+			}
+			pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
+			allProjects[i] = &pi
 		}
-		pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
-		allProjects[i] = &pi
 
-		// indexHash := crypto.Keccak256Hash([]byte(pi.BasicInfo.ProjectName), acc.Bytes(), []byte("junior"))
+		b, err := proto.Marshal(&projects)
+		if err != nil {
+			panic("invalid parameter")
+		}
+
+		data := base64.StdEncoding.EncodeToString(b)
+		return Params{data, []types.AccAddress{acc}}
 	}
-
-	b, err := proto.Marshal(&projects)
-	if err != nil {
-		panic("invalid parameter")
-	}
-
-	data := base64.StdEncoding.EncodeToString(b)
-	return Params{data, []types.AccAddress{acc}}
+	return Params{}
 }
 
 // DefaultParams returns a default set of parameters
