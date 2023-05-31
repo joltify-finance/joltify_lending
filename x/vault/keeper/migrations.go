@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	v17 "github.com/joltify-finance/joltify_lending/x/vault/migrations/v17"
-	v21 "github.com/joltify-finance/joltify_lending/x/vault/migrations/v21"
+	v5 "github.com/joltify-finance/joltify_lending/x/vault/migrations/v5"
 )
 
 // Migrator is a struct for handling in-place store migrations.
@@ -23,5 +23,5 @@ func (m Migrator) Migrate2to3(ctx sdk.Context) error {
 
 // Migrate3to4 from version3 to 4.
 func (m Migrator) Migrate3to4(ctx sdk.Context) error {
-	return v21.MigrateStore(ctx, m.keeper.storeKey, m.keeper.cdc)
+	return v5.MigrateStore(ctx, m.keeper.storeKey, m.keeper.cdc)
 }
