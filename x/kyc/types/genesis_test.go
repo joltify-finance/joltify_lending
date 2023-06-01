@@ -29,7 +29,7 @@ func TestGenesisState_Validate(t *testing.T) {
 
 				// this line is used by starport scaffolding # types/genesis/validField
 			},
-			valid: false,
+			valid: true,
 		},
 		// this line is used by starport scaffolding # types/genesis/testcase
 	} {
