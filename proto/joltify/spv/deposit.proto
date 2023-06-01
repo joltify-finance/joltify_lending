@@ -1,0 +1,56 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+message DepositorInfo {
+  string investor_id=1;
+  bytes depositor_address     = 2
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+  string pool_index =3;
+
+
+  cosmos.base.v1beta1.Coin locked_amount = 4[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  cosmos.base.v1beta1.Coin withdrawal_amount = 5[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  cosmos.base.v1beta1.Coin incentive_amount = 6[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  repeated string linkedNFT = 7;
+
+  enum DEPOSITTYPE{
+    withdraw_proposal= 0;
+    transfer_request = 1;
+    deposit_close = 2;
+    unset  = 3;
+    processed = 4;
+    deactive = 5;
+  }
+  DEPOSITTYPE deposit_type = 8;
+
+  cosmos.base.v1beta1.Coin pending_interest= 9[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  string total_paid_liquidation_amount = 10 [
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+
+}
+

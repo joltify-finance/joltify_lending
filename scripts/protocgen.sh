@@ -5,24 +5,22 @@
 set -eo pipefail
 
 protoc_gen_gocosmos() {
-  if ! grep "github.com/gogo/protobuf => github.com/regen-network/protobuf" go.mod &>/dev/null ; then
-    echo -e "\tPlease run this command from somewhere inside the root kava folder."
-    return 1
-  fi
+#  if ! grep "github.com/gogo/protobuf => github.com/regen-network/protobuf" go.mod &>/dev/null ; then
+#    echo -e "\tPlease run this command from somewhere inside the root folder."
+#    return 1
+#  fi
 
-  go get github.com/regen-network/cosmos-proto/protoc-gen-gocosmos@latest 2>/dev/null
+  #go get github.com/regen-network/cosmos-proto/protoc-gen-gocosmos@latest 2>/dev/null
+  go install github.com/regen-network/cosmos-proto
 }
 
 protoc_gen_doc() {
   go get -u github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc 2>/dev/null
-  go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
+  go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc 2>/dev/null
 }
 
-
-
 protoc_gen_gocosmos
-protoc_gen_doc
-
+#protoc_gen_doc
 
 echo "Generating gogo proto code"
 cd proto
@@ -35,8 +33,8 @@ for dir in $proto_dirs; do
     fi
   done
 done
-
 cd ..
+
 
 # move proto files to the right places
 #

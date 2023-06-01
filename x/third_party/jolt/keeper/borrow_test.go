@@ -4,6 +4,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
@@ -293,19 +296,21 @@ func (suite *KeeperTestSuite) TestBorrow() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+
+			coins := sdk.NewCoins(
+				sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF)),
+				sdk.NewCoin("btcb", sdk.NewInt(100*BTCB_CF)),
+				sdk.NewCoin("bnb", sdk.NewInt(100*BNB_CF)),
+				sdk.NewCoin("xyz", sdk.NewInt(1)),
+			)
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
 				[]sdk.Coins{
-					sdk.NewCoins(
-						sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF)),
-						sdk.NewCoin("btcb", sdk.NewInt(100*BTCB_CF)),
-						sdk.NewCoin("bnb", sdk.NewInt(100*BNB_CF)),
-						sdk.NewCoin("xyz", sdk.NewInt(1)),
-					),
+					coins,
 				},
 				[]sdk.AccAddress{tc.args.borrower},
 			)
@@ -372,7 +377,7 @@ func (suite *KeeperTestSuite) TestBorrow() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
 
@@ -390,6 +395,9 @@ func (suite *KeeperTestSuite) TestBorrow() {
 
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower, coins)
+			suite.Require().NoError(err)
 
 			err = suite.keeper.Deposit(suite.ctx, tc.args.borrower, tc.args.depositCoins)
 			suite.Require().NoError(err)
@@ -440,7 +448,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	model := types3.NewInterestRateModel(sdk.MustNewDecFromStr("1.0"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10"))
 
 	// Initialize test app and set context
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 
 	// Auth module genesis state
@@ -505,7 +513,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 
 	// Initialize test application
 	tApp.InitializeFromGenesisStates(
-		authGS,
+		nil, nil, authGS,
 		app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 		app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
 	)
@@ -525,6 +533,10 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 		sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF)),
 		sdk.NewCoin("usdx", sdk.NewInt(100*USDX_CF)),
 	)
+
+	err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, borrower, depositCoins)
+	suite.Require().NoError(err)
+
 	err = suite.keeper.Deposit(suite.ctx, borrower, depositCoins)
 	suite.Require().NoError(err)
 
@@ -537,6 +549,10 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	jolt.BeginBlocker(suite.ctx, suite.keeper)
 
 	repayCoins := sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))) // repay everything including accumulated interest
+
+	err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, borrower, repayCoins)
+	suite.Require().NoError(err)
+
 	err = suite.keeper.Repay(suite.ctx, borrower, borrower, repayCoins)
 	suite.Require().NoError(err)
 
@@ -544,7 +560,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	modAccBalance := suite.getAccountCoins(suite.getModuleAccountAtCtx(types3.ModuleAccountName, suite.ctx))
 	reserves, found := suite.keeper.GetTotalReserves(suite.ctx)
 	suite.Require().True(found)
-	availableToBorrow := modAccBalance.Sub(reserves)
+	availableToBorrow := modAccBalance.Sub(reserves...)
 
 	// Test borrowing one over the available amount (try to borrow from the reserves)
 	err = suite.keeper.Borrow(

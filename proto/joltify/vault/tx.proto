@@ -19,17 +19,17 @@ service Msg {
 
 message MsgCreateOutboundTx {
   bytes creator = 1  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
-  string requestID = 2;
-  string outboundTx = 3;
-  string blockHeight = 4;
+  string request_iD = 2;
+  string outbound_tx = 3;
+  string block_height = 4;
   repeated cosmos.base.v1beta1.Coin feecoin = 5 [
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  string chainType= 6;
-  bool needMint= 7;
-  string inTxHash= 8;
-  bytes receiverAddress= 9 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string chain_type= 6;
+  bool need_mint= 7;
+  string in_tx_hash= 8;
+  bytes receiver_address= 9 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
 }
 
 
@@ -48,8 +48,8 @@ message MsgCreateIssueTokenResponse {
 
 message MsgCreateCreatePool {
   bytes creator = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
-  string poolPubKey = 2;
-  string blockHeight = 3;
+  string pool_pub_key = 2;
+  string block_height = 3;
 }
 message MsgCreateCreatePoolResponse {
   bool successful = 1;

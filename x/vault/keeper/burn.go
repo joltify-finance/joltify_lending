@@ -54,7 +54,7 @@ func (k Keeper) sendFeesToValidators(ctx sdk.Context, pool *types.PoolInfo) bool
 		}
 	}
 	feeProcessed.Sort()
-	fee = fee.Sub(feeProcessed)
+	fee = fee.Sub(feeProcessed...)
 	k.SetStoreFeeAmount(ctx, fee)
 	return true
 }

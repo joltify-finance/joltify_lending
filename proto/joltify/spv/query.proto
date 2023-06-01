@@ -1,0 +1,154 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "joltify/spv/poolinfo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "joltify/spv/deposit.proto";
+import "joltify/spv/params.proto";
+// this line is used by starport scaffolding # 1
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+  }
+  // this line is used by starport scaffolding # 2
+
+  // Queries a list of Listpools items.
+  rpc ListPools(QueryListPoolsRequest) returns (QueryListPoolsResponse) {
+    option (google.api.http).get = "/joltify/spv/list_pools";
+  }
+
+  // Queries a list of QueryPool items.
+  rpc QueryPool(QueryQueryPoolRequest) returns (QueryQueryPoolResponse) {
+    option (google.api.http).get = "/joltify/spv/query_pool/{pool_index}";
+  }
+
+  rpc Depositor(QueryDepositorRequest) returns (QueryDepositorResponse) {
+    option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}";
+  }
+
+  // Queries a list of AllowedPools items.
+  rpc AllowedPools(QueryAllowedPoolsRequest) returns (QueryAllowedPoolsResponse) {
+    option (google.api.http).get = "/joltify/spve/allowed_pools/{wallet_address}";}
+
+   rpc OutstandingInterest(QueryOutstandingInterestRequest) returns (QueryOutstandingInterestResponse) {
+		option (google.api.http).get = "/joltify/spv/outstanding_interest/{wallet}/{pool_index}";}
+
+
+  // Queries a list of ClaimableInterest items.
+  rpc ClaimableInterest(QueryClaimableInterestRequest) returns (QueryClaimableInterestResponse) {
+    option (google.api.http).get = "/joltify/spv/claimable_interest/{wallet}";
+  }
+
+  // Queries a list of withdrawalPrincipal items.
+  rpc withdrawalPrincipal(QuerywithdrawalPrincipalRequest) returns (QuerywithdrawalPrincipalResponse) {
+    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/withdrawal_principal/{pool_index}";
+  }
+
+  // Queries a list of TotalReserve items.
+  rpc TotalReserve (QueryTotalReserveRequest) returns (QueryTotalReserveResponse) {
+    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/total_reserve";
+  }
+
+  // Queries a list of investors 
+  rpc PoolInvestors (QueryPoolInvestorsRequest) returns (QueryPoolInvestorsResponse) {
+    option (google.api.http).get = "/joltify-finance/joltify_lending/spv/pool_investors/{poolIndex}";
+  
+  }
+
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// this line is used by starport scaffolding # 3
+
+message QueryListPoolsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+message QueryListPoolsResponse {
+  repeated  PoolInfo pools_info = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryQueryPoolRequest {
+  string pool_index = 1;
+}
+
+message QueryQueryPoolResponse {
+  PoolInfo pool_info = 1;
+}
+
+message QueryDepositorRequest {
+  string walletAddress = 1;
+  string deposit_pool_index = 2;
+}
+
+message QueryDepositorResponse {
+  DepositorInfo depositor =1;
+}
+
+message QueryAllowedPoolsRequest {
+  string wallet_address = 1;
+}
+
+message QueryAllowedPoolsResponse {
+  repeated string pools_index = 1;
+}
+message QueryClaimableInterestRequest {
+  string wallet = 1;
+  string pool_index = 2;
+}
+
+message QueryClaimableInterestResponse {
+  cosmos.base.v1beta1.Coin claimable_interest_amount = 6[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+}
+
+message QueryOutstandingInterestRequest {
+  string wallet = 1;
+  string pool_index = 2;
+}
+
+message QueryOutstandingInterestResponse {
+  string amount = 1;
+}
+
+
+message QuerywithdrawalPrincipalRequest {
+  string pool_index = 1;
+  string walletAddress = 2;
+}
+
+message QuerywithdrawalPrincipalResponse {
+  string amount = 1;
+}
+
+message QueryTotalReserveRequest {
+}
+
+message QueryTotalReserveResponse {
+  string coins = 1;
+}
+
+message QueryPoolInvestorsRequest {
+  string poolIndex = 1;
+}
+
+message QueryPoolInvestorsResponse {
+  repeated string investors = 1;
+  }

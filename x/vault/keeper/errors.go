@@ -1,5 +1,7 @@
 package keeper
 
-import sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+import (
+	errorsmod "cosmossdk.io/errors"
+)
 
-var ErrSuspend = sdkerrors.Register("oppyChain", 1, "bridge transfer suspended")
+var ErrSuspend = errorsmod.Register("oppyChain", 1, "bridge transfer suspended")

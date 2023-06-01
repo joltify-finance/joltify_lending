@@ -17,6 +17,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/params"
 	"github.com/spf13/cobra"
+	tmcfg "github.com/tendermint/tendermint/config"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 )
 
@@ -70,7 +71,7 @@ func NewRootCmd() *cobra.Command {
 				Config: *srvCfg,
 			}
 			customAppTemplate := serverconfig.DefaultConfigTemplate
-			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig)
+			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, tmcfg.DefaultConfig())
 		},
 	}
 

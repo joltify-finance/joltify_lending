@@ -3,6 +3,9 @@ package keeper_test
 import (
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
@@ -209,7 +212,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp()
+			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 
 			// Auth module genesis state
@@ -271,7 +274,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(authGS,
+			tApp.InitializeFromGenesisStates(nil, nil, authGS,
 				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
 				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
 			)
@@ -287,6 +290,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower, tc.args.initialBorrowerCoins)
+			suite.Require().NoError(err)
+
+			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.repayer, tc.args.initialRepayerCoins)
+			suite.Require().NoError(err)
 
 			// Deposit coins to jolt
 			err = suite.keeper.Deposit(suite.ctx, tc.args.borrower, tc.args.depositCoins)
@@ -307,19 +316,19 @@ func (suite *KeeperTestSuite) TestRepay() {
 				suite.Require().NoError(err)
 
 				// Check repayer balance
-				expectedRepayerCoins := previousRepayerCoins.Sub(repaymentCoins)
+				expectedRepayerCoins := previousRepayerCoins.Sub(repaymentCoins...)
 				acc := suite.getAccount(tc.args.repayer)
 				// use IsEqual for sdk.Coins{nil} vs sdk.Coins{}
 				suite.Require().True(expectedRepayerCoins.IsEqual(bankKeeper.GetAllBalances(suite.ctx, acc.GetAddress())))
 
 				// Check module account balance
-				expectedModuleCoins := tc.args.initialModuleCoins.Add(tc.args.depositCoins...).Sub(tc.args.borrowCoins).Add(repaymentCoins...)
+				expectedModuleCoins := tc.args.initialModuleCoins.Add(tc.args.depositCoins...).Sub(tc.args.borrowCoins...).Add(repaymentCoins...)
 				mAcc := suite.getModuleAccount(types3.ModuleAccountName)
 				suite.Require().Equal(expectedModuleCoins, bankKeeper.GetAllBalances(suite.ctx, mAcc.GetAddress()))
 
 				// Check user's borrow object
 				borrow, foundBorrow := suite.keeper.GetBorrow(suite.ctx, tc.args.borrower)
-				expectedBorrowCoins := tc.args.borrowCoins.Sub(repaymentCoins)
+				expectedBorrowCoins := tc.args.borrowCoins.Sub(repaymentCoins...)
 
 				if tc.errArgs.expectDelete {
 					suite.Require().False(foundBorrow)
@@ -336,7 +345,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 				suite.Require().Equal(previousRepayerCoins, bankKeeper.GetAllBalances(suite.ctx, acc.GetAddress()))
 
 				// Check module account balance (no repay coins)
-				expectedModuleCoins := tc.args.initialModuleCoins.Add(tc.args.depositCoins...).Sub(tc.args.borrowCoins)
+				expectedModuleCoins := tc.args.initialModuleCoins.Add(tc.args.depositCoins...).Sub(tc.args.borrowCoins...)
 				mAcc := suite.getModuleAccount(types3.ModuleAccountName)
 				suite.Require().Equal(expectedModuleCoins, bankKeeper.GetAllBalances(suite.ctx, mAcc.GetAddress()))
 

@@ -204,7 +204,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
@@ -505,7 +506,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @summary NextAuctionID queries the next auction ID
    * @request GET:/joltify/auction/v1beta1/next-auction-id
    */
-  queryNextAuctionId = (params: RequestParams = {}) =>
+  queryNextAuctionID = (params: RequestParams = {}) =>
     this.request<V1Beta1QueryNextAuctionIDResponse, RpcStatus>({
       path: `/joltify/auction/v1beta1/next-auction-id`,
       method: "GET",

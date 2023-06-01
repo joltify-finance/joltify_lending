@@ -4,23 +4,27 @@
 *.dll
 *.so
 *.dylib
-
+*.xlsx
 # Test binary, build with `go test -c`
 *.test
-
+*.log
+config.toml
 # Output of the go coverage tool
 *.out
-
+runtest
+gui
 # Exclude build files
+contrib/devnet/integrationtest/scripts/run_deposit
 vendor
 build
-
+.~lock*
 # IDE files
 *.vscode
 *.idea
 node_modules
 docs/node_modules
 docs/.vuepress/dist
-
+contrib/devnet/run_deposit
 # Ignore macOS file system metadata
 .DS_Store
+config.yml

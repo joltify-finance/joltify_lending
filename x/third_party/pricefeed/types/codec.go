@@ -13,7 +13,7 @@ import (
 // RegisterLegacyAminoCodec registers all the necessary types and interfaces for the
 // governance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgPostPrice{}, "pricefeed/MsgPostPrice", nil)
+	cdc.RegisterConcrete(&MsgPostPrice{}, "/joltify.third_party.pricefeed.v1beta1.MsgPostPrice", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

@@ -89,7 +89,8 @@ corresponding request message has used PageRequest.
 export interface V1Beta1PageResponse {
   /**
    * next_key is the key to be passed to PageRequest.key to
-   * query the next page most efficiently
+   * query the next page most efficiently. It will be empty if
+   * there are no more results.
    * @format byte
    */
   next_key?: string;
@@ -100,6 +101,23 @@ export interface V1Beta1PageResponse {
    * @format uint64
    */
   total?: string;
+}
+
+export interface VaultCoinsQuota {
+  history?: VaultHistoricalAmount[];
+  Coins_sum?: V1Beta1Coin[];
+}
+
+export interface VaultEntity {
+  /** @format byte */
+  address?: string;
+  feecoin?: V1Beta1Coin[];
+}
+
+export interface VaultHistoricalAmount {
+  /** @format int64 */
+  blockHeight?: string;
+  amount?: V1Beta1Coin[];
 }
 
 export interface VaultIssueToken {
@@ -129,7 +147,7 @@ export interface VaultMsgCreateOutboundTxResponse {
 export interface VaultOutboundTx {
   index?: string;
   processed?: boolean;
-  items?: Record<string, Vaultproposals>;
+  items?: Record<string, VaultProposals>;
   chainType?: string;
   inTxHash?: string;
 
@@ -139,12 +157,21 @@ export interface VaultOutboundTx {
   feecoin?: V1Beta1Coin[];
 }
 
+export interface VaultPoolInfo {
+  BlockHeight?: string;
+  CreatePool?: VaultPoolProposal;
+}
+
 export interface VaultPoolProposal {
-  poolPubKey?: string;
+  pool_pubKey?: string;
 
   /** @format byte */
-  poolAddr?: string;
+  pool_addr?: string;
   nodes?: string[];
+}
+
+export interface VaultProposals {
+  entry?: VaultEntity[];
 }
 
 export interface VaultQueryAllCreatePoolResponse {
@@ -220,7 +247,7 @@ export interface VaultQueryGetOutboundTxResponse {
 }
 
 export interface VaultQueryGetQuotaResponse {
-  coinQuotaResponse?: VaultcoinsQuota;
+  coinQuotaResponse?: VaultCoinsQuota;
 }
 
 export interface VaultQueryGetValidatorsResponse {
@@ -228,7 +255,7 @@ export interface VaultQueryGetValidatorsResponse {
 }
 
 export interface VaultQueryLastPoolResponse {
-  pools?: VaultpoolInfo[];
+  pools?: VaultPoolInfo[];
 }
 
 export interface VaultQueryPendingFeeResponse {
@@ -259,32 +286,6 @@ export interface VaultValidators {
 
   /** @format int64 */
   height?: string;
-}
-
-export interface VaultcoinsQuota {
-  history?: VaulthistoricalAmount[];
-  CoinsSum?: V1Beta1Coin[];
-}
-
-export interface Vaultentity {
-  /** @format byte */
-  address?: string;
-  feecoin?: V1Beta1Coin[];
-}
-
-export interface VaulthistoricalAmount {
-  /** @format int64 */
-  blockHeight?: string;
-  amount?: V1Beta1Coin[];
-}
-
-export interface VaultpoolInfo {
-  BlockHeight?: string;
-  CreatePool?: VaultPoolProposal;
-}
-
-export interface Vaultproposals {
-  entry?: Vaultentity[];
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
@@ -510,6 +511,33 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
+   * @name QueryGetQuota
+   * @summary Queries a list of GetQuota items.
+   * @request GET:/joltify/vault/get_quota/{query_length}
+   */
+  queryGetQuota = (
+    queryLength: number,
+    query?: {
+      "pagination.key"?: string;
+      "pagination.offset"?: string;
+      "pagination.limit"?: string;
+      "pagination.count_total"?: boolean;
+      "pagination.reverse"?: boolean;
+    },
+    params: RequestParams = {},
+  ) =>
+    this.request<VaultQueryGetQuotaResponse, RpcStatus>({
+      path: `/joltify/vault/get_quota/${queryLength}`,
+      method: "GET",
+      query: query,
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
    * @name QueryGetValidators
    * @summary Queries a list of GetValidators items.
    * @request GET:/joltify/vault/get_validators/{height}
@@ -626,33 +654,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
   ) =>
     this.request<VaultQueryAllValidatorsResponse, RpcStatus>({
       path: `/joltify/vault/validators`,
-      method: "GET",
-      query: query,
-      format: "json",
-      ...params,
-    });
-
-  /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryGetQuota
-   * @summary Queries a list of GetQuota items.
-   * @request GET:/oppy-finance/oppychain/vault/get_quota/{query_length}
-   */
-  queryGetQuota = (
-    queryLength: number,
-    query?: {
-      "pagination.key"?: string;
-      "pagination.offset"?: string;
-      "pagination.limit"?: string;
-      "pagination.count_total"?: boolean;
-      "pagination.reverse"?: boolean;
-    },
-    params: RequestParams = {},
-  ) =>
-    this.request<VaultQueryGetQuotaResponse, RpcStatus>({
-      path: `/oppy-finance/oppychain/vault/get_quota/${queryLength}`,
       method: "GET",
       query: query,
       format: "json",

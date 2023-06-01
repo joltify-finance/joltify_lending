@@ -22,8 +22,17 @@ import (
 // Prevent strconv unused error
 var _ = strconv.IntSize
 
+func SetupBech32Prefix() {
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount("jolt", "joltpub")
+	config.SetBech32PrefixForValidator("joltvaloper", "joltvpub")
+	config.SetBech32PrefixForConsensusNode("joltvalcons", "joltcpub")
+}
+
 func networkWithOutboundTxObjects(t *testing.T, n int) (*network.Network, []types.OutboundTx) {
 	t.Helper()
+	SetupBech32Prefix()
+
 	cfg := network.DefaultConfig()
 	cfg.BondedTokens = sdk.NewInt(10000000000000000)
 	cfg.StakingTokens = sdk.NewInt(100000000000000000)
@@ -45,7 +54,6 @@ func networkWithOutboundTxObjects(t *testing.T, n int) (*network.Network, []type
 
 func TestShowOutboundTx(t *testing.T) {
 	net, objs := networkWithOutboundTxObjects(t, 2)
-
 	ctx := net.Validators[0].ClientCtx
 	common := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
@@ -124,7 +132,7 @@ func TestListOutboundTx(t *testing.T) {
 			require.NoError(t, err)
 			var resp types.QueryAllOutboundTxResponse
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
-			require.LessOrEqual(t, len(resp.OutboundTx), step)
+			require.LessOrEqual(t, len(resp.AllOutbound), step)
 
 			var a []string
 			for _, el := range objs {
@@ -132,8 +140,8 @@ func TestListOutboundTx(t *testing.T) {
 			}
 
 			var b []string
-			for _, el := range resp.OutboundTx {
-				b = append(b, el.String())
+			for _, el := range resp.AllOutbound {
+				b = append(b, el.OutboundTx.String())
 			}
 			require.Subset(t, a, b)
 		}
@@ -147,7 +155,7 @@ func TestListOutboundTx(t *testing.T) {
 			require.NoError(t, err)
 			var resp types.QueryAllOutboundTxResponse
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
-			require.LessOrEqual(t, len(resp.OutboundTx), step)
+			require.LessOrEqual(t, len(resp.AllOutbound), step)
 
 			var a []string
 			for _, el := range objs {
@@ -155,8 +163,8 @@ func TestListOutboundTx(t *testing.T) {
 			}
 
 			var b []string
-			for _, el := range resp.OutboundTx {
-				b = append(b, el.String())
+			for _, el := range resp.GetAllOutbound() {
+				b = append(b, el.OutboundTx.String())
 			}
 
 			require.Subset(t, a, b)
@@ -178,8 +186,8 @@ func TestListOutboundTx(t *testing.T) {
 		}
 
 		var b []string
-		for _, el := range resp.OutboundTx {
-			b = append(b, el.String())
+		for _, el := range resp.AllOutbound {
+			b = append(b, el.OutboundTx.String())
 		}
 
 		require.ElementsMatch(t, a, b)

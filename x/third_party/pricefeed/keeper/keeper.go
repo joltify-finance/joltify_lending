@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/tendermint/tendermint/libs/log"
@@ -15,10 +16,21 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
+//// Keeper struct for pricefeed module
+//type Keeper interface {
+//
+//	// key used to access the stores from Context
+//	key storetypes.StoreKey
+//// Codec for binary encoding/decoding
+//cdc codec.Codec
+//// The reference to the Paramstore to get and set pricefeed specific params
+//paramSubspace paramtypes.Subspace
+//}
+
 // Keeper struct for pricefeed module
 type Keeper struct {
 	// key used to access the stores from Context
-	key sdk.StoreKey
+	key storetypes.StoreKey
 	// Codec for binary encoding/decoding
 	cdc codec.Codec
 	// The reference to the Paramstore to get and set pricefeed specific params
@@ -27,7 +39,7 @@ type Keeper struct {
 
 // NewKeeper returns a new keeper for the pricefeed module.
 func NewKeeper(
-	cdc codec.Codec, key sdk.StoreKey, paramstore paramtypes.Subspace,
+	cdc codec.Codec, key storetypes.StoreKey, paramstore paramtypes.Subspace,
 ) Keeper {
 	if !paramstore.HasKeyTable() {
 		paramstore = paramstore.WithKeyTable(types2.ParamKeyTable())

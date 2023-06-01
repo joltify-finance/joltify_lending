@@ -60,6 +60,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=joltify\
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
 		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_PKG_VERSION)
 
+
 # DB backend selection
 ifeq (cleveldb,$(findstring cleveldb,$(COSMOS_BUILD_OPTIONS)))
   ldflags += -X github.com/cosmos/cosmos-sdk/types.DBBackend=cleveldb
@@ -80,19 +81,32 @@ ifeq (boltdb,$(findstring boltdb,$(COSMOS_BUILD_OPTIONS)))
   ldflags += -X github.com/cosmos/cosmos-sdk/types.DBBackend=boltdb
 endif
 
+
+ldflagsdev = $(ldflags) -X github.com/joltify-finance/joltify_lending/x/kyc/types.MAINNETFLAG=false
+ldflagsmainnet = $(ldflags) -X github.com/joltify-finance/joltify_lending/x/kyc/types.MAINNETFLAG=true
+
+
+
 ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
-  ldflags += -w -s
+  ldflagsdev += -w -s
+  ldflagsmainnet += -w -s
 endif
-ldflags += $(LDFLAGS)
-ldflags := $(strip $(ldflags))
+#ldflags += $(LDFLAGS)
+ldflagsmainnet := $(strip $(ldflagsmainnet))
+ldflagsdev := $(strip $(ldflagsdev))
+
+
 
 build_tags += $(BUILD_TAGS)
 build_tags := $(strip $(build_tags))
 
-BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
+BUILD_FLAGS_MAINNET := -tags "$(build_tags)" -ldflags '$(ldflagsmainnet)'
+BUILD_FLAGS_DEV := -tags "$(build_tags)" -ldflags '$(ldflagsdev)'
+
 # check for nostrip option
 ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
   BUILD_FLAGS += -trimpath
+  BUILD_FLAGS_DEV += -trimpath
 endif
 
 all: install
@@ -108,7 +122,10 @@ build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
 
 install: go.sum
-	go install -mod=readonly $(BUILD_FLAGS) ./cmd/joltify
+	go install -mod=readonly $(BUILD_FLAGS_MAINNET) ./cmd/joltify
+
+dev: go.sum
+	go install -mod=readonly $(BUILD_FLAGS_DEV) ./cmd/joltify
 
 ########################################
 ### Tools & dependencies
@@ -154,10 +171,14 @@ format:
 ###############################################################################
 # Launch a new single validator chain
 start:
+	rm -rf ~/.joltify
 	./contrib/devnet/init-new-chain.sh
 	joltify start
 test:
-	go test ./...
+	gotestsum  --junitfile report.xml --format testname  -- -coverprofile=coverage.out -timeout 15m ./...
+	cat coverage.out |grep -v "erc20.go"|grep -v "oppy_transfer.go" > cover.out
+	go tool cover -func=cover.out
+
 
 ###############################################################################
 ###                                Protobuf                                 ###
@@ -206,7 +227,7 @@ GOGO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/gogo/protobuf)
 TENDERMINT_PATH := $(shell go list -m -f '{{.Dir}}' github.com/tendermint/tendermint)
 COSMOS_PROTO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-proto)
 COSMOS_SDK_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-sdk)
-IBC_GO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/ibc-go/v3)
+IBC_GO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/ibc-go/v5)
 
 proto-update-deps:
 	mkdir -p $(GOOGLE_PROTO_TYPES)
@@ -230,5 +251,9 @@ proto-update-deps:
 	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(IBC_GO_PATH)/proto third_party
 	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(ETHERMINT_PATH)/proto third_party
 	cp -f $(IBC_GO_PATH)/third_party/proto/proofs.proto third_party/proto/proofs.proto
+
+integration-test:
+	make -C contrib/devnet/integrationtest build
+
 
 .PHONY: proto-all proto-gen proto-gen-any proto-swagger-gen proto-format proto-lint proto-check-breaking proto-update-deps

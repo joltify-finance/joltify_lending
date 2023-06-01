@@ -1,8 +1,8 @@
 package keeper
 
 import (
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
@@ -39,8 +39,9 @@ func processHistory(historyLength int32, newItem *types.HistoricalAmount, coinsQ
 	}
 	// now we pop up the old and add the new one
 	old := coinsQuota.History[0]
+	old.Amount.Sort()
 	coinsQuota.History = coinsQuota.History[1:]
-	coinsQuota.CoinsSum = coinsQuota.CoinsSum.Sub(old.GetAmount()).Add(newItem.Amount...)
+	coinsQuota.CoinsSum = coinsQuota.CoinsSum.Sub(old.Amount...).Add(newItem.Amount...)
 	coinsQuota.History = append(coinsQuota.History, newItem)
 	return coinsQuota
 }
@@ -101,7 +102,7 @@ func (vd VaultQuotaDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 					return next(ctx, tx, simulate)
 				}
 
-				return ctx, sdkerrors.Wrapf(
+				return ctx, errorsmod.Wrapf(
 					ErrSuspend,
 					"pool %v is suspended currently",
 					msg.ToAddress,

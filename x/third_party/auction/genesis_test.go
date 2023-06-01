@@ -7,6 +7,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/stretchr/testify/require"
 
@@ -33,7 +34,8 @@ var (
 func TestInitGenesis(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		// setup keepers
-		tApp := app.NewTestApp()
+		lg := tmlog.TestingLogger()
+		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
 
 		// setup module account
@@ -80,7 +82,8 @@ func TestInitGenesis(t *testing.T) {
 	})
 	t.Run("invalid (invalid nextAuctionID)", func(t *testing.T) {
 		// setup keepers
-		tApp := app.NewTestApp()
+		lg := tmlog.TestingLogger()
+		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
 
 		// setup module account
@@ -104,7 +107,8 @@ func TestInitGenesis(t *testing.T) {
 	})
 	t.Run("invalid (missing mod account coins)", func(t *testing.T) {
 		// setup keepers
-		tApp := app.NewTestApp()
+		lg := tmlog.TestingLogger()
+		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
 
 		// invalid as there is no module account setup
@@ -127,9 +131,10 @@ func TestInitGenesis(t *testing.T) {
 func TestExportGenesis(t *testing.T) {
 	t.Run("default", func(t *testing.T) {
 		// setup state
-		tApp := app.NewTestApp()
+		lg := tmlog.TestingLogger()
+		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
-		tApp.InitializeFromGenesisStates()
+		tApp.InitializeFromGenesisStates(nil, nil)
 
 		// export
 		gs := auction.ExportGenesis(ctx, tApp.GetAuctionKeeper())
@@ -140,9 +145,10 @@ func TestExportGenesis(t *testing.T) {
 	})
 	t.Run("one auction", func(t *testing.T) {
 		// setup state
-		tApp := app.NewTestApp()
+		lg := tmlog.TestingLogger()
+		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
-		tApp.InitializeFromGenesisStates()
+		tApp.InitializeFromGenesisStates(nil, nil)
 		tApp.GetAuctionKeeper().SetAuction(ctx, testAuction)
 
 		// export

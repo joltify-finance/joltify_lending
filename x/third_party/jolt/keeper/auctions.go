@@ -64,7 +64,7 @@ func (k Keeper) RunSurplusAuctions(ctx sdk.Context) error {
 		}
 	}
 	if !processedCoins.Empty() {
-		newReserved := totalReserves.Sub(processedCoins)
+		newReserved := totalReserves.Sub(processedCoins...)
 		k.SetTotalReserves(ctx, newReserved)
 	}
 	return nil

@@ -3,36 +3,36 @@ import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "joltify.vault";
 
-export interface addressV16 {
+export interface AddressV16 {
   address: Uint8Array[];
 }
 
 export interface OutboundTxV16 {
   index: string;
-  items: { [key: string]: addressV16 };
+  items: { [key: string]: AddressV16 };
 }
 
 export interface OutboundTxV16_ItemsEntry {
   key: string;
-  value: addressV16 | undefined;
+  value: AddressV16 | undefined;
 }
 
-function createBaseaddressV16(): addressV16 {
+function createBaseAddressV16(): AddressV16 {
   return { address: [] };
 }
 
-export const addressV16 = {
-  encode(message: addressV16, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const AddressV16 = {
+  encode(message: AddressV16, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.address) {
       writer.uint32(10).bytes(v!);
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): addressV16 {
+  decode(input: _m0.Reader | Uint8Array, length?: number): AddressV16 {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseaddressV16();
+    const message = createBaseAddressV16();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -47,11 +47,11 @@ export const addressV16 = {
     return message;
   },
 
-  fromJSON(object: any): addressV16 {
+  fromJSON(object: any): AddressV16 {
     return { address: Array.isArray(object?.address) ? object.address.map((e: any) => bytesFromBase64(e)) : [] };
   },
 
-  toJSON(message: addressV16): unknown {
+  toJSON(message: AddressV16): unknown {
     const obj: any = {};
     if (message.address) {
       obj.address = message.address.map((e) => base64FromBytes(e !== undefined ? e : new Uint8Array()));
@@ -61,8 +61,8 @@ export const addressV16 = {
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<addressV16>, I>>(object: I): addressV16 {
-    const message = createBaseaddressV16();
+  fromPartial<I extends Exact<DeepPartial<AddressV16>, I>>(object: I): AddressV16 {
+    const message = createBaseAddressV16();
     message.address = object.address?.map((e) => e) || [];
     return message;
   },
@@ -111,8 +111,8 @@ export const OutboundTxV16 = {
     return {
       index: isSet(object.index) ? String(object.index) : "",
       items: isObject(object.items)
-        ? Object.entries(object.items).reduce<{ [key: string]: addressV16 }>((acc, [key, value]) => {
-          acc[key] = addressV16.fromJSON(value);
+        ? Object.entries(object.items).reduce<{ [key: string]: AddressV16 }>((acc, [key, value]) => {
+          acc[key] = AddressV16.fromJSON(value);
           return acc;
         }, {})
         : {},
@@ -125,7 +125,7 @@ export const OutboundTxV16 = {
     obj.items = {};
     if (message.items) {
       Object.entries(message.items).forEach(([k, v]) => {
-        obj.items[k] = addressV16.toJSON(v);
+        obj.items[k] = AddressV16.toJSON(v);
       });
     }
     return obj;
@@ -134,9 +134,9 @@ export const OutboundTxV16 = {
   fromPartial<I extends Exact<DeepPartial<OutboundTxV16>, I>>(object: I): OutboundTxV16 {
     const message = createBaseOutboundTxV16();
     message.index = object.index ?? "";
-    message.items = Object.entries(object.items ?? {}).reduce<{ [key: string]: addressV16 }>((acc, [key, value]) => {
+    message.items = Object.entries(object.items ?? {}).reduce<{ [key: string]: AddressV16 }>((acc, [key, value]) => {
       if (value !== undefined) {
-        acc[key] = addressV16.fromPartial(value);
+        acc[key] = AddressV16.fromPartial(value);
       }
       return acc;
     }, {});
@@ -154,7 +154,7 @@ export const OutboundTxV16_ItemsEntry = {
       writer.uint32(10).string(message.key);
     }
     if (message.value !== undefined) {
-      addressV16.encode(message.value, writer.uint32(18).fork()).ldelim();
+      AddressV16.encode(message.value, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -170,7 +170,7 @@ export const OutboundTxV16_ItemsEntry = {
           message.key = reader.string();
           break;
         case 2:
-          message.value = addressV16.decode(reader, reader.uint32());
+          message.value = AddressV16.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -183,14 +183,14 @@ export const OutboundTxV16_ItemsEntry = {
   fromJSON(object: any): OutboundTxV16_ItemsEntry {
     return {
       key: isSet(object.key) ? String(object.key) : "",
-      value: isSet(object.value) ? addressV16.fromJSON(object.value) : undefined,
+      value: isSet(object.value) ? AddressV16.fromJSON(object.value) : undefined,
     };
   },
 
   toJSON(message: OutboundTxV16_ItemsEntry): unknown {
     const obj: any = {};
     message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value ? addressV16.toJSON(message.value) : undefined);
+    message.value !== undefined && (obj.value = message.value ? AddressV16.toJSON(message.value) : undefined);
     return obj;
   },
 
@@ -198,7 +198,7 @@ export const OutboundTxV16_ItemsEntry = {
     const message = createBaseOutboundTxV16_ItemsEntry();
     message.key = object.key ?? "";
     message.value = (object.value !== undefined && object.value !== null)
-      ? addressV16.fromPartial(object.value)
+      ? AddressV16.fromPartial(object.value)
       : undefined;
     return message;
   },

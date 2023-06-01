@@ -91,8 +91,14 @@ message QueryGetOutboundTxRequest {
 	  string requestID = 1;
 }
 
+message ProposalView{
+	string outboundTx = 1;
+	Proposals proposals = 2   [(gogoproto.nullable) = false];
+}
+
 message QueryGetOutboundTxResponse {
 	OutboundTx outboundTx = 1 [(gogoproto.nullable) = false];
+	repeated ProposalView view = 2 [(gogoproto.nullable) = false];
 }
 
 message QueryAllOutboundTxRequest {
@@ -100,7 +106,7 @@ message QueryAllOutboundTxRequest {
 }
 
 message QueryAllOutboundTxResponse {
-	repeated OutboundTx outboundTx = 1 [(gogoproto.nullable) = false];
+	repeated QueryGetOutboundTxResponse allOutbound =1 [(gogoproto.nullable) = false];
 	cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
@@ -129,7 +135,7 @@ message QueryGetQuotaRequest {
 }
 
 message QueryGetQuotaResponse {
-	coinsQuota coinQuotaResponse=1  [(gogoproto.nullable) = false] ;
+	CoinsQuota coinQuotaResponse=1  [(gogoproto.nullable) = false] ;
 }
 
 // this line is used by starport scaffolding # 3
@@ -157,13 +163,13 @@ message QueryGetCreatePoolResponse {
 	PoolProposal CreatePool = 1;
 }
 
-message poolInfo {
+message PoolInfo {
 	string BlockHeight=1;
 	PoolProposal CreatePool = 2;
 }
 
 message QueryLastPoolResponse {
-	repeated poolInfo pools = 1;
+	repeated PoolInfo pools = 1;
 }
 
 message QueryAllCreatePoolRequest {

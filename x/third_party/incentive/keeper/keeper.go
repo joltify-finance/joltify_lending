@@ -3,6 +3,8 @@ package keeper
 import (
 	"time"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -13,7 +15,7 @@ import (
 // Keeper keeper for the incentive module
 type Keeper struct {
 	cdc           codec.Codec
-	key           sdk.StoreKey
+	key           storetypes.StoreKey
 	paramSubspace types2.ParamSubspace
 	accountKeeper types2.AccountKeeper
 	bankKeeper    types2.BankKeeper
@@ -23,7 +25,7 @@ type Keeper struct {
 
 // NewKeeper creates a new keeper
 func NewKeeper(
-	cdc codec.Codec, key sdk.StoreKey, paramstore types2.ParamSubspace, bk types2.BankKeeper,
+	cdc codec.Codec, key storetypes.StoreKey, paramstore types2.ParamSubspace, bk types2.BankKeeper,
 	cdpk types2.CdpKeeper, hk types2.JoltKeeper, ak types2.AccountKeeper,
 ) Keeper {
 	if !paramstore.HasKeyTable() {

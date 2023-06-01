@@ -1,6 +1,7 @@
 package ante_test
 
 import (
+	"math/rand"
 	"os"
 	"testing"
 	"time"
@@ -50,7 +51,7 @@ func TestAppAnteHandler_AuthorizedMempool(t *testing.T) {
 	chainID := "jolttest_1-1"
 	tApp = tApp.InitializeFromGenesisStatesWithTimeAndChainID(
 		time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC),
-		chainID,
+		chainID, nil, nil,
 		app.NewFundedGenStateWithSameCoins(
 			tApp.AppCodec(),
 			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 1e6)),
@@ -87,7 +88,8 @@ func TestAppAnteHandler_AuthorizedMempool(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			stdTx, err := helpers.GenTx(
+			stdTx, err := helpers.GenSignedMockTx(
+				rand.New(rand.NewSource(time.Now().UnixNano())),
 				encodingConfig.TxConfig,
 				[]sdk.Msg{
 					banktypes.NewMsgSend(

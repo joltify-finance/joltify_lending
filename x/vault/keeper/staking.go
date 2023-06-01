@@ -3,11 +3,11 @@ package keeper
 import (
 	"sort"
 	"strconv"
-	"time"
+
+	errorsmod "cosmossdk.io/errors"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -104,7 +104,7 @@ func (k Keeper) getEligibleValidators(ctx sdk.Context) ([]vaulttypes.ValidatorPo
 func (k Keeper) updateValidators(ctx sdk.Context) error {
 	vs, err := k.getEligibleValidators(ctx)
 	if err != nil {
-		return sdkerrors.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
+		return errorsmod.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
 	}
 
 	stakingValidators := make([]*vaulttypes.Validator, len(vs))
@@ -112,7 +112,7 @@ func (k Keeper) updateValidators(ctx sdk.Context) error {
 	for i, el := range vs {
 		key, err := el.Validator.ConsPubKey()
 		if err != nil {
-			return sdkerrors.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
+			return errorsmod.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
 		}
 		v := vaulttypes.Validator{
 			Pubkey: key.Bytes(),
@@ -130,7 +130,7 @@ func (k Keeper) updateValidators(ctx sdk.Context) error {
 }
 
 func (k Keeper) NewUpdate(ctx sdk.Context) []abci.ValidatorUpdate {
-	defer telemetry.ModuleMeasureSince(vaulttypes.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
+	defer telemetry.ModuleMeasureSince(vaulttypes.ModuleName, ctx.BlockTime(), telemetry.MetricKeyEndBlocker)
 
 	blockHeight := k.GetParams(ctx).BlockChurnInterval
 	if ctx.BlockHeight()%blockHeight == 0 {

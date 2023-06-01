@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
@@ -39,7 +41,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 }
 
 func (suite *KeeperTestSuite) SetupApp() {
-	suite.app = app.NewTestApp()
+	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 

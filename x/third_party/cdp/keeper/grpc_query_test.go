@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 
@@ -26,8 +28,9 @@ type grpcQueryTestSuite struct {
 }
 
 func (suite *grpcQueryTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp()
-	suite.tApp.InitializeFromGenesisStates(
+	lg := tmlog.TestingLogger()
+	suite.tApp = app.NewTestApp(lg, suite.T().TempDir())
+	suite.tApp.InitializeFromGenesisStates(nil, nil,
 		NewPricefeedGenStateMulti(suite.tApp.AppCodec()),
 		NewCDPGenStateMulti(suite.tApp.AppCodec()),
 	)

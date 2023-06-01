@@ -5,6 +5,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/assert"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmprototypes "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtime "github.com/tendermint/tendermint/types/time"
 
@@ -18,7 +19,8 @@ func TestGenesis(t *testing.T) {
 		Params: types.DefaultParams(),
 		// this line is used by starport scaffolding # genesis/test/state
 	}
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
 	k := tApp.GetMintKeeper()
 	mint.InitGenesis(ctx, k, genesisState)

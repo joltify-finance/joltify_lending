@@ -33,6 +33,10 @@ func (suite *auctionTestSuite) TestSurplusAuctionBasic() {
 	sellerAddr := authtypes.NewModuleAddress(suite.ModAcc.Name)
 	suite.AddCoinsToNamedModule(suite.ModAcc.Name, cs(c("token1", 100), c("token2", 100)))
 
+	for _, el := range suite.Addrs {
+		suite.AddCoinsToAccount(el, cs(c("token1", 100), c("token2", 100)))
+	}
+
 	// Create an auction (lot: 20 token1, initialBid: 0 token2)
 	auctionID, err := suite.Keeper.StartSurplusAuction(suite.Ctx, suite.ModAcc.Name, c("token1", 20), "token2") // lobid denom
 	suite.NoError(err)
@@ -62,6 +66,10 @@ func (suite *auctionTestSuite) TestDebtAuctionBasic() {
 	seller := suite.Addrs[0]
 	suite.AddCoinsToNamedModule(suite.ModAcc.Name, cs(c("debt", 100)))
 
+	for _, el := range suite.Addrs {
+		suite.AddCoinsToAccount(el, cs(c("token1", 100), c("token2", 100)))
+	}
+
 	// Start auction
 	auctionID, err := suite.Keeper.StartDebtAuction(suite.Ctx, suite.ModAcc.Name, c("token1", 20), c("token2", 99999), c("debt", 20))
 	suite.NoError(err)
@@ -88,6 +96,10 @@ func (suite *auctionTestSuite) TestDebtAuctionDebtRemaining() {
 
 	buyerAddr := authtypes.NewModuleAddress(suite.ModAcc.Name)
 	suite.AddCoinsToNamedModule(suite.ModAcc.Name, cs(c("debt", 100)))
+
+	for _, el := range suite.Addrs {
+		suite.AddCoinsToAccount(el, cs(c("token1", 100), c("token2", 100)))
+	}
 
 	// Start auction
 	auctionID, err := suite.Keeper.StartDebtAuction(suite.Ctx, suite.ModAcc.Name, c("token1", 10), c("token2", 99999), c("debt", 20))
@@ -119,6 +131,9 @@ func (suite *auctionTestSuite) TestCollateralAuctionBasic() {
 	sellerModName := suite.ModAcc.Name
 	sellerAddr := suite.ModAcc.GetAddress()
 	suite.AddCoinsToNamedModule(sellerModName, cs(c("token1", 100), c("token2", 100), c("debt", 100)))
+	for _, el := range suite.Addrs {
+		suite.AddCoinsToAccount(el, cs(c("token1", 100), c("token2", 100)))
+	}
 
 	// Start auction
 	auctionID, err := suite.Keeper.StartCollateralAuction(suite.Ctx, sellerModName, c("token1", 20), c("token2", 50), returnAddrs, returnWeights, c("debt", 40))
@@ -164,6 +179,10 @@ func (suite *auctionTestSuite) TestCollateralAuctionDebtRemaining() {
 	sellerModName := suite.ModAcc.Name
 	sellerAddr := suite.ModAcc.GetAddress()
 	suite.AddCoinsToNamedModule(sellerModName, cs(c("token1", 100), c("token2", 100), c("debt", 100)))
+
+	for _, el := range suite.Addrs {
+		suite.AddCoinsToAccount(el, cs(c("token1", 100), c("token2", 100)))
+	}
 
 	// Start auction
 	auctionID, err := suite.Keeper.StartCollateralAuction(suite.Ctx, sellerModName, c("token1", 20), c("token2", 50), returnAddrs, returnWeights, c("debt", 40))
@@ -259,7 +278,7 @@ func (suite *auctionTestSuite) TestStartSurplusAuction() {
 			if tc.expectPass {
 				suite.NoError(err, tc.name)
 				// check coins moved
-				suite.Equal(initialLiquidatorCoins.Sub(cs(tc.args.lot)), liquidatorCoins, tc.name)
+				suite.Equal(initialLiquidatorCoins.Sub(tc.args.lot), liquidatorCoins, tc.name)
 				// check auction in store and is correct
 				suite.True(found, tc.name)
 

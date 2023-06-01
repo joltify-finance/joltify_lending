@@ -16,7 +16,7 @@ func (k Keeper) OutboundTxAll(c context.Context, req *types.QueryAllOutboundTxRe
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	var outboundTxs []types.OutboundTx
+	var results []types.QueryGetOutboundTxResponse
 	ctx := sdk.UnwrapSDKContext(c)
 
 	store := ctx.KVStore(k.storeKey)
@@ -28,14 +28,24 @@ func (k Keeper) OutboundTxAll(c context.Context, req *types.QueryAllOutboundTxRe
 			return err
 		}
 
-		outboundTxs = append(outboundTxs, outboundTx)
+		var views []types.ProposalView
+		outboundTxs := outboundTx.GetOutboundTxs()
+		for _, el := range outboundTxs {
+			proposals, found := k.GetOutboundTxProposal(ctx, outboundTx.Index, el)
+			if found {
+				view := types.ProposalView{OutboundTx: el, Proposals: proposals}
+				views = append(views, view)
+			}
+		}
+		item := types.QueryGetOutboundTxResponse{OutboundTx: outboundTx, View: views}
+		results = append(results, item)
 		return nil
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &types.QueryAllOutboundTxResponse{OutboundTx: outboundTxs, Pagination: pageRes}, nil
+	return &types.QueryAllOutboundTxResponse{AllOutbound: results, Pagination: pageRes}, nil
 }
 
 func (k Keeper) OutboundTx(c context.Context, req *types.QueryGetOutboundTxRequest) (*types.QueryGetOutboundTxResponse, error) {
@@ -51,6 +61,15 @@ func (k Keeper) OutboundTx(c context.Context, req *types.QueryGetOutboundTxReque
 	if !found {
 		return nil, status.Error(codes.InvalidArgument, "not found")
 	}
+	var views []types.ProposalView
+	outboundTxs := val.GetOutboundTxs()
+	for _, el := range outboundTxs {
+		proposals, found := k.GetOutboundTxProposal(ctx, req.RequestID, el)
+		if found {
+			view := types.ProposalView{OutboundTx: el, Proposals: proposals}
+			views = append(views, view)
+		}
+	}
 
-	return &types.QueryGetOutboundTxResponse{OutboundTx: val}, nil
+	return &types.QueryGetOutboundTxResponse{OutboundTx: val, View: views}, nil
 }

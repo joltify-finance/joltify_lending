@@ -1,0 +1,193 @@
+syntax = "proto3";
+package joltify.spv;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
+
+message PoolInfo {
+  string index  =1 ;
+  string pool_name = 2 ;
+  int32 linked_project = 3 ;
+  bytes owner_address     = 4
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+
+
+  string      apy      = 5 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  bool principal_paid = 6;
+
+  int32 pay_freq = 7;
+
+  string            reserve_factor      = 8 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+
+//  string            pool_nFT_class      = 9 [
+//    (cosmos_proto.scalar)  = "cosmos.Class",
+//    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+//    (gogoproto.nullable)   = false
+//  ];
+  repeated string pool_nFT_ids =9 ;
+
+  google.protobuf.Timestamp last_payment_time = 10 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+  enum POOLSTATUS{
+    ACTIVE = 0;
+    INACTIVE = 1;
+    FROZEN = 2;
+    PREPARE = 3;
+    FREEZING  =4;
+    Liquidation = 5;
+    PooLPayPartially = 6;
+  }
+  POOLSTATUS pool_status = 11;
+
+  cosmos.base.v1beta1.Coin borrowed_amount = 12[    // this variable is frozen after pool is in luquidation
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  string            pool_interest      = 13 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+ uint64  project_length = 14;
+
+  cosmos.base.v1beta1.Coin usable_amount = 15[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  cosmos.base.v1beta1.Coin target_amount = 16[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  enum POOLTYPE{
+    JUNIOR = 0;
+    SENIOR = 1;
+  }
+  POOLTYPE pool_type = 17;
+
+  string  escrow_interest_amount  = 18 [
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+
+  cosmos.base.v1beta1.Coin escrow_principal_amount = 19[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+
+  cosmos.base.v1beta1.Coin withdraw_proposal_amount = 20[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  google.protobuf.Timestamp project_due_time = 21 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+  repeated bytes withdraw_accounts     = 22
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+  repeated bytes transfer_accounts     = 23
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+
+  int32  withdraw_request_window_seconds = 24;
+  int32  pool_locked_seconds = 25;
+  int32  pool_total_borrow_limit= 26;
+  int32 current_pool_total_borrow_counter= 27;
+  google.protobuf.Timestamp pool_created_time = 28 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp pool_first_due_time= 29 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Duration grace_time= 30 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+  int32 negative_interest_counter= 31 ;
+  string      liquidation_ratio      = 32 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  string total_liquidation_amount = 34 [
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+
+  string      principal_payment_exchange_ratio      = 35 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  string      principal_withdrawal_request_payment_ratio     = 36 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  string pool_denom_prefix = 37;
+  Interest_prepayment interest_prepayment = 38;
+
+  repeated bytes processed_transfer_accounts     = 39
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+
+  string project_name = 40;
+  bool separate_pool = 41;
+
+  repeated bytes processed_withdraw_accounts     = 42
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+
+
+  cosmos.base.v1beta1.Coin total_transfer_ownership_amount = 43[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  // the minimum amount of coins that can be withdrawn from the pool for the first time
+  cosmos.base.v1beta1.Coin min_borrow_amount = 44[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
+
+message Interest_prepayment{
+  int32 counter = 1;
+  string exchange_ratio = 2 [
+  (cosmos_proto.scalar)  = "cosmos.Dec",
+  (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+  (gogoproto.nullable)   = false
+  ];
+}
+
+message PoolWithInvestors {
+  string pool_index =1;
+  repeated string investors    = 2;
+}
+
+message PoolDepositedInvestors {
+  string pool_index = 1;
+  repeated  bytes wallet_address     = 4
+  [(cosmos_proto.scalar) = "cosmos.AddressBytes",
+    (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"
+  ];
+}

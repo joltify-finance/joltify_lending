@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
@@ -25,7 +28,7 @@ type grpcQueryTestSuite struct {
 }
 
 func (suite *grpcQueryTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp()
+	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
 
 	suite.addrs = addrs
@@ -45,7 +48,7 @@ func (suite *grpcQueryTestSuite) SetupTest() {
 	)
 	suite.Require().NoError(err)
 
-	suite.tApp.InitializeFromGenesisStates(
+	suite.tApp.InitializeFromGenesisStates(nil, nil,
 		NewPricefeedGenStateMulti(suite.tApp.AppCodec()),
 		NewJoltGenState(suite.tApp.AppCodec()),
 		app.NewFundedGenStateWithSameCoins(
@@ -57,6 +60,15 @@ func (suite *grpcQueryTestSuite) SetupTest() {
 			addrs,
 		),
 	)
+	coins := cs(
+		c("bnb", 10000000000),
+		c("busd", 20000000000),
+	)
+
+	for _, addr := range addrs {
+		err = testutil.FundAccount(suite.tApp.GetBankKeeper(), suite.ctx, addr, coins)
+		suite.Require().NoError(err)
+	}
 }
 
 func (suite *grpcQueryTestSuite) TestGrpcQueryParams() {

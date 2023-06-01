@@ -81,7 +81,8 @@ func (cdp CDP) GetNormalizedPrincipal() (sdk.Dec, error) {
 	if cdp.InterestFactor.LT(sdk.OneDec()) {
 		return sdk.Dec{}, fmt.Errorf("interest factor '%s' must be ≥ 1", cdp.InterestFactor)
 	}
-	return unsyncedDebt.ToDec().Quo(cdp.InterestFactor), nil
+	value := sdk.NewDecFromInt(unsyncedDebt).Quo(cdp.InterestFactor)
+	return value, nil
 }
 
 // CDPs a collection of CDP objects

@@ -7,6 +7,13 @@ import (
 	"os"
 	"path/filepath"
 
+	vaultmodule "github.com/joltify-finance/joltify_lending/x/vault"
+
+	"github.com/cosmos/cosmos-sdk/server/config"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	ibcporttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
+
 	v1 "github.com/joltify-finance/joltify_lending/upgrade"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
@@ -15,6 +22,14 @@ import (
 	cdpkeeper "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
+
+	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	nftmoduletypes "github.com/cosmos/cosmos-sdk/x/nft"
+	nftmodulekeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
+	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
+	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
+	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
+	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/issuance"
@@ -29,6 +44,8 @@ import (
 	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
 	vaultmoduletypes "github.com/joltify-finance/joltify_lending/x/vault/types"
 
+	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
+
 	"github.com/joltify-finance/joltify_lending/x/mint"
 	mintkeeper "github.com/joltify-finance/joltify_lending/x/mint/keeper"
 	minttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
@@ -36,12 +53,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
-	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/server/api"
-	"github.com/cosmos/cosmos-sdk/server/config"
-
 	cosante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -69,6 +83,7 @@ import (
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/evidence"
 	evidencekeeper "github.com/cosmos/cosmos-sdk/x/evidence/keeper"
@@ -96,19 +111,22 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	transfer "github.com/cosmos/ibc-go/v3/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v3/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v3/modules/core/02-client"
-	ibcclientclient "github.com/cosmos/ibc-go/v3/modules/core/02-client/client"
-	ibcclienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
-	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
-	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
+
+	"github.com/cosmos/ibc-go/v5/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v5/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v5/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v5/modules/core/02-client"
+	ibcclientclient "github.com/cosmos/ibc-go/v5/modules/core/02-client/client"
+	ibcclienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
+	ibchost "github.com/cosmos/ibc-go/v5/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v5/modules/core/keeper"
+
+	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/joltify-finance/joltify_lending/app/ante"
 	joltparams "github.com/joltify-finance/joltify_lending/app/params"
-	vaultmodule "github.com/joltify-finance/joltify_lending/x/vault"
+	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
+	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmlog "github.com/tendermint/tendermint/libs/log"
@@ -133,14 +151,7 @@ var (
 		staking.AppModuleBasic{},
 		mint.AppModuleBasic{},
 		distr.AppModuleBasic{},
-		gov.NewAppModuleBasic(
-			paramsclient.ProposalHandler,
-			distrclient.ProposalHandler,
-			upgradeclient.ProposalHandler,
-			upgradeclient.CancelProposalHandler,
-			ibcclientclient.UpdateClientProposalHandler,
-			ibcclientclient.UpgradeProposalHandler,
-		),
+		gov.NewAppModuleBasic(getGovProposalHandlers()),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
@@ -158,6 +169,9 @@ var (
 		jolt.AppModuleBasic{},
 		incentive.AppModuleBasic{},
 		vaultmodule.AppModuleBasic{},
+		kycmodule.AppModuleBasic{},
+		spvmodule.AppModuleBasic{},
+		nftmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -178,6 +192,8 @@ var (
 		types3.LiquidatorMacc:          {authtypes.Minter, authtypes.Burner},
 		types2.ModuleName:              {authtypes.Minter, authtypes.Burner},
 		incentivetypes.ModuleName:      nil,
+		spvmoduletypes.ModuleAccount:   {authtypes.Minter, authtypes.Burner},
+		nftmoduletypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -205,9 +221,9 @@ type App struct {
 	interfaceRegistry types.InterfaceRegistry
 
 	// keys to access the substores
-	keys    map[string]*sdk.KVStoreKey
-	tkeys   map[string]*sdk.TransientStoreKey
-	memKeys map[string]*sdk.MemoryStoreKey
+	keys    map[string]*storetypes.KVStoreKey
+	tkeys   map[string]*storetypes.TransientStoreKey
+	memKeys map[string]*storetypes.MemoryStoreKey
 
 	// keepers from all the modules
 	accountKeeper    authkeeper.AccountKeeper
@@ -233,6 +249,9 @@ type App struct {
 	incentiveKeeper  incentivekeeper.Keeper
 	feeGrantKeeper   feegrantkeeper.Keeper
 	VaultKeeper      vaultmodulekeeper.Keeper
+	kycKeeper        kycmodulekeeper.Keeper
+	spvKeeper        spvmodulekeeper.Keeper
+	nftKeeper        nftmodulekeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -255,6 +274,23 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, ".joltify")
+}
+
+func getGovProposalHandlers() []govclient.ProposalHandler {
+	var govProposalHandlers []govclient.ProposalHandler
+	// this line is used by starport scaffolding # stargate/app/govProposalHandlers
+
+	govProposalHandlers = append(govProposalHandlers,
+		paramsclient.ProposalHandler,
+		distrclient.ProposalHandler,
+		upgradeclient.LegacyProposalHandler,
+		upgradeclient.LegacyCancelProposalHandler,
+		ibcclientclient.UpdateClientProposalHandler,
+		ibcclientclient.UpgradeProposalHandler,
+		// this line is used by starport scaffolding # stargate/app/govProposalHandler
+	)
+
+	return govProposalHandlers
 }
 
 // NewApp returns a reference to an initialized App.
@@ -287,6 +323,9 @@ func NewApp(
 		types3.StoreKey, types2.StoreKey,
 		incentivetypes.StoreKey,
 		vaultmoduletypes.StoreKey,
+		kycmoduletypes.StoreKey,
+		spvmoduletypes.StoreKey,
+		nftmoduletypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -314,7 +353,7 @@ func NewApp(
 	mintSubspace := app.paramsKeeper.Subspace(minttypes.ModuleName)
 	distrSubspace := app.paramsKeeper.Subspace(distrtypes.ModuleName)
 	slashingSubspace := app.paramsKeeper.Subspace(slashingtypes.ModuleName)
-	govSubspace := app.paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govtypes.ParamKeyTable())
+	govSubspace := app.paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable())
 	crisisSubspace := app.paramsKeeper.Subspace(crisistypes.ModuleName)
 	auctionSubspace := app.paramsKeeper.Subspace(auctiontypes.ModuleName)
 	issuanceSubspace := app.paramsKeeper.Subspace(types4.ModuleName)
@@ -325,9 +364,11 @@ func NewApp(
 	ibcSubspace := app.paramsKeeper.Subspace(ibchost.ModuleName)
 	ibctransferSubspace := app.paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	vaultSubspace := app.paramsKeeper.Subspace(vaultmoduletypes.ModuleName)
+	kycSubspace := app.paramsKeeper.Subspace(kycmoduletypes.ModuleName)
+	spvSubspace := app.paramsKeeper.Subspace(spvmoduletypes.ModuleName)
 
 	bApp.SetParamStore(
-		app.paramsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramskeeper.ConsensusParamsKeyTable()),
+		app.paramsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable()),
 	)
 	app.capabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
 	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibchost.ModuleName)
@@ -341,6 +382,7 @@ func NewApp(
 		authSubspace,
 		authtypes.ProtoBaseAccount,
 		mAccPerms,
+		sdk.Bech32MainPrefix,
 	)
 
 	app.feeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.accountKeeper)
@@ -362,6 +404,7 @@ func NewApp(
 		keys[authzkeeper.StoreKey],
 		appCodec,
 		app.BaseApp.MsgServiceRouter(),
+		app.accountKeeper,
 	)
 
 	app.distrKeeper = distrkeeper.NewKeeper(
@@ -372,7 +415,6 @@ func NewApp(
 		app.bankKeeper,
 		&app.stakingKeeper,
 		authtypes.FeeCollectorName,
-		app.ModuleAccountAddrs(),
 	)
 	app.slashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
@@ -392,6 +434,7 @@ func NewApp(
 		appCodec,
 		homePath,
 		app.BaseApp,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	app.evidenceKeeper = *evidencekeeper.NewKeeper(
 		appCodec,
@@ -435,7 +478,7 @@ func NewApp(
 	)
 
 	// Create static IBC router, add transfer route, then set and seal it
-	ibcRouter := porttypes.NewRouter()
+	ibcRouter := ibcporttypes.NewRouter()
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
 	app.ibcKeeper.SetRouter(ibcRouter)
 
@@ -500,18 +543,24 @@ func NewApp(
 		app.accountKeeper,
 	)
 
+	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace)
+	app.nftKeeper = nftmodulekeeper.NewKeeper(keys[nftmoduletypes.StoreKey], appCodec, app.accountKeeper, app.bankKeeper)
+	app.spvKeeper = *spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper, app.pricefeedKeeper)
+
 	// Note: the committee proposal handler is not registered on the committee router. This means committees cannot create or update other committees.
 	// Adding the committee proposal handler to the router is possible but awkward as the handler depends on the keeper which depends on the handler.
 
 	// create gov keeper with router
 	// NOTE this must be done after any keepers referenced in the gov router (ie committee) are defined
-	govRouter := govtypes.NewRouter()
+	govRouter := govv1beta1.NewRouter()
 	govRouter.
-		AddRoute(govtypes.RouterKey, govtypes.ProposalHandler).
+		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.paramsKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.upgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.ibcKeeper.ClientKeeper)).
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.distrKeeper))
+
+	govConfig := govtypes.DefaultConfig()
 	app.govKeeper = govkeeper.NewKeeper(
 		appCodec,
 		keys[govtypes.StoreKey],
@@ -520,6 +569,8 @@ func NewApp(
 		app.bankKeeper,
 		&app.stakingKeeper,
 		govRouter,
+		app.MsgServiceRouter(),
+		govConfig,
 	)
 
 	// register the staking hooks
@@ -558,6 +609,9 @@ func NewApp(
 		jolt.NewAppModule(app.joltKeeper, app.accountKeeper, app.bankKeeper, app.pricefeedKeeper),
 		incentive.NewAppModule(app.incentiveKeeper, app.accountKeeper, app.bankKeeper, app.cdpKeeper),
 		vaultmodule.NewAppModule(appCodec, app.VaultKeeper, app.accountKeeper, app.bankKeeper),
+		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.accountKeeper, app.bankKeeper),
+		spvmodule.NewAppModule(appCodec, app.spvKeeper, app.accountKeeper, app.bankKeeper),
+		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -584,6 +638,9 @@ func NewApp(
 		types4.ModuleName,
 		incentivetypes.ModuleName,
 		vaultmoduletypes.ModuleName,
+		kycmoduletypes.ModuleName,
+		nftmoduletypes.ModuleName,
+		spvmoduletypes.ModuleName,
 		ibchost.ModuleName,
 		// Add all remaining modules with an empty begin blocker below since cosmos 0.45.0 requires it
 		vestingtypes.ModuleName,
@@ -615,6 +672,9 @@ func NewApp(
 		types3.ModuleName,
 		types2.ModuleName,
 		vaultmoduletypes.ModuleName,
+		kycmoduletypes.ModuleName,
+		nftmoduletypes.ModuleName,
+		spvmoduletypes.ModuleName,
 		upgradetypes.ModuleName,
 		evidencetypes.ModuleName,
 		feegrant.ModuleName,
@@ -649,6 +709,9 @@ func NewApp(
 		types3.ModuleName, // reads market prices, so must run after pricefeed genesis
 		types2.ModuleName,
 		vaultmoduletypes.ModuleName,
+		kycmoduletypes.ModuleName,
+		nftmoduletypes.ModuleName,
+		spvmoduletypes.ModuleName,
 		incentivetypes.ModuleName, // reads cdp params, so must run after cdp genesis
 		genutiltypes.ModuleName,   // runs arbitrary txs included in genisis state, so run after modules have been initialized
 		crisistypes.ModuleName,    // runs the invariants at genesis, should run after other modules
@@ -703,7 +766,7 @@ func NewApp(
 		SigGasConsumer:  cosante.DefaultSigVerificationGasConsumer,
 	}
 
-	anteHandler, err := ante.NewAnteHandler(app.ibcKeeper, baseAnte, fetchers)
+	anteHandler, err := ante.NewAnteHandler(app.VaultKeeper, baseAnte, fetchers)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}
@@ -713,16 +776,16 @@ func NewApp(
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 
+	app.ScopedIBCKeeper = scopedIBCKeeper
+	app.ScopedTransferKeeper = scopedTransferKeeper
+	app.setupUpgradeHandlers()
+
 	// load store
 	if !options.SkipLoadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			panic(fmt.Sprintf("failed to load latest version: %s", err))
 		}
 	}
-
-	app.ScopedIBCKeeper = scopedIBCKeeper
-	app.ScopedTransferKeeper = scopedTransferKeeper
-	app.setupUpgradeHandlers()
 
 	return app
 }
@@ -784,9 +847,9 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 	clientCtx := apiSvr.ClientCtx
 
 	// Register legacy REST routes
-	rpc.RegisterRoutes(clientCtx, apiSvr.Router)
-	ModuleBasics.RegisterRESTRoutes(clientCtx, apiSvr.Router)
-	RegisterLegacyTxRoutes(clientCtx, apiSvr.Router)
+	// rpc.RegisterRoutes(clientCtx, apiSvr.Router)
+	// ModuleBasics.RegisterRESTRoutes(clientCtx, apiSvr.Router)
+	// RegisterLegacyTxRoutes(clientCtx, apiSvr.Router)
 
 	// Register GRPC Gateway routes
 	tmservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
@@ -794,6 +857,8 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// Swagger API configuration is ignored
+	// apiSvr.Router.Handle("/static/openapi.yml", http.FileServer(http.FS(docs.Docs)))
+	// apiSvr.Router.HandleFunc("/", openapiconsole.Handler(Name, "/static/openapi.yml"))
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
@@ -805,7 +870,7 @@ func (app *App) RegisterTxService(clientCtx client.Context) {
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
 // It registers the standard tendermint grpc endpoints on the app's grpc server.
 func (app *App) RegisterTendermintService(clientCtx client.Context) {
-	tmservice.RegisterTendermintService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.interfaceRegistry)
+	tmservice.RegisterTendermintService(clientCtx, app.BaseApp.GRPCQueryRouter(), app.interfaceRegistry, app.Query)
 }
 
 // loadBlockedMaccAddrs returns a map indicating the blocked status of each module account address
@@ -824,4 +889,19 @@ func (app *App) loadBlockedMaccAddrs() map[string]bool {
 func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V003UpgradeName, v1.CreateUpgradeHandlerForV003Upgrade(app.mm, &app.VaultKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V004UpgradeName, v1.CreateUpgradeHandlerForV004Upgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V005UpgradeName, v1.CreateUpgradeHandlerForV005Upgrade(app.mm, app.configurator))
+
+	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Name == v1.V005UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{kycmoduletypes.StoreKey, nftmoduletypes.StoreKey, spvmoduletypes.StoreKey},
+		}
+
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
 }

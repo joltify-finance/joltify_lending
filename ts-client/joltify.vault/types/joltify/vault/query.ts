@@ -5,7 +5,7 @@ import { Coin } from "../../cosmos/base/v1beta1/coin";
 import { PoolProposal } from "./create_pool";
 import { IssueToken } from "./issue_token";
 import { OutboundTx } from "./outbound_tx";
-import { coinsQuota } from "./quota";
+import { CoinsQuota } from "./quota";
 import { Validators } from "./staking";
 
 export const protobufPackage = "joltify.vault";
@@ -59,7 +59,7 @@ export interface QueryGetQuotaRequest {
 }
 
 export interface QueryGetQuotaResponse {
-  coinQuotaResponse: coinsQuota | undefined;
+  coinQuotaResponse: CoinsQuota | undefined;
 }
 
 /** this line is used by starport scaffolding # 3 */
@@ -88,13 +88,13 @@ export interface QueryGetCreatePoolResponse {
   CreatePool: PoolProposal | undefined;
 }
 
-export interface poolInfo {
+export interface PoolInfo {
   BlockHeight: string;
   CreatePool: PoolProposal | undefined;
 }
 
 export interface QueryLastPoolResponse {
-  pools: poolInfo[];
+  pools: PoolInfo[];
 }
 
 export interface QueryAllCreatePoolRequest {
@@ -719,7 +719,7 @@ function createBaseQueryGetQuotaResponse(): QueryGetQuotaResponse {
 export const QueryGetQuotaResponse = {
   encode(message: QueryGetQuotaResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.coinQuotaResponse !== undefined) {
-      coinsQuota.encode(message.coinQuotaResponse, writer.uint32(10).fork()).ldelim();
+      CoinsQuota.encode(message.coinQuotaResponse, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
@@ -732,7 +732,7 @@ export const QueryGetQuotaResponse = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.coinQuotaResponse = coinsQuota.decode(reader, reader.uint32());
+          message.coinQuotaResponse = CoinsQuota.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -744,21 +744,21 @@ export const QueryGetQuotaResponse = {
 
   fromJSON(object: any): QueryGetQuotaResponse {
     return {
-      coinQuotaResponse: isSet(object.coinQuotaResponse) ? coinsQuota.fromJSON(object.coinQuotaResponse) : undefined,
+      coinQuotaResponse: isSet(object.coinQuotaResponse) ? CoinsQuota.fromJSON(object.coinQuotaResponse) : undefined,
     };
   },
 
   toJSON(message: QueryGetQuotaResponse): unknown {
     const obj: any = {};
     message.coinQuotaResponse !== undefined
-      && (obj.coinQuotaResponse = message.coinQuotaResponse ? coinsQuota.toJSON(message.coinQuotaResponse) : undefined);
+      && (obj.coinQuotaResponse = message.coinQuotaResponse ? CoinsQuota.toJSON(message.coinQuotaResponse) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<QueryGetQuotaResponse>, I>>(object: I): QueryGetQuotaResponse {
     const message = createBaseQueryGetQuotaResponse();
     message.coinQuotaResponse = (object.coinQuotaResponse !== undefined && object.coinQuotaResponse !== null)
-      ? coinsQuota.fromPartial(object.coinQuotaResponse)
+      ? CoinsQuota.fromPartial(object.coinQuotaResponse)
       : undefined;
     return message;
   },
@@ -1073,12 +1073,12 @@ export const QueryGetCreatePoolResponse = {
   },
 };
 
-function createBasepoolInfo(): poolInfo {
+function createBasePoolInfo(): PoolInfo {
   return { BlockHeight: "", CreatePool: undefined };
 }
 
-export const poolInfo = {
-  encode(message: poolInfo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const PoolInfo = {
+  encode(message: PoolInfo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.BlockHeight !== "") {
       writer.uint32(10).string(message.BlockHeight);
     }
@@ -1088,10 +1088,10 @@ export const poolInfo = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): poolInfo {
+  decode(input: _m0.Reader | Uint8Array, length?: number): PoolInfo {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasepoolInfo();
+    const message = createBasePoolInfo();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1109,14 +1109,14 @@ export const poolInfo = {
     return message;
   },
 
-  fromJSON(object: any): poolInfo {
+  fromJSON(object: any): PoolInfo {
     return {
       BlockHeight: isSet(object.BlockHeight) ? String(object.BlockHeight) : "",
       CreatePool: isSet(object.CreatePool) ? PoolProposal.fromJSON(object.CreatePool) : undefined,
     };
   },
 
-  toJSON(message: poolInfo): unknown {
+  toJSON(message: PoolInfo): unknown {
     const obj: any = {};
     message.BlockHeight !== undefined && (obj.BlockHeight = message.BlockHeight);
     message.CreatePool !== undefined
@@ -1124,8 +1124,8 @@ export const poolInfo = {
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<poolInfo>, I>>(object: I): poolInfo {
-    const message = createBasepoolInfo();
+  fromPartial<I extends Exact<DeepPartial<PoolInfo>, I>>(object: I): PoolInfo {
+    const message = createBasePoolInfo();
     message.BlockHeight = object.BlockHeight ?? "";
     message.CreatePool = (object.CreatePool !== undefined && object.CreatePool !== null)
       ? PoolProposal.fromPartial(object.CreatePool)
@@ -1141,7 +1141,7 @@ function createBaseQueryLastPoolResponse(): QueryLastPoolResponse {
 export const QueryLastPoolResponse = {
   encode(message: QueryLastPoolResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.pools) {
-      poolInfo.encode(v!, writer.uint32(10).fork()).ldelim();
+      PoolInfo.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
@@ -1154,7 +1154,7 @@ export const QueryLastPoolResponse = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.pools.push(poolInfo.decode(reader, reader.uint32()));
+          message.pools.push(PoolInfo.decode(reader, reader.uint32()));
           break;
         default:
           reader.skipType(tag & 7);
@@ -1165,13 +1165,13 @@ export const QueryLastPoolResponse = {
   },
 
   fromJSON(object: any): QueryLastPoolResponse {
-    return { pools: Array.isArray(object?.pools) ? object.pools.map((e: any) => poolInfo.fromJSON(e)) : [] };
+    return { pools: Array.isArray(object?.pools) ? object.pools.map((e: any) => PoolInfo.fromJSON(e)) : [] };
   },
 
   toJSON(message: QueryLastPoolResponse): unknown {
     const obj: any = {};
     if (message.pools) {
-      obj.pools = message.pools.map((e) => e ? poolInfo.toJSON(e) : undefined);
+      obj.pools = message.pools.map((e) => e ? PoolInfo.toJSON(e) : undefined);
     } else {
       obj.pools = [];
     }
@@ -1180,7 +1180,7 @@ export const QueryLastPoolResponse = {
 
   fromPartial<I extends Exact<DeepPartial<QueryLastPoolResponse>, I>>(object: I): QueryLastPoolResponse {
     const message = createBaseQueryLastPoolResponse();
-    message.pools = object.pools?.map((e) => poolInfo.fromPartial(e)) || [];
+    message.pools = object.pools?.map((e) => PoolInfo.fromPartial(e)) || [];
     return message;
   },
 };

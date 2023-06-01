@@ -11,7 +11,7 @@ type Hooks struct {
 	k Keeper
 }
 
-//_ cdptypes.CDPHooks   = Hooks{}
+// _ cdptypes.CDPHooks   = Hooks{}
 var _ types.JOLTHooks = Hooks{}
 
 // Hooks create new incentive hooks

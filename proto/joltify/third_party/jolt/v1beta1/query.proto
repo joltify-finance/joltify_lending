@@ -15,62 +15,62 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/jo
 service Query {
   // Params queries module params.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/params";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/params";
   }
 
   // Accounts queries module accounts.
   rpc Accounts(QueryAccountsRequest) returns (QueryAccountsResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/accounts";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/accounts";
   }
 
   // Deposits queries jolt deposits.
   rpc Deposits(QueryDepositsRequest) returns (QueryDepositsResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/deposits";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/deposits";
   }
 
   // UnsyncedDeposits queries unsynced deposits.
   rpc UnsyncedDeposits(QueryUnsyncedDepositsRequest) returns (QueryUnsyncedDepositsResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/unsynced-deposits";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/unsynced-deposits";
   }
 
   // TotalDeposited queries total coins deposited to jolt liquidity pools.
   rpc TotalDeposited(QueryTotalDepositedRequest) returns (QueryTotalDepositedResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/total-deposited/{denom}";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/total-deposited/{denom}";
   }
 
   // Borrows queries jolt borrows.
   rpc Borrows(QueryBorrowsRequest) returns (QueryBorrowsResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/borrows";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/borrows";
   }
 
   // UnsyncedBorrows queries unsynced borrows.
   rpc UnsyncedBorrows(QueryUnsyncedBorrowsRequest) returns (QueryUnsyncedBorrowsResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/unsynced-borrows";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/unsynced-borrows";
   }
 
   // TotalBorrowed queries total coins borrowed from jolt liquidity pools.
   rpc TotalBorrowed(QueryTotalBorrowedRequest) returns (QueryTotalBorrowedResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/total-borrowed/{denom}";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/total-borrowed/{denom}";
   }
 
   // InterestRate queries the jolt module interest rates.
   rpc InterestRate(QueryInterestRateRequest) returns (QueryInterestRateResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/interest-rate/{denom}";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/interest-rate/{denom}";
   }
 
   // Reserves queries total jolt reserve coins.
   rpc Reserves(QueryReservesRequest) returns (QueryReservesResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/reserves/{denom}";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/reserves/{denom}";
   }
 
   // InterestFactors queries jolt module interest factors.
   rpc InterestFactors(QueryInterestFactorsRequest) returns (QueryInterestFactorsResponse) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/interest-factors/{denom}";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/interest-factors/{denom}";
   }
 
   // queries jolt module interest factors.
   rpc liquidate(QueryLiquidateRequest) returns (QueryLiquidateResp) {
-    option (google.api.http).get = "/joltify/jolt/v1beta1/liquidate";
+    option (google.api.http).get = "/joltify/third_party/jolt/v1beta1/liquidate";
   }
 }
 

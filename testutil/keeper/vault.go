@@ -4,12 +4,15 @@ import (
 	"testing"
 	"time"
 
-	jolt "github.com/joltify-finance/joltify_lending/app"
+	sdkmath "cosmossdk.io/math"
+
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	jolt "github.com/joltify-finance/joltify_lending/app"
 )
 
 type testVaultStaking struct{}
@@ -97,7 +100,7 @@ func (t testVaultStaking) DeleteLastValidatorPower(ctx sdk.Context, operator sdk
 	panic("implement me")
 }
 
-func (t testVaultStaking) SetLastTotalPower(ctx sdk.Context, power sdk.Int) {
+func (t testVaultStaking) SetLastTotalPower(ctx sdk.Context, power sdkmath.Int) {
 	panic("implement me")
 }
 
@@ -107,8 +110,9 @@ func (t testVaultStaking) BondDenom(ctx sdk.Context) (res string) {
 
 // setup the general vault app
 func SetupVaultApp(t testing.TB) (*jolt.TestApp, sdk.Context) {
-	tApp := jolt.NewTestApp()
-	tApp.InitializeFromGenesisStates()
+	logger := tmlog.TestingLogger()
+	tApp := jolt.NewTestApp(logger, t.TempDir())
+	tApp.InitializeFromGenesisStates(nil, nil)
 	ctx := tApp.App.NewContext(false, tmproto.Header{Height: 100, Time: time.Now().UTC()})
 	params := tApp.GetStakingKeeper().GetParams(ctx)
 	params.MaxValidators = 3

@@ -4,6 +4,9 @@ import (
 	"testing"
 	"time"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -39,7 +42,7 @@ func (suite *HandlerTestSuite) SetupTest() {
 }
 
 func (suite *HandlerTestSuite) SetupApp() {
-	suite.App = app.NewTestApp()
+	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
 }
 
@@ -47,7 +50,7 @@ type genesisBuilder interface {
 	BuildMarshalled(cdc codec.JSONCodec) app.GenesisState
 }
 
-func (suite *HandlerTestSuite) SetupWithGenState(builders ...genesisBuilder) {
+func (suite *HandlerTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, builders ...genesisBuilder) {
 	suite.SetupApp()
 
 	builtGenStates := []app.GenesisState{
@@ -61,7 +64,7 @@ func (suite *HandlerTestSuite) SetupWithGenState(builders ...genesisBuilder) {
 	}
 
 	suite.App.InitializeFromGenesisStatesWithTime(
-		suite.genesisTime,
+		suite.genesisTime, genAcc, coins,
 		builtGenStates...,
 	)
 }
@@ -114,7 +117,11 @@ func (suite *HandlerTestSuite) TestPayoutJoltClaimMultiDenom() {
 		WithSimpleSupplyRewardPeriod("bnb", cs(c("hard", 1e6), c("swap", 1e6))).
 		WithSimpleBorrowRewardPeriod("bnb", cs(c("hard", 1e6), c("swap", 1e6)))
 
-	suite.SetupWithGenState(authBulder, incentBuilder)
+	var genAcc []authtypes.GenesisAccount
+	b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
+	genAcc = append(genAcc, b)
+	coin := cs(c("bnb", 1e12))
+	suite.SetupWithGenState(genAcc, coin, authBulder, incentBuilder)
 
 	suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
 	// create a deposit and borrow
@@ -157,9 +164,15 @@ func (suite *HandlerTestSuite) TestPayoutHardClaimSingleDenom() {
 		WithSimpleSupplyRewardPeriod("bnb", cs(c("jolt", 1e6), c("swap", 1e6))).
 		WithSimpleBorrowRewardPeriod("bnb", cs(c("jolt", 1e6), c("swap", 1e6)))
 
-	suite.SetupWithGenState(authBulder, incentBuilder)
-
+	var genAcc []authtypes.GenesisAccount
+	b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
+	genAcc = append(genAcc, b)
+	coin := cs(c("bnb", 1e12))
+	suite.SetupWithGenState(genAcc, coin, authBulder, incentBuilder)
 	suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
+
+	// err := fundModuleAccount(suite.App.GetBankKeeper(), suite.Ctx, types2.ModuleName, cs(c("jjolt", 1e18)))
+	// suite.Require().NoError(err)
 
 	// create a deposit and borrow
 	suite.NoError(suite.DeliverJoltMsgDeposit(userAddr, cs(c("bnb", 1e11))))

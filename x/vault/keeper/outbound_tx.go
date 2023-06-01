@@ -1,6 +1,9 @@
 package keeper
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
@@ -33,15 +36,32 @@ func (k Keeper) GetOutboundTx(
 	return val, true
 }
 
-// RemoveOutboundTx removes a outboundTx from the store
-func (k Keeper) RemoveOutboundTx(
+// SetOutboundTxProposal set proposals based on its requestID:outboundTxID
+func (k Keeper) SetOutboundTxProposal(ctx sdk.Context, reqID, outboundTxID string, proposals types.Proposals) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxProposalKeyPrefix))
+	b := k.cdc.MustMarshal(&proposals)
+	key := fmt.Sprintf("%v:%v", reqID, outboundTxID)
+	store.Set(types.OutboundTxKey(
+		strings.ToLower(key),
+	), b)
+}
+
+// GetOutboundTxProposal returns proposals from its requestID:outboundTxID
+func (k Keeper) GetOutboundTxProposal(
 	ctx sdk.Context,
-	requestID string,
-) {
-	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
-	store.Delete(types.OutboundTxKey(
-		requestID,
+	reqID, outboundTxID string,
+) (val types.Proposals, found bool) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxProposalKeyPrefix))
+
+	key := fmt.Sprintf("%v:%v", reqID, outboundTxID)
+	b := store.Get(types.OutboundTxKey(
+		strings.ToLower(key),
 	))
+	if b == nil {
+		return val, false
+	}
+	k.cdc.MustUnmarshal(b, &val)
+	return val, true
 }
 
 // GetAllOutboundTx returns all outboundTx

@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
@@ -29,11 +31,12 @@ type AuctionTestSuite struct {
 func (suite *AuctionTestSuite) SetupTest() {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	taddr := sdk.AccAddress(crypto.AddressHash([]byte("KavaTestUser1")))
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), cs(c("usdx", 21000000000)), []sdk.AccAddress{taddr})
-	tApp.InitializeFromGenesisStates(
+	tApp.InitializeFromGenesisStates(nil, nil,
 		authGS,
 		NewPricefeedGenStateMulti(tApp.AppCodec()),
 		NewCDPGenStateMulti(tApp.AppCodec()),

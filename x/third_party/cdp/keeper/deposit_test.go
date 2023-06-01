@@ -4,6 +4,9 @@ import (
 	"errors"
 	"testing"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 
@@ -27,20 +30,30 @@ type DepositTestSuite struct {
 }
 
 func (suite *DepositTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	cdc := tApp.AppCodec()
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(10)
+	coins := []sdk.Coins{
+		cs(c("xrp", 500000000), c("btc", 500000000)),
+		cs(c("xrp", 200000000)),
+	}
+
 	authGS := app.NewFundedGenStateWithCoins(
 		cdc,
-		[]sdk.Coins{
-			cs(c("xrp", 500000000), c("btc", 500000000)),
-			cs(c("xrp", 200000000)),
-		},
+		coins,
 		addrs[0:2],
 	)
-	tApp.InitializeFromGenesisStates(
+
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	tApp.InitializeFromGenesisStates(genAcc, coins[0],
 		authGS,
 		NewPricefeedGenStateMulti(cdc),
 		NewCDPGenStateMulti(cdc),

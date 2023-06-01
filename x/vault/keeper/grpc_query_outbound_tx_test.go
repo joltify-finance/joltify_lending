@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/stretchr/testify/require"
@@ -84,15 +86,30 @@ func TestOutboundTxQueryPaginated(t *testing.T) {
 			},
 		}
 	}
+
+	expected := make([]types.QueryGetOutboundTxResponse, len(msgs))
+	for i, el := range msgs {
+		expected[i] = types.QueryGetOutboundTxResponse{
+			el,
+			nil,
+		}
+	}
+
 	t.Run("ByOffset", func(t *testing.T) {
 		step := 2
 		for i := 0; i < len(msgs); i += step {
 			resp, err := app.VaultKeeper.OutboundTxAll(wctx, request(nil, uint64(i), uint64(step), false))
 			require.NoError(t, err)
-			require.LessOrEqual(t, len(resp.OutboundTx), step)
+			require.LessOrEqual(t, len(resp.AllOutbound), step)
+
+			// returned := make([]types.QueryGetOutboundTxResponse, len(resp.AllOutbound))
+
+			spew.Dump(resp.AllOutbound)
+			spew.Dump(expected)
+
 			require.Subset(t,
-				nullify.Fill(msgs),
-				nullify.Fill(resp.OutboundTx),
+				nullify.Fill(expected),
+				nullify.Fill(resp.AllOutbound),
 			)
 		}
 	})
@@ -102,10 +119,10 @@ func TestOutboundTxQueryPaginated(t *testing.T) {
 		for i := 0; i < len(msgs); i += step {
 			resp, err := app.VaultKeeper.OutboundTxAll(wctx, request(next, 0, uint64(step), false))
 			require.NoError(t, err)
-			require.LessOrEqual(t, len(resp.OutboundTx), step)
+			require.LessOrEqual(t, len(resp.AllOutbound), step)
 			require.Subset(t,
-				nullify.Fill(msgs),
-				nullify.Fill(resp.OutboundTx),
+				nullify.Fill(expected),
+				nullify.Fill(resp.AllOutbound),
 			)
 			next = resp.Pagination.NextKey
 		}
@@ -115,8 +132,8 @@ func TestOutboundTxQueryPaginated(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(msgs), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(msgs),
-			nullify.Fill(resp.OutboundTx),
+			nullify.Fill(expected),
+			nullify.Fill(resp.AllOutbound),
 		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {

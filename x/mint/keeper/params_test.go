@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"testing"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmprototypes "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtime "github.com/tendermint/tendermint/types/time"
 
@@ -12,7 +13,8 @@ import (
 )
 
 func TestGetParams(t *testing.T) {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
 	k := tApp.GetMintKeeper()
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -28,7 +29,8 @@ import (
 //}
 
 func TestMintCoinsAndDistribute(t *testing.T) {
-	tApp := app.NewTestApp()
+	lg := tmlog.NewNopLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	k := tApp.GetMintKeeper()
 	ctx := tApp.Ctx
 
@@ -171,7 +173,8 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 //}
 
 func TestMintCoinsAndDistributeFor3Years(t *testing.T) {
-	tApp := app.NewTestApp()
+	lg := tmlog.NewNopLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.Ctx
 	k := tApp.GetMintKeeper()
 	params := joltminttypes.DefaultParams()
@@ -229,7 +232,8 @@ func TestMintCoinsAndDistributeFor3Years(t *testing.T) {
 }
 
 func TestMintCoinsAndDistributeForAllYears(t *testing.T) {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.Ctx
 	k := tApp.GetMintKeeper()
 	params := joltminttypes.DefaultParams()

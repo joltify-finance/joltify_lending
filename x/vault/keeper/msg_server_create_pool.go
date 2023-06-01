@@ -8,6 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32" //nolint
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -20,7 +21,7 @@ func PubKeyToPoolAddr(pk string) (sdk.AccAddress, error) {
 	if err != nil {
 		return nil, err
 	}
-	return sdk.AccAddressFromHex(poolPubKey.Address().String())
+	return sdk.AccAddressFromHexUnsafe(poolPubKey.Address().String())
 }
 
 func (k msgServer) setupAccount(ctx sdk.Context, address sdk.AccAddress) error {
@@ -38,11 +39,11 @@ func (k msgServer) CreateCreatePool(goCtx context.Context, msg *types.MsgCreateC
 
 	height, err := strconv.ParseInt(msg.BlockHeight, 10, 64)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("invalid block height %v", msg.BlockHeight))
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("invalid block height %v", msg.BlockHeight))
 	}
 	history, get := k.vaultStaking.GetHistoricalInfo(ctx, height)
 	if !get {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("too early, we cannot find the block %v", msg.BlockHeight))
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("too early, we cannot find the block %v", msg.BlockHeight))
 	}
 
 	// now we check whether the msg is sent from the validator

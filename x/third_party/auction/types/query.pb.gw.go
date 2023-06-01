@@ -382,13 +382,13 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "auction", "v1beta1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "auction", "v1beta1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Auction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"joltify", "auction", "v1beta1", "auctions", "auction_id"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Auction_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"joltify", "third_party", "auction", "v1beta1", "auctions", "auction_id"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Auctions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "auction", "v1beta1", "auctions"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Auctions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "auction", "v1beta1", "auctions"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_NextAuctionID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "auction", "v1beta1", "next-auction-id"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_NextAuctionID_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "auction", "v1beta1", "next-auction-id"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

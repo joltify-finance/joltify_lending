@@ -17,11 +17,11 @@ var (
 // RegisterLegacyAminoCodec registers all the necessary types and interfaces for the
 // issuance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgIssueTokens{}, "issuance/MsgIssueTokens", nil)
-	cdc.RegisterConcrete(&MsgRedeemTokens{}, "issuance/MsgRedeemTokens", nil)
-	cdc.RegisterConcrete(&MsgBlockAddress{}, "issuance/MsgBlockAddress", nil)
-	cdc.RegisterConcrete(&MsgUnblockAddress{}, "issuance/MsgUnblockAddress", nil)
-	cdc.RegisterConcrete(&MsgSetPauseStatus{}, "issuance/MsgChangePauseStatus", nil)
+	cdc.RegisterConcrete(&MsgIssueTokens{}, "/joltify.third_party.issuance.v1beta1.MsgIssueTokens", nil)
+	cdc.RegisterConcrete(&MsgRedeemTokens{}, "/joltify.third_party.issuance.v1beta1.MsgRedeemTokens", nil)
+	cdc.RegisterConcrete(&MsgBlockAddress{}, "/joltify.third_party.issuance.v1beta1.MsgBlockAddress", nil)
+	cdc.RegisterConcrete(&MsgUnblockAddress{}, "/joltify.third_party.issuance.v1beta1.MsgUnblockAddress", nil)
+	cdc.RegisterConcrete(&MsgSetPauseStatus{}, "/joltify.third_party.issuance.v1beta1.MsgChangePauseStatus", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

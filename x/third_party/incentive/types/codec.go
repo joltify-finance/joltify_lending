@@ -12,11 +12,11 @@ import (
 // RegisterLegacyAminoCodec registers all the necessary types and interfaces for the
 // governance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgClaimUSDXMintingReward{}, "incentive/MsgClaimUSDXMintingReward", nil)
-	cdc.RegisterConcrete(&MsgClaimJoltReward{}, "incentive/MsgClaimJoltReward", nil)
-	cdc.RegisterConcrete(&MsgClaimDelegatorReward{}, "incentive/MsgClaimDelegatorReward", nil)
-	cdc.RegisterConcrete(&MsgClaimSwapReward{}, "incentive/MsgClaimSwapReward", nil)
-	cdc.RegisterConcrete(&MsgClaimSavingsReward{}, "incentive/MsgClaimSavingsReward", nil)
+	cdc.RegisterConcrete(&MsgClaimUSDXMintingReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimUSDXMintingReward", nil)
+	cdc.RegisterConcrete(&MsgClaimJoltReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimJoltReward", nil)
+	cdc.RegisterConcrete(&MsgClaimDelegatorReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimDelegatorReward", nil)
+	cdc.RegisterConcrete(&MsgClaimSwapReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimSwapReward", nil)
+	cdc.RegisterConcrete(&MsgClaimSavingsReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimSavingsReward", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

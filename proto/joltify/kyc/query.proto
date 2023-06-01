@@ -1,0 +1,70 @@
+syntax = "proto3";
+package joltify.kyc;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "joltify/kyc/params.proto";
+import "joltify/kyc/investor.proto";
+// this line is used by starport scaffolding # 1
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/kyc/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/joltify/kyc/params";
+  }
+  // Queries a list of QueryInvestorWallets items.
+  rpc QueryInvestorWallets (QueryInvestorWalletsRequest) returns (QueryInvestorWalletsResponse) {
+    option (google.api.http).get = "/joltify/kyc/query_investor_wallets/{investorId}";
+
+  }
+
+  // Queries a list of QueryByWallet items.
+  rpc QueryByWallet (QueryByWalletRequest) returns (QueryByWalletResponse) {
+    option (google.api.http).get = "/joltify/kyc/query_by_wallet/{wallet}";
+
+  }
+
+  // Queries a list of ListInvestors items.
+  rpc ListInvestors (ListInvestorsRequest) returns (ListInvestorsResponse) {
+    option (google.api.http).get = "/joltify/kyc/list_investors";
+
+  }
+}
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryInvestorWalletsRequest {
+  string investorId = 1;
+}
+
+message QueryInvestorWalletsResponse {
+  repeated string wallets = 1;
+}
+
+message QueryByWalletRequest {
+  string wallet = 1;
+}
+
+message QueryByWalletResponse {
+  Investor investor = 1;
+}
+
+message ListInvestorsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message ListInvestorsResponse {
+  repeated Investor                               investor   = 1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+

@@ -10,7 +10,9 @@ import { Module as CosmosCrisisV1Beta1, msgTypes as CosmosCrisisV1Beta1MsgTypes 
 import { Module as CosmosDistributionV1Beta1, msgTypes as CosmosDistributionV1Beta1MsgTypes } from './cosmos.distribution.v1beta1'
 import { Module as CosmosEvidenceV1Beta1, msgTypes as CosmosEvidenceV1Beta1MsgTypes } from './cosmos.evidence.v1beta1'
 import { Module as CosmosFeegrantV1Beta1, msgTypes as CosmosFeegrantV1Beta1MsgTypes } from './cosmos.feegrant.v1beta1'
+import { Module as CosmosGovV1, msgTypes as CosmosGovV1MsgTypes } from './cosmos.gov.v1'
 import { Module as CosmosGovV1Beta1, msgTypes as CosmosGovV1Beta1MsgTypes } from './cosmos.gov.v1beta1'
+import { Module as CosmosNftV1Beta1, msgTypes as CosmosNftV1Beta1MsgTypes } from './cosmos.nft.v1beta1'
 import { Module as CosmosParamsV1Beta1, msgTypes as CosmosParamsV1Beta1MsgTypes } from './cosmos.params.v1beta1'
 import { Module as CosmosSlashingV1Beta1, msgTypes as CosmosSlashingV1Beta1MsgTypes } from './cosmos.slashing.v1beta1'
 import { Module as CosmosStakingV1Beta1, msgTypes as CosmosStakingV1Beta1MsgTypes } from './cosmos.staking.v1beta1'
@@ -24,6 +26,7 @@ import { Module as IbcCoreChannelV1, msgTypes as IbcCoreChannelV1MsgTypes } from
 import { Module as IbcCoreClientV1, msgTypes as IbcCoreClientV1MsgTypes } from './ibc.core.client.v1'
 import { Module as IbcCoreConnectionV1, msgTypes as IbcCoreConnectionV1MsgTypes } from './ibc.core.connection.v1'
 import { Module as JoltifyMint, msgTypes as JoltifyMintMsgTypes } from './joltify.mint'
+import { Module as JoltifySpv, msgTypes as JoltifySpvMsgTypes } from './joltify.spv'
 import { Module as JoltifyThirdPartyAuctionV1Beta1, msgTypes as JoltifyThirdPartyAuctionV1Beta1MsgTypes } from './joltify.third_party.auction.v1beta1'
 import { Module as JoltifyThirdPartyCdpV1Beta1, msgTypes as JoltifyThirdPartyCdpV1Beta1MsgTypes } from './joltify.third_party.cdp.v1beta1'
 import { Module as JoltifyThirdPartyIncentiveV1Beta1, msgTypes as JoltifyThirdPartyIncentiveV1Beta1MsgTypes } from './joltify.third_party.incentive.v1beta1'
@@ -31,10 +34,11 @@ import { Module as JoltifyThirdPartyIssuanceV1Beta1, msgTypes as JoltifyThirdPar
 import { Module as JoltifyThirdPartyJoltV1Beta1, msgTypes as JoltifyThirdPartyJoltV1Beta1MsgTypes } from './joltify.third_party.jolt.v1beta1'
 import { Module as JoltifyThirdPartyPricefeedV1Beta1, msgTypes as JoltifyThirdPartyPricefeedV1Beta1MsgTypes } from './joltify.third_party.pricefeed.v1beta1'
 import { Module as JoltifyVault, msgTypes as JoltifyVaultMsgTypes } from './joltify.vault'
+import { Module as JoltifyfinanceJoltifyLendingKyc, msgTypes as JoltifyfinanceJoltifyLendingKycMsgTypes } from './joltifyfinance.joltify_lending.kyc'
 
 
 const Client = IgniteClient.plugin([
-    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcApplicationsTransferV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1, JoltifyMint, JoltifyThirdPartyAuctionV1Beta1, JoltifyThirdPartyCdpV1Beta1, JoltifyThirdPartyIncentiveV1Beta1, JoltifyThirdPartyIssuanceV1Beta1, JoltifyThirdPartyJoltV1Beta1, JoltifyThirdPartyPricefeedV1Beta1, JoltifyVault
+    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1, CosmosGovV1Beta1, CosmosNftV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcApplicationsTransferV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1, JoltifyMint, JoltifySpv, JoltifyThirdPartyAuctionV1Beta1, JoltifyThirdPartyCdpV1Beta1, JoltifyThirdPartyIncentiveV1Beta1, JoltifyThirdPartyIssuanceV1Beta1, JoltifyThirdPartyJoltV1Beta1, JoltifyThirdPartyPricefeedV1Beta1, JoltifyVault, JoltifyfinanceJoltifyLendingKyc
 ]);
 
 const registry = new Registry([
@@ -46,7 +50,9 @@ const registry = new Registry([
   ...CosmosDistributionV1Beta1MsgTypes,
   ...CosmosEvidenceV1Beta1MsgTypes,
   ...CosmosFeegrantV1Beta1MsgTypes,
+  ...CosmosGovV1MsgTypes,
   ...CosmosGovV1Beta1MsgTypes,
+  ...CosmosNftV1Beta1MsgTypes,
   ...CosmosParamsV1Beta1MsgTypes,
   ...CosmosSlashingV1Beta1MsgTypes,
   ...CosmosStakingV1Beta1MsgTypes,
@@ -60,6 +66,7 @@ const registry = new Registry([
   ...IbcCoreClientV1MsgTypes,
   ...IbcCoreConnectionV1MsgTypes,
   ...JoltifyMintMsgTypes,
+  ...JoltifySpvMsgTypes,
   ...JoltifyThirdPartyAuctionV1Beta1MsgTypes,
   ...JoltifyThirdPartyCdpV1Beta1MsgTypes,
   ...JoltifyThirdPartyIncentiveV1Beta1MsgTypes,
@@ -67,6 +74,7 @@ const registry = new Registry([
   ...JoltifyThirdPartyJoltV1Beta1MsgTypes,
   ...JoltifyThirdPartyPricefeedV1Beta1MsgTypes,
   ...JoltifyVaultMsgTypes,
+  ...JoltifyfinanceJoltifyLendingKycMsgTypes,
   
 ])
 

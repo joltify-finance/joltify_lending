@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 
@@ -45,12 +47,13 @@ func BenchmarkAccountIteration(b *testing.B) {
 
 	for _, bm := range benchmarks {
 		b.Run(bm.name, func(b *testing.B) {
-			tApp := app.NewTestApp()
+			lg := tmlog.TestingLogger()
+			tApp := app.NewTestApp(lg, b.TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			ak := tApp.GetAccountKeeper()
 			bk := tApp.GetBankKeeper()
 
-			tApp.InitializeFromGenesisStates()
+			tApp.InitializeFromGenesisStates(nil, nil)
 			for i := 0; i < bm.numberAccounts; i++ {
 				arr := []byte{byte((i & 0xFF0000) >> 16), byte((i & 0xFF00) >> 8), byte(i & 0xFF)}
 				addr := sdk.AccAddress(arr)
@@ -76,8 +79,9 @@ func BenchmarkAccountIteration(b *testing.B) {
 	}
 }
 
-func createCdps(n int) (app.TestApp, sdk.Context, keeper.Keeper) {
-	tApp := app.NewTestApp()
+func createCdps(b *testing.B, n int) (app.TestApp, sdk.Context, keeper.Keeper) {
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, b.TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	cdc := tApp.AppCodec()
 
@@ -85,7 +89,7 @@ func createCdps(n int) (app.TestApp, sdk.Context, keeper.Keeper) {
 	coins := cs(c("btc", 100000000))
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), coins, addrs)
 	tApp.InitializeFromGenesisStates(
-		authGS,
+		nil, nil, authGS,
 		NewPricefeedGenStateMulti(cdc),
 		NewCDPGenStateMulti(cdc),
 	)
@@ -110,7 +114,7 @@ func BenchmarkCdpIteration(b *testing.B) {
 	}
 	for _, bm := range benchmarks {
 		b.Run(bm.name, func(b *testing.B) {
-			_, ctx, cdpKeeper := createCdps(bm.numberCdps)
+			_, ctx, cdpKeeper := createCdps(b, bm.numberCdps)
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				cdpKeeper.IterateAllCdps(ctx, func(c types.CDP) (stop bool) {
@@ -125,7 +129,8 @@ func BenchmarkCdpIteration(b *testing.B) {
 var errResult error
 
 func BenchmarkCdpCreation(b *testing.B) {
-	tApp := app.NewTestApp()
+	lg := tmlog.TestingLogger()
+	tApp := app.NewTestApp(lg, b.TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	cdc := tApp.AppCodec()
 
@@ -133,7 +138,7 @@ func BenchmarkCdpCreation(b *testing.B) {
 	coins := cs(c("btc", 100000000))
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), coins, addrs)
 	tApp.InitializeFromGenesisStates(
-		authGS,
+		nil, nil, authGS,
 		NewPricefeedGenStateMulti(cdc),
 		NewCDPGenStateMulti(cdc),
 	)

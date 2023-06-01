@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	tmlog "github.com/tendermint/tendermint/libs/log"
+
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 	pfkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
@@ -46,7 +48,7 @@ type QuerierTestSuite struct {
 }
 
 func (suite *QuerierTestSuite) SetupTest() {
-	tApp := app.NewTestApp()
+	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	suite.cdc = tApp.AppCodec()
 	suite.legacyAmino = *tApp.LegacyAmino()
@@ -57,7 +59,14 @@ func (suite *QuerierTestSuite) SetupTest() {
 	coins := cs(c("btc", 10000000000), c("xrp", 10000000000))
 
 	authGS := app.NewFundedGenStateWithSameCoins(tApp.AppCodec(), coins, addrs)
-	tApp.InitializeFromGenesisStates(
+
+	var genAcc []authtypes.GenesisAccount
+	for _, el := range addrs {
+		b := authtypes.NewBaseAccount(el, nil, 0, 0)
+		genAcc = append(genAcc, b)
+	}
+
+	tApp.InitializeFromGenesisStates(genAcc, coins,
 		authGS,
 		NewPricefeedGenStateMulti(suite.cdc),
 		NewCDPGenStateHighDebtLimit(suite.cdc),

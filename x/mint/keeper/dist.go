@@ -55,7 +55,7 @@ func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params) error {
 
 	amountToCommunity := pa.CurrentProvisions.Mul(sdk.MustNewDecFromStr("0.15"))
 	communityCoins := sdk.NewCoins(sdk.NewCoin("ujolt", amountToCommunity.TruncateInt()))
-	feeCollector := newCoins.Sub(communityCoins)
+	feeCollector := newCoins.Sub(communityCoins...)
 
 	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.feeCollectorName, feeCollector)
 	if err != nil {

@@ -11,6 +11,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	errorsmod "cosmossdk.io/errors"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
@@ -36,17 +38,17 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if !k.sanitize(msg) {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "the request ID do not match the given inbound tx and receiver")
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "the request ID do not match the given inbound tx and receiver")
 	}
 
 	height, err := strconv.ParseInt(msg.BlockHeight, 10, 64)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("invalid block height %v", msg.BlockHeight))
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("invalid block height %v", msg.BlockHeight))
 	}
 
 	history, get := k.vaultStaking.GetHistoricalInfo(ctx, height)
 	if !get {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("too early, we cannot find the block %v", msg.BlockHeight))
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("too early, we cannot find the block %v", msg.BlockHeight))
 	}
 
 	// now we check whether the msg is sent from the validator
@@ -60,63 +62,55 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 	}
 	if !isValidator {
 		ctx.Logger().Info("not a validator update tss message", "result", "false")
-		return &types.MsgCreateOutboundTxResponse{Successful: false}, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintln("not a validator"))
+		return &types.MsgCreateOutboundTxResponse{Successful: false}, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintln("not a validator"))
 	}
 	info, isFound := k.GetOutboundTx(ctx, msg.RequestID)
 	if isFound {
-		proposal, ok := info.Items[msg.OutboundTx]
+		proposal, ok := k.GetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx)
 		if ok {
 			for _, el := range proposal.Entry {
 				if el.Address.Equals(msg.Creator) {
 					ctx.Logger().Info("the creator has already submitted the outbound tx")
-					return &types.MsgCreateOutboundTxResponse{Successful: false}, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintln("already submitted"))
+					return &types.MsgCreateOutboundTxResponse{Successful: false}, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintln("already submitted"))
 				}
 			}
 			thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
 			proposal.Entry = append(proposal.Entry, &thisProposal)
-			info.Items[msg.OutboundTx] = proposal
 
 			// here we check whether we need to send the fee to the validator module
-			k.sendFeeToStakes(ctx, len(validators), msg.OutboundTx, &info)
-
-			k.SetOutboundTx(
-				ctx,
-				info,
-			)
+			k.sendFeeToStakes(ctx, len(validators), &info, proposal)
+			k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
+			k.SetOutboundTx(ctx, info)
 			return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
 		}
 
+		// we create the new entry
 		thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
-		info.Items[msg.OutboundTx] = types.Proposals{Entry: []*types.Entity{&thisProposal}}
-		k.SetOutboundTx(
-			ctx,
-			info,
-		)
+		proposal = types.Proposals{Entry: []*types.Entity{&thisProposal}}
+		// we add this entry
+		info.OutboundTxs = append(info.OutboundTxs, msg.OutboundTx)
+		k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
+		k.SetOutboundTx(ctx, info)
 		return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
 	}
 
-	items := make(map[string]types.Proposals)
-
 	thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
-	items[msg.OutboundTx] = types.Proposals{Entry: []*types.Entity{&thisProposal}}
+	proposal := types.Proposals{Entry: []*types.Entity{&thisProposal}}
 	newInfo := types.OutboundTx{
 		Index:           msg.RequestID,
-		Items:           items,
 		Processed:       false,
 		ReceiverAddress: msg.ReceiverAddress,
 		ChainType:       msg.ChainType,
 		InTxHash:        msg.InTxHash,
 		NeedMint:        msg.NeedMint,
+		OutboundTxs:     []string{msg.OutboundTx},
 	}
-
-	k.SetOutboundTx(
-		ctx,
-		newInfo,
-	)
+	k.SetOutboundTx(ctx, newInfo)
+	k.SetOutboundTxProposal(ctx, msg.RequestID, msg.OutboundTx, proposal)
 	return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
 }
 
-func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, outboundTx string, info *types.OutboundTx) {
+func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, info *types.OutboundTx, proposal types.Proposals) {
 	if info.Processed {
 		return
 	}
@@ -138,14 +132,15 @@ func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, outbo
 	candidateNumDec := candidateDec.Mul(params.CandidateRatio).MulTruncate(sdk.MustNewDecFromStr("0.6667"))
 	candidateNum := int(candidateNumDec.TruncateInt64())
 
-	proposal := info.Items[outboundTx]
 	if len(proposal.Entry) < candidateNum {
 		return
 	}
+	// we need only to check this proposal as at least one submit will run the check for that list of proposals
 	feeCoinMap := make(map[string]int)
 	for _, el := range proposal.Entry {
 		feeCoinMap[el.Feecoin.String()]++
 		if feeCoinMap[el.Feecoin.String()] >= candidateNum {
+
 			// transfer
 			previousFee := k.GetAllFeeAmount(ctx)
 			previousFee.Sort()

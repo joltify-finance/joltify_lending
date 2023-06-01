@@ -681,19 +681,19 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "cdp", "v1beta1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "cdp", "v1beta1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Accounts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "cdp", "v1beta1", "accounts"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Accounts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "cdp", "v1beta1", "accounts"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TotalPrincipal_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "cdp", "v1beta1", "totalPrincipal"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_TotalPrincipal_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "cdp", "v1beta1", "totalPrincipal"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TotalCollateral_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "cdp", "v1beta1", "totalCollateral"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_TotalCollateral_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "cdp", "v1beta1", "totalCollateral"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Cdps_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"joltify", "cdp", "v1beta1", "cdps"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Cdps_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"joltify", "third_party", "cdp", "v1beta1", "cdps"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Cdp_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"joltify", "cdp", "v1beta1", "cdps", "owner", "collateral_type"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Cdp_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 1, 0, 4, 1, 5, 6}, []string{"joltify", "third_party", "cdp", "v1beta1", "cdps", "owner", "collateral_type"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Deposits_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 1, 0, 4, 1, 5, 6}, []string{"joltify", "cdp", "v1beta1", "cdps", "deposits", "owner", "collateral_type"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Deposits_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 1, 0, 4, 1, 5, 6, 1, 0, 4, 1, 5, 7}, []string{"joltify", "third_party", "cdp", "v1beta1", "cdps", "deposits", "owner", "collateral_type"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (
