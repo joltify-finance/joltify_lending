@@ -1,6 +1,7 @@
 package main
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"fmt"
 	"os"
 	"strconv"
@@ -36,7 +37,7 @@ func main() {
 		return
 	}
 
-	var interestToUser, interestToReserve sdk.Dec
+	var a, interestToUser, interestToReserve sdkmath.Int
 	if len(os.Args) == 4 {
 		userAmount := os.Args[3]
 		amount, ok := sdk.NewIntFromString(userAmount)
@@ -46,10 +47,10 @@ func main() {
 			return
 		}
 		// 85% of the interest is paid to the user, 15% is to the pool
-		a := apyToPayFreq.MulInt(amount)
-		interestToReserve = a.Mul(sdk.MustNewDecFromStr("0.15"))
+		a = apyToPayFreq.MulInt(amount).TruncateInt()
+		interestToReserve = sdk.NewDecFromInt(a).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
 		interestToUser = a.Sub(interestToReserve)
 	}
 
-	fmt.Printf("apy: %s, payFreq: %d, apyToPayFreq: %s, interest_to_user: %s interest_to_reserve %s\n", apy, payFreq, apyToPayFreq, interestToUser, interestToReserve)
+	fmt.Printf("apy: %s, payFreq: %d, apyToPayFreq: %s, interest_to_user: %s interest_to_reserve %s, total %s\n", apy, payFreq, apyToPayFreq, interestToUser, interestToReserve, a)
 }
