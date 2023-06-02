@@ -558,7 +558,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 
 	// this payfreq is from the testutil spv.go
 	paymentAmount := totalPayment
-	//reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	// reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
 	toInvestors := paymentAmount
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount

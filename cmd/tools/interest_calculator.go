@@ -1,10 +1,11 @@
 package main
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"fmt"
 	"os"
 	"strconv"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/log"
