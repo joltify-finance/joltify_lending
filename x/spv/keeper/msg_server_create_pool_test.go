@@ -81,5 +81,4 @@ func TestMsgSERvCreatePoolApyCheck(t *testing.T) {
 
 	require.Equal(t, p1.Apy, sdk.MustNewDecFromStr("7.8"))
 	require.Equal(t, p2.Apy, sdk.MustNewDecFromStr("7.2"))
-
 }

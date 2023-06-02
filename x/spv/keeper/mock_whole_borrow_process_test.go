@@ -574,10 +574,10 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	totalInterest := reserve.AddAmount(totalToInvestorUSD)
 	suite.Require().True(sdk.NewIntFromUint64(100000).Sub(totalInterest.Amount).LTE(sdk.NewIntFromUint64(1000000)))
 
-	//seniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, seniorPool)
-	//juniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, juniorPool)
-	//totalLeftInterest := seniorPoolInfo.EscrowInterestAmount.Add(juniorPoolInfo.EscrowInterestAmount)
-	//suite.Require().True(totalLeftInterest.LT(sdk.NewIntFromUint64(100)))
+	// seniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, seniorPool)
+	// juniorPoolInfo, _ := suite.keeper.GetPools(suite.ctx, juniorPool)
+	// totalLeftInterest := seniorPoolInfo.EscrowInterestAmount.Add(juniorPoolInfo.EscrowInterestAmount)
+	// suite.Require().True(totalLeftInterest.LT(sdk.NewIntFromUint64(100)))
 
 	addr, err = sdk.AccAddressFromBech32(suite.investors[0])
 	suite.Require().NoError(err)
