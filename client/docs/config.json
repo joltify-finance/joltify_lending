@@ -1,0 +1,314 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Joltify - REST and gRPC Gateway Docs",
+    "description": "A REST interface for state queries",
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "GitHub",
+    "url": "https://github.com/joltify-finance/joltify_lending.git"
+  },
+  "apis": [
+    {
+      "url": "./tmp-swagger-gen/joltify/third_party/auction/v1beta1/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "Auction"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "Auction$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/third_party/cdp/v1beta1/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "CDP"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "CDP$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/third_party/jolt/v1beta1/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "Jolt"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "jolt$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/third_party/issuance/v1beta1/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "Issuance"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "Issuance$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/third_party/pricefeed/v1beta1/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "Pricefeed"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "Pricefeed$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/kyc/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "kyc"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "kyc$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/mint/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "Mint"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "mint$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/spv/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "spv"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "spv$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/vault/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "vault"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "vault$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/auth/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "AuthParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/bank/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "BankParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/base/tendermint/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "BaseParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/distribution/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "DistributionParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/evidence/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "EvidenceParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/gov/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "GovParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/gov/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "GovV1Params",
+          "Proposal": "GovV1Proposal",
+          "Proposals": "GovV1Proposal",
+          "Vote": "GovV1Vote",
+          "Votes": "GovV1Votes",
+          "Deposit": "GovV1Deposit",
+          "Deposits": "GovV1Deposit",
+          "TallyResult": "GovV1TallyResult"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/mint/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "MintParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/params/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "Params"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/slashing/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "SlashingParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/staking/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "StakingParams",
+          "DelegatorValidators": "StakingDelegatorValidators"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/tx/v1beta1/service.swagger.json",
+      "dereference": {
+        "circular": "ignore"
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/upgrade/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "UpgradeParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/authz/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "AuthzParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/feegrant/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "FeegrantParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/nft/v1beta1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "NftParams",
+          "Balance": "NftBalance"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/cosmos/group/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "GroupParams",
+          "Proposal": "GroupProposal",
+          "TallyResult": "GroupTallyResult"
+        }
+      }
+    }
+
+
+  ]
+}

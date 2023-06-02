@@ -4,8 +4,13 @@ import (
 	"fmt"
 	"io"
 	stdlog "log"
+	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/gorilla/mux"
+	_ "github.com/joltify-finance/joltify_lending/client/docs/statik"
+	"github.com/rakyll/statik/fs"
 
 	vaultmodule "github.com/joltify-finance/joltify_lending/x/vault"
 
@@ -856,9 +861,26 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
+	if apiConfig.Swagger {
+		RegisterSwaggerAPI(clientCtx, apiSvr.Router)
+	}
+
 	// Swagger API configuration is ignored
 	// apiSvr.Router.Handle("/static/openapi.yml", http.FileServer(http.FS(docs.Docs)))
 	// apiSvr.Router.HandleFunc("/", openapiconsole.Handler(Name, "/static/openapi.yml"))
+}
+
+// RegisterSwaggerAPI registers swagger route with API Server.
+func RegisterSwaggerAPI(ctx client.Context, rtr *mux.Router) {
+	statikFS, err := fs.New()
+	if err != nil {
+		panic(err)
+	}
+
+	staticServer := http.FileServer(statikFS)
+	// rtr.PathPrefix("/client/docs/swagger-ui/").Handler(http.StripPrefix("/ss/", staticServer))
+	// rtr.PathPrefix("/swagger/").Handler(staticServer)
+	rtr.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", staticServer))
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
