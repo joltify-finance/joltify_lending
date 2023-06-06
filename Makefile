@@ -187,6 +187,7 @@ test:
 protoVer=v0.8
 protoImageName=joltify/joltify-proto-gen:$(protoVer)
 containerProtoGen=cosmos-sdk-proto-gen-$(protoVer)
+containerProtoGenSwagger=cosmos-sdk-proto-swagger-$(protoVer)
 containerProtoFmt=cosmos-sdk-proto-fmt-$(protoVer)
 
 
@@ -201,6 +202,11 @@ proto-swagger-gen:
 	@echo "Generating Protobuf Swagger"
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
 		sh ./scripts/protoc-swagger-gen.sh; fi
+	@echo "now statik all the files"
+	@statik -src=client/docs/swagger-ui -dest=client/docs -f -m
+.PHONY: proto-swagger-gen
+
+
 
 proto-format:
 	@echo "Formatting Protobuf files"

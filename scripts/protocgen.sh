@@ -1,4 +1,4 @@
-  #!/usr/bin/env bash
+#!/usr/bin/env bash
 
 # Adapted from https://github.com/cosmos/cosmos-sdk/blob/master/scripts/protocgen.sh
 
