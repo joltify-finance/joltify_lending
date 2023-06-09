@@ -35,7 +35,10 @@ func (k Keeper) GetProjects(ctx sdk.Context) []*types.ProjectInfo {
 	}
 
 	var projects types.Projects
-	proto.Unmarshal(val, &projects)
+	err = proto.Unmarshal(val, &projects)
+	if err != nil {
+		panic("invalid encoded string")
+	}
 
 	return projects.Items
 }
