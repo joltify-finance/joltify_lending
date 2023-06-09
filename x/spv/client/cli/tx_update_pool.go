@@ -18,7 +18,7 @@ func CmdUpdatePool() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-pool [pool-index] [apy] [pool name] [token]",
 		Short: "Broadcast message update-pool",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPoolIndex := args[0]
 			argPoolApy := args[1]

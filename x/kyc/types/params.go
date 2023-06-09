@@ -132,10 +132,18 @@ func validateProjectInfo(i interface{}) error {
 		return err
 	}
 
+	indexCheck := make(map[int32]bool)
+
+	var exist bool
 	for _, el := range projects.Items {
 		if len(el.SPVName) == 0 {
 			return errors.New("spv name cannot be nil")
 		}
+		_, exist = indexCheck[el.Index]
+		if exist {
+			return errors.New("the index has been used")
+		}
+		indexCheck[el.Index] = true
 
 		if el.PoolLockedSeconds < 0 {
 			return errors.New("project time related setting cannot be negative")

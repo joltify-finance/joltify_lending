@@ -248,6 +248,9 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 				display.showOutput(msg, GREEN)
 
 			default:
+				if len(input) == 0 {
+					continue
+				}
 				identifier := input[0]
 				if identifier != 'c' {
 					msg := fmt.Sprintf("invalid input %v", input)
@@ -289,13 +292,13 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 
 					}
 
-					pb, bool := new(big.Int).SetString(poolb.PoolInfo.UsableAmount.Amount, 10)
-					if !bool {
+					pb, ok := new(big.Int).SetString(poolb.PoolInfo.UsableAmount.Amount, 10)
+					if !ok {
 						panic("should never fail")
 					}
 
-					pa, bool := new(big.Int).SetString(poola.PoolInfo.UsableAmount.Amount, 10)
-					if !bool {
+					pa, ok := new(big.Int).SetString(poola.PoolInfo.UsableAmount.Amount, 10)
+					if !ok {
 						panic("should never fail")
 					}
 					poolChainge := new(big.Int).Sub(pa, pb)

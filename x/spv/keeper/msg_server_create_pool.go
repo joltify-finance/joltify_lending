@@ -12,6 +12,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
+	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -39,17 +40,23 @@ func parameterSanitize(payFreqStr string, apyStr []string) ([]sdk.Dec, int32, er
 func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (*types.MsgCreatePoolResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	allProjects := k.kycKeeper.GetProjects(ctx)
-
-	if allProjects == nil || int32(len(allProjects)) < msg.ProjectIndex {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", msg.ProjectIndex)
-	}
-
 	if msg.TargetTokenAmount.IsZero() {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidVersion, "the amount cannot be 0")
 	}
 
-	targetProject := allProjects[msg.ProjectIndex-1]
+	allProjects := k.kycKeeper.GetProjects(ctx)
+
+	var targetProject *kyctypes.ProjectInfo
+	for _, el := range allProjects {
+		if el.Index == msg.ProjectIndex {
+			targetProject = el
+			break
+		}
+	}
+	if targetProject == nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", msg.ProjectIndex)
+	}
+
 	_, err := k.priceFeedKeeper.GetCurrentPrice(ctx, targetProject.MarketId)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given marketID %v cannot be found", targetProject.MarketId)
