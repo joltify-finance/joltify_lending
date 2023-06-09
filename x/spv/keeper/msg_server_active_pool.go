@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ethereum/go-ethereum/crypto"
+	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -41,7 +42,16 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 
 	allProjects := k.kycKeeper.GetProjects(ctx)
 
-	targetProject := allProjects[poolInfo1.LinkedProject-1]
+	var targetProject *kyctypes.ProjectInfo
+	for _, el := range allProjects {
+		if el.Index == poolInfo1.LinkedProject {
+			targetProject = el
+			break
+		}
+	}
+	if targetProject == nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", poolInfo1.LinkedProject)
+	}
 
 	if poolInfo1.SeparatePool || poolInfo1.PoolType == types.PoolInfo_JUNIOR {
 		k.SetPool(ctx, poolInfo1)
