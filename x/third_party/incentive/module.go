@@ -94,17 +94,15 @@ type AppModule struct {
 	keeper        keeper2.Keeper
 	accountKeeper types2.AccountKeeper
 	bankKeeper    types2.BankKeeper
-	cdpKeeper     types2.CdpKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper keeper2.Keeper, ak types2.AccountKeeper, bk types2.BankKeeper, ck types2.CdpKeeper) AppModule {
+func NewAppModule(keeper keeper2.Keeper, ak types2.AccountKeeper, bk types2.BankKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		accountKeeper:  ak,
 		bankKeeper:     bk,
-		cdpKeeper:      ck,
 	}
 }
 
@@ -139,7 +137,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
 
-	InitGenesis(ctx, am.keeper, am.accountKeeper, am.bankKeeper, am.cdpKeeper, genState)
+	InitGenesis(ctx, am.keeper, am.accountKeeper, am.bankKeeper, genState)
 	return []abci.ValidatorUpdate{}
 }
 

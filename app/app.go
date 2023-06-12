@@ -23,9 +23,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
-	"github.com/joltify-finance/joltify_lending/x/third_party/cdp"
-	cdpkeeper "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
-	types3 "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
+	cdptypes "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
@@ -37,12 +35,10 @@ import (
 	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
-	"github.com/joltify-finance/joltify_lending/x/third_party/issuance"
-	issuancekeeper "github.com/joltify-finance/joltify_lending/x/third_party/issuance/keeper"
-	types4 "github.com/joltify-finance/joltify_lending/x/third_party/issuance/types"
+	issuancetypes "github.com/joltify-finance/joltify_lending/x/third_party/issuance/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	joltkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
-	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
+	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
 	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
@@ -168,9 +164,9 @@ var (
 		transfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		auction.AppModuleBasic{},
-		issuance.AppModuleBasic{},
+		// issuance.AppModuleBasic{},
 		pricefeed.AppModuleBasic{},
-		cdp.AppModuleBasic{},
+		// cdp.AppModuleBasic{},
 		jolt.AppModuleBasic{},
 		incentive.AppModuleBasic{},
 		vaultmodule.AppModuleBasic{},
@@ -192,13 +188,13 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		auctiontypes.ModuleName:        nil,
 		vaultmoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		types4.ModuleAccountName:       {authtypes.Minter, authtypes.Burner},
-		types3.ModuleName:              {authtypes.Minter, authtypes.Burner},
-		types3.LiquidatorMacc:          {authtypes.Minter, authtypes.Burner},
-		types2.ModuleName:              {authtypes.Minter, authtypes.Burner},
-		incentivetypes.ModuleName:      nil,
-		spvmoduletypes.ModuleAccount:   {authtypes.Minter, authtypes.Burner},
-		nftmoduletypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
+		// issuancetypes.ModuleAccountName: {authtypes.Minter, authtypes.Burner},
+		// cdptypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
+		// cdptypes.LiquidatorMacc:      {authtypes.Minter, authtypes.Burner},
+		jolttypes.ModuleName:         {authtypes.Minter, authtypes.Burner},
+		incentivetypes.ModuleName:    nil,
+		spvmoduletypes.ModuleAccount: {authtypes.Minter, authtypes.Burner},
+		nftmoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -247,16 +243,16 @@ type App struct {
 	evidenceKeeper   evidencekeeper.Keeper
 	transferKeeper   ibctransferkeeper.Keeper
 	auctionKeeper    auctionkeeper.Keeper
-	issuanceKeeper   issuancekeeper.Keeper
-	pricefeedKeeper  pricefeedkeeper.Keeper
-	cdpKeeper        cdpkeeper.Keeper
-	joltKeeper       joltkeeper.Keeper
-	incentiveKeeper  incentivekeeper.Keeper
-	feeGrantKeeper   feegrantkeeper.Keeper
-	VaultKeeper      vaultmodulekeeper.Keeper
-	kycKeeper        kycmodulekeeper.Keeper
-	spvKeeper        spvmodulekeeper.Keeper
-	nftKeeper        nftmodulekeeper.Keeper
+	// issuanceKeeper   issuancekeeper.Keeper
+	pricefeedKeeper pricefeedkeeper.Keeper
+	// cdpKeeper        cdpkeeper.Keeper
+	joltKeeper      joltkeeper.Keeper
+	incentiveKeeper incentivekeeper.Keeper
+	feeGrantKeeper  feegrantkeeper.Keeper
+	VaultKeeper     vaultmodulekeeper.Keeper
+	kycKeeper       kycmodulekeeper.Keeper
+	spvKeeper       spvmodulekeeper.Keeper
+	nftKeeper       nftmodulekeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -324,8 +320,9 @@ func NewApp(
 		upgradetypes.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey,
 		capabilitytypes.StoreKey, auctiontypes.StoreKey,
-		types4.StoreKey, pricefeedtypes.StoreKey,
-		types3.StoreKey, types2.StoreKey,
+		// issuancetypes.StoreKey,
+		pricefeedtypes.StoreKey,
+		cdptypes.StoreKey, jolttypes.StoreKey,
 		incentivetypes.StoreKey,
 		vaultmoduletypes.StoreKey,
 		kycmoduletypes.StoreKey,
@@ -361,10 +358,10 @@ func NewApp(
 	govSubspace := app.paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable())
 	crisisSubspace := app.paramsKeeper.Subspace(crisistypes.ModuleName)
 	auctionSubspace := app.paramsKeeper.Subspace(auctiontypes.ModuleName)
-	issuanceSubspace := app.paramsKeeper.Subspace(types4.ModuleName)
+	// issuanceSubspace := app.paramsKeeper.Subspace(issuancetypes.ModuleName)
 	pricefeedSubspace := app.paramsKeeper.Subspace(pricefeedtypes.ModuleName)
-	cdpSubspace := app.paramsKeeper.Subspace(types3.ModuleName)
-	joltSubspace := app.paramsKeeper.Subspace(types2.ModuleName)
+	// cdpSubspace := app.paramsKeeper.Subspace(cdptypes.ModuleName)
+	joltSubspace := app.paramsKeeper.Subspace(jolttypes.ModuleName)
 	incentiveSubspace := app.paramsKeeper.Subspace(incentivetypes.ModuleName)
 	ibcSubspace := app.paramsKeeper.Subspace(ibchost.ModuleName)
 	ibctransferSubspace := app.paramsKeeper.Subspace(ibctransfertypes.ModuleName)
@@ -494,13 +491,13 @@ func NewApp(
 		app.bankKeeper,
 		app.accountKeeper,
 	)
-	app.issuanceKeeper = issuancekeeper.NewKeeper(
-		appCodec,
-		keys[types4.StoreKey],
-		issuanceSubspace,
-		app.accountKeeper,
-		app.bankKeeper,
-	)
+	//app.issuanceKeeper = issuancekeeper.NewKeeper(
+	//	appCodec,
+	//	keys[issuancetypes.StoreKey],
+	//	issuanceSubspace,
+	//	app.accountKeeper,
+	//	app.bankKeeper,
+	//)
 
 	app.pricefeedKeeper = pricefeedkeeper.NewKeeper(
 		appCodec,
@@ -508,19 +505,19 @@ func NewApp(
 		pricefeedSubspace,
 	)
 
-	cdpKeeper := cdpkeeper.NewKeeper(
-		appCodec,
-		keys[types3.StoreKey],
-		cdpSubspace,
-		app.pricefeedKeeper,
-		app.auctionKeeper,
-		app.bankKeeper,
-		app.accountKeeper,
-		mAccPerms,
-	)
+	//cdpKeeper := cdpkeeper.NewKeeper(
+	//	appCodec,
+	//	keys[cdptypes.StoreKey],
+	//	cdpSubspace,
+	//	app.pricefeedKeeper,
+	//	app.auctionKeeper,
+	//	app.bankKeeper,
+	//	app.accountKeeper,
+	//	mAccPerms,
+	//)
 	joltKeeper := joltkeeper.NewKeeper(
 		appCodec,
-		keys[types2.StoreKey],
+		keys[jolttypes.StoreKey],
 		joltSubspace,
 		app.accountKeeper,
 		app.bankKeeper,
@@ -533,7 +530,7 @@ func NewApp(
 		keys[incentivetypes.StoreKey],
 		incentiveSubspace,
 		app.bankKeeper,
-		&cdpKeeper,
+		//&cdpKeeper,
 		&joltKeeper,
 		app.accountKeeper,
 	)
@@ -583,8 +580,8 @@ func NewApp(
 	app.stakingKeeper = *(app.stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks())))
 
-	app.cdpKeeper = *cdpKeeper.SetHooks(types3.NewMultiCDPHooks(app.incentiveKeeper.Hooks()))
-	app.joltKeeper = *joltKeeper.SetHooks(types2.NewMultiJoltHooks(app.incentiveKeeper.Hooks()))
+	// app.cdpKeeper = *cdpKeeper.SetHooks(cdptypes.NewMultiCDPHooks(app.incentiveKeeper.Hooks()))
+	app.joltKeeper = *joltKeeper.SetHooks(jolttypes.NewMultiJoltHooks(app.incentiveKeeper.Hooks()))
 
 	// create the module manager (Note: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.)
@@ -608,11 +605,11 @@ func NewApp(
 		vesting.NewAppModule(app.accountKeeper, app.bankKeeper),
 		authzmodule.NewAppModule(appCodec, app.authzKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
 		auction.NewAppModule(app.auctionKeeper, app.accountKeeper, app.bankKeeper),
-		issuance.NewAppModule(app.issuanceKeeper, app.accountKeeper, app.bankKeeper),
+		// issuance.NewAppModule(app.issuanceKeeper, app.accountKeeper, app.bankKeeper),
 		pricefeed.NewAppModule(app.pricefeedKeeper, app.accountKeeper),
-		cdp.NewAppModule(app.cdpKeeper, app.accountKeeper, app.pricefeedKeeper, app.bankKeeper),
+		// cdp.NewAppModule(app.cdpKeeper, app.accountKeeper, app.pricefeedKeeper, app.bankKeeper),
 		jolt.NewAppModule(app.joltKeeper, app.accountKeeper, app.bankKeeper, app.pricefeedKeeper),
-		incentive.NewAppModule(app.incentiveKeeper, app.accountKeeper, app.bankKeeper, app.cdpKeeper),
+		incentive.NewAppModule(app.incentiveKeeper, app.accountKeeper, app.bankKeeper),
 		vaultmodule.NewAppModule(appCodec, app.VaultKeeper, app.accountKeeper, app.bankKeeper),
 		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.accountKeeper, app.bankKeeper),
 		spvmodule.NewAppModule(appCodec, app.spvKeeper, app.accountKeeper, app.bankKeeper),
@@ -638,9 +635,9 @@ func NewApp(
 		// Auction begin blocker will close out expired auctions and pay debt back to cdp.
 		// It should be run before cdp begin blocker which cancels out debt with stable and starts more auctions.
 		auctiontypes.ModuleName,
-		types3.ModuleName,
-		types2.ModuleName,
-		types4.ModuleName,
+		cdptypes.ModuleName,
+		jolttypes.ModuleName,
+		issuancetypes.ModuleName,
 		incentivetypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
@@ -669,13 +666,13 @@ func NewApp(
 		// Add all remaining modules with an empty end blocker below since cosmos 0.45.0 requires it
 		capabilitytypes.ModuleName,
 		incentivetypes.ModuleName,
-		types4.ModuleName,
+		issuancetypes.ModuleName,
 		minttypes.ModuleName,
 		slashingtypes.ModuleName,
 		distrtypes.ModuleName,
 		auctiontypes.ModuleName,
-		types3.ModuleName,
-		types2.ModuleName,
+		cdptypes.ModuleName,
+		jolttypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
@@ -709,10 +706,10 @@ func NewApp(
 		ibctransfertypes.ModuleName,
 		feegrant.ModuleName,
 		auctiontypes.ModuleName,
-		types4.ModuleName,
+		issuancetypes.ModuleName,
 		pricefeedtypes.ModuleName,
-		types3.ModuleName, // reads market prices, so must run after pricefeed genesis
-		types2.ModuleName,
+		cdptypes.ModuleName, // reads market prices, so must run after pricefeed genesis
+		jolttypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
@@ -862,7 +859,7 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	if apiConfig.Swagger {
-		RegisterSwaggerAPI(clientCtx, apiSvr.Router)
+		RegisterSwaggerAPI(apiSvr.Router)
 	}
 
 	// Swagger API configuration is ignored
@@ -871,15 +868,13 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 }
 
 // RegisterSwaggerAPI registers swagger route with API Server.
-func RegisterSwaggerAPI(ctx client.Context, rtr *mux.Router) {
+func RegisterSwaggerAPI(rtr *mux.Router) {
 	statikFS, err := fs.New()
 	if err != nil {
 		panic(err)
 	}
 
 	staticServer := http.FileServer(statikFS)
-	// rtr.PathPrefix("/client/docs/swagger-ui/").Handler(http.StripPrefix("/ss/", staticServer))
-	// rtr.PathPrefix("/swagger/").Handler(staticServer)
 	rtr.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", staticServer))
 }
 

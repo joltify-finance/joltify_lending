@@ -22,7 +22,6 @@ func InitGenesis(
 	k keeper.Keeper,
 	accountKeeper types2.AccountKeeper,
 	bankKeeper types2.BankKeeper,
-	cdpKeeper types2.CdpKeeper,
 	gs types2.GenesisState,
 ) {
 	// check if the module account exists
@@ -35,11 +34,6 @@ func InitGenesis(
 		panic(fmt.Sprintf("failed to validate %s genesis state: %s", types2.ModuleName, err))
 	}
 
-	for _, rp := range gs.Params.USDXMintingRewardPeriods {
-		if _, found := cdpKeeper.GetCollateral(ctx, rp.CollateralType); !found {
-			panic(fmt.Sprintf("incentive params contain collateral not found in cdp params: %s", rp.CollateralType))
-		}
-	}
 	// TODO more param validation?
 
 	k.SetParams(ctx, gs.Params)
