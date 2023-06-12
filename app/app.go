@@ -322,7 +322,8 @@ func NewApp(
 		capabilitytypes.StoreKey, auctiontypes.StoreKey,
 		// issuancetypes.StoreKey,
 		pricefeedtypes.StoreKey,
-		cdptypes.StoreKey, jolttypes.StoreKey,
+		// cdptypes.StoreKey,
+		jolttypes.StoreKey,
 		incentivetypes.StoreKey,
 		vaultmoduletypes.StoreKey,
 		kycmoduletypes.StoreKey,
@@ -635,9 +636,9 @@ func NewApp(
 		// Auction begin blocker will close out expired auctions and pay debt back to cdp.
 		// It should be run before cdp begin blocker which cancels out debt with stable and starts more auctions.
 		auctiontypes.ModuleName,
-		cdptypes.ModuleName,
+		// cdptypes.ModuleName,
 		jolttypes.ModuleName,
-		issuancetypes.ModuleName,
+		// issuancetypes.ModuleName,
 		incentivetypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
@@ -666,12 +667,12 @@ func NewApp(
 		// Add all remaining modules with an empty end blocker below since cosmos 0.45.0 requires it
 		capabilitytypes.ModuleName,
 		incentivetypes.ModuleName,
-		issuancetypes.ModuleName,
+		// issuancetypes.ModuleName,
 		minttypes.ModuleName,
 		slashingtypes.ModuleName,
 		distrtypes.ModuleName,
 		auctiontypes.ModuleName,
-		cdptypes.ModuleName,
+		// cdptypes.ModuleName,
 		jolttypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
@@ -706,9 +707,9 @@ func NewApp(
 		ibctransfertypes.ModuleName,
 		feegrant.ModuleName,
 		auctiontypes.ModuleName,
-		issuancetypes.ModuleName,
+		// issuancetypes.ModuleName,
 		pricefeedtypes.ModuleName,
-		cdptypes.ModuleName, // reads market prices, so must run after pricefeed genesis
+		// cdptypes.ModuleName, // reads market prices, so must run after pricefeed genesis
 		jolttypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
@@ -915,7 +916,8 @@ func (app *App) setupUpgradeHandlers() {
 
 	if upgradeInfo.Name == v1.V005UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{kycmoduletypes.StoreKey, nftmoduletypes.StoreKey, spvmoduletypes.StoreKey},
+			Added:   []string{kycmoduletypes.StoreKey, nftmoduletypes.StoreKey, spvmoduletypes.StoreKey},
+			Deleted: []string{issuancetypes.StoreKey, cdptypes.StoreKey},
 		}
 
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades

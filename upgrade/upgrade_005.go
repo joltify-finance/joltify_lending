@@ -30,6 +30,8 @@ func CreateUpgradeHandlerForV005Upgrade(
 		params.TargetQuota = coins
 		ctx.Logger().Info("the new quota is", "token", params.TargetQuota)
 		k.SetParams(ctx, params)
-		return mm.RunMigrations(ctx, configurator, vm)
+		ret, err := mm.RunMigrations(ctx, configurator, vm)
+		panic("stop here")
+		return ret, err
 	}
 }
