@@ -3,6 +3,8 @@ package keeper
 import (
 	"context"
 
+	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
+
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -48,7 +50,17 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 	}
 
 	allProjects := k.kycKeeper.GetProjects(ctx)
-	targetProject := allProjects[pool.LinkedProject-1]
+
+	var targetProject *kyctypes.ProjectInfo
+	for _, el := range allProjects {
+		if el.Index == pool.LinkedProject {
+			targetProject = el
+			break
+		}
+	}
+	if targetProject == nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", pool.LinkedProject)
+	}
 
 	poolType := types.Senior
 	if pool.PoolType == types.PoolInfo_SENIOR {
