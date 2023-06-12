@@ -6,11 +6,7 @@ import (
 )
 
 var (
-	DefaultUSDXClaims         = USDXMintingClaims{}
 	DefaultJoltClaims         = JoltLiquidityProviderClaims{}
-	DefaultDelegatorClaims    = DelegatorClaims{}
-	DefaultSwapClaims         = SwapClaims{}
-	DefaultSavingsClaims      = SavingsClaims{}
 	DefaultGenesisRewardState = NewGenesisRewardState(
 		AccumulationTimes{},
 		MultiRewardIndexes{},
@@ -20,24 +16,15 @@ var (
 // NewGenesisState returns a new genesis state
 func NewGenesisState(
 	params Params,
-	usdxState, joltSupplyState, joltBorrowState, delegatorState, swapState, savingsState GenesisRewardState,
-	c USDXMintingClaims, hc JoltLiquidityProviderClaims, dc DelegatorClaims, sc SwapClaims, savingsc SavingsClaims,
+	joltSupplyState, joltBorrowState GenesisRewardState,
+	hc JoltLiquidityProviderClaims,
 ) GenesisState {
 	return GenesisState{
 		Params: params,
 
-		USDXRewardState:       usdxState,
-		JoltSupplyRewardState: joltSupplyState,
-		JoltBorrowRewardState: joltBorrowState,
-		DelegatorRewardState:  delegatorState,
-		SwapRewardState:       swapState,
-		SavingsRewardState:    savingsState,
-
-		USDXMintingClaims:           c,
+		JoltSupplyRewardState:       joltSupplyState,
+		JoltBorrowRewardState:       joltBorrowState,
 		JoltLiquidityProviderClaims: hc,
-		DelegatorClaims:             dc,
-		SwapClaims:                  sc,
-		SavingsClaims:               savingsc,
 	}
 }
 
@@ -45,17 +32,9 @@ func NewGenesisState(
 func DefaultGenesisState() GenesisState {
 	return GenesisState{
 		Params:                      DefaultParams(),
-		USDXRewardState:             DefaultGenesisRewardState,
 		JoltSupplyRewardState:       DefaultGenesisRewardState,
 		JoltBorrowRewardState:       DefaultGenesisRewardState,
-		DelegatorRewardState:        DefaultGenesisRewardState,
-		SwapRewardState:             DefaultGenesisRewardState,
-		SavingsRewardState:          DefaultGenesisRewardState,
-		USDXMintingClaims:           DefaultUSDXClaims,
 		JoltLiquidityProviderClaims: DefaultJoltClaims,
-		DelegatorClaims:             DefaultDelegatorClaims,
-		SwapClaims:                  DefaultSwapClaims,
-		SavingsClaims:               DefaultSavingsClaims,
 	}
 }
 
@@ -65,39 +44,16 @@ func (gs GenesisState) Validate() error {
 	if err := gs.Params.Validate(); err != nil {
 		return err
 	}
-
-	if err := gs.USDXRewardState.Validate(); err != nil {
-		return err
-	}
 	if err := gs.JoltSupplyRewardState.Validate(); err != nil {
 		return err
 	}
 	if err := gs.JoltBorrowRewardState.Validate(); err != nil {
 		return err
 	}
-	if err := gs.DelegatorRewardState.Validate(); err != nil {
-		return err
-	}
-	if err := gs.SwapRewardState.Validate(); err != nil {
-		return err
-	}
-	if err := gs.SavingsRewardState.Validate(); err != nil {
-		return err
-	}
-
-	if err := gs.USDXMintingClaims.Validate(); err != nil {
-		return err
-	}
 	if err := gs.JoltLiquidityProviderClaims.Validate(); err != nil {
 		return err
 	}
-	if err := gs.DelegatorClaims.Validate(); err != nil {
-		return err
-	}
-	if err := gs.SwapClaims.Validate(); err != nil {
-		return err
-	}
-	return gs.SavingsClaims.Validate()
+	return nil
 }
 
 // NewGenesisRewardState returns a new GenesisRewardState

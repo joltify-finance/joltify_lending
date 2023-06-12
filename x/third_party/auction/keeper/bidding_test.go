@@ -35,7 +35,7 @@ func TestAuctionBidding(t *testing.T) {
 	_, addrsAll := app.GeneratePrivKeyAddressPairs(5)
 	buyer := addrsAll[0]
 	secondBuyer := addrsAll[1]
-	modName := "liquidator"
+	modName := "jolt"
 	collateralAddrs := addrsAll[2:]
 	collateralWeights := is(30, 20, 10)
 
@@ -449,7 +449,7 @@ func TestAuctionBidding(t *testing.T) {
 			tApp := app.NewTestApp(lg, t.TempDir())
 
 			// Set up module account
-			modName := "liquidator"
+			modName := "jolt"
 			modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(modName), nil, 0, 0)
 			modAcc := authtypes.NewModuleAccount(modBaseAcc, modName, []string{authtypes.Minter, authtypes.Burner}...)
 

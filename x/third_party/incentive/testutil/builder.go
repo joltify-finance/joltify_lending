@@ -98,78 +98,6 @@ func (builder IncentiveGenesisBuilder) WithSimpleSupplyRewardPeriod(ctype string
 	return builder.WithInitializedSupplyRewardPeriod(builder.simpleRewardPeriod(ctype, rewardsPerSecond))
 }
 
-// WithInitializedDelegatorRewardPeriod sets the genesis time as the previous accumulation time for the specified period.
-// This can be helpful in tests. With no prev time set, the first block accrues no rewards as it just sets the prev time to the current.
-func (builder IncentiveGenesisBuilder) WithInitializedDelegatorRewardPeriod(period types3.MultiRewardPeriod) IncentiveGenesisBuilder {
-	builder.Params.DelegatorRewardPeriods = append(builder.Params.DelegatorRewardPeriods, period)
-
-	accumulationTimeForPeriod := types3.NewAccumulationTime(period.CollateralType, builder.genesisTime)
-	builder.DelegatorRewardState.AccumulationTimes = append(
-		builder.DelegatorRewardState.AccumulationTimes,
-		accumulationTimeForPeriod,
-	)
-
-	// TODO remove to better reflect real states
-	builder.DelegatorRewardState.MultiRewardIndexes = builder.DelegatorRewardState.MultiRewardIndexes.With(
-		period.CollateralType,
-		newZeroRewardIndexesFromCoins(period.RewardsPerSecond...),
-	)
-
-	return builder
-}
-
-func (builder IncentiveGenesisBuilder) WithSimpleDelegatorRewardPeriod(ctype string, rewardsPerSecond sdk.Coins) IncentiveGenesisBuilder {
-	return builder.WithInitializedDelegatorRewardPeriod(builder.simpleRewardPeriod(ctype, rewardsPerSecond))
-}
-
-// WithInitializedSwapRewardPeriod sets the genesis time as the previous accumulation time for the specified period.
-// This can be helpful in tests. With no prev time set, the first block accrues no rewards as it just sets the prev time to the current.
-func (builder IncentiveGenesisBuilder) WithInitializedSwapRewardPeriod(period types3.MultiRewardPeriod) IncentiveGenesisBuilder {
-	builder.Params.SwapRewardPeriods = append(builder.Params.SwapRewardPeriods, period)
-
-	accumulationTimeForPeriod := types3.NewAccumulationTime(period.CollateralType, builder.genesisTime)
-	builder.SwapRewardState.AccumulationTimes = append(
-		builder.SwapRewardState.AccumulationTimes,
-		accumulationTimeForPeriod,
-	)
-
-	return builder
-}
-
-func (builder IncentiveGenesisBuilder) WithSimpleSwapRewardPeriod(poolID string, rewardsPerSecond sdk.Coins) IncentiveGenesisBuilder {
-	return builder.WithInitializedSwapRewardPeriod(builder.simpleRewardPeriod(poolID, rewardsPerSecond))
-}
-
-// WithInitializedUSDXRewardPeriod sets the genesis time as the previous accumulation time for the specified period.
-// This can be helpful in tests. With no prev time set, the first block accrues no rewards as it just sets the prev time to the current.
-func (builder IncentiveGenesisBuilder) WithInitializedUSDXRewardPeriod(period types3.RewardPeriod) IncentiveGenesisBuilder {
-	builder.Params.USDXMintingRewardPeriods = append(builder.Params.USDXMintingRewardPeriods, period)
-
-	accumulationTimeForPeriod := types3.NewAccumulationTime(period.CollateralType, builder.genesisTime)
-	builder.USDXRewardState.AccumulationTimes = append(
-		builder.USDXRewardState.AccumulationTimes,
-		accumulationTimeForPeriod,
-	)
-
-	// TODO remove to better reflect real states
-	builder.USDXRewardState.MultiRewardIndexes = builder.USDXRewardState.MultiRewardIndexes.With(
-		period.CollateralType,
-		newZeroRewardIndexesFromCoins(period.RewardsPerSecond),
-	)
-
-	return builder
-}
-
-func (builder IncentiveGenesisBuilder) WithSimpleUSDXRewardPeriod(ctype string, rewardsPerSecond sdk.Coin) IncentiveGenesisBuilder {
-	return builder.WithInitializedUSDXRewardPeriod(types3.NewRewardPeriod(
-		true,
-		ctype,
-		builder.genesisTime,
-		builder.genesisTime.Add(4*oneYear),
-		rewardsPerSecond,
-	))
-}
-
 func (builder IncentiveGenesisBuilder) WithMultipliers(multipliers types3.MultipliersPerDenoms) IncentiveGenesisBuilder {
 	builder.Params.ClaimMultipliers = multipliers
 
@@ -259,27 +187,4 @@ func NewStandardMoneyMarket(denom string) types2.MoneyMarket {
 		sdk.MustNewDecFromStr("0.05"),
 		sdk.ZeroDec(),
 	)
-}
-
-// WithInitializedSavingsRewardPeriod sets the genesis time as the previous accumulation time for the specified period.
-// This can be helpful in tests. With no prev time set, the first block accrues no rewards as it just sets the prev time to the current.
-func (builder IncentiveGenesisBuilder) WithInitializedSavingsRewardPeriod(period types3.MultiRewardPeriod) IncentiveGenesisBuilder {
-	builder.Params.SavingsRewardPeriods = append(builder.Params.SavingsRewardPeriods, period)
-
-	accumulationTimeForPeriod := types3.NewAccumulationTime(period.CollateralType, builder.genesisTime)
-	builder.SavingsRewardState.AccumulationTimes = append(
-		builder.SavingsRewardState.AccumulationTimes,
-		accumulationTimeForPeriod,
-	)
-
-	builder.SavingsRewardState.MultiRewardIndexes = builder.SavingsRewardState.MultiRewardIndexes.With(
-		period.CollateralType,
-		newZeroRewardIndexesFromCoins(period.RewardsPerSecond...),
-	)
-
-	return builder
-}
-
-func (builder IncentiveGenesisBuilder) WithSimpleSavingsRewardPeriod(ctype string, rewardsPerSecond sdk.Coins) IncentiveGenesisBuilder {
-	return builder.WithInitializedSavingsRewardPeriod(builder.simpleRewardPeriod(ctype, rewardsPerSecond))
 }

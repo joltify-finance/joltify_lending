@@ -7,8 +7,6 @@ import (
 
 	tmlog "github.com/tendermint/tendermint/libs/log"
 
-	cdpkeeper "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
-	cdptypes "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -169,30 +167,6 @@ func (suite *IntegrationTester) DeliverJoltMsgWithdraw(owner sdk.AccAddress, wit
 	return err
 }
 
-func (suite *IntegrationTester) DeliverMsgCreateCDP(owner sdk.AccAddress, collateral, principal sdk.Coin, collateralType string) error {
-	msg := cdptypes.NewMsgCreateCDP(owner, collateral, principal, collateralType)
-	msgServer := cdpkeeper.NewMsgServerImpl(suite.App.GetCDPKeeper())
-
-	_, err := msgServer.CreateCDP(sdk.WrapSDKContext(suite.Ctx), &msg)
-	return err
-}
-
-func (suite *IntegrationTester) DeliverCDPMsgRepay(owner sdk.AccAddress, collateralType string, payment sdk.Coin) error {
-	msg := cdptypes.NewMsgRepayDebt(owner, collateralType, payment)
-	msgServer := cdpkeeper.NewMsgServerImpl(suite.App.GetCDPKeeper())
-
-	_, err := msgServer.RepayDebt(sdk.WrapSDKContext(suite.Ctx), &msg)
-	return err
-}
-
-func (suite *IntegrationTester) DeliverCDPMsgBorrow(owner sdk.AccAddress, collateralType string, draw sdk.Coin) error {
-	msg := cdptypes.NewMsgDrawDebt(owner, collateralType, draw)
-	msgServer := cdpkeeper.NewMsgServerImpl(suite.App.GetCDPKeeper())
-
-	_, err := msgServer.DrawDebt(sdk.WrapSDKContext(suite.Ctx), &msg)
-	return err
-}
-
 func (suite *IntegrationTester) GetAccount(addr sdk.AccAddress) authtypes.AccountI {
 	ak := suite.App.GetAccountKeeper()
 	return ak.GetAccount(suite.Ctx, addr)
@@ -245,26 +219,8 @@ func (suite *IntegrationTester) VestingPeriodsEqual(address sdk.AccAddress, expe
 	suite.Equal(expectedPeriods, vacc.VestingPeriods)
 }
 
-func (suite *IntegrationTester) SwapRewardEquals(owner sdk.AccAddress, expected sdk.Coins) {
-	claim, found := suite.App.GetIncentiveKeeper().GetSwapClaim(suite.Ctx, owner)
-	suite.Require().Truef(found, "expected swap claim to be found for %s", owner)
-	suite.Equalf(expected, claim.Reward, "expected swap claim reward to be %s, but got %s", expected, claim.Reward)
-}
-
-func (suite *IntegrationTester) DelegatorRewardEquals(owner sdk.AccAddress, expected sdk.Coins) {
-	claim, found := suite.App.GetIncentiveKeeper().GetDelegatorClaim(suite.Ctx, owner)
-	suite.Require().Truef(found, "expected delegator claim to be found for %s", owner)
-	suite.Equalf(expected, claim.Reward, "expected delegator claim reward to be %s, but got %s", expected, claim.Reward)
-}
-
 func (suite *IntegrationTester) JoltRewardEquals(owner sdk.AccAddress, expected sdk.Coins) {
 	claim, found := suite.App.GetIncentiveKeeper().GetJoltLiquidityProviderClaim(suite.Ctx, owner)
-	suite.Require().Truef(found, "expected delegator claim to be found for %s", owner)
-	suite.Equalf(expected, claim.Reward, "expected delegator claim reward to be %s, but got %s", expected, claim.Reward)
-}
-
-func (suite *IntegrationTester) USDXRewardEquals(owner sdk.AccAddress, expected sdk.Coin) {
-	claim, found := suite.App.GetIncentiveKeeper().GetUSDXMintingClaim(suite.Ctx, owner)
 	suite.Require().Truef(found, "expected delegator claim to be found for %s", owner)
 	suite.Equalf(expected, claim.Reward, "expected delegator claim reward to be %s, but got %s", expected, claim.Reward)
 }

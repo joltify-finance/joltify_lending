@@ -157,7 +157,7 @@ func TestUploadInvestor(t *testing.T) {
 			id:     "2",
 			desc:   "invalid address",
 			fields: []string{"1", "jolt1xdpg5l3pxpyhxqg4ey4krq2pf9d3sphmmuuugg,abc"},
-			code:   1,
+			code:   3,
 			args: []string{
 				fmt.Sprintf("--%s=%s", flags.FlagFrom, addr.String()),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
@@ -181,7 +181,7 @@ func TestUploadInvestor(t *testing.T) {
 			id:     "4",
 			desc:   "cannot map multiple wallet addresses to different investors",
 			fields: []string{"4", "jolt1xdpg5l3pxpyhxqg4ey4krq2pf9d3sphmmuuugg"},
-			code:   1,
+			code:   3,
 			args: []string{
 				fmt.Sprintf("--%s=%s", flags.FlagFrom, addr.String()),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),

@@ -12,20 +12,12 @@ import (
 // RegisterLegacyAminoCodec registers all the necessary types and interfaces for the
 // governance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgClaimUSDXMintingReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimUSDXMintingReward", nil)
 	cdc.RegisterConcrete(&MsgClaimJoltReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimJoltReward", nil)
-	cdc.RegisterConcrete(&MsgClaimDelegatorReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimDelegatorReward", nil)
-	cdc.RegisterConcrete(&MsgClaimSwapReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimSwapReward", nil)
-	cdc.RegisterConcrete(&MsgClaimSavingsReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimSavingsReward", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgClaimUSDXMintingReward{},
 		&MsgClaimJoltReward{},
-		&MsgClaimDelegatorReward{},
-		&MsgClaimSwapReward{},
-		&MsgClaimSavingsReward{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

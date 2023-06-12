@@ -49,7 +49,7 @@ func (suite *Suite) SetupTest(numAddrs int) {
 
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 
-	modName := "liquidator"
+	modName := "jolt"
 	modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(modName), nil, 0, 0)
 	modAcc := authtypes.NewModuleAccount(modBaseAcc, modName, []string{authtypes.Minter, authtypes.Burner}...)
 	suite.ModAcc = modAcc

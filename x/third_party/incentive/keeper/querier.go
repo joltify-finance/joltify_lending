@@ -80,11 +80,6 @@ func queryGetJoltRewards(ctx sdk.Context, req abci.RequestQuery, k Keeper, legac
 }
 
 func queryGetRewardFactors(ctx sdk.Context, req abci.RequestQuery, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
-	var usdxFactors types2.RewardIndexes
-	k.IterateUSDXMintingRewardFactors(ctx, func(collateralType string, factor sdk.Dec) (stop bool) {
-		usdxFactors = usdxFactors.With(collateralType, factor)
-		return false
-	})
 
 	var supplyFactors types2.MultiRewardIndexes
 	k.IterateJoltSupplyRewardIndexes(ctx, func(denom string, indexes types2.RewardIndexes) (stop bool) {
@@ -98,31 +93,9 @@ func queryGetRewardFactors(ctx sdk.Context, req abci.RequestQuery, k Keeper, leg
 		return false
 	})
 
-	var delegatorFactors types2.MultiRewardIndexes
-	k.IterateDelegatorRewardIndexes(ctx, func(denom string, indexes types2.RewardIndexes) (stop bool) {
-		delegatorFactors = delegatorFactors.With(denom, indexes)
-		return false
-	})
-
-	var swapFactors types2.MultiRewardIndexes
-	k.IterateSwapRewardIndexes(ctx, func(poolID string, indexes types2.RewardIndexes) (stop bool) {
-		swapFactors = swapFactors.With(poolID, indexes)
-		return false
-	})
-
-	var savingsFactors types2.MultiRewardIndexes
-	k.IterateSavingsRewardIndexes(ctx, func(denom string, indexes types2.RewardIndexes) (stop bool) {
-		savingsFactors = savingsFactors.With(denom, indexes)
-		return false
-	})
-
 	response := types2.NewQueryGetRewardFactorsResponse(
-		usdxFactors,
 		supplyFactors,
 		borrowFactors,
-		delegatorFactors,
-		swapFactors,
-		savingsFactors,
 	)
 
 	bz, err := codec.MarshalJSONIndent(legacyQuerierCdc, response)

@@ -47,7 +47,7 @@ var validRewardPeriod = types2.NewRewardPeriod(
 	"bnb-a",
 	time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 	time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-	sdk.NewInt64Coin(types2.USDXMintingRewardDenom, 1e9),
+	sdk.NewInt64Coin("ujolt", 1e9),
 )
 
 func (suite *ParamTestSuite) TestParamValidation() {
@@ -72,20 +72,8 @@ func (suite *ParamTestSuite) TestParamValidation() {
 		{
 			"valid",
 			types2.Params{
-				USDXMintingRewardPeriods: types2.RewardPeriods{
-					types2.NewRewardPeriod(
-						true,
-						"bnb-a",
-						time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
-						time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-						sdk.NewCoin(types2.USDXMintingRewardDenom, sdk.NewInt(122354)),
-					),
-				},
 				JoltSupplyRewardPeriods: types2.DefaultMultiRewardPeriods,
 				JoltBorrowRewardPeriods: types2.DefaultMultiRewardPeriods,
-				DelegatorRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				SwapRewardPeriods:       types2.DefaultMultiRewardPeriods,
-				SavingsRewardPeriods:    types2.DefaultMultiRewardPeriods,
 				ClaimMultipliers: types2.MultipliersPerDenoms{
 					{
 						Denom: "jolt",
@@ -108,34 +96,14 @@ func (suite *ParamTestSuite) TestParamValidation() {
 				expectPass: true,
 			},
 		},
-		{
-			"invalid usdx minting period makes params invalid",
-			types2.Params{
-				USDXMintingRewardPeriods: types2.RewardPeriods{rewardPeriodWithInvalidRewardsPerSecond},
-				JoltSupplyRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				JoltBorrowRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				DelegatorRewardPeriods:   types2.DefaultMultiRewardPeriods,
-				SwapRewardPeriods:        types2.DefaultMultiRewardPeriods,
-				SavingsRewardPeriods:     types2.DefaultMultiRewardPeriods,
-				ClaimMultipliers:         types2.DefaultMultipliers,
-				ClaimEnd:                 time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
-			},
-			errArgs{
-				expectPass: false,
-				contains:   fmt.Sprintf("reward denom must be %s", types2.USDXMintingRewardDenom),
-			},
-		},
+
 		{
 			"invalid jolt supply periods makes params invalid",
 			types2.Params{
-				USDXMintingRewardPeriods: types2.DefaultRewardPeriods,
-				JoltSupplyRewardPeriods:  types2.MultiRewardPeriods{rewardMultiPeriodWithInvalidRewardsPerSecond},
-				JoltBorrowRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				DelegatorRewardPeriods:   types2.DefaultMultiRewardPeriods,
-				SwapRewardPeriods:        types2.DefaultMultiRewardPeriods,
-				SavingsRewardPeriods:     types2.DefaultMultiRewardPeriods,
-				ClaimMultipliers:         types2.DefaultMultipliers,
-				ClaimEnd:                 time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
+				JoltSupplyRewardPeriods: types2.MultiRewardPeriods{rewardMultiPeriodWithInvalidRewardsPerSecond},
+				JoltBorrowRewardPeriods: types2.DefaultMultiRewardPeriods,
+				ClaimMultipliers:        types2.DefaultMultipliers,
+				ClaimEnd:                time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
 			},
 			errArgs{
 				expectPass: false,
@@ -145,63 +113,22 @@ func (suite *ParamTestSuite) TestParamValidation() {
 		{
 			"invalid jolt borrow periods makes params invalid",
 			types2.Params{
-				USDXMintingRewardPeriods: types2.DefaultRewardPeriods,
-				JoltSupplyRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				JoltBorrowRewardPeriods:  types2.MultiRewardPeriods{rewardMultiPeriodWithInvalidRewardsPerSecond},
-				DelegatorRewardPeriods:   types2.DefaultMultiRewardPeriods,
-				SwapRewardPeriods:        types2.DefaultMultiRewardPeriods,
-				SavingsRewardPeriods:     types2.DefaultMultiRewardPeriods,
-				ClaimMultipliers:         types2.DefaultMultipliers,
-				ClaimEnd:                 time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
+				JoltSupplyRewardPeriods: types2.DefaultMultiRewardPeriods,
+				JoltBorrowRewardPeriods: types2.MultiRewardPeriods{rewardMultiPeriodWithInvalidRewardsPerSecond},
+				ClaimMultipliers:        types2.DefaultMultipliers,
+				ClaimEnd:                time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
 			},
 			errArgs{
 				expectPass: false,
 				contains:   "invalid reward amount",
 			},
 		},
-		{
-			"invalid delegator periods makes params invalid",
-			types2.Params{
-				USDXMintingRewardPeriods: types2.DefaultRewardPeriods,
-				JoltSupplyRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				JoltBorrowRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				DelegatorRewardPeriods:   types2.MultiRewardPeriods{rewardMultiPeriodWithInvalidRewardsPerSecond},
-				SwapRewardPeriods:        types2.DefaultMultiRewardPeriods,
-				SavingsRewardPeriods:     types2.DefaultMultiRewardPeriods,
-				ClaimMultipliers:         types2.DefaultMultipliers,
-				ClaimEnd:                 time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
-			},
-			errArgs{
-				expectPass: false,
-				contains:   "invalid reward amount",
-			},
-		},
-		{
-			"invalid swap periods makes params invalid",
-			types2.Params{
-				USDXMintingRewardPeriods: types2.DefaultRewardPeriods,
-				JoltSupplyRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				JoltBorrowRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				DelegatorRewardPeriods:   types2.DefaultMultiRewardPeriods,
-				SwapRewardPeriods:        types2.MultiRewardPeriods{rewardMultiPeriodWithInvalidRewardsPerSecond},
-				SavingsRewardPeriods:     types2.DefaultMultiRewardPeriods,
-				ClaimMultipliers:         types2.DefaultMultipliers,
-				ClaimEnd:                 time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
-			},
-			errArgs{
-				expectPass: false,
-				contains:   "invalid reward amount",
-			},
-		},
+
 		{
 			"invalid multipliers makes params invalid",
 			types2.Params{
-				USDXMintingRewardPeriods: types2.DefaultRewardPeriods,
-				JoltSupplyRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				JoltBorrowRewardPeriods:  types2.DefaultMultiRewardPeriods,
-				DelegatorRewardPeriods:   types2.DefaultMultiRewardPeriods,
-				SwapRewardPeriods:        types2.DefaultMultiRewardPeriods,
-				SavingsRewardPeriods:     types2.DefaultMultiRewardPeriods,
+				JoltSupplyRewardPeriods: types2.DefaultMultiRewardPeriods,
+				JoltBorrowRewardPeriods: types2.DefaultMultiRewardPeriods,
 				ClaimMultipliers: types2.MultipliersPerDenoms{
 					{
 						Denom: "jolt",
@@ -275,7 +202,7 @@ func (suite *ParamTestSuite) TestRewardPeriods() {
 					),
 				},
 				expect: err{
-					contains: fmt.Sprintf("reward denom must be %s", types2.USDXMintingRewardDenom),
+					contains: fmt.Sprintf("reward denom must be %s", "ujolt"),
 				},
 			},
 		}

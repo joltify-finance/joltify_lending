@@ -38,7 +38,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUpdatedWhenBlockTimeHasIncre
 	denom := "bnb"
 
 	joltKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, joltKeeper, nil)
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil)
 
 	suite.storeGlobalSupplyIndexes(types2.MultiRewardIndexes{
 		{
@@ -90,7 +90,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUnchangedWhenBlockTimeHasNot
 	denom := "bnb"
 
 	hardKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, hardKeeper, nil)
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
 
 	previousIndexes := types2.MultiRewardIndexes{
 		{
@@ -135,7 +135,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenSourceSharesAre
 	denom := "bnb"
 
 	hardKeeper := newFakeHardKeeper() // zero total supplys
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, hardKeeper, nil)
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
 
 	previousIndexes := types2.MultiRewardIndexes{
 		{
@@ -180,8 +180,8 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenSourceSharesAre
 func (suite *AccumulateSupplyRewardsTests) TestStateAddedWhenStateDoesNotExist() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -223,8 +223,8 @@ func (suite *AccumulateSupplyRewardsTests) TestStateAddedWhenStateDoesNotExist()
 func (suite *AccumulateSupplyRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper()
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper()
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -251,8 +251,8 @@ func (suite *AccumulateSupplyRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenBeforeStartTime() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil)
 
 	previousIndexes := types2.MultiRewardIndexes{
 		{
@@ -297,8 +297,8 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenBeforeStartTime
 func (suite *AccumulateSupplyRewardsTests) TestPanicWhenCurrentTimeLessThanPrevious() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalSupply(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil)
 
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
 	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)

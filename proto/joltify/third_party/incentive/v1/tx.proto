@@ -1,0 +1,36 @@
+syntax = "proto3";
+package joltify.third_party.incentive.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types";
+
+// Msg defines the incentive Msg service.
+service Msg {
+  rpc ClaimJoltReward(MsgClaimJoltReward) returns (MsgClaimJoltRewardResponse);
+}
+
+// Selection is a pair of denom and multiplier name. It holds the choice of multiplier a user makes when they claim a
+// denom.
+message Selection {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string denom           = 1;
+  string multiplier_name = 2;
+}
+
+
+// MsgClaimHardReward message type used to claim Hard liquidity provider rewards
+message MsgClaimJoltReward {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string             sender          = 1;
+  repeated Selection denoms_to_claim = 2 [(gogoproto.castrepeated) = "Selections", (gogoproto.nullable) = false];
+}
+
+// MsgClaimJoltRewardResponse defines the Msg/ClaimHardReward response type.
+message MsgClaimJoltRewardResponse {}
+
+

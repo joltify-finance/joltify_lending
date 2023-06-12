@@ -2,7 +2,6 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	cdptypes "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
@@ -16,20 +15,6 @@ var _ types.JOLTHooks = Hooks{}
 
 // Hooks create new incentive hooks
 func (k Keeper) Hooks() Hooks { return Hooks{k} }
-
-// ------------------- Cdp Module Hooks -------------------
-
-// AfterCDPCreated function that runs after a cdp is created
-func (h Hooks) AfterCDPCreated(ctx sdk.Context, cdp cdptypes.CDP) {
-	// todo we need to something here once we enable CDP
-}
-
-// BeforeCDPModified function that runs before a cdp is modified
-// note that this is called immediately after interest is synchronized, and so could potentially
-// be called AfterCDPInterestUpdated or something like that, if we we're to expand the scope of cdp hooks
-func (h Hooks) BeforeCDPModified(ctx sdk.Context, cdp cdptypes.CDP) {
-	// todo we need to something here once we enable CDP
-}
 
 // ------------------- Jolt Module Hooks -------------------
 
