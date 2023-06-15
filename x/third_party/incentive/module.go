@@ -3,6 +3,7 @@ package incentive
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	cli2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/client/cli"
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
@@ -74,7 +75,7 @@ func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sd
 
 // ConsensusVersion implements AppModule/ConsensusVersion.
 func (AppModule) ConsensusVersion() uint64 {
-	return 1
+	return 2
 }
 
 // GetTxCmd returns the root tx command for the incentive module.
@@ -94,17 +95,15 @@ type AppModule struct {
 	keeper        keeper2.Keeper
 	accountKeeper types2.AccountKeeper
 	bankKeeper    types2.BankKeeper
-	cdpKeeper     types2.CdpKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper keeper2.Keeper, ak types2.AccountKeeper, bk types2.BankKeeper, ck types2.CdpKeeper) AppModule {
+func NewAppModule(keeper keeper2.Keeper, ak types2.AccountKeeper, bk types2.BankKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		accountKeeper:  ak,
 		bankKeeper:     bk,
-		cdpKeeper:      ck,
 	}
 }
 
@@ -131,6 +130,11 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types2.RegisterMsgServer(cfg.MsgServer(), keeper2.NewMsgServerImpl(am.keeper))
 	// TODO: types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServerImpl(am.keeper, am.accountKeeper, am.bankKeeper))
 	types2.RegisterQueryServer(cfg.QueryServer(), keeper2.NewQueryServerImpl(am.keeper))
+
+	m := keeper2.NewMigrator(am.keeper)
+	if err := cfg.RegisterMigration(types2.ModuleName, 1, m.Migrate1to2); err != nil {
+		panic(fmt.Sprintf("failed to migrate x/incentives from version 1 to 2: %v", err))
+	}
 }
 
 // InitGenesis performs genesis initialization for the incentive module. It returns no validator updates.
@@ -139,7 +143,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
 
-	InitGenesis(ctx, am.keeper, am.accountKeeper, am.bankKeeper, am.cdpKeeper, genState)
+	InitGenesis(ctx, am.keeper, am.accountKeeper, genState)
 	return []abci.ValidatorUpdate{}
 }
 

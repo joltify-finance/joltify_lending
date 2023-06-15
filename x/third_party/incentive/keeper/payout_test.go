@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
+	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
+
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 
-	cdpkeeper "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
-	cdptypes "github.com/joltify-finance/joltify_lending/x/third_party/cdp/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/testutil"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -33,7 +33,6 @@ type PayoutTestSuite struct {
 
 	keeper     keeper.Keeper
 	joltKeeper joltkeeper.Keeper
-	cdpKeeper  cdpkeeper.Keeper
 
 	app app.TestApp
 	ctx sdk.Context
@@ -57,7 +56,6 @@ func (suite *PayoutTestSuite) SetupApp() {
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
-	suite.cdpKeeper = suite.app.GetCDPKeeper()
 
 	suite.ctx = suite.app.NewContext(true, tmprototypes.Header{Time: suite.genesisTime})
 }
@@ -68,7 +66,6 @@ func (suite *PayoutTestSuite) SetupWithGenState(authBuilder app.AuthBankGenesisB
 		suite.genesisTime, nil, nil,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
-		NewCDPGenStateMulti(suite.app.AppCodec()),
 		hardBuilder.BuildMarshalled(suite.app.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
@@ -447,7 +444,7 @@ func (suite *PayoutTestSuite) TestSendCoinsToInvalidAccount() {
 	err := suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types2.ModuleName, suite.addrs[2], cs(c("ujolt", 100)), 5)
 	suite.Require().ErrorIs(err, types2.ErrAccountNotFound)
 
-	macc := suite.getModuleAccount(cdptypes.ModuleName)
+	macc := suite.getModuleAccount(jolttypes.ModuleName)
 	err = suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types2.ModuleName, macc.GetAddress(), cs(c("ujolt", 100)), 5)
 	suite.Require().ErrorIs(err, types2.ErrInvalidAccountType)
 }

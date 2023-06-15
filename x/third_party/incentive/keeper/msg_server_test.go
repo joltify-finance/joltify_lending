@@ -72,7 +72,7 @@ func (suite *HandlerTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccou
 // authBuilder returns a new auth genesis builder with a full mint  module account.
 func (suite *HandlerTestSuite) authBuilder() *app.AuthBankGenesisBuilder {
 	return app.NewAuthBankGenesisBuilder().
-		WithSimpleModuleAccount(minttypes.ModuleName, cs(c(types2.USDXMintingRewardDenom, 1e18), c("hard", 1e18), c("swap", 1e18)))
+		WithSimpleModuleAccount(minttypes.ModuleName, cs(c(types2.RewardDenom, 1e18), c("hard", 1e18), c("swap", 1e18)))
 }
 
 // incentiveBuilder returns a new incentive genesis builder with a genesis time and multipliers set

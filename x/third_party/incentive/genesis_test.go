@@ -64,49 +64,40 @@ func (suite *GenesisTestSuite) SetupTest() {
 		types3.DefaultTotalBorrowed,
 		types3.DefaultTotalReserves,
 	)
-	incentiveGS := types2.NewGenesisState(
-		types2.NewParams(
-			types2.RewardPeriods{types2.NewRewardPeriod(true, "bnb-a", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), c("ujolt", 122354))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "bnb", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "bnb", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "ujolt", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "btcb/usdx", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), cs(c("swp", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "ujolt", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultipliersPerDenoms{
-				{
-					Denom: "ujolt",
-					Multipliers: types2.Multipliers{
-						types2.NewMultiplier("large", 12, d("1.0")),
-					},
-				},
-				{
-					Denom: "hard",
-					Multipliers: types2.Multipliers{
-						types2.NewMultiplier("small", 1, d("0.25")),
-						types2.NewMultiplier("large", 12, d("1.0")),
-					},
-				},
-				{
-					Denom: "swp",
-					Multipliers: types2.Multipliers{
-						types2.NewMultiplier("small", 1, d("0.25")),
-						types2.NewMultiplier("medium", 6, d("0.8")),
-					},
+
+	pa := types2.NewParams(
+		types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "btcb/usdx", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), cs(c("swp", 122354)))},
+		types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "ujolt", suite.genesisTime.Add(-1*oneYear), suite.genesisTime.Add(oneYear), cs(c("hard", 122354)))},
+		types2.MultipliersPerDenoms{
+			{
+				Denom: "ujolt",
+				Multipliers: types2.Multipliers{
+					types2.NewMultiplier("large", 12, d("1.0")),
 				},
 			},
-			suite.genesisTime.Add(5*oneYear),
-		),
+			{
+				Denom: "hard",
+				Multipliers: types2.Multipliers{
+					types2.NewMultiplier("small", 1, d("0.25")),
+					types2.NewMultiplier("large", 12, d("1.0")),
+				},
+			},
+			{
+				Denom: "swp",
+				Multipliers: types2.Multipliers{
+					types2.NewMultiplier("small", 1, d("0.25")),
+					types2.NewMultiplier("medium", 6, d("0.8")),
+				},
+			},
+		},
+		suite.genesisTime.Add(5*oneYear),
+	)
+
+	incentiveGS := types2.NewGenesisState(
+		pa,
 		types2.DefaultGenesisRewardState,
 		types2.DefaultGenesisRewardState,
-		types2.DefaultGenesisRewardState,
-		types2.DefaultGenesisRewardState,
-		types2.DefaultGenesisRewardState,
-		types2.DefaultGenesisRewardState,
-		types2.DefaultUSDXClaims,
 		types2.DefaultJoltClaims,
-		types2.DefaultDelegatorClaims,
-		types2.DefaultSwapClaims,
-		types2.DefaultSavingsClaims,
 	)
 
 	cdc := suite.app.AppCodec()
@@ -115,7 +106,6 @@ func (suite *GenesisTestSuite) SetupTest() {
 		suite.genesisTime, nil, nil,
 		app.GenesisState{types2.ModuleName: cdc.MustMarshalJSON(&incentiveGS)},
 		app.GenesisState{types3.ModuleName: cdc.MustMarshalJSON(&joltGS)},
-		NewCDPGenStateMulti(cdc),
 		NewPricefeedGenStateMultiFromTime(cdc, suite.genesisTime),
 		authBuilder.BuildMarshalled(cdc),
 	)
@@ -129,38 +119,35 @@ func (suite *GenesisTestSuite) SetupTest() {
 
 func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 	genesisTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	genesisState := types2.NewGenesisState(
-		types2.NewParams(
-			types2.RewardPeriods{types2.NewRewardPeriod(true, "bnb-a", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), c("ujolt", 122354))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "bnb", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "bnb", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "ujolt", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "btcb/usdx", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), cs(c("swp", 122354)))},
-			types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "ujolt", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), cs(c("hard", 122354)))},
-			types2.MultipliersPerDenoms{
-				{
-					Denom: "ujolt",
-					Multipliers: types2.Multipliers{
-						types2.NewMultiplier("large", 12, d("1.0")),
-					},
-				},
-				{
-					Denom: "hard",
-					Multipliers: types2.Multipliers{
-						types2.NewMultiplier("small", 1, d("0.25")),
-						types2.NewMultiplier("large", 12, d("1.0")),
-					},
-				},
-				{
-					Denom: "swp",
-					Multipliers: types2.Multipliers{
-						types2.NewMultiplier("small", 1, d("0.25")),
-						types2.NewMultiplier("medium", 6, d("0.8")),
-					},
+	pa := types2.NewParams(
+		types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "btcb/usdx", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), cs(c("swp", 122354)))},
+		types2.MultiRewardPeriods{types2.NewMultiRewardPeriod(true, "ujolt", genesisTime.Add(-1*oneYear), genesisTime.Add(oneYear), cs(c("hard", 122354)))},
+		types2.MultipliersPerDenoms{
+			{
+				Denom: "ujolt",
+				Multipliers: types2.Multipliers{
+					types2.NewMultiplier("large", 12, d("1.0")),
 				},
 			},
-			genesisTime.Add(5*oneYear),
-		),
+			{
+				Denom: "hard",
+				Multipliers: types2.Multipliers{
+					types2.NewMultiplier("small", 1, d("0.25")),
+					types2.NewMultiplier("large", 12, d("1.0")),
+				},
+			},
+			{
+				Denom: "swp",
+				Multipliers: types2.Multipliers{
+					types2.NewMultiplier("small", 1, d("0.25")),
+					types2.NewMultiplier("medium", 6, d("0.8")),
+				},
+			},
+		},
+		genesisTime.Add(5*oneYear),
+	)
+	genesisState := types2.NewGenesisState(
+		pa,
 		types2.NewGenesisRewardState(
 			types2.AccumulationTimes{
 				types2.NewAccumulationTime("bnb-a", genesisTime),
@@ -177,50 +164,7 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 				types2.NewMultiRewardIndex("bnb", types2.RewardIndexes{{CollateralType: "hard", RewardFactor: d("0.1")}}),
 			},
 		),
-		types2.NewGenesisRewardState(
-			types2.AccumulationTimes{
-				types2.NewAccumulationTime("bnb", genesisTime.Add(-2*time.Hour)),
-			},
-			types2.MultiRewardIndexes{
-				types2.NewMultiRewardIndex("bnb", types2.RewardIndexes{{CollateralType: "hard", RewardFactor: d("0.05")}}),
-			},
-		),
-		types2.NewGenesisRewardState(
-			types2.AccumulationTimes{
-				types2.NewAccumulationTime("ujolt", genesisTime.Add(-3*time.Hour)),
-			},
-			types2.MultiRewardIndexes{
-				types2.NewMultiRewardIndex("ujolt", types2.RewardIndexes{{CollateralType: "hard", RewardFactor: d("0.2")}}),
-			},
-		),
-		types2.NewGenesisRewardState(
-			types2.AccumulationTimes{
-				types2.NewAccumulationTime("bctb/usdx", genesisTime.Add(-4*time.Hour)),
-			},
-			types2.MultiRewardIndexes{
-				types2.NewMultiRewardIndex("btcb/usdx", types2.RewardIndexes{{CollateralType: "swap", RewardFactor: d("0.001")}}),
-			},
-		),
-		types2.NewGenesisRewardState(
-			types2.AccumulationTimes{
-				types2.NewAccumulationTime("ujolt", genesisTime.Add(-3*time.Hour)),
-			},
-			types2.MultiRewardIndexes{
-				types2.NewMultiRewardIndex("ujolt", types2.RewardIndexes{{CollateralType: "ujolt", RewardFactor: d("0.2")}}),
-			},
-		),
-		types2.USDXMintingClaims{
-			types2.NewUSDXMintingClaim(
-				suite.addrs[0],
-				c("ujolt", 1e9),
-				types2.RewardIndexes{{CollateralType: "bnb-a", RewardFactor: d("0.3")}},
-			),
-			types2.NewUSDXMintingClaim(
-				suite.addrs[1],
-				c("ujolt", 1),
-				types2.RewardIndexes{{CollateralType: "bnb-a", RewardFactor: d("0.001")}},
-			),
-		},
+
 		types2.JoltLiquidityProviderClaims{
 			types2.NewJoltLiquidityProviderClaim(
 				suite.addrs[0],
@@ -235,27 +179,6 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 				types2.MultiRewardIndexes{{CollateralType: "bnb", RewardIndexes: types2.RewardIndexes{{CollateralType: "hard", RewardFactor: d("0.0")}}}},
 			),
 		},
-		types2.DelegatorClaims{
-			types2.NewDelegatorClaim(
-				suite.addrs[2],
-				cs(c("hard", 5)),
-				types2.MultiRewardIndexes{{CollateralType: "ujolt", RewardIndexes: types2.RewardIndexes{{CollateralType: "hard", RewardFactor: d("0.2")}}}},
-			),
-		},
-		types2.SwapClaims{
-			types2.NewSwapClaim(
-				suite.addrs[3],
-				nil,
-				types2.MultiRewardIndexes{{CollateralType: "btcb/usdx", RewardIndexes: types2.RewardIndexes{{CollateralType: "swap", RewardFactor: d("0.0")}}}},
-			),
-		},
-		types2.SavingsClaims{
-			types2.NewSavingsClaim(
-				suite.addrs[3],
-				nil,
-				types2.MultiRewardIndexes{{CollateralType: "ujolt", RewardIndexes: types2.RewardIndexes{{CollateralType: "ujolt", RewardFactor: d("0.0")}}}},
-			),
-		},
 	)
 
 	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
@@ -264,7 +187,6 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 	// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
 	tApp.InitializeFromGenesisStates(nil, nil,
-		NewCDPGenStateMulti(tApp.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(tApp.AppCodec(), genesisTime),
 	)
 
@@ -272,8 +194,6 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 		ctx,
 		tApp.GetIncentiveKeeper(),
 		tApp.GetAccountKeeper(),
-		tApp.GetBankKeeper(),
-		tApp.GetCDPKeeper(),
 		genesisState,
 	)
 
@@ -302,12 +222,6 @@ func (suite *GenesisTestSuite) TestInitGenesisPanicsWhenAccumulationTimesToLongA
 	}{
 		{
 			types2.GenesisState{
-				Params:          minimalParams,
-				USDXRewardState: invalidRewardState,
-			},
-		},
-		{
-			types2.GenesisState{
 				Params:                minimalParams,
 				JoltSupplyRewardState: invalidRewardState,
 			},
@@ -316,24 +230,6 @@ func (suite *GenesisTestSuite) TestInitGenesisPanicsWhenAccumulationTimesToLongA
 			types2.GenesisState{
 				Params:                minimalParams,
 				JoltBorrowRewardState: invalidRewardState,
-			},
-		},
-		{
-			types2.GenesisState{
-				Params:               minimalParams,
-				DelegatorRewardState: invalidRewardState,
-			},
-		},
-		{
-			types2.GenesisState{
-				Params:          minimalParams,
-				SwapRewardState: invalidRewardState,
-			},
-		},
-		{
-			types2.GenesisState{
-				Params:             minimalParams,
-				SavingsRewardState: invalidRewardState,
 			},
 		},
 	}
@@ -345,7 +241,6 @@ func (suite *GenesisTestSuite) TestInitGenesisPanicsWhenAccumulationTimesToLongA
 		// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 		// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
 		tApp.InitializeFromGenesisStates(nil, nil,
-			NewCDPGenStateMulti(tApp.AppCodec()),
 			NewPricefeedGenStateMultiFromTime(tApp.AppCodec(), genesisTime),
 		)
 
@@ -355,8 +250,6 @@ func (suite *GenesisTestSuite) TestInitGenesisPanicsWhenAccumulationTimesToLongA
 				incentive.InitGenesis(
 					ctx, tApp.GetIncentiveKeeper(),
 					tApp.GetAccountKeeper(),
-					tApp.GetBankKeeper(),
-					tApp.GetCDPKeeper(),
 					tc.genesisState,
 				)
 			},

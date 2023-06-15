@@ -95,12 +95,6 @@ func (s queryServer) RewardFactors(
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	var usdxFactors types.RewardIndexes
-	s.keeper.IterateUSDXMintingRewardFactors(sdkCtx, func(collateralType string, factor sdk.Dec) (stop bool) {
-		usdxFactors = usdxFactors.With(collateralType, factor)
-		return false
-	})
-
 	var supplyFactors types.MultiRewardIndexes
 	s.keeper.IterateJoltSupplyRewardIndexes(sdkCtx, func(denom string, indexes types.RewardIndexes) (stop bool) {
 		supplyFactors = supplyFactors.With(denom, indexes)
@@ -113,38 +107,9 @@ func (s queryServer) RewardFactors(
 		return false
 	})
 
-	var delegatorFactors types.MultiRewardIndexes
-	s.keeper.IterateDelegatorRewardIndexes(sdkCtx, func(denom string, indexes types.RewardIndexes) (stop bool) {
-		delegatorFactors = delegatorFactors.With(denom, indexes)
-		return false
-	})
-
-	var swapFactors types.MultiRewardIndexes
-	s.keeper.IterateSwapRewardIndexes(sdkCtx, func(poolID string, indexes types.RewardIndexes) (stop bool) {
-		swapFactors = swapFactors.With(poolID, indexes)
-		return false
-	})
-
-	var savingsFactors types.MultiRewardIndexes
-	s.keeper.IterateSavingsRewardIndexes(sdkCtx, func(denom string, indexes types.RewardIndexes) (stop bool) {
-		savingsFactors = savingsFactors.With(denom, indexes)
-		return false
-	})
-
-	//var earnFactors types.MultiRewardIndexes
-	//s.keeper.IterateEarnRewardIndexes(sdkCtx, func(denom string, indexes types.RewardIndexes) (stop bool) {
-	//	earnFactors = earnFactors.With(denom, indexes)
-	//	return false
-	//})
-
 	return &types.QueryRewardFactorsResponse{
-		UsdxMintingRewardFactors: usdxFactors,
-		JoltSupplyRewardFactors:  supplyFactors,
-		JoltBorrowRewardFactors:  borrowFactors,
-		DelegatorRewardFactors:   delegatorFactors,
-		SwapRewardFactors:        swapFactors,
-		SavingsRewardFactors:     savingsFactors,
-		// EarnRewardFactors:        earnFactors,
+		JoltSupplyRewardFactors: supplyFactors,
+		JoltBorrowRewardFactors: borrowFactors,
 	}, nil
 }
 
@@ -164,18 +129,6 @@ func (s queryServer) queryRewards(
 		return status.Errorf(codes.InvalidArgument, "invalid reward type for owner %s: %s", owner, rewardType)
 	}
 
-	//if isAllRewards || rewardType == RewardTypeUSDXMinting {
-	//	if hasOwner {
-	//		usdxMintingClaim, foundUsdxMintingClaim := s.keeper.GetUSDXMintingClaim(ctx, owner)
-	//		if foundUsdxMintingClaim {
-	//			res.USDXMintingClaims = append(res.USDXMintingClaims, usdxMintingClaim)
-	//		}
-	//	} else {
-	//		usdxMintingClaims := s.keeper.GetAllUSDXMintingClaims(ctx)
-	//		res.USDXMintingClaims = append(res.USDXMintingClaims, usdxMintingClaims...)
-	//	}
-	//}
-
 	if isAllRewards || rewardType == RewardTypeJolt {
 		if hasOwner {
 			hardClaim, foundHardClaim := s.keeper.GetJoltLiquidityProviderClaim(ctx, owner)
@@ -185,42 +138,6 @@ func (s queryServer) queryRewards(
 		} else {
 			hardClaims := s.keeper.GetAllJoltLiquidityProviderClaims(ctx)
 			res.JoltLiquidityProviderClaims = append(res.JoltLiquidityProviderClaims, hardClaims...)
-		}
-	}
-
-	if isAllRewards || rewardType == RewardTypeDelegator {
-		if hasOwner {
-			delegatorClaim, foundDelegatorClaim := s.keeper.GetDelegatorClaim(ctx, owner)
-			if foundDelegatorClaim {
-				res.DelegatorClaims = append(res.DelegatorClaims, delegatorClaim)
-			}
-		} else {
-			delegatorClaims := s.keeper.GetAllDelegatorClaims(ctx)
-			res.DelegatorClaims = append(res.DelegatorClaims, delegatorClaims...)
-		}
-	}
-
-	//if isAllRewards || rewardType == RewardTypeSwap {
-	//	if hasOwner {
-	//		swapClaim, foundSwapClaim := s.keeper.GetSwapClaim(ctx, owner)
-	//		if foundSwapClaim {
-	//			res.SwapClaims = append(res.SwapClaims, swapClaim)
-	//		}
-	//	} else {
-	//		swapClaims := s.keeper.GetAllSwapClaims(ctx)
-	//		res.SwapClaims = append(res.SwapClaims, swapClaims...)
-	//	}
-	//}
-
-	if isAllRewards || rewardType == RewardTypeSavings {
-		if hasOwner {
-			savingsClaim, foundSavingsClaim := s.keeper.GetSavingsClaim(ctx, owner)
-			if foundSavingsClaim {
-				res.SavingsClaims = append(res.SavingsClaims, savingsClaim)
-			}
-		} else {
-			savingsClaims := s.keeper.GetAllSavingsClaims(ctx)
-			res.SavingsClaims = append(res.SavingsClaims, savingsClaims...)
 		}
 	}
 

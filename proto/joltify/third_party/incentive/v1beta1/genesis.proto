@@ -9,7 +9,7 @@ import "google/protobuf/timestamp.proto";
 // import "cosmos/base/v1beta1/coin.proto";
 // import "cosmos/base/v1beta1/coins.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types_legacy";
 
 option (gogoproto.goproto_getters_all) = false;
 

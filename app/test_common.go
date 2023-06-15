@@ -34,9 +34,7 @@ import (
 	mintkeeper "github.com/joltify-finance/joltify_lending/x/mint/keeper"
 	minttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
-	cdpkeeper "github.com/joltify-finance/joltify_lending/x/third_party/cdp/keeper"
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
-	issuancekeeper "github.com/joltify-finance/joltify_lending/x/third_party/issuance/keeper"
 	joltkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/stretchr/testify/require"
@@ -221,9 +219,7 @@ func (tApp TestApp) GetCrisisKeeper() crisiskeeper.Keeper       { return tApp.cr
 func (tApp TestApp) GetParamsKeeper() paramskeeper.Keeper       { return tApp.paramsKeeper }
 
 func (tApp TestApp) GetAuctionKeeper() auctionkeeper.Keeper     { return tApp.auctionKeeper }
-func (tApp TestApp) GetIssuanceKeeper() issuancekeeper.Keeper   { return tApp.issuanceKeeper }
 func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.pricefeedKeeper }
-func (tApp TestApp) GetCDPKeeper() cdpkeeper.Keeper             { return tApp.cdpKeeper }
 func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.joltKeeper }
 func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.incentiveKeeper }
 

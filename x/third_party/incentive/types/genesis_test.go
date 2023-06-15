@@ -7,7 +7,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto"
 )
 
 func TestGenesisState_Validate(t *testing.T) {
@@ -15,6 +14,42 @@ func TestGenesisState_Validate(t *testing.T) {
 		expectPass bool
 		contains   string
 	}
+
+	pa := NewParams(
+		DefaultMultiRewardPeriods,
+		DefaultMultiRewardPeriods,
+		MultipliersPerDenoms{
+			{
+				Denom: "ujolt",
+				Multipliers: Multipliers{
+					NewMultiplier("small", 1, sdk.MustNewDecFromStr("0.33")),
+					NewMultiplier("large", 12, sdk.MustNewDecFromStr("1.00")),
+				},
+			},
+		},
+		time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
+	)
+	//
+	//pa2 := NewParams(
+	//	DefaultMultiRewardPeriods,
+	//	DefaultMultiRewardPeriods,
+	//	nil,
+	//	time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
+	//)
+
+	state := GenesisRewardState{
+		AccumulationTimes: AccumulationTimes{
+			{CollateralType: "", PreviousAccumulationTime: normalAccumulationtime},
+		},
+	}
+
+	state2 := GenesisRewardState{
+		AccumulationTimes: AccumulationTimes{
+			{CollateralType: "bnb", PreviousAccumulationTime: normalAccumulationtime},
+		},
+	}
+
+	claimState := JoltLiquidityProviderClaim{}
 
 	testCases := []struct {
 		name    string
@@ -31,56 +66,7 @@ func TestGenesisState_Validate(t *testing.T) {
 		{
 			name: "valid",
 			genesis: GenesisState{
-				Params: NewParams(
-					RewardPeriods{
-						NewRewardPeriod(
-							true,
-							"bnb-a",
-							time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
-							time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-							sdk.NewCoin("ujolt", sdk.NewInt(25000)),
-						),
-					},
-					DefaultMultiRewardPeriods,
-					DefaultMultiRewardPeriods,
-					DefaultMultiRewardPeriods,
-					DefaultMultiRewardPeriods,
-					DefaultMultiRewardPeriods,
-					MultipliersPerDenoms{
-						{
-							Denom: "ujolt",
-							Multipliers: Multipliers{
-								NewMultiplier("small", 1, sdk.MustNewDecFromStr("0.33")),
-								NewMultiplier("large", 12, sdk.MustNewDecFromStr("1.00")),
-							},
-						},
-					},
-					time.Date(2025, 10, 15, 14, 0, 0, 0, time.UTC),
-				),
-				USDXRewardState: GenesisRewardState{
-					AccumulationTimes: AccumulationTimes{{
-						CollateralType:           "bnb-a",
-						PreviousAccumulationTime: time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
-					}},
-					MultiRewardIndexes: MultiRewardIndexes{{
-						CollateralType: "bnb-a",
-						RewardIndexes:  normalRewardIndexes,
-					}},
-				},
-				USDXMintingClaims: USDXMintingClaims{
-					{
-						BaseClaim: BaseClaim{
-							Owner:  sdk.AccAddress(crypto.AddressHash([]byte("KavaTestUser1"))),
-							Reward: sdk.NewCoin("ujolt", sdk.NewInt(100000000)),
-						},
-						RewardIndexes: []RewardIndex{
-							{
-								CollateralType: "bnb-a",
-								RewardFactor:   sdk.ZeroDec(),
-							},
-						},
-					},
-				},
+				Params: pa,
 			},
 			errArgs: errArgs{
 				expectPass: true,
@@ -89,18 +75,8 @@ func TestGenesisState_Validate(t *testing.T) {
 		{
 			name: "invalid genesis accumulation time",
 			genesis: GenesisState{
-				Params: DefaultParams(),
-				USDXRewardState: GenesisRewardState{
-					AccumulationTimes: AccumulationTimes{{
-						CollateralType:           "",
-						PreviousAccumulationTime: time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
-					}},
-					MultiRewardIndexes: MultiRewardIndexes{{
-						CollateralType: "bnb-a",
-						RewardIndexes:  normalRewardIndexes,
-					}},
-				},
-				USDXMintingClaims: DefaultUSDXClaims,
+				Params:                DefaultParams(),
+				JoltSupplyRewardState: state,
 			},
 			errArgs: errArgs{
 				expectPass: false,
@@ -110,22 +86,9 @@ func TestGenesisState_Validate(t *testing.T) {
 		{
 			name: "invalid claim",
 			genesis: GenesisState{
-				Params:          DefaultParams(),
-				USDXRewardState: DefaultGenesisRewardState,
-				USDXMintingClaims: USDXMintingClaims{
-					{
-						BaseClaim: BaseClaim{
-							Owner:  nil, // invalid address
-							Reward: sdk.NewCoin("ujolt", sdk.NewInt(100000000)),
-						},
-						RewardIndexes: []RewardIndex{
-							{
-								CollateralType: "bnb-a",
-								RewardFactor:   sdk.ZeroDec(),
-							},
-						},
-					},
-				},
+				Params:                      DefaultParams(),
+				JoltSupplyRewardState:       state2,
+				JoltLiquidityProviderClaims: JoltLiquidityProviderClaims{claimState},
 			},
 			errArgs: errArgs{
 				expectPass: false,

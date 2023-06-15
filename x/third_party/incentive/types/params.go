@@ -8,65 +8,48 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	tmtime "github.com/tendermint/tendermint/types/time"
 )
 
 // Parameter keys and default values
 var (
-	KeyUSDXMintingRewardPeriods = []byte("USDXMintingRewardPeriods")
-	KeyJoltSupplyRewardPeriods  = []byte("JoltSupplyRewardPeriods")
-	KeyJoltBorrowRewardPeriods  = []byte("JoltBorrowRewardPeriods")
-	KeyDelegatorRewardPeriods   = []byte("DelegatorRewardPeriods")
-	KeySwapRewardPeriods        = []byte("SwapRewardPeriods")
-	KeySavingsRewardPeriods     = []byte("SavingsRewardPeriods")
-	KeyClaimEnd                 = []byte("ClaimEnd")
-	KeyMultipliers              = []byte("ClaimMultipliers")
+	KeyJoltSupplyRewardPeriods = []byte("JoltSupplyRewardPeriods")
+	KeyJoltBorrowRewardPeriods = []byte("JoltBorrowRewardPeriods")
+	KeyClaimEnd                = []byte("ClaimEnd")
+	KeyMultipliers             = []byte("ClaimMultipliers")
 
-	DefaultActive             = false
-	DefaultRewardPeriods      = RewardPeriods{}
 	DefaultMultiRewardPeriods = MultiRewardPeriods{}
 	DefaultMultipliers        = MultipliersPerDenoms{}
-	DefaultClaimEnd           = tmtime.Canonical(time.Unix(1, 0))
 
-	BondDenom              = "ujolt"
-	USDXMintingRewardDenom = "ujolt"
+	RewardDenom = "ujolt"
 
 	IncentiveMacc = ModuleName
 	oneYear       = time.Hour * 24 * 365
 )
 
 // NewParams returns a new params object
-func NewParams(usdxMinting RewardPeriods, joltSupply, joltBorrow, delegator, swap,
-	savings MultiRewardPeriods, multipliers MultipliersPerDenoms, claimEnd time.Time,
+func NewParams(joltSupply, joltBorrow MultiRewardPeriods, multipliers MultipliersPerDenoms, claimEnd time.Time,
 ) Params {
 	return Params{
-		USDXMintingRewardPeriods: usdxMinting,
-		JoltSupplyRewardPeriods:  joltSupply,
-		JoltBorrowRewardPeriods:  joltBorrow,
-		DelegatorRewardPeriods:   delegator,
-		SwapRewardPeriods:        swap,
-		SavingsRewardPeriods:     savings,
-		ClaimMultipliers:         multipliers,
-		ClaimEnd:                 claimEnd,
+		JoltSupplyRewardPeriods: joltSupply,
+		JoltBorrowRewardPeriods: joltBorrow,
+		ClaimMultipliers:        multipliers,
+		ClaimEnd:                claimEnd,
 	}
 }
 
 // DefaultParams returns default params for incentive module
 func DefaultParams() Params {
 	params := NewParams(
-		RewardPeriods{},
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(500)))),
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(277)))),
 		},
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
-			NewMultiRewardPeriod(true, "ausdt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
+			NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 			NewMultiRewardPeriod(true, "ausdc", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 		},
-		MultiRewardPeriods{},
-		MultiRewardPeriods{},
-		MultiRewardPeriods{},
+
 		MultipliersPerDenoms{
 			{
 				Denom: "ujolt",
@@ -88,12 +71,8 @@ func ParamKeyTable() paramtypes.KeyTable {
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyUSDXMintingRewardPeriods, &p.USDXMintingRewardPeriods, validateRewardPeriodsParam),
 		paramtypes.NewParamSetPair(KeyJoltSupplyRewardPeriods, &p.JoltSupplyRewardPeriods, validateMultiRewardPeriodsParam),
 		paramtypes.NewParamSetPair(KeyJoltBorrowRewardPeriods, &p.JoltBorrowRewardPeriods, validateMultiRewardPeriodsParam),
-		paramtypes.NewParamSetPair(KeyDelegatorRewardPeriods, &p.DelegatorRewardPeriods, validateMultiRewardPeriodsParam),
-		paramtypes.NewParamSetPair(KeySwapRewardPeriods, &p.SwapRewardPeriods, validateMultiRewardPeriodsParam),
-		paramtypes.NewParamSetPair(KeySavingsRewardPeriods, &p.SavingsRewardPeriods, validateMultiRewardPeriodsParam),
 		paramtypes.NewParamSetPair(KeyMultipliers, &p.ClaimMultipliers, validateMultipliersPerDenomParam),
 		paramtypes.NewParamSetPair(KeyClaimEnd, &p.ClaimEnd, validateClaimEndParam),
 	}
@@ -105,27 +84,11 @@ func (p Params) Validate() error {
 		return err
 	}
 
-	if err := validateRewardPeriodsParam(p.USDXMintingRewardPeriods); err != nil {
-		return err
-	}
-
 	if err := validateMultiRewardPeriodsParam(p.JoltSupplyRewardPeriods); err != nil {
 		return err
 	}
 
 	if err := validateMultiRewardPeriodsParam(p.JoltBorrowRewardPeriods); err != nil {
-		return err
-	}
-
-	if err := validateMultiRewardPeriodsParam(p.DelegatorRewardPeriods); err != nil {
-		return err
-	}
-
-	if err := validateMultiRewardPeriodsParam(p.SwapRewardPeriods); err != nil {
-		return err
-	}
-
-	if err := validateMultiRewardPeriodsParam(p.SavingsRewardPeriods); err != nil {
 		return err
 	}
 
@@ -204,8 +167,8 @@ func (rp RewardPeriod) Validate() error {
 		// This is needed to ensure that the begin blocker accumulation does not panic.
 		return fmt.Errorf("end period time %s cannot be before start time %s", rp.End, rp.Start)
 	}
-	if rp.RewardsPerSecond.Denom != USDXMintingRewardDenom {
-		return fmt.Errorf("reward denom must be %s, got: %s", USDXMintingRewardDenom, rp.RewardsPerSecond.Denom)
+	if rp.RewardsPerSecond.Denom != RewardDenom {
+		return fmt.Errorf("reward denom must be %s, got: %s", RewardDenom, rp.RewardsPerSecond.Denom)
 	}
 	if !rp.RewardsPerSecond.IsValid() {
 		return fmt.Errorf("invalid reward amount: %s", rp.RewardsPerSecond)
