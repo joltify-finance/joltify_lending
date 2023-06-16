@@ -10,6 +10,7 @@ const (
 	MaxLiquidattion = 12
 	Senior          = "senior"
 	Junior          = "junior"
+	SupportedToken  = "ausdc"
 )
 
 var RESERVEFACTOR = sdk.NewDecWithPrec(15, 2)

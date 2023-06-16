@@ -36,6 +36,10 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
+	if msg.TargetTokenAmount.Denom != poolInfo.TargetAmount.Denom {
+		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", "target amount denom is not matched")
+	}
+
 	if poolInfo.PoolStatus != types.PoolInfo_PREPARE {
 		return nil, types.ErrUNEXPECTEDSTATUS
 	}

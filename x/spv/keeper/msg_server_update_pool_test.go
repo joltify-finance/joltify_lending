@@ -103,6 +103,28 @@ func TestMsgSERvUpdatePoolWithError(t *testing.T) {
 		PoolIndex:         poolsIndex[0],
 		PoolName:          "updatedpool-1",
 		PoolApy:           "0.3",
+		TargetTokenAmount: sdk.NewCoin("invalid", sdk.NewInt(550)),
+	}
+
+	_, err = app.UpdatePool(ctx, &reqUpdate)
+	require.ErrorContains(t, err, "target amount denom is not matched")
+
+	reqUpdate = types.MsgUpdatePool{
+		Creator:           "jolt10nsg95f7geuhf9dm8v2r4d7jxvnjk23aaufq3p",
+		PoolIndex:         poolsIndex[0],
+		PoolName:          "updatedpool-1",
+		PoolApy:           "0.3",
+		TargetTokenAmount: sdk.NewCoin("invalid", sdk.NewInt(550)),
+	}
+
+	_, err = app.UpdatePool(ctx, &reqUpdate)
+	require.ErrorContains(t, err, "target amount denom is not matched")
+
+	reqUpdate = types.MsgUpdatePool{
+		Creator:           "jolt10nsg95f7geuhf9dm8v2r4d7jxvnjk23aaufq3p",
+		PoolIndex:         poolsIndex[0],
+		PoolName:          "updatedpool-1",
+		PoolApy:           "0.3",
 		TargetTokenAmount: sdk.NewCoin("ausdc", sdk.NewInt(550)),
 	}
 
