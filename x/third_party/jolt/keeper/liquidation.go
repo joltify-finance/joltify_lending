@@ -3,6 +3,7 @@ package keeper
 import (
 	"sort"
 
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -155,7 +156,7 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 
 	// Set up auction constants
 	returnAddrs := []sdk.AccAddress{borrower}
-	weights := []sdk.Int{sdk.NewInt(100)}
+	weights := []sdkmath.Int{sdk.NewInt(100)}
 	debt := sdk.NewCoin("debt", sdk.ZeroInt())
 
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleAccountName)
@@ -315,7 +316,7 @@ func (k Keeper) IsWithinValidLtvRange(ctx sdk.Context, deposit types2.Deposit, b
 		totalBorrowedUSDAmount = totalBorrowedUSDAmount.Add(usdValue)
 	}
 
-	ratio := sdk.ZeroDec()
+	var ratio sdk.Dec
 	if totalBorrowableUSDAmount.Equal(sdk.ZeroDec()) {
 		ratio = sdk.MustNewDecFromStr("10000")
 	} else {
@@ -417,7 +418,8 @@ func getDenoms(coins sdk.Coins) []string {
 
 func removeDuplicates(one []string, two []string) []string {
 	check := make(map[string]int)
-	fullList := append(one, two...)
+	fullList := one
+	fullList = append(fullList, two...)
 
 	res := []string{}
 	for _, val := range fullList {
