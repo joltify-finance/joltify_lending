@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/gogo/protobuf/proto"
@@ -307,23 +306,23 @@ func (m mockbankKeeper) BurnCoins(ctx sdk.Context, name string, amt sdk.Coins) e
 
 type mockPriceFeedKeeper struct{}
 
-type mockAuctionKeeper struct{}
-
-func (m mockAuctionKeeper) StartCollateralAuction(ctx sdk.Context, seller string, lot sdk.Coin, maxBid sdk.Coin, lotReturnAddrs []sdk.AccAddress, lotReturnWeights []sdkmath.Int, debt sdk.Coin) (uint64, error) {
-	// TODO implement me
-	panic("implement me")
+type MockAuctionKeeper struct {
+	AuctionAmount []sdk.Coin
+	SellerBid     []string
 }
 
-func (m mockAuctionKeeper) StartSurplusAuction(ctx sdk.Context, seller string, lot sdk.Coin, bidDenom string) (uint64, error) {
-	// TODO implement me
-	panic("implement me")
+func (m MockAuctionKeeper) StartSurplusAuction(ctx sdk.Context, seller string, lot sdk.Coin, bidDenom string) (uint64, error) {
+	m.AuctionAmount[0] = lot
+	m.SellerBid[0] = seller
+	m.SellerBid[1] = bidDenom
+	return 1, nil
 }
 
 func (m mockPriceFeedKeeper) GetCurrentPrice(ctx sdk.Context, marketID string) (types2.CurrentPrice, error) {
 	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdk.MustNewDecFromStr("0.7")}, nil
 }
 
-func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, sdk.Context) {
+func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, MockAuctionKeeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
@@ -351,7 +350,10 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 	}
 	priceFeedKeeper := mockPriceFeedKeeper{}
 	bankKeeper := mockbankKeeper{make(map[string]sdk.Coins)}
-	auctionKeeper := mockAuctionKeeper{}
+	auctionKeeper := MockAuctionKeeper{
+		AuctionAmount: make([]sdk.Coin, 1),
+		SellerBid:     make([]string, 2),
+	}
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -371,5 +373,5 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
 
-	return k, &nftKeeper, &bankKeeper, ctx
+	return k, &nftKeeper, &bankKeeper, auctionKeeper, ctx
 }

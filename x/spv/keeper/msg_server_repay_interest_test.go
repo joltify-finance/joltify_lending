@@ -19,7 +19,7 @@ import (
 func TestMsgRepayInterest(t *testing.T) {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, _, _, wctx := setupMsgServer(t)
+	app, k, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
@@ -141,7 +141,7 @@ func testWithDifferentPrePayAmount(t *testing.T, ctx sdk.Context, app types.MsgS
 func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, _, wctx := setupMsgServer(t)
+	app, k, nftKeeper, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%

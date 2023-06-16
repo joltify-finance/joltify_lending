@@ -36,6 +36,11 @@ type KycKeeper interface {
 	GetByWallet(ctx sdk.Context, wallet string) (kyctypes.Investor, error)
 }
 
+// AuctionKeeper expected interface for the auction keeper (noalias)
+type AuctionKeeper interface {
+	StartSurplusAuction(ctx sdk.Context, seller string, lot sdk.Coin, bidDenom string) (uint64, error)
+}
+
 type NFTKeeper interface {
 	Mint(ctx sdk.Context, nft nfttypes.NFT, receiver sdk.AccAddress) error
 	SaveClass(ctx sdk.Context, class nfttypes.Class) error

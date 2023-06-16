@@ -57,6 +57,7 @@ func setupApp(t *testing.T) (sdk.Context, *spvkeeper.Keeper) {
 		nil,
 		nil,
 		nil,
+		nil,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())

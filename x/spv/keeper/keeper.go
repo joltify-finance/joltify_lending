@@ -10,7 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
-	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
@@ -25,7 +24,7 @@ type (
 		accKeeper       types.AccountKeeper
 		nftKeeper       types.NFTKeeper
 		priceFeedKeeper types.PriceFeedKeeper
-		auctionKeeper   types2.AuctionKeeper
+		auctionKeeper   types.AuctionKeeper
 	}
 )
 
@@ -39,7 +38,7 @@ func NewKeeper(
 	accKeeper types.AccountKeeper,
 	nftKeeper types.NFTKeeper,
 	pricefeedkeeper types.PriceFeedKeeper,
-	auctionKeeper types2.AuctionKeeper,
+	auctionKeeper types.AuctionKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
