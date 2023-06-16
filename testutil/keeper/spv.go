@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/gogo/protobuf/proto"
@@ -305,6 +306,18 @@ func (m mockbankKeeper) BurnCoins(ctx sdk.Context, name string, amt sdk.Coins) e
 
 type mockPriceFeedKeeper struct{}
 
+type mockAuctionKeeper struct{}
+
+func (m mockAuctionKeeper) StartCollateralAuction(ctx sdk.Context, seller string, lot sdk.Coin, maxBid sdk.Coin, lotReturnAddrs []sdk.AccAddress, lotReturnWeights []sdkmath.Int, debt sdk.Coin) (uint64, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (m mockAuctionKeeper) StartSurplusAuction(ctx sdk.Context, seller string, lot sdk.Coin, bidDenom string) (uint64, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
 func (m mockPriceFeedKeeper) GetCurrentPrice(ctx sdk.Context, marketID string) (types2.CurrentPrice, error) {
 	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdk.MustNewDecFromStr("0.7")}, nil
 }
@@ -337,6 +350,7 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 	}
 	priceFeedKeeper := mockPriceFeedKeeper{}
 	bankKeeper := mockbankKeeper{make(map[string]sdk.Coins)}
+	auctionKeeper := mockAuctionKeeper{}
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -348,6 +362,7 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 		accKeeper,
 		nftKeeper,
 		priceFeedKeeper,
+		auctionKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())

@@ -80,7 +80,6 @@ func queryGetJoltRewards(ctx sdk.Context, req abci.RequestQuery, k Keeper, legac
 }
 
 func queryGetRewardFactors(ctx sdk.Context, req abci.RequestQuery, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
-
 	var supplyFactors types2.MultiRewardIndexes
 	k.IterateJoltSupplyRewardIndexes(ctx, func(denom string, indexes types2.RewardIndexes) (stop bool) {
 		supplyFactors = supplyFactors.With(denom, indexes)

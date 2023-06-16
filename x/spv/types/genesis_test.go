@@ -3,6 +3,7 @@ package types_test
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/require"
 )
@@ -19,9 +20,12 @@ func TestGenesisState_Validate(t *testing.T) {
 			valid:    true,
 		},
 		{
-			desc:     "valid genesis state",
+			desc: "valid genesis state",
 			genState: &types.GenesisState{
 
+				Params: types.Params{
+					BurnThreshold: sdk.NewCoin(types.SupportedToken, sdk.NewInt(100)),
+				},
 				// this line is used by starport scaffolding # types/genesis/validField
 			},
 			valid: true,

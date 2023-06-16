@@ -46,7 +46,7 @@ func NewKeeper(cdc codec.Codec, key storetypes.StoreKey, paramstore paramtypes.S
 }
 
 // SetHooks adds hooks to the keeper.
-func (k Keeper) SetHooks(hooks types2.JOLTHooks) Keeper {
+func (k *Keeper) SetHooks(hooks types2.JOLTHooks) *Keeper {
 	if k.hooks != nil {
 		panic("cannot set jolt hooks twice")
 	}

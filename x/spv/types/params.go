@@ -25,7 +25,7 @@ func NewParams() Params {
 	if !ok {
 		panic("invalid threshold setting")
 	}
-	return Params{BurnThreshold: sdk.NewCoin("ausdc", amt)}
+	return Params{BurnThreshold: sdk.NewCoin(SupportedToken, amt)}
 }
 
 // DefaultParams returns a default set of parameters
@@ -45,8 +45,8 @@ func validateBurnToken(i interface{}) error {
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
-	if co.Denom != "ausdc" {
-		return fmt.Errorf("we only accept usdc")
+	if co.Denom != SupportedToken {
+		return fmt.Errorf("we only accept ausdc and current is %v", co.Denom)
 	}
 	return nil
 }
