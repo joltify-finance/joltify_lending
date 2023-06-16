@@ -1,11 +1,17 @@
 package types
 
 import (
+	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
 )
 
-var _ paramtypes.ParamSet = (*Params)(nil)
+var (
+	_                paramtypes.ParamSet = (*Params)(nil)
+	KeyBurnThreshold                     = []byte("burnthreshold")
+)
 
 // ParamKeyTable the param key table for launch module
 func ParamKeyTable() paramtypes.KeyTable {
@@ -14,7 +20,12 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	return Params{}
+	// 100 usdc
+	amt, ok := sdk.NewIntFromString("100000000000000000000")
+	if !ok {
+		panic("invalid threshold setting")
+	}
+	return Params{BurnThreshold: sdk.NewCoin("ausdc", amt)}
 }
 
 // DefaultParams returns a default set of parameters
@@ -24,11 +35,27 @@ func DefaultParams() Params {
 
 // ParamSetPairs get the params.ParamSet
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
-	return paramtypes.ParamSetPairs{}
+	return paramtypes.ParamSetPairs{
+		paramtypes.NewParamSetPair(KeyBurnThreshold, &p.BurnThreshold, validateBurnToken),
+	}
+}
+
+func validateBurnToken(i interface{}) error {
+	co, ok := i.(sdk.Coin)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+	if co.Denom != "ausdc" {
+		return fmt.Errorf("we only accept usdc")
+	}
+	return nil
 }
 
 // Validate validates the set of params
 func (p Params) Validate() error {
+	if err := validateBurnToken(p.BurnThreshold); err != nil {
+		return err
+	}
 	return nil
 }
 
