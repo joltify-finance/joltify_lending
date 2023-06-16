@@ -20,7 +20,8 @@ func TestMsgUpdatePool_ValidateBasic(t *testing.T) {
 				Creator: "invalid_address",
 			},
 			err: sdkerrors.ErrInvalidAddress,
-		}, {
+		},
+		{
 			name: "valid address",
 			msg: MsgUpdatePool{
 				Creator: sample.AccAddress(),

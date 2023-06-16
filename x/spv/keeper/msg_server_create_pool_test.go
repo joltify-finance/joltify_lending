@@ -50,6 +50,11 @@ func TestMsgSERvCreatePool(t *testing.T) {
 	_, err = app.CreatePool(ctx, &req)
 	require.Error(t, err)
 
+	// invalid demon
+	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("invalid", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
+	_, err = app.CreatePool(ctx, &req)
+	require.ErrorContains(t, err, "unsupported token")
+
 	// create the first pool apy 7.8%
 	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
 	_, err = app.CreatePool(ctx, &req)
