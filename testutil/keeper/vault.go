@@ -1,8 +1,12 @@
 package keeper
 
 import (
+	"encoding/hex"
 	"testing"
 	"time"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	"github.com/stretchr/testify/require"
 
 	sdkmath "cosmossdk.io/math"
 
@@ -106,6 +110,28 @@ func (t testVaultStaking) SetLastTotalPower(ctx sdk.Context, power sdkmath.Int) 
 
 func (t testVaultStaking) BondDenom(ctx sdk.Context) (res string) {
 	panic("implement me")
+}
+
+func GenerateNValidators(t *testing.T, n int) (stakingtypes.Validators, []sdk.AccAddress) {
+	testValidators := make(stakingtypes.Validators, n)
+	creators := make([]sdk.AccAddress, n)
+	for i := 0; i < n; i++ {
+		sk := ed25519.GenPrivKey()
+		desc := stakingtypes.NewDescription("tester", "testId", "www.test.com", "aaa", "aaa")
+
+		skCreator := secp256k1.GenPrivKey()
+
+		skCreator.PubKey().Address()
+		creator := skCreator.PubKey().Address().Bytes()
+
+		valAddr, err := sdk.ValAddressFromHex(hex.EncodeToString(creator))
+		require.NoError(t, err)
+		testValidator, err := stakingtypes.NewValidator(valAddr, sk.PubKey(), desc)
+		require.NoError(t, err)
+		testValidators[i] = testValidator
+		creators[i] = creator
+	}
+	return testValidators, creators
 }
 
 // setup the general vault app
