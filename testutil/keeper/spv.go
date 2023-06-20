@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -45,6 +44,10 @@ var Wallets = []string{
 	"jolt1v9ls99c83dst7x6xwwnsjcyp5zsa3acfhaxq5n",
 	"jolt169a92jz2rmxy0ll73kztlmtucswvvft78xeqne",
 	"jolt13xxls80rw3p036zyfy8hhtjyvft4ckg5a09agh",
+}
+
+func (m mockKycKeeper) GetInvestorWallets(_ sdk.Context, investorID string) (kycmoduletypes.Investor, error) {
+	return kycmoduletypes.Investor{InvestorId: investorID, WalletAddress: Wallets}, nil
 }
 
 func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmoduletypes.ProjectInfo) {
@@ -130,23 +133,21 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4}
 }
 
-func (m mockKycKeeper) QueryByWallet(goCtx context.Context, req *kycmoduletypes.QueryByWalletRequest) (*kycmoduletypes.QueryByWalletResponse, error) {
+func (m mockKycKeeper) GetByWallet(_ sdk.Context, wallet string) (kycmoduletypes.Investor, error) {
 	inv := kycmoduletypes.Investor{
 		InvestorId:    "1",
-		WalletAddress: []string{req.Wallet},
+		WalletAddress: []string{wallet},
 	}
 
 	inv2 := kycmoduletypes.Investor{InvestorId: "2", WalletAddress: Wallets}
 
 	for _, el := range Wallets {
-		if req.Wallet == el {
-			return &kycmoduletypes.QueryByWalletResponse{Investor: &inv2}, nil
+		if wallet == el {
+			return inv2, nil
 		}
 	}
 
-	return &kycmoduletypes.QueryByWalletResponse{
-		Investor: &inv,
-	}, nil
+	return inv, nil
 }
 
 type mockAccKeeper struct{}

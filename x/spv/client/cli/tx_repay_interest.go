@@ -16,7 +16,7 @@ var _ = strconv.Itoa(0)
 
 func CmdRepayInterest() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "repay-interest [pool-index][repay-amount]",
+		Use:   "repay-interest [pool-index] [repay-amount]",
 		Short: "Broadcast message repay-interest",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {

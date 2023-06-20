@@ -181,7 +181,7 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 	k.SetPool(ctx, poolInfo)
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
-			types.EventTypePayPrincipal,
+			types.EventTypePayPrincipalPartial,
 			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
 			sdk.NewAttribute(types.AttributeAmount, msg.Token.String()),
 		),
