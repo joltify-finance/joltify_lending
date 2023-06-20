@@ -153,6 +153,9 @@ func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInf
 	if err != nil {
 		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err
 	}
+	if paymentAmount.IsZero() {
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), errors.New("no interest to be paid")
+	}
 	usdEachMonth, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, marketId, paymentAmount)
 	if err != nil {
 		return 0, sdkmath.ZeroInt(), sdk.ZeroInt(), sdk.ZeroDec(), err
@@ -223,14 +226,14 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 	ownInterest := poolInfo.EscrowInterestAmount.Abs()
 	leftover := msg.Token.Amount.Sub(ownInterest)
 	if leftover.IsNegative() {
-		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay all the outstanding interest")
+		return nil, coserrors.Wrapf(types.ErrInsufficientFund, "you must pay all the outstanding interest which is %v", ownInterest)
 	}
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 	marketID := denomConvertToMarketID(a)
 	counter, interestReceived, eachMonthPayment, ratio, err := k.calculatePaymentMonth(ctx, poolInfo, marketID, leftover)
 	if err != nil {
-		return nil, coserrors.Wrapf(err, "calculate payment month failed")
+		return nil, coserrors.Wrapf(err, "calculate payment each month failed")
 	}
 
 	if counter < 1 {
@@ -245,11 +248,20 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 	poolInfo.InterestPrepayment = &prepayment
 	totalGetFromSPV := ownInterest.Add(interestReceived)
 
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{sdk.NewCoin(msg.Token.Denom, totalGetFromSPV)})
+	paidOutInterest := sdk.NewCoin(msg.Token.Denom, totalGetFromSPV)
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, spvAddress, types.ModuleAccount, sdk.Coins{paidOutInterest})
 	if err != nil {
 		return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
 	}
 
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRepayInterestSPV,
+			sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+			sdk.NewAttribute(types.AttributeAmount, paidOutInterest.String()),
+		),
+	)
+
 	k.SetPool(ctx, poolInfo)
-	return &types.MsgRepayInterestResponse{}, nil
+	return &types.MsgRepayInterestResponse{InterestAmount: paidOutInterest}, nil
 }

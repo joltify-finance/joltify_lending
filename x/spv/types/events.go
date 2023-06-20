@@ -6,6 +6,7 @@ const (
 	EventTypeAddInvestors        = "add_investors"
 	EventTypeBorrow              = "borrow"
 	EventTypeRepayInterest       = "repay_interest"
+	EventTypeRepayInterestSPV    = "repay_interest_spv"
 	EventTypeClaimInterest       = "claim_interest"
 	EventTypePayPrincipal        = "pay_principal"
 	EventTypePayPrincipalPartial = "pay_principal_partial"

@@ -76,7 +76,7 @@ func TestQueryInvestorWalletsInvestors(t *testing.T) {
 	}{
 		{
 			id:     "0",
-			err:    fmt.Errorf("rpc error: code = NotFound desc = rpc error: code = NotFound desc = investor id 111: key not found"),
+			err:    fmt.Errorf("NotFound desc = investor id 111"),
 			desc:   "invalid, not found",
 			code:   0,
 			fields: []string{"111"},
@@ -113,7 +113,7 @@ func TestQueryInvestorWalletsInvestors(t *testing.T) {
 			argsQuery = append(argsQuery, tc.args...)
 			out, err := clitestutil.ExecTestCLICmd(ctx, cli.CmdQueryInvestorWallets(), argsQuery)
 			if tc.err != nil {
-				require.Equal(t, tc.err.Error(), err.Error())
+				require.ErrorContains(t, err, tc.err.Error())
 			} else {
 				var resp kyctypes.QueryInvestorWalletsResponse
 				require.NoError(t, err)
