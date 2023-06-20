@@ -18,7 +18,7 @@ import (
 func prepare(t *testing.T) (*joltapp.TestApp, sdk.Context, []sdk.AccAddress) {
 	app, ctx := keepertest.SetupVaultApp(t)
 
-	testValidators, creators := generateNValidators(t, 4)
+	testValidators, creators := keepertest.GenerateNValidators(t, 4)
 
 	for _, el := range creators {
 		err := simapp.FundAccount(app.GetBankKeeper(), ctx, el, sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}})

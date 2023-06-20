@@ -750,15 +750,6 @@ func NewApp(
 	app.MountTransientStores(tkeys)
 	app.MountMemoryStores(memKeys)
 
-	// initialize the app
-	var fetchers []ante.AddressFetcher
-	if options.MempoolEnableAuth {
-		fetchers = append(fetchers,
-			func(sdk.Context) []sdk.AccAddress { return options.MempoolAuthAddresses },
-			app.pricefeedKeeper.GetAuthorizedAddresses,
-		)
-	}
-
 	baseAnte := cosante.HandlerOptions{
 		AccountKeeper:   app.accountKeeper,
 		BankKeeper:      app.bankKeeper,
@@ -767,7 +758,7 @@ func NewApp(
 		SigGasConsumer:  cosante.DefaultSigVerificationGasConsumer,
 	}
 
-	anteHandler, err := ante.NewAnteHandler(app.VaultKeeper, baseAnte, fetchers)
+	anteHandler, err := ante.NewAnteHandler(app.VaultKeeper, app.spvKeeper, baseAnte)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}

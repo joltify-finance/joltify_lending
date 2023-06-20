@@ -59,6 +59,43 @@ func (k Keeper) sendFeesToValidators(ctx sdk.Context, pool *types.PoolInfo) bool
 	return true
 }
 
+func NewHistory(height int64, amount sdk.Coins) *types.HistoricalAmount {
+	return &types.HistoricalAmount{
+		BlockHeight: height,
+		Amount:      amount,
+	}
+}
+
+func ProcessHistory(historyLength int32, newItem *types.HistoricalAmount, coinsQuota *types.CoinsQuota) *types.CoinsQuota {
+	if int32(len(coinsQuota.History)) < historyLength {
+		coinsQuota.History = append(coinsQuota.History, newItem)
+		coinsQuota.CoinsSum.Sort()
+		newItem.Amount.Sort()
+		coinsQuota.CoinsSum = coinsQuota.CoinsSum.Add(newItem.Amount...)
+		return coinsQuota
+	}
+	// now we pop up the old and add the new one
+	old := coinsQuota.History[0]
+	old.Amount.Sort()
+	coinsQuota.History = coinsQuota.History[1:]
+	coinsQuota.CoinsSum = coinsQuota.CoinsSum.Sub(old.Amount...).Add(newItem.Amount...)
+	coinsQuota.History = append(coinsQuota.History, newItem)
+	return coinsQuota
+}
+
+func (k Keeper) ProcessQuota(ctx sdk.Context, totalCoins sdk.Coins) {
+	quotaData, found := k.GetQuotaData(ctx)
+	if !found {
+		panic("this item should be always be available")
+	}
+	entry := NewHistory(ctx.BlockHeight(), totalCoins)
+
+	// now we pop out one item from history and add the new one in
+	params := k.GetParams(ctx)
+	newQuotaData := ProcessHistory(params.HistoryLength, entry, &quotaData)
+	k.SetQuotaData(ctx, *newQuotaData)
+}
+
 func (k Keeper) ProcessAccountLeft(ctx sdk.Context) {
 	req := types.QueryLatestPoolRequest{}
 	wctx := sdk.WrapSDKContext(ctx)

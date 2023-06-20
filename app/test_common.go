@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
-	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
@@ -167,8 +168,8 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 		baseapp.SetMinGasPrices("0stake"),
 	)
 
-	privVal := mock.NewPV()
-	pubKey, err := privVal.GetPubKey()
+	privVal := ed25519.GenPrivKey()
+	pubKey, err := cryptocodec.ToTmPubKeyInterface(privVal.PubKey())
 	if err != nil {
 		panic(err)
 	}
@@ -265,8 +266,8 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		}
 	}
 
-	privVal := mock.NewPV()
-	pubKey, err := privVal.GetPubKey()
+	privVal := ed25519.GenPrivKey()
+	pubKey, err := cryptocodec.ToTmPubKeyInterface(privVal.PubKey())
 	if err != nil {
 		panic(err)
 	}
