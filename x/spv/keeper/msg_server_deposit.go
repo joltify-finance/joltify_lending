@@ -7,10 +7,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 
 	coserrors "cosmossdk.io/errors"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -41,12 +39,8 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidCoins, "we only accept %v", poolInfo.TargetAmount.Denom)
 	}
 
-	req := kyctypes.QueryByWalletRequest{
-		Wallet: msg.Creator,
-	}
-
-	resp, err := k.kycKeeper.QueryByWallet(goCtx, &req)
-	if err != nil || resp.Investor == nil {
+	resp, err := k.kycKeeper.GetByWallet(ctx, msg.Creator)
+	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "the investor cannot be found %v", msg.Creator)
 	}
 
@@ -57,7 +51,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	found = false
 	for _, el := range investorsResp.Investors {
-		if el == resp.Investor.InvestorId {
+		if el == resp.InvestorId {
 			found = true
 		}
 	}
@@ -75,7 +69,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we update the users deposit data
 	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
-		depositor := types.DepositorInfo{InvestorId: resp.Investor.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdkmath.ZeroInt()), WithdrawalAmount: msg.Token, LinkedNFT: []string{}, DepositType: types.DepositorInfo_unset, PendingInterest: sdk.NewCoin(msg.Token.Denom, sdk.ZeroInt())}
+		depositor := types.DepositorInfo{InvestorId: resp.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdkmath.ZeroInt()), WithdrawalAmount: msg.Token, LinkedNFT: []string{}, DepositType: types.DepositorInfo_unset, PendingInterest: sdk.NewCoin(msg.Token.Denom, sdk.ZeroInt())}
 		k.SetDepositor(ctx, depositor)
 
 	} else {

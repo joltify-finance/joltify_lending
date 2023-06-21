@@ -22,20 +22,26 @@ func (k Keeper) QueryByWallet(goCtx context.Context, req *types.QueryByWalletReq
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	ret, err := k.GetByWallet(ctx, req.Wallet)
+	if err != nil {
+		return &types.QueryByWalletResponse{}, status.Errorf(codes.NotFound, "wallet %v", req.Wallet)
+	}
+	return &types.QueryByWalletResponse{Investor: &ret}, nil
+}
 
+func (k Keeper) GetByWallet(ctx sdk.Context, wallet string) (types.Investor, error) {
 	store := ctx.KVStore(k.storeKey)
 	investorStores := prefix.NewStore(store, types.KeyPrefix(types.InvestorToWalletsPrefix))
-
 	iterator := sdk.KVStorePrefixIterator(investorStores, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var investor types.Investor
 		k.cdc.MustUnmarshal(iterator.Value(), &investor)
 		for _, el := range investor.WalletAddress {
-			if el == req.Wallet {
-				return &types.QueryByWalletResponse{Investor: &investor}, nil
+			if el == wallet {
+				return investor, nil
 			}
 		}
 	}
-	return &types.QueryByWalletResponse{Investor: nil}, nil
+	return types.Investor{}, status.Errorf(codes.NotFound, "wallet %v", wallet)
 }

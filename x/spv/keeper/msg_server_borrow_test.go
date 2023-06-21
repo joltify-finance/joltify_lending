@@ -493,7 +493,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 
 	totalInterestOwn := interestWithReserve.MulRaw(10)
 	_, err = suite.app.RepayInterest(suite.ctx, types.NewMsgRepayInterest("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", depositorPool, sdk.NewCoin("ausdc", totalInterestOwn.SubRaw(100))))
-	suite.Require().ErrorContains(err, "you must pay all the outstanding interest: insufficient tokens")
+	suite.Require().ErrorContains(err, "you must pay all the outstanding interest which is")
 
 	addr := authtypes.NewModuleAddress("spv")
 	coinBefore := suite.bankKeeper.GetBalance(suite.ctx, addr, "ausdc")
@@ -604,7 +604,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 
 	totalInterestOwn := interestWithReserve.MulRaw(10)
 	_, err = suite.app.RepayInterest(suite.ctx, types.NewMsgRepayInterest("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", depositorPool, sdk.NewCoin("ausdc", totalInterestOwn.SubRaw(100))))
-	suite.Require().ErrorContains(err, "you must pay all the outstanding interest: insufficient tokens")
+	suite.Require().ErrorContains(err, "you must pay all the outstanding interest which is")
 
 	addr := authtypes.NewModuleAddress("spv")
 	coinBefore := suite.bankKeeper.GetBalance(suite.ctx, addr, "ausdc")

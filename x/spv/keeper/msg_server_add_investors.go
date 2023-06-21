@@ -49,8 +49,15 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 		return nil, coserrors.Wrap(types.ErrUnauthorized, "unauthorized operations")
 	}
 
-	allProjects := k.kycKeeper.GetProjects(ctx)
+	// check if the investor id exist in kyc module
+	for _, el := range msg.InvestorID {
+		_, err := k.kycKeeper.GetInvestorWallets(ctx, el)
+		if err != nil {
+			return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given investor id %v cannot be found", el)
+		}
+	}
 
+	allProjects := k.kycKeeper.GetProjects(ctx)
 	var targetProject *kyctypes.ProjectInfo
 	for _, el := range allProjects {
 		if el.Index == pool.LinkedProject {

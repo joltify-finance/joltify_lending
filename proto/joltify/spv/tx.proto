@@ -91,7 +91,11 @@ message MsgRepayInterest{
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
 }
-message MsgRepayInterestResponse{}
+message MsgRepayInterestResponse{
+  cosmos.base.v1beta1.Coin interest_amount= 1[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
 
 message MsgClaimInterest {
   string creator = 1;

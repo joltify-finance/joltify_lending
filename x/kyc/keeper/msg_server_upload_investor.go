@@ -89,13 +89,11 @@ func (k msgServer) UploadInvestor(goCtx context.Context, msg *types.MsgUploadInv
 		if err != nil {
 			return nil, sdkerrors.Wrapf(types.ErrInvalidWallets, "invalid wallets: %v", msg.WalletAddress)
 		}
-		q := types.QueryByWalletRequest{Wallet: el}
-		resp, err := k.QueryByWallet(goCtx, &q)
-		if err != nil {
+
+		// the wallet has been already registered
+		_, err = k.GetByWallet(ctx, el)
+		if err == nil {
 			return nil, sdkerrors.Wrapf(types.ErrInvalidWallets, "fail to check the wallets against existing data: %v", msg.WalletAddress)
-		}
-		if resp.Investor != nil {
-			return nil, sdkerrors.Wrapf(types.ErrInvalidWallets, "that wallet address has been registered already: %v", msg.WalletAddress)
 		}
 	}
 
