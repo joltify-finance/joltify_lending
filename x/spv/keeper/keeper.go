@@ -24,6 +24,7 @@ type (
 		accKeeper       types.AccountKeeper
 		nftKeeper       types.NFTKeeper
 		priceFeedKeeper types.PriceFeedKeeper
+		auctionKeeper   types.AuctionKeeper
 	}
 )
 
@@ -37,6 +38,7 @@ func NewKeeper(
 	accKeeper types.AccountKeeper,
 	nftKeeper types.NFTKeeper,
 	pricefeedkeeper types.PriceFeedKeeper,
+	auctionKeeper types.AuctionKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -53,6 +55,7 @@ func NewKeeper(
 		accKeeper:       accKeeper,
 		nftKeeper:       nftKeeper,
 		priceFeedKeeper: pricefeedkeeper,
+		auctionKeeper:   auctionKeeper,
 	}
 }
 

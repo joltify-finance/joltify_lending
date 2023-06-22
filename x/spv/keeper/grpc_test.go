@@ -66,7 +66,7 @@ func setupPoolForQueryTest(suite *querySuite) {
 func (suite *querySuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, bankKeeper, wctx := setupMsgServer(suite.T())
+	app, k, nftKeeper, bankKeeper, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 

@@ -56,8 +56,6 @@ func (k msgServer) CreateIssueToken(goCtx context.Context, msg *types.MsgCreateI
 		issueToken,
 	)
 
-	ctx.TxBytes()
-
 	id := crypto.Sha256(ctx.TxBytes())
 	hid := hex.EncodeToString(id)
 

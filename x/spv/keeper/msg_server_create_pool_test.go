@@ -29,7 +29,7 @@ func TestMsgSERvCreatePool(t *testing.T) {
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
-	app, k, _, _, wctx := setupMsgServer(t)
+	app, k, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 	_ = k
 
@@ -70,7 +70,7 @@ func TestMsgSERvCreatePool(t *testing.T) {
 func TestMsgSERvCreatePoolApyCheck(t *testing.T) {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, _, _, wctx := setupMsgServer(t)
+	app, k, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
