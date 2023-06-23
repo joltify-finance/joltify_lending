@@ -8,11 +8,7 @@ const (
 	EventTypeHardLiquidation      = "hard_liquidation"
 	EventTypeHardRepay            = "hard_repay"
 	AttributeValueCategory        = ModuleName
-	AttributeKeyDeposit           = "deposit"
-	AttributeKeyDepositDenom      = "deposit_denom"
-	AttributeKeyDepositCoins      = "deposit_coins"
 	AttributeKeyDepositor         = "depositor"
-	AttributeKeyBorrow            = "borrow"
 	AttributeKeyBorrower          = "borrower"
 	AttributeKeyBorrowCoins       = "borrow_coins"
 	AttributeKeySender            = "sender"

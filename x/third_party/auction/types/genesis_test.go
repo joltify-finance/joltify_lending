@@ -2,7 +2,7 @@ package types
 
 import (
 	"testing"
-	time "time"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"

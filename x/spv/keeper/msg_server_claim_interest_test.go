@@ -738,7 +738,7 @@ func (suite *claimInterestSuite) TestClaimInterestNoAuthorized() {
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
-	reqInterest := types.MsgRepayInterest{"jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e9))}
+	reqInterest := types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e9))}
 	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
 	suite.Require().NoError(err)
 

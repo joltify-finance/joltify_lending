@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -77,7 +77,7 @@ func (p Params) String() string {
 	return string(out)
 }
 
-// validate a set of params
+// Validate validates a set of params
 func (p Params) Validate() error {
 	if err := validateInteger(p.BlockChurnInterval); err != nil {
 		return err

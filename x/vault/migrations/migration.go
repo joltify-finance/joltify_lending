@@ -8,8 +8,3 @@ import (
 type Migrator struct {
 	keeper vaultmodulekeeper.Keeper
 }
-
-// NewMigrator returns a new Migrator.
-func NewMigrator(keeper vaultmodulekeeper.Keeper) Migrator {
-	return Migrator{keeper: keeper}
-}

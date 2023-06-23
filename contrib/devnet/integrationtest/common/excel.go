@@ -3,7 +3,7 @@ package common
 import (
 	"fmt"
 
-	excelize "github.com/xuri/excelize/v2"
+	"github.com/xuri/excelize/v2"
 )
 
 func WritePoolToExcel(sheetName string, data [][]string, fileName string) {

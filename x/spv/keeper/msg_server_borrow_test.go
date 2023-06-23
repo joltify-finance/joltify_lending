@@ -154,7 +154,7 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 	}
 }
 
-func compareDepositor(suite suite.Suite, expected, actual types.DepositorInfo) {
+func (suite *addBorrowSuite) compareDepositor(expected, actual types.DepositorInfo) {
 	suite.Require().Equal(expected.InvestorId, actual.InvestorId)
 	suite.Require().True(expected.DepositorAddress.Equals(actual.DepositorAddress))
 	suite.Require().True(expected.LockedAmount.IsEqual(actual.LockedAmount))
@@ -238,7 +238,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 		LinkedNFT:        []string{},
 	}
 
-	compareDepositor(suite.Suite, targetDepositor, depositor)
+	suite.compareDepositor(targetDepositor, depositor)
 	// we deposit again,so withdrawal is doubled
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -248,7 +248,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	depositor, found = suite.keeper.GetDepositor(suite.ctx, depositorPool, creatorAddr1)
 	suite.Require().True(found)
-	compareDepositor(suite.Suite, targetDepositor, depositor)
+	suite.compareDepositor(targetDepositor, depositor)
 
 	// we mock the second user deposits the token, now we have 3*4e5 tokens
 	//_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)

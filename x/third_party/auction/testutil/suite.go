@@ -93,7 +93,7 @@ func (suite *Suite) SetupTest(numAddrs int) {
 	suite.AccountKeeper = tApp.GetAccountKeeper()
 }
 
-// CreateAccount adds coins to an account address
+// AddCoinsToAccount adds coins to an account address
 func (suite *Suite) AddCoinsToAccount(addr sdk.AccAddress, coins sdk.Coins) {
 	ak := suite.App.GetAccountKeeper()
 	acc := ak.NewAccountWithAddress(suite.Ctx, addr)
@@ -124,7 +124,7 @@ func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, recipientM
 	return bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, recipientMod, amounts)
 }
 
-// AddCoinsToModule adds coins to a named module account
+// AddCoinsToNamedModule adds coins to a named module account
 func (suite *Suite) AddCoinsToNamedModule(moduleName string, amount sdk.Coins) {
 	// Does not use suite.BankKeeper.MintCoins as module account would not have permission to mint
 	err := fundModuleAccount(suite.BankKeeper, suite.Ctx, moduleName, amount)

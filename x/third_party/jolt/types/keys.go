@@ -15,9 +15,6 @@ const (
 
 	// QuerierRoute Top level query string
 	QuerierRoute = ModuleName
-
-	// DefaultParamspace default name for parameter store
-	DefaultParamspace = ModuleName
 )
 
 var (
@@ -32,15 +29,3 @@ var (
 	SupplyInterestFactorPrefix    = []byte{0x09} // denom -> sdk.Dec
 	DelegatorInterestFactorPrefix = []byte{0x10} // denom -> sdk.Dec
 )
-
-// DepositTypeIteratorKey returns an interator prefix for interating over deposits by deposit denom
-func DepositTypeIteratorKey(denom string) []byte {
-	return createKey([]byte(denom))
-}
-
-func createKey(bytes ...[]byte) (r []byte) {
-	for _, b := range bytes {
-		r = append(r, b...)
-	}
-	return
-}

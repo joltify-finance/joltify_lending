@@ -13,11 +13,7 @@ import (
 )
 
 const (
-	USDX_CF = 1000000
-	KAVA_CF = 1000000
-	BTCB_CF = 100000000
-	BNB_CF  = 100000000
-	BUSD_CF = 100000000
+	UsdxCf = 1000000
 )
 
 type GenesisTestSuite struct {
@@ -59,7 +55,7 @@ func (suite *GenesisTestSuite) TestGenesisValidation() {
 			args: args{
 				params: types2.NewParams(
 					types2.MoneyMarkets{
-						types2.NewMoneyMarket("usdx", types2.NewBorrowLimit(true, sdk.MustNewDecFromStr("100000000000"), sdk.MustNewDecFromStr("1")), "usdx:usd", sdk.NewInt(USDX_CF), types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
+						types2.NewMoneyMarket("usdx", types2.NewBorrowLimit(true, sdk.MustNewDecFromStr("100000000000"), sdk.MustNewDecFromStr("1")), "usdx:usd", sdk.NewInt(UsdxCf), types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
 					},
 					sdk.MustNewDecFromStr("10"),
 				),

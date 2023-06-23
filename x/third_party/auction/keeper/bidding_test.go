@@ -20,7 +20,6 @@ import (
 type AuctionType int
 
 const (
-	Invalid    AuctionType = 0
 	Surplus    AuctionType = 1
 	Debt       AuctionType = 2
 	Collateral AuctionType = 3

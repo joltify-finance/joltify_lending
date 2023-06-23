@@ -250,11 +250,11 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			"invalid: withdraw is outside loan-to-value range",
 			args{
 				borrower:             borrower,
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF)), sdk.NewCoin("usdx", sdk.NewInt(100*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))), // 100 * 2 = $200
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(80*JOLT_CF))),  // 80 * 2 = $160
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(60*JOLT_CF))),  // 60 * 2 = $120
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))), // 100 * 2 = $200
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(80*JoltCf))),  // 80 * 2 = $160
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(60*JoltCf))),  // 60 * 2 = $120
 				futureTime:           oneMonthInSeconds,
 			},
 			errArgs{
@@ -281,16 +281,16 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			harvestGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JOLT_CF), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",                  // Market ID
-						sdk.NewInt(JOLT_CF),            // Conversion Factor
+						sdk.NewInt(JoltCf),             // Conversion Factor
 						model,                          // Interest Rate Model
 						reserveFactor,                  // Reserve Factor
 						sdk.MustNewDecFromStr("0.05")), // Keeper Reward Percent
 					types3.NewMoneyMarket("usdx",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JOLT_CF), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
 						"usdx:usd",                     // Market ID
-						sdk.NewInt(JOLT_CF),            // Conversion Factor
+						sdk.NewInt(JoltCf),             // Conversion Factor
 						model,                          // Interest Rate Model
 						reserveFactor,                  // Reserve Factor
 						sdk.MustNewDecFromStr("0.05")), // Keeper Reward Percent

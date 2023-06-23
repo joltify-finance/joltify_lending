@@ -30,9 +30,12 @@ func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.Binar
 	for _, el := range toBeDeleted {
 		store := prefix.NewStore(ctx.KVStore(storeKey), el)
 		iterator := sdk.KVStorePrefixIterator(store, []byte{})
-		defer iterator.Close()
-		for ; iterator.Valid(); iterator.Next() {
+		if iterator.Valid() {
 			panic("should be empty")
+		}
+		err := iterator.Close()
+		if err != nil {
+			panic("fail to close the iterator")
 		}
 	}
 

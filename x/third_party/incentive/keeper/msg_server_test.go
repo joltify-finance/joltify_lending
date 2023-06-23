@@ -17,8 +17,6 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 )
 
-const secondsPerDay = 24 * 60 * 60
-
 // Test suite used for all keeper tests
 type HandlerTestSuite struct {
 	testutil2.IntegrationTester

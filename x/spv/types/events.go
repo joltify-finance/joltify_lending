@@ -11,11 +11,9 @@ const (
 	EventTypePayPrincipal        = "pay_principal"
 	EventTypePayPrincipalPartial = "pay_principal_partial"
 	EventTypeWithdrawPrincipal   = "withdraw_principal"
-	EventTypePoolDelete          = "pool deleted"
 )
 
 const (
 	AttributeCreator = "creator"
 	AttributeAmount  = "token"
-	Attrrbute
 )

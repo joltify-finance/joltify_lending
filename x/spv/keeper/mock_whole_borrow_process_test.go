@@ -650,21 +650,21 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 
 	for _, el := range suite.investors[2:6] {
 		_, err := suite.app.ClaimInterest(suite.ctx, &types.MsgClaimInterest{
-			el,
-			seniorPool,
+			Creator:   el,
+			PoolIndex: seniorPool,
 		})
 		suite.Require().NoError(err)
 		_, err = suite.app.ClaimInterest(suite.ctx, &types.MsgClaimInterest{
-			el,
-			juniorPool,
+			Creator:   el,
+			PoolIndex: juniorPool,
 		})
 		suite.Require().NoError(err)
 	}
 
 	for _, el := range suite.investors[:2] {
 		_, err := suite.app.ClaimInterest(suite.ctx, &types.MsgClaimInterest{
-			el,
-			juniorPool,
+			Creator:   el,
+			PoolIndex: juniorPool,
 		})
 		suite.Require().NoError(err)
 	}

@@ -34,11 +34,11 @@ const (
 	YELLOW    = "yellow"
 	WHITE     = "white"
 	denom     = "ausdc"
+	needWrite = false
 )
 
 var (
 	gbase             = new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)
-	needWrite         = false
 	logger            = log.With().Logger()
 	transferAmount    = sdk.NewInt(0)
 	guiWithdrawAmount = 0

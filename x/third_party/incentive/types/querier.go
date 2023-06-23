@@ -9,11 +9,6 @@ const (
 	QueryGetJoltRewards   = "jolt-rewards"
 	QueryGetRewardFactors = "reward-factors"
 	QueryGetParams        = "parameters"
-
-	RestClaimCollateralType = "collateral_type"
-	RestClaimOwner          = "owner"
-	RestClaimType           = "type"
-	RestUnsynced            = "unsynced"
 )
 
 // QueryRewardsParams params for query /incentive/rewards/<claim type>

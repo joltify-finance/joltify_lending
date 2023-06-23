@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	oneYear time.Duration = 365 * 24 * time.Hour
+	oneYear = 365 * 24 * time.Hour
 )
 
 type GenesisTestSuite struct {

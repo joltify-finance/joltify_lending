@@ -151,7 +151,7 @@ func (pps PostedPrices) Validate() error {
 	return nil
 }
 
-// NewPostedPrice returns a new PostedPrice
+// NewPostedPriceResponse returns a new PostedPrice
 func NewPostedPriceResponse(marketID string, oracle sdk.AccAddress, price sdk.Dec, expiry time.Time) PostedPriceResponse {
 	return PostedPriceResponse{
 		MarketID:      marketID,

@@ -14,9 +14,6 @@ const (
 
 	// QuerierRoute is the querier route for gov
 	QuerierRoute = ModuleName
-
-	// DefaultParamspace default namestore
-	DefaultParamspace = ModuleName
 )
 
 var (

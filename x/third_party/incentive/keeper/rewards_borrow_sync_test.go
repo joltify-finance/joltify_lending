@@ -338,10 +338,12 @@ func (builder BorrowBuilder) WithSourceShares(denom string, shares int64) Borrow
 // WithArbitrarySourceShares adds arbitrary borrow amounts and indexes for each specified denom.
 func (builder BorrowBuilder) WithArbitrarySourceShares(denoms ...string) BorrowBuilder {
 	const arbitraryShares = 1e9
+	var builderHandler BorrowBuilder
+	builderHandler = builder
 	for _, denom := range denoms {
-		builder = builder.WithSourceShares(denom, arbitraryShares)
+		builderHandler = builderHandler.WithSourceShares(denom, arbitraryShares)
 	}
-	return builder
+	return builderHandler
 }
 
 func TestCalculateRewards(t *testing.T) {

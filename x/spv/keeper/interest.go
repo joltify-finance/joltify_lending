@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	OneWeek = 7 * 24 * 3600
-	// fixme  need to confirm whether we need this one year
+	OneWeek       = 7 * 24 * 3600
 	OneYear       = OneWeek * 52
 	OneMonth      = OneWeek * 4
 	BASE          = 1
