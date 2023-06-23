@@ -61,7 +61,10 @@ func (a AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the gov module.
 func (a AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	types2.RegisterQueryHandlerClient(context.Background(), mux, types2.NewQueryClient(clientCtx))
+	err := types2.RegisterQueryHandlerClient(context.Background(), mux, types2.NewQueryClient(clientCtx))
+	if err != nil {
+		panic("error in RegisterGRPCGatewayRoutes")
+	}
 }
 
 // GetTxCmd returns the root tx command for the swap module.

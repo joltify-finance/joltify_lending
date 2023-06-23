@@ -45,7 +45,10 @@ func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.Binar
 		newTx := convertOutboundTx(oldOutTx)
 		newTxs = append(newTxs, newTx)
 	}
-	oldOutBoundIter.Close()
+	err := oldOutBoundIter.Close()
+	if err != nil {
+		return err
+	}
 
 	for _, el := range newTxs {
 		each := el

@@ -55,13 +55,13 @@ func setupPools(suite *payPrincipalSuite) {
 func (suite *payPrincipalSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 	suite.nftKeeper = nftKeeper
 }
 
@@ -129,7 +129,9 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().ErrorContains(err, "principal is not fully paid")
 
-	suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.2e5))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.2e5))})
+	suite.Require().NoError(err)
+
 	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(12e4))
 	req.Creator = "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0"
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)

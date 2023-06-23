@@ -88,13 +88,13 @@ func setupMockPool(suite *mockWholeProcessSuite) {
 func (suite *mockWholeProcessSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 	suite.nftKeeper = nftKeeper
 }
 
@@ -430,17 +430,19 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	// now we borrow 200,000 and 800,000
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base)))}
-	suite.app.Borrow(suite.ctx, &msgSenior)
+	_, err := suite.app.Borrow(suite.ctx, &msgSenior)
+	suite.Require().NoError(err)
 
 	//  borrow another one
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base)))}
-	suite.app.Borrow(suite.ctx, &msgJunior)
+	_, err = suite.app.Borrow(suite.ctx, &msgJunior)
+	suite.Require().NoError(err)
 
 	startTime := suite.ctx.BlockTime()
 
 	// we pay the interest  and principle in the escrow account
-	_, err := suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
 		PoolIndex: juniorPool,
 		Token:     sdk.Coin{Denom: "ausdc", Amount: sdk.NewInt(30000).Mul(sdk.NewIntFromBigInt(base))},
@@ -911,13 +913,15 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	token1 := sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", token1)}
-	suite.app.Borrow(suite.ctx, &msgSenior)
+	_, err := suite.app.Borrow(suite.ctx, &msgSenior)
+	suite.Require().NoError(err)
 
 	token2 := sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))
 	//  borrow another one
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", token2)}
-	suite.app.Borrow(suite.ctx, &msgJunior)
+	_, err = suite.app.Borrow(suite.ctx, &msgJunior)
+	suite.Require().NoError(err)
 
 	seniorInterest := sdk.NewDecFromInt(token1).Mul(sdk.NewDecWithPrec(875, 4)).Mul(sdk.NewDecWithPrec(85, 2))
 	juniorInterest := sdk.NewDecFromInt(token2).Mul(sdk.NewDecWithPrec(15, 2)).Mul(sdk.NewDecWithPrec(85, 2))
@@ -966,7 +970,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	juniorTotalInterest := sdk.ZeroInt()
 
 	amount := new(big.Int).Mul(big.NewInt(20000), base)
-	_, err := suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
 		PoolIndex: seniorPool,
 		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromBigInt(amount)),

@@ -121,7 +121,8 @@ func (suite *HandlerTestSuite) TestPayoutJoltClaimMultiDenom() {
 	coin := cs(c("bnb", 1e12))
 	suite.SetupWithGenState(genAcc, coin, authBulder, incentBuilder)
 
-	suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
+	err := suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
+	suite.Require().NoError(err)
 	// create a deposit and borrow
 	suite.NoError(suite.DeliverJoltMsgDeposit(userAddr, cs(c("bnb", 1e11))))
 	suite.NoError(suite.DeliverJoltMsgBorrow(userAddr, cs(c("bnb", 1e10))))
@@ -140,7 +141,7 @@ func (suite *HandlerTestSuite) TestPayoutJoltClaimMultiDenom() {
 	)
 
 	// Claim denoms
-	err := suite.DeliverIncentiveMsg(&msg)
+	err = suite.DeliverIncentiveMsg(&msg)
 	suite.NoError(err)
 
 	// Check rewards were paid out
@@ -167,7 +168,8 @@ func (suite *HandlerTestSuite) TestPayoutHardClaimSingleDenom() {
 	genAcc = append(genAcc, b)
 	coin := cs(c("bnb", 1e12))
 	suite.SetupWithGenState(genAcc, coin, authBulder, incentBuilder)
-	suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
+	err := suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
+	suite.Require().NoError(err)
 
 	// err := fundModuleAccount(suite.App.GetBankKeeper(), suite.Ctx, types2.ModuleName, cs(c("jjolt", 1e18)))
 	// suite.Require().NoError(err)
@@ -189,7 +191,7 @@ func (suite *HandlerTestSuite) TestPayoutHardClaimSingleDenom() {
 	)
 
 	// Claim rewards
-	err := suite.DeliverIncentiveMsg(&msg)
+	err = suite.DeliverIncentiveMsg(&msg)
 	suite.NoError(err)
 
 	// Check rewards were paid out

@@ -28,23 +28,23 @@ func TestSubmitInvestor(t *testing.T) {
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
-	app, k, wctx := setupMsgServer(t)
+	lapp, k, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 	pa := types.Params{Submitter: []sdk.AccAddress{acc}}
 	k.SetParams(ctx, pa)
 
 	msg := types.MsgUploadInvestor{Creator: "invalid msg"}
-	_, err = app.UploadInvestor(wctx, &msg)
+	_, err = lapp.UploadInvestor(wctx, &msg)
 	require.Error(t, err)
 
 	// unauthorised submitter
 	msg.Creator = "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0"
-	_, err = app.UploadInvestor(wctx, &msg)
+	_, err = lapp.UploadInvestor(wctx, &msg)
 	require.Error(t, err)
 
 	msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
 	msg.InvestorId = "123"
-	ret, err := app.UploadInvestor(wctx, &msg)
+	ret, err := lapp.UploadInvestor(wctx, &msg)
 	require.NoError(t, err)
 	require.Len(t, ret.Wallets, 0)
 
@@ -52,11 +52,11 @@ func TestSubmitInvestor(t *testing.T) {
 	// invalid investor ID test
 	msg.InvestorId = ""
 	msg.WalletAddress = addresses
-	_, err = app.UploadInvestor(wctx, &msg)
+	_, err = lapp.UploadInvestor(wctx, &msg)
 	require.Error(t, err)
 
 	msg.InvestorId = "first Investor"
-	ret, err = app.UploadInvestor(wctx, &msg)
+	ret, err = lapp.UploadInvestor(wctx, &msg)
 	require.NoError(t, err)
 	require.EqualValues(t, ret.Wallets, addresses)
 	out, err := k.QueryInvestorWallets(wctx, &types.QueryInvestorWalletsRequest{InvestorId: msg.InvestorId})
@@ -66,13 +66,13 @@ func TestSubmitInvestor(t *testing.T) {
 	msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
 	msg.InvestorId = "333"
 	msg.WalletAddress = msg.WalletAddress[2:3]
-	_, err = app.UploadInvestor(wctx, &msg)
+	_, err = lapp.UploadInvestor(wctx, &msg)
 	require.Error(t, err)
 
 	// exceed the max allowed wallets
 	addresses = generateNAddr(1000)
 	msg.WalletAddress = addresses
-	_, err = app.UploadInvestor(wctx, &msg)
+	_, err = lapp.UploadInvestor(wctx, &msg)
 	require.Error(t, err)
 }
 
@@ -82,7 +82,7 @@ func TestUpdateWallets(t *testing.T) {
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
-	app, k, wctx := setupMsgServer(t)
+	lapp, k, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 	pa := types.Params{Submitter: []sdk.AccAddress{acc}}
 	k.SetParams(ctx, pa)
@@ -94,7 +94,7 @@ func TestUpdateWallets(t *testing.T) {
 	msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
 	msg.InvestorId = "123"
 	msg.WalletAddress = addresses[:30]
-	ret, err := app.UploadInvestor(wctx, &msg)
+	ret, err := lapp.UploadInvestor(wctx, &msg)
 	require.NoError(t, err)
 	require.EqualValues(t, ret.Wallets, msg.WalletAddress)
 
@@ -104,7 +104,7 @@ func TestUpdateWallets(t *testing.T) {
 
 	// we add more wallets
 	msg.WalletAddress = addresses[30:100]
-	ret, err = app.UploadInvestor(wctx, &msg)
+	ret, err = lapp.UploadInvestor(wctx, &msg)
 	require.NoError(t, err)
 	require.EqualValues(t, addresses[:100], ret.Wallets)
 
@@ -114,7 +114,7 @@ func TestUpdateWallets(t *testing.T) {
 
 	// we add 1 more wallets that will pop out the first one
 	msg.WalletAddress = []string{addresses[100]}
-	ret, err = app.UploadInvestor(wctx, &msg)
+	ret, err = lapp.UploadInvestor(wctx, &msg)
 	require.NoError(t, err)
 	require.EqualValues(t, original[1:101], ret.Wallets)
 
@@ -124,7 +124,7 @@ func TestUpdateWallets(t *testing.T) {
 
 	// we add the extra 50 wallet
 	msg.WalletAddress = addresses[101:]
-	ret, err = app.UploadInvestor(wctx, &msg)
+	ret, err = lapp.UploadInvestor(wctx, &msg)
 	require.NoError(t, err)
 	require.EqualValues(t, original[50:150], ret.Wallets)
 

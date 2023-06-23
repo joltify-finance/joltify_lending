@@ -410,10 +410,11 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
 
-	fundModuleAccount(suite.app.GetBankKeeper(), suite.app.Ctx, types2.ModuleName, cs(c("ujolt", 600)))
+	err := fundModuleAccount(suite.app.GetBankKeeper(), suite.app.Ctx, types2.ModuleName, cs(c("ujolt", 600)))
+	suite.Require().NoError(err)
 
 	// send coins to base account
-	err := suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types2.ModuleName, suite.addrs[1], cs(c("ujolt", 100)), 5)
+	err = suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types2.ModuleName, suite.addrs[1], cs(c("ujolt", 100)), 5)
 	suite.Require().NoError(err)
 	acc := suite.getAccount(suite.addrs[1])
 	vacc, ok := acc.(*vestingtypes.PeriodicVestingAccount)

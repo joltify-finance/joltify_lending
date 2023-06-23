@@ -62,13 +62,13 @@ func SetupPool(suite *claimInterestSuite) {
 func (suite *claimInterestSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 	suite.nftKeeper = nftKeeper
 }
 
@@ -204,10 +204,12 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
 
 	req := types.MsgClaimInterest{
 		Creator:   creator1,
@@ -235,7 +237,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
 
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
@@ -261,7 +264,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	// for the rest of 10 month
 	for i := 0; i < 10; i++ {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		err := suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		suite.Require().NoError(err)
 	}
 
 	req.Creator = suite.investors[0]
@@ -350,7 +354,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
 
 	req := types.MsgClaimInterest{
 		Creator:   creator1,
@@ -396,7 +401,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	payCounter := poolInfo.InterestPrepayment.Counter
 	for i := 1; i < int(payCounter+1); i++ {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
-		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		err := suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		suite.Require().NoError(err)
 	}
 
 	poolCheck, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
@@ -645,7 +651,8 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
 
 	req := types.MsgClaimInterest{
 		Creator:   creator1,
@@ -748,7 +755,8 @@ func (suite *claimInterestSuite) TestClaimInterestNoAuthorized() {
 	month := 3600 * 24 * 30
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
-	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
 
 	req := types.MsgClaimInterest{
 		Creator:   creator1,
@@ -831,7 +839,8 @@ func (suite *claimInterestSuite) TestQueryOutStandingInterest() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
-	suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
 
 	req := types.MsgClaimInterest{
 		Creator:   creator1,

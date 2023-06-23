@@ -342,8 +342,8 @@ func (mris MultiRewardIndexes) RemoveRewardIndex(denom string) MultiRewardIndexe
 	for i, ri := range mris {
 		if ri.CollateralType == denom {
 			// copy the slice and underlying array to avoid altering the original
-			copy := mris.copy()
-			return append(copy[:i], copy[i+1:]...)
+			cp := mris.copy()
+			return append(cp[:i], cp[i+1:]...)
 		}
 	}
 	return mris

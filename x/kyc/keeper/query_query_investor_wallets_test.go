@@ -18,7 +18,7 @@ func TestQueryByInvestor(t *testing.T) {
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
-	app, k, wctx := setupMsgServer(t)
+	lapp, k, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 	pa := types.Params{Submitter: []sdk.AccAddress{acc}}
 	k.SetParams(ctx, pa)
@@ -33,7 +33,7 @@ func TestQueryByInvestor(t *testing.T) {
 		msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
 		msg.InvestorId = strconv.Itoa(i)
 		msg.WalletAddress = []string{addresses[i]}
-		ret, err := app.UploadInvestor(wctx, &msg)
+		ret, err := lapp.UploadInvestor(wctx, &msg)
 		require.NoError(t, err)
 		require.EqualValues(t, ret.Wallets, msg.WalletAddress)
 		inv := types.Investor{
@@ -58,7 +58,7 @@ func TestQueryByInvestor(t *testing.T) {
 	msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
 	msg.InvestorId = strconv.Itoa(105)
 	msg.WalletAddress = addresses2
-	_, err = app.UploadInvestor(wctx, &msg)
+	_, err = lapp.UploadInvestor(wctx, &msg)
 	require.NoError(t, err)
 
 	retInvestor, err := k.QueryInvestorWallets(wctx, &types.QueryInvestorWalletsRequest{InvestorId: msg.InvestorId})

@@ -21,7 +21,10 @@ func RunCommand(cmdStr string, parameters ...string) {
 	cmd := exec.Command(cmdStr, parameters...)
 	cmd.Env = os.Environ()
 	stdout, _ := cmd.StdoutPipe()
-	cmd.Start()
+	err := cmd.Start()
+	if err != nil {
+		panic(err)
+	}
 
 	scanner := bufio.NewScanner(stdout)
 	scanner.Split(bufio.ScanLines)
@@ -29,7 +32,10 @@ func RunCommand(cmdStr string, parameters ...string) {
 		m := scanner.Text()
 		fmt.Printf("%s\n", m)
 	}
-	cmd.Wait()
+	err = cmd.Wait()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func RunCommandWithOutput(cmdStr string, parameters ...string) (string, error) {

@@ -32,13 +32,13 @@ func (suite *withdrawProposalSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
-	app, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	suite.ctx = ctx
 	suite.keeper = k
 	suite.nftKeeper = nftKeeper
-	suite.app = app
+	suite.app = lapp
 }
 
 func setupWithdrawProposal(suite *withdrawProposalSuite) {

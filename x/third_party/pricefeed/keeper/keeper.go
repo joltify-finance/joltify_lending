@@ -228,7 +228,7 @@ func (k Keeper) GetRawPrices(ctx sdk.Context, marketId string) types2.PostedPric
 
 // IterateRawPricesByMarket iterates over all raw prices in the store and performs a callback function
 func (k Keeper) IterateRawPricesByMarket(ctx sdk.Context, marketId string, cb func(record types2.PostedPrice) (stop bool)) {
-	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.key), types2.RawPriceIteratorKey((marketId)))
+	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.key), types2.RawPriceIteratorKey(marketId))
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var record types2.PostedPrice
