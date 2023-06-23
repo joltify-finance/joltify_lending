@@ -2,7 +2,7 @@ package types
 
 import (
 	"testing"
-	time "time"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -149,7 +149,8 @@ func TestGenesisState_UnmarshalAnys(t *testing.T) {
 	require.NoError(t, err)
 
 	var unmarshalledGenesis GenesisState
-	cdc.UnmarshalJSON(bz, &unmarshalledGenesis)
+	err = cdc.UnmarshalJSON(bz, &unmarshalledGenesis)
+	require.NoError(t, err)
 
 	// Check the interface values are correct after unmarshalling.
 	unmarshalledAuctions, err := UnpackGenesisAuctions(unmarshalledGenesis.Auctions)

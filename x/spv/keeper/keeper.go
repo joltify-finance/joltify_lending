@@ -148,7 +148,7 @@ func (k Keeper) GetReserve(ctx sdk.Context, denom string) (amount sdk.Coin, ok b
 	return amount, true
 }
 
-// IteratePool iterates over all deposit objects in the store and performs a callback function
+// IterateReserve get the spv reserve token
 func (k Keeper) IterateReserve(ctx sdk.Context, cb func(coin sdk.Coin) (stop bool)) {
 	storeKey := fmt.Sprintf("%v%v", types.ProjectsKeyPrefix, "reserve")
 	reserveStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(storeKey))

@@ -16,7 +16,6 @@ import (
 
 // flags for cli queries
 const (
-	flagName   = "name"
 	flagDenom  = "denom"
 	flagOwner  = "owner"
 	flagBorrow = "borrower"

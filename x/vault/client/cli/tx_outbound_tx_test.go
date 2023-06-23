@@ -28,7 +28,7 @@ func TestCreateOutboundTx(t *testing.T) {
 	val := net.Validators[0]
 	ctx := val.ClientCtx
 
-	fields := []string{}
+	var fields []string
 	for _, tc := range []struct {
 		desc         string
 		idRequestID  string

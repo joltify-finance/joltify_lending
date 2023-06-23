@@ -1,6 +1,6 @@
 package types
 
 const (
-	// submitted addresses
-	AttributeWalletsSubmitted = "wallets"
+	// AttributeWalletsSubmitted submitted addresses
+	AttributeWalletsSubmitted = "wallets submitted"
 )

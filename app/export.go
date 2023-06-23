@@ -105,7 +105,10 @@ func (app *App) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []string
 		feePool.CommunityPool = feePool.CommunityPool.Add(scraps...)
 		app.distrKeeper.SetFeePool(ctx, feePool)
 
-		app.distrKeeper.Hooks().AfterValidatorCreated(ctx, val.GetOperator())
+		err := app.distrKeeper.Hooks().AfterValidatorCreated(ctx, val.GetOperator())
+		if err != nil {
+			panic(err)
+		}
 		return false
 	})
 
@@ -119,8 +122,14 @@ func (app *App) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []string
 		if err != nil {
 			panic(err)
 		}
-		app.distrKeeper.Hooks().BeforeDelegationCreated(ctx, delAddr, valAddr)
-		app.distrKeeper.Hooks().AfterDelegationModified(ctx, delAddr, valAddr)
+		err = app.distrKeeper.Hooks().BeforeDelegationCreated(ctx, delAddr, valAddr)
+		if err != nil {
+			panic(err)
+		}
+		err = app.distrKeeper.Hooks().AfterDelegationModified(ctx, delAddr, valAddr)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// reset context height
@@ -168,9 +177,12 @@ func (app *App) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteList []string
 		counter++
 	}
 
-	iter.Close()
+	err := iter.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	_, err := app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+	_, err = app.stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

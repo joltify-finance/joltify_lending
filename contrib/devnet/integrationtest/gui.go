@@ -34,11 +34,11 @@ const (
 	YELLOW    = "yellow"
 	WHITE     = "white"
 	denom     = "ausdc"
+	needWrite = false
 )
 
 var (
 	gbase             = new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil)
-	needWrite         = false
 	logger            = log.With().Logger()
 	transferAmount    = sdk.NewInt(0)
 	guiWithdrawAmount = 0
@@ -193,7 +193,10 @@ func getprice() common.SPV {
 	}
 
 	var price common.SPV
-	json.Unmarshal([]byte(result), &price)
+	err = json.Unmarshal([]byte(result), &price)
+	if err != nil {
+		panic(err)
+	}
 	return price
 }
 
@@ -229,7 +232,11 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 			case "6":
 				baseName := time.Now().Format("2006-01-02 15-04")
 				fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-				common.DumpAll(poolIndex, fileName, true, logger)
+				_, _, _, err = common.DumpAll(poolIndex, fileName, true, logger)
+				if err != nil {
+					display.showOutput(err.Error(), RED)
+					continue
+				}
 				display.showOutput("finish dumping the status", GREEN)
 
 			case "7":
@@ -536,10 +543,16 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 			case common.PAYPRINCIPAL:
 				baseName := time.Now().Format("2006-01-02 15-04")
 				fileName := fmt.Sprintf("%s-%s.xlsx", baseName, "before")
-				common.DumpAll(poolIndex, fileName, needWrite, logger)
+				_, _, _, err = common.DumpAll(poolIndex, fileName, true, logger)
+				if err != nil {
+					logger.Error().Err(err).Msgf("error dumnp all")
+				}
 				payPrincipalPartial(poolIndex)
 				fileName = fmt.Sprintf("%s-%s.xlsx", baseName, "after")
-				common.DumpAll(poolIndex, fileName, needWrite, logger)
+				_, _, _, err = common.DumpAll(poolIndex, fileName, true, logger)
+				if err != nil {
+					logger.Error().Err(err).Msgf("error dumnp all")
+				}
 				guiWithdrawAmount = -1
 				display.showOutput("we have processed the withdraw request and pay the principal", BLUE)
 
@@ -560,9 +573,14 @@ func main() {
 		panic(err)
 	}
 
-	defer file.Close()
-
 	logger = zlog.New(file).With().Timestamp().Logger()
+
+	defer func() {
+		err = file.Close()
+		if err != nil {
+			log.Error().Err(err).Msgf("fail to close the file")
+		}
+	}()
 
 	fmt.Printf("Do you want to start the chain? (y/n):")
 	reader := bufio.NewReader(os.Stdin)
@@ -571,8 +589,16 @@ func main() {
 	switch input {
 	case "y":
 		startChain()
-		depositAndBorrow()
-		payInterest(poolIndex)
+		err := depositAndBorrow()
+		if err != nil {
+			fmt.Printf("error deposit and borrow: %v\n", err)
+			return
+		}
+		err = payInterest(poolIndex)
+		if err != nil {
+			fmt.Printf("error pay interest: %v\n", err)
+			return
+		}
 	default:
 	}
 

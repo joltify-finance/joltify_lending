@@ -90,8 +90,7 @@ func TestOutboundTxQueryPaginated(t *testing.T) {
 	expected := make([]types.QueryGetOutboundTxResponse, len(msgs))
 	for i, el := range msgs {
 		expected[i] = types.QueryGetOutboundTxResponse{
-			el,
-			nil,
+			OutboundTx: el,
 		}
 	}
 

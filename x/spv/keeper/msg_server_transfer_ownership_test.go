@@ -61,7 +61,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipOneInvestor() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{suite.investors[1], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	reqOwner := types.MsgTransferOwnership{Creator: suite.investors[0], PoolIndex: suite.investorPool}
@@ -165,7 +165,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipTwoInvestor() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{suite.investors[1], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	addr, err := sdk.AccAddressFromBech32(suite.investors[0])
@@ -345,7 +345,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipTwoInvestorBoth() {
 	suite.Require().True(found)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{suite.investors[1], suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	reqOwner := types.MsgTransferOwnership{Creator: suite.investors[0], PoolIndex: suite.investorPool}

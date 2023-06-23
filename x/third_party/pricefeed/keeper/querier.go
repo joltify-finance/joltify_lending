@@ -60,7 +60,7 @@ func queryPrices(ctx sdk.Context, req abci.RequestQuery, keeper Keeper, legacyQu
 	var validCurrentPrices types2.CurrentPrices
 	for _, cp := range currentPrices {
 		if cp.MarketID != "" {
-			validCurrentPrices = append(validCurrentPrices, types2.CurrentPrice(cp))
+			validCurrentPrices = append(validCurrentPrices, cp)
 		}
 	}
 

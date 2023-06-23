@@ -73,7 +73,10 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 				panic("pack class any data failed")
 			}
 			thisNFT.Data = data
-			nftKeeper.Update(ctx, thisNFT)
+			err = nftKeeper.Update(ctx, thisNFT)
+			if err != nil {
+				panic(err)
+			}
 
 			data, err = types2.NewAnyWithValue(&borrowClassInfo)
 			if err != nil {
@@ -254,8 +257,7 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 	}
 
 	// we update each investor leftover
-	k.processInvestors(ctx, poolInfo, utilization, usdAmount.Amount, localToken.Amount, ratio, nftClass, depositors)
-	return nil
+	return k.processInvestors(ctx, poolInfo, utilization, usdAmount.Amount, localToken.Amount, ratio, nftClass, depositors)
 }
 
 func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, useLastPaymentTime bool) error {
@@ -516,7 +518,10 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []stri
 			panic("pack class any data failed")
 		}
 		thisNFT.Data = data
-		k.nftKeeper.Update(ctx, thisNFT)
+		err = k.nftKeeper.Update(ctx, thisNFT)
+		if err != nil {
+			panic(err)
+		}
 
 		data, err = types2.NewAnyWithValue(&borrowClassInfo)
 		if err != nil {

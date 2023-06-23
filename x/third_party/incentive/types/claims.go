@@ -89,8 +89,8 @@ func (j JoltLiquidityProviderClaim) Validate() error {
 }
 
 // HasSupplyRewardIndex check if a claim has a supply reward index for the input collateral type
-func (c JoltLiquidityProviderClaim) HasSupplyRewardIndex(denom string) (int64, bool) {
-	for index, ri := range c.SupplyRewardIndexes {
+func (j JoltLiquidityProviderClaim) HasSupplyRewardIndex(denom string) (int64, bool) {
+	for index, ri := range j.SupplyRewardIndexes {
 		if ri.CollateralType == denom {
 			return int64(index), true
 		}
@@ -99,8 +99,8 @@ func (c JoltLiquidityProviderClaim) HasSupplyRewardIndex(denom string) (int64, b
 }
 
 // HasBorrowRewardIndex check if a claim has a borrow reward index for the input collateral type
-func (c JoltLiquidityProviderClaim) HasBorrowRewardIndex(denom string) (int64, bool) {
-	for index, ri := range c.BorrowRewardIndexes {
+func (j JoltLiquidityProviderClaim) HasBorrowRewardIndex(denom string) (int64, bool) {
+	for index, ri := range j.BorrowRewardIndexes {
 		if ri.CollateralType == denom {
 			return int64(index), true
 		}
@@ -342,8 +342,8 @@ func (mris MultiRewardIndexes) RemoveRewardIndex(denom string) MultiRewardIndexe
 	for i, ri := range mris {
 		if ri.CollateralType == denom {
 			// copy the slice and underlying array to avoid altering the original
-			copy := mris.copy()
-			return append(copy[:i], copy[i+1:]...)
+			cp := mris.copy()
+			return append(cp[:i], cp[i+1:]...)
 		}
 	}
 	return mris

@@ -123,7 +123,8 @@ func TestShowCreatePool(t *testing.T) {
 func TestListCreatePoolNotEnoughValidator(t *testing.T) {
 	app2.SetSDKConfig()
 	net, _ := networkWithCreatePoolObjects(t, 2, 300)
-	net.WaitForHeight(10)
+	_, err := net.WaitForHeight(10)
+	require.NoError(t, err)
 	ctx := net.Validators[0].ClientCtx
 	common := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),

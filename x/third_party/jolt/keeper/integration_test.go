@@ -24,7 +24,7 @@ func NewJoltGenState(cdc codec.JSONCodec) app.GenesisState {
 						LoanToValue:  sdk.MustNewDecFromStr("1"),
 					},
 					SpotMarketID:     "usdx:usd",
-					ConversionFactor: sdk.NewInt(USDX_CF),
+					ConversionFactor: sdk.NewInt(UsdxCf),
 					InterestRateModel: types3.InterestRateModel{
 						BaseRateAPY:    sdk.MustNewDecFromStr("0.05"),
 						BaseMultiplier: sdk.MustNewDecFromStr("2"),
@@ -42,7 +42,7 @@ func NewJoltGenState(cdc codec.JSONCodec) app.GenesisState {
 						LoanToValue:  sdk.MustNewDecFromStr("0.5"),
 					},
 					SpotMarketID:     "bnb:usd",
-					ConversionFactor: sdk.NewInt(USDX_CF),
+					ConversionFactor: sdk.NewInt(UsdxCf),
 					InterestRateModel: types3.InterestRateModel{
 						BaseRateAPY:    sdk.MustNewDecFromStr("0"),
 						BaseMultiplier: sdk.MustNewDecFromStr("0.05"),

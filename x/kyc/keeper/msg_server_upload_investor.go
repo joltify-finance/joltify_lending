@@ -109,7 +109,7 @@ func (k msgServer) UploadInvestor(goCtx context.Context, msg *types.MsgUploadInv
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Creator),
+			sdk.NewAttribute(types.AttributeWalletsSubmitted, msg.Creator),
 		),
 	)
 

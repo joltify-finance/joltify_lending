@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -41,6 +42,11 @@ func (k Keeper) LegacyGetAllFeeAMountAndDelete(ctx sdk.Context) sdk.Coins {
 	}
 	for _, el := range deleteDenom {
 		store.Delete(types.OutboundTxKey(el))
+	}
+	err := iterator.Close()
+	if err != nil {
+		msg := fmt.Errorf("fail to close the iterator %w", err)
+		panic(msg)
 	}
 	return fees
 }

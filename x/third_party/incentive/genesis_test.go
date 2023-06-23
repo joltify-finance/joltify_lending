@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	oneYear time.Duration = 365 * 24 * time.Hour
+	oneYear = 365 * 24 * time.Hour
 )
 
 type GenesisTestSuite struct {
@@ -38,7 +38,7 @@ type GenesisTestSuite struct {
 func (suite *GenesisTestSuite) SetupTest() {
 	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.app = tApp
-	keeper := tApp.GetIncentiveKeeper()
+	k := tApp.GetIncentiveKeeper()
 	suite.genesisTime = time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
@@ -113,7 +113,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
 
 	suite.addrs = addrs
-	suite.keeper = keeper
+	suite.keeper = k
 	suite.ctx = ctx
 }
 

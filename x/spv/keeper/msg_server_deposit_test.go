@@ -29,14 +29,14 @@ func (suite *DepositTestSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
-	app, k, _, _, _, wctx := setupMsgServer(suite.T())
+	lapp, k, _, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
 
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 }
 
 func (suite *DepositTestSuite) TestDeposit() {

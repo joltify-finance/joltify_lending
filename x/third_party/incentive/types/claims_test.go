@@ -79,7 +79,7 @@ func TestRewardIndexes(t *testing.T) {
 		testcases := []struct {
 			name          string
 			rewardIndexes RewardIndexes
-			arg_denom     string
+			argDenom      string
 			expected      expected
 		}{
 			{
@@ -87,7 +87,7 @@ func TestRewardIndexes(t *testing.T) {
 				rewardIndexes: RewardIndexes{
 					NewRewardIndex("denom", arbitraryDec),
 				},
-				arg_denom: "denom",
+				argDenom: "denom",
 				expected: expected{
 					factor: arbitraryDec,
 					found:  true,
@@ -98,7 +98,7 @@ func TestRewardIndexes(t *testing.T) {
 				rewardIndexes: RewardIndexes{
 					NewRewardIndex("denom", arbitraryDec),
 				},
-				arg_denom: "notpresent",
+				argDenom: "notpresent",
 				expected: expected{
 					found: false,
 				},
@@ -107,7 +107,7 @@ func TestRewardIndexes(t *testing.T) {
 
 		for _, tc := range testcases {
 			t.Run(tc.name, func(t *testing.T) {
-				factor, found := tc.rewardIndexes.Get(tc.arg_denom)
+				factor, found := tc.rewardIndexes.Get(tc.argDenom)
 
 				require.Equal(t, tc.expected.found, found)
 				require.Equal(t, tc.expected.factor, factor)
@@ -377,7 +377,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 		testcases := []struct {
 			name               string
 			multiRewardIndexes MultiRewardIndexes
-			arg_denom          string
+			argDenom           string
 			expected           expected
 		}{
 			{
@@ -388,7 +388,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 						RewardIndexes:  arbitraryRewardIndexes,
 					},
 				},
-				arg_denom: "denom",
+				argDenom: "denom",
 				expected: expected{
 					found:         true,
 					rewardIndexes: arbitraryRewardIndexes,
@@ -402,7 +402,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 						RewardIndexes:  arbitraryRewardIndexes,
 					},
 				},
-				arg_denom: "notpresent",
+				argDenom: "notpresent",
 				expected: expected{
 					found: false,
 				},
@@ -410,7 +410,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 		}
 		for _, tc := range testcases {
 			t.Run(tc.name, func(t *testing.T) {
-				rewardIndexes, found := tc.multiRewardIndexes.Get(tc.arg_denom)
+				rewardIndexes, found := tc.multiRewardIndexes.Get(tc.argDenom)
 
 				require.Equal(t, tc.expected.found, found)
 				require.Equal(t, tc.expected.rewardIndexes, rewardIndexes)
@@ -486,7 +486,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 		testcases := []struct {
 			name               string
 			multiRewardIndexes MultiRewardIndexes
-			arg_denom          string
+			argDenom           string
 			expected           MultiRewardIndexes
 		}{
 			{
@@ -497,7 +497,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 						RewardIndexes:  arbitraryRewardIndexes,
 					},
 				},
-				arg_denom: "notpresent",
+				argDenom: "notpresent",
 				expected: MultiRewardIndexes{
 					{
 						CollateralType: "denom",
@@ -517,7 +517,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 						RewardIndexes:  arbitraryRewardIndexes,
 					},
 				},
-				arg_denom: "denom",
+				argDenom: "denom",
 				expected: MultiRewardIndexes{
 					{
 						CollateralType: "otherdenom",
@@ -530,7 +530,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 			t.Run(tc.name, func(t *testing.T) {
 				oldIndexes := tc.multiRewardIndexes.copy()
 
-				newIndexes := tc.multiRewardIndexes.RemoveRewardIndex(tc.arg_denom)
+				newIndexes := tc.multiRewardIndexes.RemoveRewardIndex(tc.argDenom)
 
 				require.Equal(t, tc.expected, newIndexes)
 				require.Equal(t, oldIndexes, tc.multiRewardIndexes)

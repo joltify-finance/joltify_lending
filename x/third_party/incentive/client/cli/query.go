@@ -24,7 +24,6 @@ const (
 	typeJolt        = "jolt"
 	typeUSDXMinting = "usdx-minting"
 	typeSwap        = "swap"
-	typeSavings     = "savings"
 )
 
 var rewardTypes = []string{typeDelegator, typeJolt, typeUSDXMinting, typeSwap}

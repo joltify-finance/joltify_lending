@@ -613,10 +613,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one day",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
@@ -636,10 +636,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one week",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
@@ -659,10 +659,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one month",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
@@ -682,10 +682,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one year",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
@@ -705,10 +705,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"0 reserve factor",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
@@ -728,17 +728,17 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"borrow during snapshot",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneYearInSeconds,
 						shouldBorrow: true,
-						borrowCoin:   sdk.NewCoin("ujolt", sdk.NewInt(1*JOLT_CF)),
+						borrowCoin:   sdk.NewCoin("ujolt", sdk.NewInt(1*JoltCf)),
 					},
 				},
 			},
@@ -751,10 +751,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"multiple snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
@@ -779,10 +779,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"varied snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
@@ -832,9 +832,9 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JOLT_CF), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",             // Market ID
-						sdk.NewInt(JOLT_CF),       // Conversion Factor
+						sdk.NewInt(JoltCf),        // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
 						sdk.ZeroDec()),            // Keeper Reward Percentage
@@ -1010,11 +1010,11 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one day",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
@@ -1034,11 +1034,11 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one week",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
@@ -1058,11 +1058,11 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one month",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
@@ -1082,11 +1082,11 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one year",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
@@ -1106,11 +1106,11 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"supply/borrow multiple coins",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF)), sdk.NewCoin("bnb", sdk.NewInt(100*BNB_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF)), sdk.NewCoin("bnb", sdk.NewInt(100*BNB_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(100*BnbCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(100*BnbCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF)), sdk.NewCoin("bnb", sdk.NewInt(20*BNB_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(20*BnbCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
@@ -1130,18 +1130,18 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"supply during snapshot",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
 						shouldSupply: true,
-						supplyCoin:   sdk.NewCoin("ujolt", sdk.NewInt(20*JOLT_CF)),
+						supplyCoin:   sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf)),
 					},
 				},
 			},
@@ -1154,11 +1154,11 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"multiple snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(80*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(80*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
@@ -1188,11 +1188,11 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"varied snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JOLT_CF))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JOLT_CF))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JOLT_CF))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
 				interestRateModel:    normalModel,
 				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
@@ -1241,16 +1241,16 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JOLT_CF), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",             // Market ID
-						sdk.NewInt(JOLT_CF),       // Conversion Factor
+						sdk.NewInt(JoltCf),        // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
 						sdk.ZeroDec()),            // Keeper Reward Percentage
 					types3.NewMoneyMarket("bnb",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BNB_CF), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BnbCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
 						"bnb:usd",                 // Market ID
-						sdk.NewInt(BNB_CF),        // Conversion Factor
+						sdk.NewInt(BnbCf),         // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
 						sdk.ZeroDec()),            // Keeper Reward Percentage

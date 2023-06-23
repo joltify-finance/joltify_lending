@@ -82,13 +82,13 @@ func lsetupMockPool(suite *mockBurnSuite) {
 func (suite *mockBurnSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, _, auctionKeeper, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, _, auctionKeeper, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 	suite.nftKeeper = nftKeeper
 	suite.auctionKeeper = auctionKeeper
 }

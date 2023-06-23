@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	types "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -22,11 +22,11 @@ type GenesisAuction interface {
 func PackGenesisAuctions(ga []GenesisAuction) ([]*types.Any, error) {
 	gaAny := make([]*types.Any, len(ga))
 	for i, genesisAuction := range ga {
-		any, err := types.NewAnyWithValue(genesisAuction)
+		ay, err := types.NewAnyWithValue(genesisAuction)
 		if err != nil {
 			return nil, err
 		}
-		gaAny[i] = any
+		gaAny[i] = ay
 	}
 
 	return gaAny, nil
@@ -43,8 +43,8 @@ func mustPackGenesisAuctions(ga []GenesisAuction) []*types.Any {
 // UnpackGenesisAuctions converts Any slice to GenesisAuctions slice
 func UnpackGenesisAuctions(genesisAuctionsAny []*types.Any) ([]GenesisAuction, error) {
 	genesisAuctions := make([]GenesisAuction, len(genesisAuctionsAny))
-	for i, any := range genesisAuctionsAny {
-		genesisAuction, ok := any.GetCachedValue().(GenesisAuction)
+	for i, ay := range genesisAuctionsAny {
+		genesisAuction, ok := ay.GetCachedValue().(GenesisAuction)
 		if !ok {
 			return nil, fmt.Errorf("expected genesis auction")
 		}
@@ -116,9 +116,9 @@ func (gs GenesisState) Validate() error {
 
 // UnpackInterfaces hooks into unmarshalling to unpack any interface types contained within the GenesisState.
 func (gs GenesisState) UnpackInterfaces(unpacker types.AnyUnpacker) error {
-	for _, any := range gs.Auctions {
+	for _, ay := range gs.Auctions {
 		var auction GenesisAuction
-		err := unpacker.UnpackAny(any, &auction)
+		err := unpacker.UnpackAny(ay, &auction)
 		if err != nil {
 			return err
 		}

@@ -145,15 +145,15 @@ func NewRewardPeriod(active bool, collateralType string, start time.Time, end ti
 
 // NewMultiRewardPeriodFromRewardPeriod converts a RewardPeriod into a MultiRewardPeriod.
 // It's useful for compatibility between single and multi denom rewards.
-func NewMultiRewardPeriodFromRewardPeriod(period RewardPeriod) MultiRewardPeriod {
-	return NewMultiRewardPeriod(
-		period.Active,
-		period.CollateralType,
-		period.Start,
-		period.End,
-		sdk.NewCoins(period.RewardsPerSecond),
-	)
-}
+// func NewMultiRewardPeriodFromRewardPeriod(period RewardPeriod) MultiRewardPeriod {
+//	return NewMultiRewardPeriod(
+//		period.Active,
+//		period.CollateralType,
+//		period.Start,
+//		period.End,
+//		sdk.NewCoins(period.RewardsPerSecond),
+//	)
+// }
 
 // Validate performs a basic check of a RewardPeriod fields.
 func (rp RewardPeriod) Validate() error {

@@ -29,17 +29,17 @@ func (suite *addInvestorSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
-	app, k, _, _, _, wctx := setupMsgServer(suite.T())
+	lapp, k, _, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
-	resp, err := app.CreatePool(ctx, &req)
+	resp, err := lapp.CreatePool(ctx, &req)
 	suite.Require().NoError(err)
 	suite.poolIndexs = resp.PoolIndex
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 }
 
 func (suite *addInvestorSuite) TestAddInvestor() {

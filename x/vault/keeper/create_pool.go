@@ -102,12 +102,15 @@ func (k Keeper) GetAllCreatePool(ctx sdk.Context) (list []types.CreatePool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.CreatePoolKey))
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 
-	defer iterator.Close()
-
 	for ; iterator.Valid(); iterator.Next() {
 		var val types.CreatePool
 		k.cdc.MustUnmarshal(iterator.Value(), &val)
 		list = append(list, val)
+	}
+
+	err := iterator.Close()
+	if err != nil {
+		panic(err)
 	}
 
 	return

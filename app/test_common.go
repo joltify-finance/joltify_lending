@@ -357,7 +357,7 @@ func (tApp TestApp) FundModuleAccount(ctx sdk.Context, recipientMod string, amou
 	return tApp.bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, recipientMod, amounts)
 }
 
-// GeneratePrivKeyAddressPairsFromRand generates (deterministically) a total of n private keys and addresses.
+// GeneratePrivKeyAddressPairs generates (deterministically) a total of n private keys and addresses.
 func GeneratePrivKeyAddressPairs(n int) (keys []cryptotypes.PrivKey, addrs []sdk.AccAddress) {
 	r := rand.New(rand.NewSource(12345)) // make the generation deterministic
 	keys = make([]cryptotypes.PrivKey, n)

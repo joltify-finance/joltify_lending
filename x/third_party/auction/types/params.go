@@ -23,17 +23,16 @@ const (
 	// fixme for test purpose
 
 	// DefaultMaxAuctionDuration max length of auction
-	DefaultMaxAuctionDuration time.Duration = time.Hour
+	DefaultMaxAuctionDuration = time.Hour
 	// DefaultForwardBidDuration how long an auction gets extended when someone bids for a forward auction
-	DefaultForwardBidDuration time.Duration = 30 * time.Minute
+	DefaultForwardBidDuration = 30 * time.Minute
 	// DefaultReverseBidDuration how long an auction gets extended when someone bids for a reverse auction
-	DefaultReverseBidDuration time.Duration = 30 * time.Minute
+	DefaultReverseBidDuration = 30 * time.Minute
 )
 
 var (
 	// DefaultIncrement is the smallest percent change a new bid must have from the old one
-	DefaultIncrement sdk.Dec = sdk.MustNewDecFromStr("0.05")
-	// ParamStoreKeyParams Param store key for auction params
+	DefaultIncrement       = sdk.MustNewDecFromStr("0.05")
 	KeyForwardBidDuration  = []byte("ForwardBidDuration")
 	KeyReverseBidDuration  = []byte("ReverseBidDuration")
 	KeyMaxAuctionDuration  = []byte("MaxAuctionDuration")
