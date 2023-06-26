@@ -40,13 +40,13 @@ func (suite *addBorrowSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 
-	app, k, nftKeeper, bankKeeper, _, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, bankKeeper, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	suite.ctx = ctx
 	suite.keeper = k
 	suite.nftKeeper = nftKeeper
 	suite.bankKeeper = bankKeeper
-	suite.app = app
+	suite.app = lapp
 }
 
 func (suite *addBorrowSuite) TestAddBorrow() {
@@ -154,7 +154,7 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 	}
 }
 
-func compareDepositor(suite suite.Suite, expected, actual types.DepositorInfo) {
+func (suite *addBorrowSuite) compareDepositor(expected, actual types.DepositorInfo) {
 	suite.Require().Equal(expected.InvestorId, actual.InvestorId)
 	suite.Require().True(expected.DepositorAddress.Equals(actual.DepositorAddress))
 	suite.Require().True(expected.LockedAmount.IsEqual(actual.LockedAmount))
@@ -238,7 +238,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 		LinkedNFT:        []string{},
 	}
 
-	compareDepositor(suite.Suite, targetDepositor, depositor)
+	suite.compareDepositor(targetDepositor, depositor)
 	// we deposit again,so withdrawal is doubled
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -248,7 +248,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	depositor, found = suite.keeper.GetDepositor(suite.ctx, depositorPool, creatorAddr1)
 	suite.Require().True(found)
-	compareDepositor(suite.Suite, targetDepositor, depositor)
+	suite.compareDepositor(targetDepositor, depositor)
 
 	// we mock the second user deposits the token, now we have 3*4e5 tokens
 	//_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
@@ -471,7 +471,9 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
-	suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
 
 	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
 
@@ -485,7 +487,8 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 
 	for i := 0; i < 10; i++ {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
-		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		suite.Require().NoError(err)
 		if i == 0 {
 			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdk.NewIntFromBigInt(big.NewInt(-1)))))
 		}
@@ -580,7 +583,9 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
-	suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
 
 	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
 
@@ -595,7 +600,8 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 	var oneInterest sdkmath.Int
 	for i := 0; i < 10; i++ {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
-		suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		suite.Require().NoError(err)
 		if i == 0 {
 			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdk.NewIntFromBigInt(big.NewInt(-1)))))
 			oneInterest = poolInfo.EscrowInterestAmount.MulRaw(-1)

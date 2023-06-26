@@ -303,7 +303,7 @@ func setDifference(a, b []string) (diff []string) {
 }
 
 func getDenoms(coins sdk.Coins) []string {
-	denoms := []string{}
+	var denoms []string
 	for _, coin := range coins {
 		denoms = append(denoms, coin.Denom)
 	}

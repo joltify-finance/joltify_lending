@@ -117,7 +117,7 @@ func NewSelectionsFromMap(selectionMap map[string]string) Selections {
 	return selections
 }
 
-// Valdate performs basic validaton checks
+// Validate performs basic validation checks
 func (ss Selections) Validate() error {
 	if len(ss) == 0 {
 		return sdkerrors.Wrap(ErrInvalidClaimDenoms, "cannot claim 0 denoms")

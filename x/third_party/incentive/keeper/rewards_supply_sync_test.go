@@ -292,15 +292,15 @@ func (suite *SynchronizeHardSupplyRewardTests) TestRewardIsIncrementedWhenNewRew
 	)
 }
 
-// HardDepositBuilder is a tool for creating a jolt deposit in tests.
+// JoltDepositBuilder is a tool for creating a jolt deposit in tests.
 // The builder inherits from jolt.Deposit, so fields can be accessed directly if a helper method doesn't exist.
-type HardDepositBuilder struct {
+type JoltDepositBuilder struct {
 	hardtypes.Deposit
 }
 
-// NewJoltDepositBuilder creates a HardDepositBuilder containing an empty deposit.
-func NewJoltDepositBuilder(depositor sdk.AccAddress) HardDepositBuilder {
-	return HardDepositBuilder{
+// NewJoltDepositBuilder creates a JoltDepositBuilder containing an empty deposit.
+func NewJoltDepositBuilder(depositor sdk.AccAddress) JoltDepositBuilder {
+	return JoltDepositBuilder{
 		Deposit: hardtypes.Deposit{
 			Depositor: depositor,
 		},
@@ -308,11 +308,11 @@ func NewJoltDepositBuilder(depositor sdk.AccAddress) HardDepositBuilder {
 }
 
 // Build assembles and returns the final deposit.
-func (builder HardDepositBuilder) Build() hardtypes.Deposit { return builder.Deposit }
+func (builder JoltDepositBuilder) Build() hardtypes.Deposit { return builder.Deposit }
 
 // WithSourceShares adds a deposit amount and factor such that the source shares for this deposit is equal to specified.
 // With a factor of 1, the deposit amount is the source shares. This picks an arbitrary factor to ensure factors are accounted for in production code.
-func (builder HardDepositBuilder) WithSourceShares(denom string, shares int64) HardDepositBuilder {
+func (builder JoltDepositBuilder) WithSourceShares(denom string, shares int64) JoltDepositBuilder {
 	if !builder.Amount.AmountOf(denom).Equal(sdk.ZeroInt()) {
 		panic("adding to amount with existing denom not implemented")
 	}
@@ -332,10 +332,12 @@ func (builder HardDepositBuilder) WithSourceShares(denom string, shares int64) H
 }
 
 // WithArbitrarySourceShares adds arbitrary deposit amounts and indexes for each specified denom.
-func (builder HardDepositBuilder) WithArbitrarySourceShares(denoms ...string) HardDepositBuilder {
+func (builder JoltDepositBuilder) WithArbitrarySourceShares(denoms ...string) JoltDepositBuilder {
 	const arbitraryShares = 1e9
+	var builderHandler JoltDepositBuilder
+	builderHandler = builder
 	for _, denom := range denoms {
-		builder = builder.WithSourceShares(denom, arbitraryShares)
+		builderHandler = builderHandler.WithSourceShares(denom, arbitraryShares)
 	}
-	return builder
+	return builderHandler
 }

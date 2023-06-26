@@ -111,7 +111,10 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to borrow money", msg.Creator)
 	}
 
-	k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
+	err = k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
+	if err != nil {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "borrow failed %v", err)
+	}
 
 	// now we need to update the interest prepaid
 	if poolInfo.InterestPrepayment != nil {

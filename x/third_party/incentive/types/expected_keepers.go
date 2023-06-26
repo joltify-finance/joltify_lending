@@ -21,7 +21,7 @@ type BankKeeper interface {
 	GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 }
 
-// joltKeeper defines the expected jolt keeper for interacting with Jolt protocol
+// JoltKeeper defines the expected jolt keeper for interacting with Jolt protocol
 type JoltKeeper interface {
 	GetDeposit(ctx sdk.Context, depositor sdk.AccAddress) (jolttypes.Deposit, bool)
 	GetBorrow(ctx sdk.Context, borrower sdk.AccAddress) (jolttypes.Borrow, bool)

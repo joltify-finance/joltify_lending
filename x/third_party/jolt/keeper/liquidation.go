@@ -409,7 +409,7 @@ func (k Keeper) LoadLiquidationData(ctx sdk.Context, deposit types2.Deposit, bor
 }
 
 func getDenoms(coins sdk.Coins) []string {
-	denoms := []string{}
+	var denoms []string
 	for _, coin := range coins {
 		denoms = append(denoms, coin.Denom)
 	}
@@ -421,7 +421,7 @@ func removeDuplicates(one []string, two []string) []string {
 	fullList := one
 	fullList = append(fullList, two...)
 
-	res := []string{}
+	var res []string
 	for _, val := range fullList {
 		check[val] = 1
 	}

@@ -3,13 +3,10 @@ package incentive_test
 import (
 	"time"
 
-	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
@@ -73,26 +70,26 @@ func NewPricefeedGenStateMultiFromTime(cdc codec.JSONCodec, t time.Time) app.Gen
 	return app.GenesisState{types.ModuleName: cdc.MustMarshalJSON(&pfGenesis)}
 }
 
-func NewJoltGenStateMulti(genTime time.Time) testutil.JoltGenesisBuilder {
-	joltMM := testutil.NewStandardMoneyMarket("ujolt")
-	joltMM.SpotMarketID = "jolt:usd"
-	btcMM := testutil.NewStandardMoneyMarket("btcb")
-	btcMM.SpotMarketID = "btc:usd"
+// func NewJoltGenStateMulti(genTime time.Time) testutil.JoltGenesisBuilder {
+//	joltMM := testutil.NewStandardMoneyMarket("ujolt")
+//	joltMM.SpotMarketID = "jolt:usd"
+//	btcMM := testutil.NewStandardMoneyMarket("btcb")
+//	btcMM.SpotMarketID = "btc:usd"
+//
+//	builder := testutil.NewJoltGenesisBuilder().WithGenesisTime(genTime).
+//		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("usdx")).
+//		WithInitializedMoneyMarket(joltMM).
+//		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("bnb")).
+//		WithInitializedMoneyMarket(btcMM).
+//		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("xrp")).
+//		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("zzz"))
+//	return builder
+// }
 
-	builder := testutil.NewJoltGenesisBuilder().WithGenesisTime(genTime).
-		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("usdx")).
-		WithInitializedMoneyMarket(joltMM).
-		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("bnb")).
-		WithInitializedMoneyMarket(btcMM).
-		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("xrp")).
-		WithInitializedMoneyMarket(testutil.NewStandardMoneyMarket("zzz"))
-	return builder
-}
-
-func NewStakingGenesisState(cdc codec.JSONCodec) app.GenesisState {
-	genState := stakingtypes.DefaultGenesisState()
-	genState.Params.BondDenom = "ujolt"
-	return app.GenesisState{
-		stakingtypes.ModuleName: cdc.MustMarshalJSON(genState),
-	}
-}
+// func NewStakingGenesisState(cdc codec.JSONCodec) app.GenesisState {
+//	genState := stakingtypes.DefaultGenesisState()
+//	genState.Params.BondDenom = "ujolt"
+//	return app.GenesisState{
+//		stakingtypes.ModuleName: cdc.MustMarshalJSON(genState),
+//	}
+// }

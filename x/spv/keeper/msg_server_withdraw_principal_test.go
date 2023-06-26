@@ -72,13 +72,13 @@ func setupPool(suite *withDrawPrincipalSuite) {
 func (suite *withDrawPrincipalSuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 	suite.nftKeeper = nftKeeper
 }
 
@@ -559,7 +559,8 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
 
-	suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))})
+	suite.Require().NoError(err)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneYear * time.Second))
 	req := types.MsgPayPrincipal{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(5e6))}
@@ -750,7 +751,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	//
 	//
 	//
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{"jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", suite.investorPool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e5))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e5))})
 	suite.Require().NoError(err)
 	// now we pay all the money
 	req := types.MsgPayPrincipal{

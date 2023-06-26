@@ -56,12 +56,3 @@ type AuctionWithPhase struct {
 	Type  string `json:"type" yaml:"type"`
 	Phase string `json:"phase" yaml:"phase"`
 }
-
-// NewAuctionWithPhase returns new AuctionWithPhase
-func NewAuctionWithPhase(a Auction) AuctionWithPhase {
-	return AuctionWithPhase{
-		Auction: a,
-		Type:    a.GetType(),
-		Phase:   a.GetPhase(),
-	}
-}

@@ -7,10 +7,7 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
-// Parameter keys
-var (
-	KeyMarkets = []byte("Markets")
-)
+var KeyMarkets = []byte("Markets")
 
 func GenDefaultMarket() Markets {
 	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")

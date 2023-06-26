@@ -41,10 +41,10 @@ func (suite *KeeperTestSuite) SetupTest() {
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)
-	keeper := tApp.GetJoltKeeper()
+	k := tApp.GetJoltKeeper()
 	suite.app = tApp
 	suite.ctx = ctx
-	suite.keeper = keeper
+	suite.keeper = k
 	suite.addrs = addrs
 }
 

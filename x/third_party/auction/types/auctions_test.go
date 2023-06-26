@@ -21,7 +21,6 @@ const (
 	TestDebtAmount1         = 20
 	TestDebtAmount2         = 15
 	TestExtraEndTime        = 10000
-	TestAuctionID           = 9999123
 	testAccAddress1         = "jolt18jz5lyhhy6ncjlyty064kttw93yzaulqgkkqwj"
 	testAccAddress2         = "jolt1g6q7rff5jdyny0ph6gm6nc9x540gs02tlu7nsp"
 )
@@ -327,8 +326,8 @@ func TestNewDebtAuction(t *testing.T) {
 func TestNewCollateralAuction(t *testing.T) {
 	// Set up WeightedAddresses
 	addresses := []sdk.AccAddress{
-		sdk.AccAddress([]byte(testAccAddress1)),
-		sdk.AccAddress([]byte(testAccAddress2)),
+		sdk.AccAddress(testAccAddress1),
+		sdk.AccAddress(testAccAddress2),
 	}
 
 	weights := []sdk.Int{

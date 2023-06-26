@@ -6,8 +6,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-const TypeMsgPayPrincipalPartial = "pay_principal_partial"
-
 var _ sdk.Msg = &MsgPayPrincipalPartial{}
 
 func NewMsgPayPrincipalPartial(creator string, poolIndex string, token sdk.Coin) *MsgPayPrincipalPartial {

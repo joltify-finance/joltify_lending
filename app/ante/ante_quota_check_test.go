@@ -32,32 +32,32 @@ import (
 
 type mockStakingKeeper struct{}
 
-func (m mockStakingKeeper) IterateLastValidators(context sdk.Context, f func(index int64, validator types2.ValidatorI) (stop bool)) {
+func (m mockStakingKeeper) IterateLastValidators(_ sdk.Context, _ func(index int64, validator types2.ValidatorI) (stop bool)) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetParams(ctx sdk.Context) types2.Params {
+func (m mockStakingKeeper) GetParams(_ sdk.Context) types2.Params {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) LastValidatorsIterator(ctx sdk.Context) (iterator sdk.Iterator) {
+func (m mockStakingKeeper) LastValidatorsIterator(_ sdk.Context) (iterator sdk.Iterator) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetValidator(ctx sdk.Context, addr sdk.ValAddress) (validator types2.Validator, found bool) {
+func (m mockStakingKeeper) GetValidator(_ sdk.Context, _ sdk.ValAddress) (validator types2.Validator, found bool) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetHistoricalInfo(ctx sdk.Context, height int64) (types2.HistoricalInfo, bool) {
+func (m mockStakingKeeper) GetHistoricalInfo(_ sdk.Context, _ int64) (types2.HistoricalInfo, bool) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetBondedValidatorsByPower(ctx sdk.Context) (validators []types2.Validator) {
+func (m mockStakingKeeper) GetBondedValidatorsByPower(_ sdk.Context) (validators []types2.Validator) {
 	v := types2.Validator{}
 	return []types2.Validator{v, v}
 }

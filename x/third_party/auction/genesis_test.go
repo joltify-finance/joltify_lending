@@ -42,7 +42,8 @@ func TestInitGenesis(t *testing.T) {
 		modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(types2.ModuleName), nil, 0, 0)
 		modAcc := authtypes.NewModuleAccount(modBaseAcc, types2.ModuleName, []string{authtypes.Minter, authtypes.Burner}...)
 		tApp.GetAccountKeeper().SetModuleAccount(ctx, modAcc)
-		tApp.GetBankKeeper().MintCoins(ctx, types2.ModuleName, testAuction.GetModuleAccountCoins())
+		err := tApp.GetBankKeeper().MintCoins(ctx, types2.ModuleName, testAuction.GetModuleAccountCoins())
+		require.NoError(t, err)
 
 		// set up auction genesis state with module account
 		auctionGS, err := types2.NewGenesisState(
@@ -90,7 +91,8 @@ func TestInitGenesis(t *testing.T) {
 		modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(types2.ModuleName), nil, 0, 0)
 		modAcc := authtypes.NewModuleAccount(modBaseAcc, types2.ModuleName, []string{authtypes.Minter, authtypes.Burner}...)
 		tApp.GetAccountKeeper().SetModuleAccount(ctx, modAcc)
-		tApp.GetBankKeeper().MintCoins(ctx, types2.ModuleName, testAuction.GetModuleAccountCoins())
+		err := tApp.GetBankKeeper().MintCoins(ctx, types2.ModuleName, testAuction.GetModuleAccountCoins())
+		require.NoError(t, err)
 
 		// create invalid genesis
 		auctionGS, err := types2.NewGenesisState(

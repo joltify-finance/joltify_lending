@@ -66,13 +66,13 @@ func setupPoolForQueryTest(suite *querySuite) {
 func (suite *querySuite) SetupTest() {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, bankKeeper, _, wctx := setupMsgServer(suite.T())
+	lapp, k, nftKeeper, bankKeeper, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
 	suite.ctx = ctx
 	suite.keeper = k
-	suite.app = app
+	suite.app = lapp
 	suite.nftKeeper = nftKeeper
 	suite.bankKeeper = bankKeeper
 }
@@ -170,13 +170,13 @@ func (suite *querySuite) TestAllQuery() {
 	depositor, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, addr)
 	suite.Require().True(found)
 
-	_, err = suite.keeper.Depositor(suite.ctx, &types.QueryDepositorRequest{"invalid", suite.investorPool})
+	_, err = suite.keeper.Depositor(suite.ctx, &types.QueryDepositorRequest{WalletAddress: "invalid", DepositPoolIndex: suite.investorPool})
 	suite.Require().ErrorContains(err, "invalid address")
 
-	_, err = suite.keeper.Depositor(suite.ctx, &types.QueryDepositorRequest{suite.investors[0], "invalid"})
+	_, err = suite.keeper.Depositor(suite.ctx, &types.QueryDepositorRequest{WalletAddress: suite.investors[0], DepositPoolIndex: "invalid"})
 	suite.Require().ErrorContains(err, "depositor not found")
 
-	respDepositor, err := suite.keeper.Depositor(suite.ctx, &types.QueryDepositorRequest{suite.investors[0], suite.investorPool})
+	respDepositor, err := suite.keeper.Depositor(suite.ctx, &types.QueryDepositorRequest{WalletAddress: suite.investors[0], DepositPoolIndex: suite.investorPool})
 
 	respWithdrawal, err = suite.keeper.WithdrawalPrincipal(suite.ctx, &types.QuerywithdrawalPrincipalRequest{PoolIndex: suite.investorPool, WalletAddress: suite.investors[0]})
 

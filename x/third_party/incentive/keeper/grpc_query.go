@@ -12,12 +12,7 @@ import (
 )
 
 const (
-	RewardTypeJolt        = "jolt"
-	RewardTypeUSDXMinting = "usdx_minting"
-	RewardTypeDelegator   = "delegator"
-	RewardTypeSwap        = "swap"
-	RewardTypeSavings     = "savings"
-	RewardTypeEarn        = "earn"
+	RewardTypeJolt = "jolt"
 )
 
 type queryServer struct {

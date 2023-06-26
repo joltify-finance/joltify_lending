@@ -14,43 +14,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
-func SetGetDeleteAuction(t *testing.T) {
-	// setup keeper, create auction
-	lg := tmlog.TestingLogger()
-	tApp := app.NewTestApp(lg, t.TempDir())
-	keeper := tApp.GetAuctionKeeper()
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
-
-	someTime := time.Date(43, time.January, 1, 0, 0, 0, 0, time.UTC) // need to specify UTC as tz info is lost on unmarshal
-	var id uint64 = 5
-	auction := types2.NewSurplusAuction("some_module", c("usdx", 100), "joltify", someTime).WithID(id)
-
-	// write and read from store
-	keeper.SetAuction(ctx, auction)
-	readAuction, found := keeper.GetAuction(ctx, id)
-
-	// check before and after match
-	require.True(t, found)
-	require.Equal(t, auction, readAuction)
-	// check auction is in the index
-	keeper.IterateAuctionsByTime(ctx, auction.GetEndTime(), func(readID uint64) bool {
-		require.Equal(t, auction.GetID(), readID)
-		return false
-	})
-
-	// delete auction
-	keeper.DeleteAuction(ctx, id)
-
-	// check auction does not exist
-	_, found = keeper.GetAuction(ctx, id)
-	require.False(t, found)
-	// check auction not in index
-	keeper.IterateAuctionsByTime(ctx, time.Unix(999999999, 0), func(readID uint64) bool {
-		require.Fail(t, "index should be empty", " found auction ID '%s", readID)
-		return false
-	})
-}
-
 func TestIncrementNextAuctionID(t *testing.T) {
 	// setup keeper
 	lg := tmlog.TestingLogger()

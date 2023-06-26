@@ -134,7 +134,7 @@ func GenerateNValidators(t *testing.T, n int) (stakingtypes.Validators, []sdk.Ac
 	return testValidators, creators
 }
 
-// setup the general vault app
+// SetupVaultApp setups the general vault app
 func SetupVaultApp(t testing.TB) (*jolt.TestApp, sdk.Context) {
 	logger := tmlog.TestingLogger()
 	tApp := jolt.NewTestApp(logger, t.TempDir())

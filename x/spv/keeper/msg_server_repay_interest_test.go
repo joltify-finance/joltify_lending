@@ -19,12 +19,12 @@ import (
 func TestMsgRepayInterest(t *testing.T) {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, _, _, _, wctx := setupMsgServer(t)
+	lapp, k, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
-	resp, err := app.CreatePool(ctx, &req)
+	resp, err := lapp.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
 	poolIndex := resp.PoolIndex
@@ -33,11 +33,11 @@ func TestMsgRepayInterest(t *testing.T) {
 		PoolIndex: poolIndex[0],
 		Token:     sdk.NewCoin("invalid", sdk.NewInt(100)),
 	}
-	_, err = app.RepayInterest(ctx, &reqRePayInterest)
+	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "pool denom ausdc and repay is invalid: inconsistency tokens")
 
 	reqRePayInterest.Creator = "invalid address"
-	_, err = app.RepayInterest(ctx, &reqRePayInterest)
+	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "invalid address")
 
 	reqRePayInterest = types.MsgRepayInterest{
@@ -45,7 +45,7 @@ func TestMsgRepayInterest(t *testing.T) {
 		PoolIndex: poolIndex[0],
 		Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
 	}
-	_, err = app.RepayInterest(ctx, &reqRePayInterest)
+	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "borrow amount is zero, no interest to be paid or interest paid is zero")
 
 	poolInfo, found := k.GetPools(ctx, poolIndex[0])
@@ -53,13 +53,13 @@ func TestMsgRepayInterest(t *testing.T) {
 	poolInfo.PoolStatus = types.PoolInfo_FROZEN
 	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdk.NewInt(100))
 	k.SetPool(ctx, poolInfo)
-	_, err = app.RepayInterest(ctx, &reqRePayInterest)
+	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "pool is not active")
 
 	poolInfo.PoolStatus = types.PoolInfo_INACTIVE
 	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdk.NewInt(100))
 	k.SetPool(ctx, poolInfo)
-	_, err = app.RepayInterest(ctx, &reqRePayInterest)
+	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "pool is not active")
 }
 
@@ -103,7 +103,10 @@ func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.Pool
 		panic(err)
 	}
 	currentBorrowClass.Data = data
-	nftKeeper.SaveClass(ctx, currentBorrowClass)
+	err = nftKeeper.SaveClass(ctx, currentBorrowClass)
+	if err != nil {
+		panic(err)
+	}
 	poolInfo.PoolNFTIds = append(poolInfo.PoolNFTIds, currentBorrowClass.Id)
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.AddAmount(localAmount)
 }
@@ -141,12 +144,12 @@ func testWithDifferentPrePayAmount(t *testing.T, ctx sdk.Context, app types.MsgS
 func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
-	app, k, nftKeeper, _, _, wctx := setupMsgServer(t)
+	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
 	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.078", "0.072"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
-	resp, err := app.CreatePool(ctx, &req)
+	resp, err := lapp.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
 	poolIndex := resp.PoolIndex[0]
@@ -190,14 +193,14 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 
 	interestOneMonth := interestOneMonthWithReserve.Sub(sdk.NewDecFromInt(interestOneMonthWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
 
-	testWithDifferentPrePayAmount(t, ctx, app, poolIndex, k, interestOneMonthWithReserve)
+	testWithDifferentPrePayAmount(t, ctx, lapp, poolIndex, k, interestOneMonthWithReserve)
 
 	repayMsg := types.MsgRepayInterest{
 		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		PoolIndex: poolIndex,
 		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)),
 	}
-	_, err = app.RepayInterest(ctx, &repayMsg)
+	_, err = lapp.RepayInterest(ctx, &repayMsg)
 
 	paymentTime := borrowInterest.Payments[1].PaymentTime
 	require.EqualValues(t, firstBorrowTime.Add(time.Second*spvkeeper.OneMonth), paymentTime)

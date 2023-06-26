@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	oneYear time.Duration = time.Hour * 24 * 365
+	oneYear = time.Hour * 24 * 365
 )
 
 // IncentiveGenesisBuilder is a tool for creating an incentive genesis state.
