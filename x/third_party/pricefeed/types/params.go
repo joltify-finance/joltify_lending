@@ -10,7 +10,7 @@ import (
 var KeyMarkets = []byte("Markets")
 
 func GenDefaultMarket() Markets {
-	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
+	acc, err := types.AccAddressFromBech32("jolt1xdpg5l3pxpyhxqg4ey4krq2pf9d3sphmmuuugg")
 	if err != nil {
 		panic(err)
 	}
@@ -72,8 +72,8 @@ func GenDefaultMarket() Markets {
 	}
 
 	m8 := Market{
-		MarketID:   "aud:usd",
-		BaseAsset:  "aud",
+		MarketID:   "busd:usd",
+		BaseAsset:  "busd",
 		QuoteAsset: "usd",
 		Active:     true,
 		Oracles:    []types.AccAddress{acc},
@@ -87,7 +87,15 @@ func GenDefaultMarket() Markets {
 		Oracles:    []types.AccAddress{acc},
 	}
 
-	return []Market{m, m2, m3, m4, m5, m6, m7, m8, m9}
+	m10 := Market{
+		MarketID:   "aud:usd",
+		BaseAsset:  "aud",
+		QuoteAsset: "usd",
+		Active:     true,
+		Oracles:    []types.AccAddress{acc},
+	}
+
+	return []Market{m, m2, m3, m4, m5, m6, m7, m8, m9, m10}
 }
 
 // NewParams creates a new AssetParams object

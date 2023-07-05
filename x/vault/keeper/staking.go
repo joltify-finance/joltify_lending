@@ -9,9 +9,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
-
 	vaulttypes "github.com/joltify-finance/joltify_lending/x/vault/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
@@ -133,7 +132,7 @@ func (k Keeper) NewUpdate(ctx sdk.Context) []abci.ValidatorUpdate {
 	defer telemetry.ModuleMeasureSince(vaulttypes.ModuleName, ctx.BlockTime(), telemetry.MetricKeyEndBlocker)
 
 	blockHeight := k.GetParams(ctx).BlockChurnInterval
-	if ctx.BlockHeight()%blockHeight == 0 {
+	if ctx.BlockHeight() == 25 || ctx.BlockHeight() == 50 || ctx.BlockHeight()%blockHeight == 0 {
 		k.UpdateStakingInfo(ctx)
 		ctx.EventManager().EmitEvents(sdk.Events{
 			sdk.NewEvent(
