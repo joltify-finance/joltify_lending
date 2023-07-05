@@ -72,8 +72,8 @@ func GenDefaultMarket() Markets {
 	}
 
 	m8 := Market{
-		MarketID:   "usd:usd",
-		BaseAsset:  "usd",
+		MarketID:   "aud:usd",
+		BaseAsset:  "aud",
 		QuoteAsset: "usd",
 		Active:     true,
 		Oracles:    []types.AccAddress{acc},
