@@ -48,14 +48,46 @@ func GenDefaultMarket() Markets {
 	}
 
 	m5 := Market{
-		MarketID:   "aud:usd",
-		BaseAsset:  "usdc",
-		QuoteAsset: "aud",
+		MarketID:   "eth:usd",
+		BaseAsset:  "eth",
+		QuoteAsset: "usd",
 		Active:     true,
 		Oracles:    []types.AccAddress{acc},
 	}
 
-	return []Market{m, m2, m3, m4, m5}
+	m6 := Market{
+		MarketID:   "btc:usd",
+		BaseAsset:  "btc",
+		QuoteAsset: "usd",
+		Active:     true,
+		Oracles:    []types.AccAddress{acc},
+	}
+
+	m7 := Market{
+		MarketID:   "atom:usd",
+		BaseAsset:  "atom",
+		QuoteAsset: "usd",
+		Active:     true,
+		Oracles:    []types.AccAddress{acc},
+	}
+
+	m8 := Market{
+		MarketID:   "aud:usd",
+		BaseAsset:  "aud",
+		QuoteAsset: "usd",
+		Active:     true,
+		Oracles:    []types.AccAddress{acc},
+	}
+
+	m9 := Market{
+		MarketID:   "avax:usd",
+		BaseAsset:  "avax",
+		QuoteAsset: "usd",
+		Active:     true,
+		Oracles:    []types.AccAddress{acc},
+	}
+
+	return []Market{m, m2, m3, m4, m5, m6, m7, m8, m9}
 }
 
 // NewParams creates a new AssetParams object
