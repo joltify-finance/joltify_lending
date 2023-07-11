@@ -50,7 +50,6 @@ sed -i -E 's|max_subscription_clients = 100|max_subscription_clients = 1000|g' $
 
 sed -i -E 's|cors_allowed_origins = \[\]|cors_allowed_origins = \[\"*\"\]|g' $DATA/config/config.toml
 
-
 # Set evm tracer to json
 sed -in-place='' 's/tracer = ""/tracer = "json"/g' $DATA/config/app.toml
 
@@ -60,7 +59,7 @@ sed -in-place='' 's/broadcast-mode = "sync"/broadcast-mode = "block"/g' $DATA/co
 
 # avoid having to use password for keys
 $BINARY config keyring-backend test
-
+set -x
 # Create validator keys and add account to genesis
 validatorKeyName="validator"
 printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover
@@ -99,8 +98,6 @@ do
   $BINARY add-genesis-account $address $amount"ausdc",$amountAtom"ujolt"
 done
 
-
-
 # Create a delegation tx for the validator and add to genesis
 $BINARY gentx $validatorKeyName 1000000000ujolt --keyring-backend test --chain-id $chainID
 $BINARY collect-gentxs
@@ -118,3 +115,7 @@ jq '.app_state.bank.supply = []' $DATA/config/genesis.json|sponge $DATA/config/g
 jq '.app_state.gov.voting_params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
 jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+
+jq '.consensus_params.block.max_gas= "20000000"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+
+#jq '.app_state.feemarket.params.base_fee= "100"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json

@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -46,7 +48,7 @@ import (
 
 var (
 	emptyTime            time.Time
-	testChainID                = "joltifytest_1-1"
+	testChainID                = "joltifytest_888-1"
 	defaultInitialHeight int64 = 1
 )
 
@@ -200,10 +202,11 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
+			ChainId:         "joltifychain_888-1",
 		},
 	)
 
-	header := tmproto.Header{Height: 1, ChainID: "oppyChain-1", Time: time.Now().UTC()}
+	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: time.Now().UTC()}
 
 	ctx := app.BaseApp.NewContext(false, header)
 	return TestApp{App: *app, Ctx: ctx}
@@ -223,6 +226,7 @@ func (tApp TestApp) GetAuctionKeeper() auctionkeeper.Keeper     { return tApp.au
 func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.pricefeedKeeper }
 func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.joltKeeper }
 func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.incentiveKeeper }
+func (tApp TestApp) GetEVMKeeper() evmkeeper.Keeper             { return *tApp.evmKeeper }
 
 // LegacyAmino returns the app's amino codec.
 func (app *App) LegacyAmino() *codec.LegacyAmino {

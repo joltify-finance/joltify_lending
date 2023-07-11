@@ -25,7 +25,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
-var testChainID = "joltifytest_1-1"
+var testChainID = "joltifytestchain_888-1"
 
 type IntegrationTester struct {
 	suite.Suite

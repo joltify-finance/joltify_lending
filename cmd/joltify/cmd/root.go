@@ -3,9 +3,12 @@ package cmd
 import (
 	"os"
 
+	"github.com/evmos/ethermint/crypto/hd"
+
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
-	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
+	ethermintclient "github.com/evmos/ethermint/client"
+	ethermintserver "github.com/evmos/ethermint/server"
+	servercfg "github.com/evmos/ethermint/server/config"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
@@ -16,6 +19,7 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/params"
+	joltclient "github.com/joltify-finance/joltify_lending/client"
 	"github.com/spf13/cobra"
 	tmcfg "github.com/tendermint/tendermint/config"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
@@ -39,6 +43,7 @@ func NewRootCmd() *cobra.Command {
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastBlock).
 		WithHomeDir(app.DefaultNodeHome).
+		WithKeyringOptions(hd.EthSecp256k1Option()).
 		WithViper(EnvPrefix)
 
 	rootCmd := &cobra.Command{
@@ -61,16 +66,8 @@ func NewRootCmd() *cobra.Command {
 			if err = client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
-			srvCfg := serverconfig.DefaultConfig()
-			srvCfg.MinGasPrices = "0ujolt"
 
-			type CustomAppConfig struct {
-				serverconfig.Config
-			}
-			customAppConfig := CustomAppConfig{
-				Config: *srvCfg,
-			}
-			customAppTemplate := serverconfig.DefaultConfigTemplate
+			customAppTemplate, customAppConfig := servercfg.AppConfig("ujolt")
 			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, tmcfg.DefaultConfig())
 		},
 	}
@@ -83,7 +80,9 @@ func NewRootCmd() *cobra.Command {
 // addSubCmds registers all the sub commands used by joltify.
 func addSubCmds(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, defaultNodeHome string) {
 	rootCmd.AddCommand(
-		genutilcli.InitCmd(app.ModuleBasics, defaultNodeHome),
+		ethermintclient.ValidateChainID(
+			genutilcli.InitCmd(app.ModuleBasics, defaultNodeHome),
+		),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, defaultNodeHome),
 		genutilcli.MigrateGenesisCmd(),
 		genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, defaultNodeHome),
@@ -99,10 +98,12 @@ func addSubCmds(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, de
 		encodingConfig: encodingConfig,
 	}
 
-	server.AddCommands(
+	ethermintserver.AddCommands(
 		rootCmd,
-		defaultNodeHome,
-		ac.newApp,
+		ethermintserver.NewDefaultStartOptions(
+			ac.newApp,
+			app.DefaultNodeHome,
+		),
 		ac.appExport,
 		func(cmd *cobra.Command) {
 			ac.addStartCmdFlags(cmd)
@@ -114,6 +115,6 @@ func addSubCmds(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, de
 		StatusCommand(),
 		newQueryCmd(),
 		newTxCmd(),
-		keys.Commands(app.DefaultNodeHome),
+		joltclient.KeyCommands(app.DefaultNodeHome),
 	)
 }
