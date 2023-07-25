@@ -1,7 +1,10 @@
 package app
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"encoding/json"
+	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
+	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
 	"math/rand"
 	"testing"
 	"time"
@@ -227,6 +230,8 @@ func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.pr
 func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.joltKeeper }
 func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.incentiveKeeper }
 func (tApp TestApp) GetEVMKeeper() evmkeeper.Keeper             { return *tApp.evmKeeper }
+func (tApp TestApp) GetEVMUtilKeeper() evmutilkeeper.Keeper     { return tApp.evmutilKeeper }
+func (tApp TestApp) GetFeeMarketKeeper() feemarketkeeper.Keeper { return tApp.feeMarketKeeper }
 
 // LegacyAmino returns the app's amino codec.
 func (app *App) LegacyAmino() *codec.LegacyAmino {
@@ -332,10 +337,28 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	return tApp
 }
 
+// RandomAddress non-deterministically generates a new address, discarding the private key.
+func RandomAddress() sdk.AccAddress {
+	secret := make([]byte, 32)
+	_, err := rand.Read(secret)
+	if err != nil {
+		panic("Could not read randomness")
+	}
+	key := secp256k1.GenPrivKeyFromSecret(secret)
+	return sdk.AccAddress(key.PubKey().Address())
+}
+
 // CheckBalance requires the account address has the expected amount of coins.
 func (tApp TestApp) CheckBalance(t *testing.T, ctx sdk.Context, owner sdk.AccAddress, expectedCoins sdk.Coins) {
 	coins := tApp.GetBankKeeper().GetAllBalances(ctx, owner)
 	require.Equal(t, expectedCoins, coins)
+}
+
+// GetModuleAccountBalance gets the current balance of the denom for a module account
+func (tApp TestApp) GetModuleAccountBalance(ctx sdk.Context, moduleName string, denom string) sdkmath.Int {
+	moduleAcc := tApp.accountKeeper.GetModuleAccount(ctx, moduleName)
+	balance := tApp.bankKeeper.GetBalance(ctx, moduleAcc.GetAddress(), denom)
+	return balance.Amount
 }
 
 // FundAccount is a utility function that funds an account by minting and sending the coins to the address.

@@ -2,16 +2,19 @@ package app
 
 import (
 	"fmt"
+	"github.com/evmos/ethermint/x/evm/vm/geth"
 	"io"
 	stdlog "log"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil"
+	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
+	evmutiltypes "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
+
 	evmante "github.com/evmos/ethermint/app/ante"
 	ethermint "github.com/evmos/ethermint/types"
-	"github.com/evmos/ethermint/x/evm/vm/geth"
-
 	"github.com/evmos/ethermint/x/evm"
 	"github.com/gorilla/mux"
 	_ "github.com/joltify-finance/joltify_lending/client/docs/statik"
@@ -179,6 +182,7 @@ var (
 		nftmodule.AppModuleBasic{},
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
+		evmutil.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -202,6 +206,7 @@ var (
 		spvmoduletypes.ModuleAccount: {authtypes.Minter, authtypes.Burner},
 		nftmoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		evmtypes.ModuleName:          {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
+		evmutiltypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
 	}
 )
 
@@ -250,6 +255,7 @@ type App struct {
 	distrKeeper      distrkeeper.Keeper
 	evmKeeper        *evmkeeper.Keeper
 	feeMarketKeeper  feemarketkeeper.Keeper
+	evmutilKeeper    evmutilkeeper.Keeper
 	govKeeper        govkeeper.Keeper
 	paramsKeeper     paramskeeper.Keeper
 	authzKeeper      authzkeeper.Keeper
@@ -348,6 +354,7 @@ func NewApp(
 		nftmoduletypes.StoreKey,
 		evmtypes.StoreKey,
 		feemarkettypes.StoreKey,
+		evmutiltypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -390,6 +397,7 @@ func NewApp(
 	spvSubspace := app.paramsKeeper.Subspace(spvmoduletypes.ModuleName)
 	evmSubspace := app.paramsKeeper.Subspace(evmtypes.ModuleName)
 	feemarketSubspace := app.paramsKeeper.Subspace(feemarkettypes.ModuleName)
+	evmutilSubspace := app.paramsKeeper.Subspace(evmutiltypes.ModuleName)
 
 	bApp.SetParamStore(
 		app.paramsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable()),
@@ -514,13 +522,6 @@ func NewApp(
 		app.bankKeeper,
 		app.accountKeeper,
 	)
-	// app.issuanceKeeper = issuancekeeper.NewKeeper(
-	//	appCodec,
-	//	keys[issuancetypes.StoreKey],
-	//	issuanceSubspace,
-	//	app.accountKeeper,
-	//	app.bankKeeper,
-	// )
 
 	app.pricefeedKeeper = pricefeedkeeper.NewKeeper(
 		appCodec,
@@ -528,16 +529,6 @@ func NewApp(
 		pricefeedSubspace,
 	)
 
-	// cdpKeeper := cdpkeeper.NewKeeper(
-	//	appCodec,
-	//	keys[cdptypes.StoreKey],
-	//	cdpSubspace,
-	//	app.pricefeedKeeper,
-	//	app.auctionKeeper,
-	//	app.bankKeeper,
-	//	app.accountKeeper,
-	//	mAccPerms,
-	// )
 	joltKeeper := joltkeeper.NewKeeper(
 		appCodec,
 		keys[jolttypes.StoreKey],
@@ -582,16 +573,27 @@ func NewApp(
 		feemarketSubspace,
 	)
 
+	app.evmutilKeeper = evmutilkeeper.NewKeeper(
+		app.appCodec,
+		keys[evmutiltypes.StoreKey],
+		evmutilSubspace,
+		app.bankKeeper,
+		app.accountKeeper,
+	)
+
+	evmBankKeeper := evmutilkeeper.NewEvmBankKeeper(app.evmutilKeeper, app.bankKeeper, app.accountKeeper)
 	app.evmKeeper = evmkeeper.NewKeeper(
 		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey],
 		// Authority
 		authtypes.NewModuleAddress(govtypes.ModuleName),
-		app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.feeMarketKeeper,
+		app.accountKeeper, evmBankKeeper, app.stakingKeeper, app.feeMarketKeeper,
 		nil, // precompiled contracts
 		geth.NewEVM,
 		options.EVMTrace,
 		evmSubspace,
 	)
+
+	app.evmutilKeeper.SetEvmKeeper(app.evmKeeper)
 
 	// Note: the committee proposal handler is not registered on the committee router. This means committees cannot create or update other committees.
 	// Adding the committee proposal handler to the router is possible but awkward as the handler depends on the keeper which depends on the handler.
@@ -660,6 +662,7 @@ func NewApp(
 		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
 		evm.NewAppModule(app.evmKeeper, app.accountKeeper, evmSubspace),
 		feemarket.NewAppModule(app.feeMarketKeeper, feemarketSubspace),
+		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper),
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -703,6 +706,7 @@ func NewApp(
 		ibctransfertypes.ModuleName,
 		paramstypes.ModuleName,
 		authz.ModuleName,
+		evmutiltypes.ModuleName,
 	)
 
 	// Warning: Some end blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -738,6 +742,7 @@ func NewApp(
 		ibctransfertypes.ModuleName,
 		paramstypes.ModuleName,
 		authz.ModuleName,
+		evmutiltypes.ModuleName,
 	)
 
 	// Warning: Some init genesis methods must run before others. Ensure the dependencies are understood before modifying this list
@@ -766,6 +771,7 @@ func NewApp(
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
+		evmutiltypes.ModuleName,
 		incentivetypes.ModuleName, // reads cdp params, so must run after cdp genesis
 		genutiltypes.ModuleName,   // runs arbitrary txs included in genisis state, so run after modules have been initialized
 		crisistypes.ModuleName,    // runs the invariants at genesis, should run after other modules
