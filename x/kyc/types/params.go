@@ -16,9 +16,7 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
-var (
-	_ paramtypes.ParamSet = (*Params)(nil)
-)
+var _ paramtypes.ParamSet = (*Params)(nil)
 
 // Parameter keys
 var (

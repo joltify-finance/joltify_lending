@@ -40,7 +40,6 @@ func NewParams(
 
 // DefaultParams returns the default parameters for evmutil.
 func DefaultParams() Params {
-
 	if client.MAINNETFLAG == "false" {
 		DefaultAllowedCosmosDenoms = NewAllowedCosmosCoinERC20Tokens(NewAllowedCosmosCoinERC20Token("abnb", "wrap of bnb", "wabnb", 18))
 	}

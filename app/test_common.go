@@ -1,13 +1,15 @@
 package app
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"encoding/json"
-	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
-	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
 	"math/rand"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
+
+	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
+	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
 
 	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 
