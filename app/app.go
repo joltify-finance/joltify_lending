@@ -2,12 +2,13 @@ package app
 
 import (
 	"fmt"
-	"github.com/evmos/ethermint/x/evm/vm/geth"
 	"io"
 	stdlog "log"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/evmos/ethermint/x/evm/vm/geth"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil"
 	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
@@ -662,7 +663,7 @@ func NewApp(
 		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
 		evm.NewAppModule(app.evmKeeper, app.accountKeeper, evmSubspace),
 		feemarket.NewAppModule(app.feeMarketKeeper, feemarketSubspace),
-		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper),
+		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper, app.accountKeeper),
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.

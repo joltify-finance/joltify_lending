@@ -107,11 +107,11 @@ func (suite *ParamsTestSuite) TestParams_Validate() {
 	invalidConversionPairs := types.NewConversionPairs(
 		types.NewConversionPair(
 			testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000A"),
-			"kava",
+			"jolt",
 		),
 		types.NewConversionPair(
 			testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000B"),
-			"kava", // duplicate denom!
+			"jolt", // duplicate denom!
 		),
 	)
 	validAllowedCosmosDenoms := types.NewAllowedCosmosCoinERC20Tokens(

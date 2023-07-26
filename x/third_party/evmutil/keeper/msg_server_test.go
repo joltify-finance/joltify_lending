@@ -1,11 +1,8 @@
 package keeper_test
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
-
-	types2 "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/stretchr/testify/suite"
 
@@ -60,9 +57,6 @@ func (suite *MsgServerSuite) TestConvertCoinToERC20() {
 		pairStartingBal,
 	)
 	suite.Require().NoError(err)
-
-	sss := suite.App.GetModuleAccountBalance(suite.Ctx, types2.FeeCollectorName, "ajolt")
-	fmt.Printf(">>>>>>>>>>fee collector amount %v\n", sss.String())
 
 	type errArgs struct {
 		expectPass bool
@@ -193,7 +187,7 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 			types.MsgConvertERC20ToCoin{
 				Initiator:        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc",
 				Receiver:         invokerCosmosAddr.String(),
-				KavaERC20Address: contractAddr.String(),
+				JoltERC20Address: contractAddr.String(),
 				Amount:           sdkmath.NewInt(10_000),
 			},
 			math.MaxBig256,
@@ -288,7 +282,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		// make the denom allowed for conversion
 		params := suite.Keeper.GetParams(suite.Ctx)
 		params.AllowedCosmosDenoms = types.NewAllowedCosmosCoinERC20Tokens(
-			types.NewAllowedCosmosCoinERC20Token(allowedDenom, "Kava EVM Atom", "ATOM", 6),
+			types.NewAllowedCosmosCoinERC20Token(allowedDenom, "Jolt EVM Atom", "ATOM", 6),
 		)
 		suite.Keeper.SetParams(suite.Ctx, params)
 
@@ -337,7 +331,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		{
 			name: "invalid - bad initiator",
 			msg: types.NewMsgConvertCosmosCoinToERC20(
-				"invalid-kava-address",
+				"invalid-jolt-address",
 				testutil.RandomEvmAddress().Hex(),
 				sdk.NewInt64Coin(allowedDenom, 1e4),
 			),
@@ -458,7 +452,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_AlreadyDeployedContrac
 	// make the denom allowed for conversion
 	params := suite.Keeper.GetParams(suite.Ctx)
 	params.AllowedCosmosDenoms = types.NewAllowedCosmosCoinERC20Tokens(
-		types.NewAllowedCosmosCoinERC20Token(allowedDenom, "Kava EVM Atom", "ATOM", 6),
+		types.NewAllowedCosmosCoinERC20Token(allowedDenom, "Jolt EVM Atom", "ATOM", 6),
 	)
 	suite.Keeper.SetParams(suite.Ctx, params)
 
@@ -505,7 +499,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_AlreadyDeployedContrac
 	// check total supply
 	caller, key := testutil.RandomEvmAccount()
 	totalSupply, err := suite.QueryContract(
-		types.ERC20KavaWrappedCosmosCoinContract.ABI,
+		types.ERC20JoltWrappedCosmosCoinContract.ABI,
 		caller,
 		key,
 		contractAddress,
@@ -645,7 +639,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 			// expect erc20 total supply to reflect new value
 			caller, key := testutil.RandomEvmAccount()
 			totalSupply, err := suite.QueryContract(
-				types.ERC20KavaWrappedCosmosCoinContract.ABI,
+				types.ERC20JoltWrappedCosmosCoinContract.ABI,
 				caller,
 				key,
 				contractAddress,

@@ -6,13 +6,13 @@ order: 2
 
 ## Parameters and Genesis State
 
-`Parameters` define the list of conversion pairs allowed to be converted between Kava ERC20 tokens & sdk.Coins, and the list of native cosmos sdk.Coins that are allowed to be converted to ERC20s.
+`Parameters` define the list of conversion pairs allowed to be converted between Jolt ERC20 tokens & sdk.Coins, and the list of native cosmos sdk.Coins that are allowed to be converted to ERC20s.
 
 ```protobuf
 // Params defines the evmutil module params
 message Params {
   // enabled_conversion_pairs defines the list of conversion pairs allowed to be
-  // converted between Kava ERC20 and sdk.Coin
+  // converted between Jolt ERC20 and sdk.Coin
   repeated ConversionPair enabled_conversion_pairs = 4;
 
   // allowed_cosmos_denoms is a list of denom & erc20 token metadata pairs.
@@ -20,11 +20,11 @@ message Params {
   repeated AllowedCosmosCoinERC20Token allowed_cosmos_denoms = 1;
 }
 
-// ConversionPair defines a Kava ERC20 address and corresponding denom that is
+// ConversionPair defines a Jolt ERC20 address and corresponding denom that is
 // allowed to be converted between ERC20 and sdk.Coin
 message ConversionPair {
-  // ERC20 address of the token on the Kava EVM
-  bytes kava_erc20_address = 1;
+  // ERC20 address of the token on the Jolt EVM
+  bytes jolt_erc20_address = 1;
   // Denom of the corresponding sdk.Coin
   string denom = 2;
 }
@@ -58,9 +58,9 @@ message GenesisState {
 
 ## Account
 
-An `Account` is a struct representing the excess `akava` balance of an address.
+An `Account` is a struct representing the excess `ajolt` balance of an address.
 
-Since an address's total `akava` balance is derived from its `ukava` balance and the excess `akava` balance stored by the `Account` struct, the `akava` balance here should never exceed 1 `ukava` (10^12 `akava`).
+Since an address's total `ajolt` balance is derived from its `ujolt` balance and the excess `ajolt` balance stored by the `Account` struct, the `ajolt` balance here should never exceed 1 `ujolt` (10^12 `ajolt`).
 
 ```protobuf
 message Account {

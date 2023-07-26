@@ -683,15 +683,15 @@ func (suite *evmBankKeeperTestSuite) TestConvertOneUjoltToAjoltIfNeeded() {
 
 			suite.FundAccountWithJolt(suite.Addrs[0], tt.startingCoins)
 			err := suite.EvmBankKeeper.ConvertOneUjoltToAjoltIfNeeded(suite.Ctx, suite.Addrs[0], ajoltNeeded)
-			moduleKava := suite.BankKeeper.GetBalance(suite.Ctx, suite.AccountKeeper.GetModuleAddress(types.ModuleName), "ujolt")
+			moduleJolt := suite.BankKeeper.GetBalance(suite.Ctx, suite.AccountKeeper.GetModuleAddress(types.ModuleName), "ujolt")
 			if tt.success {
 				suite.Require().NoError(err)
 				if tt.startingCoins.AmountOf("ajolt").LT(ajoltNeeded) {
-					suite.Require().Equal(sdk.OneInt(), moduleKava.Amount)
+					suite.Require().Equal(sdk.OneInt(), moduleJolt.Amount)
 				}
 			} else {
 				suite.Require().Error(err)
-				suite.Require().Equal(sdk.ZeroInt(), moduleKava.Amount)
+				suite.Require().Equal(sdk.ZeroInt(), moduleJolt.Amount)
 			}
 
 			ajolt := suite.Keeper.GetBalance(suite.Ctx, suite.Addrs[0])

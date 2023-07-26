@@ -16,7 +16,7 @@ const (
 	// EvmDenom is the gas denom used by the evm
 	EvmDenom = "ajolt"
 
-	// CosmosDenom is the gas denom used by the kava app
+	// CosmosDenom is the gas denom used by the jolt app
 	CosmosDenom = "ujolt"
 )
 
@@ -32,14 +32,14 @@ var _ evmtypes.BankKeeper = EvmBankKeeper{}
 // This keeper uses both the ujolt coin and a separate ajolt balance to manage the
 // extra percision needed by the evm.
 type EvmBankKeeper struct {
-	akavaKeeper Keeper
+	ajoltKeeper Keeper
 	bk          types.BankKeeper
 	ak          types.AccountKeeper
 }
 
-func NewEvmBankKeeper(akavaKeeper Keeper, bk types.BankKeeper, ak types.AccountKeeper) EvmBankKeeper {
+func NewEvmBankKeeper(uJoltKeeper Keeper, bk types.BankKeeper, ak types.AccountKeeper) EvmBankKeeper {
 	return EvmBankKeeper{
-		akavaKeeper: akavaKeeper,
+		ajoltKeeper: uJoltKeeper,
 		bk:          bk,
 		ak:          ak,
 	}
@@ -53,7 +53,7 @@ func (k EvmBankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom st
 
 	spendableCoins := k.bk.SpendableCoins(ctx, addr)
 	ujolt := spendableCoins.AmountOf(CosmosDenom)
-	ajolt := k.akavaKeeper.GetBalance(ctx, addr)
+	ajolt := k.ajoltKeeper.GetBalance(ctx, addr)
 	total := ujolt.Mul(ConversionMultiplier).Add(ajolt)
 	return sdk.NewCoin(EvmDenom, total)
 }
@@ -86,7 +86,7 @@ func (k EvmBankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModul
 		return err
 	}
 
-	if err := k.akavaKeeper.SendBalance(ctx, senderAddr, recipientAddr, ajolt); err != nil {
+	if err := k.ajoltKeeper.SendBalance(ctx, senderAddr, recipientAddr, ajolt); err != nil {
 		return err
 	}
 
@@ -96,7 +96,7 @@ func (k EvmBankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModul
 // SendCoinsFromAccountToModule transfers ajolt coins from an AccAddress to a ModuleAccount.
 // It will panic if the module account does not exist.
 func (k EvmBankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
-	ujolt, akavaNeeded, err := SplitAJoltCoins(amt)
+	ujolt, uJoltNeeded, err := SplitAJoltCoins(amt)
 	if err != nil {
 		return err
 	}
@@ -107,12 +107,12 @@ func (k EvmBankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr 
 		}
 	}
 
-	if err := k.ConvertOneUjoltToAjoltIfNeeded(ctx, senderAddr, akavaNeeded); err != nil {
+	if err := k.ConvertOneUjoltToAjoltIfNeeded(ctx, senderAddr, uJoltNeeded); err != nil {
 		return err
 	}
 
 	recipientAddr := k.GetModuleAddress(recipientModule)
-	if err := k.akavaKeeper.SendBalance(ctx, senderAddr, recipientAddr, akavaNeeded); err != nil {
+	if err := k.ajoltKeeper.SendBalance(ctx, senderAddr, recipientAddr, uJoltNeeded); err != nil {
 		return err
 	}
 
@@ -134,7 +134,7 @@ func (k EvmBankKeeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coi
 	}
 
 	recipientAddr := k.GetModuleAddress(moduleName)
-	if err := k.akavaKeeper.AddBalance(ctx, recipientAddr, ajolt); err != nil {
+	if err := k.ajoltKeeper.AddBalance(ctx, recipientAddr, ajolt); err != nil {
 		return err
 	}
 
@@ -160,25 +160,25 @@ func (k EvmBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk.Coi
 		return err
 	}
 
-	return k.akavaKeeper.RemoveBalance(ctx, moduleAddr, ajolt)
+	return k.ajoltKeeper.RemoveBalance(ctx, moduleAddr, ajolt)
 }
 
-// ConvertOneUkavaToAkavaIfNeeded converts 1 ujolt to ajolt for an address if
-// its ajolt balance is smaller than the akavaNeeded amount.
-func (k EvmBankKeeper) ConvertOneUjoltToAjoltIfNeeded(ctx sdk.Context, addr sdk.AccAddress, akavaNeeded sdkmath.Int) error {
-	akavaBal := k.akavaKeeper.GetBalance(ctx, addr)
-	if akavaBal.GTE(akavaNeeded) {
+// ConvertOneuJoltTouJoltIfNeeded converts 1 ujolt to ajolt for an address if
+// its ajolt balance is smaller than the uJoltNeeded amount.
+func (k EvmBankKeeper) ConvertOneUjoltToAjoltIfNeeded(ctx sdk.Context, addr sdk.AccAddress, uJoltNeeded sdkmath.Int) error {
+	ajoltBal := k.ajoltKeeper.GetBalance(ctx, addr)
+	if ajoltBal.GTE(uJoltNeeded) {
 		return nil
 	}
 
-	ukavaToStore := sdk.NewCoins(sdk.NewCoin(CosmosDenom, sdk.OneInt()))
-	if err := k.bk.SendCoinsFromAccountToModule(ctx, addr, types.ModuleName, ukavaToStore); err != nil {
+	uJoltToStore := sdk.NewCoins(sdk.NewCoin(CosmosDenom, sdk.OneInt()))
+	if err := k.bk.SendCoinsFromAccountToModule(ctx, addr, types.ModuleName, uJoltToStore); err != nil {
 		return err
 	}
 
-	// add 1ukava equivalent of ajolt to addr
-	akavaToReceive := ConversionMultiplier
-	if err := k.akavaKeeper.AddBalance(ctx, addr, akavaToReceive); err != nil {
+	// add 1uJolt equivalent of ajolt to addr
+	uJoltToReceive := ConversionMultiplier
+	if err := k.ajoltKeeper.AddBalance(ctx, addr, uJoltToReceive); err != nil {
 		return err
 	}
 
@@ -187,22 +187,22 @@ func (k EvmBankKeeper) ConvertOneUjoltToAjoltIfNeeded(ctx sdk.Context, addr sdk.
 
 // ConvertAJoltToUJolt converts all available ajolt to ujolt for a given AccAddress.
 func (k EvmBankKeeper) ConvertAJoltToUJolt(ctx sdk.Context, addr sdk.AccAddress) error {
-	totalAkava := k.akavaKeeper.GetBalance(ctx, addr)
-	ujolt, _, err := SplitAJoltCoins(sdk.NewCoins(sdk.NewCoin(EvmDenom, totalAkava)))
+	totaluJolt := k.ajoltKeeper.GetBalance(ctx, addr)
+	ujolt, _, err := SplitAJoltCoins(sdk.NewCoins(sdk.NewCoin(EvmDenom, totaluJolt)))
 	if err != nil {
 		return err
 	}
 
 	// do nothing if account does not have enough ajolt for a single ujolt
-	ukavaToReceive := ujolt.Amount
-	if !ukavaToReceive.IsPositive() {
+	uJoltToReceive := ujolt.Amount
+	if !uJoltToReceive.IsPositive() {
 		return nil
 	}
 
 	// remove ajolt used for converting to ujolt
-	akavaToBurn := ukavaToReceive.Mul(ConversionMultiplier)
-	finalBal := totalAkava.Sub(akavaToBurn)
-	if err := k.akavaKeeper.SetBalance(ctx, addr, finalBal); err != nil {
+	uJoltToBurn := uJoltToReceive.Mul(ConversionMultiplier)
+	finalBal := totaluJolt.Sub(uJoltToBurn)
+	if err := k.ajoltKeeper.SetBalance(ctx, addr, finalBal); err != nil {
 		return err
 	}
 
@@ -242,9 +242,9 @@ func SplitAJoltCoins(coins sdk.Coins) (sdk.Coin, sdkmath.Int, error) {
 	if remainingBalance.IsPositive() {
 		ajolt = remainingBalance
 	}
-	ukavaAmount := coin.Amount.Quo(ConversionMultiplier)
-	if ukavaAmount.IsPositive() {
-		ujolt = sdk.NewCoin(CosmosDenom, ukavaAmount)
+	uJoltAmount := coin.Amount.Quo(ConversionMultiplier)
+	if uJoltAmount.IsPositive() {
+		ujolt = sdk.NewCoin(CosmosDenom, uJoltAmount)
 	}
 
 	return ujolt, ajolt, nil

@@ -3,6 +3,7 @@ package evmutil_test
 import (
 	"testing"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/suite"
 
 	sdkmath "cosmossdk.io/math"
@@ -28,7 +29,7 @@ func (s *genesisTestSuite) TestInitGenesis_SetAccounts() {
 	)
 	accounts := s.Keeper.GetAllAccounts(s.Ctx)
 	s.Require().Len(accounts, 0)
-	evmutil.InitGenesis(s.Ctx, s.Keeper, gs)
+	evmutil.InitGenesis(s.Ctx, s.Keeper, gs, s.AccountKeeper)
 	accounts = s.Keeper.GetAllAccounts(s.Ctx)
 	s.Require().Len(accounts, 1)
 	account := s.Keeper.GetAccount(s.Ctx, s.Addrs[0])
@@ -39,7 +40,7 @@ func (s *genesisTestSuite) TestInitGenesis_SetAccounts() {
 func (s *genesisTestSuite) TestInitGenesis_SetParams() {
 	params := types.DefaultParams()
 	conversionPair := types.ConversionPair{
-		KavaERC20Address: testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2").Bytes(),
+		JoltERC20Address: testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2").Bytes(),
 		Denom:            "weth",
 	}
 	params.EnabledConversionPairs = []types.ConversionPair{conversionPair}
@@ -47,7 +48,7 @@ func (s *genesisTestSuite) TestInitGenesis_SetParams() {
 		[]types.Account{},
 		params,
 	)
-	evmutil.InitGenesis(s.Ctx, s.Keeper, gs)
+	evmutil.InitGenesis(s.Ctx, s.Keeper, gs, s.AccountKeeper)
 	params = s.Keeper.GetParams(s.Ctx)
 	s.Require().Len(params.EnabledConversionPairs, 1)
 	s.Require().Equal(conversionPair, params.EnabledConversionPairs[0])
@@ -61,8 +62,23 @@ func (s *genesisTestSuite) TestInitGenesis_ValidateFail() {
 		types.DefaultParams(),
 	)
 	s.Require().Panics(func() {
-		evmutil.InitGenesis(s.Ctx, s.Keeper, gs)
+		evmutil.InitGenesis(s.Ctx, s.Keeper, gs, s.AccountKeeper)
 	})
+}
+
+func (s *genesisTestSuite) TestInitGenesis_ModuleAccount() {
+	gs := types.NewGenesisState(
+		[]types.Account{},
+		types.DefaultParams(),
+	)
+	s.Require().NotPanics(func() {
+		evmutil.InitGenesis(s.Ctx, s.Keeper, gs, s.AccountKeeper)
+	})
+	// check for module account this way b/c GetModuleAccount creates if not existing.
+	acc := s.AccountKeeper.GetAccount(s.Ctx, s.AccountKeeper.GetModuleAddress(types.ModuleName))
+	s.Require().NotNil(acc)
+	_, ok := acc.(authtypes.ModuleAccountI)
+	s.Require().True(ok)
 }
 
 func (s *genesisTestSuite) TestExportGenesis() {
@@ -76,14 +92,14 @@ func (s *genesisTestSuite) TestExportGenesis() {
 	params := types.DefaultParams()
 	params.EnabledConversionPairs = []types.ConversionPair{
 		{
-			KavaERC20Address: testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2").Bytes(),
+			JoltERC20Address: testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2").Bytes(),
 			Denom:            "weth",
 		},
 	}
 	params.AllowedCosmosDenoms = []types.AllowedCosmosCoinERC20Token{
 		{
-			CosmosDenom: "hard",
-			Name:        "Kava EVM HARD",
+			CosmosDenom: "jolt",
+			Name:        "Jolt EVM HARD",
 			Symbol:      "HARD",
 			Decimals:    6,
 		},

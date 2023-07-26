@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	sdkmath "cosmossdk.io/math"
+	"github.com/joltify-finance/joltify_lending/client"
 
 	"github.com/gogo/protobuf/proto"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
@@ -16,8 +17,7 @@ import (
 )
 
 var (
-	_           paramtypes.ParamSet = (*Params)(nil)
-	MAINNETFLAG                     = "false"
+	_ paramtypes.ParamSet = (*Params)(nil)
 )
 
 // Parameter keys
@@ -33,7 +33,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	if MAINNETFLAG == "false" {
+	if client.MAINNETFLAG == "false" {
 		acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
 		if err != nil {
 			panic(err)

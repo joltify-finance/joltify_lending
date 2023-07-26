@@ -23,7 +23,7 @@ func TestParamsSuite(t *testing.T) {
 func (suite *ParamsTestSuite) TestEnabledConversionPair() {
 	pairAddr := testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
 	expPair := types.ConversionPair{
-		KavaERC20Address: pairAddr.Bytes(),
+		JoltERC20Address: pairAddr.Bytes(),
 		Denom:            "weth",
 	}
 	params := types.DefaultParams()
@@ -66,9 +66,9 @@ func (suite *keeperTestSuite) TestGetAllowedTokenMetadata() {
 
 	atom := types.NewAllowedCosmosCoinERC20Token(
 		"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
-		"Kava EVM ATOM", "ATOM", 6,
+		"Jolt EVM ATOM", "ATOM", 6,
 	)
-	hard := types.NewAllowedCosmosCoinERC20Token("hard", "Kava EVM Hard", "HARD", 6)
+	hard := types.NewAllowedCosmosCoinERC20Token("hard", "Jolt EVM Hard", "HARD", 6)
 
 	// init state with some allowed tokens
 	params := suite.Keeper.GetParams(suite.Ctx)

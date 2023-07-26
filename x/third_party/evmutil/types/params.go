@@ -2,6 +2,7 @@ package types
 
 import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/joltify-finance/joltify_lending/client"
 )
 
 // Parameter keys and default values
@@ -39,6 +40,11 @@ func NewParams(
 
 // DefaultParams returns the default parameters for evmutil.
 func DefaultParams() Params {
+
+	if client.MAINNETFLAG == "false" {
+		DefaultAllowedCosmosDenoms = NewAllowedCosmosCoinERC20Tokens(NewAllowedCosmosCoinERC20Token("abnb", "wrap of bnb", "wabnb", 18))
+	}
+
 	return NewParams(
 		DefaultConversionPairs,
 		DefaultAllowedCosmosDenoms,

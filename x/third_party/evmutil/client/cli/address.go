@@ -45,12 +45,12 @@ func ParseOrQueryConversionPairAddress(
 
 	if err := sdk.ValidateDenom(addrOrDenom); err != nil {
 		return common.Address{}, fmt.Errorf(
-			"Kava ERC20 '%s' is not a valid hex address or denom",
+			"Jolt ERC20 '%s' is not a valid hex address or denom",
 			addrOrDenom,
 		)
 	}
 
-	// Valid denom, try looking up as denom to get corresponding Kava ERC20 address
+	// Valid denom, try looking up as denom to get corresponding Jolt ERC20 address
 	paramsRes, err := queryClient.Params(
 		context.Background(),
 		&types.QueryParamsRequest{},
@@ -66,7 +66,7 @@ func ParseOrQueryConversionPairAddress(
 	}
 
 	return common.Address{}, fmt.Errorf(
-		"Kava ERC20 '%s' is not a valid hex address or denom (did not match any denoms in queried enabled conversion pairs)",
+		"Jolt ERC20 '%s' is not a valid hex address or denom (did not match any denoms in queried enabled conversion pairs)",
 		addrOrDenom,
 	)
 }

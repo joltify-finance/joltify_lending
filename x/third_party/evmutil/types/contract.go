@@ -34,11 +34,11 @@ var (
 	// ERC20MintableBurnableAddress is the erc20 module address
 	ERC20MintableBurnableAddress common.Address
 
-	//go:embed ethermint_json/ERC20KavaWrappedCosmosCoin.json
-	ERC20KavaWrappedCosmosCoinJSON []byte
+	//go:embed ethermint_json/ERC20JoltWrappedCosmosCoin.json
+	ERC20JoltWrappedCosmosCoinJSON []byte
 
-	// ERC20KavaWrappedCosmosCoinContract is the compiled erc20 contract
-	ERC20KavaWrappedCosmosCoinContract evmtypes.CompiledContract
+	// ERC20JoltWrappedCosmosCoinContract is the compiled erc20 contract
+	ERC20JoltWrappedCosmosCoinContract evmtypes.CompiledContract
 )
 
 func init() {
@@ -53,12 +53,12 @@ func init() {
 		panic("loading ERC20MintableBurnable contract failed")
 	}
 
-	err = json.Unmarshal(ERC20KavaWrappedCosmosCoinJSON, &ERC20KavaWrappedCosmosCoinContract)
+	err = json.Unmarshal(ERC20JoltWrappedCosmosCoinJSON, &ERC20JoltWrappedCosmosCoinContract)
 	if err != nil {
-		panic(fmt.Sprintf("failed to unmarshal ERC20KavaWrappedCosmosCoinJSON: %s. %s", err, string(ERC20KavaWrappedCosmosCoinJSON)))
+		panic(fmt.Sprintf("failed to unmarshal ERC20JoltWrappedCosmosCoinJSON: %s. %s", err, string(ERC20JoltWrappedCosmosCoinJSON)))
 	}
 
-	if len(ERC20KavaWrappedCosmosCoinContract.Bin) == 0 {
-		panic("loading ERC20KavaWrappedCosmosCoin contract failed")
+	if len(ERC20JoltWrappedCosmosCoinContract.Bin) == 0 {
+		panic("loading ERC20JoltWrappedCosmosCoin contract failed")
 	}
 }

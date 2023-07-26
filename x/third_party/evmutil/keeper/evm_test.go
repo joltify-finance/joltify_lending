@@ -1,15 +1,8 @@
 package keeper_test
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
-	"time"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
-	etherminttypes "github.com/evmos/ethermint/types"
 
 	"github.com/stretchr/testify/suite"
 
@@ -37,11 +30,11 @@ func (suite *evmKeeperTestSuite) StateDB() *statedb.StateDB {
 
 func (suite *evmKeeperTestSuite) TestEvmKeeper_SetAccount() {
 	baseAddr := tests.GenerateAddress()
-	baseAcc := &authtypes.BaseAccount{Address: sdk.AccAddress(baseAddr.Bytes()).String()}
+	//baseAcc := &authtypes.BaseAccount{Address: sdk.AccAddress(baseAddr.Bytes()).String()}
 	ethAddr := tests.GenerateAddress()
-	ethAcc := &etherminttypes.EthAccount{BaseAccount: &authtypes.BaseAccount{Address: sdk.AccAddress(ethAddr.Bytes()).String()}, CodeHash: common.BytesToHash(types.EmptyCodeHash).String()}
+	//ethAcc := &etherminttypes.EthAccount{BaseAccount: &authtypes.BaseAccount{Address: sdk.AccAddress(ethAddr.Bytes()).String()}, CodeHash: common.BytesToHash(types.EmptyCodeHash).String()}
 	vestingAddr := tests.GenerateAddress()
-	vestingAcc := vestingtypes.NewBaseVestingAccount(&authtypes.BaseAccount{Address: sdk.AccAddress(vestingAddr.Bytes()).String()}, sdk.NewCoins(), time.Now().Unix())
+	//vestingAcc := vestingtypes.NewBaseVestingAccount(&authtypes.BaseAccount{Address: sdk.AccAddress(vestingAddr.Bytes()).String()}, sdk.NewCoins(), time.Now().Unix())
 
 	testCases := []struct {
 		name        string
@@ -103,20 +96,16 @@ func (suite *evmKeeperTestSuite) TestEvmKeeper_SetAccount() {
 		suite.Run(tc.name, func() {
 			suite.SetupTest()
 
-			addr, _ := sdk.GetFromBech32("cosmos1sp66y7smka4yvv9wazx6ve86gsd3tkzu7dwf9u", "cosmos")
-
-			a := sdk.AccAddress(addr)
-			fmt.Printf(">>>>>>>>>11111111111111111111111>>>>%v\n", a.String())
-
-			if tc.address == baseAddr {
-				suite.AccountKeeper.SetAccount(suite.Ctx, baseAcc)
-			}
-			if tc.address == ethAddr {
-				suite.AccountKeeper.SetAccount(suite.Ctx, ethAcc)
-			}
-			if tc.address == vestingAddr {
-				suite.AccountKeeper.SetAccount(suite.Ctx, vestingAcc)
-			}
+			// TODO we need to avoid setting the base account as the joltify has the majority of EVM type accounts
+			//if tc.address == baseAddr {
+			//	suite.AccountKeeper.SetAccount(suite.Ctx, baseAcc)
+			//}
+			//if tc.address == ethAddr {
+			//	suite.AccountKeeper.SetAccount(suite.Ctx, ethAcc)
+			//}
+			//if tc.address == vestingAddr {
+			//	suite.AccountKeeper.SetAccount(suite.Ctx, vestingAcc)
+			//}
 
 			vmdb := suite.StateDB()
 			err := vmdb.Keeper().SetAccount(suite.Ctx, tc.address, tc.account)

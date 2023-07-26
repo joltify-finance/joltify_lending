@@ -76,7 +76,7 @@ func TestConversionPairValidate_Direct(t *testing.T) {
 		{
 			"valid",
 			types.ConversionPair{
-				KavaERC20Address: testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2").Bytes(),
+				JoltERC20Address: testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2").Bytes(),
 				Denom:            "weth",
 			},
 			errArgs{
@@ -87,7 +87,7 @@ func TestConversionPairValidate_Direct(t *testing.T) {
 		{
 			"invalid - length",
 			types.ConversionPair{
-				KavaERC20Address: []byte{1},
+				JoltERC20Address: []byte{1},
 				Denom:            "weth",
 			},
 			errArgs{
@@ -119,7 +119,7 @@ func TestConversionPair_GetAddress(t *testing.T) {
 		"weth",
 	)
 
-	require.Equal(t, types.HexBytes(addr.Bytes()), pair.KavaERC20Address, "struct address should match input bytes")
+	require.Equal(t, types.HexBytes(addr.Bytes()), pair.JoltERC20Address, "struct address should match input bytes")
 	require.Equal(t, addr, pair.GetAddress(), "get internal address should match input bytes")
 }
 
@@ -142,7 +142,7 @@ func TestConversionPairs_Validate(t *testing.T) {
 				),
 				types.NewConversionPair(
 					testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000A"),
-					"kava",
+					"jolt",
 				),
 				types.NewConversionPair(
 					testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000B"),
@@ -162,7 +162,7 @@ func TestConversionPairs_Validate(t *testing.T) {
 				),
 				types.NewConversionPair(
 					testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"),
-					"kava",
+					"jolt",
 				),
 				types.NewConversionPair(
 					testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000B"),
@@ -183,16 +183,16 @@ func TestConversionPairs_Validate(t *testing.T) {
 				),
 				types.NewConversionPair(
 					testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000A"),
-					"kava",
+					"jolt",
 				),
 				types.NewConversionPair(
 					testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000B"),
-					"kava",
+					"jolt",
 				),
 			),
 			errArgs{
 				expectPass: false,
-				contains:   "found duplicate enabled conversion pair denom kava",
+				contains:   "found duplicate enabled conversion pair denom jolt",
 			},
 		},
 		{
@@ -208,7 +208,7 @@ func TestConversionPairs_Validate(t *testing.T) {
 				),
 				types.NewConversionPair(
 					testutil.MustNewInternalEVMAddressFromString("0x000000000000000000000000000000000000000B"),
-					"kava",
+					"jolt",
 				),
 			),
 			errArgs{
@@ -240,12 +240,12 @@ func TestAllowedCosmosCoinERC20Token_Validate(t *testing.T) {
 	}{
 		{
 			name:   "valid token",
-			token:  types.NewAllowedCosmosCoinERC20Token("uatom", "Kava-wrapped ATOM", "kATOM", 6),
+			token:  types.NewAllowedCosmosCoinERC20Token("uatom", "Jolt-wrapped ATOM", "kATOM", 6),
 			expErr: "",
 		},
 		{
 			name:   "valid - highest allowed decimals",
-			token:  types.NewAllowedCosmosCoinERC20Token("uatom", "Kava-wrapped ATOM", "kATOM", 255),
+			token:  types.NewAllowedCosmosCoinERC20Token("uatom", "Jolt-wrapped ATOM", "kATOM", 255),
 			expErr: "",
 		},
 		{
@@ -280,7 +280,7 @@ func TestAllowedCosmosCoinERC20Token_Validate(t *testing.T) {
 		},
 		{
 			name:   "invalid - decimals higher than uint8",
-			token:  types.NewAllowedCosmosCoinERC20Token("uatom", "Kava-wrapped ATOM", "kATOM", 256),
+			token:  types.NewAllowedCosmosCoinERC20Token("uatom", "Jolt-wrapped ATOM", "kATOM", 256),
 			expErr: "decimals must be less than 256",
 		},
 	}
