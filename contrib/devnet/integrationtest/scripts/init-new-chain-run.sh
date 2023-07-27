@@ -2,18 +2,15 @@
 base=1000000000000000000
 
 validatorMnemonic="equip town gesture square tomorrow volume nephew minute witness beef rich gadget actress egg sing secret pole winter alarm law today check violin uncover"
-#jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl
+#jolt1a33x0juy5t8a0zgksfz50yluw8jyvy764p9ych
 
 faucetMnemonic="crash sort dwarf disease change advice attract clump avoid mobile clump right junior axis book fresh mask tube front require until face effort vault"
-# jolt1g6q7rff5jdyny0ph6gm6nc9x540gs02tlu7nsp
 
 evmFaucetMnemonic="hundred flash cattle inquiry gorilla quick enact lazy galaxy apple bitter liberty print sun hurdle oak town cash because round chalk marriage response success"
 # 0x3C854F92F726A7897C8B23F55B2D6E2C482EF3E0
-# jolt18jz5lyhhy6ncjlyty064kttw93yzaulqgkkqwj
 
 userMnemonic="news tornado sponsor drastic dolphin awful plastic select true lizard width idle ability pigeon runway lift oppose isolate maple aspect safe jungle author hole"
 # 0x7Bbf300890857b8c241b219C6a489431669b3aFA
-# jolt10wlnqzyss4accfqmyxwx5jy5x9nfkwh6kwhjs9
 
 relayerMnemonic="never reject sniff east arctic funny twin feed upper series stay shoot vivid adapt defense economy pledge fetch invite approve ceiling admit gloom exit"
 # 0xa2F728F997f62F47D4262a70947F6c36885dF9fa
@@ -25,7 +22,7 @@ rm -rf $DATA
 BINARY=joltify
 
 # Create new data directory, overwriting any that alread existed
-chainID="joltifylocalnet_8888-1"
+chainID="joltify_1729-1"
 $BINARY init validator --chain-id $chainID --trace
 #cp  $DATA/config/genesis.json /home/yb/development/joltify/joltify_lending/contrib/gen_raw.json
 
@@ -54,7 +51,7 @@ sed -i -E 's|cors_allowed_origins = \[\]|cors_allowed_origins = \[\"*\"\]|g' $DA
 sed -in-place='' 's/tracer = ""/tracer = "json"/g' $DATA/config/app.toml
 
 # Set client chain id
-sed -in-place='' 's/chain-id = ""/chain-id = "joltifylocalnet_8888-1"/g' $DATA/config/client.toml
+sed -in-place='' 's/chain-id = ""/chain-id = "joltify_1729-1"/g' $DATA/config/client.toml
 sed -in-place='' 's/broadcast-mode = "sync"/broadcast-mode = "block"/g' $DATA/config/client.toml
 
 # avoid having to use password for keys

@@ -3,7 +3,7 @@
 
 base=1000000000000000000
 amount=$(echo $2*$base | bc)
-ret=$(joltify tx spv withdraw-principal  $1 $amount"ausdc" --from key_$3 --gas 80000000 --output json -y)
+ret=$(joltify tx spv withdraw-principal  $1 $amount"ausdc" --from key_$3 --gas 20000000 --output json -y)
 # get the code from json
 code=$(echo $ret | jq -r '.code')
 # check whether the return value of the function is 0

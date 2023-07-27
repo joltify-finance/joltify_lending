@@ -7,7 +7,6 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	ibcante "github.com/cosmos/ibc-go/v6/modules/core/ante"
@@ -59,7 +58,7 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 	}
 
 	if options.SigGasConsumer == nil {
-		options.SigGasConsumer = ante.DefaultSigVerificationGasConsumer
+		options.SigGasConsumer = authante.DefaultSigVerificationGasConsumer
 	}
 
 	return func(
@@ -135,7 +134,8 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 
 	var sigVerification sdk.AnteDecorator = authante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler)
 	if options.isEIP712 {
-		sigVerification = evmante.NewLegacyEip712SigVerificationDecorator(options.AccountKeeper, options.SignModeHandler)
+		// fixme ignore the deprecated warning
+		sigVerification = evmante.NewLegacyEip712SigVerificationDecorator(options.AccountKeeper, options.SignModeHandler) //nolint:staticcheck
 	}
 
 	decorators = append(decorators,

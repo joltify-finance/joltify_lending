@@ -42,6 +42,9 @@ func NewParams(
 func DefaultParams() Params {
 	if client.MAINNETFLAG == "false" {
 		DefaultAllowedCosmosDenoms = NewAllowedCosmosCoinERC20Tokens(NewAllowedCosmosCoinERC20Token("abnb", "wrap of bnb", "wabnb", 18))
+		DefaultAllowedCosmosDenoms = NewAllowedCosmosCoinERC20Tokens(NewAllowedCosmosCoinERC20Token("atom", "wrap of atom", "watom", 6))
+		DefaultAllowedCosmosDenoms = NewAllowedCosmosCoinERC20Tokens(NewAllowedCosmosCoinERC20Token("ausdc", "wrap of usdc", "wusdc", 18))
+		DefaultAllowedCosmosDenoms = NewAllowedCosmosCoinERC20Tokens(NewAllowedCosmosCoinERC20Token("ausdt", "wrap of usdt", "wusdt", 18))
 	}
 
 	return NewParams(

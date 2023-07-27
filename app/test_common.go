@@ -1,6 +1,7 @@
 package app
 
 import (
+	crand "crypto/rand"
 	"encoding/json"
 	"math/rand"
 	"testing"
@@ -342,7 +343,7 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 // RandomAddress non-deterministically generates a new address, discarding the private key.
 func RandomAddress() sdk.AccAddress {
 	secret := make([]byte, 32)
-	_, err := rand.Read(secret)
+	_, err := crand.Read(secret)
 	if err != nil {
 		panic("Could not read randomness")
 	}
@@ -389,6 +390,7 @@ func (tApp TestApp) FundModuleAccount(ctx sdk.Context, recipientMod string, amou
 // GeneratePrivKeyAddressPairs generates (deterministically) a total of n private keys and addresses.
 func GeneratePrivKeyAddressPairs(n int) (keys []cryptotypes.PrivKey, addrs []sdk.AccAddress) {
 	r := rand.New(rand.NewSource(12345)) // make the generation deterministic
+
 	keys = make([]cryptotypes.PrivKey, n)
 	addrs = make([]sdk.AccAddress, n)
 	for i := 0; i < n; i++ {
