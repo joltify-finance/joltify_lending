@@ -10,7 +10,7 @@ import (
 var KeyMarkets = []byte("Markets")
 
 func GenDefaultMarket() Markets {
-	acc, err := types.AccAddressFromBech32("jolt10jghunnwjka54yzvaly4pjcxmarkvevzvq8cvl")
+	acc, err := types.AccAddressFromBech32("jolt1a33x0juy5t8a0zgksfz50yluw8jyvy764p9ych")
 	if err != nil {
 		panic(err)
 	}

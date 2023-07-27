@@ -28,23 +28,6 @@
       }
     },
     {
-      "url": "./tmp-swagger-gen/joltify/third_party/cdp/v1beta1/query.swagger.json",
-      "tags": {
-        "rename": {
-          "Query": "CDP"
-        }
-      },
-      "operationIds": {
-        "rename": [
-          {
-            "type": "regex",
-            "from": "(.*)",
-            "to": "CDP$1"
-          }
-        ]
-      }
-    },
-    {
       "url": "./tmp-swagger-gen/joltify/third_party/jolt/v1beta1/query.swagger.json",
       "tags": {
         "rename": {
@@ -57,23 +40,6 @@
             "type": "regex",
             "from": "(.*)",
             "to": "jolt$1"
-          }
-        ]
-      }
-    },
-    {
-      "url": "./tmp-swagger-gen/joltify/third_party/issuance/v1beta1/query.swagger.json",
-      "tags": {
-        "rename": {
-          "Query": "Issuance"
-        }
-      },
-      "operationIds": {
-        "rename": [
-          {
-            "type": "regex",
-            "from": "(.*)",
-            "to": "Issuance$1"
           }
         ]
       }

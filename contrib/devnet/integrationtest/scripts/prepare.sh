@@ -92,7 +92,7 @@ cecho "READ" "Add investors  to junior pool failed with $ret"
 exit 1
 fi
 
-#ret=$(joltify tx spv add-investors  $indexSenior 44  --from validator --gas 80000000 --output json -y)
+#ret=$(joltify tx spv add-investors  $indexSenior 44  --from validator --gas 20000000 --output json -y)
 #code=$(echo $ret | jq -r '.code')
 ## check whether the return value of the function is 0
 #if [ $code -eq 0 ]; then

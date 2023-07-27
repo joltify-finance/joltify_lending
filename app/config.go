@@ -16,7 +16,7 @@ const (
 	// Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key
 	Bech32PrefixConsPub = Bech32MainPrefix + "val" + "cons" + "pub"
 
-	Bip44CoinType = 118 // we apply the atom coin type
+	Bip44CoinType = 60 // we apply the atom coin type
 
 	HumanCoinUnit = "jolt"
 	BaseCoinUnit  = "ujolt"
