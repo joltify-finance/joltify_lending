@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/tendermint/tendermint/store"
 	"os"
+
+	"github.com/tendermint/tendermint/store"
 
 	cmtjson "github.com/tendermint/tendermint/libs/json"
 
@@ -127,8 +128,9 @@ func addSubCmds(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, de
 	}
 
 	blockStore := store.NewBlockStore(blockStoreDB)
-	b := blockStore.LoadBlock(50)
-	blockStore.SaveBlock(b, b.Evidence)
+	block := blockStore.LoadBlock(50)
+	// blockStore.SaveBlock(b, b.Evidence)
+	_ = block.ChainID
 
 	////
 	genesisDocKey := []byte("genesisDoc")
@@ -155,6 +157,11 @@ func addSubCmds(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, de
 	}
 
 	state.ChainID = genDoc.ChainID
+	fmt.Printf(">>>>>>>>>>>>>%v\n", state.ChainID)
+	fmt.Printf(">>>>>>>>>last height >>%v\n", state.LastBlockHeight)
+	state.
+		// state.LastBlockHeight = state.LastBlockHeight + 1
+		fmt.Printf(">>>>>>>>>>%v\n", state)
 	err = stateStore.Save(state)
 	if err != nil {
 		panic(err)
