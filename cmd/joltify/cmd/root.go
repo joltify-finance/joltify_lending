@@ -1,7 +1,14 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/tendermint/tendermint/store"
 	"os"
+
+	cmtjson "github.com/tendermint/tendermint/libs/json"
+
+	"github.com/tendermint/tendermint/node"
+	sm "github.com/tendermint/tendermint/state"
 
 	"github.com/evmos/ethermint/crypto/hd"
 
@@ -97,6 +104,87 @@ func addSubCmds(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, de
 	ac := appCreator{
 		encodingConfig: encodingConfig,
 	}
+
+	//config, err := servercfg.GetConfig(serverCtx.Viper)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+
+	dbProvider := node.DefaultDBProvider
+	cfg := tmcfg.DefaultConfig()
+	cfg.DBBackend = "goleveldb"
+	cfg.DBPath = "/home/yb/.joltify/data"
+	cfg.RootDir = "data"
+	stateDB, err := dbProvider(&node.DBContext{ID: "state", Config: cfg})
+	if err != nil {
+		panic(err)
+	}
+
+	blockStoreDB, err := dbProvider(&node.DBContext{"blockstore", cfg})
+	if err != nil {
+		return
+	}
+
+	blockStore := store.NewBlockStore(blockStoreDB)
+	b := blockStore.LoadBlock(50)
+	blockStore.SaveBlock(b, b.Evidence)
+
+	////
+	genesisDocKey := []byte("genesisDoc")
+	state, genDoc, err := node.LoadStateFromDBOrGenesisDocProvider(stateDB, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	stateStore := sm.NewStore(stateDB, sm.StoreOptions{
+		DiscardABCIResponses: false,
+	})
+
+	fmt.Printf(">>>>>>>genIDDIIIIII>>>>>>>>%v\n", genDoc.ChainID)
+	fmt.Printf(">>>>>>>state ID>>>>>>>>%v\n", state.ChainID)
+	genDoc.ChainID = "joltify-133"
+
+	// panics if failed to marshal the given genesis document
+	b, err := cmtjson.Marshal(genDoc)
+	if err != nil {
+		panic(err)
+	}
+	if err := stateDB.SetSync(genesisDocKey, b); err != nil {
+		panic(err)
+	}
+
+	state.ChainID = genDoc.ChainID
+	err = stateStore.Save(state)
+	if err != nil {
+		panic(err)
+	}
+
+	err = stateDB.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	err = blockStoreDB.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	//
+	//
+	//
+	//
+	//
+	//stateDB, err = dbProvider(&DBContext{"state", config})
+	//
+	//
+	//
+	//state, genDoc, err := LoadStateFromDBOrGenesisDocProvider(stateDB, genesisDocProvider)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//
 
 	ethermintserver.AddCommands(
 		rootCmd,

@@ -974,7 +974,7 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V003UpgradeName, v1.CreateUpgradeHandlerForV003Upgrade(app.mm, &app.VaultKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V004UpgradeName, v1.CreateUpgradeHandlerForV004Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V005UpgradeName, v1.CreateUpgradeHandlerForV005Upgrade(app.mm, &app.VaultKeeper, app.configurator, app.incentiveKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V006UpgradeName, v1.CreateUpgradeHandlerForV006Upgrade(app.mm, app.evmutilKeeper, app.evmKeeper, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V006UpgradeName, v1.CreateUpgradeHandlerForV006Upgrade(app.mm, app.evmutilKeeper, app.evmKeeper, app.accountKeeper, app.configurator))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
@@ -997,5 +997,4 @@ func (app *App) setupUpgradeHandlers() {
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
-
 }
