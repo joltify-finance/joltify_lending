@@ -82,8 +82,8 @@ ifeq (boltdb,$(findstring boltdb,$(COSMOS_BUILD_OPTIONS)))
 endif
 
 
-ldflagsdev = $(ldflags) -X github.com/joltify-finance/joltify_lending/x/kyc/types.MAINNETFLAG=false
-ldflagsmainnet = $(ldflags) -X github.com/joltify-finance/joltify_lending/x/kyc/types.MAINNETFLAG=true
+ldflagsdev = $(ldflags) -X github.com/joltify-finance/joltify_lending/client/client.MAINNETFLAG=false
+ldflagsmainnet = $(ldflags) -X github.com/joltify-finance/joltify_lending/client/client.MAINNETFLAG=true
 
 
 

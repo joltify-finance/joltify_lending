@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
+	ethermintflags "github.com/evmos/ethermint/server/flags"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/params"
 	"github.com/spf13/cast"
@@ -87,6 +88,8 @@ func (ac appCreator) newApp(
 			InvariantCheckPeriod:  cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
 			MempoolEnableAuth:     mempoolEnableAuth,
 			MempoolAuthAddresses:  mempoolAuthAddresses,
+			EVMTrace:              cast.ToString(appOpts.Get(ethermintflags.EVMTracer)),
+			EVMMaxGasWanted:       cast.ToUint64(appOpts.Get(ethermintflags.EVMMaxTxGasWanted)),
 		},
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(strings.ReplaceAll(cast.ToString(appOpts.Get(server.FlagMinGasPrices)), ";", ",")),
@@ -115,7 +118,9 @@ func (ac appCreator) appExport(
 		return servertypes.ExportedApp{}, errors.New("application home not set")
 	}
 
-	var options app.Options
+	options := app.DefaultOptions
+	options.SkipLoadLatest = true
+	options.InvariantCheckPeriod = cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod))
 
 	var tempApp *app.App
 	if height != -1 {

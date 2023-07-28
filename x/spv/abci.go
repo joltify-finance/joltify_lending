@@ -19,7 +19,6 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		// it means we need to catchup, we give extra 30 seconds to allow the delay caused by block process time
 		// currently, the block process time is 5 seconds
 		for int32(currentTime.Sub(poolInfo.LastPaymentTime).Seconds()) > poolInfo.PayFreq*2 {
-
 			if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
 				break
 			}
@@ -30,13 +29,13 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 			}
 
 			err := k.HandleInterest(ctx, &poolInfo)
-			if err.Error() == "pay interest too early" {
-				break
-			}
-			if err.Error() == "no interest to be paid" {
-				break
-			}
 			if err != nil {
+				if err.Error() == "pay interest too early" {
+					break
+				}
+				if err.Error() == "no interest to be paid" {
+					break
+				}
 				panic(err)
 			}
 			ctx.Logger().Info("####process interest", "pool Index:", poolInfo.Index, "latest payment", poolInfo.LastPaymentTime.Local().String())

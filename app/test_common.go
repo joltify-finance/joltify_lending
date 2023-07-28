@@ -1,10 +1,18 @@
 package app
 
 import (
+	crand "crypto/rand"
 	"encoding/json"
 	"math/rand"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
+
+	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
+	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
+
+	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 
@@ -46,7 +54,7 @@ import (
 
 var (
 	emptyTime            time.Time
-	testChainID                = "joltifytest_1-1"
+	testChainID                = "joltifytest_888-1"
 	defaultInitialHeight int64 = 1
 )
 
@@ -200,10 +208,11 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
+			ChainId:         "joltifychain_888-1",
 		},
 	)
 
-	header := tmproto.Header{Height: 1, ChainID: "oppyChain-1", Time: time.Now().UTC()}
+	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: time.Now().UTC()}
 
 	ctx := app.BaseApp.NewContext(false, header)
 	return TestApp{App: *app, Ctx: ctx}
@@ -223,6 +232,9 @@ func (tApp TestApp) GetAuctionKeeper() auctionkeeper.Keeper     { return tApp.au
 func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.pricefeedKeeper }
 func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.joltKeeper }
 func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.incentiveKeeper }
+func (tApp TestApp) GetEVMKeeper() evmkeeper.Keeper             { return *tApp.evmKeeper }
+func (tApp TestApp) GetEVMUtilKeeper() evmutilkeeper.Keeper     { return tApp.evmutilKeeper }
+func (tApp TestApp) GetFeeMarketKeeper() feemarketkeeper.Keeper { return tApp.feeMarketKeeper }
 
 // LegacyAmino returns the app's amino codec.
 func (app *App) LegacyAmino() *codec.LegacyAmino {
@@ -328,10 +340,28 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	return tApp
 }
 
+// RandomAddress non-deterministically generates a new address, discarding the private key.
+func RandomAddress() sdk.AccAddress {
+	secret := make([]byte, 32)
+	_, err := crand.Read(secret)
+	if err != nil {
+		panic("Could not read randomness")
+	}
+	key := secp256k1.GenPrivKeyFromSecret(secret)
+	return sdk.AccAddress(key.PubKey().Address())
+}
+
 // CheckBalance requires the account address has the expected amount of coins.
 func (tApp TestApp) CheckBalance(t *testing.T, ctx sdk.Context, owner sdk.AccAddress, expectedCoins sdk.Coins) {
 	coins := tApp.GetBankKeeper().GetAllBalances(ctx, owner)
 	require.Equal(t, expectedCoins, coins)
+}
+
+// GetModuleAccountBalance gets the current balance of the denom for a module account
+func (tApp TestApp) GetModuleAccountBalance(ctx sdk.Context, moduleName string, denom string) sdkmath.Int {
+	moduleAcc := tApp.accountKeeper.GetModuleAccount(ctx, moduleName)
+	balance := tApp.bankKeeper.GetBalance(ctx, moduleAcc.GetAddress(), denom)
+	return balance.Amount
 }
 
 // FundAccount is a utility function that funds an account by minting and sending the coins to the address.
@@ -360,6 +390,7 @@ func (tApp TestApp) FundModuleAccount(ctx sdk.Context, recipientMod string, amou
 // GeneratePrivKeyAddressPairs generates (deterministically) a total of n private keys and addresses.
 func GeneratePrivKeyAddressPairs(n int) (keys []cryptotypes.PrivKey, addrs []sdk.AccAddress) {
 	r := rand.New(rand.NewSource(12345)) // make the generation deterministic
+
 	keys = make([]cryptotypes.PrivKey, n)
 	addrs = make([]sdk.AccAddress, n)
 	for i := 0; i < n; i++ {
