@@ -62,6 +62,23 @@
       }
     },
     {
+      "url": "./tmp-swagger-gen/joltify/third_party/evmutil/v1beta1/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "evmutil"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "evmutil$1"
+          }
+        ]
+      }
+    },
+    {
       "url": "./tmp-swagger-gen/joltify/kyc/query.swagger.json",
       "tags": {
         "rename": {
