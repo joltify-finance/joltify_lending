@@ -22,7 +22,7 @@ rm -rf $DATA
 BINARY=joltify
 
 # Create new data directory, overwriting any that alread existed
-chainID="joltify_1729-1"
+chainID="joltifydev_1729-1"
 $BINARY init validator --chain-id $chainID --trace
 #cp  $DATA/config/genesis.json /home/yb/development/joltify/joltify_lending/contrib/gen_raw.json
 
