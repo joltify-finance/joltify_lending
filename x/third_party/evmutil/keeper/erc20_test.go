@@ -172,7 +172,8 @@ func (suite *ERC20TestSuite) TestGetOrDeployCosmosCoinERC20Contract() {
 	suite.Run("finds existing contract address", func() {
 		suite.SetupTest()
 		denom := "magic"
-		addr := types.BytesToInternalEVMAddress(app.RandomAddress().Bytes())
+		rAddr, _ := app.RandomAddress()
+		addr := types.BytesToInternalEVMAddress(rAddr.Bytes())
 		// pretend like we've registered a contract in a previous life
 		err := suite.Keeper.SetDeployedCosmosCoinContract(suite.Ctx, denom, addr)
 		suite.NoError(err)

@@ -14,7 +14,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgConvertCoinToERC20{}, "/joltify.third_party.evmutil.v1beta1.MsgConvertCoinToERC20", nil)
 	cdc.RegisterConcrete(&MsgConvertERC20ToCoin{}, "/joltify.third_party.evmutil.v1beta1.MsgConvertERC20ToCoin", nil)
 	cdc.RegisterConcrete(&MsgConvertCosmosCoinToERC20{}, "/joltify.third_party.evmutil.v1beta1.MsgConvertCosmosCoinToERC20", nil)
-	cdc.RegisterConcrete(&MsgConvertCosmosCoinFromERC20{}, "/joltify.third_party.evmutil.v1beta1.MsgConvertCoinFromERC20", nil)
+	cdc.RegisterConcrete(&MsgConvertCosmosCoinFromERC20{}, "/joltify.third_party.evmutil.v1beta1.MsgConvertCosmosCoinFromERC20", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

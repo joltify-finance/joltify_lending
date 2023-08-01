@@ -45,31 +45,30 @@ func GetTxCmd() *cobra.Command {
 
 func getCmdConvertEvmERC20FromCoin() *cobra.Command {
 	return &cobra.Command{
-		Use:   "convert-evm-erc20-from-coin [Jolt EVM address] [coin]",
+		Use:   "convert-evm-erc20-from-coin [initiator pubkey]  [Jolt EVM address] [coin]",
 		Short: "EVM-native asset: converts a coin on Cosmos co-chain to an ERC20 on EVM co-chain",
 		Example: fmt.Sprintf(
 			`%s tx %s convert-evm-erc20-from-coin 0x7Bbf300890857b8c241b219C6a489431669b3aFA 500000000erc20/usdc --from <key> --gas 2000000`,
 			version.AppName, types.ModuleName,
 		),
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
-
-			receiver := args[0]
+			initiator := args[0]
+			receiver := args[1]
 			if !common.IsHexAddress(receiver) {
 				return fmt.Errorf("receiver '%s' is an invalid hex address", args[0])
 			}
 
-			coin, err := sdk.ParseCoinNormalized(args[1])
+			coin, err := sdk.ParseCoinNormalized(args[2])
 			if err != nil {
 				return err
 			}
 
-			signer := clientCtx.GetFromAddress()
-			msg := types.NewMsgConvertCoinToERC20(signer.String(), receiver, coin)
+			msg := types.NewMsgConvertCoinToERC20(initiator, receiver, coin)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -81,31 +80,25 @@ func getCmdConvertEvmERC20FromCoin() *cobra.Command {
 
 func getCmdConvertEvmERC20ToCoin() *cobra.Command {
 	return &cobra.Command{
-		Use:   "convert-evm-erc20-to-coin [Jolt receiver address] [Jolt ERC20 address] [amount]",
+		Use:   "convert-evm-erc20-to-coin  [initiator pubkey]   [Jolt receiver address] [Jolt ERC20 address] [amount]",
 		Short: "EVM-native asset: converts an ERC20 on EVM co-chain to a coin on Cosmos co-chain",
 		Example: fmt.Sprintf(`
 %[1]s tx %[2]s convert-evm-erc20-to-coin jolt10wlnqzyss4accfqmyxwx5jy5x9nfkwh6qm7n4t 0xeA7100edA2f805356291B0E55DaD448599a72C6d 1000000000000000 --from <key> --gas 1000000
 `, version.AppName, types.ModuleName,
 		),
-		Args: cobra.ExactArgs(3),
+		Args: cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			receiver, err := sdk.AccAddressFromBech32(args[0])
+			receiver, err := sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return fmt.Errorf("receiver '%s' is not a bech32 address", args[0])
 			}
 
-			signer := clientCtx.GetFromAddress()
-			initiator, err := ParseAddrFromHexOrBech32(signer.String())
-			if err != nil {
-				return err
-			}
-
-			amount, ok := sdkmath.NewIntFromString(args[2])
+			amount, ok := sdkmath.NewIntFromString(args[3])
 			if !ok {
 				return fmt.Errorf("amount '%s' is invalid", args[2])
 			}
@@ -113,8 +106,8 @@ func getCmdConvertEvmERC20ToCoin() *cobra.Command {
 			if !common.IsHexAddress(args[1]) {
 				return fmt.Errorf("contractAddr '%s' is not a hex address", args[1])
 			}
-			contractAddr := types.NewInternalEVMAddress(common.HexToAddress(args[1]))
-			msg := types.NewMsgConvertERC20ToCoin(types.NewInternalEVMAddress(initiator), receiver, contractAddr, amount)
+			contractAddr := types.NewInternalEVMAddress(common.HexToAddress(args[2]))
+			msg := types.NewMsgConvertERC20ToCoin(args[0], receiver, contractAddr, amount)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -126,32 +119,32 @@ func getCmdConvertEvmERC20ToCoin() *cobra.Command {
 
 func getCmdMsgConvertCosmosCoinToERC20() *cobra.Command {
 	return &cobra.Command{
-		Use:   "convert-cosmos-coin-to-erc20 [receiver_0x_address] [amount] [flags]",
+		Use:   "convert-cosmos-coin-to-erc20 [initiator pubkey]  [receiver_0x_address] [amount] [flags]",
 		Short: "Cosmos-native asset: converts a coin on Cosmos co-chain to an ERC20 on EVM co-chain",
 		Example: fmt.Sprintf(
 			`Convert 500 ATOM and send ERC20 to 0x03db6b11F47d074a532b9eb8a98aB7AdA5845087:
   %s tx %s convert-cosmos-coin-to-erc20 0x03db6b11F47d074a532b9eb8a98aB7AdA5845087 500000000ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2 --from <key> --gas 2000000`,
 			version.AppName, types.ModuleName,
 		),
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			receiver := args[0]
+			initiator := args[0]
+			receiver := args[1]
 			if !common.IsHexAddress(receiver) {
 				return fmt.Errorf("receiver '%s' is an invalid hex address", args[0])
 			}
 
-			amount, err := sdk.ParseCoinNormalized(args[1])
+			amount, err := sdk.ParseCoinNormalized(args[2])
 			if err != nil {
 				return err
 			}
 
-			signer := clientCtx.GetFromAddress()
-			msg := types.NewMsgConvertCosmosCoinToERC20(signer.String(), receiver, amount)
+			msg := types.NewMsgConvertCosmosCoinToERC20(initiator, receiver, amount)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -163,34 +156,33 @@ func getCmdMsgConvertCosmosCoinToERC20() *cobra.Command {
 
 func getCmdMsgConvertCosmosCoinFromERC20() *cobra.Command {
 	return &cobra.Command{
-		Use:   "convert-cosmos-coin-from-erc20 [receiver_jolt_address] [amount] [flags]",
+		Use:   "convert-cosmos-coin-from-erc20 [initiator pubkey] [receiver_jolt_address] [amount] [flags]",
 		Short: "Cosmos-native asset: converts an ERC20 on EVM co-chain back to a coin on Cosmos co-chain",
 		Example: fmt.Sprintf(
 			`Convert ERC20 representation of 500 ATOM back to a Cosmos coin, sending to jolt1q0dkky0505r555etn6u2nz4h4kjcg5y8dg863a:
   %s tx %s convert-cosmos-coin-from-erc20 jolt1q0dkky0505r555etn6u2nz4h4kjcg5y8dg863a 500000000ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2 --from <key> --gas 2000000`,
 			version.AppName, types.ModuleName,
 		),
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			receiver, err := sdk.AccAddressFromBech32(args[0])
+			initiator := args[0]
+
+			receiver, err := sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return fmt.Errorf("receiver '%s' is an invalid jolt address", args[0])
 			}
 
-			amount, err := sdk.ParseCoinNormalized(args[1])
+			amount, err := sdk.ParseCoinNormalized(args[2])
 			if err != nil {
 				return err
 			}
 
-			signer := clientCtx.GetFromAddress()
-			initiator := common.BytesToAddress(signer.Bytes())
-
-			msg := types.NewMsgConvertCosmosCoinFromERC20(initiator.String(), receiver.String(), amount)
+			msg := types.NewMsgConvertCosmosCoinFromERC20(initiator, receiver.String(), amount)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}

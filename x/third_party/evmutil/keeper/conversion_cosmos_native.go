@@ -10,6 +10,15 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
 )
 
+func (k *Keeper) doNativeTransfer(ctx sdk.Context, sender, receiver sdk.AccAddress, amount sdk.Coin) error {
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, sender, types.ModuleName, sdk.NewCoins(amount))
+	if err != nil {
+		return err
+	}
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, receiver, sdk.NewCoins(amount))
+	return err
+}
+
 // ConvertCosmosCoinToERC20 locks the initiator's sdk.Coin in the module account
 // and mints the receiver a corresponding amount of an ERC20 representing the Coin.
 // If a conversion has never been made before and no contract exists, one will be deployed.
@@ -20,6 +29,22 @@ func (k *Keeper) ConvertCosmosCoinToERC20(
 	receiver types.InternalEVMAddress,
 	amount sdk.Coin,
 ) error {
+	if amount.Denom == CosmosDenom {
+		joltReceiver := types.EVMAddressToJoltAddress(receiver.Address)
+		err := k.doNativeTransfer(ctx, initiator, joltReceiver, amount)
+		if err != nil {
+			return err
+		}
+
+		ctx.EventManager().EmitEvent(sdk.NewEvent(
+			types.EventTypeConvertCosmosCoinToERC20,
+			sdk.NewAttribute(types.AttributeKeyInitiator, initiator.String()),
+			sdk.NewAttribute(types.AttributeKeyReceiver, receiver.String()),
+			sdk.NewAttribute(types.AttributeKeyAmount, amount.String()),
+		))
+		return nil
+	}
+
 	// check that the conversion is allowed
 	tokenInfo, allowed := k.GetAllowedTokenMetadata(ctx, amount.Denom)
 	if !allowed {
@@ -66,6 +91,23 @@ func (k *Keeper) ConvertCosmosCoinFromERC20(
 	receiver sdk.AccAddress,
 	coin sdk.Coin,
 ) error {
+	if coin.Denom == CosmosDenom {
+		sender := types.EVMAddressToJoltAddress(initiator.Address)
+		err := k.doNativeTransfer(ctx, sender, receiver, coin)
+		if err != nil {
+			return err
+		}
+
+		ctx.EventManager().EmitEvent(sdk.NewEvent(
+			types.EventTypeConvertCosmosCoinToERC20,
+			sdk.NewAttribute(types.AttributeKeyInitiator, initiator.String()),
+			sdk.NewAttribute(types.AttributeKeyReceiver, receiver.String()),
+			sdk.NewAttribute(types.AttributeKeyAmount, coin.String()),
+		))
+		return nil
+
+	}
+
 	amount := coin.Amount.BigInt()
 	// get deployed contract
 	contractAddress, found := k.GetDeployedCosmosCoinContract(ctx, coin.Denom)

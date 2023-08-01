@@ -238,7 +238,6 @@ func (suite *Suite) GetERC20BalanceOf(
 ) *big.Int {
 	// Query ERC20.balanceOf()
 	addr := common.BytesToAddress(suite.Key1.PubKey().Address())
-	fmt.Printf(">>>>>>>.44444444444444444444444\n")
 	res, err := suite.QueryContract(
 		types.ERC20MintableBurnableContract.ABI,
 		addr,
