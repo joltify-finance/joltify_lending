@@ -15,7 +15,6 @@ import (
 	evmutiltypes "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
 
 	evmante "github.com/evmos/ethermint/app/ante"
-	ethermint "github.com/evmos/ethermint/types"
 	"github.com/evmos/ethermint/x/evm"
 	"github.com/gorilla/mux"
 	_ "github.com/joltify-finance/joltify_lending/client/docs/statik"
@@ -413,8 +412,7 @@ func NewApp(
 		appCodec,
 		keys[authtypes.StoreKey],
 		authSubspace,
-		// authtypes.ProtoBaseAccount,
-		ethermint.ProtoAccount,
+		authtypes.ProtoBaseAccount,
 		mAccPerms,
 		sdk.Bech32MainPrefix,
 	)
