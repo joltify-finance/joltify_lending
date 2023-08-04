@@ -34,7 +34,8 @@ func TestMsgServerSuite(t *testing.T) {
 }
 
 func (suite *MsgServerSuite) TestConvertCoinToERC20() {
-	invoker, err := sdk.AccAddressFromBech32("jolt18jz5lyhhy6ncjlyty064kttw93yzaulqgkkqwj")
+	sender := "jolt1356qefk94955pfvyxueshnj7ggxfp24g5zs295"
+	invoker, err := sdk.AccAddressFromBech32(sender)
 
 	suite.Require().NoError(err)
 
@@ -71,8 +72,8 @@ func (suite *MsgServerSuite) TestConvertCoinToERC20() {
 		{
 			"valid",
 			types.NewMsgConvertCoinToERC20(
-				invoker.String(),
-				"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+				"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
+				"0x6eB0e7B549De7fB09E8D41c7eBd0aA4369234Ba7",
 				sdk.NewCoin("erc20/usdc", sdkmath.NewInt(1234)),
 			),
 			errArgs{
@@ -82,7 +83,7 @@ func (suite *MsgServerSuite) TestConvertCoinToERC20() {
 		{
 			"invalid - odd length hex address",
 			types.NewMsgConvertCoinToERC20(
-				invoker.String(),
+				"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 				"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc",
 				sdk.NewCoin("erc20/usdc", sdkmath.NewInt(1234)),
 			),
@@ -108,19 +109,22 @@ func (suite *MsgServerSuite) TestConvertCoinToERC20() {
 
 				suite.Require().Equal(tc.msg.Amount.Amount.BigInt(), bal, "balance should match converted amount")
 
+				initiatorAddr, err := types.PubKeyToJoltAddr(tc.msg.Initiator)
+				suite.Require().NoError(err)
+
 				// msg server event
 				suite.EventsContains(suite.GetEvents(),
 					sdk.NewEvent(
 						sdk.EventTypeMessage,
 						sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-						sdk.NewAttribute(sdk.AttributeKeySender, tc.msg.Initiator),
+						sdk.NewAttribute(sdk.AttributeKeySender, initiatorAddr.String()),
 					))
 
 				// keeper event
 				suite.EventsContains(suite.GetEvents(),
 					sdk.NewEvent(
 						types.EventTypeConvertCoinToERC20,
-						sdk.NewAttribute(types.AttributeKeyInitiator, tc.msg.Initiator),
+						sdk.NewAttribute(types.AttributeKeyInitiator, initiatorAddr.String()),
 						sdk.NewAttribute(types.AttributeKeyReceiver, tc.msg.Receiver),
 						sdk.NewAttribute(types.AttributeKeyERC20Address, pair.GetAddress().String()),
 						sdk.NewAttribute(types.AttributeKeyAmount, tc.msg.Amount.String()),
@@ -140,22 +144,32 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 		"erc20/usdc",
 	)
 
+	invoker := "02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7"
+	ethAddr, err := types.PubKeyToEthAddr(invoker)
+	suite.Require().NoError(err)
+
 	// give invoker account some erc20 usdc to begin with
-	invoker := testutil.MustNewInternalEVMAddressFromString("0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
+	receiver := testutil.MustNewInternalEVMAddressFromString(ethAddr.String())
 	pairStartingBal := big.NewInt(10_000_000)
-	err := suite.Keeper.MintERC20(
+	err = suite.Keeper.MintERC20(
 		suite.Ctx,
 		pair.GetAddress(), // contractAddr
-		invoker,           // receiver
+		receiver,          // receiver
 		pairStartingBal,
 	)
 	suite.Require().NoError(err)
 
-	invokerCosmosAddr, err := sdk.AccAddressFromHexUnsafe(invoker.String()[2:])
+	invokerCosmosAddr, err := types.PubKeyToJoltAddr(invoker)
 	suite.Require().NoError(err)
 
 	// create user account, otherwise `CallEVMWithData` will fail due to failing to get user account when finding its sequence.
 	err = suite.App.FundAccount(suite.Ctx, invokerCosmosAddr, sdk.NewCoins(sdk.NewCoin(pair.Denom, sdk.ZeroInt())))
+	suite.Require().NoError(err)
+
+	cosAddrFromEvm, err := sdk.AccAddressFromHexUnsafe(receiver.String()[2:])
+	suite.Require().NoError(err)
+
+	err = suite.App.FundAccount(suite.Ctx, cosAddrFromEvm, sdk.NewCoins(sdk.NewCoin(pair.Denom, sdk.ZeroInt())))
 	suite.Require().NoError(err)
 
 	type errArgs struct {
@@ -185,7 +199,7 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 		{
 			"invalid - invalid hex address",
 			types.MsgConvertERC20ToCoin{
-				Initiator:        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc",
+				Initiator:        "112233445", // invalid pubkey
 				Receiver:         invokerCosmosAddr.String(),
 				JoltERC20Address: contractAddr.String(),
 				Amount:           sdkmath.NewInt(10_000),
@@ -193,7 +207,7 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 			math.MaxBig256,
 			errArgs{
 				expectPass: false,
-				contains:   "invalid initiator address: string is not a hex address",
+				contains:   "invalid pubkey",
 			},
 		},
 		{
@@ -233,11 +247,14 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 			if tc.errArgs.expectPass {
 				suite.Require().NoError(err)
 
+				evmAddr, err := types.PubKeyToEthAddr(tc.msg.Initiator)
+				suite.Require().NoError(err)
+
 				// validate user balance after conversion
 				bal := suite.GetERC20BalanceOf(
 					types.ERC20MintableBurnableContract.ABI,
 					pair.GetAddress(),
-					testutil.MustNewInternalEVMAddressFromString(tc.msg.Initiator),
+					testutil.MustNewInternalEVMAddressFromString(evmAddr.String()),
 				)
 				expectedBal := sdkmath.NewIntFromBigInt(pairStartingBal).Sub(tc.msg.Amount)
 				suite.Require().Equal(expectedBal.BigInt(), bal, "user erc20 balance is invalid")
@@ -251,7 +268,7 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 					sdk.NewEvent(
 						sdk.EventTypeMessage,
 						sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-						sdk.NewAttribute(sdk.AttributeKeySender, tc.msg.Initiator),
+						sdk.NewAttribute(sdk.AttributeKeySender, evmAddr.String()),
 					))
 
 				// keeper event
@@ -259,7 +276,7 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 					sdk.NewEvent(
 						types.EventTypeConvertERC20ToCoin,
 						sdk.NewAttribute(types.AttributeKeyERC20Address, pair.GetAddress().String()),
-						sdk.NewAttribute(types.AttributeKeyInitiator, tc.msg.Initiator),
+						sdk.NewAttribute(types.AttributeKeyInitiator, evmAddr.String()),
 						sdk.NewAttribute(types.AttributeKeyReceiver, tc.msg.Receiver),
 						sdk.NewAttribute(types.AttributeKeyAmount, sdk.NewCoin(pair.Denom, tc.msg.Amount).String()),
 					))
@@ -274,7 +291,11 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy() {
 	allowedDenom := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
 	initialFunding := int64(1e10)
-	fundedAccount := app.RandomAddress()
+	fundedAccount, pk := app.RandomAddress()
+
+	// rAddr1, _ := app.RandomAddress()
+	// rAddr2, _ := app.RandomAddress()
+	// rAddr3, _ := app.RandomAddress()
 
 	setup := func() {
 		suite.SetupTest()
@@ -302,7 +323,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		{
 			name: "valid - first conversion deploys contract, send to self",
 			msg: types.NewMsgConvertCosmosCoinToERC20(
-				fundedAccount.String(),
+				pk,
 				common.BytesToAddress(fundedAccount.Bytes()).Hex(), // it's me!
 				sdk.NewInt64Coin(allowedDenom, 5e7),
 			),
@@ -312,7 +333,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		{
 			name: "valid - first conversion deploys contract, send to other",
 			msg: types.NewMsgConvertCosmosCoinToERC20(
-				fundedAccount.String(),
+				pk,
 				testutil.RandomEvmAddress().Hex(), // someone else!
 				sdk.NewInt64Coin(allowedDenom, 9993317),
 			),
@@ -322,7 +343,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		{
 			name: "invalid - un-allowed denom",
 			msg: types.NewMsgConvertCosmosCoinToERC20(
-				app.RandomAddress().String(),
+				pk,
 				testutil.RandomEvmAddress().Hex(),
 				sdk.NewInt64Coin("not-allowed-denom", 1e4),
 			),
@@ -340,7 +361,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		{
 			name: "invalid - bad receiver",
 			msg: types.NewMsgConvertCosmosCoinToERC20(
-				app.RandomAddress().String(),
+				pk,
 				"invalid-0x-address",
 				sdk.NewInt64Coin(allowedDenom, 1e4),
 			),
@@ -349,7 +370,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		{
 			name: "invalid - bad receiver",
 			msg: types.NewMsgConvertCosmosCoinToERC20(
-				app.RandomAddress().String(),
+				pk,
 				"invalid-0x-address",
 				sdk.NewInt64Coin(allowedDenom, 1e4),
 			),
@@ -358,7 +379,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 		{
 			name: "invalid - insufficient balance",
 			msg: types.NewMsgConvertCosmosCoinToERC20(
-				fundedAccount.String(),
+				pk,
 				testutil.RandomEvmAddress().Hex(),
 				sdk.NewInt64Coin(allowedDenom, initialFunding+1),
 			),
@@ -389,7 +410,10 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 			// verify success
 			suite.NoError(err)
 
-			initiator := sdk.MustAccAddressFromBech32(tc.msg.Initiator)
+			initiatorAddr, err := types.PubKeyToJoltAddr(pk)
+			suite.Require().NoError(err)
+
+			initiator := sdk.MustAccAddressFromBech32(initiatorAddr.String())
 			receiver := testutil.MustNewInternalEVMAddressFromString(tc.msg.Receiver)
 
 			// initiator no longer has sdk coins
@@ -422,14 +446,14 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 				sdk.NewEvent(
 					sdk.EventTypeMessage,
 					sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-					sdk.NewAttribute(sdk.AttributeKeySender, initiator.String()),
+					sdk.NewAttribute(sdk.AttributeKeySender, initiatorAddr.String()),
 				))
 
 			// keeper event
 			suite.EventsContains(suite.GetEvents(),
 				sdk.NewEvent(
 					types.EventTypeConvertCosmosCoinToERC20,
-					sdk.NewAttribute(types.AttributeKeyInitiator, initiator.String()),
+					sdk.NewAttribute(types.AttributeKeyInitiator, initiatorAddr.String()),
 					sdk.NewAttribute(types.AttributeKeyReceiver, receiver.String()),
 					sdk.NewAttribute(types.AttributeKeyERC20Address, contractAddress.Hex()),
 					sdk.NewAttribute(types.AttributeKeyAmount, tc.msg.Amount.String()),
@@ -441,11 +465,14 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_AlreadyDeployedContract() {
 	allowedDenom := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
 	initialFunding := int64(1e10)
-	fundedAccount := app.RandomAddress()
+	fundedAccount, iniator := app.RandomAddress()
+
+	rAddr1, _ := app.RandomAddress()
+	rAddr2, _ := app.RandomAddress()
 
 	amount := sdkmath.NewInt(6e8)
-	receiver1 := types.BytesToInternalEVMAddress(app.RandomAddress().Bytes())
-	receiver2 := types.BytesToInternalEVMAddress(app.RandomAddress().Bytes())
+	receiver1 := types.BytesToInternalEVMAddress(rAddr1.Bytes())
+	receiver2 := types.BytesToInternalEVMAddress(rAddr2.Bytes())
 
 	suite.SetupTest()
 
@@ -468,7 +495,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_AlreadyDeployedContrac
 
 	// initial convert deploys contract
 	msg := types.NewMsgConvertCosmosCoinToERC20(
-		fundedAccount.String(),
+		iniator,
 		receiver1.Hex(),
 		sdk.NewCoin(allowedDenom, amount),
 	)
@@ -514,7 +541,11 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 	denom := "magic"
 	tokenInfo := types.NewAllowedCosmosCoinERC20Token(denom, "Cosmos Coin", "MAGIC", 6)
 	initialPosition := sdk.NewInt64Coin(denom, 1e10)
-	initiator := testutil.RandomInternalEVMAddress()
+	initiator := "02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7"
+	evmAddr, err := types.PubKeyToEthAddr(initiator)
+	suite.NoError(err)
+
+	internalAddr := types.NewInternalEVMAddress(evmAddr)
 
 	var contractAddress types.InternalEVMAddress
 	setup := func() {
@@ -526,14 +557,20 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 		suite.Keeper.SetParams(suite.Ctx, params)
 
 		// setup initial position
-		addr := app.RandomAddress()
+		addr, _ := app.RandomAddress()
 		err := suite.App.FundAccount(suite.Ctx, addr, sdk.NewCoins(initialPosition))
 		suite.NoError(err)
-		err = suite.Keeper.ConvertCosmosCoinToERC20(suite.Ctx, addr, initiator, initialPosition)
+		err = suite.Keeper.ConvertCosmosCoinToERC20(suite.Ctx, addr, internalAddr, initialPosition)
 		suite.NoError(err)
 
 		contractAddress, _ = suite.Keeper.GetDeployedCosmosCoinContract(suite.Ctx, denom)
 	}
+
+	addr1, _ := app.RandomAddress()
+	addr2, _ := app.RandomAddress()
+	addr3, _ := app.RandomAddress()
+	addr4, _ := app.RandomAddress()
+	addr5, _ := app.RandomAddress()
 
 	testCases := []struct {
 		name            string
@@ -544,8 +581,8 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 		{
 			name: "valid - full convert",
 			msg: types.NewMsgConvertCosmosCoinFromERC20(
-				initiator.Hex(),
-				app.RandomAddress().String(),
+				initiator,
+				addr1.String(),
 				initialPosition,
 			),
 			amountConverted: initialPosition.Amount,
@@ -554,8 +591,8 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 		{
 			name: "valid - partial convert",
 			msg: types.NewMsgConvertCosmosCoinFromERC20(
-				initiator.Hex(),
-				app.RandomAddress().String(),
+				initiator,
+				addr2.String(),
 				sdk.NewInt64Coin(denom, 123456),
 			),
 			amountConverted: sdkmath.NewInt(123456),
@@ -565,11 +602,11 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 			name: "invalid - bad initiator",
 			msg: types.NewMsgConvertCosmosCoinFromERC20(
 				"invalid-address",
-				app.RandomAddress().String(),
+				addr3.String(),
 				sdk.NewInt64Coin(denom, 123456),
 			),
 			amountConverted: sdkmath.ZeroInt(),
-			expectedErr:     "invalid initiator address",
+			expectedErr:     "invalid pubkey(invalid-address) length",
 		},
 		{
 			name: "invalid - bad receiver",
@@ -579,13 +616,13 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 				sdk.NewInt64Coin(denom, 123456),
 			),
 			amountConverted: sdkmath.ZeroInt(),
-			expectedErr:     "invalid receiver address",
+			expectedErr:     "invalid pubkey",
 		},
 		{
 			name: "invalid - unsupported asset",
 			msg: types.NewMsgConvertCosmosCoinFromERC20(
-				initiator.Hex(),
-				app.RandomAddress().String(),
+				initiator,
+				addr4.String(),
 				sdk.NewInt64Coin("not-supported", 123456),
 			),
 			amountConverted: sdkmath.ZeroInt(),
@@ -594,8 +631,8 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 		{
 			name: "invalid - insufficient funds",
 			msg: types.NewMsgConvertCosmosCoinFromERC20(
-				initiator.Hex(),
-				app.RandomAddress().String(),
+				initiator,
+				addr5.String(),
 				initialPosition.AddAmount(sdkmath.OneInt()),
 			),
 			amountConverted: sdkmath.ZeroInt(),
@@ -612,7 +649,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 			if tc.expectedErr != "" {
 				suite.ErrorContains(err, tc.expectedErr)
 				// expect no change in erc20 balance
-				balance, err := suite.Keeper.QueryERC20BalanceOf(suite.Ctx, contractAddress, initiator)
+				balance, err := suite.Keeper.QueryERC20BalanceOf(suite.Ctx, contractAddress, internalAddr)
 				suite.NoError(err)
 				suite.BigIntsEqual(initialPosition.Amount.BigInt(), balance, "expected no change in initiator's erc20 balance")
 				// expect no change in module balance
@@ -629,7 +666,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 
 			newEvmBalance := initialPosition.SubAmount(tc.amountConverted)
 			// expect initiator to have the balance deducted
-			evmBalance, err := suite.Keeper.QueryERC20BalanceOf(suite.Ctx, contractAddress, initiator)
+			evmBalance, err := suite.Keeper.QueryERC20BalanceOf(suite.Ctx, contractAddress, internalAddr)
 			suite.NoError(err)
 			suite.BigIntsEqual(newEvmBalance.Amount.BigInt(), evmBalance, "unexpected initiator final erc20 balance")
 
@@ -659,8 +696,10 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 func (suite *MsgServerSuite) TestConvertCosmosCoinForRemovedDenom() {
 	denom := "magic"
 	tokenInfo := types.NewAllowedCosmosCoinERC20Token(denom, "MAGIC COIN", "MAGIC", 6)
-	account := app.RandomAddress()
-	evmAddr := types.BytesToInternalEVMAddress(account.Bytes())
+	account, pk := app.RandomAddress()
+	evmAddress, err := types.PubKeyToEthAddr(pk)
+	suite.NoError(err)
+	evmAddr := types.BytesToInternalEVMAddress(evmAddress.Bytes())
 	coin := func(amt int64) sdk.Coin { return sdk.NewInt64Coin(denom, amt) }
 
 	// fund account
@@ -672,8 +711,8 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinForRemovedDenom() {
 	suite.Keeper.SetParams(suite.Ctx, params)
 
 	// convert some coins while its allowed
-	msg := types.NewMsgConvertCosmosCoinToERC20(account.String(), evmAddr.Hex(), coin(5e9))
-	_, err := suite.msgServer.ConvertCosmosCoinToERC20(suite.Ctx, &msg)
+	msg := types.NewMsgConvertCosmosCoinToERC20(pk, evmAddr.Hex(), coin(5e9))
+	_, err = suite.msgServer.ConvertCosmosCoinToERC20(suite.Ctx, &msg)
 	suite.NoError(err)
 
 	// expect contract registered
@@ -686,13 +725,13 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinForRemovedDenom() {
 	suite.Keeper.SetParams(suite.Ctx, params)
 
 	suite.Run("disallows sdk -> evm when removed", func() {
-		msg := types.NewMsgConvertCosmosCoinToERC20(account.String(), evmAddr.Hex(), coin(5e9))
+		msg := types.NewMsgConvertCosmosCoinToERC20(pk, evmAddr.Hex(), coin(5e9))
 		_, err := suite.msgServer.ConvertCosmosCoinToERC20(suite.Ctx, &msg)
 		suite.ErrorContains(err, "sdk.Coin not enabled to convert to ERC20 token")
 	})
 
 	suite.Run("allows conversion of existing ERC20s", func() {
-		msg := types.NewMsgConvertCosmosCoinFromERC20(evmAddr.Hex(), account.String(), coin(5e9))
+		msg := types.NewMsgConvertCosmosCoinFromERC20(pk, account.String(), coin(5e9))
 		_, err := suite.msgServer.ConvertCosmosCoinFromERC20(suite.Ctx, &msg)
 		suite.NoError(err)
 
@@ -716,7 +755,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinForRemovedDenom() {
 		suite.Keeper.SetParams(suite.Ctx, params)
 
 		// attempt conversion
-		msg := types.NewMsgConvertCosmosCoinToERC20(account.String(), evmAddr.Hex(), coin(1e10))
+		msg := types.NewMsgConvertCosmosCoinToERC20(pk, evmAddr.Hex(), coin(1e10))
 		_, err := suite.msgServer.ConvertCosmosCoinToERC20(suite.Ctx, &msg)
 		suite.NoError(err)
 

@@ -179,7 +179,7 @@ func (suite *invariantTestSuite) TestSendToModuleAccountNotAllowed() {
 	suite.True(bKeeper.BlockedAddr(maccAddress))
 
 	coins := sdk.NewCoins(sdk.NewInt64Coin(suite.cosmosCoin.CosmosDenom, 1e7))
-	addr := app.RandomAddress()
+	addr, _ := app.RandomAddress()
 
 	err := suite.App.FundAccount(suite.Ctx, addr, coins)
 	suite.NoError(err)
@@ -203,11 +203,12 @@ func (suite *invariantTestSuite) TestCosmosCoinsFullyBackedInvariant() {
 	_, broken = suite.runInvariant(invariantName, keeper.CosmosCoinsFullyBackedInvariant)
 	suite.False(broken)
 
+	rAddr, _ := app.RandomAddress()
 	// break the invariant by removing module account balance without adjusting token supply
 	err := suite.BankKeeper.SendCoinsFromModuleToAccount(
 		suite.Ctx,
 		types.ModuleName,
-		app.RandomAddress(),
+		rAddr,
 		sdk.NewCoins(sdk.NewInt64Coin(suite.cosmosCoin.CosmosDenom, 1e5)),
 	)
 	suite.NoError(err)
