@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
+
 	sdkmath "cosmossdk.io/math"
 
 	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
@@ -341,14 +343,14 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 }
 
 // RandomAddress non-deterministically generates a new address, discarding the private key.
-func RandomAddress() sdk.AccAddress {
+func RandomAddress() (sdk.AccAddress, string) {
 	secret := make([]byte, 32)
 	_, err := crand.Read(secret)
 	if err != nil {
 		panic("Could not read randomness")
 	}
 	key := secp256k1.GenPrivKeyFromSecret(secret)
-	return sdk.AccAddress(key.PubKey().Address())
+	return sdk.AccAddress(key.PubKey().Address()), common.Bytes2Hex(key.PubKey().Bytes())
 }
 
 // CheckBalance requires the account address has the expected amount of coins.

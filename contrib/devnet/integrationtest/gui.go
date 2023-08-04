@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	poolIndex = "0x98d8263f2a386f600623fd0531f5cc43b7d0d908d2c68ef371aee8ae5b1b584b"
+	poolIndex = "0x6aa3f2a59b8599d0ced06bd7ad6edc60ce75908333b3c239d4afc519f585298a"
 	RED       = "red"
 	GREEN     = "green"
 	BLUE      = "blue"
