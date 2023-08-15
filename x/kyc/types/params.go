@@ -32,7 +32,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	if client.MAINNETFLAG == "false" {
-		acc, err := types.AccAddressFromBech32("jolt15qdefkmwswysgg4qxgqpqr35k3m49pkxu8ygkq")
+		acc, err := types.AccAddressFromBech32("jolt1xdpg5l3pxpyhxqg4ey4krq2pf9d3sphmmuuugg")
 		if err != nil {
 			panic(err)
 		}
@@ -40,10 +40,7 @@ func NewParams() Params {
 		if err != nil {
 			panic(err)
 		}
-		acc2, err := types.AccAddressFromBech32("jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np")
-		if err != nil {
-			panic(err)
-		}
+
 		var projects Projects
 		allProjects := make([]*ProjectInfo, 100)
 		projects.Items = allProjects
