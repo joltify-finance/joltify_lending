@@ -40,6 +40,10 @@ func NewParams() Params {
 		if err != nil {
 			panic(err)
 		}
+		acc2, err := types.AccAddressFromBech32("jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np")
+		if err != nil {
+			panic(err)
+		}
 		var projects Projects
 		allProjects := make([]*ProjectInfo, 100)
 		projects.Items = allProjects
