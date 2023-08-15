@@ -15,12 +15,17 @@ func GenDefaultMarket() Markets {
 		panic(err)
 	}
 
+	acc2, err := types.AccAddressFromBech32("jolt1a33x0juy5t8a0zgksfz50yluw8jyvy764p9ych")
+	if err != nil {
+		panic(err)
+	}
+
 	m := Market{
 		MarketID:   "jolt:usd",
 		BaseAsset:  "jolt",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m2 := Market{
@@ -28,7 +33,7 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "bnb",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m3 := Market{
@@ -36,7 +41,7 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "usdt",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m4 := Market{
@@ -44,7 +49,7 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "usdc",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m5 := Market{
@@ -52,7 +57,7 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "eth",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m6 := Market{
@@ -60,7 +65,7 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "btc",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m7 := Market{
@@ -68,7 +73,7 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "atom",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m8 := Market{
@@ -76,7 +81,7 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "aud",
 		QuoteAsset: "usd",
 		Active:     true,
-		Oracles:    []types.AccAddress{acc},
+		Oracles:    []types.AccAddress{acc, acc2},
 	}
 
 	m9 := Market{
@@ -84,10 +89,26 @@ func GenDefaultMarket() Markets {
 		BaseAsset:  "avax",
 		QuoteAsset: "usd",
 		Active:     true,
+		Oracles:    []types.AccAddress{acc, acc2},
+	}
+
+	m10 := Market{
+		MarketID:   "aud:usd",
+		BaseAsset:  "aud",
+		QuoteAsset: "usd",
+		Active:     true,
 		Oracles:    []types.AccAddress{acc},
 	}
 
-	return []Market{m, m2, m3, m4, m5, m6, m7, m8, m9}
+	m11 := Market{
+		MarketID:   "matic:usd",
+		BaseAsset:  "matic",
+		QuoteAsset: "usd",
+		Active:     true,
+		Oracles:    []types.AccAddress{acc, acc2},
+	}
+
+	return []Market{m, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11}
 }
 
 // NewParams creates a new AssetParams object
