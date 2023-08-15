@@ -106,6 +106,9 @@ func (suite *MsgServerSuite) TestConvertCoinToERC20() {
 				initiatorAddr, err := types.PubKeyToJoltAddr(tc.msg.Initiator)
 				suite.Require().NoError(err)
 
+				initiatorAddr, err := types.PubKeyToJoltAddr(tc.msg.Initiator)
+				suite.Require().NoError(err)
+
 				// msg server event
 				suite.EventsContains(suite.GetEvents(),
 					sdk.NewEvent(
