@@ -29,7 +29,7 @@ func TestMsgConvertCoinToERC20(t *testing.T) {
 	}{
 		{
 			"valid",
-			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 			sdk.NewCoin("erc20/weth", sdkmath.NewInt(1234)),
 			errArgs{
@@ -38,7 +38,7 @@ func TestMsgConvertCoinToERC20(t *testing.T) {
 		},
 		{
 			"invalid - odd length hex address",
-			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc",
 			sdk.NewCoin("erc20/weth", sdkmath.NewInt(1234)),
 			errArgs{
@@ -48,7 +48,7 @@ func TestMsgConvertCoinToERC20(t *testing.T) {
 		},
 		{
 			"invalid - zero amount",
-			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 			sdk.NewCoin("erc20/weth", sdkmath.NewInt(0)),
 			errArgs{
@@ -58,7 +58,7 @@ func TestMsgConvertCoinToERC20(t *testing.T) {
 		},
 		{
 			"invalid - negative amount",
-			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 			// Create manually so there is no validation
 			sdk.Coin{Denom: "erc20/weth", Amount: sdkmath.NewInt(-1234)},
@@ -69,7 +69,7 @@ func TestMsgConvertCoinToERC20(t *testing.T) {
 		},
 		{
 			"invalid - empty denom",
-			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 			sdk.Coin{Denom: "", Amount: sdkmath.NewInt(-1234)},
 			errArgs{
@@ -79,7 +79,7 @@ func TestMsgConvertCoinToERC20(t *testing.T) {
 		},
 		{
 			"invalid - invalid denom",
-			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 			sdk.Coin{Denom: "h", Amount: sdkmath.NewInt(-1234)},
 			errArgs{
@@ -127,7 +127,7 @@ func TestMsgConvertERC20ToCoin(t *testing.T) {
 		{
 			"valid",
 			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
-			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0x404F9466d758eA33eA84CeBE9E444b06533b369e",
 			sdkmath.NewInt(1234),
 			errArgs{
@@ -135,20 +135,20 @@ func TestMsgConvertERC20ToCoin(t *testing.T) {
 			},
 		},
 		{
-			"invalid - odd length hex address",
+			"invalid - invalid public key",
 			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
 			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc",
 			"0x404F9466d758eA33eA84CeBE9E444b06533b369e",
 			sdkmath.NewInt(1234),
 			errArgs{
 				expectPass: false,
-				contains:   "initiator is not a valid hex address",
+				contains:   "invalid initiator pubkey",
 			},
 		},
 		{
 			"invalid - zero amount",
 			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
-			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0x404F9466d758eA33eA84CeBE9E444b06533b369e",
 			sdkmath.NewInt(0),
 			errArgs{
@@ -159,7 +159,7 @@ func TestMsgConvertERC20ToCoin(t *testing.T) {
 		{
 			"invalid - negative amount",
 			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
-			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0x404F9466d758eA33eA84CeBE9E444b06533b369e",
 			sdkmath.NewInt(-1234),
 			errArgs{
@@ -170,7 +170,7 @@ func TestMsgConvertERC20ToCoin(t *testing.T) {
 		{
 			"invalid - invalid contract address",
 			"jolt17cnnh8076vgv2y2lln6qtrlv83k05f7zch5dqv",
-			"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+			"02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7",
 			"0x404F9466d758eA33eA84CeBE9E444b06533b369",
 			sdkmath.NewInt(1234),
 			errArgs{
@@ -201,10 +201,13 @@ func TestMsgConvertERC20ToCoin(t *testing.T) {
 }
 
 func TestConvertCosmosCoinToERC20_ValidateBasic(t *testing.T) {
-	validJoltAddr := app.RandomAddress()
+	_, pk := app.RandomAddress()
 	validHexAddr, _ := testutil.RandomEvmAccount()
 	invalidAddr := "not-an-address"
 	validAmount := sdk.NewInt64Coin("hard", 5e3)
+
+	rAddr1, _ := app.RandomAddress()
+	rAddr2, _ := app.RandomAddress()
 
 	testCases := []struct {
 		name        string
@@ -215,56 +218,56 @@ func TestConvertCosmosCoinToERC20_ValidateBasic(t *testing.T) {
 	}{
 		{
 			name:        "valid",
-			initiator:   validJoltAddr.String(),
+			initiator:   pk,
 			receiver:    validHexAddr.String(),
 			amount:      validAmount,
 			expectedErr: "",
 		},
 		{
 			name:        "invalid - sending to jolt addr",
-			initiator:   validJoltAddr.String(),
-			receiver:    app.RandomAddress().String(),
+			initiator:   pk,
+			receiver:    rAddr1.String(),
 			amount:      validAmount,
 			expectedErr: "receiver is not a valid hex address",
 		},
 		{
 			name:        "invalid - invalid initiator",
-			initiator:   invalidAddr,
-			receiver:    app.RandomAddress().String(),
+			initiator:   "not-a-pubkey",
+			receiver:    rAddr2.String(),
 			amount:      validAmount,
-			expectedErr: "invalid initiator address",
+			expectedErr: "invalid initiator pubkey",
 		},
 		{
 			name:        "invalid - invalid receiver",
-			initiator:   validJoltAddr.String(),
+			initiator:   pk,
 			receiver:    invalidAddr,
 			amount:      validAmount,
 			expectedErr: "receiver is not a valid hex address",
 		},
 		{
 			name:        "invalid - invalid amount - nil",
-			initiator:   validJoltAddr.String(),
+			initiator:   pk,
 			receiver:    validHexAddr.String(),
 			amount:      sdk.Coin{},
 			expectedErr: "invalid coins",
 		},
 		{
 			name:        "invalid - invalid amount - zero",
-			initiator:   validJoltAddr.String(),
+			initiator:   pk,
 			receiver:    validHexAddr.String(),
 			amount:      sdk.NewInt64Coin("magic", 0),
 			expectedErr: "invalid coins",
 		},
 		{
 			name:        "invalid - invalid amount - negative",
-			initiator:   validJoltAddr.String(),
+			initiator:   pk,
 			receiver:    validHexAddr.String(),
 			amount:      sdk.Coin{Denom: "magic", Amount: sdkmath.NewInt(-42)},
 			expectedErr: "invalid coins",
 		},
 		{
 			name:        "invalid - invalid amount - invalid denom",
-			initiator:   validJoltAddr.String(),
+			initiator:   pk,
 			receiver:    validHexAddr.String(),
 			amount:      sdk.Coin{Denom: "", Amount: sdkmath.NewInt(42)},
 			expectedErr: "invalid coins",
@@ -294,9 +297,9 @@ func TestConvertCosmosCoinToERC20_ValidateBasic(t *testing.T) {
 
 func TestConvertCosmosCoinToERC20_GetSigners(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
-		initiator := app.RandomAddress()
+		initiator, pk := app.RandomAddress()
 		signers := types.MsgConvertCosmosCoinToERC20{
-			Initiator: initiator.String(),
+			Initiator: pk,
 		}.GetSigners()
 		require.Len(t, signers, 1)
 		require.Equal(t, initiator, signers[0])
@@ -312,8 +315,13 @@ func TestConvertCosmosCoinToERC20_GetSigners(t *testing.T) {
 }
 
 func TestConvertCosmosCoinFromERC20_ValidateBasic(t *testing.T) {
-	validHexAddr := testutil.RandomEvmAddress()
-	validJoltAddr := app.RandomAddress()
+	// validHexAddr := testutil.RandomEvmAddress()
+	validJoltAddr, pk := app.RandomAddress()
+	evmAddr, err := types.PubKeyToEthAddr(pk)
+	require.NoError(t, err)
+	_ = evmAddr
+
+	rAddr1, _ := app.RandomAddress()
 	invalidAddr := "not-an-address"
 	validAmount := sdk.NewInt64Coin("hard", 5e3)
 
@@ -326,14 +334,14 @@ func TestConvertCosmosCoinFromERC20_ValidateBasic(t *testing.T) {
 	}{
 		{
 			name:        "valid",
-			initiator:   validHexAddr.String(),
+			initiator:   pk,
 			receiver:    validJoltAddr.String(),
 			amount:      validAmount,
 			expectedErr: "",
 		},
 		{
 			name:        "invalid - sending to 0x addr",
-			initiator:   validHexAddr.String(),
+			initiator:   pk,
 			receiver:    testutil.RandomEvmAddress().Hex(),
 			amount:      validAmount,
 			expectedErr: "invalid receiver address",
@@ -341,41 +349,41 @@ func TestConvertCosmosCoinFromERC20_ValidateBasic(t *testing.T) {
 		{
 			name:        "invalid - invalid initiator",
 			initiator:   invalidAddr,
-			receiver:    app.RandomAddress().String(),
+			receiver:    rAddr1.String(),
 			amount:      validAmount,
-			expectedErr: "initiator is not a valid hex address",
+			expectedErr: "invalid initiator pubkey",
 		},
 		{
 			name:        "invalid - invalid receiver",
-			initiator:   validHexAddr.String(),
+			initiator:   pk,
 			receiver:    invalidAddr,
 			amount:      validAmount,
 			expectedErr: "invalid receiver address",
 		},
 		{
 			name:        "invalid - invalid amount - nil",
-			initiator:   validHexAddr.String(),
+			initiator:   pk,
 			receiver:    validJoltAddr.String(),
 			amount:      sdk.Coin{},
 			expectedErr: "invalid coins",
 		},
 		{
 			name:        "invalid - invalid amount - zero",
-			initiator:   validHexAddr.String(),
+			initiator:   pk,
 			receiver:    validJoltAddr.String(),
 			amount:      sdk.NewInt64Coin("magic", 0),
 			expectedErr: "invalid coins",
 		},
 		{
 			name:        "invalid - invalid amount - negative",
-			initiator:   validHexAddr.String(),
+			initiator:   pk,
 			receiver:    validJoltAddr.String(),
 			amount:      sdk.Coin{Denom: "magic", Amount: sdkmath.NewInt(-42)},
 			expectedErr: "invalid coins",
 		},
 		{
 			name:        "invalid - invalid amount - invalid denom",
-			initiator:   validHexAddr.String(),
+			initiator:   pk,
 			receiver:    validJoltAddr.String(),
 			amount:      sdk.Coin{Denom: "", Amount: sdkmath.NewInt(42)},
 			expectedErr: "invalid coins",
@@ -405,13 +413,13 @@ func TestConvertCosmosCoinFromERC20_ValidateBasic(t *testing.T) {
 
 func TestConvertCosmosCoinFromERC20_GetSigners(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
-		initiator0x := testutil.RandomEvmAddress()
-		initiator := sdk.AccAddress(initiator0x.Bytes())
+		cosAddr, pk := app.RandomAddress()
+		_ = cosAddr
 		signers := types.MsgConvertCosmosCoinFromERC20{
-			Initiator: initiator0x.Hex(),
+			Initiator: pk,
 		}.GetSigners()
 		require.Len(t, signers, 1)
-		require.Equal(t, initiator, signers[0])
+		require.Equal(t, cosAddr, signers[0])
 	})
 
 	t.Run("panics when depositor is invalid", func(t *testing.T) {

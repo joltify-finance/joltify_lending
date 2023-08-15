@@ -32,8 +32,7 @@ func (s msgServer) ConvertCoinToERC20(
 	msg *types.MsgConvertCoinToERC20,
 ) (*types.MsgConvertCoinToERC20Response, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	initiator, err := sdk.AccAddressFromBech32(msg.Initiator)
+	initiator, err := types.PubKeyToJoltAddr(msg.Initiator)
 	if err != nil {
 		return nil, fmt.Errorf("invalid Initiator address: %w", err)
 	}
@@ -56,7 +55,7 @@ func (s msgServer) ConvertCoinToERC20(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Initiator),
+			sdk.NewAttribute(sdk.AttributeKeySender, initiator.String()),
 		),
 	)
 
@@ -71,9 +70,13 @@ func (s msgServer) ConvertERC20ToCoin(
 ) (*types.MsgConvertERC20ToCoinResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	initiator, err := types.NewInternalEVMAddressFromString(msg.Initiator)
+	ethAddr, err := types.PubKeyToEthAddr(msg.Initiator)
 	if err != nil {
-		return nil, fmt.Errorf("invalid initiator address: %w", err)
+		return nil, fmt.Errorf("invalid initiator pubkey: %w", err)
+	}
+	initiator, err := types.NewInternalEVMAddressFromString(ethAddr.String())
+	if err != nil {
+		return nil, fmt.Errorf("invalid initiator pubkey: %w", err)
 	}
 
 	receiver, err := sdk.AccAddressFromBech32(msg.Receiver)
@@ -100,7 +103,7 @@ func (s msgServer) ConvertERC20ToCoin(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Initiator),
+			sdk.NewAttribute(sdk.AttributeKeySender, initiator.String()),
 		),
 	)
 
@@ -120,7 +123,7 @@ func (s msgServer) ConvertCosmosCoinToERC20(
 ) (*types.MsgConvertCosmosCoinToERC20Response, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	initiator, err := sdk.AccAddressFromBech32(msg.Initiator)
+	initiator, err := types.PubKeyToJoltAddr(msg.Initiator)
 	if err != nil {
 		return nil, fmt.Errorf("invalid initiator address: %w", err)
 	}
@@ -143,7 +146,7 @@ func (s msgServer) ConvertCosmosCoinToERC20(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.Initiator),
+			sdk.NewAttribute(sdk.AttributeKeySender, initiator.String()),
 		),
 	)
 
@@ -158,7 +161,11 @@ func (s msgServer) ConvertCosmosCoinFromERC20(
 ) (*types.MsgConvertCosmosCoinFromERC20Response, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	initiator, err := types.NewInternalEVMAddressFromString(msg.Initiator)
+	ethAddr, err := types.PubKeyToEthAddr(msg.Initiator)
+	if err != nil {
+		return nil, err
+	}
+	initiator, err := types.NewInternalEVMAddressFromString(ethAddr.String())
 	if err != nil {
 		return nil, fmt.Errorf("invalid initiator address: %w", err)
 	}
