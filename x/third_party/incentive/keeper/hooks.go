@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
@@ -46,4 +47,14 @@ func (h Hooks) BeforeBorrowModified(ctx sdk.Context, borrow types.Borrow) {
 // AfterBorrowModified function that runs after a borrow is modified
 func (h Hooks) AfterBorrowModified(ctx sdk.Context, borrow types.Borrow) {
 	h.k.UpdateJoltBorrowIndexDenoms(ctx, borrow)
+}
+
+// ------------------- Swap Module Hooks -------------------
+
+func (h Hooks) AfterPoolDepositCreated(ctx sdk.Context, poolID string, depositor sdk.AccAddress, _ sdkmath.Int) {
+	h.k.InitializeSwapReward(ctx, poolID, depositor)
+}
+
+func (h Hooks) BeforePoolDepositModified(ctx sdk.Context, poolID string, depositor sdk.AccAddress, sharesOwned sdkmath.Int) {
+	h.k.SynchronizeSwapReward(ctx, poolID, depositor, sharesOwned)
 }

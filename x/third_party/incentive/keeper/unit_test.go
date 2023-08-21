@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 
 	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
-	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -55,12 +56,12 @@ func (suite *unitTester) SetupSuite() {
 	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.cdc = tApp.AppCodec()
 
-	suite.incentiveStoreKey = sdk.NewKVStoreKey(types2.StoreKey)
+	suite.incentiveStoreKey = sdk.NewKVStoreKey(types.StoreKey)
 }
 
 func (suite *unitTester) SetupTest() {
 	suite.ctx = NewTestContext(suite.incentiveStoreKey)
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil)
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, nil)
 }
 
 func (suite *unitTester) TearDownTest() {
@@ -68,21 +69,21 @@ func (suite *unitTester) TearDownTest() {
 	suite.ctx = sdk.Context{}
 }
 
-func (suite *unitTester) NewKeeper(paramSubspace types2.ParamSubspace, bk types2.BankKeeper, hk types2.JoltKeeper, ak types2.AccountKeeper) keeper.Keeper {
-	return keeper.NewKeeper(suite.cdc, suite.incentiveStoreKey, paramSubspace, bk, hk, ak)
+func (suite *unitTester) NewKeeper(paramSubspace types.ParamSubspace, bk types.BankKeeper, hk types.JoltKeeper, ak types.AccountKeeper, swapKeeper types.SwapKeeper) keeper.Keeper {
+	return keeper.NewKeeper(suite.cdc, suite.incentiveStoreKey, paramSubspace, bk, hk, ak, swapKeeper)
 }
 
-func (suite *unitTester) storeJoltClaim(claim types2.JoltLiquidityProviderClaim) {
+func (suite *unitTester) storeJoltClaim(claim types.JoltLiquidityProviderClaim) {
 	suite.keeper.SetJoltLiquidityProviderClaim(suite.ctx, claim)
 }
 
-func (suite *unitTester) storeGlobalBorrowIndexes(indexes types2.MultiRewardIndexes) {
+func (suite *unitTester) storeGlobalBorrowIndexes(indexes types.MultiRewardIndexes) {
 	for _, i := range indexes {
 		suite.keeper.SetJoltBorrowRewardIndexes(suite.ctx, i.CollateralType, i.RewardIndexes)
 	}
 }
 
-func (suite *unitTester) storeGlobalSupplyIndexes(indexes types2.MultiRewardIndexes) {
+func (suite *unitTester) storeGlobalSupplyIndexes(indexes types.MultiRewardIndexes) {
 	for _, i := range indexes {
 		suite.keeper.SetJoltSupplyRewardIndexes(suite.ctx, i.CollateralType, i.RewardIndexes)
 	}
@@ -90,20 +91,30 @@ func (suite *unitTester) storeGlobalSupplyIndexes(indexes types2.MultiRewardInde
 
 // fakeParamSubspace is a stub paramSpace to simplify keeper unit test setup.
 type fakeParamSubspace struct {
-	params types2.Params
+	params types.Params
 }
 
 func (subspace *fakeParamSubspace) GetParamSet(_ sdk.Context, ps paramtypes.ParamSet) {
-	*(ps.(*types2.Params)) = subspace.params
+	*(ps.(*types.Params)) = subspace.params
 }
 
 func (subspace *fakeParamSubspace) SetParamSet(_ sdk.Context, ps paramtypes.ParamSet) {
-	subspace.params = *(ps.(*types2.Params))
+	subspace.params = *(ps.(*types.Params))
 }
 
 func (subspace *fakeParamSubspace) HasKeyTable() bool {
 	// return true so the keeper does not try to call WithKeyTable, which does nothing
 	return true
+}
+
+func (suite *unitTester) storeSwapClaim(claim types.SwapClaim) {
+	suite.keeper.SetSwapClaim(suite.ctx, claim)
+}
+
+func (suite *unitTester) storeGlobalSwapIndexes(indexes types.MultiRewardIndexes) {
+	for _, i := range indexes {
+		suite.keeper.SetSwapRewardIndexes(suite.ctx, i.CollateralType, i.RewardIndexes)
+	}
 }
 
 func (subspace *fakeParamSubspace) WithKeyTable(paramtypes.KeyTable) paramtypes.Subspace {
@@ -130,7 +141,7 @@ func newFakeHardState() fakeHardState {
 	}
 }
 
-var _ types2.JoltKeeper = newFakeHardKeeper()
+var _ types.JoltKeeper = newFakeHardKeeper()
 
 func newFakeHardKeeper() *fakeJoltKeeper {
 	return &fakeJoltKeeper{
@@ -210,10 +221,10 @@ func generateValidatorAddresses(n int) []sdk.ValAddress {
 	return valAddresses
 }
 
-var nonEmptyMultiRewardIndexes = types2.MultiRewardIndexes{
+var nonEmptyMultiRewardIndexes = types.MultiRewardIndexes{
 	{
 		CollateralType: "bnb",
-		RewardIndexes: types2.RewardIndexes{
+		RewardIndexes: types.RewardIndexes{
 			{
 				CollateralType: "jolt",
 				RewardFactor:   d("0.02"),
@@ -226,7 +237,7 @@ var nonEmptyMultiRewardIndexes = types2.MultiRewardIndexes{
 	},
 	{
 		CollateralType: "btcb",
-		RewardIndexes: types2.RewardIndexes{
+		RewardIndexes: types.RewardIndexes{
 			{
 				CollateralType: "jolt",
 				RewardFactor:   d("0.2"),
@@ -239,7 +250,7 @@ var nonEmptyMultiRewardIndexes = types2.MultiRewardIndexes{
 	},
 }
 
-func extractCollateralTypes(indexes types2.MultiRewardIndexes) []string {
+func extractCollateralTypes(indexes types.MultiRewardIndexes) []string {
 	var denoms []string
 	for _, ri := range indexes {
 		denoms = append(denoms, ri.CollateralType)
@@ -247,8 +258,8 @@ func extractCollateralTypes(indexes types2.MultiRewardIndexes) []string {
 	return denoms
 }
 
-func increaseAllRewardFactors(indexes types2.MultiRewardIndexes) types2.MultiRewardIndexes {
-	increasedIndexes := make(types2.MultiRewardIndexes, len(indexes))
+func increaseAllRewardFactors(indexes types.MultiRewardIndexes) types.MultiRewardIndexes {
+	increasedIndexes := make(types.MultiRewardIndexes, len(indexes))
 	copy(increasedIndexes, indexes)
 
 	for i := range increasedIndexes {
@@ -257,8 +268,8 @@ func increaseAllRewardFactors(indexes types2.MultiRewardIndexes) types2.MultiRew
 	return increasedIndexes
 }
 
-func increaseRewardFactors(indexes types2.RewardIndexes) types2.RewardIndexes {
-	increasedIndexes := make(types2.RewardIndexes, len(indexes))
+func increaseRewardFactors(indexes types.RewardIndexes) types.RewardIndexes {
+	increasedIndexes := make(types.RewardIndexes, len(indexes))
 	copy(increasedIndexes, indexes)
 
 	for i := range increasedIndexes {
@@ -267,7 +278,7 @@ func increaseRewardFactors(indexes types2.RewardIndexes) types2.RewardIndexes {
 	return increasedIndexes
 }
 
-func appendUniqueMultiRewardIndex(indexes types2.MultiRewardIndexes) types2.MultiRewardIndexes {
+func appendUniqueMultiRewardIndex(indexes types.MultiRewardIndexes) types.MultiRewardIndexes {
 	const uniqueDenom = "uniquedenom"
 
 	for _, mri := range indexes {
@@ -276,9 +287,9 @@ func appendUniqueMultiRewardIndex(indexes types2.MultiRewardIndexes) types2.Mult
 		}
 	}
 
-	return append(indexes, types2.NewMultiRewardIndex(
+	return append(indexes, types.NewMultiRewardIndex(
 		uniqueDenom,
-		types2.RewardIndexes{
+		types.RewardIndexes{
 			{
 				CollateralType: "jolt",
 				RewardFactor:   d("0.02"),
@@ -292,7 +303,7 @@ func appendUniqueMultiRewardIndex(indexes types2.MultiRewardIndexes) types2.Mult
 	)
 }
 
-func appendUniqueEmptyMultiRewardIndex(indexes types2.MultiRewardIndexes) types2.MultiRewardIndexes {
+func appendUniqueEmptyMultiRewardIndex(indexes types.MultiRewardIndexes) types.MultiRewardIndexes {
 	const uniqueDenom = "uniquedenom"
 
 	for _, mri := range indexes {
@@ -301,18 +312,18 @@ func appendUniqueEmptyMultiRewardIndex(indexes types2.MultiRewardIndexes) types2
 		}
 	}
 
-	return append(indexes, types2.NewMultiRewardIndex(uniqueDenom, nil))
+	return append(indexes, types.NewMultiRewardIndex(uniqueDenom, nil))
 }
 
-func appendUniqueRewardIndexToFirstItem(indexes types2.MultiRewardIndexes) types2.MultiRewardIndexes {
-	newIndexes := make(types2.MultiRewardIndexes, len(indexes))
+func appendUniqueRewardIndexToFirstItem(indexes types.MultiRewardIndexes) types.MultiRewardIndexes {
+	newIndexes := make(types.MultiRewardIndexes, len(indexes))
 	copy(newIndexes, indexes)
 
 	newIndexes[0].RewardIndexes = appendUniqueRewardIndex(newIndexes[0].RewardIndexes)
 	return newIndexes
 }
 
-func appendUniqueRewardIndex(indexes types2.RewardIndexes) types2.RewardIndexes {
+func appendUniqueRewardIndex(indexes types.RewardIndexes) types.RewardIndexes {
 	const uniqueDenom = "uniquereward"
 
 	for _, mri := range indexes {
@@ -323,6 +334,45 @@ func appendUniqueRewardIndex(indexes types2.RewardIndexes) types2.RewardIndexes 
 
 	return append(
 		indexes,
-		types2.NewRewardIndex(uniqueDenom, d("0.02")),
+		types.NewRewardIndex(uniqueDenom, d("0.02")),
 	)
+}
+
+// fakeSwapKeeper is a stub swap keeper.
+// It can be used to return values to the incentive keeper without having to initialize a full swap keeper.
+type fakeSwapKeeper struct {
+	poolShares    map[string]sdkmath.Int
+	depositShares map[string](map[string]sdkmath.Int)
+}
+
+var _ types.SwapKeeper = newFakeSwapKeeper()
+
+func newFakeSwapKeeper() *fakeSwapKeeper {
+	return &fakeSwapKeeper{
+		poolShares:    map[string]sdkmath.Int{},
+		depositShares: map[string](map[string]sdkmath.Int){},
+	}
+}
+
+func (k *fakeSwapKeeper) addPool(id string, shares sdkmath.Int) *fakeSwapKeeper {
+	k.poolShares[id] = shares
+	return k
+}
+
+func (k *fakeSwapKeeper) addDeposit(poolID string, depositor sdk.AccAddress, shares sdkmath.Int) *fakeSwapKeeper {
+	if k.depositShares[poolID] == nil {
+		k.depositShares[poolID] = map[string]sdkmath.Int{}
+	}
+	k.depositShares[poolID][depositor.String()] = shares
+	return k
+}
+
+func (k *fakeSwapKeeper) GetPoolShares(_ sdk.Context, poolID string) (sdkmath.Int, bool) {
+	shares, ok := k.poolShares[poolID]
+	return shares, ok
+}
+
+func (k *fakeSwapKeeper) GetDepositorSharesAmount(_ sdk.Context, depositor sdk.AccAddress, poolID string) (sdkmath.Int, bool) {
+	shares, found := k.depositShares[poolID][depositor.String()]
+	return shares, found
 }

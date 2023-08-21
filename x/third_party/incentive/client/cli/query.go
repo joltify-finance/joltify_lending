@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/spf13/cobra"
 
@@ -31,7 +31,7 @@ var rewardTypes = []string{typeDelegator, typeJolt, typeUSDXMinting, typeSwap}
 // GetQueryCmd returns the cli query commands for the incentive module
 func GetQueryCmd() *cobra.Command {
 	incentiveQueryCmd := &cobra.Command{
-		Use:   types2.ModuleName,
+		Use:   types.ModuleName,
 		Short: "Querying commands for the incentive module",
 	}
 
@@ -68,11 +68,11 @@ func queryRewardsCmd() *cobra.Command {
 			$ %s query %s rewards --type jolt --ownerjolt16xjuwuy80gffg37ymkjfmafmf6k6e653cey7nn 
 			$ %s query %s rewards --type jolt --unsynced
 			`,
-				version.AppName, types2.ModuleName, version.AppName, types2.ModuleName,
-				version.AppName, types2.ModuleName, version.AppName, types2.ModuleName,
-				version.AppName, types2.ModuleName, version.AppName, types2.ModuleName,
-				version.AppName, types2.ModuleName, version.AppName, types2.ModuleName,
-				version.AppName, types2.ModuleName)),
+				version.AppName, types.ModuleName, version.AppName, types.ModuleName,
+				version.AppName, types.ModuleName, version.AppName, types.ModuleName,
+				version.AppName, types.ModuleName, version.AppName, types.ModuleName,
+				version.AppName, types.ModuleName, version.AppName, types.ModuleName,
+				version.AppName, types.ModuleName)),
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx, err := client.GetClientQueryContext(cmd)
@@ -96,7 +96,7 @@ func queryRewardsCmd() *cobra.Command {
 
 			switch strings.ToLower(strType) {
 			case typeJolt:
-				params := types2.NewQueryRewardsParams(page, limit, owner, boolUnsynced)
+				params := types.NewQueryRewardsParams(page, limit, owner, boolUnsynced)
 				claims, err := executeJoltRewardsQuery(cliCtx, params)
 				if err != nil {
 					return err
@@ -116,13 +116,13 @@ func queryRewardsCmd() *cobra.Command {
 			//		return err
 			//	}
 			//	return cliCtx.PrintObjectLegacy(claims)
-			// case typeSwap:
-			//	params := types.NewQueryRewardsParams(page, limit, owner, boolUnsynced)
-			//	claims, err := executeSwapRewardsQuery(cliCtx, params)
-			//	if err != nil {
-			//		return err
-			//	}
-			//	return cliCtx.PrintObjectLegacy(claims)
+			case typeSwap:
+				params := types.NewQueryRewardsParams(page, limit, owner, boolUnsynced)
+				claims, err := executeSwapRewardsQuery(cliCtx, params)
+				if err != nil {
+					return err
+				}
+				return cliCtx.PrintObjectLegacy(claims)
 			// case typeSavings:
 			//	params := types.NewQueryRewardsParams(page, limit, owner, boolUnsynced)
 			//	claims, err := executeSavingsRewardsQuery(cliCtx, params)
@@ -131,9 +131,13 @@ func queryRewardsCmd() *cobra.Command {
 			//	}
 			//	return cliCtx.PrintObjectLegacy(claims)
 			default:
-				params := types2.NewQueryRewardsParams(page, limit, owner, boolUnsynced)
+				params := types.NewQueryRewardsParams(page, limit, owner, boolUnsynced)
 
 				joltClaims, err := executeJoltRewardsQuery(cliCtx, params)
+				if err != nil {
+					return err
+				}
+				swapClaims, err := executeSwapRewardsQuery(cliCtx, params)
 				if err != nil {
 					return err
 				}
@@ -168,11 +172,12 @@ func queryRewardsCmd() *cobra.Command {
 				//		return err
 				//	}
 				//}
-				//if len(swapClaims) > 0 {
-				//	if err := cliCtx.PrintObjectLegacy(swapClaims); err != nil {
-				//		return err
-				//	}
-				//}
+				if len(swapClaims) > 0 {
+					fmt.Printf(">>>>>>%v\n", swapClaims[0].Reward)
+					if err := cliCtx.PrintObjectLegacy(swapClaims); err != nil {
+						return err
+					}
+				}
 				//if len(savingsClaims) > 0 {
 				//	if err := cliCtx.PrintObjectLegacy(savingsClaims); err != nil {
 				//		return err
@@ -203,7 +208,7 @@ func queryParamsCmd() *cobra.Command {
 			}
 
 			// Query
-			route := fmt.Sprintf("custom/%s/%s", types2.ModuleName, types2.QueryGetParams)
+			route := fmt.Sprintf("custom/%s/%s", types.ModuleName, types.QueryGetParams)
 			res, height, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err
@@ -211,7 +216,7 @@ func queryParamsCmd() *cobra.Command {
 			cliCtx = cliCtx.WithHeight(height)
 
 			// Decode and print results
-			var params types2.Params
+			var params types.Params
 			if err := cliCtx.LegacyAmino.UnmarshalJSON(res, &params); err != nil {
 				return fmt.Errorf("failed to unmarshal params: %w", err)
 			}
@@ -233,7 +238,7 @@ func queryRewardFactorsCmd() *cobra.Command {
 			}
 
 			// Execute query
-			route := fmt.Sprintf("custom/%s/%s", types2.ModuleName, types2.QueryGetRewardFactors)
+			route := fmt.Sprintf("custom/%s/%s", types.ModuleName, types.QueryGetRewardFactors)
 			res, height, err := cliCtx.QueryWithData(route, nil)
 			if err != nil {
 				return err
@@ -241,7 +246,7 @@ func queryRewardFactorsCmd() *cobra.Command {
 			cliCtx = cliCtx.WithHeight(height)
 
 			// Decode and print results
-			var response types2.QueryGetRewardFactorsResponse
+			var response types.QueryGetRewardFactorsResponse
 			if err := cliCtx.LegacyAmino.UnmarshalJSON(res, &response); err != nil {
 				return fmt.Errorf("failed to unmarshal reward factors: %w", err)
 			}
@@ -252,23 +257,45 @@ func queryRewardFactorsCmd() *cobra.Command {
 	return cmd
 }
 
-func executeJoltRewardsQuery(cliCtx client.Context, params types2.QueryRewardsParams) (types2.JoltLiquidityProviderClaims, error) {
+func executeJoltRewardsQuery(cliCtx client.Context, params types.QueryRewardsParams) (types.JoltLiquidityProviderClaims, error) {
 	bz, err := cliCtx.LegacyAmino.MarshalJSON(params)
 	if err != nil {
-		return types2.JoltLiquidityProviderClaims{}, err
+		return types.JoltLiquidityProviderClaims{}, err
 	}
 
-	route := fmt.Sprintf("custom/%s/%s", types2.ModuleName, types2.QueryGetJoltRewards)
+	route := fmt.Sprintf("custom/%s/%s", types.ModuleName, types.QueryGetJoltRewards)
 	res, height, err := cliCtx.QueryWithData(route, bz)
 	if err != nil {
-		return types2.JoltLiquidityProviderClaims{}, err
+		return types.JoltLiquidityProviderClaims{}, err
 	}
 
 	cliCtx = cliCtx.WithHeight(height)
 
-	var claims types2.JoltLiquidityProviderClaims
+	var claims types.JoltLiquidityProviderClaims
 	if err := cliCtx.LegacyAmino.UnmarshalJSON(res, &claims); err != nil {
-		return types2.JoltLiquidityProviderClaims{}, fmt.Errorf("failed to unmarshal claims: %w", err)
+		return types.JoltLiquidityProviderClaims{}, fmt.Errorf("failed to unmarshal claims: %w", err)
+	}
+
+	return claims, nil
+}
+
+func executeSwapRewardsQuery(cliCtx client.Context, params types.QueryRewardsParams) (types.SwapClaims, error) {
+	bz, err := cliCtx.LegacyAmino.MarshalJSON(params)
+	if err != nil {
+		return types.SwapClaims{}, err
+	}
+
+	route := fmt.Sprintf("custom/%s/%s", types.ModuleName, types.QueryGetSwapRewards)
+	res, height, err := cliCtx.QueryWithData(route, bz)
+	if err != nil {
+		return types.SwapClaims{}, err
+	}
+
+	cliCtx = cliCtx.WithHeight(height)
+
+	var claims types.SwapClaims
+	if err := cliCtx.LegacyAmino.UnmarshalJSON(res, &claims); err != nil {
+		return types.SwapClaims{}, fmt.Errorf("failed to unmarshal claims: %w", err)
 	}
 
 	return claims, nil

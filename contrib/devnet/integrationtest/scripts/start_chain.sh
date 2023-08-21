@@ -69,3 +69,14 @@ ret=$(joltify tx pricefeed postprice bnb:usd 233.0 253402300799 -y --from valida
     cecho "READ" "submit price failed with $ret"
     exit 1
   fi
+
+
+ret=$(joltify tx pricefeed postprice jolt:usd 0.1 253402300799 -y --from validator --output json)
+ code=$(echo $ret | jq -r '.code')
+  # check whether the return value of the function is 0
+  if [ $code -eq 0 ]; then
+    cecho "GREEN" "submit price done"
+  else
+    cecho "READ" "submit price failed with $ret"
+    exit 1
+  fi

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/spf13/cobra"
 
@@ -22,7 +22,7 @@ const (
 // GetTxCmd returns the transaction cli commands for the incentive module
 func GetTxCmd() *cobra.Command {
 	incentiveTxCmd := &cobra.Command{
-		Use:   types2.ModuleName,
+		Use:   types.ModuleName,
 		Short: "transaction commands for the incentive module",
 	}
 
@@ -30,7 +30,7 @@ func GetTxCmd() *cobra.Command {
 		// getCmdClaimCdp(),
 		getCmdClaimJolt(),
 		// getCmdClaimDelegator(),
-		// getCmdClaimSwap(),
+		getCmdClaimSwap(),
 		// getCmdClaimSavings(),
 	}
 
@@ -51,8 +51,8 @@ func getCmdClaimJolt() *cobra.Command {
 		Short: "claim sender's Jolt module rewards using given multipliers",
 		Long:  `Claim sender's outstanding Jolt rewards for deposit/borrow using given multipliers`,
 		Example: strings.Join([]string{
-			fmt.Sprintf(`  $ %s tx %s claim-jolt --%s jolt=large --%s ujolt=small`, version.AppName, types2.ModuleName, multiplierFlag, multiplierFlag),
-			fmt.Sprintf(`  $ %s tx %s claim-jolt --%s jolt=large,ujolt=small`, version.AppName, types2.ModuleName, multiplierFlag),
+			fmt.Sprintf(`  $ %s tx %s claim-jolt --%s jolt=large --%s ujolt=small`, version.AppName, types.ModuleName, multiplierFlag, multiplierFlag),
+			fmt.Sprintf(`  $ %s tx %s claim-jolt --%s jolt=large,ujolt=small`, version.AppName, types.ModuleName, multiplierFlag),
 		}, "\n"),
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -62,9 +62,44 @@ func getCmdClaimJolt() *cobra.Command {
 			}
 
 			sender := cliCtx.GetFromAddress()
-			selections := types2.NewSelectionsFromMap(denomsToClaim)
+			selections := types.NewSelectionsFromMap(denomsToClaim)
 
-			msg := types2.NewMsgClaimJoltReward(sender.String(), selections)
+			msg := types.NewMsgClaimJoltReward(sender.String(), selections)
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
+		},
+	}
+	cmd.Flags().StringToStringVarP(&denomsToClaim, multiplierFlag, multiplierFlagShort, nil, "specify the denoms to claim, each with a multiplier lockup")
+	if err := cmd.MarkFlagRequired(multiplierFlag); err != nil {
+		panic(err)
+	}
+	return cmd
+}
+
+func getCmdClaimSwap() *cobra.Command {
+	var denomsToClaim map[string]string
+
+	cmd := &cobra.Command{
+		Use:   "claim-swap",
+		Short: "claim sender's swap rewards using given multipliers",
+		Long:  `Claim sender's outstanding swap rewards using given multipliers`,
+		Example: strings.Join([]string{
+			fmt.Sprintf(`  $ %s tx %s claim-swap --%s swp=large --%s ukava=small`, version.AppName, types.ModuleName, multiplierFlag, multiplierFlag),
+			fmt.Sprintf(`  $ %s tx %s claim-swap --%s swp=large,ukava=small`, version.AppName, types.ModuleName, multiplierFlag),
+		}, "\n"),
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			sender := cliCtx.GetFromAddress()
+			selections := types.NewSelectionsFromMap(denomsToClaim)
+
+			msg := types.NewMsgClaimSwapReward(sender.String(), selections)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}

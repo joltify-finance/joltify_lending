@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 
 	sdkmath "cosmossdk.io/math"
 
@@ -237,6 +238,7 @@ func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.in
 func (tApp TestApp) GetEVMKeeper() evmkeeper.Keeper             { return *tApp.evmKeeper }
 func (tApp TestApp) GetEVMUtilKeeper() evmutilkeeper.Keeper     { return tApp.evmutilKeeper }
 func (tApp TestApp) GetFeeMarketKeeper() feemarketkeeper.Keeper { return tApp.feeMarketKeeper }
+func (tApp TestApp) GetSwapKeeper() swapkeeper.Keeper           { return tApp.swapKeeper }
 
 // LegacyAmino returns the app's amino codec.
 func (app *App) LegacyAmino() *codec.LegacyAmino {

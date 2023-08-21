@@ -37,3 +37,21 @@ func (k msgServer) ClaimJoltReward(goCtx context.Context, msg *types.MsgClaimJol
 
 	return &types.MsgClaimJoltRewardResponse{}, nil
 }
+
+func (k msgServer) ClaimSwapReward(goCtx context.Context, msg *types.MsgClaimSwapReward) (*types.MsgClaimSwapRewardResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	sender, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, selection := range msg.DenomsToClaim {
+		err := k.keeper.ClaimSwapReward(ctx, sender, sender, selection.Denom, selection.MultiplierName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &types.MsgClaimSwapRewardResponse{}, nil
+}
