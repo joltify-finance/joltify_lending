@@ -34,7 +34,11 @@ func (m msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, err
 	}
 
-	if err := m.keeper.Deposit(ctx, depositor, msg.TokenA, msg.TokenB, msg.Slippage); err != nil {
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil {
+		return nil, err
+	}
+	if err := m.keeper.Deposit(ctx, depositor, msg.TokenA, msg.TokenB, slippage); err != nil {
 		return nil, err
 	}
 
@@ -90,7 +94,11 @@ func (m msgServer) SwapExactForTokens(goCtx context.Context, msg *types.MsgSwapE
 		return nil, err
 	}
 
-	if err := m.keeper.SwapExactForTokens(ctx, requester, msg.ExactTokenA, msg.TokenB, msg.Slippage); err != nil {
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil {
+		return nil, err
+	}
+	if err := m.keeper.SwapExactForTokens(ctx, requester, msg.ExactTokenA, msg.TokenB, slippage); err != nil {
 		return nil, err
 	}
 
@@ -118,7 +126,12 @@ func (m msgServer) SwapForExactTokens(goCtx context.Context, msg *types.MsgSwapF
 		return nil, err
 	}
 
-	if err := m.keeper.SwapForExactTokens(ctx, requester, msg.TokenA, msg.ExactTokenB, msg.Slippage); err != nil {
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := m.keeper.SwapForExactTokens(ctx, requester, msg.TokenA, msg.ExactTokenB, slippage); err != nil {
 		return nil, err
 	}
 

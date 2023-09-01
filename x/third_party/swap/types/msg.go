@@ -38,7 +38,7 @@ type MsgWithDeadline interface {
 }
 
 // NewMsgDeposit returns a new MsgDeposit
-func NewMsgDeposit(depositor string, tokenA sdk.Coin, tokenB sdk.Coin, slippage sdk.Dec, deadline int64) *MsgDeposit {
+func NewMsgDeposit(depositor string, tokenA sdk.Coin, tokenB sdk.Coin, slippage string, deadline int64) *MsgDeposit {
 	return &MsgDeposit{
 		Depositor: depositor,
 		TokenA:    tokenA,
@@ -76,12 +76,13 @@ func (msg MsgDeposit) ValidateBasic() error {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, "denominations can not be equal")
 	}
 
-	if msg.Slippage.IsNil() {
+	if msg.Slippage == "" {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	if msg.Slippage.IsNegative() {
-		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage can not be negative")
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil || slippage.IsNegative() {
+		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}
 
 	if msg.Deadline <= 0 {
@@ -190,7 +191,7 @@ func (msg MsgWithdraw) DeadlineExceeded(blockTime time.Time) bool {
 }
 
 // NewMsgSwapExactForTokens returns a new MsgSwapExactForTokens
-func NewMsgSwapExactForTokens(requester string, exactTokenA sdk.Coin, tokenB sdk.Coin, slippage sdk.Dec, deadline int64) *MsgSwapExactForTokens {
+func NewMsgSwapExactForTokens(requester string, exactTokenA sdk.Coin, tokenB sdk.Coin, slippage string, deadline int64) *MsgSwapExactForTokens {
 	return &MsgSwapExactForTokens{
 		Requester:   requester,
 		ExactTokenA: exactTokenA,
@@ -228,12 +229,13 @@ func (msg MsgSwapExactForTokens) ValidateBasic() error {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, "denominations can not be equal")
 	}
 
-	if msg.Slippage.IsNil() {
+	if msg.Slippage == "" {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	if msg.Slippage.IsNegative() {
-		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage can not be negative")
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil || slippage.IsNegative() {
+		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}
 
 	if msg.Deadline <= 0 {
@@ -266,7 +268,7 @@ func (msg MsgSwapExactForTokens) DeadlineExceeded(blockTime time.Time) bool {
 }
 
 // NewMsgSwapForExactTokens returns a new MsgSwapForExactTokens
-func NewMsgSwapForExactTokens(requester string, tokenA sdk.Coin, exactTokenB sdk.Coin, slippage sdk.Dec, deadline int64) *MsgSwapForExactTokens {
+func NewMsgSwapForExactTokens(requester string, tokenA sdk.Coin, exactTokenB sdk.Coin, slippage string, deadline int64) *MsgSwapForExactTokens {
 	return &MsgSwapForExactTokens{
 		Requester:   requester,
 		TokenA:      tokenA,
@@ -304,12 +306,13 @@ func (msg MsgSwapForExactTokens) ValidateBasic() error {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, "denominations can not be equal")
 	}
 
-	if msg.Slippage.IsNil() {
+	if msg.Slippage == "" {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	if msg.Slippage.IsNegative() {
-		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage can not be negative")
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil || slippage.IsNegative() {
+		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}
 
 	if msg.Deadline <= 0 {

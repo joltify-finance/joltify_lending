@@ -30,11 +30,7 @@ message MsgDeposit {
   // token_b represents one token of deposit pair
   cosmos.base.v1beta1.Coin token_b = 3 [(gogoproto.nullable) = false];
   // slippage represents the max decimal percentage price change
-  string slippage = 4 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
-  ];
+  string slippage = 4;
   // deadline represents the unix timestamp to complete the deposit by
   int64 deadline = 5;
 }
@@ -75,11 +71,7 @@ message MsgSwapExactForTokens {
   // token_b represents the desired token_b to swap for
   cosmos.base.v1beta1.Coin token_b = 3 [(gogoproto.nullable) = false];
   // slippage represents the maximum change in token_b allowed
-  string slippage = 4 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
-  ];
+  string slippage = 4;
   // deadline represents the unix timestamp to complete the swap by
   int64 deadline = 5;
 }
@@ -100,11 +92,7 @@ message MsgSwapForExactTokens {
   // exact_token_b represents the exact token b amount to swap for token a
   cosmos.base.v1beta1.Coin exact_token_b = 3 [(gogoproto.nullable) = false];
   // slippage represents the maximum change in token_a allowed
-  string slippage = 4 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
-  ];
+  string slippage = 4;
   // deadline represents the unix timestamp to complete the swap by
   int64 deadline = 5;
 }

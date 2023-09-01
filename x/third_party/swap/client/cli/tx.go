@@ -67,18 +67,13 @@ func getCmdDeposit() *cobra.Command {
 				return err
 			}
 
-			slippage, err := sdk.NewDecFromStr(args[2])
-			if err != nil {
-				return err
-			}
-
 			deadline, err := strconv.ParseInt(args[3], 10, 64)
 			if err != nil {
 				return err
 			}
 
 			signer := clientCtx.GetFromAddress()
-			msg := types.NewMsgDeposit(signer.String(), tokenA, tokenB, slippage, deadline)
+			msg := types.NewMsgDeposit(signer.String(), tokenA, tokenB, args[2], deadline)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -160,18 +155,13 @@ func getCmdSwapExactForTokens() *cobra.Command {
 				return err
 			}
 
-			slippage, err := sdk.NewDecFromStr(args[2])
-			if err != nil {
-				return err
-			}
-
 			deadline, err := strconv.ParseInt(args[3], 10, 64)
 			if err != nil {
 				return err
 			}
 
 			fromAddr := clientCtx.GetFromAddress()
-			msg := types.NewMsgSwapExactForTokens(fromAddr.String(), exactTokenA, tokenB, slippage, deadline)
+			msg := types.NewMsgSwapExactForTokens(fromAddr.String(), exactTokenA, tokenB, args[2], deadline)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -206,18 +196,13 @@ func getCmdSwapForExactTokens() *cobra.Command {
 				return err
 			}
 
-			slippage, err := sdk.NewDecFromStr(args[2])
-			if err != nil {
-				return err
-			}
-
 			deadline, err := strconv.ParseInt(args[3], 10, 64)
 			if err != nil {
 				return err
 			}
 
 			fromAddr := clientCtx.GetFromAddress()
-			msg := types.NewMsgSwapForExactTokens(fromAddr.String(), tokenA, exactTokenB, slippage, deadline)
+			msg := types.NewMsgSwapForExactTokens(fromAddr.String(), tokenA, exactTokenB, args[2], deadline)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
