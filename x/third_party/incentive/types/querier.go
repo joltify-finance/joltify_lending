@@ -8,7 +8,6 @@ import (
 const (
 	QueryGetJoltRewards   = "jolt-rewards"
 	QueryGetRewardFactors = "reward-factors"
-	QueryGetSwapRewards   = "swap-rewards"
 	QueryGetParams        = "parameters"
 )
 
@@ -34,16 +33,14 @@ func NewQueryRewardsParams(page, limit int, owner sdk.AccAddress, unsynchronized
 type QueryGetRewardFactorsResponse struct {
 	JoltSupplyRewardFactors MultiRewardIndexes `json:"jolt_supply_reward_factors" yaml:"jolt_supply_reward_factors"`
 	JoltBorrowRewardFactors MultiRewardIndexes `json:"jolt_borrow_reward_factors" yaml:"jolt_borrow_reward_factors"`
-	SwapRewardFactors       MultiRewardIndexes `json:"swap_reward_factors" yaml:"swap_reward_factors"`
 }
 
 // NewQueryGetRewardFactorsResponse returns a new instance of QueryAllRewardFactorsResponse
 func NewQueryGetRewardFactorsResponse(supplyFactors,
-	joltBorrowFactors, swapFactors MultiRewardIndexes,
+	joltBorrowFactors MultiRewardIndexes,
 ) QueryGetRewardFactorsResponse {
 	return QueryGetRewardFactorsResponse{
 		JoltSupplyRewardFactors: supplyFactors,
 		JoltBorrowRewardFactors: joltBorrowFactors,
-		SwapRewardFactors:       swapFactors,
 	}
 }

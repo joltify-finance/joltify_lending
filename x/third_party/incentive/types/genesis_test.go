@@ -18,7 +18,6 @@ func TestGenesisState_Validate(t *testing.T) {
 	pa := NewParams(
 		DefaultMultiRewardPeriods,
 		DefaultMultiRewardPeriods,
-		DefaultMultiRewardPeriods,
 		MultipliersPerDenoms{
 			{
 				Denom: "ujolt",

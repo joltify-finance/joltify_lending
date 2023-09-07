@@ -7,7 +7,6 @@ import (
 
 var (
 	DefaultJoltClaims         = JoltLiquidityProviderClaims{}
-	DefaultSwapClaims         = SwapClaims{}
 	DefaultGenesisRewardState = NewGenesisRewardState(
 		AccumulationTimes{},
 		MultiRewardIndexes{},
@@ -17,17 +16,15 @@ var (
 // NewGenesisState returns a new genesis state
 func NewGenesisState(
 	params Params,
-	joltSupplyState, joltBorrowState, swapState GenesisRewardState,
-	hc JoltLiquidityProviderClaims, sc SwapClaims,
+	joltSupplyState, joltBorrowState GenesisRewardState,
+	hc JoltLiquidityProviderClaims,
 ) GenesisState {
 	return GenesisState{
 		Params: params,
 
 		JoltSupplyRewardState:       joltSupplyState,
 		JoltBorrowRewardState:       joltBorrowState,
-		SwapRewardState:             swapState,
 		JoltLiquidityProviderClaims: hc,
-		SwapClaims:                  sc,
 	}
 }
 

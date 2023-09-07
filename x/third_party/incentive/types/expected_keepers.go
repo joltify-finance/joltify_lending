@@ -1,7 +1,6 @@
 package types
 
 import (
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -48,10 +47,4 @@ type JOLTHooks interface {
 	AfterBorrowCreated(ctx sdk.Context, borrow jolttypes.Borrow)
 	BeforeBorrowModified(ctx sdk.Context, borrow jolttypes.Borrow)
 	AfterBorrowModified(ctx sdk.Context, deposit jolttypes.Deposit)
-}
-
-// SwapKeeper defines the required methods needed by this modules keeper
-type SwapKeeper interface {
-	GetPoolShares(ctx sdk.Context, poolID string) (shares sdkmath.Int, found bool)
-	GetDepositorSharesAmount(ctx sdk.Context, depositor sdk.AccAddress, poolID string) (shares sdkmath.Int, found bool)
 }

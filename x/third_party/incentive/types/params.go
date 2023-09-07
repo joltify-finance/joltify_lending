@@ -16,7 +16,6 @@ var (
 	KeyJoltBorrowRewardPeriods = []byte("JoltBorrowRewardPeriods")
 	KeyClaimEnd                = []byte("ClaimEnd")
 	KeyMultipliers             = []byte("ClaimMultipliers")
-	KeySwapRewardPeriods       = []byte("SwapRewardPeriods")
 
 	DefaultMultiRewardPeriods = MultiRewardPeriods{}
 	DefaultMultipliers        = MultipliersPerDenoms{}
@@ -28,12 +27,11 @@ var (
 )
 
 // NewParams returns a new params object
-func NewParams(joltSupply, joltBorrow, swap MultiRewardPeriods, multipliers MultipliersPerDenoms, claimEnd time.Time,
+func NewParams(joltSupply, joltBorrow MultiRewardPeriods, multipliers MultipliersPerDenoms, claimEnd time.Time,
 ) Params {
 	return Params{
 		JoltSupplyRewardPeriods: joltSupply,
 		JoltBorrowRewardPeriods: joltBorrow,
-		SwapRewardPeriods:       swap,
 		ClaimMultipliers:        multipliers,
 		ClaimEnd:                claimEnd,
 	}
@@ -42,22 +40,16 @@ func NewParams(joltSupply, joltBorrow, swap MultiRewardPeriods, multipliers Mult
 // DefaultParams returns default params for incentive module
 func DefaultParams() Params {
 	params := NewParams(
-		//suply
 		MultiRewardPeriods{
-			//NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(500)))),
-			//NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(277)))),
+			// NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(500)))),
+			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(277)))),
 		},
-		//borrow
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
 			NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 			NewMultiRewardPeriod(true, "ausdc", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 		},
-		//swap
-		MultiRewardPeriods{
-			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
-			NewMultiRewardPeriod(true, "abnb:ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
-		},
+
 		MultipliersPerDenoms{
 			{
 				Denom: "ujolt",
@@ -83,7 +75,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyJoltBorrowRewardPeriods, &p.JoltBorrowRewardPeriods, validateMultiRewardPeriodsParam),
 		paramtypes.NewParamSetPair(KeyMultipliers, &p.ClaimMultipliers, validateMultipliersPerDenomParam),
 		paramtypes.NewParamSetPair(KeyClaimEnd, &p.ClaimEnd, validateClaimEndParam),
-		paramtypes.NewParamSetPair(KeySwapRewardPeriods, &p.SwapRewardPeriods, validateMultiRewardPeriodsParam),
 	}
 }
 
@@ -102,6 +93,15 @@ func (p Params) Validate() error {
 	}
 
 	return nil
+}
+
+func validateRewardPeriodsParam(i interface{}) error {
+	rewards, ok := i.(RewardPeriods)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	return rewards.Validate()
 }
 
 func validateMultiRewardPeriodsParam(i interface{}) error {

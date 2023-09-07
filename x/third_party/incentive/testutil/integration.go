@@ -77,8 +77,8 @@ func (suite *IntegrationTester) DeliverIncentiveMsg(msg sdk.Msg) error {
 	switch msg := msg.(type) {
 	case *types.MsgClaimJoltReward:
 		_, err = msgServer.ClaimJoltReward(sdk.WrapSDKContext(suite.Ctx), msg)
-	case *types.MsgClaimSwapReward:
-		_, err = msgServer.ClaimSwapReward(sdk.WrapSDKContext(suite.Ctx), msg)
+		//	case *types.MsgClaimSwapReward:
+		//		_, err = msgServer.ClaimSwapReward(sdk.WrapSDKContext(suite.Ctx), msg)
 		//	case *types.MsgClaimUSDXMintingReward:
 		//		_, err = msgServer.ClaimUSDXMintingReward(sdk.WrapSDKContext(suite.Ctx), msg)
 	// case *types.MsgClaimDelegatorReward:

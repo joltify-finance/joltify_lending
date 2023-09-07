@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
-	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
+	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -20,17 +20,17 @@ var EarliestValidAccumulationTime = year
 func InitGenesis(
 	ctx sdk.Context,
 	k keeper.Keeper,
-	accountKeeper types.AccountKeeper,
-	gs types.GenesisState,
+	accountKeeper types2.AccountKeeper,
+	gs types2.GenesisState,
 ) {
 	// check if the module account exists
-	moduleAcc := accountKeeper.GetModuleAccount(ctx, types.IncentiveMacc)
+	moduleAcc := accountKeeper.GetModuleAccount(ctx, types2.IncentiveMacc)
 	if moduleAcc == nil {
-		panic(fmt.Sprintf("%s module account has not been set", types.IncentiveMacc))
+		panic(fmt.Sprintf("%s module account has not been set", types2.IncentiveMacc))
 	}
 
 	if err := gs.Validate(); err != nil {
-		panic(fmt.Sprintf("failed to validate %s genesis state: %s", types.ModuleName, err))
+		panic(fmt.Sprintf("failed to validate %s genesis state: %s", types2.ModuleName, err))
 	}
 
 	// TODO more param validation?
@@ -42,7 +42,7 @@ func InitGenesis(
 		k.SetJoltLiquidityProviderClaim(ctx, claim)
 	}
 	for _, gat := range gs.JoltSupplyRewardState.AccumulationTimes {
-		if err := ValidateAccumulationTime(gat.PreviousAccumulationTime); err != nil {
+		if err := ValidateAccumulationTime(gat.PreviousAccumulationTime, ctx.BlockTime()); err != nil {
 			panic(err.Error())
 		}
 		k.SetPreviousJoltSupplyRewardAccrualTime(ctx, gat.CollateralType, gat.PreviousAccumulationTime)
@@ -51,7 +51,7 @@ func InitGenesis(
 		k.SetJoltSupplyRewardIndexes(ctx, mri.CollateralType, mri.RewardIndexes)
 	}
 	for _, gat := range gs.JoltBorrowRewardState.AccumulationTimes {
-		if err := ValidateAccumulationTime(gat.PreviousAccumulationTime); err != nil {
+		if err := ValidateAccumulationTime(gat.PreviousAccumulationTime, ctx.BlockTime()); err != nil {
 			panic(err.Error())
 		}
 		k.SetPreviousJoltBorrowRewardAccrualTime(ctx, gat.CollateralType, gat.PreviousAccumulationTime)
@@ -59,99 +59,61 @@ func InitGenesis(
 	for _, mri := range gs.JoltBorrowRewardState.MultiRewardIndexes {
 		k.SetJoltBorrowRewardIndexes(ctx, mri.CollateralType, mri.RewardIndexes)
 	}
-
-	// Swap
-	for _, claim := range gs.SwapClaims {
-		k.SetSwapClaim(ctx, claim)
-	}
-	for _, gat := range gs.SwapRewardState.AccumulationTimes {
-		if err := ValidateAccumulationTime(gat.PreviousAccumulationTime); err != nil {
-			panic(err.Error())
-		}
-		k.SetSwapRewardAccrualTime(ctx, gat.CollateralType, gat.PreviousAccumulationTime)
-	}
-	for _, mri := range gs.SwapRewardState.MultiRewardIndexes {
-		k.SetSwapRewardIndexes(ctx, mri.CollateralType, mri.RewardIndexes)
-	}
-}
-
-func getSwapGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {
-	var ats types.AccumulationTimes
-	keeper.IterateSwapRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
-		ats = append(ats, types.NewAccumulationTime(ctype, accTime))
-		return false
-	})
-
-	var mris types.MultiRewardIndexes
-	keeper.IterateSwapRewardIndexes(ctx, func(ctype string, indexes types.RewardIndexes) bool {
-		mris = append(mris, types.NewMultiRewardIndex(ctype, indexes))
-		return false
-	})
-
-	return types.NewGenesisRewardState(ats, mris)
 }
 
 // ExportGenesis export genesis state for incentive module
-func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types.GenesisState {
+func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types2.GenesisState {
 	params := k.GetParams(ctx)
 
 	joltClaims := k.GetAllJoltLiquidityProviderClaims(ctx)
 	joltSupplyRewardState := getJoltSupplyGenesisRewardState(ctx, k)
 	joltBorrowRewardState := getJoltBorrowGenesisRewardState(ctx, k)
 
-	swapClaims := k.GetAllSwapClaims(ctx)
-	swapRewardState := getSwapGenesisRewardState(ctx, k)
-
-	return types.NewGenesisState(
-		params, joltSupplyRewardState, joltBorrowRewardState, swapRewardState, joltClaims, swapClaims,
+	return types2.NewGenesisState(
+		params, joltSupplyRewardState, joltBorrowRewardState, joltClaims,
 	)
 }
 
-func getJoltSupplyGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {
-	var ats types.AccumulationTimes
+func getJoltSupplyGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types2.GenesisRewardState {
+	var ats types2.AccumulationTimes
 	keeper.IterateJoltSupplyRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
-		ats = append(ats, types.NewAccumulationTime(ctype, accTime))
+		ats = append(ats, types2.NewAccumulationTime(ctype, accTime))
 		return false
 	})
 
-	var mris types.MultiRewardIndexes
-	keeper.IterateJoltSupplyRewardIndexes(ctx, func(ctype string, indexes types.RewardIndexes) bool {
-		mris = append(mris, types.NewMultiRewardIndex(ctype, indexes))
+	var mris types2.MultiRewardIndexes
+	keeper.IterateJoltSupplyRewardIndexes(ctx, func(ctype string, indexes types2.RewardIndexes) bool {
+		mris = append(mris, types2.NewMultiRewardIndex(ctype, indexes))
 		return false
 	})
 
-	return types.NewGenesisRewardState(ats, mris)
+	return types2.NewGenesisRewardState(ats, mris)
 }
 
-func getJoltBorrowGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {
-	var ats types.AccumulationTimes
+func getJoltBorrowGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types2.GenesisRewardState {
+	var ats types2.AccumulationTimes
 	keeper.IterateJoltBorrowRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
-		ats = append(ats, types.NewAccumulationTime(ctype, accTime))
+		ats = append(ats, types2.NewAccumulationTime(ctype, accTime))
 		return false
 	})
 
-	var mris types.MultiRewardIndexes
-	keeper.IterateJoltBorrowRewardIndexes(ctx, func(ctype string, indexes types.RewardIndexes) bool {
-		mris = append(mris, types.NewMultiRewardIndex(ctype, indexes))
+	var mris types2.MultiRewardIndexes
+	keeper.IterateJoltBorrowRewardIndexes(ctx, func(ctype string, indexes types2.RewardIndexes) bool {
+		mris = append(mris, types2.NewMultiRewardIndex(ctype, indexes))
 		return false
 	})
 
-	return types.NewGenesisRewardState(ats, mris)
+	return types2.NewGenesisRewardState(ats, mris)
 }
 
-func ValidateAccumulationTime(previousAccumulationTime time.Time) error {
-	//if previousAccumulationTime.Before(genesisTime.Add(-1 * EarliestValidAccumulationTime)) {
-	//	return fmt.Errorf(
-	//		"found accumulation time '%s' more than '%s' behind genesis time '%s'",
-	//		previousAccumulationTime,
-	//		EarliestValidAccumulationTime,
-	//		genesisTime,
-	//	)
-	//}
-	if previousAccumulationTime.Equal(time.Time{}) {
-		return fmt.Errorf("accumulation time is not set")
+func ValidateAccumulationTime(previousAccumulationTime, genesisTime time.Time) error {
+	if previousAccumulationTime.Before(genesisTime.Add(-1 * EarliestValidAccumulationTime)) {
+		return fmt.Errorf(
+			"found accumulation time '%s' more than '%s' behind genesis time '%s'",
+			previousAccumulationTime,
+			EarliestValidAccumulationTime,
+			genesisTime,
+		)
 	}
-	return nil
-
 	return nil
 }

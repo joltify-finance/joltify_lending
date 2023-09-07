@@ -54,11 +54,6 @@ message QueryRewardsResponse {
     (gogoproto.nullable) = false
   ];
 
-  repeated SwapClaim swap_claims = 4 [
-    (gogoproto.castrepeated) = "SwapClaims",
-    (gogoproto.nullable) = false
-  ];
-
 }
 
 // QueryRewardFactorsRequest is the request type for the Query/RewardFactors RPC method.
@@ -71,11 +66,6 @@ message QueryRewardFactorsResponse {
     (gogoproto.nullable) = false
   ];
   repeated MultiRewardIndex jolt_borrow_reward_factors = 2 [
-    (gogoproto.castrepeated) = "MultiRewardIndexes",
-    (gogoproto.nullable) = false
-  ];
-
-  repeated MultiRewardIndex swap_reward_factors = 4 [
     (gogoproto.castrepeated) = "MultiRewardIndexes",
     (gogoproto.nullable) = false
   ];

@@ -36,7 +36,7 @@ unit-test-job:   # This job runs in the test stage.
   coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
   script:
     - go install gotest.tools/gotestsum@latest
-    - gotestsum  --junitfile report.xml --format testname  -- -coverprofile=coverage.out -timeout 25m ./...
+    - gotestsum  --junitfile report.xml --format testname  -- -coverprofile=coverage.out -timeout 15m ./...
     - cat coverage.out | grep -v ".pb.go"|grep -v ".gw.go" > cover.out
     - go tool cover -func=cover.out
   artifacts:
