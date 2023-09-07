@@ -4777,7 +4777,7 @@ paths:
           type: boolean
       tags:
         - Jolt
-  /kava/swap/v1beta1/deposits:
+  /joltify/swap/v1beta1/deposits:
     get:
       summary: Deposits queries deposit details based on owner address and pool
       operationId: swapDeposits
@@ -4943,7 +4943,7 @@ paths:
           type: boolean
       tags:
         - Swap
-  /kava/swap/v1beta1/params:
+  /joltify/swap/v1beta1/params:
     get:
       summary: Params queries all parameters of the swap module.
       operationId: swapParams
@@ -5003,7 +5003,7 @@ paths:
                       format: byte
       tags:
         - Swap
-  /kava/swap/v1beta1/pools:
+  /joltify/swap/v1beta1/pools:
     get:
       summary: Pools queries pools based on pool ID
       operationId: swapPools
