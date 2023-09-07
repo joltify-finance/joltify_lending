@@ -14,15 +14,15 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/sw
 service Query {
   // Params queries all parameters of the swap module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/kava/swap/v1beta1/params";
+    option (google.api.http).get = "/joltify/swap/v1beta1/params";
   }
   // Pools queries pools based on pool ID
   rpc Pools(QueryPoolsRequest) returns (QueryPoolsResponse) {
-    option (google.api.http).get = "/kava/swap/v1beta1/pools";
+    option (google.api.http).get = "/joltify/swap/v1beta1/pools";
   }
   // Deposits queries deposit details based on owner address and pool
   rpc Deposits(QueryDepositsRequest) returns (QueryDepositsResponse) {
-    option (google.api.http).get = "/kava/swap/v1beta1/deposits";
+    option (google.api.http).get = "/joltify/swap/v1beta1/deposits";
   }
 }
 
