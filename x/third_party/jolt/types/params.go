@@ -323,8 +323,46 @@ func DefaultParams() Params {
 		sdk.MustNewDecFromStr("0.02"),
 	)
 
+	m7 := NewMoneyMarket(
+		"aeth",
+		NewBorrowLimit(
+			false,
+			sdk.NewDec(1e15),
+			loanToValue,
+		),
+		"bnb:usd",
+		sdk.NewInt(1e18),
+		NewInterestRateModel(
+			sdk.MustNewDecFromStr("0.0"),
+			sdk.MustNewDecFromStr("0.02"),
+			sdk.MustNewDecFromStr("0.8"),
+			sdk.MustNewDecFromStr("5"),
+		),
+		sdk.MustNewDecFromStr("0.02"),
+		sdk.MustNewDecFromStr("0.02"),
+	)
+
+	m8 := NewMoneyMarket(
+		"abtc",
+		NewBorrowLimit(
+			false,
+			sdk.NewDec(1e15),
+			loanToValue,
+		),
+		"bnb:usd",
+		sdk.NewInt(1e18),
+		NewInterestRateModel(
+			sdk.MustNewDecFromStr("0.0"),
+			sdk.MustNewDecFromStr("0.02"),
+			sdk.MustNewDecFromStr("0.8"),
+			sdk.MustNewDecFromStr("5"),
+		),
+		sdk.MustNewDecFromStr("0.02"),
+		sdk.MustNewDecFromStr("0.02"),
+	)
+
 	params := NewParams(
-		MoneyMarkets{m1, m2, m3, m4, m5, m6},
+		MoneyMarkets{m1, m2, m3, m4, m5, m6, m7, m8},
 		sdk.NewDec(10),
 	)
 

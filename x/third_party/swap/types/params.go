@@ -12,9 +12,17 @@ import (
 var (
 	KeyAllowedPools     = []byte("AllowedPools")
 	KeySwapFee          = []byte("SwapFee")
-	DefaultAllowedPools = AllowedPools{AllowedPool{"abnb", "ujolt"}}
-	DefaultSwapFee      = sdk.ZeroDec()
-	MaxSwapFee          = sdk.OneDec()
+	DefaultAllowedPools = AllowedPools{
+		AllowedPool{"abnb", "aswap"},
+		AllowedPool{"aswap", "ausdt"},
+		AllowedPool{"aswap", "ausdc"},
+		AllowedPool{"aeth", "aswap"},
+		AllowedPool{"abtc", "aswap"},
+		AllowedPool{"aswap", "ujolt"},
+		AllowedPool{"aswap", "uatom"},
+	}
+	DefaultSwapFee = sdk.MustNewDecFromStr("0.02")
+	MaxSwapFee     = sdk.OneDec()
 )
 
 // NewParams returns a new params object
