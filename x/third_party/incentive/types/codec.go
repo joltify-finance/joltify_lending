@@ -13,11 +13,13 @@ import (
 // governance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgClaimJoltReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimJoltReward", nil)
+	cdc.RegisterConcrete(&MsgClaimSwapReward{}, "incentive/MsgClaimSwapReward", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgClaimJoltReward{},
+		&MsgClaimSwapReward{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

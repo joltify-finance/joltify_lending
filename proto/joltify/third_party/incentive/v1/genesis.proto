@@ -37,7 +37,13 @@ message GenesisState {
 
   GenesisRewardState jolt_borrow_reward_state = 3 [(gogoproto.nullable) = false];
 
-  repeated JoltLiquidityProviderClaim jolt_liquidity_provider_claims = 4
+  GenesisRewardState swap_reward_state = 4 [(gogoproto.nullable) = false];
+
+  repeated JoltLiquidityProviderClaim jolt_liquidity_provider_claims = 5
       [(gogoproto.castrepeated) = "JoltLiquidityProviderClaims", (gogoproto.nullable) = false];
 
+  repeated SwapClaim swap_claims = 6 [
+    (gogoproto.castrepeated) = "SwapClaims",
+    (gogoproto.nullable) = false
+  ];
 }

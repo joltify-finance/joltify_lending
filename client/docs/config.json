@@ -45,6 +45,23 @@
       }
     },
     {
+      "url": "./tmp-swagger-gen/joltify/third_party/swap/v1beta1/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "Swap"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "swap$1"
+          }
+        ]
+      }
+    },
+    {
       "url": "./tmp-swagger-gen/joltify/third_party/pricefeed/v1beta1/query.swagger.json",
       "tags": {
         "rename": {

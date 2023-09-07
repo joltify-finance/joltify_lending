@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/evmos/ethermint/x/evm/vm/geth"
+	"github.com/joltify-finance/joltify_lending/x/third_party/swap"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil"
 	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
@@ -50,6 +51,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
 	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
+	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
+	swaptypes "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
 	vaultmoduletypes "github.com/joltify-finance/joltify_lending/x/vault/types"
 
@@ -183,6 +186,7 @@ var (
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
 		evmutil.AppModuleBasic{},
+		swap.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -207,6 +211,7 @@ var (
 		nftmoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		evmtypes.ModuleName:          {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 		evmutiltypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
+		swaptypes.ModuleName:         nil,
 	}
 )
 
@@ -276,6 +281,7 @@ type App struct {
 	kycKeeper       kycmodulekeeper.Keeper
 	spvKeeper       spvmodulekeeper.Keeper
 	nftKeeper       nftmodulekeeper.Keeper
+	swapKeeper      swapkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -355,6 +361,7 @@ func NewApp(
 		evmtypes.StoreKey,
 		feemarkettypes.StoreKey,
 		evmutiltypes.StoreKey,
+		swaptypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -398,6 +405,7 @@ func NewApp(
 	evmSubspace := app.paramsKeeper.Subspace(evmtypes.ModuleName)
 	feemarketSubspace := app.paramsKeeper.Subspace(feemarkettypes.ModuleName)
 	evmutilSubspace := app.paramsKeeper.Subspace(evmutiltypes.ModuleName)
+	swapSubspace := app.paramsKeeper.Subspace(swaptypes.ModuleName)
 
 	bApp.SetParamStore(
 		app.paramsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable()),
@@ -538,6 +546,14 @@ func NewApp(
 		app.auctionKeeper,
 	)
 
+	mSwapKeeper := swapkeeper.NewKeeper(
+		appCodec,
+		keys[swaptypes.StoreKey],
+		swapSubspace,
+		app.accountKeeper,
+		app.bankKeeper,
+	)
+
 	app.incentiveKeeper = incentivekeeper.NewKeeper(
 		appCodec,
 		keys[incentivetypes.StoreKey],
@@ -546,7 +562,10 @@ func NewApp(
 		// &cdpKeeper,
 		&joltKeeper,
 		app.accountKeeper,
+		mSwapKeeper,
 	)
+
+	app.swapKeeper = *mSwapKeeper.SetHooks(app.incentiveKeeper.Hooks())
 
 	app.VaultKeeper = *vaultmodulekeeper.NewKeeper(
 		appCodec,
@@ -593,7 +612,6 @@ func NewApp(
 	)
 
 	app.evmutilKeeper.SetEvmKeeper(app.evmKeeper)
-
 	// Note: the committee proposal handler is not registered on the committee router. This means committees cannot create or update other committees.
 	// Adding the committee proposal handler to the router is possible but awkward as the handler depends on the keeper which depends on the handler.
 
@@ -662,6 +680,7 @@ func NewApp(
 		evm.NewAppModule(app.evmKeeper, app.accountKeeper, evmSubspace),
 		feemarket.NewAppModule(app.feeMarketKeeper, feemarketSubspace),
 		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper, app.accountKeeper),
+		swap.NewAppModule(app.swapKeeper, app.accountKeeper),
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -687,6 +706,7 @@ func NewApp(
 		auctiontypes.ModuleName,
 		// cdptypes.ModuleName,
 		jolttypes.ModuleName,
+		swaptypes.ModuleName,
 		// issuancetypes.ModuleName,
 		incentivetypes.ModuleName,
 		vaultmoduletypes.ModuleName,
@@ -726,6 +746,7 @@ func NewApp(
 		auctiontypes.ModuleName,
 		// cdptypes.ModuleName,
 		jolttypes.ModuleName,
+		swaptypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
@@ -766,6 +787,7 @@ func NewApp(
 		pricefeedtypes.ModuleName,
 		// cdptypes.ModuleName, // reads market prices, so must run after pricefeed genesis
 		jolttypes.ModuleName,
+		swaptypes.ModuleName,
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,

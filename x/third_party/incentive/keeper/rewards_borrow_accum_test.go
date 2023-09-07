@@ -38,8 +38,8 @@ func TestAccumulateBorrowRewards(t *testing.T) {
 func (suite *AccumulateBorrowRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil)
 
 	suite.storeGlobalBorrowIndexes(types2.MultiRewardIndexes{
 		{
@@ -90,8 +90,8 @@ func (suite *AccumulateBorrowRewardsTests) TestStateUpdatedWhenBlockTimeHasIncre
 func (suite *AccumulateBorrowRewardsTests) TestStateUnchangedWhenBlockTimeHasNotIncreased() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil)
 
 	previousIndexes := types2.MultiRewardIndexes{
 		{
@@ -135,8 +135,8 @@ func (suite *AccumulateBorrowRewardsTests) TestStateUnchangedWhenBlockTimeHasNot
 func (suite *AccumulateBorrowRewardsTests) TestNoAccumulationWhenSourceSharesAreZero() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper() // zero total borrows
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper() // zero total borrows
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil)
 
 	previousIndexes := types2.MultiRewardIndexes{
 		{
@@ -181,8 +181,8 @@ func (suite *AccumulateBorrowRewardsTests) TestNoAccumulationWhenSourceSharesAre
 func (suite *AccumulateBorrowRewardsTests) TestStateAddedWhenStateDoesNotExist() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -224,8 +224,8 @@ func (suite *AccumulateBorrowRewardsTests) TestStateAddedWhenStateDoesNotExist()
 func (suite *AccumulateBorrowRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper()
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper()
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -252,8 +252,8 @@ func (suite *AccumulateBorrowRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 func (suite *AccumulateBorrowRewardsTests) TestNoAccumulationWhenBeforeStartTime() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil)
 
 	previousIndexes := types2.MultiRewardIndexes{
 		{
@@ -298,8 +298,8 @@ func (suite *AccumulateBorrowRewardsTests) TestNoAccumulationWhenBeforeStartTime
 func (suite *AccumulateBorrowRewardsTests) TestPanicWhenCurrentTimeLessThanPrevious() {
 	denom := "bnb"
 
-	hardKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, hardKeeper, nil)
+	joltKeeper := newFakeHardKeeper().addTotalBorrow(c(denom, 1e6), d("1"))
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil)
 
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
 	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
