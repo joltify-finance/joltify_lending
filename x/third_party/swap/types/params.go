@@ -20,6 +20,9 @@ var (
 		AllowedPool{"abtc", "aswap"},
 		AllowedPool{"aswap", "ujolt"},
 		AllowedPool{"aswap", "uatom"},
+		AllowedPool{"aevmos", "aswap"},
+		AllowedPool{"aswap", "uosmo"},
+		AllowedPool{"aswap", "ujuno"},
 	}
 	DefaultSwapFee = sdk.MustNewDecFromStr("0.02")
 	MaxSwapFee     = sdk.OneDec()
