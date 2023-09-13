@@ -13,16 +13,16 @@ var (
 	KeyAllowedPools     = []byte("AllowedPools")
 	KeySwapFee          = []byte("SwapFee")
 	DefaultAllowedPools = AllowedPools{
-		AllowedPool{"abnb", "aswap"},
-		AllowedPool{"aswap", "ausdt"},
-		AllowedPool{"aswap", "ausdc"},
-		AllowedPool{"aeth", "aswap"},
-		AllowedPool{"abtc", "aswap"},
-		AllowedPool{"aswap", "ujolt"},
-		AllowedPool{"aswap", "uatom"},
-		AllowedPool{"aevmos", "aswap"},
-		AllowedPool{"aswap", "uosmo"},
-		AllowedPool{"aswap", "ujuno"},
+		AllowedPool{"abnb", "uoppy"},
+		AllowedPool{"ausdt", "uoppy"},
+		AllowedPool{"ausdc", "uoppy"},
+		AllowedPool{"aeth", "uoppy"},
+		AllowedPool{"abtc", "uoppy"},
+		AllowedPool{"ujolt", "uoppy"},
+		AllowedPool{"uatom", "uoppy"},
+		AllowedPool{"aevmos", "uoppy"},
+		AllowedPool{"uoppy", "uosmo"},
+		AllowedPool{"ujuno", "uoppy"},
 	}
 	DefaultSwapFee = sdk.MustNewDecFromStr("0.02")
 	MaxSwapFee     = sdk.OneDec()
