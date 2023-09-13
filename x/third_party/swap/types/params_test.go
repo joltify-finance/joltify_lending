@@ -77,8 +77,8 @@ func TestParams_Default(t *testing.T) {
 	assert.Equal(t, types.DefaultAllowedPools, defaultParams.AllowedPools)
 	assert.Equal(t, types.DefaultSwapFee, defaultParams.SwapFee)
 
-	assert.Equal(t, 1, len(defaultParams.AllowedPools))
-	assert.Equal(t, sdk.ZeroDec(), defaultParams.SwapFee)
+	assert.Equal(t, 10, len(defaultParams.AllowedPools))
+	assert.Equal(t, sdk.MustNewDecFromStr("0.02"), defaultParams.SwapFee)
 }
 
 func TestParams_ParamSetPairs_AllowedPools(t *testing.T) {
