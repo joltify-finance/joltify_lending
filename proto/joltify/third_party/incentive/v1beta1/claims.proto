@@ -1,5 +1,5 @@
 syntax = "proto3";
-package joltify.third_party.incentive.v1;
+package joltify.third_party.incentive.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";

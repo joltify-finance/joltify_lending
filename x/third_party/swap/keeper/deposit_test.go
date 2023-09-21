@@ -67,7 +67,6 @@ func (suite *keeperTestSuite) TestDeposit_InsufficientFunds() {
 			err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdk.MustNewDecFromStr("0"))
 			// TODO: wrap in module specific error?
 			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
-			fmt.Printf(">>>>>about to setup.........\n")
 			suite.SetupTest()
 			// test deposit to existing pool insuffient funds
 			err = suite.CreatePool(sdk.NewCoins(sdk.NewCoin("ukava", sdkmath.NewInt(10e6)), sdk.NewCoin("usdx", sdkmath.NewInt(50e6))))
