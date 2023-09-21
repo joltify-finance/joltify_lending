@@ -13,7 +13,7 @@ import (
 // governance module.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgClaimJoltReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimJoltReward", nil)
-	cdc.RegisterConcrete(&MsgClaimSwapReward{}, "incentive/MsgClaimSwapReward", nil)
+	cdc.RegisterConcrete(&MsgClaimSwapReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimSwapReward", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

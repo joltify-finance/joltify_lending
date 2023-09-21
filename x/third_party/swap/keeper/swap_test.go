@@ -311,11 +311,11 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_PanicOnInsufficientModuleAc
 	coinB := sdk.NewCoin("usdx", sdkmath.NewInt(5e6))
 
 	suite.Panics(func() {
-		_ = suite.Keeper.SwapExactForTokens(suite.Ctx, requester.GetAddress(), coinA, coinB, sdk.MustNewDecFromStr("0.01"))
+		_ = suite.Keeper.SwapExactForTokens(suite.Ctx, requester.GetAddress(), coinA, coinB, sdk.MustNewDecFromStr("0.1"))
 	}, "expected panic when module account does not have enough funds")
 
 	suite.Panics(func() {
-		_ = suite.Keeper.SwapExactForTokens(suite.Ctx, requester.GetAddress(), coinA, coinB, sdk.MustNewDecFromStr("0.01"))
+		_ = suite.Keeper.SwapExactForTokens(suite.Ctx, requester.GetAddress(), coinA, coinB, sdk.MustNewDecFromStr("0.5"))
 	}, "expected panic when module account does not have enough funds")
 }
 

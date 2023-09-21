@@ -2,8 +2,8 @@ syntax = "proto3";
 package joltify.third_party.incentive.v1;
 
 import "gogoproto/gogo.proto";
-import "joltify/third_party/incentive/v1/claims.proto";
-import "joltify/third_party/incentive/v1/params.proto";
+import "joltify/third_party/incentive/v1beta1/claims.proto";
+import "joltify/third_party/incentive/v1beta1/params.proto";
 import "google/protobuf/timestamp.proto";
 
 // import "cosmos/base/v1beta1/coin.proto";

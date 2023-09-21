@@ -3,8 +3,8 @@ package joltify.third_party.incentive.v1;
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "joltify/third_party/incentive/v1/claims.proto";
-import "joltify/third_party/incentive/v1/params.proto";
+import "joltify/third_party/incentive/v1beta1/claims.proto";
+import "joltify/third_party/incentive/v1beta1/params.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types";
 
