@@ -7277,6 +7277,62 @@ paths:
           type: string
       tags:
         - spv
+  /joltify/spv/params:
+    get:
+      summary: Parameters queries the parameters of the module.
+      operationId: spvParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                description: params holds all the parameters of this module.
+                type: object
+                properties:
+                  burn_threshold:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+            description: >-
+              QueryParamsResponse is response type for the Query/Params RPC
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - spv
   /joltify/spv/query_pool/{pool_index}:
     get:
       summary: Queries a list of QueryPool items.
@@ -44008,7 +44064,7 @@ definitions:
 
       NOTE: The amount field is an Int which implements the custom method
       signatures required by gogoproto.
-  joltify.third_party.incentive.v1.BaseMultiClaim:
+  joltify.third_party.incentive.v1beta1.BaseMultiClaim:
     type: object
     properties:
       owner:
@@ -44029,7 +44085,7 @@ definitions:
             NOTE: The amount field is an Int which implements the custom method
             signatures required by gogoproto.
     title: BaseMultiClaim is a claim with multiple reward coin types
-  joltify.third_party.incentive.v1.JoltLiquidityProviderClaim:
+  joltify.third_party.incentive.v1beta1.JoltLiquidityProviderClaim:
     type: object
     properties:
       base_claim:
@@ -44101,7 +44157,7 @@ definitions:
     title: >-
       JoltLiquidityProviderClaim stores the jolt liquidity provider rewards that
       can be claimed by owner
-  joltify.third_party.incentive.v1.MultiRewardIndex:
+  joltify.third_party.incentive.v1beta1.MultiRewardIndex:
     type: object
     properties:
       collateral_type:
@@ -44120,7 +44176,7 @@ definitions:
     title: >-
       MultiRewardIndex stores reward accumulation information on multiple reward
       types
-  joltify.third_party.incentive.v1.MultiRewardPeriod:
+  joltify.third_party.incentive.v1beta1.MultiRewardPeriod:
     type: object
     properties:
       active:
@@ -44148,7 +44204,7 @@ definitions:
             NOTE: The amount field is an Int which implements the custom method
             signatures required by gogoproto.
     title: MultiRewardPeriod supports multiple reward types
-  joltify.third_party.incentive.v1.Multiplier:
+  joltify.third_party.incentive.v1beta1.Multiplier:
     type: object
     properties:
       name:
@@ -44162,7 +44218,7 @@ definitions:
     title: >-
       Multiplier amount the claim rewards get increased by, along with how long
       the claim rewards are locked
-  joltify.third_party.incentive.v1.MultipliersPerDenom:
+  joltify.third_party.incentive.v1beta1.MultipliersPerDenom:
     type: object
     properties:
       denom:
@@ -44184,7 +44240,7 @@ definitions:
             Multiplier amount the claim rewards get increased by, along with how
             long the claim rewards are locked
     title: MultipliersPerDenom is a map of denoms to a set of multipliers
-  joltify.third_party.incentive.v1.Params:
+  joltify.third_party.incentive.v1beta1.Params:
     type: object
     properties:
       jolt_supply_reward_periods:
@@ -44314,7 +44370,7 @@ definitions:
         type: string
         format: date-time
     title: Params
-  joltify.third_party.incentive.v1.QueryParamsResponse:
+  joltify.third_party.incentive.v1beta1.QueryParamsResponse:
     type: object
     properties:
       params:
@@ -44448,7 +44504,7 @@ definitions:
             format: date-time
         title: Params
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
-  joltify.third_party.incentive.v1.QueryRewardFactorsResponse:
+  joltify.third_party.incentive.v1beta1.QueryRewardFactorsResponse:
     type: object
     properties:
       jolt_supply_reward_factors:
@@ -44517,7 +44573,7 @@ definitions:
     description: >-
       QueryRewardFactorsResponse is the response type for the
       Query/RewardFactors RPC method.
-  joltify.third_party.incentive.v1.QueryRewardsResponse:
+  joltify.third_party.incentive.v1beta1.QueryRewardsResponse:
     type: object
     properties:
       jolt_liquidity_provider_claims:
@@ -44648,7 +44704,7 @@ definitions:
     description: >-
       QueryRewardsResponse is the response type for the Query/Rewards RPC
       method.
-  joltify.third_party.incentive.v1.RewardIndex:
+  joltify.third_party.incentive.v1beta1.RewardIndex:
     type: object
     properties:
       collateral_type:
@@ -44657,7 +44713,7 @@ definitions:
         type: string
         format: byte
     title: RewardIndex stores reward accumulation information
-  joltify.third_party.incentive.v1.SwapClaim:
+  joltify.third_party.incentive.v1beta1.SwapClaim:
     type: object
     properties:
       base_claim:
