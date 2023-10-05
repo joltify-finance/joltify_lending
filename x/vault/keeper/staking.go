@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -27,6 +28,7 @@ func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
 	}
 
 	stakingKeeper.IterateLastValidators(ctx, func(index int64, validator stakingtypes.ValidatorI) (stop bool) {
+		fmt.Printf(">>>111111>>>>>>>>\n")
 		consAddr, err := validator.GetConsAddr()
 		if err != nil {
 			panic("get cons should never fail")

@@ -288,10 +288,25 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		panic(err)
 	}
 
+	privVal1 := ed25519.GenPrivKey()
+	pubKey1, err := cryptocodec.ToTmPubKeyInterface(privVal1.PubKey())
+	if err != nil {
+		panic(err)
+	}
+
+	privVal2 := ed25519.GenPrivKey()
+	pubKey2, err := cryptocodec.ToTmPubKeyInterface(privVal2.PubKey())
+	if err != nil {
+		panic(err)
+	}
+
 	// create validator set with single validator
-	validator := tmtypes.NewValidator(pubKey, 1)
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
-	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(100000000000000))
+	validator := tmtypes.NewValidator(pubKey, 600000)
+	validator1 := tmtypes.NewValidator(pubKey1, 400000)
+	validator2 := tmtypes.NewValidator(pubKey2, 320000)
+
+	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator, validator1, validator2})
+	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(200000000000000))
 	coins = coins.Add(defaultCoins)
 	var balances []banktypes.Balance
 	if len(genAccs) == 0 {

@@ -25,6 +25,7 @@ node_modules
 docs/node_modules
 docs/.vuepress/dist
 contrib/devnet/run_deposit
+contrib/devnet/integrationtest/auction.json
 # Ignore macOS file system metadata
 .DS_Store
 config.yml
