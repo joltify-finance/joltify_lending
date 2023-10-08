@@ -96,8 +96,6 @@ func genesisStateWithValSet(
 	validators := make([]stakingtypes.Validator, 0, len(valSet.Validators))
 	delegations := make([]stakingtypes.Delegation, 0, len(valSet.Validators))
 
-	bondAmt := sdk.DefaultPowerReduction
-
 	for _, val := range valSet.Validators {
 		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
 		if err != nil {
@@ -107,6 +105,7 @@ func genesisStateWithValSet(
 		if err != nil {
 			panic(err)
 		}
+		bondAmt := sdkmath.NewIntFromUint64(uint64(val.VotingPower)).Mul(sdk.DefaultPowerReduction)
 		validator := stakingtypes.Validator{
 			OperatorAddress:   sdk.ValAddress(val.Address).String(),
 			ConsensusPubkey:   pkAny,
@@ -134,15 +133,17 @@ func genesisStateWithValSet(
 		totalSupply = totalSupply.Add(b.Coins...)
 	}
 
-	for range delegations {
+	totalBonded := sdk.ZeroInt()
+	for _, v := range validators {
+		bondAmt := v.Tokens
 		// add delegated tokens to total supply
 		totalSupply = totalSupply.Add(sdk.NewCoin(sdk.DefaultBondDenom, bondAmt))
+		totalBonded = totalBonded.Add(bondAmt)
 	}
-
 	// add bonded amount to bonded pool module account
 	balances = append(balances, banktypes.Balance{
 		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-		Coins:   sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, bondAmt)},
+		Coins:   sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, totalBonded)},
 	})
 
 	// update total supply
@@ -300,12 +301,19 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		panic(err)
 	}
 
+	privVal3 := ed25519.GenPrivKey()
+	pubKey3, err := cryptocodec.ToTmPubKeyInterface(privVal3.PubKey())
+	if err != nil {
+		panic(err)
+	}
+
 	// create validator set with single validator
 	validator := tmtypes.NewValidator(pubKey, 600000)
 	validator1 := tmtypes.NewValidator(pubKey1, 400000)
 	validator2 := tmtypes.NewValidator(pubKey2, 320000)
+	validator3 := tmtypes.NewValidator(pubKey3, 300000)
 
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator, validator1, validator2})
+	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator, validator1, validator2, validator3})
 	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(200000000000000))
 	coins = coins.Add(defaultCoins)
 	var balances []banktypes.Balance
@@ -327,7 +335,6 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 			balances = append(balances, balanceItem)
 		}
 	}
-
 	genesisState = genesisStateWithValSet(&tApp.App, genesisState, valSet, genAccs, balances...)
 	// Initialize the chain
 	stateBytes, err := json.Marshal(genesisState)

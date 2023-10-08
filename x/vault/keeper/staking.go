@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"fmt"
+	"bytes"
 	"sort"
 	"strconv"
 
@@ -27,12 +27,27 @@ func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
 		existValidators[el.Addr] = true
 	}
 
+	latestBridgeValidators, found := k.GetValidatorsByHeight(ctx, strconv.FormatUint(uint64(ctx.BlockHeight()), 10))
+	if !found {
+		latestBridgeValidators = vaulttypes.Validators{}
+	}
+
 	stakingKeeper.IterateLastValidators(ctx, func(index int64, validator stakingtypes.ValidatorI) (stop bool) {
-		fmt.Printf(">>>111111>>>>>>>>\n")
 		consAddr, err := validator.GetConsAddr()
 		if err != nil {
 			panic("get cons should never fail")
 		}
+
+		isLastValidator := false
+		// if this node is not in the last bridge validator, we should skip the standby power deduction
+		for _, el := range latestBridgeValidators.AllValidators {
+			elpubkey, err := validator.GetConsAddr()
+			if bytes.Equal(el.GetPubkey(), validator.ConsPubKey().Bytes()) {
+				return false
+			}
+
+		}
+
 		current, found := k.GetStandbyPower(ctx, consAddr.String())
 		if !found {
 			item := vaulttypes.StandbyPower{
