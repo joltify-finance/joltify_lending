@@ -2,8 +2,14 @@ package keeper
 
 import (
 	"bytes"
+	"fmt"
 	"sort"
 	"strconv"
+
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
+
+	"github.com/tendermint/tendermint/crypto"
 
 	errorsmod "cosmossdk.io/errors"
 
@@ -15,19 +21,35 @@ import (
 	vaulttypes "github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
+func packPubkey(b []byte) crypto.PubKey {
+	switch len(b) {
+	case ed25519.PubKeySize:
+		pk := make(ed25519.PubKey, ed25519.PubKeySize)
+		copy(pk, b)
+		return pk
+	case secp256k1.PubKeySize:
+		pk := make(ed25519.PubKey, ed25519.PubKeySize)
+		copy(pk, b)
+		return pk
+
+	}
+	return nil
+}
+
 func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
 	stakingKeeper := k.vaultStaking
 	params := k.GetParams(ctx)
 
 	allStandbyPowerHistory := k.DoGetAllStandbyPower(ctx)
 
-	existValidators := make(map[string]bool)
+	allStandbyValidators := make(map[string]bool)
 	updatedValidators := make(map[string]bool)
 	for _, el := range allStandbyPowerHistory {
-		existValidators[el.Addr] = true
+		allStandbyValidators[el.Addr] = true
 	}
 
-	latestBridgeValidators, found := k.GetValidatorsByHeight(ctx, strconv.FormatUint(uint64(ctx.BlockHeight()), 10))
+	lastBlockHeight := ctx.BlockHeight() - params.BlockChurnInterval
+	latestBridgeValidators, found := k.GetValidatorsByHeight(ctx, strconv.FormatUint(uint64(lastBlockHeight), 10))
 	if !found {
 		latestBridgeValidators = vaulttypes.Validators{}
 	}
@@ -41,11 +63,16 @@ func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
 		isLastValidator := false
 		// if this node is not in the last bridge validator, we should skip the standby power deduction
 		for _, el := range latestBridgeValidators.AllValidators {
-			elpubkey, err := validator.GetConsAddr()
-			if bytes.Equal(el.GetPubkey(), validator.ConsPubKey().Bytes()) {
-				return false
+
+			ppk := packPubkey(el.Pubkey)
+			if ppk == nil {
+				panic("unrecognized pubkey type")
 			}
 
+			if bytes.Equal(ppk.Address(), consAddr.Bytes()) {
+				isLastValidator = true
+				break
+			}
 		}
 
 		current, found := k.GetStandbyPower(ctx, consAddr.String())
@@ -59,20 +86,18 @@ func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
 		}
 		updatedValidators[consAddr.String()] = true
 		if current.Power < 0 {
+			fmt.Printf(">>> now we delete %v\n", consAddr.String())
 			k.DelStandbyPower(ctx, consAddr.String())
 			return false
 		}
+		if !isLastValidator {
+			return false
+		}
+
 		current.Power -= params.Step
 		k.SetStandbyPower(ctx, consAddr.String(), current)
 		return false
 	})
-
-	for key := range existValidators {
-		_, exist := updatedValidators[key]
-		if !exist {
-			k.DelStandbyPower(ctx, key)
-		}
-	}
 }
 
 func (k Keeper) getEligibleValidators(ctx sdk.Context) ([]vaulttypes.ValidatorPowerInfo, error) {
