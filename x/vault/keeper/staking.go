@@ -2,7 +2,7 @@ package keeper
 
 import (
 	"bytes"
-	"fmt"
+	"math/big"
 	"sort"
 	"strconv"
 
@@ -85,8 +85,9 @@ func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
 			return false
 		}
 		updatedValidators[consAddr.String()] = true
+
+		// if logPower.Int64()+current.Power < consensusPower/2 {
 		if current.Power < 0 {
-			fmt.Printf(">>> now we delete %v\n", consAddr.String())
 			k.DelStandbyPower(ctx, consAddr.String())
 			return false
 		}
@@ -112,9 +113,11 @@ func (k Keeper) getEligibleValidators(ctx sdk.Context) ([]vaulttypes.ValidatorPo
 	candidateNum := uint32(candidateNumDec.TruncateInt64())
 
 	for _, validator := range boundedValidators {
+		logPower := new(big.Int).Sqrt(big.NewInt(validator.ConsensusPower(sdk.DefaultPowerReduction)))
+
 		validatorWithPower := vaulttypes.ValidatorPowerInfo{
 			Validator: validator,
-			Power:     validator.ConsensusPower(sdk.DefaultPowerReduction),
+			Power:     logPower.Int64(),
 		}
 		candidates = append(candidates, validatorWithPower)
 	}
@@ -131,9 +134,9 @@ func (k Keeper) getEligibleValidators(ctx sdk.Context) ([]vaulttypes.ValidatorPo
 				Power: params.Power,
 			}
 			k.SetStandbyPower(ctx, consAddr.String(), item)
-
 			standbyPower = item
 		}
+
 		candidates[i].Power += standbyPower.GetPower()
 	}
 	sort.Slice(candidates, func(i, j int) bool {

@@ -309,9 +309,9 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 
 	// create validator set with single validator
 	validator := tmtypes.NewValidator(pubKey, 600000)
-	validator1 := tmtypes.NewValidator(pubKey1, 400000)
-	validator2 := tmtypes.NewValidator(pubKey2, 320000)
-	validator3 := tmtypes.NewValidator(pubKey3, 300000)
+	validator1 := tmtypes.NewValidator(pubKey1, 500000)
+	validator2 := tmtypes.NewValidator(pubKey2, 400000)
+	validator3 := tmtypes.NewValidator(pubKey3, 320000)
 
 	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator, validator1, validator2, validator3})
 	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(200000000000000))

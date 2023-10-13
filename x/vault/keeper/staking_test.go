@@ -226,6 +226,58 @@ func TestUpdateStakingInfo(t *testing.T) {
 	}
 }
 
+// disable the validator selection distribution test
+//func TestRun(t *testing.T) {
+//	app2.SetSDKConfig()
+//
+//	app, ctx := keepertest.SetupVaultApp(t)
+//	k := app.VaultKeeper
+//
+//	blockHeight := k.GetParams(ctx).BlockChurnInterval
+//	defaultParam := k.GetParams(ctx)
+//	defaultParam.Step = 100
+//	defaultParam.Power = 1000
+//	k.SetParams(ctx, defaultParam)
+//
+//	freqMap := make(map[string]int)
+//	bigCounter := 0
+//	for i := 1; i < 11000; i++ {
+//
+//		ctx = ctx.WithBlockHeight(blockHeight * int64(i))
+//		k.NewUpdate(ctx)
+//		result, found := k.GetValidatorsByHeight(ctx, strconv.Itoa(int(ctx.BlockHeight())))
+//		assert.True(t, found)
+//
+//		validators1 := result.GetAllValidators()
+//		sort.Slice(validators1, func(i, j int) bool {
+//			return validators1[i].Power > validators1[j].Power
+//		})
+//
+//		for _, el := range validators1 {
+//			ppk := packPubkey(el.Pubkey)
+//			if ppk == nil {
+//				panic("unrecognized pubkey type")
+//			}
+//			addr := sdk.ConsAddress(ppk.Address().Bytes())
+//			fmt.Printf(">>>%v=%v\n", addr.String(), el.Power)
+//
+//			counter, ok := freqMap[addr.String()]
+//			if !ok {
+//				counter = 1
+//			} else {
+//				counter += 1
+//			}
+//			freqMap[addr.String()] = counter
+//		}
+//		bigCounter++
+//	}
+//
+//	for addr, counter := range freqMap {
+//		ratio := float64(counter) / float64(bigCounter)
+//		fmt.Printf(">>>>%v=%v\n", addr, ratio)
+//	}
+//}
+
 func TestGetEligibleValidator(t *testing.T) {
 	app2.SetSDKConfig()
 
@@ -259,8 +311,9 @@ func TestGetEligibleValidator(t *testing.T) {
 
 	// the first time all validator has the validator voting power + standby voting power
 	assert.Equal(t, 2, len(result.GetAllValidators()))
-	assert.Equal(t, 700000, int(result.GetAllValidators()[0].Power))
-	assert.Equal(t, 500000, int(result.GetAllValidators()[1].Power))
+
+	assert.Equal(t, 100774, int(result.GetAllValidators()[0].Power))
+	assert.Equal(t, 100707, int(result.GetAllValidators()[1].Power))
 
 	ctx = ctx.WithBlockHeight(blockHeight * 2)
 
@@ -285,8 +338,8 @@ func TestGetEligibleValidator(t *testing.T) {
 		return validators2[i].Power > validators2[j].Power
 	})
 
-	assert.Equal(t, 600000, int(result.GetAllValidators()[0].Power))
-	assert.Equal(t, 420000, int(result.GetAllValidators()[1].Power))
+	assert.Equal(t, 100632, int(result.GetAllValidators()[0].Power))
+	assert.Equal(t, 774, int(result.GetAllValidators()[1].Power))
 
 	ctx = ctx.WithBlockHeight(blockHeight * 3)
 	k.NewUpdate(ctx)
@@ -299,12 +352,10 @@ func TestGetEligibleValidator(t *testing.T) {
 	})
 
 	assert.Equal(t, 2, len(result.GetAllValidators()))
-	assert.Equal(t, 500000, int(result.GetAllValidators()[0].Power))
-	assert.Equal(t, 400000, int(result.GetAllValidators()[1].Power))
 
-	assert.True(t, bytes.Equal(validators1[0].GetPubkey(), validators2[0].GetPubkey()))
-	assert.True(t, bytes.Equal(validators3[0].GetPubkey(), validators2[0].GetPubkey()))
+	assert.Equal(t, 707, int(result.GetAllValidators()[0].Power))
+	assert.Equal(t, 632, int(result.GetAllValidators()[1].Power))
 
-	assert.False(t, bytes.Equal(validators1[1].GetPubkey(), validators2[1].GetPubkey()))
-	assert.False(t, bytes.Equal(validators2[1].GetPubkey(), validators3[1].GetPubkey()))
+	assert.True(t, bytes.Equal(validators1[0].GetPubkey(), validators2[1].GetPubkey()))
+	assert.True(t, bytes.Equal(validators3[1].GetPubkey(), validators2[0].GetPubkey()))
 }
