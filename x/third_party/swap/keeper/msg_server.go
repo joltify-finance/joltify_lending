@@ -113,6 +113,38 @@ func (m msgServer) SwapExactForTokens(goCtx context.Context, msg *types.MsgSwapE
 	return &types.MsgSwapExactForTokensResponse{}, nil
 }
 
+// SwapExactForBatchTokens handles MsgSwapExactForBatchTokens messages
+func (m msgServer) SwapExactForBatchTokens(goCtx context.Context, msg *types.MsgSwapExactForBatchTokens) (*types.MsgSwapExactForBatchTokensResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := checkDeadline(ctx, msg); err != nil {
+		return nil, err
+	}
+
+	requester, err := sdk.AccAddressFromBech32(msg.Requester)
+	if err != nil {
+		return nil, err
+	}
+
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil {
+		return nil, err
+	}
+	if err := m.keeper.SwapExactForBatchTokens(ctx, requester, msg.ExactTokenA, msg.TokenB, slippage); err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, requester.String()),
+		),
+	)
+
+	return &types.MsgSwapExactForBatchTokensResponse{}, nil
+}
+
 // SwapForExactTokens handles MsgSwapForExactTokens messages
 func (m msgServer) SwapForExactTokens(goCtx context.Context, msg *types.MsgSwapForExactTokens) (*types.MsgSwapForExactTokensResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)

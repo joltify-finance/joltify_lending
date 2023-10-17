@@ -284,6 +284,91 @@ func (m *MsgSwapExactForTokensResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgSwapExactForTokensResponse proto.InternalMessageInfo
 
+// MsgSwapExactForBatchTokens represents a message for trading exact coinA for coinB
+type MsgSwapExactForBatchTokens struct {
+	// represents the address swaping the tokens
+	Requester string `protobuf:"bytes,1,opt,name=requester,proto3" json:"requester,omitempty"`
+	// exact_token_a represents the exact amount to swap for token_b
+	ExactTokenA types.Coin `protobuf:"bytes,2,opt,name=exact_token_a,json=exactTokenA,proto3" json:"exact_token_a"`
+	// token_b represents the desired token_b to swap for
+	TokenB types.Coin `protobuf:"bytes,3,opt,name=token_b,json=tokenB,proto3" json:"token_b"`
+	// slippage represents the maximum change in token_b allowed
+	Slippage string `protobuf:"bytes,4,opt,name=slippage,proto3" json:"slippage,omitempty"`
+	// deadline represents the unix timestamp to complete the swap by
+	Deadline int64 `protobuf:"varint,5,opt,name=deadline,proto3" json:"deadline,omitempty"`
+}
+
+func (m *MsgSwapExactForBatchTokens) Reset()         { *m = MsgSwapExactForBatchTokens{} }
+func (m *MsgSwapExactForBatchTokens) String() string { return proto.CompactTextString(m) }
+func (*MsgSwapExactForBatchTokens) ProtoMessage()    {}
+func (*MsgSwapExactForBatchTokens) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4b3ba4122690e2e5, []int{6}
+}
+func (m *MsgSwapExactForBatchTokens) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgSwapExactForBatchTokens) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgSwapExactForBatchTokens.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgSwapExactForBatchTokens) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSwapExactForBatchTokens.Merge(m, src)
+}
+func (m *MsgSwapExactForBatchTokens) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgSwapExactForBatchTokens) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSwapExactForBatchTokens.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgSwapExactForBatchTokens proto.InternalMessageInfo
+
+// MsgSwapExactForBatchTokensResponse defines the Msg/SwapExactForTokens response
+// type.
+type MsgSwapExactForBatchTokensResponse struct {
+}
+
+func (m *MsgSwapExactForBatchTokensResponse) Reset()         { *m = MsgSwapExactForBatchTokensResponse{} }
+func (m *MsgSwapExactForBatchTokensResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgSwapExactForBatchTokensResponse) ProtoMessage()    {}
+func (*MsgSwapExactForBatchTokensResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4b3ba4122690e2e5, []int{7}
+}
+func (m *MsgSwapExactForBatchTokensResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgSwapExactForBatchTokensResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgSwapExactForBatchTokensResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgSwapExactForBatchTokensResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSwapExactForBatchTokensResponse.Merge(m, src)
+}
+func (m *MsgSwapExactForBatchTokensResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgSwapExactForBatchTokensResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSwapExactForBatchTokensResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgSwapExactForBatchTokensResponse proto.InternalMessageInfo
+
 // MsgSwapForExactTokens represents a message for trading coinA for an exact
 // coinB
 type MsgSwapForExactTokens struct {
@@ -303,7 +388,7 @@ func (m *MsgSwapForExactTokens) Reset()         { *m = MsgSwapForExactTokens{} }
 func (m *MsgSwapForExactTokens) String() string { return proto.CompactTextString(m) }
 func (*MsgSwapForExactTokens) ProtoMessage()    {}
 func (*MsgSwapForExactTokens) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b3ba4122690e2e5, []int{6}
+	return fileDescriptor_4b3ba4122690e2e5, []int{8}
 }
 func (m *MsgSwapForExactTokens) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -341,7 +426,7 @@ func (m *MsgSwapForExactTokensResponse) Reset()         { *m = MsgSwapForExactTo
 func (m *MsgSwapForExactTokensResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgSwapForExactTokensResponse) ProtoMessage()    {}
 func (*MsgSwapForExactTokensResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b3ba4122690e2e5, []int{7}
+	return fileDescriptor_4b3ba4122690e2e5, []int{9}
 }
 func (m *MsgSwapForExactTokensResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -377,6 +462,8 @@ func init() {
 	proto.RegisterType((*MsgWithdrawResponse)(nil), "joltify.third_party.swap.v1beta1.MsgWithdrawResponse")
 	proto.RegisterType((*MsgSwapExactForTokens)(nil), "joltify.third_party.swap.v1beta1.MsgSwapExactForTokens")
 	proto.RegisterType((*MsgSwapExactForTokensResponse)(nil), "joltify.third_party.swap.v1beta1.MsgSwapExactForTokensResponse")
+	proto.RegisterType((*MsgSwapExactForBatchTokens)(nil), "joltify.third_party.swap.v1beta1.MsgSwapExactForBatchTokens")
+	proto.RegisterType((*MsgSwapExactForBatchTokensResponse)(nil), "joltify.third_party.swap.v1beta1.MsgSwapExactForBatchTokensResponse")
 	proto.RegisterType((*MsgSwapForExactTokens)(nil), "joltify.third_party.swap.v1beta1.MsgSwapForExactTokens")
 	proto.RegisterType((*MsgSwapForExactTokensResponse)(nil), "joltify.third_party.swap.v1beta1.MsgSwapForExactTokensResponse")
 }
@@ -386,46 +473,49 @@ func init() {
 }
 
 var fileDescriptor_4b3ba4122690e2e5 = []byte{
-	// 623 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x95, 0xcd, 0x6a, 0xdb, 0x4c,
-	0x14, 0x86, 0xad, 0xc4, 0x5f, 0x12, 0x8f, 0xf9, 0x36, 0xd3, 0x04, 0x14, 0x41, 0x65, 0x93, 0x45,
-	0x49, 0x21, 0x96, 0x48, 0xfa, 0x4b, 0x37, 0x21, 0x4a, 0x13, 0xe8, 0xc2, 0x1b, 0x25, 0x50, 0x28,
-	0x14, 0x31, 0xb2, 0x26, 0xf2, 0x34, 0xd6, 0x8c, 0x3a, 0x33, 0x69, 0xe2, 0x3b, 0xc8, 0xa2, 0x94,
-	0x5e, 0x42, 0x77, 0xbd, 0x81, 0x5e, 0x44, 0x96, 0xa1, 0xab, 0xd2, 0x45, 0x28, 0xf6, 0x3d, 0x74,
-	0x5d, 0xf4, 0x6b, 0x3b, 0x36, 0x44, 0x32, 0x85, 0xae, 0xac, 0xa3, 0x79, 0xdf, 0x33, 0xc7, 0x8f,
-	0xce, 0x9c, 0x01, 0x0f, 0xdf, 0xb1, 0x9e, 0x24, 0x27, 0x7d, 0x53, 0x76, 0x09, 0xf7, 0x9c, 0x10,
-	0x71, 0xd9, 0x37, 0xc5, 0x39, 0x0a, 0xcd, 0x0f, 0xdb, 0x2e, 0x96, 0x68, 0xdb, 0x94, 0x17, 0x46,
-	0xc8, 0x99, 0x64, 0xb0, 0x99, 0x4a, 0x8d, 0x31, 0xa9, 0x11, 0x49, 0x8d, 0x54, 0xaa, 0xe9, 0x1d,
-	0x26, 0x02, 0x26, 0x4c, 0x17, 0x09, 0x9c, 0xfb, 0x3b, 0x8c, 0xd0, 0x24, 0x83, 0xb6, 0x9e, 0xac,
-	0x3b, 0x71, 0x64, 0x26, 0x41, 0xba, 0xb4, 0xea, 0x33, 0x9f, 0x25, 0xef, 0xa3, 0xa7, 0xe4, 0xed,
-	0xc6, 0x6f, 0x05, 0x80, 0xb6, 0xf0, 0x5f, 0xe2, 0x90, 0x09, 0x22, 0xe1, 0x53, 0x50, 0xf3, 0x92,
-	0x47, 0xc6, 0x55, 0xa5, 0xa9, 0x6c, 0xd6, 0x2c, 0xf5, 0xfb, 0xb7, 0xd6, 0x6a, 0x9a, 0x69, 0xcf,
-	0xf3, 0x38, 0x16, 0xe2, 0x48, 0x72, 0x42, 0x7d, 0x7b, 0x24, 0x85, 0xcf, 0xc1, 0xb2, 0x64, 0xa7,
-	0x98, 0x3a, 0x48, 0x5d, 0x68, 0x2a, 0x9b, 0xf5, 0x9d, 0x75, 0x23, 0xb5, 0x44, 0x95, 0x66, 0xe5,
-	0x1b, 0xfb, 0x8c, 0x50, 0xab, 0x7a, 0x75, 0xd3, 0xa8, 0xd8, 0x4b, 0xb1, 0x7e, 0x6f, 0xe4, 0x74,
-	0xd5, 0xc5, 0x32, 0x4e, 0x0b, 0x6a, 0x60, 0x45, 0xf4, 0x48, 0x18, 0x22, 0x1f, 0xab, 0xd5, 0xa8,
-	0x54, 0x3b, 0x8f, 0xa3, 0x35, 0x0f, 0x23, 0xaf, 0x47, 0x28, 0x56, 0xff, 0x6b, 0x2a, 0x9b, 0x8b,
-	0x76, 0x1e, 0xbf, 0xa8, 0x5e, 0x7e, 0x69, 0x54, 0x36, 0x56, 0x01, 0x1c, 0xfd, 0x6f, 0x1b, 0x8b,
-	0x90, 0x51, 0x81, 0x37, 0xbe, 0x2e, 0x80, 0x7a, 0x5b, 0xf8, 0xaf, 0x89, 0xec, 0x7a, 0x1c, 0x9d,
-	0xc3, 0x2d, 0x50, 0x3d, 0xe1, 0x2c, 0xb8, 0x13, 0x45, 0xac, 0x82, 0x87, 0x60, 0x49, 0x74, 0x11,
-	0xc7, 0x22, 0x86, 0x50, 0xb3, 0x8c, 0xa8, 0xde, 0x9f, 0x37, 0x8d, 0x07, 0x3e, 0x91, 0xdd, 0x33,
-	0xd7, 0xe8, 0xb0, 0x20, 0xfd, 0x26, 0xe9, 0x4f, 0x4b, 0x78, 0xa7, 0xa6, 0xec, 0x87, 0x58, 0x18,
-	0xaf, 0xa8, 0xb4, 0x53, 0x37, 0xdc, 0x05, 0xf5, 0x80, 0x50, 0x27, 0x23, 0x5a, 0x90, 0x4b, 0x2d,
-	0x20, 0xf4, 0x38, 0x81, 0x3a, 0x91, 0xc0, 0x8d, 0xe9, 0x94, 0x49, 0x60, 0x15, 0xe0, 0xb7, 0x06,
-	0xee, 0x8d, 0x81, 0xca, 0x01, 0x7e, 0x5c, 0x00, 0x6b, 0x6d, 0xe1, 0x1f, 0x9d, 0xa3, 0xf0, 0xe0,
-	0x02, 0x75, 0xe4, 0x21, 0xe3, 0x71, 0x4a, 0x11, 0xb5, 0x16, 0xc7, 0xef, 0xcf, 0xb0, 0x90, 0xb8,
-	0x40, 0x6b, 0xe5, 0x52, 0xb8, 0x0f, 0xfe, 0xc7, 0x51, 0x26, 0xa7, 0x64, 0x83, 0xd5, 0x63, 0xd7,
-	0xf1, 0xbf, 0xed, 0xb2, 0x06, 0xb8, 0x3f, 0x93, 0xc6, 0x2c, 0x5e, 0x87, 0x8c, 0x1f, 0xe4, 0x25,
-	0xcf, 0xcf, 0x6b, 0xfe, 0xa3, 0x78, 0x8b, 0x74, 0x61, 0x54, 0x63, 0xa4, 0xff, 0x1e, 0xaf, 0x49,
-	0x1a, 0x19, 0xaf, 0x9d, 0xcb, 0x2a, 0x58, 0x6c, 0x0b, 0x1f, 0x06, 0x60, 0x39, 0x9b, 0x59, 0x5b,
-	0xc6, 0x5d, 0x63, 0xd3, 0x18, 0x9d, 0x74, 0xed, 0x71, 0x19, 0x75, 0xb6, 0x2d, 0x0c, 0xc1, 0x4a,
-	0x3e, 0x13, 0x5a, 0x85, 0x32, 0x64, 0x72, 0xed, 0x49, 0x29, 0x79, 0xbe, 0xe3, 0x27, 0x05, 0xc0,
-	0x19, 0xa7, 0xe8, 0x59, 0xa1, 0x6c, 0xd3, 0x46, 0x6d, 0x77, 0x4e, 0xe3, 0x54, 0x41, 0xb7, 0xda,
-	0xb4, 0x78, 0x41, 0x93, 0xc6, 0x12, 0x05, 0xcd, 0x6e, 0x05, 0xeb, 0xed, 0xd5, 0x40, 0x57, 0xae,
-	0x07, 0xba, 0xf2, 0x6b, 0xa0, 0x2b, 0x9f, 0x87, 0x7a, 0xe5, 0x7a, 0xa8, 0x57, 0x7e, 0x0c, 0xf5,
-	0xca, 0x9b, 0xfd, 0xb1, 0x79, 0x9b, 0x6e, 0xd2, 0x3a, 0x21, 0x14, 0xd1, 0x0e, 0xce, 0x62, 0xa7,
-	0x87, 0xa9, 0x47, 0xa8, 0x6f, 0x5e, 0x4c, 0xdf, 0xcb, 0xf1, 0x40, 0x76, 0x97, 0xe2, 0x0b, 0xf2,
-	0xd1, 0x9f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x7a, 0xec, 0x5d, 0x4e, 0xc0, 0x07, 0x00, 0x00,
+	// 665 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe4, 0x96, 0x4d, 0x6b, 0xd4, 0x40,
+	0x18, 0xc7, 0x37, 0xdb, 0xed, 0xcb, 0xce, 0xe2, 0x65, 0x6c, 0x71, 0x1b, 0x30, 0xbb, 0x2c, 0x22,
+	0x15, 0xba, 0x09, 0xad, 0xaf, 0x88, 0x50, 0x9a, 0xbe, 0x80, 0x87, 0xbd, 0x6c, 0x0b, 0x82, 0x20,
+	0x61, 0x92, 0x4c, 0xb3, 0x63, 0x37, 0x33, 0x71, 0x66, 0x6a, 0xdb, 0x6f, 0xe0, 0x41, 0x44, 0x3f,
+	0x80, 0xe0, 0x4d, 0x3f, 0x80, 0x1f, 0xa2, 0xc7, 0xe2, 0x49, 0x3c, 0x14, 0x69, 0xbf, 0x83, 0x67,
+	0xc9, 0xeb, 0x6e, 0xdb, 0x2d, 0x4d, 0xaa, 0xe0, 0xc1, 0xd3, 0xe6, 0xc9, 0xfc, 0xff, 0xcf, 0x3c,
+	0xfb, 0xcb, 0x93, 0x67, 0x02, 0xee, 0xbc, 0x64, 0x7d, 0x49, 0xb6, 0xf6, 0x0d, 0xd9, 0x23, 0xdc,
+	0xb5, 0x02, 0xc4, 0xe5, 0xbe, 0x21, 0x76, 0x51, 0x60, 0xbc, 0x5e, 0xb0, 0xb1, 0x44, 0x0b, 0x86,
+	0xdc, 0xd3, 0x03, 0xce, 0x24, 0x83, 0xcd, 0x44, 0xaa, 0x0f, 0x49, 0xf5, 0x50, 0xaa, 0x27, 0x52,
+	0x55, 0x73, 0x98, 0xf0, 0x99, 0x30, 0x6c, 0x24, 0x70, 0xe6, 0x77, 0x18, 0xa1, 0x71, 0x06, 0x75,
+	0x36, 0x5e, 0xb7, 0xa2, 0xc8, 0x88, 0x83, 0x64, 0x69, 0xda, 0x63, 0x1e, 0x8b, 0xef, 0x87, 0x57,
+	0xf1, 0xdd, 0xd6, 0x2f, 0x05, 0x80, 0x8e, 0xf0, 0x56, 0x71, 0xc0, 0x04, 0x91, 0xf0, 0x01, 0xa8,
+	0xba, 0xf1, 0x25, 0xe3, 0x75, 0xa5, 0xa9, 0xcc, 0x55, 0xcd, 0xfa, 0xb7, 0xaf, 0xed, 0xe9, 0x24,
+	0xd3, 0xb2, 0xeb, 0x72, 0x2c, 0xc4, 0x86, 0xe4, 0x84, 0x7a, 0xdd, 0x81, 0x14, 0x3e, 0x02, 0x93,
+	0x92, 0x6d, 0x63, 0x6a, 0xa1, 0x7a, 0xb9, 0xa9, 0xcc, 0xd5, 0x16, 0x67, 0xf5, 0xc4, 0x12, 0x56,
+	0x9a, 0x96, 0xaf, 0xaf, 0x30, 0x42, 0xcd, 0xca, 0xc1, 0x51, 0xa3, 0xd4, 0x9d, 0x88, 0xf4, 0xcb,
+	0x03, 0xa7, 0x5d, 0x1f, 0x2b, 0xe2, 0x34, 0xa1, 0x0a, 0xa6, 0x44, 0x9f, 0x04, 0x01, 0xf2, 0x70,
+	0xbd, 0x12, 0x96, 0xda, 0xcd, 0xe2, 0x70, 0xcd, 0xc5, 0xc8, 0xed, 0x13, 0x8a, 0xeb, 0xe3, 0x4d,
+	0x65, 0x6e, 0xac, 0x9b, 0xc5, 0x8f, 0x2b, 0x6f, 0x3e, 0x35, 0x4a, 0xad, 0x69, 0x00, 0x07, 0xff,
+	0xbb, 0x8b, 0x45, 0xc0, 0xa8, 0xc0, 0xad, 0xcf, 0x65, 0x50, 0xeb, 0x08, 0xef, 0x19, 0x91, 0x3d,
+	0x97, 0xa3, 0x5d, 0x38, 0x0f, 0x2a, 0x5b, 0x9c, 0xf9, 0x97, 0xa2, 0x88, 0x54, 0x70, 0x1d, 0x4c,
+	0x88, 0x1e, 0xe2, 0x58, 0x44, 0x10, 0xaa, 0xa6, 0x1e, 0xd6, 0xfb, 0xe3, 0xa8, 0x71, 0xdb, 0x23,
+	0xb2, 0xb7, 0x63, 0xeb, 0x0e, 0xf3, 0x93, 0x67, 0x92, 0xfc, 0xb4, 0x85, 0xbb, 0x6d, 0xc8, 0xfd,
+	0x00, 0x0b, 0xfd, 0x29, 0x95, 0xdd, 0xc4, 0x0d, 0x97, 0x40, 0xcd, 0x27, 0xd4, 0x4a, 0x89, 0xe6,
+	0xe4, 0x52, 0xf5, 0x09, 0xdd, 0x8c, 0xa1, 0x9e, 0x4a, 0x60, 0x47, 0x74, 0x8a, 0x24, 0x30, 0x73,
+	0xf0, 0x9b, 0x01, 0xd7, 0x87, 0x40, 0x65, 0x00, 0xdf, 0x96, 0xc1, 0x4c, 0x47, 0x78, 0x1b, 0xbb,
+	0x28, 0x58, 0xdb, 0x43, 0x8e, 0x5c, 0x67, 0x3c, 0x4a, 0x29, 0xc2, 0xd6, 0xe2, 0xf8, 0xd5, 0x0e,
+	0x16, 0x12, 0xe7, 0x68, 0xad, 0x4c, 0x0a, 0x57, 0xc0, 0x35, 0x1c, 0x66, 0xb2, 0x0a, 0x36, 0x58,
+	0x2d, 0x72, 0x6d, 0xfe, 0xdb, 0x2e, 0x6b, 0x80, 0x9b, 0x23, 0x69, 0x64, 0xbc, 0x3e, 0x94, 0x81,
+	0x7a, 0x46, 0x61, 0x22, 0xe9, 0xf4, 0xfe, 0x67, 0x68, 0xb7, 0x40, 0xeb, 0x62, 0x24, 0xa3, 0x3a,
+	0x6d, 0x9d, 0xf1, 0xb5, 0xac, 0xee, 0xab, 0x43, 0xbb, 0xfa, 0x10, 0x3b, 0x83, 0x3b, 0x37, 0xaf,
+	0x21, 0xdc, 0x7f, 0xaf, 0xd3, 0x4e, 0xd3, 0x48, 0x79, 0x2d, 0x7e, 0x19, 0x07, 0x63, 0x1d, 0xe1,
+	0x41, 0x1f, 0x4c, 0xa6, 0xd3, 0x7e, 0x5e, 0xbf, 0xec, 0xc0, 0xd1, 0x07, 0x33, 0x52, 0xbd, 0x57,
+	0x44, 0x9d, 0x6e, 0x0b, 0x03, 0x30, 0x95, 0x4d, 0xd3, 0x76, 0xae, 0x0c, 0xa9, 0x5c, 0xbd, 0x5f,
+	0x48, 0x9e, 0xed, 0xf8, 0x4e, 0x01, 0x70, 0xc4, 0xfc, 0x79, 0x98, 0x2b, 0xdb, 0x79, 0xa3, 0xba,
+	0x74, 0x45, 0x63, 0x56, 0xd0, 0x47, 0x05, 0xdc, 0xb8, 0xe8, 0x05, 0x7f, 0x52, 0x38, 0xf9, 0x90,
+	0x5b, 0x5d, 0xfd, 0x13, 0xf7, 0x39, 0x60, 0x67, 0x5e, 0xa3, 0xfc, 0xc0, 0x4e, 0x1b, 0x0b, 0x00,
+	0x1b, 0xdd, 0xaa, 0xe6, 0x8b, 0x83, 0x63, 0x4d, 0x39, 0x3c, 0xd6, 0x94, 0x9f, 0xc7, 0x9a, 0xf2,
+	0xfe, 0x44, 0x2b, 0x1d, 0x9e, 0x68, 0xa5, 0xef, 0x27, 0x5a, 0xe9, 0xf9, 0xca, 0xd0, 0x49, 0x9a,
+	0x6c, 0xd2, 0xde, 0x22, 0x14, 0x51, 0x07, 0xa7, 0xb1, 0xd5, 0xc7, 0xd4, 0x25, 0xd4, 0x33, 0xf6,
+	0xce, 0x7f, 0x71, 0x45, 0x47, 0xad, 0x3d, 0x11, 0x7d, 0xfa, 0xdc, 0xfd, 0x1d, 0x00, 0x00, 0xff,
+	0xff, 0x1a, 0xda, 0xaa, 0xf5, 0x9a, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -446,6 +536,8 @@ type MsgClient interface {
 	Withdraw(ctx context.Context, in *MsgWithdraw, opts ...grpc.CallOption) (*MsgWithdrawResponse, error)
 	// SwapExactForTokens represents a message for trading exact coinA for coinB
 	SwapExactForTokens(ctx context.Context, in *MsgSwapExactForTokens, opts ...grpc.CallOption) (*MsgSwapExactForTokensResponse, error)
+	// SwapExactForBatchTokens represents a message for trading exact coinA for coinB
+	SwapExactForBatchTokens(ctx context.Context, in *MsgSwapExactForBatchTokens, opts ...grpc.CallOption) (*MsgSwapExactForBatchTokensResponse, error)
 	// SwapForExactTokens represents a message for trading coinA for an exact coinB
 	SwapForExactTokens(ctx context.Context, in *MsgSwapForExactTokens, opts ...grpc.CallOption) (*MsgSwapForExactTokensResponse, error)
 }
@@ -485,6 +577,15 @@ func (c *msgClient) SwapExactForTokens(ctx context.Context, in *MsgSwapExactForT
 	return out, nil
 }
 
+func (c *msgClient) SwapExactForBatchTokens(ctx context.Context, in *MsgSwapExactForBatchTokens, opts ...grpc.CallOption) (*MsgSwapExactForBatchTokensResponse, error) {
+	out := new(MsgSwapExactForBatchTokensResponse)
+	err := c.cc.Invoke(ctx, "/joltify.third_party.swap.v1beta1.Msg/SwapExactForBatchTokens", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *msgClient) SwapForExactTokens(ctx context.Context, in *MsgSwapForExactTokens, opts ...grpc.CallOption) (*MsgSwapForExactTokensResponse, error) {
 	out := new(MsgSwapForExactTokensResponse)
 	err := c.cc.Invoke(ctx, "/joltify.third_party.swap.v1beta1.Msg/SwapForExactTokens", in, out, opts...)
@@ -502,6 +603,8 @@ type MsgServer interface {
 	Withdraw(context.Context, *MsgWithdraw) (*MsgWithdrawResponse, error)
 	// SwapExactForTokens represents a message for trading exact coinA for coinB
 	SwapExactForTokens(context.Context, *MsgSwapExactForTokens) (*MsgSwapExactForTokensResponse, error)
+	// SwapExactForBatchTokens represents a message for trading exact coinA for coinB
+	SwapExactForBatchTokens(context.Context, *MsgSwapExactForBatchTokens) (*MsgSwapExactForBatchTokensResponse, error)
 	// SwapForExactTokens represents a message for trading coinA for an exact coinB
 	SwapForExactTokens(context.Context, *MsgSwapForExactTokens) (*MsgSwapForExactTokensResponse, error)
 }
@@ -518,6 +621,9 @@ func (*UnimplementedMsgServer) Withdraw(ctx context.Context, req *MsgWithdraw) (
 }
 func (*UnimplementedMsgServer) SwapExactForTokens(ctx context.Context, req *MsgSwapExactForTokens) (*MsgSwapExactForTokensResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SwapExactForTokens not implemented")
+}
+func (*UnimplementedMsgServer) SwapExactForBatchTokens(ctx context.Context, req *MsgSwapExactForBatchTokens) (*MsgSwapExactForBatchTokensResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SwapExactForBatchTokens not implemented")
 }
 func (*UnimplementedMsgServer) SwapForExactTokens(ctx context.Context, req *MsgSwapForExactTokens) (*MsgSwapForExactTokensResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SwapForExactTokens not implemented")
@@ -581,6 +687,24 @@ func _Msg_SwapExactForTokens_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_SwapExactForBatchTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSwapExactForBatchTokens)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).SwapExactForBatchTokens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/joltify.third_party.swap.v1beta1.Msg/SwapExactForBatchTokens",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).SwapExactForBatchTokens(ctx, req.(*MsgSwapExactForBatchTokens))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Msg_SwapForExactTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgSwapForExactTokens)
 	if err := dec(in); err != nil {
@@ -614,6 +738,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SwapExactForTokens",
 			Handler:    _Msg_SwapExactForTokens_Handler,
+		},
+		{
+			MethodName: "SwapExactForBatchTokens",
+			Handler:    _Msg_SwapExactForBatchTokens_Handler,
 		},
 		{
 			MethodName: "SwapForExactTokens",
@@ -882,6 +1010,91 @@ func (m *MsgSwapExactForTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgSwapExactForBatchTokens) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgSwapExactForBatchTokens) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgSwapExactForBatchTokens) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Deadline != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.Deadline))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.Slippage) > 0 {
+		i -= len(m.Slippage)
+		copy(dAtA[i:], m.Slippage)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Slippage)))
+		i--
+		dAtA[i] = 0x22
+	}
+	{
+		size, err := m.TokenB.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1a
+	{
+		size, err := m.ExactTokenA.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	if len(m.Requester) > 0 {
+		i -= len(m.Requester)
+		copy(dAtA[i:], m.Requester)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Requester)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgSwapExactForBatchTokensResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgSwapExactForBatchTokensResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgSwapExactForBatchTokensResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func (m *MsgSwapForExactTokens) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1067,6 +1280,39 @@ func (m *MsgSwapExactForTokens) Size() (n int) {
 }
 
 func (m *MsgSwapExactForTokensResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgSwapExactForBatchTokens) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Requester)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = m.ExactTokenA.Size()
+	n += 1 + l + sovTx(uint64(l))
+	l = m.TokenB.Size()
+	n += 1 + l + sovTx(uint64(l))
+	l = len(m.Slippage)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.Deadline != 0 {
+		n += 1 + sovTx(uint64(m.Deadline))
+	}
+	return n
+}
+
+func (m *MsgSwapExactForBatchTokensResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1840,6 +2086,255 @@ func (m *MsgSwapExactForTokensResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgSwapExactForTokensResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgSwapExactForBatchTokens) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgSwapExactForBatchTokens: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgSwapExactForBatchTokens: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Requester", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Requester = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ExactTokenA", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.ExactTokenA.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TokenB", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TokenB.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Slippage", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Slippage = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Deadline", wireType)
+			}
+			m.Deadline = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Deadline |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgSwapExactForBatchTokensResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgSwapExactForBatchTokensResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgSwapExactForBatchTokensResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
