@@ -14,7 +14,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgDeposit{}, "/joltify.third_party.swap.v1beta1.MsgDeposit", nil)
 	cdc.RegisterConcrete(&MsgWithdraw{}, "/joltify.third_party.swap.v1beta1.MsgWithdraw", nil)
 	cdc.RegisterConcrete(&MsgSwapExactForTokens{}, "/joltify.third_party.swap.v1beta1.MsgSwapExactForTokens", nil)
-	cdc.RegisterConcrete(&MsgSwapExactForBatchTokens{}, "/joltify.third_party.swap.v1beta1.MsgSwapForExactBatchTokens", nil)
+	cdc.RegisterConcrete(&MsgSwapExactForBatchTokens{}, "/joltify.third_party.swap.v1beta1.MsgSwapExactForBatchTokens", nil)
 	cdc.RegisterConcrete(&MsgSwapForExactTokens{}, "/joltify.third_party.swap.v1beta1.MsgSwapForExactTokens", nil)
 }
 
