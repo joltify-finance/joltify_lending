@@ -33,6 +33,44 @@ func (k *Keeper) SwapExactForTokens(ctx sdk.Context, requester sdk.AccAddress, e
 	return nil
 }
 
+// SwapExactForBatchTokens swaps an exact coin a input for a coin b output
+func (k *Keeper) SwapExactForBatchTokens(ctx sdk.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdk.Dec) error {
+	poolID, pool, err := k.loadPool(ctx, exactCoinA.Denom, "uoppy")
+	if err != nil {
+		return err
+	}
+
+	swapOutputintermediate, feePaid := pool.SwapWithExactInput(exactCoinA, k.GetSwapFee(ctx))
+	if swapOutputintermediate.IsZero() {
+		return errorsmod.Wrapf(types.ErrInsufficientLiquidity, "swap1 output rounds to zero, increase input amount")
+	}
+
+	poolID2, pool2, err := k.loadPool(ctx, "uoppy", coinB.Denom)
+	if err != nil {
+		return err
+	}
+
+	swapOutput, feePaid2 := pool2.SwapWithExactInput(swapOutputintermediate, k.GetSwapFee(ctx))
+	if swapOutput.IsZero() {
+		return errorsmod.Wrapf(types.ErrInsufficientLiquidity, "swap2 output rounds to zero, increase input amount")
+	}
+
+	priceChange := sdk.NewDecFromInt(swapOutput.Amount).Quo(sdk.NewDecFromInt(coinB.Amount))
+	if err := k.assertSlippageWithinLimit(priceChange, slippageLimit); err != nil {
+		return err
+	}
+
+	if err := k.commitSwap(ctx, poolID, pool, requester, exactCoinA, swapOutputintermediate, feePaid, "input"); err != nil {
+		return err
+	}
+
+	if err := k.commitSwap(ctx, poolID2, pool2, requester, swapOutputintermediate, swapOutput, feePaid2, "input"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SwapForExactTokens swaps a coin a input for an exact coin b output
 func (k *Keeper) SwapForExactTokens(ctx sdk.Context, requester sdk.AccAddress, coinA, exactCoinB sdk.Coin, slippageLimit sdk.Dec) error {
 	poolID, pool, err := k.loadPool(ctx, coinA.Denom, exactCoinB.Denom)

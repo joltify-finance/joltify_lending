@@ -14,6 +14,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgDeposit{}, "/joltify.third_party.swap.v1beta1.MsgDeposit", nil)
 	cdc.RegisterConcrete(&MsgWithdraw{}, "/joltify.third_party.swap.v1beta1.MsgWithdraw", nil)
 	cdc.RegisterConcrete(&MsgSwapExactForTokens{}, "/joltify.third_party.swap.v1beta1.MsgSwapExactForTokens", nil)
+	cdc.RegisterConcrete(&MsgSwapExactForBatchTokens{}, "/joltify.third_party.swap.v1beta1.MsgSwapForExactBatchTokens", nil)
 	cdc.RegisterConcrete(&MsgSwapForExactTokens{}, "/joltify.third_party.swap.v1beta1.MsgSwapForExactTokens", nil)
 }
 
@@ -25,6 +26,7 @@ func RegisterInterfaces(registry types.InterfaceRegistry) {
 		&MsgWithdraw{},
 		&MsgSwapExactForTokens{},
 		&MsgSwapForExactTokens{},
+		&MsgSwapExactForBatchTokens{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
@@ -39,5 +41,4 @@ var (
 func init() {
 	RegisterLegacyAminoCodec(amino)
 	cryptocodec.RegisterCrypto(amino)
-
 }

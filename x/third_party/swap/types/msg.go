@@ -16,6 +16,8 @@ const (
 	TypeMsgWithdraw = "swap_withdraw"
 	// TypeSwapExactForTokens represents the type string for MsgSwapExactForTokens
 	TypeSwapExactForTokens = "swap_exact_for_tokens"
+	// TypeSwapExactForBatchTokens represents the type string for MsgSwapExactForTokens
+	TypeSwapExactForBatchTokens = "swap_exact_for_batch_tokens"
 	// TypeSwapForExactTokens represents the type string for MsgSwapForExactTokens
 	TypeSwapForExactTokens = "swap_for_exact_tokens"
 )
@@ -264,6 +266,83 @@ func (msg MsgSwapExactForTokens) GetDeadline() time.Time {
 
 // DeadlineExceeded returns if the msg has exceeded it's deadline
 func (msg MsgSwapExactForTokens) DeadlineExceeded(blockTime time.Time) bool {
+	return blockTime.Unix() >= msg.Deadline
+}
+
+// NewMsgSwapExactForBatchTokens returns a new MsgSwapExactForBatchTokens
+func NewMsgSwapExactForBatchTokens(requester string, exactTokenA sdk.Coin, tokenB sdk.Coin, slippage string, deadline int64) *MsgSwapExactForBatchTokens {
+	return &MsgSwapExactForBatchTokens{
+		Requester:   requester,
+		ExactTokenA: exactTokenA,
+		TokenB:      tokenB,
+		Slippage:    slippage,
+		Deadline:    deadline,
+	}
+}
+
+// Route return the message type used for routing the message.
+func (msg MsgSwapExactForBatchTokens) Route() string { return RouterKey }
+
+// Type returns a human-readable string for the message, intended for utilization within tags.
+func (msg MsgSwapExactForBatchTokens) Type() string { return TypeSwapExactForBatchTokens }
+
+// ValidateBasic does a simple validation check that doesn't require access to any other information.
+func (msg MsgSwapExactForBatchTokens) ValidateBasic() error {
+	if msg.Requester == "" {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "requester address cannot be empty")
+	}
+
+	if _, err := sdk.AccAddressFromBech32(msg.Requester); err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid requester address: %s", err)
+	}
+
+	if !msg.ExactTokenA.IsValid() || msg.ExactTokenA.IsZero() {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidCoins, "exact token a deposit amount %s", msg.ExactTokenA)
+	}
+
+	if !msg.TokenB.IsValid() || msg.TokenB.IsZero() {
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidCoins, "token b deposit amount %s", msg.TokenB)
+	}
+
+	if msg.ExactTokenA.Denom == msg.TokenB.Denom {
+		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, "denominations can not be equal")
+	}
+
+	if msg.Slippage == "" {
+		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
+	}
+
+	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	if err != nil || slippage.IsNegative() {
+		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
+	}
+
+	if msg.Deadline <= 0 {
+		return errorsmod.Wrapf(ErrInvalidDeadline, "deadline %d", msg.Deadline)
+	}
+
+	return nil
+}
+
+// GetSignBytes gets the canonical byte representation of the Msg.
+func (msg MsgSwapExactForBatchTokens) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners returns the addresses of signers that must sign.
+func (msg MsgSwapExactForBatchTokens) GetSigners() []sdk.AccAddress {
+	requester, _ := sdk.AccAddressFromBech32(msg.Requester)
+	return []sdk.AccAddress{requester}
+}
+
+// GetDeadline returns the time at which the msg is considered invalid
+func (msg MsgSwapExactForBatchTokens) GetDeadline() time.Time {
+	return time.Unix(msg.Deadline, 0)
+}
+
+// DeadlineExceeded returns if the msg has exceeded it's deadline
+func (msg MsgSwapExactForBatchTokens) DeadlineExceeded(blockTime time.Time) bool {
 	return blockTime.Unix() >= msg.Deadline
 }
 

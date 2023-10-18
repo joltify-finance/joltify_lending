@@ -60,7 +60,7 @@ set -x
 # Create validator keys and add account to genesis
 validatorKeyName="validator"
 printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover
-$BINARY add-genesis-account $validatorKeyName 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
+$BINARY add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
 
 # Create faucet keys and add account to genesis
 faucetKeyName="faucet"
