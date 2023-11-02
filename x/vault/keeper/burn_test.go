@@ -72,29 +72,28 @@ func prepare(t *testing.T) (*joltapp.TestApp, sdk.Context, []sdk.AccAddress) {
 }
 
 func TestProcessAccountLeft(t *testing.T) {
-	app, ctx, creators := prepare(t)
+	app, ctx, _ := prepare(t)
+	err := app.GetBankKeeper().MintCoins(ctx, types.ModuleName, sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}})
+	assert.NoError(t, err)
 	app.VaultKeeper.SetStoreFeeAmount(ctx, sdk.NewCoins(sdk.NewCoin("mock", sdk.NewInt(12))))
 	app.VaultKeeper.ProcessAccountLeft(ctx)
 	fee, ok := app.VaultKeeper.GetFeeAmount(ctx, "mock")
 	assert.True(t, ok)
 	assert.Equal(t, fee.Amount, sdk.NewInt(0))
-	f1 := app.GetBankKeeper().GetAllBalances(ctx, creators[0])
-	assert.Equal(t, len(f1), 0)
-	f2 := app.GetBankKeeper().GetAllBalances(ctx, creators[1])
-	assert.Equal(t, len(f2), 0)
+
+	balance := app.GetModuleAccountBalance(ctx, types.ModuleName, "mock")
+	assert.True(t, balance.IsZero())
 }
 
 func TestProcessAccountLeftWithAccountLessThanFee(t *testing.T) {
-	app, ctx, creators := prepare(t)
+	app, ctx, _ := prepare(t)
+	err := app.GetBankKeeper().MintCoins(ctx, types.ModuleName, sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}})
+	assert.NoError(t, err)
 	app.VaultKeeper.SetStoreFeeAmount(ctx, sdk.NewCoins(sdk.NewCoin("mock", sdk.NewInt(120000))))
 	app.VaultKeeper.ProcessAccountLeft(ctx)
 	fee, ok := app.VaultKeeper.GetFeeAmount(ctx, "mock")
 	assert.True(t, ok)
 	assert.Equal(t, fee.Amount, sdk.NewInt(120000))
-	f1 := app.GetBankKeeper().GetAllBalances(ctx, creators[0])
-	assert.Equal(t, len(f1), 0)
-	f2 := app.GetBankKeeper().GetAllBalances(ctx, creators[1])
-	assert.Equal(t, len(f2), 0)
 	allCoins := app.GetBankKeeper().GetAllBalances(ctx, authtypes.NewModuleAddress(types.ModuleName))
 	assert.Equal(t, len(allCoins), 0)
 }

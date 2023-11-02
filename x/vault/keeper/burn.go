@@ -8,8 +8,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
-func (k Keeper) BurnTokens(ctx sdk.Context, addr sdk.AccAddress) error {
-	coinsBalance := k.bankKeeper.GetAllBalances(ctx, addr)
+func (k Keeper) BurnModuleTokens(ctx sdk.Context) error {
+	moduleAddr := k.ak.GetModuleAddress(types.ModuleName)
+	coinsBalance := k.bankKeeper.GetAllBalances(ctx, moduleAddr)
 	var coins sdk.Coins
 	for _, el := range coinsBalance {
 		if el.IsZero() {
@@ -20,30 +21,22 @@ func (k Keeper) BurnTokens(ctx sdk.Context, addr sdk.AccAddress) error {
 	if coins.Empty() {
 		return nil
 	}
-	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, addr, types.ModuleName, coins)
-	if err != nil {
-		k.Logger(ctx).Error("fail to send token to account")
-		return err
-	}
 	defer func() {
 		tick := html.UnescapeString("&#" + "128293" + ";")
 		msg := tick + " burn"
-		k.Logger(ctx).Info(msg, "coins", coins.String(), "address", addr.String())
+		k.Logger(ctx).Info(msg, "coins", coins.String(), "address", moduleAddr.String())
 	}()
 	return k.bankKeeper.BurnCoins(ctx, types.ModuleName, coins)
 }
 
-func (k Keeper) sendFeesToValidators(ctx sdk.Context, pool *types.PoolInfo) bool {
-	addr := pool.CreatePool.PoolAddr
-	if addr == nil {
-		return true
-	}
-	coinsBalance := sdk.NewCoins(k.bankKeeper.GetAllBalances(ctx, addr)...)
+func (k Keeper) sendFeesFromModuleToValidators(ctx sdk.Context) bool {
+	moduleAddr := k.ak.GetModuleAddress(types.ModuleName)
+	coinsBalance := sdk.NewCoins(k.bankKeeper.GetAllBalances(ctx, moduleAddr)...)
 	fee := sdk.NewCoins(k.GetAllFeeAmount(ctx)...)
 	var feeProcessed sdk.Coins
 	for _, el := range fee {
 		if coinsBalance.IsAllGTE(sdk.NewCoins(el)) {
-			err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, addr, types2.FeeCollectorName, sdk.NewCoins(el))
+			err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, types2.FeeCollectorName, sdk.NewCoins(el))
 			if err != nil {
 				k.Logger(ctx).Error("vault", "fail to send fee", err)
 				continue
@@ -105,26 +98,14 @@ func (k Keeper) ProcessAccountLeft(ctx sdk.Context) {
 		return
 	}
 
-	if len(ret.Pools) != 2 {
-		return
-	}
-
-	addr1 := ret.Pools[0].CreatePool.PoolAddr
-	addr2 := ret.Pools[1].CreatePool.PoolAddr
-
-	c1 := k.bankKeeper.GetAllBalances(ctx, addr1)
-	c2 := k.bankKeeper.GetAllBalances(ctx, addr2)
-	c1.Sort()
-	c2.Sort()
-	totalCoins := c1.Add(c2...)
+	moduleAccountAddr := k.ak.GetModuleAddress(types.ModuleName)
+	totalCoins := k.bankKeeper.GetAllBalances(ctx, moduleAccountAddr)
 	k.ProcessQuota(ctx, totalCoins)
 
 	// we only send fee to validators from the latest pool
-	if len(ret.Pools) != 0 {
-		transferred := k.sendFeesToValidators(ctx, ret.Pools[0])
-		if !transferred {
-			ctx.Logger().Info("vault", "send Fee to validator", "not enough token to be paid as fee")
-		}
+	transferred := k.sendFeesFromModuleToValidators(ctx)
+	if !transferred {
+		ctx.Logger().Info("vault", "send Fee to validator", "not enough token to be paid as fee")
 	}
 
 	for _, el := range ret.Pools {
@@ -135,15 +116,9 @@ func (k Keeper) ProcessAccountLeft(ctx sdk.Context) {
 		if addr == nil {
 			continue
 		}
-		err := k.BurnTokens(ctx, addr)
+		err := k.BurnModuleTokens(ctx)
 		if err != nil {
 			k.Logger(ctx).Error("fail to burn the token")
 		}
-	}
-
-	c1After := k.bankKeeper.GetAllBalances(ctx, addr1)
-	c2After := k.bankKeeper.GetAllBalances(ctx, addr2)
-	if (!c1After.Empty()) || (!c2After.Empty()) {
-		panic("after burn the tokens, pool should have ZERO coins")
 	}
 }

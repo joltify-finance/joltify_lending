@@ -115,18 +115,6 @@ func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, info 
 		return
 	}
 
-	req := types.QueryLatestPoolRequest{}
-
-	lastPoolsInfoResp, err := k.GetLastPool(sdk.WrapSDKContext(ctx), &req)
-	if err != nil {
-		ctx.Logger().Error("vault", "error", "fail to get the last pool")
-		return
-	}
-	if len(lastPoolsInfoResp.Pools) < 2 {
-		ctx.Logger().Error("vault", "error", "less than two pool we skip fee distribution")
-		return
-	}
-
 	candidateDec := sdk.NewDecWithPrec(int64(totalValidatorNum), 0)
 	params := k.GetParams(ctx)
 	candidateNumDec := candidateDec.Mul(params.CandidateRatio).MulTruncate(sdk.MustNewDecFromStr("0.6667"))
@@ -152,11 +140,6 @@ func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, info 
 				err := k.bankKeeper.MintCoins(ctx, types.ModuleName, newFee)
 				if err != nil {
 					ctx.Logger().Error("vault", "fail to mint fee", el.Feecoin.String())
-					return
-				}
-				err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, lastPoolsInfoResp.Pools[0].CreatePool.PoolAddr, newFee)
-				if err != nil {
-					ctx.Logger().Error("vault", "fail to send fee to latest pool", el.Feecoin.String())
 					return
 				}
 			}
