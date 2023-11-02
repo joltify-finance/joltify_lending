@@ -26,7 +26,7 @@ func (k *Keeper) SwapExactForTokens(ctx sdk.Context, requester sdk.AccAddress, e
 		return err
 	}
 
-	if err := k.commitSwap(ctx, poolID, pool, requester, exactCoinA, swapOutput, feePaid, "input"); err != nil {
+	if err := k.commitSwap(ctx, poolID, pool, requester, exactCoinA, swapOutput, feePaid, "input", true); err != nil {
 		return err
 	}
 
@@ -60,13 +60,25 @@ func (k *Keeper) SwapExactForBatchTokens(ctx sdk.Context, requester sdk.AccAddre
 		return err
 	}
 
-	if err := k.commitSwap(ctx, poolID, pool, requester, exactCoinA, swapOutputintermediate, feePaid, "input"); err != nil {
+	if err := k.commitSwap(ctx, poolID, pool, requester, exactCoinA, swapOutputintermediate, feePaid, "input", false); err != nil {
 		return err
 	}
 
-	if err := k.commitSwap(ctx, poolID2, pool2, requester, swapOutputintermediate, swapOutput, feePaid2, "input"); err != nil {
+	if err := k.commitSwap(ctx, poolID2, pool2, requester, swapOutputintermediate, swapOutput, feePaid2, "input", false); err != nil {
 		return err
 	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeSwapTrade,
+			sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
+			sdk.NewAttribute(types.AttributeKeyRequester, requester.String()),
+			sdk.NewAttribute(types.AttributeKeySwapInput, exactCoinA.String()),
+			sdk.NewAttribute(types.AttributeKeySwapOutput, swapOutput.String()),
+			sdk.NewAttribute(types.AttributeKeyFeePaid, feePaid.Add(feePaid2).String()),
+			sdk.NewAttribute(types.AttributeKeyExactDirection, "input"),
+		),
+	)
 
 	return nil
 }
@@ -92,7 +104,7 @@ func (k *Keeper) SwapForExactTokens(ctx sdk.Context, requester sdk.AccAddress, c
 		return err
 	}
 
-	if err := k.commitSwap(ctx, poolID, pool, requester, swapInput, exactCoinB, feePaid, "output"); err != nil {
+	if err := k.commitSwap(ctx, poolID, pool, requester, swapInput, exactCoinB, feePaid, "output", true); err != nil {
 		return err
 	}
 
@@ -132,7 +144,7 @@ func (k Keeper) commitSwap(
 	swapInput sdk.Coin,
 	swapOutput sdk.Coin,
 	feePaid sdk.Coin,
-	exactDirection string,
+	exactDirection string, emit bool,
 ) error {
 	k.SetPool(ctx, types.NewPoolRecordFromPool(pool))
 
@@ -144,17 +156,18 @@ func (k Keeper) commitSwap(
 		panic(err)
 	}
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeSwapTrade,
-			sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
-			sdk.NewAttribute(types.AttributeKeyRequester, requester.String()),
-			sdk.NewAttribute(types.AttributeKeySwapInput, swapInput.String()),
-			sdk.NewAttribute(types.AttributeKeySwapOutput, swapOutput.String()),
-			sdk.NewAttribute(types.AttributeKeyFeePaid, feePaid.String()),
-			sdk.NewAttribute(types.AttributeKeyExactDirection, exactDirection),
-		),
-	)
-
+	if emit {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeSwapTrade,
+				sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
+				sdk.NewAttribute(types.AttributeKeyRequester, requester.String()),
+				sdk.NewAttribute(types.AttributeKeySwapInput, swapInput.String()),
+				sdk.NewAttribute(types.AttributeKeySwapOutput, swapOutput.String()),
+				sdk.NewAttribute(types.AttributeKeyFeePaid, feePaid.String()),
+				sdk.NewAttribute(types.AttributeKeyExactDirection, exactDirection),
+			),
+		)
+	}
 	return nil
 }
