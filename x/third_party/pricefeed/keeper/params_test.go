@@ -3,7 +3,7 @@ package keeper_test
 import (
 	"testing"
 
-	tmlog "github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
@@ -12,8 +12,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	tmprototypes "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtime "github.com/tendermint/tendermint/types/time"
+	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmtime "github.com/cometbft/cometbft/types/time"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )

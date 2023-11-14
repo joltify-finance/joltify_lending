@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
@@ -12,7 +13,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/kyc/client/cli"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 )
@@ -43,7 +43,7 @@ func TestQueryParameters(t *testing.T) {
 	err = key.ImportPrivKey("0", am, "testme")
 	assert.Nil(t, err)
 
-	_, err = net.WaitForHeight(1)
+	err = net.WaitForNextBlock()
 	assert.Nil(t, err)
 
 	for _, tc := range []struct {

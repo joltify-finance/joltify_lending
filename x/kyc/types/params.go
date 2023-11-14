@@ -9,8 +9,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/client"
 
+	tmrand "github.com/cometbft/cometbft/libs/rand"
 	"github.com/gogo/protobuf/proto"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"

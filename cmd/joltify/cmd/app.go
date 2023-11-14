@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	dbm "github.com/cometbft/cometbft-db"
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -21,13 +23,12 @@ import (
 	"github.com/joltify-finance/joltify_lending/app/params"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/libs/log"
-	db "github.com/tendermint/tm-db"
 )
 
 const (
 	flagMempoolEnableAuth    = "mempool.enable-authentication"
 	flagMempoolAuthAddresses = "mempool.authorized-addresses"
+	ChainID                  = "joltifydev_1729-1"
 )
 
 // appCreator holds functions used by the sdk server to control the joltify app.
@@ -39,7 +40,7 @@ type appCreator struct {
 // newApp loads config from AppOptions and returns a new app.
 func (ac appCreator) newApp(
 	logger log.Logger,
-	db db.DB,
+	db dbm.DB,
 	traceStore io.Writer,
 	appOpts servertypes.AppOptions,
 ) servertypes.Application {
@@ -60,7 +61,7 @@ func (ac appCreator) newApp(
 
 	homeDir := cast.ToString(appOpts.Get(flags.FlagHome))
 	snapshotDir := filepath.Join(homeDir, "data", "snapshots") // TODO can these directory names be imported from somewhere?
-	snapshotDB, err := sdk.NewLevelDB("metadata", snapshotDir) //nolint:staticcheck
+	snapshotDB, err := dbm.NewDB("metadata", dbm.GoLevelDBBackend, snapshotDir)
 	if err != nil {
 		panic(err)
 	}
@@ -91,6 +92,8 @@ func (ac appCreator) newApp(
 			EVMTrace:              cast.ToString(appOpts.Get(ethermintflags.EVMTracer)),
 			EVMMaxGasWanted:       cast.ToUint64(appOpts.Get(ethermintflags.EVMMaxTxGasWanted)),
 		},
+		0,
+		appOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(strings.ReplaceAll(cast.ToString(appOpts.Get(server.FlagMinGasPrices)), ";", ",")),
 		baseapp.SetHaltHeight(cast.ToUint64(appOpts.Get(server.FlagHaltHeight))),
@@ -100,18 +103,20 @@ func (ac appCreator) newApp(
 		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
 		baseapp.SetSnapshot(snapshotStore, snapOpts),
+		baseapp.SetChainID(ChainID),
 	)
 }
 
 // appExport writes out an app's state to json.
 func (ac appCreator) appExport(
 	logger log.Logger,
-	db db.DB,
+	db dbm.DB,
 	traceStore io.Writer,
 	height int64,
 	forZeroHeight bool,
 	jailAllowedAddrs []string,
 	appOpts servertypes.AppOptions,
+	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
 	homePath, ok := appOpts.Get(flags.FlagHome).(string)
 	if !ok || homePath == "" {
@@ -124,15 +129,15 @@ func (ac appCreator) appExport(
 
 	var tempApp *app.App
 	if height != -1 {
-		tempApp = app.NewApp(logger, db, homePath, traceStore, ac.encodingConfig, options)
-
+		tempApp = app.NewApp(logger, db, homePath, traceStore, ac.encodingConfig, options, uint(1), appOpts, baseapp.SetChainID(ChainID))
 		if err := tempApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		tempApp = app.NewApp(logger, db, homePath, traceStore, ac.encodingConfig, options)
+		tempApp = app.NewApp(logger, db, homePath, traceStore, ac.encodingConfig, options, uint(1), appOpts, baseapp.SetChainID(ChainID))
 	}
-	return tempApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
+
+	return tempApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
 }
 
 // addStartCmdFlags adds flags to the server start command.

@@ -8,10 +8,10 @@ import (
 )
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgCreateOutboundTx{}, "vault/CreateOutboundTx", nil)
+	cdc.RegisterConcrete(&MsgCreateOutboundTx{}, "/joltify.vault.MsgCreateOutboundTx", nil)
 	// this line is used by starport scaffolding # 2
-	cdc.RegisterConcrete(&MsgCreateIssueToken{}, "vault/CreateIssueToken", nil)
-	cdc.RegisterConcrete(&MsgCreateCreatePool{}, "vault/CreateCreatePool", nil)
+	cdc.RegisterConcrete(&MsgCreateIssueToken{}, "/joltify.vault.MsgCreateIssueToken", nil)
+	cdc.RegisterConcrete(&MsgCreateCreatePool{}, "/joltify.vault.MsgCreateCreatePool", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {

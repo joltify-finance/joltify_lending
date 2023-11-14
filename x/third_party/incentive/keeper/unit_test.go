@@ -7,22 +7,22 @@ import (
 	sdkmath "cosmossdk.io/math"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 
-	tmlog "github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
+	db "github.com/cometbft/cometbft-db"
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/libs/log"
-	db "github.com/tendermint/tm-db"
 
+	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/joltify-finance/joltify_lending/app"
-	tmprototypes "github.com/tendermint/tendermint/proto/tendermint/types"
 )
 
 // NewTestContext sets up a basic context with an in-memory db

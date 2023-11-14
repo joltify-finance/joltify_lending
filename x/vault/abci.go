@@ -1,9 +1,9 @@
 package vault
 
 import (
+	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/keeper"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func EndBlock(ctx sdk.Context, keeper keeper.Keeper) []abci.ValidatorUpdate {

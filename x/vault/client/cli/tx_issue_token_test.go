@@ -6,6 +6,9 @@ import (
 	"testing"
 	"time"
 
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -103,7 +106,7 @@ func TestCreateIssueTokenFail(t *testing.T) {
 			args: []string{
 				fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 				// fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdk.NewInt(10))).String()),
 			},
 		},
@@ -117,15 +120,19 @@ func TestCreateIssueTokenFail(t *testing.T) {
 			out, err := clitestutil.ExecTestCLICmd(ctx, cli.CmdCreateIssueToken(), args)
 			var resp sdk.TxResponse
 			require.NoError(t, ctx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+			err = net.WaitForNextBlock()
+			require.NoError(t, err)
+			ret, err := tx.QueryTx(ctx, resp.TxHash)
+			require.NoError(t, err)
 			expected := fmt.Sprintf("failed to execute message; message index: 0: creator %v is not in pool addresses set: invalid request", val.Address.String())
-			require.Equal(t, expected, resp.RawLog)
+			require.Equal(t, expected, ret.RawLog)
 			require.Nil(t, err)
-			require.NotEqual(t, uint32(0), resp.Code)
+			require.NotEqual(t, uint32(0), ret.Code)
 		})
 	}
 }
 
-func networkPrepare(t *testing.T, maxValidator uint32, addr string) (*network.Network, []*types.CreatePool) {
+func networkPrepare(t *testing.T, maxValidator uint32, addr sdk.AccAddress, pk cryptotypes.PubKey) (*network.Network, []*types.CreatePool) {
 	t.Helper()
 	cfg := network.DefaultConfig()
 	cfg.MinGasPrices = "0stake"
@@ -142,12 +149,10 @@ func networkPrepare(t *testing.T, maxValidator uint32, addr string) (*network.Ne
 	state.Params.BlockChurnInterval = 3
 	buf, err := cfg.Codec.MarshalJSON(&state)
 	require.NoError(t, err)
-	stateBank.Balances = []banktypes.Balance{{Address: addr, Coins: sdk.Coins{sdk.NewCoin("stake", sdk.NewInt(100000))}}}
+	stateBank.Balances = []banktypes.Balance{{Address: addr.String(), Coins: sdk.Coins{sdk.NewCoin("stake", sdk.NewInt(100000))}}}
 	bankBuf, err := cfg.Codec.MarshalJSON(&stateBank)
 	require.NoError(t, err)
 	cfg.GenesisState[banktypes.ModuleName] = bankBuf
-
-	cfg.GenesisState[types.ModuleName] = buf
 
 	var stateVault stakingtypes.GenesisState
 	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[stakingtypes.ModuleName], &stateVault))
@@ -155,6 +160,12 @@ func networkPrepare(t *testing.T, maxValidator uint32, addr string) (*network.Ne
 	buf, err = cfg.Codec.MarshalJSON(&stateVault)
 	require.NoError(t, err)
 	cfg.GenesisState[stakingtypes.ModuleName] = buf
+
+	//acc := authtypes.NewBaseAccount(addr, pk, 10, 0)
+	//genAccs := []authtypes.GenesisAccount{acc}
+
+	//authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
+	//cfg.GenesisState[authtypes.ModuleName] = cfg.Codec.MustMarshalJSON(authGenesis)
 
 	nb := network.New(t, cfg)
 	return nb, state.CreatePoolList
@@ -177,9 +188,12 @@ func TestCreateIssue(t *testing.T) {
 	assert.Nil(t, err)
 	addr, err := v.GetAddress()
 	assert.NoError(t, err)
-	net, _ := networkPrepare(t, 3, addr.String())
+	pk, err := v.GetPubKey()
+	assert.NoError(t, err)
 
-	_, err = net.WaitForHeightWithTimeout(5, time.Minute)
+	net, _ := networkPrepare(t, 3, addr, pk)
+
+	err = net.WaitForNextBlock()
 	assert.NoError(t, err)
 	val := net.Validators[0]
 	ctx := val.ClientCtx
@@ -211,20 +225,21 @@ func TestCreateIssue(t *testing.T) {
 	commonArgs := []string{
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, infoAddr),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdk.NewInt(10))).String()),
 	}
 
 	commonArgs2 := []string{
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, thisInfoAddr),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 	}
 	var args []string
 	args = append(args, createPoolFields...)
 	args = append(args, commonArgs...)
 
-	_, err = net.WaitForHeightWithTimeout(3, time.Minute)
+	err = net.WaitForNextBlock()
+	//_, err = net.WaitForHeightWithTimeout(30, time.Minute)
 	assert.Nil(t, err)
 
 	out, err := clitestutil.ExecTestCLICmd(ctx, cli.CmdCreateCreatePool(), args)
@@ -233,7 +248,15 @@ func TestCreateIssue(t *testing.T) {
 	require.NoError(t, ctx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 	require.Equal(t, uint32(0), resp.Code)
 
-	_, err = net.WaitForHeightWithTimeout(15, time.Minute)
+	current, err := net.LatestHeight()
+	assert.Nil(t, err)
+	_, err = net.WaitForHeightWithTimeout(int64(current)+5, time.Minute)
+	assert.Nil(t, err)
+
+	ret, err := tx.QueryTx(ctx, resp.TxHash)
+	require.NoError(t, err)
+
+	//_, err = net.WaitForHeightWithTimeout(15, time.Minute)
 	assert.Nil(t, err)
 	// now we submit the issue token request
 	issueTokenfields := []string{"100vvusd", "jolt18mdnq8x9m07dryymlyf8jknagp87yga0hpe7n6"}
@@ -243,7 +266,20 @@ func TestCreateIssue(t *testing.T) {
 	issueTokenArgs = append(issueTokenArgs, commonArgs2...)
 	out, err = clitestutil.ExecTestCLICmd(ctx, cli.CmdCreateIssueToken(), issueTokenArgs)
 	assert.Nil(t, err)
-	var respIssueToken sdk.TxResponse
-	require.NoError(t, ctx.Codec.UnmarshalJSON(out.Bytes(), &respIssueToken))
-	require.Equal(t, uint32(0), respIssueToken.Code)
+
+	current, err = net.LatestHeight()
+	assert.Nil(t, err)
+	_, err = net.WaitForHeightWithTimeout(int64(current)+5, time.Minute)
+	assert.Nil(t, err)
+
+	var response sdk.TxResponse
+	err = net.Validators[0].ClientCtx.Codec.UnmarshalJSON(out.Bytes(), &response)
+	require.NoError(t, err)
+
+	ret, err = tx.QueryTx(net.Validators[0].ClientCtx, response.TxHash)
+	require.NoError(t, err)
+
+	fmt.Printf(">>>>>>>>>>>>>>>%v\n", ret)
+	fmt.Printf(">>>>>>>>>>>>>>>%v\n", ret.Code)
+	require.Equal(t, uint32(0), ret.Code)
 }

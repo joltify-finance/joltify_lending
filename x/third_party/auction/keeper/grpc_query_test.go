@@ -4,15 +4,15 @@ import (
 	"testing"
 	"time"
 
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/require"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 )
 
 func TestGrpcAuctionsFilter(t *testing.T) {

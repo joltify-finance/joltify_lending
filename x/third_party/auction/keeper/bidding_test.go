@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/stretchr/testify/require"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
@@ -576,7 +576,7 @@ func TestAuctionBidding(t *testing.T) {
 					if oldBidder.Equals(authtypes.NewModuleAddress(oldAuction.GetInitiator())) {
 						require.Equal(t, oldBidderOldCoins.Add(oldAuction.GetBid()).Add(c("debt", oldAuction.GetBid().Amount.Int64())), bank.GetAllBalances(ctx, oldBidder))
 					} else if oldBidder.Empty() {
-						require.Equal(t, oldBidderOldCoins.Add(oldAuction.GetBid()).Add(c("debt", oldAuction.GetBid().Amount.Int64())), oldBidderOldCoins)
+						require.True(t, oldBidderOldCoins.Add(oldAuction.GetBid()).Add(c("debt", oldAuction.GetBid().Amount.Int64())).Empty())
 					} else {
 						require.Equal(t, cs(oldBidderOldCoins.Add(oldAuction.GetBid())...), bank.GetAllBalances(ctx, oldBidder))
 					}

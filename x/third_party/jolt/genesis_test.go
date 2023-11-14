@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -13,9 +13,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtime "github.com/tendermint/tendermint/types/time"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )

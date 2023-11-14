@@ -9,7 +9,7 @@ package simulation
 
 // 	"github.com/cosmos/cosmos-sdk/baseapp"
 // 	"github.com/cosmos/cosmos-sdk/codec"
-// 	"github.com/cosmos/cosmos-sdk/simapp/helpers"
+// 	"cosmossdk.io/simapp/helpers"
 // 	sdk "github.com/cosmos/cosmos-sdk/types"
 // 	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 // 	"github.com/cosmos/cosmos-sdk/x/simulation"

@@ -40,16 +40,11 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipOneInvestor() {
 		PoolIndex: suite.investorPool,
 		Token:     depositAmount,
 	}
-	fmt.Printf(">>>>>>>>333333333333333333#>>>>>>>>>\n")
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
 
 	//_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
 	//suite.Require().NoError(err)
-
-	poolInfoBefore2, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
-	suite.Require().True(found)
-	fmt.Printf(">>>>111>>>>>###>>>>>>%v ### %v\n", poolInfoBefore2.UsableAmount, poolInfoBefore2.BorrowedAmount)
 
 	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
 

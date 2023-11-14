@@ -8,9 +8,9 @@ import (
 
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/testutil"
@@ -19,10 +19,10 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
-	tmprototypes "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )

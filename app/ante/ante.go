@@ -5,17 +5,18 @@ import (
 	"runtime/debug"
 
 	errorsmod "cosmossdk.io/errors"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	ibcante "github.com/cosmos/ibc-go/v6/modules/core/ante"
-	ibckeeper "github.com/cosmos/ibc-go/v6/modules/core/keeper"
+	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
+	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 	evmante "github.com/evmos/ethermint/app/ante"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
+	feeMarketKeeper "github.com/evmos/ethermint/x/feemarket/keeper"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 )
 
 // cosmosHandlerOptions extends HandlerOptions to provide some Cosmos specific configurations
@@ -36,7 +37,7 @@ type HandlerOptions struct {
 	FeegrantKeeper         authante.FeegrantKeeper
 	SignModeHandler        authsigning.SignModeHandler
 	SigGasConsumer         authante.SignatureVerificationGasConsumer
-	FeeMarketKeeper        evmtypes.FeeMarketKeeper
+	FeeMarketKeeper        feeMarketKeeper.Keeper
 	MaxTxGasWanted         uint64
 	AddressFetchers        []AddressFetcher
 	ExtensionOptionChecker authante.ExtensionOptionChecker
@@ -82,7 +83,7 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 				switch typeURL := opts[0].GetTypeUrl(); typeURL {
 				case "/ethermint.evm.v1.ExtensionOptionsEthereumTx":
 					// handle as *evmtypes.MsgEthereumTx
-					anteHandler = newEthAnteHandler(options)
+					anteHandler = newEthAnteHandler(ctx, options)
 				case "/ethermint.types.v1.ExtensionOptionsWeb3Tx":
 					// handle as normal Cosmos SDK tx, except signature is checked for EIP712 representation
 					anteHandler = newCosmosAnteHandler(cosmosHandlerOptions{
@@ -165,18 +166,28 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 	return sdk.ChainAnteDecorators(decorators...)
 }
 
-func newEthAnteHandler(options HandlerOptions) sdk.AnteHandler {
-	return sdk.ChainAnteDecorators(
-		evmante.NewEthSetUpContextDecorator(options.EvmKeeper), // outermost AnteDecorator. SetUpContext must be called first
-		evmante.NewEthMempoolFeeDecorator(options.EvmKeeper),   // Check eth effective gas price against minimal-gas-prices
-		evmante.NewEthValidateBasicDecorator(options.EvmKeeper),
-		evmante.NewEthSigVerificationDecorator(options.EvmKeeper),
-		evmante.NewEthAccountVerificationDecorator(options.AccountKeeper, options.EvmKeeper),
-		evmante.NewCanTransferDecorator(options.EvmKeeper),
-		evmante.NewEthGasConsumeDecorator(options.EvmKeeper, options.MaxTxGasWanted),
+func newEthAnteHandler(ctx sdk.Context, options HandlerOptions) sdk.AnteHandler {
+	evmParams := options.EvmKeeper.GetParams(ctx)
+	evmDenom := evmParams.EvmDenom
+	chainID := options.EvmKeeper.ChainID()
+	chainCfg := evmParams.GetChainConfig()
+	ethCfg := chainCfg.EthereumConfig(chainID)
+	baseFee := options.EvmKeeper.GetBaseFee(ctx, ethCfg)
+
+	decorators := []sdk.AnteDecorator{
+		evmante.NewEthSetUpContextDecorator(options.EvmKeeper),               // outermost AnteDecorator. SetUpContext must be called first
+		evmante.NewEthMempoolFeeDecorator(evmDenom, baseFee),                 // Check eth effective gas price against minimal-gas-prices
+		evmante.NewEthMinGasPriceDecorator(options.FeeMarketKeeper, baseFee), // Check eth effective gas price against the global MinGasPrice
+		evmante.NewEthValidateBasicDecorator(&evmParams, baseFee),
+		evmante.NewEthSigVerificationDecorator(chainID),
+		evmante.NewEthAccountVerificationDecorator(options.AccountKeeper, options.EvmKeeper, evmDenom),
+		evmante.NewCanTransferDecorator(options.EvmKeeper, baseFee, &evmParams, ethCfg),
+		evmante.NewEthGasConsumeDecorator(options.EvmKeeper, options.MaxTxGasWanted, ethCfg, evmDenom, baseFee),
 		evmante.NewEthIncrementSenderSequenceDecorator(options.AccountKeeper), // innermost AnteDecorator.
-		evmante.NewEthEmitEventDecorator(options.EvmKeeper),                   // emit eth tx hash and index at the very last ante handler.
-	)
+		evmante.NewGasWantedDecorator(options.FeeMarketKeeper, ethCfg),
+		evmante.NewEthEmitEventDecorator(options.EvmKeeper), // emit eth tx hash and index at the very last ante handler.
+	}
+	return sdk.ChainAnteDecorators(decorators...)
 }
 
 func Recover(logger tmlog.Logger, err *error) {

@@ -37,6 +37,14 @@ type EvmBankKeeper struct {
 	ak          types.AccountKeeper
 }
 
+func (k EvmBankKeeper) IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error {
+	return k.bk.IsSendEnabledCoins(ctx, coins...)
+}
+
+func (k EvmBankKeeper) BlockedAddr(addr sdk.AccAddress) bool {
+	return k.bk.BlockedAddr(addr)
+}
+
 func NewEvmBankKeeper(uJoltKeeper Keeper, bk types.BankKeeper, ak types.AccountKeeper) EvmBankKeeper {
 	return EvmBankKeeper{
 		ajoltKeeper: uJoltKeeper,

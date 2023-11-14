@@ -17,7 +17,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	abci "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 )
 
 var (
@@ -105,21 +105,6 @@ func (AppModule) Name() string {
 
 // RegisterInvariants register module invariants
 func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
-
-// Route module message route name
-func (am AppModule) Route() sdk.Route {
-	return sdk.Route{}
-}
-
-// QuerierRoute module querier route name
-func (AppModule) QuerierRoute() string {
-	return types2.QuerierRoute
-}
-
-// LegacyQuerierHandler returns no sdk.Querier.
-func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return keeper2.NewQuerier(am.keeper, legacyQuerierCdc)
-}
 
 // ConsensusVersion implements AppModule/ConsensusVersion.
 func (AppModule) ConsensusVersion() uint64 {
