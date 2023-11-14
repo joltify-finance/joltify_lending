@@ -5,17 +5,17 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	types4 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
+	"github.com/cometbft/cometbft/crypto"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/tendermint/tendermint/crypto"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )

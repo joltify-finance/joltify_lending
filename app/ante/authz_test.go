@@ -8,7 +8,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/ante"
 
-	"github.com/cosmos/cosmos-sdk/simapp/helpers"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/authz"
@@ -212,12 +212,12 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tx, err := helpers.GenSignedMockTx(
+			tx, err := simtestutil.GenSignedMockTx(
 				rand.New(rand.NewSource(time.Now().UnixNano())),
 				txConfig,
 				tc.msgs,
 				sdk.NewCoins(),
-				helpers.DefaultGenTxGas,
+				simtestutil.DefaultGenTxGas,
 				"testing-chain-id",
 				[]uint64{0},
 				[]uint64{0},

@@ -9,8 +9,8 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/types"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
+	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "google.golang.org/protobuf/types/known/durationpb"
 	io "io"
 	math "math"
@@ -604,7 +604,7 @@ func (m *ProjectInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x6a
 	}
-	n1, err1 := github_com_gogo_protobuf_types.StdDurationMarshalTo(m.GraceTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdDuration(m.GraceTime):])
+	n1, err1 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.GraceTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.GraceTime):])
 	if err1 != nil {
 		return 0, err1
 	}
@@ -875,7 +875,7 @@ func (m *ProjectInfo) Size() (n int) {
 	if m.PoolTotalBorrowLimit != 0 {
 		n += 1 + sovParams(uint64(m.PoolTotalBorrowLimit))
 	}
-	l = github_com_gogo_protobuf_types.SizeOfStdDuration(m.GraceTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.GraceTime)
 	n += 1 + l + sovParams(uint64(l))
 	l = len(m.MarketId)
 	if l > 0 {
@@ -1673,7 +1673,7 @@ func (m *ProjectInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdDurationUnmarshal(&m.GraceTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.GraceTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

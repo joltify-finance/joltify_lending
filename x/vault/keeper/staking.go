@@ -6,10 +6,10 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 
+	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	vaulttypes "github.com/joltify-finance/joltify_lending/x/vault/types"
 )

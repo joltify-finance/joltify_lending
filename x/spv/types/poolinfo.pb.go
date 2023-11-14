@@ -9,8 +9,8 @@ import (
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
+	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "google.golang.org/protobuf/types/known/durationpb"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
@@ -853,7 +853,7 @@ func (m *PoolInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0xf8
 	}
-	n4, err4 := github_com_gogo_protobuf_types.StdDurationMarshalTo(m.GraceTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdDuration(m.GraceTime):])
+	n4, err4 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.GraceTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.GraceTime):])
 	if err4 != nil {
 		return 0, err4
 	}
@@ -863,7 +863,7 @@ func (m *PoolInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	dAtA[i] = 0x1
 	i--
 	dAtA[i] = 0xf2
-	n5, err5 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.PoolFirstDueTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.PoolFirstDueTime):])
+	n5, err5 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.PoolFirstDueTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.PoolFirstDueTime):])
 	if err5 != nil {
 		return 0, err5
 	}
@@ -873,7 +873,7 @@ func (m *PoolInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	dAtA[i] = 0x1
 	i--
 	dAtA[i] = 0xea
-	n6, err6 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.PoolCreatedTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.PoolCreatedTime):])
+	n6, err6 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.PoolCreatedTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.PoolCreatedTime):])
 	if err6 != nil {
 		return 0, err6
 	}
@@ -933,7 +933,7 @@ func (m *PoolInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0xb2
 		}
 	}
-	n7, err7 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.ProjectDueTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.ProjectDueTime):])
+	n7, err7 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.ProjectDueTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.ProjectDueTime):])
 	if err7 != nil {
 		return 0, err7
 	}
@@ -1038,7 +1038,7 @@ func (m *PoolInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x58
 	}
-	n13, err13 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.LastPaymentTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.LastPaymentTime):])
+	n13, err13 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.LastPaymentTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.LastPaymentTime):])
 	if err13 != nil {
 		return 0, err13
 	}
@@ -1283,7 +1283,7 @@ func (m *PoolInfo) Size() (n int) {
 			n += 1 + l + sovPoolinfo(uint64(l))
 		}
 	}
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.LastPaymentTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.LastPaymentTime)
 	n += 1 + l + sovPoolinfo(uint64(l))
 	if m.PoolStatus != 0 {
 		n += 1 + sovPoolinfo(uint64(m.PoolStatus))
@@ -1308,7 +1308,7 @@ func (m *PoolInfo) Size() (n int) {
 	n += 2 + l + sovPoolinfo(uint64(l))
 	l = m.WithdrawProposalAmount.Size()
 	n += 2 + l + sovPoolinfo(uint64(l))
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.ProjectDueTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.ProjectDueTime)
 	n += 2 + l + sovPoolinfo(uint64(l))
 	if len(m.WithdrawAccounts) > 0 {
 		for _, b := range m.WithdrawAccounts {
@@ -1334,11 +1334,11 @@ func (m *PoolInfo) Size() (n int) {
 	if m.CurrentPoolTotalBorrowCounter != 0 {
 		n += 2 + sovPoolinfo(uint64(m.CurrentPoolTotalBorrowCounter))
 	}
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.PoolCreatedTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.PoolCreatedTime)
 	n += 2 + l + sovPoolinfo(uint64(l))
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.PoolFirstDueTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.PoolFirstDueTime)
 	n += 2 + l + sovPoolinfo(uint64(l))
-	l = github_com_gogo_protobuf_types.SizeOfStdDuration(m.GraceTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.GraceTime)
 	n += 2 + l + sovPoolinfo(uint64(l))
 	if m.NegativeInterestCounter != 0 {
 		n += 2 + sovPoolinfo(uint64(m.NegativeInterestCounter))
@@ -1757,7 +1757,7 @@ func (m *PoolInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.LastPaymentTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.LastPaymentTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2080,7 +2080,7 @@ func (m *PoolInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.ProjectDueTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.ProjectDueTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2253,7 +2253,7 @@ func (m *PoolInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.PoolCreatedTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.PoolCreatedTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2286,7 +2286,7 @@ func (m *PoolInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.PoolFirstDueTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.PoolFirstDueTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2319,7 +2319,7 @@ func (m *PoolInfo) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdDurationUnmarshal(&m.GraceTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.GraceTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

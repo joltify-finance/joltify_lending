@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	app2 "github.com/joltify-finance/joltify_lending/app"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/stretchr/testify/assert"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
@@ -53,7 +53,7 @@ func TestQueryByWallets(t *testing.T) {
 	defaultArgs := []string{
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, addr.String()),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 	}
 	fields := []string{"2", "jolt1xdpg5l3pxpyhxqg4ey4krq2pf9d3sphmmuuugg,jolt1ljsg33ad5wjac6vm5htxxujrxrwgpzy8ucl2yq,jolt1hnk55w58lje99eqqjmffgg8278l22jmzpsa9rj"}
 
@@ -61,9 +61,13 @@ func TestQueryByWallets(t *testing.T) {
 	args := append(fields, defaultArgs...)
 	_, err = clitestutil.ExecTestCLICmd(ctx, cli.CmdUploadInvestor(), args)
 	require.NoError(t, err)
+	err = net.WaitForNextBlock()
+	require.NoError(t, err)
 
 	args = append(fields2, defaultArgs...)
 	_, err = clitestutil.ExecTestCLICmd(ctx, cli.CmdUploadInvestor(), args)
+	require.NoError(t, err)
+	err = net.WaitForNextBlock()
 	require.NoError(t, err)
 
 	for _, tc := range []struct {
@@ -141,14 +145,15 @@ func TestQueryByWallets(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			var args []string
 			args = append(tc.fields, tc.args...)
-			fmt.Printf(">>>>%v\n", args)
 			out, err2 := clitestutil.ExecTestCLICmd(ctx, cli.CmdQueryByWallet(), args)
-			if err2 != nil {
-				fmt.Printf(">>>>>>>>%v\n", err2.Error())
+			if tc.err != nil {
+				assert.EqualError(t, err2, tc.err.Error())
 			}
 			if tc.err != nil {
 				require.Equal(t, tc.err.Error(), err2.Error())
 			} else {
+				err = net.WaitForNextBlock()
+				require.NoError(t, err)
 				var resp kyctypes.QueryByWalletResponse
 				require.NoError(t, ctx.Codec.UnmarshalJSON(out.Bytes(), &resp))
 				if tc.id == "2" {

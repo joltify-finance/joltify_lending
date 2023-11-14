@@ -3,9 +3,9 @@ package v2_test
 import (
 	"testing"
 
+	simappparams "cosmossdk.io/simapp/params"
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -15,7 +15,7 @@ import (
 )
 
 func TestStoreMigrationAddsKeyTableIncludingNewParam(t *testing.T) {
-	encCfg := simapp.MakeTestEncodingConfig()
+	encCfg := simappparams.MakeTestEncodingConfig()
 	evmutilKey := sdk.NewKVStoreKey(types.ModuleName)
 	tEvmutilKey := sdk.NewTransientStoreKey("transient_test")
 	ctx := testutil.DefaultContext(evmutilKey, tEvmutilKey)
@@ -33,7 +33,7 @@ func TestStoreMigrationAddsKeyTableIncludingNewParam(t *testing.T) {
 }
 
 func TestStoreMigrationSetsNewParamOnExistingKeyTable(t *testing.T) {
-	encCfg := simapp.MakeTestEncodingConfig()
+	encCfg := simappparams.MakeTestEncodingConfig()
 	evmutilKey := sdk.NewKVStoreKey(types.ModuleName)
 	tEvmutilKey := sdk.NewTransientStoreKey("transient_test")
 	ctx := testutil.DefaultContext(evmutilKey, tEvmutilKey)

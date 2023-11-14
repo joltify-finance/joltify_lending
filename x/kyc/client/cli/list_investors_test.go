@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	app2 "github.com/joltify-finance/joltify_lending/app"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/stretchr/testify/assert"
 
@@ -30,7 +30,6 @@ func TestListInvestors(t *testing.T) {
 	assert.Nil(t, err)
 
 	addr, err := v.GetAddress()
-	_ = addr
 	assert.NoError(t, err)
 
 	net := networkPrepare(t, 3, v)
@@ -73,7 +72,7 @@ func TestListInvestors(t *testing.T) {
 		defaultArgs := []string{
 			fmt.Sprintf("--%s=%s", flags.FlagFrom, addr.String()),
 			fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-			fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+			fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 		}
 		var args []string
 		args = append(args, fields...)
@@ -81,6 +80,10 @@ func TestListInvestors(t *testing.T) {
 		_, err := clitestutil.ExecTestCLICmd(ctx, cli.CmdUploadInvestor(), args)
 		require.NoError(t, err)
 		tc := tc
+
+		err = net.WaitForNextBlock()
+		require.NoError(t, err)
+
 		t.Run(tc.desc, func(t *testing.T) {
 			var args []string
 			args = append(args, tc.fields...)
@@ -92,6 +95,7 @@ func TestListInvestors(t *testing.T) {
 				var resp kyctypes.ListInvestorsResponse
 				require.NoError(t, err)
 				require.NoError(t, ctx.Codec.UnmarshalJSON(out.Bytes(), &resp))
+
 				require.Equal(t, fields[0], resp.Investor[0].InvestorId)
 				require.EqualValues(t, "jolt1xdpg5l3pxpyhxqg4ey4krq2pf9d3sphmmuuugg", resp.Investor[0].GetWalletAddress()[0])
 				require.EqualValues(t, "jolt1ljsg33ad5wjac6vm5htxxujrxrwgpzy8ucl2yq", resp.Investor[0].GetWalletAddress()[1])

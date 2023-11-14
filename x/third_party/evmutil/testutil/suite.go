@@ -1,7 +1,6 @@
 package testutil
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,9 +8,14 @@ import (
 	"reflect"
 	"time"
 
-	tmlog "github.com/tendermint/tendermint/libs/log"
-
 	sdkmath "cosmossdk.io/math"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
+	tmtime "github.com/cometbft/cometbft/types/time"
+	"github.com/cometbft/cometbft/version"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -31,12 +35,6 @@ import (
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 	"github.com/stretchr/testify/suite"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/tmhash"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
-	tmtime "github.com/tendermint/tendermint/types/time"
-	"github.com/tendermint/tendermint/version"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
@@ -113,7 +111,7 @@ func (suite *Suite) SetupTest() {
 	// InitializeFromGenesisStates commits first block so we start at 2 here
 	suite.Ctx = suite.App.NewContext(false, tmproto.Header{
 		Height:          suite.App.LastBlockHeight() + 1,
-		ChainID:         "jolttest_888-1",
+		ChainID:         "joltifytest_888-1",
 		Time:            time.Now().UTC(),
 		ProposerAddress: consAddress.Bytes(),
 		Version: tmversion.Consensus{
@@ -270,6 +268,10 @@ func (suite *Suite) QueryContract(
 	res, err := suite.SendTx(contract, from, fromKey, data)
 	suite.Require().NoError(err)
 
+	suite.Commit()
+
+	// suite.Require().NoError(err)
+
 	// Check for VM errors and unpack returned data
 	switch res.VmError {
 	case vm.ErrExecutionReverted.Error():
@@ -282,8 +284,10 @@ func (suite *Suite) QueryContract(
 		panic(fmt.Sprintf("unhandled vm error response: %v", res.VmError))
 	}
 
+	fmt.Printf(">>>>>1111>>>>result >>>>%v\n", res.Ret)
 	// Unpack response
 	unpackedRes, err := contractAbi.Unpack(method, res.Ret)
+	fmt.Printf(">>>>>>>>>result >>>>%v\n", res.String())
 	suite.Require().NoErrorf(err, "failed to unpack method %v response", method)
 	return unpackedRes, nil
 }
@@ -340,7 +344,8 @@ func (suite *Suite) SendTx(
 		&ethtypes.AccessList{}, // accesses
 	)
 
-	ercTransferTx.From = hex.EncodeToString(signerKey.PubKey().Address())
+	// addrBytes:=signerKey.PubKey().Address().Bytes()
+	ercTransferTx.From = signerKey.PubKey().Address().Bytes()
 	err = ercTransferTx.Sign(ethtypes.LatestSignerForChainID(chainID), etherminttests.NewSigner(signerKey))
 	if err != nil {
 		return nil, err

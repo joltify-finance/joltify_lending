@@ -5,12 +5,16 @@ import (
 	"reflect"
 	"time"
 
+	tmlog "github.com/cometbft/cometbft/libs/log"
+	ethermint "github.com/evmos/ethermint/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 
 	sdkmath "cosmossdk.io/math"
+	abci "github.com/cometbft/cometbft/abci/types"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -18,9 +22,6 @@ import (
 	BankKeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/suite"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtime "github.com/tendermint/tendermint/types/time"
 )
 
 var defaultSwapFee = sdk.MustNewDecFromStr("0.003")
@@ -40,7 +41,7 @@ func (suite *Suite) SetupTest() {
 	lg := tmlog.TestingLogger()
 	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-
+	ctx.WithConsensusParams(app.DefaultConsensusParams).WithBlockGasMeter(sdk.NewInfiniteGasMeter())
 	suite.Ctx = ctx
 	suite.App = tApp
 	suite.Keeper = tApp.GetSwapKeeper()
@@ -99,8 +100,9 @@ func (suite *Suite) NewAccountFromAddr(addr sdk.AccAddress, balance sdk.Coins) a
 // CreateVestingAccount creates a new vesting account from the provided balance and vesting balance
 func (suite *Suite) CreateVestingAccount(initialBalance sdk.Coins, vestingBalance sdk.Coins) authtypes.AccountI {
 	acc := suite.CreateAccount(initialBalance)
-	bacc := acc.(*authtypes.BaseAccount)
+	accv := acc.(*ethermint.EthAccount)
 
+	bacc := accv.GetBaseAccount()
 	periods := vestingtypes.Periods{
 		vestingtypes.Period{
 			Length: 31556952,

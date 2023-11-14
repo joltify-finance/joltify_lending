@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"sync"
-	// rand2 "github.com/tendermint/tendermint/libs/rand"
+	// rand2 "github.com/cometbft/cometbft/libs/rand"
 )
 
 // the random here is pre-determined order

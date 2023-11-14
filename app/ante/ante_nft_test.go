@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
+	tmdb "github.com/cometbft/cometbft-db"
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmdb "github.com/tendermint/tm-db"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -21,7 +21,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/simapp/helpers"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/ante"
@@ -87,7 +87,7 @@ func TestTransferSPVNFT(t *testing.T) {
 
 	decorator := ante.NewSPVNFTDecorator(*k)
 
-	tx, err := helpers.GenSignedMockTx(
+	tx, err := simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -99,7 +99,7 @@ func TestTransferSPVNFT(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -111,7 +111,7 @@ func TestTransferSPVNFT(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "found disabled spv nft")
 
-	tx2, err := helpers.GenSignedMockTx(
+	tx2, err := simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -123,7 +123,7 @@ func TestTransferSPVNFT(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -133,7 +133,7 @@ func TestTransferSPVNFT(t *testing.T) {
 	_, err = decorator.AnteHandle(ctx, tx2, false, mockAnteHandler)
 	require.NoError(t, err)
 
-	tx3, err := helpers.GenSignedMockTx(
+	tx3, err := simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -151,7 +151,7 @@ func TestTransferSPVNFT(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},

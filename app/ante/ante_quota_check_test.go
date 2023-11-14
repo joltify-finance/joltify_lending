@@ -7,15 +7,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tendermint/tendermint/libs/log"
+	"github.com/cometbft/cometbft/libs/log"
 
+	tmdb "github.com/cometbft/cometbft-db"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	"github.com/cosmos/cosmos-sdk/simapp/helpers"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -26,8 +28,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmdb "github.com/tendermint/tm-db"
 )
 
 type mockStakingKeeper struct{}
@@ -174,7 +174,7 @@ func TestQuotaCheck(t *testing.T) {
 	assert.False(t, ret)
 
 	// tEth := sdk.NewCoins(sdk.NewCoin("aeth", sdk.NewInt(1)))
-	tx, err := helpers.GenSignedMockTx(
+	tx, err := simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -185,7 +185,7 @@ func TestQuotaCheck(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -202,7 +202,7 @@ func TestQuotaCheck(t *testing.T) {
 	ret = vd.QuotaCheck(ctx, t1)
 	assert.True(t, ret)
 
-	tx, err = helpers.GenSignedMockTx(
+	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -213,7 +213,7 @@ func TestQuotaCheck(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -226,7 +226,7 @@ func TestQuotaCheck(t *testing.T) {
 
 	tEth := sdk.NewCoins(sdk.NewCoin("aeth", sdk.NewInt(1)))
 
-	tx, err = helpers.GenSignedMockTx(
+	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -237,7 +237,7 @@ func TestQuotaCheck(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -253,7 +253,7 @@ func TestQuotaCheck(t *testing.T) {
 	ret = vd.QuotaCheck(ctx, tEthandBnb)
 	assert.False(t, ret)
 
-	tx, err = helpers.GenSignedMockTx(
+	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -264,7 +264,7 @@ func TestQuotaCheck(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -276,7 +276,7 @@ func TestQuotaCheck(t *testing.T) {
 	require.ErrorContainsf(t, err, "has reached the quota target", "quota check")
 
 	t2 := t1.Add(sdk.NewCoin("abnb", sdk.NewInt(1)))
-	tx, err = helpers.GenSignedMockTx(
+	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -287,7 +287,7 @@ func TestQuotaCheck(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -299,7 +299,7 @@ func TestQuotaCheck(t *testing.T) {
 	require.ErrorContainsf(t, err, "has reached the quota target", "quota check")
 
 	// not to the pool, should pass
-	tx, err = helpers.GenSignedMockTx(
+	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -310,7 +310,7 @@ func TestQuotaCheck(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},
@@ -321,7 +321,7 @@ func TestQuotaCheck(t *testing.T) {
 	_, err = decorator.AnteHandle(ctx, tx, false, mockAnteHandler)
 	require.NoError(t, err)
 
-	tx, err = helpers.GenSignedMockTx(
+	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
 		[]sdk.Msg{
@@ -337,7 +337,7 @@ func TestQuotaCheck(t *testing.T) {
 			},
 		},
 		sdk.NewCoins(),
-		helpers.DefaultGenTxGas,
+		simtestutil.DefaultGenTxGas,
 		"testing-chain-id",
 		[]uint64{0},
 		[]uint64{0},

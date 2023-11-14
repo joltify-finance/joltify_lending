@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	tmlog "github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
+	abcitypes "github.com/cometbft/cometbft/abci/types"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -19,13 +21,11 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/suite"
-	abcitypes "github.com/tendermint/tendermint/abci/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
-var testChainID = "joltifytestchain_888-1"
+var testChainID = "joltifytest_888-1"
 
 type IntegrationTester struct {
 	suite.Suite
@@ -50,6 +50,8 @@ func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, c
 	)
 
 	suite.Ctx = suite.App.NewContext(false, tmproto.Header{Height: 1, Time: genesisTime, ChainID: testChainID})
+	suite.Ctx = suite.Ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
+	suite.Ctx = suite.Ctx.WithConsensusParams(app.DefaultConsensusParams)
 }
 
 func (suite *IntegrationTester) NextBlockAt(blockTime time.Time) {
@@ -61,6 +63,8 @@ func (suite *IntegrationTester) NextBlockAt(blockTime time.Time) {
 	_ = suite.App.EndBlocker(suite.Ctx, abcitypes.RequestEndBlock{})
 
 	suite.Ctx = suite.Ctx.WithBlockTime(blockTime).WithBlockHeight(blockHeight).WithChainID(testChainID)
+	suite.Ctx = suite.Ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
+	suite.Ctx = suite.Ctx.WithConsensusParams(app.DefaultConsensusParams)
 
 	_ = suite.App.BeginBlocker(suite.Ctx, abcitypes.RequestBeginBlock{}) // height and time in RequestBeginBlock are ignored by module begin blockers
 }
@@ -103,7 +107,8 @@ func (suite *IntegrationTester) DeliverMsgCreateValidator(address sdk.ValAddress
 		return err
 	}
 
-	msgServer := stakingkeeper.NewMsgServerImpl(suite.App.GetStakingKeeper())
+	stk := suite.App.GetStakingKeeper()
+	msgServer := stakingkeeper.NewMsgServerImpl(&stk)
 	_, err = msgServer.CreateValidator(sdk.WrapSDKContext(suite.Ctx), msg)
 
 	return err
@@ -115,7 +120,9 @@ func (suite *IntegrationTester) DeliverMsgDelegate(delegator sdk.AccAddress, val
 		validator,
 		amount,
 	)
-	msgServer := stakingkeeper.NewMsgServerImpl(suite.App.GetStakingKeeper())
+
+	stk := suite.App.GetStakingKeeper()
+	msgServer := stakingkeeper.NewMsgServerImpl(&stk)
 	_, err := msgServer.Delegate(sdk.WrapSDKContext(suite.Ctx), msg)
 	return err
 }
