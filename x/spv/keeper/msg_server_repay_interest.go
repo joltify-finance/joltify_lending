@@ -6,7 +6,7 @@ import (
 	"time"
 
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"

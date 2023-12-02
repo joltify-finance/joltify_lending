@@ -8,7 +8,7 @@ import (
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"

@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 )
 

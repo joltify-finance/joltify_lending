@@ -242,7 +242,7 @@ GOOGLE_PROTO_TYPES = third_party/proto/google/api
 PROTOBUF_GOOGLE_TYPES = third_party/proto/google/protobuf
 COSMOS_PROTO_TYPES = third_party/proto/cosmos_proto
 
-GOGO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/gogo/protobuf)
+GOGO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/gogoproto)
 TENDERMINT_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cometbft/cometbft/)
 COSMOS_PROTO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-proto)
 COSMOS_SDK_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-sdk)

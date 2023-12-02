@@ -7,7 +7,7 @@ import (
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/nft"
