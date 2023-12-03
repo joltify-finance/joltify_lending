@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
+
 	errorsmod "cosmossdk.io/errors"
 	tmlog "github.com/cometbft/cometbft/libs/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -45,7 +47,7 @@ type HandlerOptions struct {
 }
 
 // NewAnteHandler returns an 'AnteHandler' that will run actions before a tx is sent to a module's handler.
-func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
+func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper.Keeper) (sdk.AnteHandler, error) {
 	if options.AccountKeeper == nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "account keeper is required for ante builder")
 	}
@@ -68,6 +70,14 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		var anteHandler sdk.AnteHandler
 
 		defer Recover(ctx.Logger(), &err)
+
+		c, err := consensusKeeper.Get(ctx)
+		if err != nil {
+			panic("fail to load the consensus")
+		}
+		ctx = ctx.WithConsensusParams(c)
+
+		debug.PrintStack()
 
 		txWithExtensions, ok := tx.(authante.HasExtensionOptionsTx)
 		if ok {

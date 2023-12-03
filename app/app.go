@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
+
 	ethermint "github.com/evmos/ethermint/types"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
@@ -52,6 +54,7 @@ import (
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	nftmoduletypes "github.com/cosmos/cosmos-sdk/x/nft"
 	nftmodulekeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
@@ -188,6 +191,7 @@ var (
 		slashing.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
 		ibc.AppModuleBasic{},
+		ibctm.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
 		authzmodule.AppModuleBasic{},
@@ -282,7 +286,7 @@ type App struct {
 	feeMarketKeeper  feemarketkeeper.Keeper
 	evmutilKeeper    evmutilkeeper.Keeper
 	govKeeper        govkeeper.Keeper
-	paramsKeeper     paramskeeper.Keeper
+	ParamsKeeper     paramskeeper.Keeper
 	authzKeeper      authzkeeper.Keeper
 	crisisKeeper     *crisiskeeper.Keeper
 	slashingKeeper   slashingkeeper.Keeper
@@ -401,34 +405,37 @@ func NewApp(
 	}
 
 	// init params keeper and subspaces
-	app.paramsKeeper = paramskeeper.NewKeeper(
+	app.ParamsKeeper = paramskeeper.NewKeeper(
 		appCodec,
 		legacyAmino,
 		keys[paramstypes.StoreKey],
 		tkeys[paramstypes.TStoreKey],
 	)
-	// stakingSubspace := app.paramsKeeper.Subspace(stakingtypes.ModuleName)
-	mintSubspace := app.paramsKeeper.Subspace(minttypes.ModuleName)
-	// distrSubspace := app.paramsKeeper.Subspace(distrtypes.ModuleName)
-	// slashingSubspace := app.paramsKeeper.Subspace(slashingtypes.ModuleName)
-	// crisisSubspace := app.paramsKeeper.Subspace(crisistypes.ModuleName)
-	auctionSubspace := app.paramsKeeper.Subspace(auctiontypes.ModuleName)
-	// issuanceSubspace := app.paramsKeeper.Subspace(issuancetypes.ModuleName)
-	pricefeedSubspace := app.paramsKeeper.Subspace(pricefeedtypes.ModuleName)
-	// cdpSubspace := app.paramsKeeper.Subspace(cdptypes.ModuleName)
-	joltSubspace := app.paramsKeeper.Subspace(jolttypes.ModuleName)
-	incentiveSubspace := app.paramsKeeper.Subspace(incentivetypes.ModuleName)
-	ibcSubspace := app.paramsKeeper.Subspace(ibcexported.ModuleName)
-	ibctransferSubspace := app.paramsKeeper.Subspace(ibctransfertypes.ModuleName)
-	vaultSubspace := app.paramsKeeper.Subspace(vaultmoduletypes.ModuleName)
-	kycSubspace := app.paramsKeeper.Subspace(kycmoduletypes.ModuleName)
-	spvSubspace := app.paramsKeeper.Subspace(spvmoduletypes.ModuleName)
-	evmSubspace := app.paramsKeeper.Subspace(evmtypes.ModuleName)
-	feemarketSubspace := app.paramsKeeper.Subspace(feemarkettypes.ModuleName)
-	evmutilSubspace := app.paramsKeeper.Subspace(evmutiltypes.ModuleName)
-	swapSubspace := app.paramsKeeper.Subspace(swaptypes.ModuleName)
+	// stakingSubspace := app.ParamsKeeper.Subspace(stakingtypes.ModuleName)
+	mintSubspace := app.ParamsKeeper.Subspace(minttypes.ModuleName)
+	// distrSubspace := app.ParamsKeeper.Subspace(distrtypes.ModuleName)
+	// slashingSubspace := app.ParamsKeeper.Subspace(slashingtypes.ModuleName)
+	// crisisSubspace := app.ParamsKeeper.Subspace(crisistypes.ModuleName)
+	auctionSubspace := app.ParamsKeeper.Subspace(auctiontypes.ModuleName)
+	// issuanceSubspace := app.ParamsKeeper.Subspace(issuancetypes.ModuleName)
+	pricefeedSubspace := app.ParamsKeeper.Subspace(pricefeedtypes.ModuleName)
+	// cdpSubspace := app.ParamsKeeper.Subspace(cdptypes.ModuleName)
+	joltSubspace := app.ParamsKeeper.Subspace(jolttypes.ModuleName)
+	incentiveSubspace := app.ParamsKeeper.Subspace(incentivetypes.ModuleName)
+	ibcSubspace := app.ParamsKeeper.Subspace(ibcexported.ModuleName)
+	ibctransferSubspace := app.ParamsKeeper.Subspace(ibctransfertypes.ModuleName)
+	vaultSubspace := app.ParamsKeeper.Subspace(vaultmoduletypes.ModuleName)
+	kycSubspace := app.ParamsKeeper.Subspace(kycmoduletypes.ModuleName)
+	spvSubspace := app.ParamsKeeper.Subspace(spvmoduletypes.ModuleName)
+	evmSubspace := app.ParamsKeeper.Subspace(evmtypes.ModuleName)
+	feemarketSubspace := app.ParamsKeeper.Subspace(feemarkettypes.ModuleName)
+	evmutilSubspace := app.ParamsKeeper.Subspace(evmutiltypes.ModuleName)
+	swapSubspace := app.ParamsKeeper.Subspace(swaptypes.ModuleName)
 
 	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(appCodec, keys[consensusparamtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
+
+	// baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
+
 	bApp.SetParamStore(&app.ConsensusParamsKeeper)
 
 	app.capabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
@@ -666,7 +673,7 @@ func NewApp(
 	govRouter := govv1beta1.NewRouter()
 	govRouter.
 		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
-		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.paramsKeeper)).
+		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.upgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.ibcKeeper.ClientKeeper))
 
@@ -690,19 +697,19 @@ func NewApp(
 
 	// create the module manager (Note: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.)
-	authModule := auth.NewAppModule(appCodec, app.accountKeeper, authsims.RandomGenesisAccounts, app.paramsKeeper.Subspace(authtypes.ModuleName))
+	authModule := auth.NewAppModule(appCodec, app.accountKeeper, authsims.RandomGenesisAccounts, app.ParamsKeeper.Subspace(authtypes.ModuleName))
 	app.mm = module.NewManager(
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx, encodingConfig.TxConfig),
 		authModule,
-		bank.NewAppModule(appCodec, app.bankKeeper, app.accountKeeper, app.paramsKeeper.Subspace(banktypes.ModuleName)),
+		bank.NewAppModule(appCodec, app.bankKeeper, app.accountKeeper, app.ParamsKeeper.Subspace(banktypes.ModuleName)),
 		capability.NewAppModule(appCodec, *app.capabilityKeeper, false),
 		feegrantmodule.NewAppModule(appCodec, app.accountKeeper, app.bankKeeper, app.feeGrantKeeper, app.interfaceRegistry),
-		staking.NewAppModule(appCodec, app.stakingKeeper, app.accountKeeper, app.bankKeeper, app.paramsKeeper.Subspace(stakingtypes.ModuleName)),
+		staking.NewAppModule(appCodec, app.stakingKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(stakingtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.mintKeeper, app.accountKeeper, app.bankKeeper),
-		distr.NewAppModule(appCodec, app.distrKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.paramsKeeper.Subspace(distrtypes.ModuleName)),
-		gov.NewAppModule(appCodec, &app.govKeeper, app.accountKeeper, app.bankKeeper, app.paramsKeeper.Subspace(govtypes.ModuleName)),
-		params.NewAppModule(app.paramsKeeper),
-		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.paramsKeeper.Subspace(slashingtypes.ModuleName)),
+		distr.NewAppModule(appCodec, app.distrKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
+		gov.NewAppModule(appCodec, &app.govKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(govtypes.ModuleName)),
+		params.NewAppModule(app.ParamsKeeper),
+		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName)),
 		ibc.NewAppModule(app.ibcKeeper),
 		upgrade.NewAppModule(app.upgradeKeeper),
 		evidence.NewAppModule(*app.evidenceKeeper),
@@ -723,7 +730,7 @@ func NewApp(
 		feemarket.NewAppModule(app.feeMarketKeeper, feemarketSubspace),
 		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper, app.accountKeeper),
 		swap.NewAppModule(app.swapKeeper, app.accountKeeper),
-		crisis.NewAppModule(app.crisisKeeper, skipGenesisInvariants, app.paramsKeeper.Subspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
+		crisis.NewAppModule(app.crisisKeeper, skipGenesisInvariants, app.ParamsKeeper.Subspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -910,7 +917,7 @@ func NewApp(
 		TxFeeChecker:           nil,
 	}
 
-	anteHandler, err := ante.NewAnteHandler(anteOptions)
+	anteHandler, err := ante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}
@@ -939,6 +946,13 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker contains app specific logic for the BeginBlock abci call.
 func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	cs := app.BaseApp.GetConsensusParams(ctx)
+	if cs.Block == nil {
+		baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
+		baseapp.MigrateParams(ctx, baseAppLegacySS, &app.ConsensusParamsKeeper)
+		cs := app.BaseApp.GetConsensusParams(ctx)
+		ctx = ctx.WithConsensusParams(cs)
+	}
 	return app.mm.BeginBlock(ctx, req)
 }
 
@@ -1046,11 +1060,46 @@ func (app *App) RegisterTendermintService(clientCtx client.Context) {
 // }
 
 func (app *App) setupUpgradeHandlers() {
+	// Set param key table for params module migration
+	for _, subspace := range app.ParamsKeeper.GetSubspaces() {
+		subspace := subspace
+		var keyTable paramstypes.KeyTable
+		switch subspace.Name() {
+		case authtypes.ModuleName:
+			keyTable = authtypes.ParamKeyTable() //nolint:staticcheck
+		case banktypes.ModuleName:
+			keyTable = banktypes.ParamKeyTable() //nolint:staticcheck
+		case stakingtypes.ModuleName:
+			keyTable = stakingtypes.ParamKeyTable() //nolint:staticcheck
+		case minttypes.ModuleName:
+			keyTable = minttypes.ParamKeyTable() //nolint:staticcheck
+		case distrtypes.ModuleName:
+			keyTable = distrtypes.ParamKeyTable() //nolint:staticcheck
+		case slashingtypes.ModuleName:
+			keyTable = slashingtypes.ParamKeyTable() //nolint:staticcheck
+		case govtypes.ModuleName:
+			keyTable = govv1.ParamKeyTable() //nolint:staticcheck
+		case crisistypes.ModuleName:
+			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
+		case evmtypes.ModuleName:
+			keyTable = evmutiltypes.ParamKeyTable() //nolint:staticcheck
+		case feemarkettypes.ModuleName:
+			keyTable = feemarkettypes.ParamKeyTable() //nolint:staticcheck
+		}
+		if !subspace.HasKeyTable() {
+			subspace.WithKeyTable(keyTable)
+		}
+	}
+
+	// we need to migrate the tendermint consensus from x/params to x/consensus module
+	// baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
+
 	app.upgradeKeeper.SetUpgradeHandler(v1.V003UpgradeName, v1.CreateUpgradeHandlerForV003Upgrade(app.mm, &app.VaultKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V004UpgradeName, v1.CreateUpgradeHandlerForV004Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V005UpgradeName, v1.CreateUpgradeHandlerForV005Upgrade(app.mm, &app.VaultKeeper, app.configurator, app.incentiveKeeper))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V006UpgradeName, v1.CreateUpgradeHandlerForV006Upgrade(app.mm, app.evmutilKeeper, app.evmKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V007UpgradeName, v1.CreateUpgradeHandlerForV007Upgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V008UpgradeName, v1.CreateUpgradeHandlerForV008Upgrade(app.mm, app.configurator))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
@@ -1069,6 +1118,14 @@ func (app *App) setupUpgradeHandlers() {
 	if upgradeInfo.Name == v1.V006UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{evmtypes.StoreKey, evmutiltypes.StoreKey, feemarkettypes.StoreKey},
+		}
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
+	if upgradeInfo.Name == v1.V008UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{crisistypes.StoreKey, consensusparamtypes.ModuleName},
 		}
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
