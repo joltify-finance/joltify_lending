@@ -10,10 +10,11 @@ const TypeMsgLiquidate = "liquidate"
 
 var _ sdk.Msg = &MsgLiquidate{}
 
-func NewMsgLiquidate(creator string, poolIndex string) *MsgLiquidate {
+func NewMsgLiquidate(creator string, poolIndex string, amount sdk.Coin) *MsgLiquidate {
 	return &MsgLiquidate{
 		Creator:   creator,
 		PoolIndex: poolIndex,
+		Amount:    amount,
 	}
 }
 

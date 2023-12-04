@@ -3,6 +3,8 @@ package cli
 import (
 	"strconv"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -16,9 +18,14 @@ func CmdLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "liquidate [pool-index]",
 		Short: "Broadcast message liquidate",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPoolIndex := args[0]
+
+			amount, err := sdk.ParseCoinNormalized(args[1])
+			if err != nil {
+				return err
+			}
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -28,6 +35,7 @@ func CmdLiquidate() *cobra.Command {
 			msg := types.NewMsgLiquidate(
 				clientCtx.GetFromAddress().String(),
 				argPoolIndex,
+				amount,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
