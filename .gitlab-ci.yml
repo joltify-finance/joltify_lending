@@ -47,10 +47,9 @@ unit-test-job:   # This job runs in the test stage.
 
 
 lint_code:
-  image: golang:1.21
+  image: golang:1.20
   stage: test
   before_script:
-    - go mod tidy
     - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.0
   script:
     - ./bin/golangci-lint run -v --timeout 3600s -c ./.golangci.yml

@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 
 	ethermint "github.com/evmos/ethermint/types"
@@ -946,9 +948,20 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker contains app specific logic for the BeginBlock abci call.
 func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	cs := app.BaseApp.GetConsensusParams(ctx)
-	if cs.Block == nil {
+	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Height == ctx.BlockHeight() && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		// we need to migrate the tendermint consensus from x/params to x/consensus module
 		baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
+		if baseAppLegacySS.Has(ctx, baseapp.ParamStoreKeyBlockParams) {
+			var bp tmproto.BlockParams
+			baseAppLegacySS.Get(ctx, baseapp.ParamStoreKeyBlockParams, &bp)
+			bp.MaxGas = 200000000
+			baseAppLegacySS.Set(ctx, baseapp.ParamStoreKeyBlockParams, bp)
+		}
 		baseapp.MigrateParams(ctx, baseAppLegacySS, &app.ConsensusParamsKeeper)
 		cs := app.BaseApp.GetConsensusParams(ctx)
 		ctx = ctx.WithConsensusParams(cs)
@@ -1070,9 +1083,9 @@ func (app *App) setupUpgradeHandlers() {
 		case banktypes.ModuleName:
 			keyTable = banktypes.ParamKeyTable() //nolint:staticcheck
 		case stakingtypes.ModuleName:
-			keyTable = stakingtypes.ParamKeyTable() //nolint:staticcheck
+			keyTable = stakingtypes.ParamKeyTable()
 		case minttypes.ModuleName:
-			keyTable = minttypes.ParamKeyTable() //nolint:staticcheck
+			keyTable = minttypes.ParamKeyTable()
 		case distrtypes.ModuleName:
 			keyTable = distrtypes.ParamKeyTable() //nolint:staticcheck
 		case slashingtypes.ModuleName:
@@ -1082,17 +1095,14 @@ func (app *App) setupUpgradeHandlers() {
 		case crisistypes.ModuleName:
 			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
 		case evmtypes.ModuleName:
-			keyTable = evmutiltypes.ParamKeyTable() //nolint:staticcheck
+			keyTable = evmutiltypes.ParamKeyTable()
 		case feemarkettypes.ModuleName:
-			keyTable = feemarkettypes.ParamKeyTable() //nolint:staticcheck
+			keyTable = feemarkettypes.ParamKeyTable()
 		}
 		if !subspace.HasKeyTable() {
 			subspace.WithKeyTable(keyTable)
 		}
 	}
-
-	// we need to migrate the tendermint consensus from x/params to x/consensus module
-	// baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
 
 	app.upgradeKeeper.SetUpgradeHandler(v1.V003UpgradeName, v1.CreateUpgradeHandlerForV003Upgrade(app.mm, &app.VaultKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V004UpgradeName, v1.CreateUpgradeHandlerForV004Upgrade(app.mm, app.configurator))
