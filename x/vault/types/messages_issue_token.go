@@ -1,6 +1,8 @@
 package types
 
 import (
+	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -8,9 +10,13 @@ var _ sdk.Msg = &MsgCreateIssueToken{}
 
 func NewMsgCreateIssueToken(creator string, index string, coinStr string, receiver string) (*MsgCreateIssueToken, error) {
 	coins, err := sdk.ParseCoinsNormalized(coinStr)
-	if err != nil || len(coins) != 1 {
+	if err != nil {
 		return nil, err
 	}
+	if len(coins) != 1 {
+		return nil, errors.New("invalid token amount")
+	}
+
 	creatorAddr, err := sdk.AccAddressFromBech32(creator)
 	if err != nil {
 		return nil, err
