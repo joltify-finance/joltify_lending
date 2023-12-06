@@ -4,11 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
@@ -480,7 +479,7 @@ func TestCalculateRewards(t *testing.T) {
 				sourceAmount: d("1000000000"),
 			},
 			expected: expected{
-				coins: nil,
+				coins: sdk.Coins{},
 			},
 		},
 		{

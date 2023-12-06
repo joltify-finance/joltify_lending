@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
@@ -12,7 +12,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	tmprototypes "github.com/tendermint/tendermint/proto/tendermint/types"
+	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )

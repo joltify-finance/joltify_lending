@@ -8,25 +8,45 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/evmos/ethermint/x/evm/vm/geth"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
+	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
+
+	ethermint "github.com/evmos/ethermint/types"
+
+	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
+	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
+
+	"github.com/spf13/cast"
+
+	consensusparamtypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
+
+	"github.com/cosmos/cosmos-sdk/x/consensus"
+
+	"github.com/ethereum/go-ethereum/core/vm"
+
+	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap"
 
+	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil"
 	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
 	evmutiltypes "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
 
+	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	evmante "github.com/evmos/ethermint/app/ante"
 	"github.com/evmos/ethermint/x/evm"
 	"github.com/gorilla/mux"
 	_ "github.com/joltify-finance/joltify_lending/client/docs/statik"
+
+	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/rakyll/statik/fs"
 
 	vaultmodule "github.com/joltify-finance/joltify_lending/x/vault"
 
 	"github.com/cosmos/cosmos-sdk/server/config"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	ibcporttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+	ibcporttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	"github.com/evmos/ethermint/x/feemarket"
@@ -36,9 +56,11 @@ import (
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	nftmoduletypes "github.com/cosmos/cosmos-sdk/x/nft"
 	nftmodulekeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -91,7 +113,6 @@ import (
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
-	distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	ethermintconfig "github.com/evmos/ethermint/server/config"
 
@@ -125,25 +146,27 @@ import (
 	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
 	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 
-	"github.com/cosmos/ibc-go/v6/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v6/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v6/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v6/modules/core/02-client"
-	ibcclientclient "github.com/cosmos/ibc-go/v6/modules/core/02-client/client"
-	ibcclienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
-	ibchost "github.com/cosmos/ibc-go/v6/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v6/modules/core/keeper"
+	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v7/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v7/modules/core/02-client"
+	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
+	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 
+	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+
+	abci "github.com/cometbft/cometbft/abci/types"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/joltify-finance/joltify_lending/app/ante"
 	joltparams "github.com/joltify-finance/joltify_lending/app/params"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
 	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	tmlog "github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
+
+	dbm "github.com/cometbft/cometbft-db"
 )
 
 const (
@@ -170,6 +193,7 @@ var (
 		slashing.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
 		ibc.AppModuleBasic{},
+		ibctm.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
 		authzmodule.AppModuleBasic{},
@@ -183,10 +207,12 @@ var (
 		kycmodule.AppModuleBasic{},
 		spvmodule.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
+		consensus.AppModuleBasic{},
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
 		evmutil.AppModuleBasic{},
 		swap.AppModuleBasic{},
+		capability.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -255,33 +281,34 @@ type App struct {
 	accountKeeper    authkeeper.AccountKeeper
 	bankKeeper       bankkeeper.Keeper
 	capabilityKeeper *capabilitykeeper.Keeper
-	stakingKeeper    stakingkeeper.Keeper
+	stakingKeeper    *stakingkeeper.Keeper
 	mintKeeper       mintkeeper.Keeper
 	distrKeeper      distrkeeper.Keeper
 	evmKeeper        *evmkeeper.Keeper
 	feeMarketKeeper  feemarketkeeper.Keeper
 	evmutilKeeper    evmutilkeeper.Keeper
 	govKeeper        govkeeper.Keeper
-	paramsKeeper     paramskeeper.Keeper
+	ParamsKeeper     paramskeeper.Keeper
 	authzKeeper      authzkeeper.Keeper
-	crisisKeeper     crisiskeeper.Keeper
+	crisisKeeper     *crisiskeeper.Keeper
 	slashingKeeper   slashingkeeper.Keeper
 	ibcKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	upgradeKeeper    upgradekeeper.Keeper
-	evidenceKeeper   evidencekeeper.Keeper
+	upgradeKeeper    *upgradekeeper.Keeper
+	evidenceKeeper   *evidencekeeper.Keeper
 	transferKeeper   ibctransferkeeper.Keeper
 	auctionKeeper    auctionkeeper.Keeper
 	// issuanceKeeper   issuancekeeper.Keeper
 	pricefeedKeeper pricefeedkeeper.Keeper
 	// cdpKeeper        cdpkeeper.Keeper
-	joltKeeper      joltkeeper.Keeper
-	incentiveKeeper incentivekeeper.Keeper
-	feeGrantKeeper  feegrantkeeper.Keeper
-	VaultKeeper     vaultmodulekeeper.Keeper
-	kycKeeper       kycmodulekeeper.Keeper
-	spvKeeper       spvmodulekeeper.Keeper
-	nftKeeper       nftmodulekeeper.Keeper
-	swapKeeper      swapkeeper.Keeper
+	joltKeeper            joltkeeper.Keeper
+	incentiveKeeper       incentivekeeper.Keeper
+	feeGrantKeeper        feegrantkeeper.Keeper
+	VaultKeeper           vaultmodulekeeper.Keeper
+	kycKeeper             kycmodulekeeper.Keeper
+	spvKeeper             spvmodulekeeper.Keeper
+	nftKeeper             nftmodulekeeper.Keeper
+	swapKeeper            swapkeeper.Keeper
+	ConsensusParamsKeeper consensusparamkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -312,7 +339,6 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 
 	govProposalHandlers = append(govProposalHandlers,
 		paramsclient.ProposalHandler,
-		distrclient.ProposalHandler,
 		upgradeclient.LegacyProposalHandler,
 		upgradeclient.LegacyCancelProposalHandler,
 		ibcclientclient.UpdateClientProposalHandler,
@@ -331,6 +357,8 @@ func NewApp(
 	traceStore io.Writer,
 	encodingConfig joltparams.EncodingConfig,
 	options Options,
+	invCheckPeriod uint,
+	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
 	appCodec := encodingConfig.Marshaler
@@ -345,10 +373,11 @@ func NewApp(
 	keys := sdk.NewKVStoreKeys(
 		authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
-		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey,
+		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey,
 		upgradetypes.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey,
 		feegrant.StoreKey, authzkeeper.StoreKey,
 		capabilitytypes.StoreKey, auctiontypes.StoreKey,
+		crisistypes.StoreKey,
 		// issuancetypes.StoreKey,
 		pricefeedtypes.StoreKey,
 		// cdptypes.StoreKey,
@@ -362,6 +391,7 @@ func NewApp(
 		feemarkettypes.StoreKey,
 		evmutiltypes.StoreKey,
 		swaptypes.StoreKey,
+		consensusparamtypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -377,41 +407,41 @@ func NewApp(
 	}
 
 	// init params keeper and subspaces
-	app.paramsKeeper = paramskeeper.NewKeeper(
+	app.ParamsKeeper = paramskeeper.NewKeeper(
 		appCodec,
 		legacyAmino,
 		keys[paramstypes.StoreKey],
 		tkeys[paramstypes.TStoreKey],
 	)
-	authSubspace := app.paramsKeeper.Subspace(authtypes.ModuleName)
-	bankSubspace := app.paramsKeeper.Subspace(banktypes.ModuleName)
-	stakingSubspace := app.paramsKeeper.Subspace(stakingtypes.ModuleName)
-	mintSubspace := app.paramsKeeper.Subspace(minttypes.ModuleName)
-	distrSubspace := app.paramsKeeper.Subspace(distrtypes.ModuleName)
-	slashingSubspace := app.paramsKeeper.Subspace(slashingtypes.ModuleName)
-	govSubspace := app.paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable())
-	crisisSubspace := app.paramsKeeper.Subspace(crisistypes.ModuleName)
-	auctionSubspace := app.paramsKeeper.Subspace(auctiontypes.ModuleName)
-	// issuanceSubspace := app.paramsKeeper.Subspace(issuancetypes.ModuleName)
-	pricefeedSubspace := app.paramsKeeper.Subspace(pricefeedtypes.ModuleName)
-	// cdpSubspace := app.paramsKeeper.Subspace(cdptypes.ModuleName)
-	joltSubspace := app.paramsKeeper.Subspace(jolttypes.ModuleName)
-	incentiveSubspace := app.paramsKeeper.Subspace(incentivetypes.ModuleName)
-	ibcSubspace := app.paramsKeeper.Subspace(ibchost.ModuleName)
-	ibctransferSubspace := app.paramsKeeper.Subspace(ibctransfertypes.ModuleName)
-	vaultSubspace := app.paramsKeeper.Subspace(vaultmoduletypes.ModuleName)
-	kycSubspace := app.paramsKeeper.Subspace(kycmoduletypes.ModuleName)
-	spvSubspace := app.paramsKeeper.Subspace(spvmoduletypes.ModuleName)
-	evmSubspace := app.paramsKeeper.Subspace(evmtypes.ModuleName)
-	feemarketSubspace := app.paramsKeeper.Subspace(feemarkettypes.ModuleName)
-	evmutilSubspace := app.paramsKeeper.Subspace(evmutiltypes.ModuleName)
-	swapSubspace := app.paramsKeeper.Subspace(swaptypes.ModuleName)
+	// stakingSubspace := app.ParamsKeeper.Subspace(stakingtypes.ModuleName)
+	mintSubspace := app.ParamsKeeper.Subspace(minttypes.ModuleName)
+	// distrSubspace := app.ParamsKeeper.Subspace(distrtypes.ModuleName)
+	// slashingSubspace := app.ParamsKeeper.Subspace(slashingtypes.ModuleName)
+	// crisisSubspace := app.ParamsKeeper.Subspace(crisistypes.ModuleName)
+	auctionSubspace := app.ParamsKeeper.Subspace(auctiontypes.ModuleName)
+	// issuanceSubspace := app.ParamsKeeper.Subspace(issuancetypes.ModuleName)
+	pricefeedSubspace := app.ParamsKeeper.Subspace(pricefeedtypes.ModuleName)
+	// cdpSubspace := app.ParamsKeeper.Subspace(cdptypes.ModuleName)
+	joltSubspace := app.ParamsKeeper.Subspace(jolttypes.ModuleName)
+	incentiveSubspace := app.ParamsKeeper.Subspace(incentivetypes.ModuleName)
+	ibcSubspace := app.ParamsKeeper.Subspace(ibcexported.ModuleName)
+	ibctransferSubspace := app.ParamsKeeper.Subspace(ibctransfertypes.ModuleName)
+	vaultSubspace := app.ParamsKeeper.Subspace(vaultmoduletypes.ModuleName)
+	kycSubspace := app.ParamsKeeper.Subspace(kycmoduletypes.ModuleName)
+	spvSubspace := app.ParamsKeeper.Subspace(spvmoduletypes.ModuleName)
+	evmSubspace := app.ParamsKeeper.Subspace(evmtypes.ModuleName)
+	feemarketSubspace := app.ParamsKeeper.Subspace(feemarkettypes.ModuleName)
+	evmutilSubspace := app.ParamsKeeper.Subspace(evmutiltypes.ModuleName)
+	swapSubspace := app.ParamsKeeper.Subspace(swaptypes.ModuleName)
 
-	bApp.SetParamStore(
-		app.paramsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable()),
-	)
+	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(appCodec, keys[consensusparamtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
+
+	// baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
+
+	bApp.SetParamStore(&app.ConsensusParamsKeeper)
+
 	app.capabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
-	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibchost.ModuleName)
+	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibcexported.ModuleName)
 	scopedTransferKeeper := app.capabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	app.capabilityKeeper.Seal()
 
@@ -419,10 +449,11 @@ func NewApp(
 	app.accountKeeper = authkeeper.NewAccountKeeper(
 		appCodec,
 		keys[authtypes.StoreKey],
-		authSubspace,
-		authtypes.ProtoBaseAccount,
+		// authtypes.ProtoBaseAccount,
+		ethermint.ProtoAccount,
 		mAccPerms,
 		sdk.Bech32MainPrefix,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
 	app.feeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.accountKeeper)
@@ -430,15 +461,16 @@ func NewApp(
 		appCodec,
 		keys[banktypes.StoreKey],
 		app.accountKeeper,
-		bankSubspace,
-		app.loadBlockedMaccAddrs(),
+		app.BlockedModuleAccountAddrs(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
+
 	app.stakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		keys[stakingtypes.StoreKey],
 		app.accountKeeper,
 		app.bankKeeper,
-		stakingSubspace,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	app.authzKeeper = authzkeeper.NewKeeper(
 		keys[authzkeeper.StoreKey],
@@ -450,23 +482,26 @@ func NewApp(
 	app.distrKeeper = distrkeeper.NewKeeper(
 		appCodec,
 		keys[distrtypes.StoreKey],
-		distrSubspace,
 		app.accountKeeper,
 		app.bankKeeper,
-		&app.stakingKeeper,
+		app.stakingKeeper,
 		authtypes.FeeCollectorName,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	app.slashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
+		encodingConfig.Amino,
 		keys[slashingtypes.StoreKey],
-		&app.stakingKeeper,
-		slashingSubspace,
+		app.stakingKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	app.crisisKeeper = crisiskeeper.NewKeeper(
-		crisisSubspace,
-		options.InvariantCheckPeriod,
+		appCodec,
+		keys[crisistypes.StoreKey],
+		invCheckPeriod,
 		app.bankKeeper,
 		authtypes.FeeCollectorName,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 	app.upgradeKeeper = upgradekeeper.NewKeeper(
 		options.SkipUpgradeHeights,
@@ -476,16 +511,16 @@ func NewApp(
 		app.BaseApp,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
-	app.evidenceKeeper = *evidencekeeper.NewKeeper(
+	app.evidenceKeeper = evidencekeeper.NewKeeper(
 		appCodec,
 		keys[evidencetypes.StoreKey],
-		&app.stakingKeeper,
+		app.stakingKeeper,
 		app.slashingKeeper,
 	)
 
 	app.ibcKeeper = ibckeeper.NewKeeper(
 		appCodec,
-		keys[ibchost.StoreKey],
+		keys[ibcexported.StoreKey],
 		ibcSubspace,
 		app.stakingKeeper,
 		app.upgradeKeeper,
@@ -513,7 +548,7 @@ func NewApp(
 		app.accountKeeper,
 		app.bankKeeper,
 		app.distrKeeper,
-		app.stakingKeeper,
+		*app.stakingKeeper,
 		authtypes.FeeCollectorName,
 	)
 
@@ -600,70 +635,86 @@ func NewApp(
 	)
 
 	evmBankKeeper := evmutilkeeper.NewEvmBankKeeper(app.evmutilKeeper, app.bankKeeper, app.accountKeeper)
+
+	allKeys := make(map[string]storetypes.StoreKey, len(keys)+len(tkeys)+len(memKeys))
+	for k, v := range keys {
+		allKeys[k] = v
+	}
+	for k, v := range tkeys {
+		allKeys[k] = v
+	}
+	for k, v := range memKeys {
+		allKeys[k] = v
+	}
 	app.evmKeeper = evmkeeper.NewKeeper(
-		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey],
-		// Authority
-		authtypes.NewModuleAddress(govtypes.ModuleName),
-		app.accountKeeper, evmBankKeeper, app.stakingKeeper, app.feeMarketKeeper,
-		nil, // precompiled contracts
-		geth.NewEVM,
+		appCodec, keys[evmtypes.StoreKey], tkeys[evmtypes.TransientKey], authtypes.NewModuleAddress(govtypes.ModuleName),
+		app.accountKeeper, evmBankKeeper, app.stakingKeeper,
+		app.feeMarketKeeper,
 		options.EVMTrace,
 		evmSubspace,
+		[]vm.PrecompiledContract{},
+		allKeys,
 	)
 
 	app.evmutilKeeper.SetEvmKeeper(app.evmKeeper)
-	// Note: the committee proposal handler is not registered on the committee router. This means committees cannot create or update other committees.
-	// Adding the committee proposal handler to the router is possible but awkward as the handler depends on the keeper which depends on the handler.
+
+	govConfig := govtypes.DefaultConfig()
+	govKeeper := govkeeper.NewKeeper(
+		appCodec,
+		keys[govtypes.StoreKey],
+		app.accountKeeper,
+		app.bankKeeper,
+		app.stakingKeeper,
+		app.MsgServiceRouter(),
+		govConfig,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
 
 	// create gov keeper with router
 	// NOTE this must be done after any keepers referenced in the gov router (ie committee) are defined
 	govRouter := govv1beta1.NewRouter()
 	govRouter.
 		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
-		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.paramsKeeper)).
+		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.upgradeKeeper)).
-		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.ibcKeeper.ClientKeeper)).
-		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.distrKeeper))
+		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.ibcKeeper.ClientKeeper))
 
-	govConfig := govtypes.DefaultConfig()
-	app.govKeeper = govkeeper.NewKeeper(
-		appCodec,
-		keys[govtypes.StoreKey],
-		govSubspace,
-		app.accountKeeper,
-		app.bankKeeper,
-		&app.stakingKeeper,
-		govRouter,
-		app.MsgServiceRouter(),
-		govConfig,
+	govKeeper.SetLegacyRouter(govRouter)
+
+	app.govKeeper = *govKeeper.SetHooks(
+		govtypes.NewMultiGovHooks(
+		// register the governance hooks
+		),
 	)
 
 	// register the staking hooks
 	// NOTE: These keepers are passed by reference above, so they will contain these hooks.
-	app.stakingKeeper = *(app.stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks())))
+	app.stakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()))
 
 	// app.cdpKeeper = *cdpKeeper.SetHooks(cdptypes.NewMultiCDPHooks(app.incentiveKeeper.Hooks()))
 	app.joltKeeper = *joltKeeper.SetHooks(jolttypes.NewMultiJoltHooks(app.incentiveKeeper.Hooks()))
 
+	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
+
 	// create the module manager (Note: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.)
+	authModule := auth.NewAppModule(appCodec, app.accountKeeper, authsims.RandomGenesisAccounts, app.ParamsKeeper.Subspace(authtypes.ModuleName))
 	app.mm = module.NewManager(
 		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx, encodingConfig.TxConfig),
-		auth.NewAppModule(appCodec, app.accountKeeper, nil),
-		bank.NewAppModule(appCodec, app.bankKeeper, app.accountKeeper),
-		capability.NewAppModule(appCodec, *app.capabilityKeeper),
+		authModule,
+		bank.NewAppModule(appCodec, app.bankKeeper, app.accountKeeper, app.ParamsKeeper.Subspace(banktypes.ModuleName)),
+		capability.NewAppModule(appCodec, *app.capabilityKeeper, false),
 		feegrantmodule.NewAppModule(appCodec, app.accountKeeper, app.bankKeeper, app.feeGrantKeeper, app.interfaceRegistry),
-		staking.NewAppModule(appCodec, app.stakingKeeper, app.accountKeeper, app.bankKeeper),
+		staking.NewAppModule(appCodec, app.stakingKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(stakingtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.mintKeeper, app.accountKeeper, app.bankKeeper),
-		distr.NewAppModule(appCodec, app.distrKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper),
-		gov.NewAppModule(appCodec, app.govKeeper, app.accountKeeper, app.bankKeeper),
-		params.NewAppModule(app.paramsKeeper),
-		crisis.NewAppModule(&app.crisisKeeper, options.SkipGenesisInvariants),
-		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper),
+		distr.NewAppModule(appCodec, app.distrKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
+		gov.NewAppModule(appCodec, &app.govKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(govtypes.ModuleName)),
+		params.NewAppModule(app.ParamsKeeper),
+		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName)),
 		ibc.NewAppModule(app.ibcKeeper),
 		upgrade.NewAppModule(app.upgradeKeeper),
-		evidence.NewAppModule(app.evidenceKeeper),
+		evidence.NewAppModule(*app.evidenceKeeper),
 		transferModule,
 		vesting.NewAppModule(app.accountKeeper, app.bankKeeper),
 		authzmodule.NewAppModule(appCodec, app.authzKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
@@ -681,6 +732,7 @@ func NewApp(
 		feemarket.NewAppModule(app.feeMarketKeeper, feemarketSubspace),
 		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper, app.accountKeeper),
 		swap.NewAppModule(app.swapKeeper, app.accountKeeper),
+		crisis.NewAppModule(app.crisisKeeper, skipGenesisInvariants, app.ParamsKeeper.Subspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -713,7 +765,7 @@ func NewApp(
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
-		ibchost.ModuleName,
+		ibcexported.ModuleName,
 		// Add all remaining modules with an empty begin blocker below since cosmos 0.45.0 requires it
 		vestingtypes.ModuleName,
 		pricefeedtypes.ModuleName,
@@ -755,7 +807,7 @@ func NewApp(
 		evidencetypes.ModuleName,
 		feegrant.ModuleName,
 		vestingtypes.ModuleName,
-		ibchost.ModuleName,
+		ibcexported.ModuleName,
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		genutiltypes.ModuleName,
@@ -775,7 +827,7 @@ func NewApp(
 		slashingtypes.ModuleName, // iterates over validators, run after staking
 		govtypes.ModuleName,
 		minttypes.ModuleName,
-		ibchost.ModuleName,
+		ibcexported.ModuleName,
 		evidencetypes.ModuleName,
 		authz.ModuleName,
 		ibctransfertypes.ModuleName,
@@ -802,11 +854,23 @@ func NewApp(
 		upgradetypes.ModuleName,
 	)
 
-	app.mm.RegisterInvariants(&app.crisisKeeper)
-	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
-
+	app.mm.RegisterInvariants(app.crisisKeeper)
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 	app.mm.RegisterServices(app.configurator)
+
+	autocliv1.RegisterQueryServer(app.GRPCQueryRouter(), runtimeservices.NewAutoCLIQueryService(app.mm.Modules))
+	reflectionSvc, err := runtimeservices.NewReflectionService()
+	if err != nil {
+		panic(err)
+	}
+	reflectionv1.RegisterReflectionServiceServer(app.GRPCQueryRouter(), reflectionSvc)
+
+	// create the simulation manager and define the order of the modules for deterministic simulations
+	overrideModules := map[string]module.AppModuleSimulation{
+		authtypes.ModuleName: authModule,
+	}
+	app.sm = module.NewSimulationManagerFromAppModules(app.mm.Modules, overrideModules)
+	app.sm.RegisterStoreDecoders()
 
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	//
@@ -855,7 +919,7 @@ func NewApp(
 		TxFeeChecker:           nil,
 	}
 
-	anteHandler, err := ante.NewAnteHandler(anteOptions)
+	anteHandler, err := ante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}
@@ -872,7 +936,7 @@ func NewApp(
 	// load store
 	if !options.SkipLoadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
-			panic(fmt.Sprintf("failed to load latest version: %s", err))
+			tmos.Exit(err.Error())
 		}
 	}
 
@@ -884,6 +948,24 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker contains app specific logic for the BeginBlock abci call.
 func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Height == ctx.BlockHeight() && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		// we need to migrate the tendermint consensus from x/params to x/consensus module
+		baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
+		if baseAppLegacySS.Has(ctx, baseapp.ParamStoreKeyBlockParams) {
+			var bp tmproto.BlockParams
+			baseAppLegacySS.Get(ctx, baseapp.ParamStoreKeyBlockParams, &bp)
+			bp.MaxGas = 200000000
+			baseAppLegacySS.Set(ctx, baseapp.ParamStoreKeyBlockParams, bp)
+		}
+		baseapp.MigrateParams(ctx, baseAppLegacySS, &app.ConsensusParamsKeeper)
+		cs := app.BaseApp.GetConsensusParams(ctx)
+		ctx = ctx.WithConsensusParams(cs)
+	}
 	return app.mm.BeginBlock(ctx, req)
 }
 
@@ -978,24 +1060,56 @@ func (app *App) RegisterTendermintService(clientCtx client.Context) {
 }
 
 // loadBlockedMaccAddrs returns a map indicating the blocked status of each module account address
-func (app *App) loadBlockedMaccAddrs() map[string]bool {
-	modAccAddrs := app.ModuleAccountAddrs()
-	joltIncentiveMaccAddr := app.accountKeeper.GetModuleAddress(incentivetypes.ModuleName)
-	for addr := range modAccAddrs {
-		// Set the joltincentives module account address as unblocked
-		if addr == joltIncentiveMaccAddr.String() {
-			modAccAddrs[addr] = false
-		}
-	}
-	return modAccAddrs
-}
+// func (app *App) loadBlockedMaccAddrs() map[string]bool {
+//	modAccAddrs := app.ModuleAccountAddrs()
+//	joltIncentiveMaccAddr := app.accountKeeper.GetModuleAddress(incentivetypes.ModuleName)
+//	for addr := range modAccAddrs {
+//		// Set the joltincentives module account address as unblocked
+//		if addr == joltIncentiveMaccAddr.String() {
+//			modAccAddrs[addr] = false
+//		}
+//	}
+//	return modAccAddrs
+// }
 
 func (app *App) setupUpgradeHandlers() {
+	// Set param key table for params module migration
+	for _, subspace := range app.ParamsKeeper.GetSubspaces() {
+		subspace := subspace
+		var keyTable paramstypes.KeyTable
+		switch subspace.Name() {
+		case authtypes.ModuleName:
+			keyTable = authtypes.ParamKeyTable() //nolint:staticcheck
+		case banktypes.ModuleName:
+			keyTable = banktypes.ParamKeyTable() //nolint:staticcheck
+		case stakingtypes.ModuleName:
+			keyTable = stakingtypes.ParamKeyTable()
+		case minttypes.ModuleName:
+			keyTable = minttypes.ParamKeyTable()
+		case distrtypes.ModuleName:
+			keyTable = distrtypes.ParamKeyTable() //nolint:staticcheck
+		case slashingtypes.ModuleName:
+			keyTable = slashingtypes.ParamKeyTable() //nolint:staticcheck
+		case govtypes.ModuleName:
+			keyTable = govv1.ParamKeyTable() //nolint:staticcheck
+		case crisistypes.ModuleName:
+			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
+		case evmtypes.ModuleName:
+			keyTable = evmutiltypes.ParamKeyTable()
+		case feemarkettypes.ModuleName:
+			keyTable = feemarkettypes.ParamKeyTable()
+		}
+		if !subspace.HasKeyTable() {
+			subspace.WithKeyTable(keyTable)
+		}
+	}
+
 	app.upgradeKeeper.SetUpgradeHandler(v1.V003UpgradeName, v1.CreateUpgradeHandlerForV003Upgrade(app.mm, &app.VaultKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V004UpgradeName, v1.CreateUpgradeHandlerForV004Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V005UpgradeName, v1.CreateUpgradeHandlerForV005Upgrade(app.mm, &app.VaultKeeper, app.configurator, app.incentiveKeeper))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V006UpgradeName, v1.CreateUpgradeHandlerForV006Upgrade(app.mm, app.evmutilKeeper, app.evmKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V007UpgradeName, v1.CreateUpgradeHandlerForV007Upgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V008UpgradeName, v1.CreateUpgradeHandlerForV008Upgrade(app.mm, app.configurator))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
@@ -1018,4 +1132,26 @@ func (app *App) setupUpgradeHandlers() {
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
+
+	if upgradeInfo.Name == v1.V008UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{crisistypes.StoreKey, consensusparamtypes.ModuleName},
+		}
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+}
+
+// RegisterNodeService implements the Application.RegisterNodeService method.
+func (app *App) RegisterNodeService(clientCtx client.Context) {
+	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter())
+}
+
+// BlockedModuleAccountAddrs returns all the app's blocked module account
+// addresses.
+func (app *App) BlockedModuleAccountAddrs() map[string]bool {
+	modAccAddrs := app.ModuleAccountAddrs()
+	delete(modAccAddrs, authtypes.NewModuleAddress(govtypes.ModuleName).String())
+
+	return modAccAddrs
 }

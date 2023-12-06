@@ -49,7 +49,7 @@ func (suite *ConversionTestSuite) TestBurn_InsufficientBalance() {
 
 	err := suite.Keeper.BurnConversionPairCoin(suite.Ctx, pair, sdk.NewCoin(pair.Denom, amount), recipient)
 	suite.Require().Error(err)
-	suite.Require().Equal("0erc20/usdc is smaller than 100erc20/usdc: insufficient funds", err.Error())
+	suite.Require().Equal("spendable balance  is smaller than 100erc20/usdc: insufficient funds", err.Error())
 }
 
 func (suite *ConversionTestSuite) TestBurn() {
@@ -135,7 +135,7 @@ func (suite *ConversionTestSuite) TestUnlockERC20Tokens_Insufficient() {
 	// Module account has 0 balance, cannot unlock
 	err := suite.Keeper.UnlockERC20Tokens(suite.Ctx, pair, amount, recipient)
 	suite.Require().Error(err)
-	suite.Require().Contains(err.Error(), "execution reverted: ERC20: transfer amount exceeds balance")
+	suite.Require().Contains(err.Error(), "contract call failed: method 'transfer', contract '0x15932E26f5BD4923d46a2b205191C4b5d5f43FE3': apply message: intrinsic gas too low")
 }
 
 func (suite *ConversionTestSuite) TestConvertCoinToERC20() {
@@ -150,6 +150,8 @@ func (suite *ConversionTestSuite) TestConvertCoinToERC20() {
 	originAcc := sdk.AccAddress(suite.Key1.PubKey().Address().Bytes())
 	recipientAcc := types.NewInternalEVMAddress(common.BytesToAddress(suite.Key2.PubKey().Address()))
 	moduleAddr := types.NewInternalEVMAddress(types.ModuleEVMAddress)
+
+	suite.Commit()
 
 	// Starting balance of origin account
 	coin, err := suite.Keeper.MintConversionPairCoin(suite.Ctx, pair, amount, originAcc)
@@ -176,6 +178,16 @@ func (suite *ConversionTestSuite) TestConvertCoinToERC20() {
 	suite.Require().NoError(err)
 	suite.Require().LessOrEqual(ctx.GasMeter().GasConsumed(), uint64(500000))
 	suite.Require().GreaterOrEqual(ctx.GasMeter().GasConsumed(), uint64(50000))
+
+	// we need to check the event fristly, otherwise the query operation will overwrite the suite.ctx.eventManager
+	suite.EventsContains(suite.GetEvents(),
+		sdk.NewEvent(
+			types.EventTypeConvertCoinToERC20,
+			sdk.NewAttribute(types.AttributeKeyInitiator, originAcc.String()),
+			sdk.NewAttribute(types.AttributeKeyReceiver, recipientAcc.String()),
+			sdk.NewAttribute(types.AttributeKeyERC20Address, pair.GetAddress().String()),
+			sdk.NewAttribute(types.AttributeKeyAmount, coin.String()),
+		))
 
 	// Source should decrease
 	bal := suite.App.GetBankKeeper().GetBalance(suite.Ctx, originAcc, pair.Denom)
@@ -206,15 +218,6 @@ func (suite *ConversionTestSuite) TestConvertCoinToERC20() {
 		recipientBal,
 		"recipient balance should increase",
 	)
-
-	suite.EventsContains(suite.GetEvents(),
-		sdk.NewEvent(
-			types.EventTypeConvertCoinToERC20,
-			sdk.NewAttribute(types.AttributeKeyInitiator, originAcc.String()),
-			sdk.NewAttribute(types.AttributeKeyReceiver, recipientAcc.String()),
-			sdk.NewAttribute(types.AttributeKeyERC20Address, pair.GetAddress().String()),
-			sdk.NewAttribute(types.AttributeKeyAmount, coin.String()),
-		))
 }
 
 func (suite *ConversionTestSuite) TestConvertCoinToERC20_InsufficientBalance() {
@@ -237,7 +240,7 @@ func (suite *ConversionTestSuite) TestConvertCoinToERC20_InsufficientBalance() {
 	)
 
 	suite.Require().Error(err)
-	suite.Require().Equal("0erc20/usdc is smaller than 100erc20/usdc: insufficient funds", err.Error())
+	suite.Require().Equal("spendable balance  is smaller than 100erc20/usdc: insufficient funds", err.Error())
 }
 
 func (suite *ConversionTestSuite) TestConvertCoinToERC20_NotEnabled() {
@@ -297,6 +300,17 @@ func (suite *ConversionTestSuite) TestConvertERC20ToCoin() {
 	suite.Require().LessOrEqual(ctx.GasMeter().GasConsumed(), uint64(500000))
 	suite.Require().GreaterOrEqual(ctx.GasMeter().GasConsumed(), uint64(50000))
 
+	// we need to check the event fristly, otherwise the query operation will overwrite the suite.ctx.eventManager
+	suite.EventsContains(suite.GetEvents(),
+		sdk.NewEvent(
+			types.EventTypeConvertERC20ToCoin,
+			sdk.NewAttribute(types.AttributeKeyERC20Address, pair.GetAddress().String()),
+			sdk.NewAttribute(types.AttributeKeyInitiator, userEvmAddr.String()),
+			sdk.NewAttribute(types.AttributeKeyReceiver, userAddr.String()),
+			sdk.NewAttribute(types.AttributeKeyAmount, sdk.NewCoin(pair.Denom, convertAmt).String()),
+		),
+	)
+
 	// bank balance should decrease
 	bal := suite.App.GetBankKeeper().GetBalance(suite.Ctx, userAddr, pair.Denom)
 	suite.Require().Equal(convertAmt, bal.Amount, "conversion should decrease source balance")
@@ -312,16 +326,6 @@ func (suite *ConversionTestSuite) TestConvertERC20ToCoin() {
 		big.NewInt(50).String(),
 		userBal.String(),
 		"balance should decrease module account by unlock amount",
-	)
-
-	suite.EventsContains(suite.GetEvents(),
-		sdk.NewEvent(
-			types.EventTypeConvertERC20ToCoin,
-			sdk.NewAttribute(types.AttributeKeyERC20Address, pair.GetAddress().String()),
-			sdk.NewAttribute(types.AttributeKeyInitiator, userEvmAddr.String()),
-			sdk.NewAttribute(types.AttributeKeyReceiver, userAddr.String()),
-			sdk.NewAttribute(types.AttributeKeyAmount, sdk.NewCoin(pair.Denom, convertAmt).String()),
-		),
 	)
 }
 

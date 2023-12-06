@@ -8,14 +8,16 @@ import (
 
 	"github.com/labstack/gommon/random"
 
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+
+	tmdb "github.com/cometbft/cometbft-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/stretchr/testify/assert"
-	tmdb "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -24,7 +26,6 @@ import (
 
 type (
 	Network = network.Network
-	Config  = network.Config
 )
 
 // New creates instance with fully configured cosmos network.
@@ -40,6 +41,7 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 		cfg = configs[0]
 	}
 
+	cfg.EnableTMLogging = true
 	net, err := network.New(t, t.TempDir(), cfg)
 	assert.NoError(t, err)
 	t.Cleanup(net.Cleanup)
@@ -51,26 +53,38 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 func DefaultConfig() network.Config {
 	rd := random.New()
 	randomChainName := rd.String(6, random.Alphabetic)
-
+	randomChainID := strings.ToLower(randomChainName) + "localnet" + "_888-1"
+	// randomChainID := "joltifydev_1729-1"
 	encoding := app.MakeEncodingConfig()
+
 	return network.Config{
 		Codec:             encoding.Marshaler,
 		TxConfig:          encoding.TxConfig,
 		LegacyAmino:       encoding.Amino,
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		AppConstructor: func(val network.Validator) servertypes.Application {
-			return app.NewApp(
-				val.Ctx.Logger, tmdb.NewMemDB(), val.Ctx.Config.RootDir, nil, encoding,
-				app.Options{},
-				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
-				baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
+		AppConstructor: func(val network.ValidatorI) servertypes.Application {
+			localApp := app.NewApp(
+				val.GetCtx().Logger,
+				tmdb.NewMemDB(),
+				val.GetCtx().Config.RootDir,
+				nil,
+				encoding,
+				app.Options{
+					EVMMaxGasWanted: 10000,
+				},
+				0,
+				simtestutil.EmptyAppOptions{},
+				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
+				baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
+				baseapp.SetChainID(randomChainID),
 			)
+			return localApp
 		},
 
 		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),
 		TimeoutCommit:   2 * time.Second,
-		ChainID:         strings.ToLower(randomChainName) + "localnet" + "_888-1",
+		ChainID:         randomChainID,
 		NumValidators:   1,
 		BondDenom:       sdk.DefaultBondDenom,
 		MinGasPrices:    fmt.Sprintf("0.000006%s", "ujolt"),

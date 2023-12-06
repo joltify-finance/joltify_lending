@@ -122,7 +122,7 @@ func CreateEthCallContractTx(
 	)
 
 	// Must set from address before signing
-	ethTx.From = from.String()
+	ethTx.From = from.Bytes()
 
 	// Sign Ethereum TX (not the cosmos Msg)
 	signer := ethtypes.LatestSignerForChainID(chainID)

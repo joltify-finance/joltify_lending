@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
-TM_PKG_VERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
+TM_PKG_VERSION := $(shell go list -m github.com/cometbft/cometbft/ | sed 's:.* ::')
 COSMOS_PKG_VERSION := $(shell go list -m github.com/cosmos/cosmos-sdk | sed 's:.* ::')
 COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
@@ -58,7 +58,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=joltify\
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_PKG_VERSION)
+		  -X github.com/cometbft/cometbft/version.TMCoreSemVer=$(TM_PKG_VERSION)
 
 
 # DB backend selection
@@ -184,24 +184,37 @@ test:
 ###                                Protobuf                                 ###
 ###############################################################################
 
-protoVer=v0.8
-protoImageName=joltify/joltify-proto-gen:$(protoVer)
-containerProtoGen=cosmos-sdk-proto-gen-$(protoVer)
-containerProtoGenSwagger=cosmos-sdk-proto-swagger-$(protoVer)
-containerProtoFmt=cosmos-sdk-proto-fmt-$(protoVer)
+
+#
+#protoVer=v0.13.0
+#protoImageName=joltify/joltify-proto-gen:$(protoVer)
+#
+#
+#containerProtoGen=cosmos-sdk-proto-gen-$(protoVer)
+#containerProtoGenSwagger=cosmos-sdk-proto-swagger-$(protoVer)
+#containerProtoFmt=cosmos-sdk-proto-fmt-$(protoVer)
+#protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
+
+
+protoVer=0.13.0
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
+
 
 
 proto-all: proto-gen proto-format proto-lint proto-swagger-gen
 
 proto-gen:
 	@echo "Generating Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
+	@$(protoImage) sh ./scripts/protocgen.sh
+#	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
 		sh ./scripts/protocgen.sh; fi
 
 proto-swagger-gen:
 	@echo "Generating Protobuf Swagger"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
-		sh ./scripts/protoc-swagger-gen.sh; fi
+	@$(protoImage) sh ./scripts/protoc-swagger-gen.sh
+	#@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
+	#	sh ./scripts/protoc-swagger-gen.sh; fi
 	@echo "now statik all the files"
 	@statik -src=client/docs/swagger-ui -dest=client/docs -f -m
 .PHONY: proto-swagger-gen
@@ -230,7 +243,7 @@ PROTOBUF_GOOGLE_TYPES = third_party/proto/google/protobuf
 COSMOS_PROTO_TYPES = third_party/proto/cosmos_proto
 
 GOGO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/gogo/protobuf)
-TENDERMINT_PATH := $(shell go list -m -f '{{.Dir}}' github.com/tendermint/tendermint)
+TENDERMINT_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cometbft/cometbft/)
 COSMOS_PROTO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-proto)
 COSMOS_SDK_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-sdk)
 IBC_GO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/ibc-go/v6)

@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -14,7 +15,6 @@ import (
 	testutil2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/testutil"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	"github.com/stretchr/testify/suite"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 )
 
 // Test suite used for all keeper tests

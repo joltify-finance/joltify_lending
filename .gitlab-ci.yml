@@ -47,12 +47,12 @@ unit-test-job:   # This job runs in the test stage.
 
 
 lint_code:
-  image: golangci/golangci-lint:v1.52
+  image: golang:1.20
   stage: test
   before_script:
-    - go mod tidy
+    - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.0
   script:
-    - golangci-lint run -v --timeout 3600s -c ./.golangci.yml
+    - ./bin/golangci-lint run -v --timeout 3600s -c ./.golangci.yml
 
 # deploy-job:      # This job runs in the deploy stage.
 #   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.

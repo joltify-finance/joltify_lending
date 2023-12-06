@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	tmlog "github.com/tendermint/tendermint/libs/log"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/stretchr/testify/suite"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"

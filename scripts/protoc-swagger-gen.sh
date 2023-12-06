@@ -4,8 +4,8 @@ set -eo pipefail
 
 mkdir -p ./tmp-swagger-gen
 
-echo "cloning cosmos v0.46.8"
-git clone --depth 1 --branch v0.46.8 https://github.com/cosmos/cosmos-sdk.git tmp_repo
+echo "cloning cosmos v0.47.4"
+git clone --depth 1 --branch v0.47.4 https://github.com/cosmos/cosmos-sdk.git tmp_repo
 
 cosmos_sdk_dir=$(go list -f '{{ .Dir }}' -m github.com/cosmos/cosmos-sdk)
 

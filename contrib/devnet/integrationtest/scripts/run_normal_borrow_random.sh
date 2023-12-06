@@ -49,6 +49,8 @@ indexJunior=$thispool
 #fi
 
 
+sleep 6
+
 amount=$(echo 200000*$base|bc)
 # run the borrow for junior
 set -x
@@ -63,6 +65,9 @@ if [ $code -eq 0 ]; then
     cecho "RED" "Borrow junior failed with $ret"
 fi
 
+
+echo "last borrow"
+sleep 50
 
 ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 20000000)
 # get the code from json

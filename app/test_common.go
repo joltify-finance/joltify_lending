@@ -7,6 +7,9 @@ import (
 	"testing"
 	"time"
 
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	"github.com/evmos/ethermint/app"
+
 	"github.com/ethereum/go-ethereum/common"
 	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 
@@ -19,16 +22,19 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
-	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
+	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 
-	tmtypes "github.com/tendermint/tendermint/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 
+	tmdb "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
@@ -50,9 +56,6 @@ import (
 	joltkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmdb "github.com/tendermint/tm-db"
 )
 
 var (
@@ -146,28 +149,13 @@ func genesisStateWithValSet(
 	})
 
 	// update total supply
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	genesisState[banktypes.ModuleName] = app.AppCodec().MustMarshalJSON(bankGenesis)
 
 	return genesisState
 }
 
-var DefaultConsensusParams = &abci.ConsensusParams{
-	Block: &abci.BlockParams{
-		MaxBytes: 200000,
-		MaxGas:   2000000,
-	},
-	Evidence: &tmproto.EvidenceParams{
-		MaxAgeNumBlocks: 302400,
-		MaxAgeDuration:  504 * time.Hour, // 3 weeks is the max duration
-		MaxBytes:        10000,
-	},
-	Validator: &tmproto.ValidatorParams{
-		PubKeyTypes: []string{
-			tmtypes.ABCIPubKeyTypeEd25519,
-		},
-	},
-}
+var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 
 // NewTestAppFromSealed creates a TestApp without first setting sdk config.
 func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
@@ -175,8 +163,11 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 	app := NewApp(
 		logger, tmdb.NewMemDB(), rootDir, nil, encCfg,
 		Options{},
+		0,
+		simtestutil.NewAppOptionsWithFlagHome(rootDir),
 		baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(pruningtypes.PruningOptionDefault)),
 		baseapp.SetMinGasPrices("0stake"),
+		baseapp.SetChainID("joltifytest_888-1"),
 	)
 
 	privVal := ed25519.GenPrivKey()
@@ -211,25 +202,26 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
-			ChainId:         "joltifychain_888-1",
+			ChainId:         "joltifytest_888-1",
 		},
 	)
 
 	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: time.Now().UTC()}
 
 	ctx := app.BaseApp.NewContext(false, header)
+	ctx = ctx.WithBlockGasMeter(sdk.NewGasMeter(1000000000000000000))
 	return TestApp{App: *app, Ctx: ctx}
 }
 
 func (tApp TestApp) GetAccountKeeper() authkeeper.AccountKeeper { return tApp.accountKeeper }
 func (tApp TestApp) GetBankKeeper() bankkeeper.Keeper           { return tApp.bankKeeper }
-func (tApp TestApp) GetStakingKeeper() stakingkeeper.Keeper     { return tApp.stakingKeeper }
+func (tApp TestApp) GetStakingKeeper() stakingkeeper.Keeper     { return *tApp.stakingKeeper }
 func (tApp TestApp) GetSlashingKeeper() slashingkeeper.Keeper   { return tApp.slashingKeeper }
 func (tApp TestApp) GetMintKeeper() mintkeeper.Keeper           { return tApp.mintKeeper }
 func (tApp TestApp) GetDistrKeeper() distkeeper.Keeper          { return tApp.distrKeeper }
 func (tApp TestApp) GetGovKeeper() govkeeper.Keeper             { return tApp.govKeeper }
-func (tApp TestApp) GetCrisisKeeper() crisiskeeper.Keeper       { return tApp.crisisKeeper }
-func (tApp TestApp) GetParamsKeeper() paramskeeper.Keeper       { return tApp.paramsKeeper }
+func (tApp TestApp) GetCrisisKeeper() crisiskeeper.Keeper       { return *tApp.crisisKeeper }
+func (tApp TestApp) GetParamsKeeper() paramskeeper.Keeper       { return tApp.ParamsKeeper }
 
 func (tApp TestApp) GetAuctionKeeper() auctionkeeper.Keeper     { return tApp.auctionKeeper }
 func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.pricefeedKeeper }
@@ -319,6 +311,7 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	if err != nil {
 		panic(err)
 	}
+
 	tApp.InitChain(
 		abci.RequestInitChain{
 			Time:          genTime,
@@ -326,13 +319,8 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 			AppStateBytes: stateBytes,
 			ChainId:       chainID,
 			// Set consensus params, which is needed by x/feemarket
-			ConsensusParams: &abci.ConsensusParams{
-				Block: &abci.BlockParams{
-					MaxBytes: 200000,
-					MaxGas:   20000000,
-				},
-			},
-			InitialHeight: initialHeight,
+			ConsensusParams: app.DefaultConsensusParams,
+			InitialHeight:   initialHeight,
 		},
 	)
 	tApp.Commit()

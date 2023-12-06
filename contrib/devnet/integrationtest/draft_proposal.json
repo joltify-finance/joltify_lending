@@ -1,0 +1,17 @@
+{
+ "messages": [
+  {
+   "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+   "authority": "jolt10d07y265gmmuvt4z0w9aw880jnsr700jszwe96",
+   "plan": {
+    "name": "v007_upgrade",
+    "time": "0001-01-01T00:00:00Z",
+    "height": "220",
+    "info": "",
+    "upgraded_client_state": null
+   }
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "10000jolt"
+}

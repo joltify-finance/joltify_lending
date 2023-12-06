@@ -15,6 +15,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/joltify-finance/joltify_lending/testutil/network"
@@ -22,7 +23,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 )
 
 func networkWithCreatePoolObjects(t *testing.T, n int, maxValidator uint32) (*network.Network, []*types.CreatePool) {

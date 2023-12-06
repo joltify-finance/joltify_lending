@@ -52,7 +52,7 @@ sed -in-place='' 's/tracer = ""/tracer = "json"/g' $DATA/config/app.toml
 
 # Set client chain id
 sed -in-place='' 's/chain-id = ""/chain-id = "joltify_1729-1"/g' $DATA/config/client.toml
-sed -in-place='' 's/broadcast-mode = "sync"/broadcast-mode = "block"/g' $DATA/config/client.toml
+sed -in-place='' 's/broadcast-mode = "sync"/broadcast-mode = "sync"/g' $DATA/config/client.toml
 
 # avoid having to use password for keys
 $BINARY config keyring-backend test

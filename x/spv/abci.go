@@ -56,7 +56,6 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 					k.SetPool(ctx, poolInfo)
 					return false
 				}
-				poolInfo.ProjectLength = 1641
 				ctx.Logger().Info("pool due time update", "index", poolInfo.Index, "due time", poolInfo.ProjectDueTime.Local().String())
 				if poolInfo.ProjectDueTime.Before(currentTime) {
 					// we pay the partial of the interest

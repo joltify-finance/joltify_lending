@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	app2 "github.com/joltify-finance/joltify_lending/app"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/stretchr/testify/assert"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
@@ -54,16 +54,21 @@ func TestQueryInvestorWalletsInvestors(t *testing.T) {
 	defaultArgs := []string{
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, addr.String()),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 	}
 	var args []string
 	args = append(fields, defaultArgs...)
 	_, err = clitestutil.ExecTestCLICmd(ctx, cli.CmdUploadInvestor(), args)
 	require.NoError(t, err)
+	err = net.WaitForNextBlock()
+	require.NoError(t, err)
 
 	fields2 := []string{"3", "jolt1hnk55w58lje99eqqjmffgg8278l22jmzpsa9rj,jolt1t0h9w5w9wl0mhdhlfyk0rl8rnr4qudnk3yxe67,jolt13rmg7wwpnvw4cq0fps4v4ljzvs5v9xz5k8znqa"}
 	args = append(fields2, defaultArgs...)
 	_, err = clitestutil.ExecTestCLICmd(ctx, cli.CmdUploadInvestor(), args)
+	require.NoError(t, err)
+
+	err = net.WaitForNextBlock()
 	require.NoError(t, err)
 
 	for _, tc := range []struct {

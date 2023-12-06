@@ -1,6 +1,7 @@
 #!/bin/bash
 # generate n cosmos accounts
 # loop function to generate n cosmos accounts
+set -x
 base=1000000000000000000
 all_keys=100
 project_index=1
@@ -38,6 +39,9 @@ while true; do
   sleep 1 # wait for a second before running the command again
 done
 
+
+sleep 6
+
 ret=$(joltify tx pricefeed postprice aud:usd 1.0 253402300799 -y --from validator --output json)
  code=$(echo $ret | jq -r '.code')
   # check whether the return value of the function is 0
@@ -48,6 +52,8 @@ ret=$(joltify tx pricefeed postprice aud:usd 1.0 253402300799 -y --from validato
     exit 1
   fi
 
+echo "now we sleep"
+sleep 6
 
 ret=$(joltify tx pricefeed postprice usdc:usd 1.0 253402300799 -y --from validator --output json)
  code=$(echo $ret | jq -r '.code')
@@ -59,6 +65,7 @@ ret=$(joltify tx pricefeed postprice usdc:usd 1.0 253402300799 -y --from validat
     exit 1
   fi
 
+sleep 6
 
 ret=$(joltify tx pricefeed postprice bnb:usd 233.0 253402300799 -y --from validator --output json)
  code=$(echo $ret | jq -r '.code')
@@ -69,7 +76,7 @@ ret=$(joltify tx pricefeed postprice bnb:usd 233.0 253402300799 -y --from valida
     cecho "READ" "submit price failed with $ret"
     exit 1
   fi
-
+sleep 6
 
 ret=$(joltify tx pricefeed postprice jolt:usd 0.1 253402300799 -y --from validator --output json)
  code=$(echo $ret | jq -r '.code')
@@ -80,3 +87,4 @@ ret=$(joltify tx pricefeed postprice jolt:usd 0.1 253402300799 -y --from validat
     cecho "READ" "submit price failed with $ret"
     exit 1
   fi
+sleep 6

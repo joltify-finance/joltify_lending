@@ -10,12 +10,12 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	app2 "github.com/joltify-finance/joltify_lending/app"
 
+	"github.com/cometbft/cometbft/crypto/secp256k1"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
 	types2 "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/joltify-finance/joltify_lending/testutil/simapp"
 	"github.com/stretchr/testify/assert"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"

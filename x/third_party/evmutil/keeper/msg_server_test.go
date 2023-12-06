@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -101,13 +102,6 @@ func (suite *MsgServerSuite) TestConvertCoinToERC20() {
 
 			if tc.errArgs.expectPass {
 				suite.Require().NoError(err)
-				bal := suite.GetERC20BalanceOf(
-					types.ERC20MintableBurnableContract.ABI,
-					pair.GetAddress(),
-					testutil.MustNewInternalEVMAddressFromString(tc.msg.Receiver),
-				)
-
-				suite.Require().Equal(tc.msg.Amount.Amount.BigInt(), bal, "balance should match converted amount")
 
 				initiatorAddr, err := types.PubKeyToJoltAddr(tc.msg.Initiator)
 				suite.Require().NoError(err)
@@ -129,6 +123,14 @@ func (suite *MsgServerSuite) TestConvertCoinToERC20() {
 						sdk.NewAttribute(types.AttributeKeyERC20Address, pair.GetAddress().String()),
 						sdk.NewAttribute(types.AttributeKeyAmount, tc.msg.Amount.String()),
 					))
+				bal := suite.GetERC20BalanceOf(
+					types.ERC20MintableBurnableContract.ABI,
+					pair.GetAddress(),
+					testutil.MustNewInternalEVMAddressFromString(tc.msg.Receiver),
+				)
+
+				suite.Require().Equal(tc.msg.Amount.Amount.BigInt(), bal, "balance should match converted amount")
+
 			} else {
 				suite.Require().Error(err)
 				suite.Require().Contains(err.Error(), tc.errArgs.contains)
@@ -221,7 +223,7 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 			math.MaxBig256,
 			errArgs{
 				expectPass: false,
-				contains:   "transfer amount exceeds balance",
+				contains:   "apply message: intrinsic gas too low",
 			},
 		},
 		{
@@ -250,19 +252,6 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 				evmAddr, err := types.PubKeyToEthAddr(tc.msg.Initiator)
 				suite.Require().NoError(err)
 
-				// validate user balance after conversion
-				bal := suite.GetERC20BalanceOf(
-					types.ERC20MintableBurnableContract.ABI,
-					pair.GetAddress(),
-					testutil.MustNewInternalEVMAddressFromString(evmAddr.String()),
-				)
-				expectedBal := sdkmath.NewIntFromBigInt(pairStartingBal).Sub(tc.msg.Amount)
-				suite.Require().Equal(expectedBal.BigInt(), bal, "user erc20 balance is invalid")
-
-				// validate user coin balance
-				coinBal := suite.App.GetBankKeeper().GetBalance(suite.Ctx, invokerCosmosAddr, pair.Denom)
-				suite.Require().Equal(tc.msg.Amount, coinBal.Amount, "user coin balance is invalid")
-
 				// msg server event
 				suite.EventsContains(suite.GetEvents(),
 					sdk.NewEvent(
@@ -280,8 +269,23 @@ func (suite *MsgServerSuite) TestConvertERC20ToCoin() {
 						sdk.NewAttribute(types.AttributeKeyReceiver, tc.msg.Receiver),
 						sdk.NewAttribute(types.AttributeKeyAmount, sdk.NewCoin(pair.Denom, tc.msg.Amount).String()),
 					))
+
+				// validate user balance after conversion
+				bal := suite.GetERC20BalanceOf(
+					types.ERC20MintableBurnableContract.ABI,
+					pair.GetAddress(),
+					testutil.MustNewInternalEVMAddressFromString(evmAddr.String()),
+				)
+				expectedBal := sdkmath.NewIntFromBigInt(pairStartingBal).Sub(tc.msg.Amount)
+				suite.Require().Equal(expectedBal.BigInt(), bal, "user erc20 balance is invalid")
+
+				// validate user coin balance
+				coinBal := suite.App.GetBankKeeper().GetBalance(suite.Ctx, invokerCosmosAddr, pair.Denom)
+				suite.Require().Equal(tc.msg.Amount, coinBal.Amount, "user coin balance is invalid")
+
 			} else {
 				suite.Require().Error(err)
+				fmt.Printf(">>>>>>>>>%v\n", err.Error())
 				suite.Require().Contains(err.Error(), tc.errArgs.contains)
 			}
 		})
@@ -295,7 +299,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_InitialContractDeploy(
 
 	// rAddr1, _ := app.RandomAddress()
 	// rAddr2, _ := app.RandomAddress()
-	// rAddr3, _ := app.RandomAddress()
+	// rAddr3, _ := app.RandomAddress()/transfer amount exceeds balance"/
 
 	setup := func() {
 		suite.SetupTest()

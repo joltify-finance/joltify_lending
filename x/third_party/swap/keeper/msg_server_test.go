@@ -5,17 +5,17 @@ import (
 	"testing"
 	"time"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 	"github.com/stretchr/testify/suite"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtime "github.com/tendermint/tendermint/types/time"
 
 	sdkmath "cosmossdk.io/math"
+	"github.com/cometbft/cometbft/crypto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/tendermint/tendermint/crypto"
 )
 
 var swapModuleAccountAddress = sdk.AccAddress(crypto.AddressHash([]byte(types.ModuleAccountName)))

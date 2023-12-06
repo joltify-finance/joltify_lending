@@ -7,9 +7,9 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 
+	"github.com/cometbft/cometbft/crypto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/tendermint/tendermint/crypto"
 
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
