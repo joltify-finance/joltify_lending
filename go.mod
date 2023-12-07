@@ -224,18 +224,12 @@ require (
 
 replace (
 	// Use the cosmos keyring code
-
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 
 	github.com/cometbft/cometbft => github.com/joltify-finance/cometbft v0.37.3-joltify
 
-	//github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
-
 	github.com/ethereum/go-ethereum => github.com/evmos/go-ethereum v1.10.26-evmos-rc1
-	//github.com/99designs/keyring => github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76
 	//github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
-
-	//github.com/evmos/ethermint => /home/yb/development/ethermint
 
 	github.com/evmos/ethermint => github.com/joltify-finance/ethermint v0.1.1-joltify
 
@@ -245,6 +239,4 @@ replace (
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	// replace broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
-// Make sure that we use grpc compatible with cosmos
-//google.golang.org/grpc => google.golang.org/grpc v1.33.2
 )
