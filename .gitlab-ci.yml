@@ -36,7 +36,7 @@ build:       # This job runs in the build stage, which runs first.
   artifacts:
     paths:
       - release_files/
-
+#
 #unit-test-job:   # This job runs in the test stage.
 #  stage: test    # It only starts when the job in the build stage completes successfully.
 #  coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
@@ -50,8 +50,8 @@ build:       # This job runs in the build stage, which runs first.
 #    reports:
 #      junit: report.xml
 #    expire_in: 1 week
-
 #
+
 #lint_code:
 #  image: golang:1.20
 #  stage: test
@@ -59,7 +59,7 @@ build:       # This job runs in the build stage, which runs first.
 #    - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.0
 #  script:
 #    - ./bin/golangci-lint run -v --timeout 3600s -c ./.golangci.yml
-
+#
 # deploy-job:      # This job runs in the deploy stage.
 #   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
 #   script:
