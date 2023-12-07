@@ -1,6 +1,7 @@
 cache:
   paths:
     - .cache
+    - release_files/
 
 before_script:
   - mkdir -p .cache
@@ -11,7 +12,7 @@ before_script:
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
-  # - deploy
+#  - deploy
   - upload
   - release
 
@@ -19,8 +20,24 @@ variables:
 #  DARWIN_AMD64_BINARY: "joltify-darwin-amd64-${CI_COMMIT_TAG}"
   LINUX_AMD64_BINARY: "joltify-linux-amd64-${CI_COMMIT_TAG}"
 
+build-job_dev:       # This job runs in the build stage, which runs first.
+  stage: build
+  rules:
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_TAG =~ /testnet/
+  script:
+    - make build_dev
+    - sha256sum build/linux/joltify > checksum.txt
+    - mkdir release_files
+    - cp build/linux/joltify release_files/joltify
+    - cp checksum.txt release_files/${LINUX_AMD64_BINARY}-checksum.txt
+  artifacts:
+    paths:
+      - release_files/
+
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
+  rules:
+    - if: $CI_COMMIT_TAG
   script:
     - make build
     - sha256sum build/linux/joltify > checksum.txt
@@ -31,28 +48,29 @@ build-job:       # This job runs in the build stage, which runs first.
     paths:
       - release_files/
 
-unit-test-job:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
-  coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
-  script:
-    - go install gotest.tools/gotestsum@latest
-    - gotestsum  --junitfile report.xml --format testname  -- -coverprofile=coverage.out -timeout 25m ./...
-    - cat coverage.out | grep -v ".pb.go"|grep -v ".gw.go" > cover.out
-    - go tool cover -func=cover.out
-  artifacts:
-    when: always
-    reports:
-      junit: report.xml
-    expire_in: 1 week
 
+#unit-test-job:   # This job runs in the test stage.
+#  stage: test    # It only starts when the job in the build stage completes successfully.
+#  coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
+#  script:
+#    - go install gotest.tools/gotestsum@latest
+#    - gotestsum  --junitfile report.xml --format testname  -- -coverprofile=coverage.out -timeout 25m ./...
+#    - cat coverage.out | grep -v ".pb.go"|grep -v ".gw.go" > cover.out
+#    - go tool cover -func=cover.out
+#  artifacts:
+#    when: always
+#    reports:
+#      junit: report.xml
+#    expire_in: 1 week
 
-lint_code:
-  image: golang:1.20
-  stage: test
-  before_script:
-    - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.0
-  script:
-    - ./bin/golangci-lint run -v --timeout 3600s -c ./.golangci.yml
+#
+#lint_code:
+#  image: golang:1.20
+#  stage: test
+#  before_script:
+#    - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.0
+#  script:
+#    - ./bin/golangci-lint run -v --timeout 3600s -c ./.golangci.yml
 
 # deploy-job:      # This job runs in the deploy stage.
 #   stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.

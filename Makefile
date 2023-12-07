@@ -113,9 +113,16 @@ all: install
 
 build: go.sum
 ifeq ($(OS), Windows_NT)
-	go build -mod=readonly $(BUILD_FLAGS) -o build/$(shell go env GOOS)/joltify.exe ./cmd/joltify
+	go build -mod=readonly $(BUILD_FLAGS_MAINNET) -o build/$(shell go env GOOS)/joltify.exe ./cmd/joltify
 else
-	go build -mod=readonly $(BUILD_FLAGS) -o build/$(shell go env GOOS)/joltify ./cmd/joltify
+	go build -mod=readonly $(BUILD_FLAGS_MAINNET) -o build/$(shell go env GOOS)/joltify ./cmd/joltify
+endif
+
+build_dev: go.sum
+ifeq ($(OS), Windows_NT)
+	go build -mod=readonly $(BUILD_FLAGS_DEV) -o build/$(shell go env GOOS)/joltify.exe ./cmd/joltify
+else
+	go build -mod=readonly $(BUILD_FLAGS_DEV) -o build/$(shell go env GOOS)/joltify ./cmd/joltify
 endif
 
 build-linux: go.sum
