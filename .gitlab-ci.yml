@@ -11,20 +11,26 @@ before_script:
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
-  # - deploy
+  #  - deploy
   - upload
   - release
 
 variables:
-#  DARWIN_AMD64_BINARY: "joltify-darwin-amd64-${CI_COMMIT_TAG}"
+  #  DARWIN_AMD64_BINARY: "joltify-darwin-amd64-${CI_COMMIT_TAG}"
   LINUX_AMD64_BINARY: "joltify-linux-amd64-${CI_COMMIT_TAG}"
+  BUILD_TYPE : ""
 
-build-job:       # This job runs in the build stage, which runs first.
+build:       # This job runs in the build stage, which runs first.
   stage: build
+  image: golang:1.21
+  rules:
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_TAG =~ /testnet/
+      variables:
+        BUILD_TYPE: "dev"
   script:
-    - make build
+    - make build ${BUILD_TYPE}
     - sha256sum build/linux/joltify > checksum.txt
-    - mkdir release_files
+    - mkdir -p release_files
     - cp build/linux/joltify release_files/joltify
     - cp checksum.txt release_files/${LINUX_AMD64_BINARY}-checksum.txt
   artifacts:
@@ -34,6 +40,8 @@ build-job:       # This job runs in the build stage, which runs first.
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
+  rules:
+    - if: ! $CI_COMMIT_TAG
   script:
     - go install gotest.tools/gotestsum@latest
     - gotestsum  --junitfile report.xml --format testname  -- -coverprofile=coverage.out -timeout 25m ./...
@@ -49,7 +57,10 @@ unit-test-job:   # This job runs in the test stage.
 lint_code:
   image: golang:1.20
   stage: test
+  rules:
+    - if: ! $CI_COMMIT_TAG
   before_script:
+    - echo $CI_COMMIT_TAG
     - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.0
   script:
     - ./bin/golangci-lint run -v --timeout 3600s -c ./.golangci.yml
