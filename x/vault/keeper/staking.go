@@ -11,7 +11,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	vaulttypes "github.com/joltify-finance/joltify_lending/x/vault/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
