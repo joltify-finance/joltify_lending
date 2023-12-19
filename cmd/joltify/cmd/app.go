@@ -28,7 +28,7 @@ import (
 const (
 	flagMempoolEnableAuth    = "mempool.enable-authentication"
 	flagMempoolAuthAddresses = "mempool.authorized-addresses"
-	ChainID                  = "joltifydev_1729-1"
+	ChainID                  = "joltifydev_1730-1"
 )
 
 // appCreator holds functions used by the sdk server to control the joltify app.
