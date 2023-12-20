@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
@@ -945,24 +943,6 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker contains app specific logic for the BeginBlock abci call.
 func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
-	if err != nil {
-		panic(err)
-	}
-
-	if upgradeInfo.Height == ctx.BlockHeight() && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		// we need to migrate the tendermint consensus from x/params to x/consensus module
-		baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
-		if baseAppLegacySS.Has(ctx, baseapp.ParamStoreKeyBlockParams) {
-			var bp tmproto.BlockParams
-			baseAppLegacySS.Get(ctx, baseapp.ParamStoreKeyBlockParams, &bp)
-			bp.MaxGas = 200000000
-			baseAppLegacySS.Set(ctx, baseapp.ParamStoreKeyBlockParams, bp)
-		}
-		baseapp.MigrateParams(ctx, baseAppLegacySS, &app.ConsensusParamsKeeper)
-		cs := app.BaseApp.GetConsensusParams(ctx)
-		ctx = ctx.WithConsensusParams(cs)
-	}
 	return app.mm.BeginBlock(ctx, req)
 }
 
@@ -1107,6 +1087,7 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V006UpgradeName, v1.CreateUpgradeHandlerForV006Upgrade(app.mm, app.evmutilKeeper, app.evmKeeper, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V007UpgradeName, v1.CreateUpgradeHandlerForV007Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V008UpgradeName, v1.CreateUpgradeHandlerForV008Upgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V009UpgradeName, v1.CreateUpgradeHandlerForV009Upgrade(app.mm, app.configurator, app.accountKeeper, app.bankKeeper))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
