@@ -77,8 +77,6 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 		}
 		ctx = ctx.WithConsensusParams(c)
 
-		debug.PrintStack()
-
 		txWithExtensions, ok := tx.(authante.HasExtensionOptionsTx)
 		if ok {
 			opts := txWithExtensions.GetExtensionOptions()

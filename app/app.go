@@ -12,8 +12,6 @@ import (
 
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 
-	ethermint "github.com/evmos/ethermint/types"
-
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
 
@@ -449,8 +447,7 @@ func NewApp(
 	app.accountKeeper = authkeeper.NewAccountKeeper(
 		appCodec,
 		keys[authtypes.StoreKey],
-		// authtypes.ProtoBaseAccount,
-		ethermint.ProtoAccount,
+		authtypes.ProtoBaseAccount,
 		mAccPerms,
 		sdk.Bech32MainPrefix,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
