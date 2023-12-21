@@ -110,6 +110,7 @@ jq '.app_state.bank.supply = []' $DATA/config/genesis.json|sponge $DATA/config/g
 
 # update the vote
 jq '.app_state.gov.voting_params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+jq '.app_state.gov.params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
 jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 

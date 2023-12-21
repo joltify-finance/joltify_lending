@@ -57,9 +57,10 @@ set -x
 ret=$(joltify tx spv  borrow $indexJunior $amount"ausdc" --from validator -y --output json --gas 20000000)
 # get the code from json
 echo $ret
-code=$(echo $ret | jq -r '.code')
+code=$(echo $ret | jq -r '.txhash')
+./scripts/query_tx.sh $code
 # check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
+if [ $? -eq 0 ]; then
     cecho "GREEN" "Borrow junior successful"
   else
     cecho "RED" "Borrow junior failed with $ret"
@@ -67,13 +68,13 @@ fi
 
 
 echo "last borrow"
-sleep 50
 
 ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 20000000)
 # get the code from json
-code=$(echo $ret | jq -r '.code')
+code=$(echo $ret | jq -r '.txhash')
+./scripts/query_tx.sh $code
 # check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
+if [ $? -eq 0 ]; then
     cecho "RED" "Borrow junior should not successful"
   else
     cecho "GREEN" "Borrow junior failed with $ret"
