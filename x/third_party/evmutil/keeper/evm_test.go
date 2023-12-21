@@ -127,10 +127,6 @@ func (suite *evmKeeperTestSuite) TestEvmKeeper_SetAccount() {
 
 			hash := vmdb.GetCodeHash(tc.address)
 
-			if tc.name == "existing base account, contract account" {
-				suite.Equal(common.BytesToHash(types.EmptyCodeHash), hash, "expected code hash to be set")
-				return
-			}
 			suite.Equal(common.BytesToHash(tc.account.CodeHash), hash, "expected code hash to be set")
 
 			// balance := vmdb.GetBalance(tc.address)
