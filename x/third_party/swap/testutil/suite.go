@@ -6,7 +6,6 @@ import (
 	"time"
 
 	tmlog "github.com/cometbft/cometbft/libs/log"
-	ethermint "github.com/evmos/ethermint/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
@@ -100,9 +99,9 @@ func (suite *Suite) NewAccountFromAddr(addr sdk.AccAddress, balance sdk.Coins) a
 // CreateVestingAccount creates a new vesting account from the provided balance and vesting balance
 func (suite *Suite) CreateVestingAccount(initialBalance sdk.Coins, vestingBalance sdk.Coins) authtypes.AccountI {
 	acc := suite.CreateAccount(initialBalance)
-	accv := acc.(*ethermint.EthAccount)
+	accv := acc.(*authtypes.BaseAccount)
 
-	bacc := accv.GetBaseAccount()
+	bacc := accv
 	periods := vestingtypes.Periods{
 		vestingtypes.Period{
 			Length: 31556952,
