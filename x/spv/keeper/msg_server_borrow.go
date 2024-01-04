@@ -65,6 +65,7 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo, borrowAmount
 
 func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.MsgBorrowResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
