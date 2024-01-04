@@ -80,21 +80,21 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, coserrors.Wrap(types.ErrInconsistencyToken, "token to be borrowed is inconsistency")
 	}
 
+	var allBorrowed sdkmath.Int
 	// check that junior pool must meet its target amount before senior pool can borrow
-	if poolInfo.PoolType == types.PoolInfo_SENIOR && !poolInfo.SeparatePool {
-		juniorPoolIndex := crypto.Keccak256Hash([]byte(poolInfo.ProjectName), poolInfo.OwnerAddress.Bytes(), []byte("junior"))
+	juniorPoolIndex := crypto.Keccak256Hash([]byte(poolInfo.ProjectName), poolInfo.OwnerAddress.Bytes(), []byte("junior"))
 
-		juniorInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
-		if !found {
-			return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
-		}
-		allBorrowed := k.getAllBorrowed(ctx, juniorInfo)
+	juniorInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
+	if !found {
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+	}
+	allBorrowed = k.getAllBorrowed(ctx, juniorInfo)
+
+	if poolInfo.PoolType == types.PoolInfo_SENIOR && !poolInfo.SeparatePool {
 		if juniorInfo.TargetAmount.Amount.Sub(allBorrowed).GT(sdk.NewIntFromUint64(10)) {
 			return nil, coserrors.Wrapf(types.ErrPoolNotActive, "junior pool has not met its target amount, cannot borrow from senior pool current Borrowed Junior %v and target is %v", allBorrowed, juniorInfo.TargetAmount.Amount)
 		}
 	}
-
-	allBorrowed := k.getAllBorrowed(ctx, poolInfo)
 
 	err = checkEligibility(ctx.BlockTime(), poolInfo, msg.BorrowAmount)
 	if err != nil {

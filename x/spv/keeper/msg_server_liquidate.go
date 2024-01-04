@@ -110,8 +110,7 @@ func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*t
 		return nil, coserrors.Wrapf(types.ErrPoolNotInLiquidation, "pool is not in liquidation %v", poolInfo.PoolStatus)
 	}
 
-	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, liquidator, sdk.NewCoins(msg.Amount))
-
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, liquidator, types.ModuleAccount, sdk.NewCoins(msg.Amount))
 	if err != nil {
 		return nil, coserrors.Wrapf(types.ErrLiquidation, "liquidation failed %v", err)
 	}

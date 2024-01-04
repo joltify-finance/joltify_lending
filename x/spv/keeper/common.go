@@ -142,6 +142,14 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 // tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
 // rather then all the usable money
 func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int, userPoolLastPaymentTime bool) error {
+
+	// fixme we do not add the gas of do borrow to avoid overflow of the gas
+	currentGas := ctx.GasMeter().GasConsumed()
+	defer func() {
+		doneGas := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(doneGas-currentGas, "doBorrow")
+	}()
+
 	if usdTokenAmount.IsZero() {
 		return nil
 	}
