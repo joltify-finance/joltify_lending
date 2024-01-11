@@ -65,6 +65,12 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // SetPool sets the pool
 func (k Keeper) SetPool(ctx sdk.Context, poolInfo types.PoolInfo) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
+
 	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.Pool))
 	bz := k.cdc.MustMarshal(&poolInfo)
 	poolsStore.Set(types.KeyPrefix(poolInfo.Index), bz)
@@ -93,6 +99,11 @@ func (k Keeper) SetHistoryPool(ctx sdk.Context, poolInfo types.PoolInfo) {
 
 // AddInvestorToPool add investors to the give pool
 func (k Keeper) AddInvestorToPool(ctx sdk.Context, poolWithInvestors *types.PoolWithInvestors) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolInvestor))
 	key := types.KeyPrefix(poolWithInvestors.PoolIndex)
 	bz := k.cdc.MustMarshal(poolWithInvestors)
@@ -100,6 +111,11 @@ func (k Keeper) AddInvestorToPool(ctx sdk.Context, poolWithInvestors *types.Pool
 }
 
 func (k Keeper) GetInvestorToPool(ctx sdk.Context, poolIndex string) (currentInvestorPool types.PoolWithInvestors, found bool) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolInvestor))
 	key := types.KeyPrefix(poolIndex)
 	bz := poolsStore.Get(key)
@@ -112,6 +128,11 @@ func (k Keeper) GetInvestorToPool(ctx sdk.Context, poolIndex string) (currentInv
 
 // IterateInvestorPools iterates over all pools objects in the store and performs a callback function
 func (k Keeper) IterateInvestorPools(ctx sdk.Context, cb func(poolWithInvestors types.PoolWithInvestors) (stop bool)) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolInvestor))
 	iterator := sdk.KVStorePrefixIterator(poolsStore, []byte{})
 	defer iterator.Close()
@@ -126,6 +147,11 @@ func (k Keeper) IterateInvestorPools(ctx sdk.Context, cb func(poolWithInvestors 
 
 // GetPools gets the poolInfo with given pool index
 func (k Keeper) GetPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo, ok bool) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.Pool))
 	bz := store.Get(types.KeyPrefix(index))
 	if bz == nil {
@@ -150,6 +176,11 @@ func (k Keeper) GetReserve(ctx sdk.Context, denom string) (amount sdk.Coin, ok b
 
 // IterateReserve get the spv reserve token
 func (k Keeper) IterateReserve(ctx sdk.Context, cb func(coin sdk.Coin) (stop bool)) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	storeKey := fmt.Sprintf("%v%v", types.ProjectsKeyPrefix, "reserve")
 	reserveStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(storeKey))
 	iterator := sdk.KVStorePrefixIterator(reserveStore, []byte{})
@@ -165,6 +196,11 @@ func (k Keeper) IterateReserve(ctx sdk.Context, cb func(coin sdk.Coin) (stop boo
 
 // IteratePool iterates over all deposit objects in the store and performs a callback function
 func (k Keeper) IteratePool(ctx sdk.Context, cb func(poolInfo types.PoolInfo) (stop bool)) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.Pool))
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -179,6 +215,11 @@ func (k Keeper) IteratePool(ctx sdk.Context, cb func(poolInfo types.PoolInfo) (s
 
 // SetDepositorHistory sets the depositor to history store
 func (k Keeper) SetDepositorHistory(ctx sdk.Context, depositor types.DepositorInfo) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositorHistory+depositor.PoolIndex))
 	bz := k.cdc.MustMarshal(&depositor)
 	timeBytes, err := ctx.BlockTime().MarshalBinary()
@@ -191,6 +232,11 @@ func (k Keeper) SetDepositorHistory(ctx sdk.Context, depositor types.DepositorIn
 
 // GetDepositorHistory sets the depositor to history store
 func (k Keeper) GetDepositorHistory(ctx sdk.Context, timeStamp time.Time, poolIndex string, addr sdk.AccAddress) (types.DepositorInfo, bool) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositorHistory+poolIndex))
 	var depositor types.DepositorInfo
 	timeBytes, err := timeStamp.MarshalBinary()
@@ -208,18 +254,34 @@ func (k Keeper) GetDepositorHistory(ctx sdk.Context, timeStamp time.Time, poolIn
 
 // SetDepositor sets the depositor
 func (k Keeper) SetDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))
 	bz := k.cdc.MustMarshal(&depositor)
+
 	depositorPoolStore.Set(depositor.GetDepositorAddress().Bytes(), bz)
 }
 
 // DelDepositor sets the depositor
 func (k Keeper) DelDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+depositor.PoolIndex))
 	depositorPoolStore.Delete(depositor.GetDepositorAddress().Bytes())
 }
 
 func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types.DepositorInfo, found bool) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+poolIndex))
 
 	bz := depositorPoolStore.Get(walletAddress.Bytes())
@@ -233,6 +295,11 @@ func (k Keeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sd
 
 // IterateDepositors iterates over all deposit objects in the store and performs a callback function
 func (k Keeper) IterateDepositors(ctx sdk.Context, poolIndex string, cb func(depositor types.DepositorInfo) (stop bool)) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositor+poolIndex))
 	iterator := sdk.KVStorePrefixIterator(depositorPoolStore, []byte{})
 	defer iterator.Close()
