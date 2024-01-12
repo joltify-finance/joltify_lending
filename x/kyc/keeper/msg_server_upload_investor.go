@@ -38,6 +38,12 @@ func (k Keeper) GetInvestor(ctx sdk.Context, investorID string) types.Investor {
 
 // SetInvestor set a specific issueToken in the store from its index
 func (k Keeper) SetInvestor(ctx sdk.Context, investor types.Investor) *types.Investor {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "setInvestor")
+	}()
+
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.InvestorToWalletsPrefix))
 
 	var storedInvestor types.Investor

@@ -35,6 +35,7 @@ func addToList(previousList, newElements []string) []string {
 
 func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestors) (*types.MsgAddInvestorsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {

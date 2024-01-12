@@ -161,11 +161,11 @@ func networkPrepare(t *testing.T, maxValidator uint32, addr sdk.AccAddress, pk c
 	require.NoError(t, err)
 	cfg.GenesisState[stakingtypes.ModuleName] = buf
 
-	//acc := authtypes.NewBaseAccount(addr, pk, 10, 0)
-	//genAccs := []authtypes.GenesisAccount{acc}
+	// acc := authtypes.NewBaseAccount(addr, pk, 10, 0)
+	// genAccs := []authtypes.GenesisAccount{acc}
 
-	//authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
-	//cfg.GenesisState[authtypes.ModuleName] = cfg.Codec.MustMarshalJSON(authGenesis)
+	// authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
+	// cfg.GenesisState[authtypes.ModuleName] = cfg.Codec.MustMarshalJSON(authGenesis)
 
 	nb := network.New(t, cfg)
 	return nb, state.CreatePoolList

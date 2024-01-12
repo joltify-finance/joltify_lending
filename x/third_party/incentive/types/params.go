@@ -42,18 +42,18 @@ func NewParams(joltSupply, joltBorrow, swap MultiRewardPeriods, multipliers Mult
 // DefaultParams returns default params for incentive module
 func DefaultParams() Params {
 	params := NewParams(
-		//suply
+		// suply
 		MultiRewardPeriods{
-			//NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(500)))),
-			//NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(277)))),
+			// NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(500)))),
+			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(277)))),
 		},
-		//borrow
+		// borrow
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
 			NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 			NewMultiRewardPeriod(true, "ausdc", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 		},
-		//swap
+		// swap
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
 			NewMultiRewardPeriod(true, "abnb:ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
