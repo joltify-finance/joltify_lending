@@ -153,6 +153,8 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)

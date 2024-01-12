@@ -88,6 +88,8 @@ func (k Keeper) handleLiquidation(ctx sdk.Context, poolInfo types.PoolInfo, amou
 func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*types.MsgLiquidateResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+
 	liquidator, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
