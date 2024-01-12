@@ -34,6 +34,8 @@ func (k msgServer) calculateTotalDueInterest(ctx sdk.Context, poolInfo types.Poo
 func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipal) (*types.MsgPayPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+
 	spv, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)

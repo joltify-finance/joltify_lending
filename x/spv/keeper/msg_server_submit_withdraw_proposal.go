@@ -14,6 +14,8 @@ import (
 func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgSubmitWithdrawProposal) (*types.MsgSubmitWithdrawProposalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+
 	investorAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)

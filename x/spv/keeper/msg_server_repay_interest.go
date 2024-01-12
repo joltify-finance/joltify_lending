@@ -166,6 +166,7 @@ func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInf
 
 func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
