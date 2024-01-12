@@ -64,7 +64,7 @@ func (k Keeper) SetInvestor(ctx sdk.Context, investor types.Investor) *types.Inv
 
 func (k msgServer) UploadInvestor(goCtx context.Context, msg *types.MsgUploadInvestor) (*types.MsgUploadInvestorResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 	if len(msg.InvestorId) == 0 {
 		return nil, errors.New("invalid investor ID")
 	}
