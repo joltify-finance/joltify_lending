@@ -30,6 +30,12 @@ func (k Keeper) QueryByWallet(goCtx context.Context, req *types.QueryByWalletReq
 }
 
 func (k Keeper) GetByWallet(ctx sdk.Context, wallet string) (types.Investor, error) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "GetByWallet")
+	}()
+
 	store := ctx.KVStore(k.storeKey)
 	investorStores := prefix.NewStore(store, types.KeyPrefix(types.InvestorToWalletsPrefix))
 	iterator := sdk.KVStorePrefixIterator(investorStores, []byte{})

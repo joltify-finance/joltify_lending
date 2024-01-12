@@ -223,14 +223,12 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 }
 
 func (suite *GenesisTestSuite) TestValidateAccumulationTime() {
-
 	// valid when set
 	accTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
 	suite.NoError(incentive.ValidateAccumulationTime(accTime))
 
 	// invalid when nil value
 	suite.Error(incentive.ValidateAccumulationTime(time.Time{}))
-
 }
 
 func TestGenesisTestSuite(t *testing.T) {

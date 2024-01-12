@@ -14,6 +14,7 @@ import (
 // TransferOwnership will allow the investor to submit the request to transfer/update their ratio in the pool
 func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransferOwnership) (*types.MsgTransferOwnershipResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
