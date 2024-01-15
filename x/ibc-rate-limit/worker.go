@@ -1,0 +1,39 @@
+package ibc_rate_limit
+
+import (
+	"strings"
+
+	errorsmod "cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+)
+
+import sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+func (i *ICS4Wrapper) whecherOnWhitelist(ctx sdk.Context, data []byte) (bool, error) {
+	var tdata transfertypes.FungibleTokenPacketData
+	if err := transfertypes.ModuleCdc.UnmarshalJSON(data, &tdata); err != nil {
+		return false, errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+	}
+	ret := i.quotaKeeper.WhetherOnwhitelist(ctx, "ibc", tdata.Sender)
+	return ret, nil
+}
+
+func (i *ICS4Wrapper) UpdateQuota(ctx sdk.Context, seq uint64, data []byte) error {
+	var tdata transfertypes.FungibleTokenPacketData
+	if err := transfertypes.ModuleCdc.UnmarshalJSON(data, &tdata); err != nil {
+		return errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+	}
+
+	token := strings.Join([]string{tdata.Amount, tdata.Denom}, "")
+	tokenAmount, err := sdk.ParseCoinNormalized(token)
+	if err != nil {
+		return err
+	}
+	err = i.quotaKeeper.UpdateQuota(ctx, sdk.NewCoins(tokenAmount), seq, "ibc")
+	return err
+}
+
+func (i *ICS4Wrapper) RevokeQuotaHistory(ctx sdk.Context, seq uint64) {
+	i.quotaKeeper.RevokeHistory(ctx, "ibc", seq)
+}

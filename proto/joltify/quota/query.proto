@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package joltify.quota;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "joltify/quota/params.proto";
+import "joltify/quota/quota.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/quota/types";
+
+// Query defines the gRPC querier service.
+service Query {
+
+  // Parameters queries the parameters of the module.
+  rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/joltify/quota/params";
+
+  }
+
+  // Queries a list of Quota items.
+  rpc Quota    (QueryGetQuotaRequest) returns (QueryGetQuotaResponse) {
+    option (google.api.http).get = "/joltify/quota/quota/{quota_module_name}";
+
+  }
+  rpc QuotaAll (QueryAllQuotaRequest) returns (QueryAllQuotaResponse) {
+    option (google.api.http).get = "/joltify/quota/quota";
+
+  }
+}
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetQuotaRequest {
+  string quota_module_name = 1;
+}
+
+message QueryGetQuotaResponse {
+  CoinsQuota Quota = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllQuotaRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllQuotaResponse {
+  repeated  CoinsQuota Quota      = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+

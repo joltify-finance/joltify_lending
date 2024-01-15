@@ -1,0 +1,30 @@
+syntax = "proto3";
+package joltify.quota;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/quota/types";
+
+
+message HistoricalAmount{
+  int64 blockHeight = 1;
+  repeated cosmos.base.v1beta1.Coin amount = 2 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // only for ibc to revoke
+  uint64  ibcSequence = 3;
+}
+
+
+
+message CoinsQuota {
+  string moduleName = 1;
+  repeated HistoricalAmount history = 2;
+  repeated cosmos.base.v1beta1.Coin CoinsSum= 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+

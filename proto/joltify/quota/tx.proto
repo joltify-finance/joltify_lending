@@ -1,0 +1,7 @@
+syntax = "proto3";
+package joltify.quota;
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/quota/types";
+
+// Msg defines the Msg service.
+service Msg {}
