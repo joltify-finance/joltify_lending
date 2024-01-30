@@ -19,5 +19,6 @@ func KeyPrefix(p string) []byte {
 }
 
 const (
-	QuotaKey = "Quota/value/"
+	QuotaKey    = "Quota/value/"
+	QuotaAccKey = "QuotaAcc/value/"
 )

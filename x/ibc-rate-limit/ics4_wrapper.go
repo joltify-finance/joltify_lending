@@ -2,6 +2,9 @@ package ibc_rate_limit
 
 import (
 	"context"
+	"errors"
+
+	quotamoduletypes "github.com/joltify-finance/joltify_lending/x/quota/types"
 
 	errorsmod "cosmossdk.io/errors"
 
@@ -56,19 +59,23 @@ func (i *ICS4Wrapper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capab
 	}
 
 	if sourcePort == "transfer" {
-		onlist, errCheck := i.whecherOnWhitelist(ctx, data)
+		onWhiteList, onBanList, errCheck := i.whecherOnWhiteBanList(ctx, data)
 		if errCheck != nil {
 			ctx.Logger().Error("fail to check the whitelist", "transferInfo", string(data), "reason", errCheck.Error())
 			return seq, nil
 		}
 		// the sender is on whitelist, so bypass
-		if onlist {
+		if onWhiteList {
 			return seq, nil
+		}
+
+		if onBanList {
+			return 0, errorsmod.Wrapf(errors.New("sender is on banlist"), "rate limit SendPacket failed to authorize transfer")
 		}
 
 		errUpdate := i.UpdateQuota(ctx, seq, data)
 		if errUpdate != nil {
-			if errUpdate.Error() == "quota exceeded" {
+			if errUpdate.Error() == quotamoduletypes.AccErrQuotaExceed.Error() || errUpdate.Error() == quotamoduletypes.ErrQuotaExceed.Error() {
 				ctx.Logger().Error("quota exceeded", "transferInfo", string(data), "reason", errUpdate.Error())
 				return 0, errorsmod.Wrapf(errUpdate, "rate limit SendPacket failed to authorize transfer")
 			}

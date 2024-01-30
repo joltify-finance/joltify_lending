@@ -8,5 +8,6 @@ import (
 
 // x/quota module sentinel errors
 var (
-	ErrSample = errorsmod.Register(ModuleName, 1100, "sample error")
+	AccErrQuotaExceed = errorsmod.Register(ModuleName, 1100, "Account Quota Exceed")
+	ErrQuotaExceed    = errorsmod.Register(ModuleName, 1101, "Module Quota Exceed")
 )

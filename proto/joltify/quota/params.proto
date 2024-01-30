@@ -12,7 +12,7 @@ message Target{
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-  uint32 history_length=3 [(gogoproto.moretags) = "yaml:\"history_length\""];
+  int64 history_length=3 [(gogoproto.moretags) = "yaml:\"history_length\""];
 }
 
 message WhiteList{
@@ -20,9 +20,16 @@ message WhiteList{
   repeated string addressList = 2;
 }
 
+message BanList{
+  string moduleName = 1;
+  repeated string addressList = 2;
+}
+
 // Params defines the parameters for the module.
 message Params {
   repeated Target targets = 1;
-  repeated WhiteList whitelist = 2;
+  repeated Target PerAccounttargets = 2;
+  repeated WhiteList whitelist = 3;
   option (gogoproto.goproto_stringer) = false;
+  repeated BanList banlist = 4;
 }
