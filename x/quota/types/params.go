@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -26,12 +27,14 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	// the coin list is the amount of USD for the given token, 100jolt means 100 USD value of jolt
-	quota, err := sdk.ParseCoinsNormalized("IBC/9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E100000_000000000000000000")
+	loweramount1 := strings.ToLower("9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E100000e18")
+	loweramount2 := strings.ToLower("9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E10000e18")
+	quota, err := sdk.ParseCoinsNormalized(loweramount1)
 	if err != nil {
 		panic(err)
 	}
 
-	preAccountQuota, err := sdk.ParseCoinsNormalized("IBC/9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E10000_000000000000000000")
+	preAccountQuota, err := sdk.ParseCoinsNormalized(loweramount2)
 	if err != nil {
 		panic(err)
 	}

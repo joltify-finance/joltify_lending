@@ -80,6 +80,11 @@ func testParams() types.Params {
 		panic(err)
 	}
 
+	quotaAcc, err := sdk.ParseCoinsNormalized("10000000ujolt,100000000usdt")
+	if err != nil {
+		panic(err)
+	}
+
 	targets := types.Target{
 		ModuleName:    "ibc",
 		CoinsSum:      quota,
@@ -92,7 +97,19 @@ func testParams() types.Params {
 		HistoryLength: 512,
 	}
 
-	return types.Params{Targets: []*types.Target{&targets, &targets2}}
+	targetsAcc := types.Target{
+		ModuleName:    "ibc",
+		CoinsSum:      quotaAcc,
+		HistoryLength: 512,
+	}
+
+	targets2Acc := types.Target{
+		ModuleName:    "bridge",
+		CoinsSum:      quotaAcc,
+		HistoryLength: 512,
+	}
+
+	return types.Params{Targets: []*types.Target{&targets, &targets2}, PerAccounttargets: []*types.Target{&targetsAcc, &targets2Acc}}
 }
 
 func TestUpdateQuota(t *testing.T) {
@@ -100,21 +117,21 @@ func TestUpdateQuota(t *testing.T) {
 	items1 := createNQuota("testmodule1", 10)
 	keeper.SetQuotaData(ctx, items1)
 
-	testcoins := sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err := keeper.UpdateQuota(ctx, testcoins, 1, "testmodule1")
+	testcoins := sdk.NewCoins(sdk.NewCoin("testAcc", sdk.NewInt(100)))
+	err := keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 	keeper.SetParams(ctx, testParams())
 
 	testcoins = sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "testmodule1")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 
 	testcoins = sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 	require.Error(t, err, "quota not found")
 
 	testcoins = sdk.NewCoins(sdk.NewCoin("invalid", sdk.NewInt(1)))
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 	require.Error(t, err, "some coins cannot be found in target")
 
 	newcoin := sdk.NewCoin("usdt", sdk.NewInt(1))
@@ -123,7 +140,7 @@ func TestUpdateQuota(t *testing.T) {
 	before, found := keeper.GetQuotaData(ctx, "ibc")
 	require.True(t, true)
 
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 	require.NoError(t, err)
 
 	after, found := keeper.GetQuotaData(ctx, "ibc")
@@ -140,7 +157,7 @@ func TestUpdateQuota(t *testing.T) {
 		newcoin := sdk.NewCoin("usdt", sdk.NewInt(int64(1+i)))
 		testcoins = sdk.NewCoins(newcoin)
 		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
-		err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+		err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 		require.NoError(t, err)
 	}
 
@@ -148,7 +165,7 @@ func TestUpdateQuota(t *testing.T) {
 	left := testParams().Targets[0].CoinsSum.Sub(after.CoinsSum...)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
-	err = keeper.UpdateQuota(ctx, left, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, left, "testaddr", 1, "ibc")
 	require.NoError(t, err)
 
 	after, found = keeper.GetQuotaData(ctx, "ibc")
@@ -157,8 +174,8 @@ func TestUpdateQuota(t *testing.T) {
 	newcoin = sdk.NewCoin("usdt", sdk.NewInt(int64(1)))
 	testcoins = sdk.NewCoins(newcoin)
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
-	require.ErrorContains(t, err, "quota exceeded")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
+	require.ErrorContains(t, err, types.ErrQuotaExceed.Error())
 }
 
 func TestExceedMaxHistoryLength(t *testing.T) {
@@ -167,26 +184,26 @@ func TestExceedMaxHistoryLength(t *testing.T) {
 	keeper.SetQuotaData(ctx, items1)
 
 	testcoins := sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err := keeper.UpdateQuota(ctx, testcoins, 1, "testmodule1")
+	err := keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 	keeper.SetParams(ctx, testParams())
 
 	testcoins = sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "testmodule1")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 
 	testcoins = sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 	require.Error(t, err, "quota not found")
 
 	testcoins = sdk.NewCoins(sdk.NewCoin("invalid", sdk.NewInt(1)))
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 	require.Error(t, err, "some coins cannot be found in target")
 
 	newcoin := sdk.NewCoin("usdt", sdk.NewInt(1))
 	testcoins = sdk.NewCoins(newcoin)
 
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 	require.NoError(t, err)
 
 	before, found := keeper.GetQuotaData(ctx, "ibc")
@@ -201,8 +218,8 @@ func TestExceedMaxHistoryLength(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
-	require.ErrorContains(t, err, "quota exceeded")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
+	require.ErrorContains(t, err, types.ErrQuotaExceed.Error())
 
 	before, found = keeper.GetQuotaData(ctx, "ibc")
 	require.True(t, found)
@@ -216,7 +233,7 @@ func TestExceedMaxHistoryLength(t *testing.T) {
 
 	// we can put one more record
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
-	err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+	err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 	require.NoError(t, err)
 }
 
@@ -224,21 +241,21 @@ func TestBlockUpdate(t *testing.T) {
 	keeper, ctx := keepertest.QuotaKeeper(t)
 
 	testcoins := sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err := keeper.UpdateQuota(ctx, testcoins, 1, "testmodule1")
+	err := keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 	keeper.SetParams(ctx, testParams())
 
-	var i uint32
+	var i int64
 	for i = 0; i < testParams().Targets[0].HistoryLength; i++ {
 		newcoin := sdk.NewCoin("usdt", sdk.NewInt(int64(1+i)))
 		testcoins = sdk.NewCoins(newcoin)
 		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(i+1))
-		err = keeper.UpdateQuota(ctx, testcoins, 1, "ibc")
+		err = keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "ibc")
 		require.NoError(t, err)
 		if i < testParams().Targets[0].HistoryLength/2 {
 			newcoin2 := sdk.NewCoin("ujolt", sdk.NewInt(int64(2+i)))
 			testcoins2 := sdk.NewCoins(newcoin2)
-			err = keeper.UpdateQuota(ctx, testcoins2, 1, "bridge")
+			err = keeper.UpdateQuota(ctx, testcoins2, "testaddr", 1, "bridge")
 			require.NoError(t, err)
 		}
 	}
@@ -334,21 +351,21 @@ func TestRevokehistory(t *testing.T) {
 	keeper, ctx := keepertest.QuotaKeeper(t)
 
 	testcoins := sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err := keeper.UpdateQuota(ctx, testcoins, 1, "testmodule1")
+	err := keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 	keeper.SetParams(ctx, testParams())
 
-	var i uint32
+	var i int64
 	for i = 0; i < testParams().Targets[0].HistoryLength; i++ {
 		newcoin := sdk.NewCoin("usdt", sdk.NewInt(int64(1+i)))
 		testcoins = sdk.NewCoins(newcoin)
 		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(1))
-		err = keeper.UpdateQuota(ctx, testcoins, uint64(i), "ibc")
+		err = keeper.UpdateQuota(ctx, testcoins, "testaddr", uint64(i), "ibc")
 		require.NoError(t, err)
 		if i < testParams().Targets[0].HistoryLength/2 {
 			newcoin2 := sdk.NewCoin("ujolt", sdk.NewInt(int64(i)))
 			testcoins2 := sdk.NewCoins(newcoin2)
-			err = keeper.UpdateQuota(ctx, testcoins2, uint64(i), "bridge")
+			err = keeper.UpdateQuota(ctx, testcoins2, "testaddr", uint64(i), "bridge")
 			require.NoError(t, err)
 		}
 	}
@@ -405,7 +422,7 @@ func TestWhiteList(t *testing.T) {
 	config.SetBech32PrefixForAccount("jolt", "joltpub")
 
 	testcoins := sdk.NewCoins(sdk.NewCoin("testa", sdk.NewInt(100)))
-	err := keeper.UpdateQuota(ctx, testcoins, 1, "testmodule1")
+	err := keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 	tParams := testParams()
 	w1 := types.WhiteList{"t1", []string{"jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np", "jolt1h8m4p5vlaup3jzxv3k0tkvwamzel3regpsw5j2"}}

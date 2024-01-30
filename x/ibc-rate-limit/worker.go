@@ -1,6 +1,8 @@
 package ibc_rate_limit
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"strings"
 
 	errorsmod "cosmossdk.io/errors"
@@ -26,7 +28,13 @@ func (i *ICS4Wrapper) UpdateQuota(ctx sdk.Context, seq uint64, data []byte) erro
 		return errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
 	}
 
-	token := strings.Join([]string{tdata.Amount, tdata.Denom}, "")
+	denom := tdata.Denom
+	if strings.ContainsAny(tdata.Denom, "/") {
+		dataHash := sha256.Sum256([]byte(tdata.Denom))
+		denom = hex.EncodeToString(dataHash[:])
+	}
+
+	token := strings.Join([]string{tdata.Amount, denom}, "")
 	tokenAmount, err := sdk.ParseCoinNormalized(token)
 	if err != nil {
 		return err

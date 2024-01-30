@@ -118,9 +118,9 @@ func (k Keeper) updatePerAccountQuota(ctx sdk.Context, accTargets []*types.Targe
 			return types.AccErrQuotaExceed
 		}
 		el := types.AccQuota{
-			ctx.BlockHeight(),
-			ctx.BlockHeight(),
-			coins,
+			BlockHeight:      ctx.BlockHeight(),
+			LastUpdateHeight: ctx.BlockHeight(),
+			CoinsSum:         coins,
 		}
 		k.setAccQuotaData(ctx, moduleName, sender, el)
 		return nil
