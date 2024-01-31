@@ -12,6 +12,46 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// NewParams creates a new Params instance
+func testParams() types.Params {
+	// the coin list is the amount of USD for the given token, 100jolt means 100 USD value of jolt
+	quota, err := sdk.ParseCoinsNormalized("100000ujolt,1000000usdt")
+	if err != nil {
+		panic(err)
+	}
+
+	quotaAcc, err := sdk.ParseCoinsNormalized("10000000ujolt,100000000usdt")
+	if err != nil {
+		panic(err)
+	}
+
+	targets := types.Target{
+		ModuleName:    "ibc",
+		CoinsSum:      quota,
+		HistoryLength: 512,
+	}
+
+	targets2 := types.Target{
+		ModuleName:    "bridge",
+		CoinsSum:      quota,
+		HistoryLength: 512,
+	}
+
+	targetsAcc := types.Target{
+		ModuleName:    "ibc",
+		CoinsSum:      quotaAcc,
+		HistoryLength: 512,
+	}
+
+	targets2Acc := types.Target{
+		ModuleName:    "bridge",
+		CoinsSum:      quotaAcc,
+		HistoryLength: 512,
+	}
+
+	return types.Params{Targets: []*types.Target{&targets, &targets2}, PerAccounttargets: []*types.Target{&targetsAcc, &targets2Acc}}
+}
+
 func TestGenesis(t *testing.T) {
 	ht := types.HistoricalAmount{
 		100,
@@ -26,7 +66,7 @@ func TestGenesis(t *testing.T) {
 	}
 
 	genesisState := types.GenesisState{
-		Params:        types.DefaultParams(),
+		Params:        testParams(),
 		AllCoinsQuota: []types.CoinsQuota{cq},
 	}
 

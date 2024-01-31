@@ -12,7 +12,7 @@ import (
 func TestParamsQuery(t *testing.T) {
 	keeper, ctx := testkeeper.QuotaKeeper(t)
 	wctx := sdk.WrapSDKContext(ctx)
-	params := types.DefaultParams()
+	params := testParams()
 	keeper.SetParams(ctx, params)
 
 	response, err := keeper.Params(wctx, &types.QueryParamsRequest{})
@@ -22,5 +22,4 @@ func TestParamsQuery(t *testing.T) {
 	ret, err := keeper.Params(wctx, nil)
 	require.ErrorContains(t, err, "invalid request")
 	require.Nil(t, ret)
-
 }

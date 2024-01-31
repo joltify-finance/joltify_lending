@@ -12,7 +12,7 @@ import (
 
 func TestGetParams(t *testing.T) {
 	k, ctx := testkeeper.QuotaKeeper(t)
-	params := types.DefaultParams()
+	params := testParams()
 
 	k.SetParams(ctx, params)
 

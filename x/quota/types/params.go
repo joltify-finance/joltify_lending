@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/joltify-finance/joltify_lending/client"
 	"gopkg.in/yaml.v2"
 )
 
@@ -27,8 +28,47 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	// the coin list is the amount of USD for the given token, 100jolt means 100 USD value of jolt
-	loweramount1 := strings.ToLower("9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E100000e18")
-	loweramount2 := strings.ToLower("9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E10000e18")
+
+	if client.MAINNETFLAG == "false" {
+		loweramount1 := strings.ToLower("300e189117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E,10000e18ujolt")
+		loweramount2 := strings.ToLower("10e189117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E,100e18ujolt")
+		quota, err := sdk.ParseCoinsNormalized(loweramount1)
+		if err != nil {
+			panic(err)
+		}
+
+		preAccountQuota, err := sdk.ParseCoinsNormalized(loweramount2)
+		if err != nil {
+			panic(err)
+		}
+
+		// eacho block takes 5 seconds, so we have 3600*24/5=17280 blocks per day
+		targets := Target{
+			"ibc",
+			quota,
+			17280,
+		}
+
+		perAccountTargets := Target{
+			"ibc",
+			preAccountQuota,
+			17280,
+		}
+		w := WhiteList{
+			"ibc",
+			[]string{"jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np"},
+		}
+
+		b := BanList{
+			"ibc",
+			[]string{"jolt1xdp3ralsry3ux4nuraq9qzr8zzc9r9nh0v3y56"},
+		}
+
+		return Params{[]*Target{&targets}, []*Target{&perAccountTargets}, []*WhiteList{&w}, []*BanList{&b}}
+	}
+
+	loweramount1 := strings.ToLower("10000ujolt")
+	loweramount2 := strings.ToLower("100ujolt")
 	quota, err := sdk.ParseCoinsNormalized(loweramount1)
 	if err != nil {
 		panic(err)
