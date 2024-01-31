@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package joltify.quota;
+
+import "gogoproto/gogo.proto";
+import "joltify/quota/params.proto";
+import "joltify/quota/quota.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/quota/types";
+
+// GenesisState defines the quota module's genesis state.
+message GenesisState {
+  Params params     = 1 [(gogoproto.nullable) = false];
+  repeated CoinsQuota  allCoinsQuota = 2 [(gogoproto.nullable) = false];
+}
+

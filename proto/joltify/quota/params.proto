@@ -1,0 +1,35 @@
+syntax = "proto3";
+package joltify.quota;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/quota/types";
+
+message Target{
+  string module_name = 1;
+  repeated cosmos.base.v1beta1.Coin CoinsSum = 2 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  int64 history_length=3 [(gogoproto.moretags) = "yaml:\"history_length\""];
+}
+
+message WhiteList{
+  string moduleName = 1;
+  repeated string addressList = 2;
+}
+
+message BanList{
+  string moduleName = 1;
+  repeated string addressList = 2;
+}
+
+// Params defines the parameters for the module.
+message Params {
+  repeated Target targets = 1;
+  repeated Target PerAccounttargets = 2;
+  repeated WhiteList whitelist = 3;
+  option (gogoproto.goproto_stringer) = false;
+  repeated BanList banlist = 4;
+}

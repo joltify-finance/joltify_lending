@@ -8,6 +8,13 @@ import (
 	"os"
 	"path/filepath"
 
+	quotamodule "github.com/joltify-finance/joltify_lending/x/quota"
+	quotamodulekeeper "github.com/joltify-finance/joltify_lending/x/quota/keeper"
+	quotamoduletypes "github.com/joltify-finance/joltify_lending/x/quota/types"
+
+	ibcratelimit "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit"
+	ibcratelimittypes "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit/types"
+
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
@@ -201,6 +208,8 @@ var (
 		incentive.AppModuleBasic{},
 		vaultmodule.AppModuleBasic{},
 		kycmodule.AppModuleBasic{},
+		ibcratelimit.AppModule{},
+		quotamodule.AppModuleBasic{},
 		spvmodule.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
@@ -296,15 +305,18 @@ type App struct {
 	// issuanceKeeper   issuancekeeper.Keeper
 	pricefeedKeeper pricefeedkeeper.Keeper
 	// cdpKeeper        cdpkeeper.Keeper
-	joltKeeper            joltkeeper.Keeper
-	incentiveKeeper       incentivekeeper.Keeper
-	feeGrantKeeper        feegrantkeeper.Keeper
-	VaultKeeper           vaultmodulekeeper.Keeper
-	kycKeeper             kycmodulekeeper.Keeper
-	spvKeeper             spvmodulekeeper.Keeper
-	nftKeeper             nftmodulekeeper.Keeper
-	swapKeeper            swapkeeper.Keeper
-	ConsensusParamsKeeper consensusparamkeeper.Keeper
+	joltKeeper              joltkeeper.Keeper
+	incentiveKeeper         incentivekeeper.Keeper
+	feeGrantKeeper          feegrantkeeper.Keeper
+	VaultKeeper             vaultmodulekeeper.Keeper
+	kycKeeper               kycmodulekeeper.Keeper
+	spvKeeper               spvmodulekeeper.Keeper
+	nftKeeper               nftmodulekeeper.Keeper
+	swapKeeper              swapkeeper.Keeper
+	ibcQuota                *ibcratelimit.IBCMiddleware
+	QuotaKeeper             quotamodulekeeper.Keeper
+	RateLimitingICS4Wrapper *ibcratelimit.ICS4Wrapper
+	ConsensusParamsKeeper   consensusparamkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -383,6 +395,7 @@ func NewApp(
 		kycmoduletypes.StoreKey,
 		spvmoduletypes.StoreKey,
 		nftmoduletypes.StoreKey,
+		quotamoduletypes.StoreKey,
 		evmtypes.StoreKey,
 		feemarkettypes.StoreKey,
 		evmutiltypes.StoreKey,
@@ -425,11 +438,12 @@ func NewApp(
 	vaultSubspace := app.ParamsKeeper.Subspace(vaultmoduletypes.ModuleName)
 	kycSubspace := app.ParamsKeeper.Subspace(kycmoduletypes.ModuleName)
 	spvSubspace := app.ParamsKeeper.Subspace(spvmoduletypes.ModuleName)
+	ibcQuotaSubspace := app.ParamsKeeper.Subspace(ibcratelimittypes.ModuleName)
 	evmSubspace := app.ParamsKeeper.Subspace(evmtypes.ModuleName)
 	feemarketSubspace := app.ParamsKeeper.Subspace(feemarkettypes.ModuleName)
 	evmutilSubspace := app.ParamsKeeper.Subspace(evmutiltypes.ModuleName)
 	swapSubspace := app.ParamsKeeper.Subspace(swaptypes.ModuleName)
-
+	quotaSubspace := app.ParamsKeeper.Subspace(quotamoduletypes.ModuleName)
 	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(appCodec, keys[consensusparamtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 
 	// baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
@@ -513,6 +527,12 @@ func NewApp(
 		app.slashingKeeper,
 	)
 
+	app.QuotaKeeper = *quotamodulekeeper.NewKeeper(
+		appCodec,
+		keys[quotamoduletypes.StoreKey],
+		quotaSubspace,
+	)
+
 	app.ibcKeeper = ibckeeper.NewKeeper(
 		appCodec,
 		keys[ibcexported.StoreKey],
@@ -522,11 +542,21 @@ func NewApp(
 		scopedIBCKeeper,
 	)
 
+	rateLimitingICS4Wrapper := ibcratelimit.NewICS4Middleware(
+		app.ibcKeeper.ChannelKeeper,
+		&app.accountKeeper,
+		&app.bankKeeper,
+		app.QuotaKeeper,
+		ibcQuotaSubspace,
+	)
+	app.RateLimitingICS4Wrapper = &rateLimitingICS4Wrapper
+
 	app.transferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		ibctransferSubspace,
-		app.ibcKeeper.ChannelKeeper,
+		// app.ibcKeeper.ChannelKeeper,
+		app.RateLimitingICS4Wrapper,
 		app.ibcKeeper.ChannelKeeper,
 		&app.ibcKeeper.PortKeeper,
 		app.accountKeeper,
@@ -549,7 +579,11 @@ func NewApp(
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
+
+	transferWithQuota := ibcratelimit.NewIBCMiddleware(transferIBCModule, app.RateLimitingICS4Wrapper)
+	app.ibcQuota = &transferWithQuota
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, app.ibcQuota)
+	// ibcRouter.AddRoute(ibctransfertypes.ModuleName, &transferIBCModule)
 	app.ibcKeeper.SetRouter(ibcRouter)
 
 	app.auctionKeeper = auctionkeeper.NewKeeper(
@@ -721,9 +755,12 @@ func NewApp(
 		incentive.NewAppModule(app.incentiveKeeper, app.accountKeeper, app.bankKeeper),
 		vaultmodule.NewAppModule(appCodec, app.VaultKeeper, app.accountKeeper, app.bankKeeper),
 		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.accountKeeper, app.bankKeeper),
+
 		spvmodule.NewAppModule(appCodec, app.spvKeeper, app.accountKeeper, app.bankKeeper),
 		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
 		evm.NewAppModule(app.evmKeeper, app.accountKeeper, evmSubspace),
+		ibcratelimit.NewAppModule(*app.RateLimitingICS4Wrapper),
+		quotamodule.NewAppModule(appCodec, app.QuotaKeeper),
 		feemarket.NewAppModule(app.feeMarketKeeper, feemarketSubspace),
 		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper, app.accountKeeper),
 		swap.NewAppModule(app.swapKeeper, app.accountKeeper),
@@ -759,6 +796,7 @@ func NewApp(
 		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
+		ibcratelimittypes.ModuleName,
 		spvmoduletypes.ModuleName,
 		ibcexported.ModuleName,
 		// Add all remaining modules with an empty begin blocker below since cosmos 0.45.0 requires it
@@ -769,6 +807,7 @@ func NewApp(
 		govtypes.ModuleName,
 		crisistypes.ModuleName,
 		genutiltypes.ModuleName,
+		quotamoduletypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		paramstypes.ModuleName,
 		authz.ModuleName,
@@ -798,6 +837,8 @@ func NewApp(
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
+		quotamoduletypes.ModuleName,
+		ibcratelimittypes.ModuleName,
 		upgradetypes.ModuleName,
 		evidencetypes.ModuleName,
 		feegrant.ModuleName,
@@ -840,6 +881,8 @@ func NewApp(
 		nftmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
 		evmutiltypes.ModuleName,
+		quotamoduletypes.ModuleName,
+		ibcratelimittypes.ModuleName,
 		incentivetypes.ModuleName, // reads cdp params, so must run after cdp genesis
 		genutiltypes.ModuleName,   // runs arbitrary txs included in genisis state, so run after modules have been initialized
 		crisistypes.ModuleName,    // runs the invariants at genesis, should run after other modules
@@ -1091,6 +1134,7 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V010UpgradeName, v1.CreateUpgradeHandlerForV010Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeName, v1.CreateUpgradeHandlerForV013Upgrade(app.mm, app.configurator))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
@@ -1117,6 +1161,14 @@ func (app *App) setupUpgradeHandlers() {
 	if upgradeInfo.Name == v1.V008UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{crisistypes.StoreKey, consensusparamtypes.ModuleName},
+		}
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
+	if upgradeInfo.Name == v1.V013UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{quotamoduletypes.StoreKey},
 		}
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
