@@ -7,10 +7,9 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 )
-
-import sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 func (i *ICS4Wrapper) whecherOnWhiteBanList(ctx sdk.Context, data []byte) (bool, bool, error) {
 	var tdata transfertypes.FungibleTokenPacketData
@@ -31,7 +30,7 @@ func (i *ICS4Wrapper) UpdateQuota(ctx sdk.Context, seq uint64, data []byte) erro
 	denom := tdata.Denom
 	if strings.ContainsAny(tdata.Denom, "/") {
 		dataHash := sha256.Sum256([]byte(tdata.Denom))
-		denom = hex.EncodeToString(dataHash[:])
+		denom = "ibc" + hex.EncodeToString(dataHash[:])
 	}
 
 	token := strings.Join([]string{tdata.Amount, denom}, "")
