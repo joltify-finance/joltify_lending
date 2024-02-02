@@ -46,6 +46,21 @@ type HandlerOptions struct {
 	TxFeeChecker           authante.TxFeeChecker
 }
 
+func normalCosmosTxAnte(ctx sdk.Context, tx sdk.Tx, sim bool, options HandlerOptions) (sdk.Context, error) {
+	var anteHandler sdk.AnteHandler
+	switch tx.(type) {
+	case sdk.Tx:
+		anteHandler = newCosmosAnteHandler(
+			cosmosHandlerOptions{
+				HandlerOptions: options,
+				isEIP712:       false,
+			})
+	default:
+		return ctx, errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "invalid transaction type: %T", tx)
+	}
+	return anteHandler(ctx, tx, sim)
+}
+
 // NewAnteHandler returns an 'AnteHandler' that will run actions before a tx is sent to a module's handler.
 func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper.Keeper) (sdk.AnteHandler, error) {
 	if options.AccountKeeper == nil {
@@ -88,7 +103,8 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 			}
 
 			if len(opts) == 1 {
-				switch typeURL := opts[0].GetTypeUrl(); typeURL {
+				typeURL := opts[0].GetTypeUrl()
+				switch typeURL {
 				case "/ethermint.evm.v1.ExtensionOptionsEthereumTx":
 					// handle as *evmtypes.MsgEthereumTx
 					anteHandler = newEthAnteHandler(ctx, options)
@@ -98,6 +114,8 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 						HandlerOptions: options,
 						isEIP712:       true,
 					})
+				case "/cosmos.authz.v1beta1.MsgRevoke", "/cosmos.authz.v1beta1.MsgExec", "/cosmos.authz.v1beta1.MsgGrant":
+					return normalCosmosTxAnte(ctx, tx, sim, options)
 				default:
 					return ctx, errorsmod.Wrapf(
 						sdkerrors.ErrUnknownExtensionOptions,
@@ -109,19 +127,7 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 			}
 		}
 
-		// handle as totally normal Cosmos SDK tx
-		switch tx.(type) {
-		case sdk.Tx:
-			anteHandler = newCosmosAnteHandler(
-				cosmosHandlerOptions{
-					HandlerOptions: options,
-					isEIP712:       false,
-				})
-		default:
-			return ctx, errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "invalid transaction type: %T", tx)
-		}
-
-		return anteHandler(ctx, tx, sim)
+		return normalCosmosTxAnte(ctx, tx, sim, options)
 	}, nil
 }
 

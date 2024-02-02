@@ -940,6 +940,11 @@ func NewApp(
 	//	SigGasConsumer:  cosante.DefaultSigVerificationGasConsumer,
 	//}
 
+	extensionCheck := func(a *types.Any) bool {
+		// todo we need to verify here, currently, we allow all the tx to be passed
+		return true
+	}
+
 	anteOptions := ante.HandlerOptions{
 		AccountKeeper:          app.accountKeeper,
 		BankKeeper:             app.bankKeeper,
@@ -953,7 +958,7 @@ func NewApp(
 		FeeMarketKeeper:        app.feeMarketKeeper,
 		MaxTxGasWanted:         options.EVMMaxGasWanted,
 		AddressFetchers:        []ante.AddressFetcher{},
-		ExtensionOptionChecker: nil,
+		ExtensionOptionChecker: extensionCheck,
 		TxFeeChecker:           nil,
 	}
 
