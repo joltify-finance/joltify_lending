@@ -940,6 +940,11 @@ func NewApp(
 	//	SigGasConsumer:  cosante.DefaultSigVerificationGasConsumer,
 	//}
 
+	extensionCheck := func(a *types.Any) bool {
+		// todo we need to verify here, currently, we allow all the tx to be passed
+		return true
+	}
+
 	anteOptions := ante.HandlerOptions{
 		AccountKeeper:          app.accountKeeper,
 		BankKeeper:             app.bankKeeper,
@@ -953,7 +958,7 @@ func NewApp(
 		FeeMarketKeeper:        app.feeMarketKeeper,
 		MaxTxGasWanted:         options.EVMMaxGasWanted,
 		AddressFetchers:        []ante.AddressFetcher{},
-		ExtensionOptionChecker: nil,
+		ExtensionOptionChecker: extensionCheck,
 		TxFeeChecker:           nil,
 	}
 
@@ -1135,6 +1140,7 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeName, v1.CreateUpgradeHandlerForV013Upgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V014UpgradeName, v1.CreateUpgradeHandlerForV014Upgrade(app.mm, app.configurator))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {

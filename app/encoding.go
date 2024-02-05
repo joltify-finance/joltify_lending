@@ -1,6 +1,8 @@
 package app
 
 import (
+	"github.com/cosmos/cosmos-sdk/types/tx"
+	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	enccodec "github.com/evmos/ethermint/encoding/codec"
 	"github.com/joltify-finance/joltify_lending/app/params"
 )
@@ -12,5 +14,11 @@ func MakeEncodingConfig() params.EncodingConfig {
 	enccodec.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	ModuleBasics.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	ModuleBasics.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+	encodingConfig.InterfaceRegistry.RegisterImplementations(
+		(*tx.TxExtensionOptionI)(nil),
+		&authztypes.MsgGrant{},
+		&authztypes.MsgRevoke{},
+		&authztypes.MsgExec{},
+	)
 	return encodingConfig
 }
