@@ -52,3 +52,16 @@ func (k Keeper) Quota(goCtx context.Context, req *types.QueryGetQuotaRequest) (*
 
 	return &types.QueryGetQuotaResponse{Quota: quota}, nil
 }
+
+func (k Keeper) AccountQuota(goCtx context.Context, req *types.QueryGetAccountQuotaRequest) (*types.QueryGetAccountQuotaResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	quota, found := k.getAccountQuotaData(ctx, req.QuotaModuleName, req.GetAccountAddress())
+	if !found {
+		return nil, sdkerrors.ErrKeyNotFound
+	}
+	return &types.QueryGetAccountQuotaResponse{Quota: quota}, nil
+}
