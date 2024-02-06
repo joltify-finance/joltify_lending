@@ -44,7 +44,6 @@
         ]
       }
     },
-
     {
       "url": "./tmp-swagger-gen/joltify/third_party/jolt/v1beta1/query.swagger.json",
       "tags": {
@@ -109,6 +108,23 @@
             "type": "regex",
             "from": "(.*)",
             "to": "evmutil$1"
+          }
+        ]
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/joltify/quota/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "Quota"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "quota$1"
           }
         ]
       }

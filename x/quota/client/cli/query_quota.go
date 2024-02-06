@@ -75,3 +75,37 @@ func CmdShowQuota() *cobra.Command {
 
 	return cmd
 }
+
+func CmdShowAccountQuota() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "show-account-quota [id]",
+		Short: "shows account quota",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			moduleName := args[0]
+			accountAddr := args[1]
+			params := &types.QueryGetAccountQuotaRequest{
+				QuotaModuleName: moduleName,
+				AccountAddress:  accountAddr,
+			}
+
+			res, err := queryClient.AccountQuota(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
