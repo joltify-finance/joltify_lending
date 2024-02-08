@@ -15,7 +15,7 @@ import (
 func (k msgServer) calculateTotalDueInterest(ctx sdk.Context, poolInfo types.PoolInfo) (sdkmath.Int, error) {
 	totalAmount := sdk.ZeroInt()
 	for _, el := range poolInfo.PoolNFTIds {
-		class, found := k.nftKeeper.GetClass(ctx, el)
+		class, found := k.NftKeeper.GetClass(ctx, el)
 		if !found {
 			panic(found)
 		}

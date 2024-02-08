@@ -22,7 +22,7 @@ type (
 		kycKeeper       types.KycKeeper
 		bankKeeper      types.BankKeeper
 		accKeeper       types.AccountKeeper
-		nftKeeper       types.NFTKeeper
+		NftKeeper       types.NFTKeeper
 		priceFeedKeeper types.PriceFeedKeeper
 		auctionKeeper   types.AuctionKeeper
 	}
@@ -53,7 +53,7 @@ func NewKeeper(
 		kycKeeper:       kycKeeper,
 		bankKeeper:      bankKeeper,
 		accKeeper:       accKeeper,
-		nftKeeper:       nftKeeper,
+		NftKeeper:       nftKeeper,
 		priceFeedKeeper: pricefeedkeeper,
 		auctionKeeper:   auctionKeeper,
 	}

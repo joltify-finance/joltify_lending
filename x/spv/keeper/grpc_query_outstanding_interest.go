@@ -35,7 +35,7 @@ func (k Keeper) OutstandingInterest(goCtx context.Context, req *types.QueryOutst
 
 	reserve := poolInfo.ReserveFactor
 	lendNFTs := depositor.LinkedNFT
-	totalInterest, err := calculateTotalOutstandingInterest(ctx, lendNFTs, k.nftKeeper, reserve)
+	totalInterest, err := calculateTotalOutstandingInterest(ctx, lendNFTs, k.NftKeeper, reserve)
 	if err != nil {
 		return nil, err
 	}

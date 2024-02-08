@@ -57,7 +57,7 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 
 func (k Keeper) claimInterest(ctx sdk.Context, depositor *types.DepositorInfo) (sdk.Coin, error) {
 	// for each lending NFT this owner has
-	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		return sdk.Coin{}, err
 	}

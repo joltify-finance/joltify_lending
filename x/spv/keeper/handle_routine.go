@@ -80,7 +80,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	// borrowable is larger than the total required, so we can return the money to these investors
 	if poolInfo.UsableAmount.Amount.GTE(usdTotalLocked) {
 		for _, el := range depositors {
-			interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.nftKeeper, true)
+			interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.NftKeeper, true)
 			if err != nil {
 				panic(err)
 			}
@@ -110,7 +110,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	// now we process the partial transfer
 	totalBorrowableFromPrevious := sdkmath.ZeroInt()
 	for i, el := range depositors {
-		interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.nftKeeper, true)
+		interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.NftKeeper, true)
 		if err != nil {
 			panic(err)
 		}
@@ -151,7 +151,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 }
 
 func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, burnNFT bool, exchangeRatio sdk.Dec) error {
-	thisClass, found := k.nftKeeper.GetClass(ctx, classID)
+	thisClass, found := k.NftKeeper.GetClass(ctx, classID)
 	if !found {
 		return coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
 	}
@@ -163,7 +163,7 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, bu
 	}
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1]
 
-	thisNFT, found := k.nftKeeper.GetNFT(ctx, classID, nftID)
+	thisNFT, found := k.NftKeeper.GetNFT(ctx, classID, nftID)
 	if !found {
 		return coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", nftID)
 	}
@@ -183,12 +183,12 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, bu
 		panic("should never fail")
 	}
 	thisClass.Data = data
-	err = k.nftKeeper.UpdateClass(ctx, thisClass)
+	err = k.NftKeeper.UpdateClass(ctx, thisClass)
 	if err != nil {
 		return coserrors.Wrapf(err, "fail to update the class")
 	}
 	if burnNFT {
-		err = k.nftKeeper.Burn(ctx, classID, nftID)
+		err = k.NftKeeper.Burn(ctx, classID, nftID)
 		if err != nil {
 			return coserrors.Wrapf(err, "fail to burn the nft")
 		}
@@ -234,7 +234,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 			panic("should never fail to find the depositor")
 		}
 
-		interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+		interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 		if err != nil {
 			panic(err)
 		}
@@ -259,7 +259,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		panic("should never fail to find the depositor")
 	}
 
-	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		panic(err)
 	}

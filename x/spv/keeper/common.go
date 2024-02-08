@@ -155,7 +155,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmou
 
 	// create the new nft class for this borrow event
 	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
-	poolClass, found := k.nftKeeper.GetClass(ctx, classID)
+	poolClass, found := k.NftKeeper.GetClass(ctx, classID)
 	if !found {
 		panic("pool class must have already been set")
 	}
@@ -200,7 +200,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmou
 		panic(err)
 	}
 	currentBorrowClass.Data = data
-	err = k.nftKeeper.SaveClass(ctx, currentBorrowClass)
+	err = k.NftKeeper.SaveClass(ctx, currentBorrowClass)
 	if err != nil {
 		return err
 	}
@@ -290,7 +290,7 @@ func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInf
 		panic("should never fail")
 	}
 	nftTemplate.Data = data
-	err = k.nftKeeper.Mint(ctx, nftTemplate, depositor.DepositorAddress)
+	err = k.NftKeeper.Mint(ctx, nftTemplate, depositor.DepositorAddress)
 	if err != nil {
 		return err
 	}
@@ -329,6 +329,9 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 			}
 			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
+			if !lockedLocal.IsPositive() {
+				continue
+			}
 			err := k.doProcessInvestor(ctx, depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, true)
 			if err != nil {
 				return err
@@ -353,6 +356,9 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 			}
 			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
+			if !lockedLocal.IsPositive() {
+				return false
+			}
 			err := k.doProcessInvestor(ctx, &depositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, true)
 			if err != nil {
 				ctx.Logger().Error(err.Error(), "error msg:", "failed to process investor")
@@ -369,7 +375,7 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	lockedLocal := localAmount.Sub(totalLockedLocal)
 
 	// we do not need to borrow from this investor
-	if lockedLocal.IsNegative() {
+	if !lockedLocal.IsPositive() {
 		return nil
 	}
 	err := k.doProcessInvestor(ctx, firstDepositor, lockedUsd, lockedLocal, nftTemplate, nftClass.Id, poolInfo, true)
@@ -382,7 +388,7 @@ func (k Keeper) handleClassLeftover(ctx sdk.Context, poolinfo types.PoolInfo) sd
 	var err error
 	leftover := sdk.NewCoin(poolinfo.TargetAmount.Denom, sdk.ZeroInt())
 	for _, el := range nfts {
-		class, found := k.nftKeeper.GetClass(ctx, el)
+		class, found := k.NftKeeper.GetClass(ctx, el)
 		if !found {
 			panic("class not found")
 		}
@@ -400,7 +406,7 @@ func (k Keeper) handleClassLeftover(ctx sdk.Context, poolinfo types.PoolInfo) sd
 }
 
 func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
-	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		panic(err)
 	}
@@ -467,7 +473,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []stri
 	totalRedeem := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
-		thisNFT, found := k.nftKeeper.GetNFT(ctx, ids[0], ids[1])
+		thisNFT, found := k.NftKeeper.GetNFT(ctx, ids[0], ids[1])
 		if !found {
 			return sdkmath.Int{}, coserrors.Wrapf(types.ErrDepositorNotFound, "the given nft %v cannot ben found in storage", ids[1])
 		}
@@ -477,7 +483,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []stri
 			panic(err)
 		}
 
-		borrowClass, found := k.nftKeeper.GetClass(ctx, ids[0])
+		borrowClass, found := k.NftKeeper.GetClass(ctx, ids[0])
 		if !found {
 			panic("it should never fail to find the class")
 		}
@@ -518,7 +524,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []stri
 			panic("pack class any data failed")
 		}
 		thisNFT.Data = data
-		err = k.nftKeeper.Update(ctx, thisNFT)
+		err = k.NftKeeper.Update(ctx, thisNFT)
 		if err != nil {
 			panic(err)
 		}
@@ -528,7 +534,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []stri
 			panic("pack class any data failed")
 		}
 		borrowClass.Data = data
-		err = k.nftKeeper.UpdateClass(ctx, borrowClass)
+		err = k.NftKeeper.UpdateClass(ctx, borrowClass)
 		if err != nil {
 			panic(err)
 		}
