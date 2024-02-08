@@ -1,4 +1,6 @@
 #!/bin/bash
+
+bash -x
 # amount is value*base
 base=1000000000000000000
 junior=$(echo 200000*$base|bc)
@@ -34,25 +36,27 @@ done
 allInvestors=${allInvestors:1}
 
 ret=$(joltify tx spv create-pool $2 $1 0.15 0.0875 $junior"ausdc" $senior"ausdc"  --from validator --gas 8000000 --output json -y)
-
 # get the code from the json
-code=$(echo $ret | jq -r '.code')
+tx_hash=$(echo $ret | jq -r '.txhash')
+./scripts/checktx.sh $tx_hash
 # check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
+if [ $? -eq 0 ]; then
 cecho "GREEN" "Pool creation successful"
 else
-cecho "READ" "Pool creation failed"
+cecho "READ" "Pool creation failed with $tx_hash"
 exit 1
 fi
+return
 
 
 ret=$(joltify tx kyc upload-investor 44 $allInvestors --from validator  --gas 8000000 --output json -y)
+tx_hash=$(echo $ret | jq -r '.txhash')
+./scripts/checktx.sh $tx_hash
 # get the code from json
 #get the code value from json
-code=$(echo $ret | jq -r '.code')
 # remove leading empty spaces
 # check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
+if [ $? -eq 0 ]; then
 cecho "GREEN" "KYC uplad investor successful"
 else
 cecho "READ" "KYC upload investor failed $ret"
@@ -73,9 +77,10 @@ indexJunior=$3
 
 
 ret=$(joltify tx spv active-pool $indexJunior --from validator --gas 8000000 --output json -y)
-code=$(echo $ret | jq -r '.code')
+tx_hash=$(echo $ret | jq -r '.txhash')
+./scripts/checktx.sh $tx_hash
 # check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
+if [ $? -eq 0 ]; then
 cecho "GREEN" "Senior pool activation successful"
 else
 cecho "READ" "Senior pool activation failed with $ret"
@@ -83,9 +88,11 @@ exit 1
 fi
 
 ret=$(joltify tx spv add-investors  $indexJunior 44  --from validator --gas 8000000 --output json -y)
-code=$(echo $ret | jq -r '.code')
+
+tx_hash=$(echo $ret | jq -r '.txhash')
+./scripts/checktx.sh $tx_hash
 # check whether the return value of the function is 0
-if [ $code -eq 0 ]; then
+if [ $? -eq 0 ]; then
 cecho "GREEN" "Add investors to junior pool successful"
 else
 cecho "READ" "Add investors  to junior pool failed with $ret"

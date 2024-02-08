@@ -115,6 +115,6 @@ jq '.app_state.gov.params.voting_period = "60s"' $DATA/config/genesis.json|spong
 
 jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
-jq '.consensus_params.block.max_gas= "20000000"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+jq '.consensus_params.block.max_gas= "8000000000"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
 #jq '.app_state.feemarket.params.base_fee= "100"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
