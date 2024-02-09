@@ -31,7 +31,7 @@ func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depos
 }
 
 func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
-	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.nftKeeper, true)
+	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -67,7 +67,7 @@ func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
 	}
 
 	for _, el := range poolInfo.PoolNFTIds {
-		if k.nftKeeper.GetTotalSupply(ctx, el) > 0 {
+		if k.NftKeeper.GetTotalSupply(ctx, el) > 0 {
 			return false
 		}
 	}
@@ -104,11 +104,11 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 	// burn the nft if it is existed
 	for _, el := range depositor.LinkedNFT {
 		ids := strings.Split(el, ":")
-		_, found := k.nftKeeper.GetNFT(ctx, ids[0], ids[1])
+		_, found := k.NftKeeper.GetNFT(ctx, ids[0], ids[1])
 		if !found {
 			continue
 		}
-		err := k.nftKeeper.Burn(ctx, ids[0], ids[1])
+		err := k.NftKeeper.Burn(ctx, ids[0], ids[1])
 		if err != nil {
 			return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(err, "burn nft failed")
 		}

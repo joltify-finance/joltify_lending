@@ -114,7 +114,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 	}
 	var poolLatestPaymentTime time.Time
 	for _, el := range nftClasses {
-		class, found := k.nftKeeper.GetClass(ctx, el)
+		class, found := k.NftKeeper.GetClass(ctx, el)
 		if !found {
 			panic(found)
 		}
@@ -135,7 +135,7 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 		if err != nil {
 			panic("pack class any data failed")
 		}
-		err = k.nftKeeper.UpdateClass(ctx, class)
+		err = k.NftKeeper.UpdateClass(ctx, class)
 		if err != nil {
 			return sdkmath.Int{}, time.Time{}, err
 		}

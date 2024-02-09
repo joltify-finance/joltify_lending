@@ -14,7 +14,7 @@ import (
 )
 
 func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLiquidator, totalPoolBorrowed sdk.Coin, paidAmount sdkmath.Int) (sdkmath.Int, error) {
-	class, found := k.nftKeeper.GetClass(ctx, el)
+	class, found := k.NftKeeper.GetClass(ctx, el)
 	if !found {
 		panic(found)
 	}
@@ -47,7 +47,7 @@ func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLi
 	if err != nil {
 		panic("pack class any data failed")
 	}
-	err = k.nftKeeper.UpdateClass(ctx, class)
+	err = k.NftKeeper.UpdateClass(ctx, class)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
