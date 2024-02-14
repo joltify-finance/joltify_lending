@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
-TM_PKG_VERSION := $(shell go list -m github.com/cometbft/cometbft/ | sed 's:.* ::')
+TM_PKG_VERSION := $(shell go list -m  github.com/cometbft/cometbft  | sed 's:.* ::')
 COSMOS_PKG_VERSION := $(shell go list -m github.com/cosmos/cosmos-sdk | sed 's:.* ::')
 COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
@@ -118,7 +118,7 @@ else
 	go build -mod=readonly $(BUILD_FLAGS_MAINNET) -o build/$(shell go env GOOS)/joltify ./cmd/joltify
 endif
 
-build dev: go.sum
+dev: go.sum
 ifeq ($(OS), Windows_NT)
 	go build -mod=readonly $(BUILD_FLAGS_DEV) -o build/$(shell go env GOOS)/joltify.exe ./cmd/joltify
 else
@@ -134,8 +134,8 @@ build-linux: go.sum
 install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS_MAINNET) ./cmd/joltify
 
-dev: go.sum
-	go install -mod=readonly $(BUILD_FLAGS_DEV) ./cmd/joltify
+#dev: go.sum
+#	go install -mod=readonly $(BUILD_FLAGS_DEV) ./cmd/joltify
 
 ########################################
 ### Tools & dependencies
@@ -145,22 +145,13 @@ go-mod-cache: go.sum
 	@go mod download
 PHONY: go-mod-cache
 
-go.sum: go.mod
+#go.sum: go.mod
+go.sum:
 	@echo "--> Ensuring dependencies have not been modified"
 	@go mod verify
 
 clean:
 	rm -rf build/
-
-########################################
-### Linting
-
-# Check url links in the repo are not broken.
-# This tool checks local markdown links as well.
-# Set to exclude riot links as they trigger false positives
-link-check:
-	@go get -u github.com/raviqqe/liche@f57a5d1c5be4856454cb26de155a65a4fd856ee3
-	liche -r . --exclude "^http://127.*|^https://riot.im/app*|^http://joltify-testnet*|^https://testnet-dex*|^https://joltify3.data.joltify.io*|^https://ipfs.io*|^https://apps.apple.com*|^https://joltify.quicksync.io*"
 
 
 lint:
@@ -252,34 +243,34 @@ GOOGLE_PROTO_TYPES = third_party/proto/google/api
 PROTOBUF_GOOGLE_TYPES = third_party/proto/google/protobuf
 COSMOS_PROTO_TYPES = third_party/proto/cosmos_proto
 
-GOGO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/gogo/protobuf)
-TENDERMINT_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cometbft/cometbft/)
-COSMOS_PROTO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-proto)
-COSMOS_SDK_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-sdk)
-IBC_GO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/ibc-go/v6)
-
-proto-update-deps:
-	mkdir -p $(GOOGLE_PROTO_TYPES)
-	curl -sSL $(GOOGLE_PROTO_URL)/annotations.proto > $(GOOGLE_PROTO_TYPES)/annotations.proto
-	curl -sSL $(GOOGLE_PROTO_URL)/http.proto > $(GOOGLE_PROTO_TYPES)/http.proto
-	curl -sSL $(GOOGLE_PROTO_URL)/httpbody.proto > $(GOOGLE_PROTO_TYPES)/httpbody.proto
-
-	mkdir -p $(PROTOBUF_GOOGLE_TYPES)
-	curl -sSL $(PROTOBUF_GOOGLE_URL)/any.proto > $(PROTOBUF_GOOGLE_TYPES)/any.proto
-
-	mkdir -p client/docs
-	cp $(COSMOS_SDK_PATH)/client/docs/swagger-ui/swagger.yaml client/docs/cosmos-swagger.yml
-	cp $(IBC_GO_PATH)/docs/client/swagger-ui/swagger.yaml client/docs/ibc-go-swagger.yml
-
-	mkdir -p $(COSMOS_PROTO_TYPES)
-	cp $(COSMOS_PROTO_PATH)/cosmos.proto $(COSMOS_PROTO_TYPES)/cosmos.proto
-
-	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(GOGO_PATH)/gogoproto third_party/proto
-	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(TENDERMINT_PATH)/proto third_party
-	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(COSMOS_SDK_PATH)/proto third_party
-	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(IBC_GO_PATH)/proto third_party
-	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(ETHERMINT_PATH)/proto third_party
-	cp -f $(IBC_GO_PATH)/third_party/proto/proofs.proto third_party/proto/proofs.proto
+#GOGO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/gogo/protobuf)
+#TENDERMINT_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cometbft/cometbft/)
+#COSMOS_PROTO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-proto)
+#COSMOS_SDK_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/cosmos-sdk)
+#IBC_GO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/cosmos/ibc-go/v6)
+#
+#proto-update-deps:
+#	mkdir -p $(GOOGLE_PROTO_TYPES)
+#	curl -sSL $(GOOGLE_PROTO_URL)/annotations.proto > $(GOOGLE_PROTO_TYPES)/annotations.proto
+#	curl -sSL $(GOOGLE_PROTO_URL)/http.proto > $(GOOGLE_PROTO_TYPES)/http.proto
+#	curl -sSL $(GOOGLE_PROTO_URL)/httpbody.proto > $(GOOGLE_PROTO_TYPES)/httpbody.proto
+#
+#	mkdir -p $(PROTOBUF_GOOGLE_TYPES)
+#	curl -sSL $(PROTOBUF_GOOGLE_URL)/any.proto > $(PROTOBUF_GOOGLE_TYPES)/any.proto
+#
+#	mkdir -p client/docs
+#	cp $(COSMOS_SDK_PATH)/client/docs/swagger-ui/swagger.yaml client/docs/cosmos-swagger.yml
+#	cp $(IBC_GO_PATH)/docs/client/swagger-ui/swagger.yaml client/docs/ibc-go-swagger.yml
+#
+#	mkdir -p $(COSMOS_PROTO_TYPES)
+#	cp $(COSMOS_PROTO_PATH)/cosmos.proto $(COSMOS_PROTO_TYPES)/cosmos.proto
+#
+#	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(GOGO_PATH)/gogoproto third_party/proto
+#	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(TENDERMINT_PATH)/proto third_party
+#	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(COSMOS_SDK_PATH)/proto third_party
+#	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(IBC_GO_PATH)/proto third_party
+#	rsync -r --chmod 644 --include "*.proto" --include='*/' --exclude='*' $(ETHERMINT_PATH)/proto third_party
+#	cp -f $(IBC_GO_PATH)/third_party/proto/proofs.proto third_party/proto/proofs.proto
 
 integration-test:
 	make -C contrib/devnet/integrationtest build
