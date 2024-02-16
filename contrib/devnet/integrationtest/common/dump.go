@@ -33,7 +33,7 @@ func dumpPool(poolIndex, fileName string, needWrite bool) (SPV, error) {
 		poolInfo.PoolInfo.PoolName, poolInfo.PoolInfo.Index, poolInfo.PoolInfo.UsableAmount.Amount, poolInfo.PoolInfo.BorrowedAmount.Amount, poolInfo.PoolInfo.PoolStatus, poolInfo.PoolInfo.ProjectLength, strconv.Itoa(poolInfo.PoolInfo.PayFreq), poolInfo.PoolInfo.LastPaymentTime.String(),
 	}
 	if needWrite {
-		WritePoolToExcel("pool_info", data, fileName)
+		WriteDataToExcel("pool_info", data, fileName)
 	}
 	return poolInfo, nil
 }
@@ -108,7 +108,7 @@ func dumpInvestorsAndInterest(poolIndex, fileName string, needWrite bool, logger
 	wg.Wait()
 
 	if needWrite {
-		WritePoolToExcel("depositor_info", data, fileName)
+		WriteDataToExcel("depositor_info", data, fileName)
 	}
 	return depositorsInterest, errG
 }
@@ -155,7 +155,7 @@ func dumpBorrowNFT(poolIndex, fileName string, needWrite bool, logger zlog.Logge
 		nftsResult[i] = nft
 	}
 	if needWrite {
-		WritePoolToExcel("borrow_info", data, fileName)
+		WriteDataToExcel("borrow_info", data, fileName)
 	}
 	return nftsResult, nil
 }

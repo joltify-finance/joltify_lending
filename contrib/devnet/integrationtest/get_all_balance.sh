@@ -24,9 +24,9 @@ balance_validator=$(echo $ret | jq -r '.balances[1].amount')
 
 sum_all=$(echo $total_amount+$amount_reserved+$balance_validator| bc)
 
-
+echo "###########################################################"
 echo "recovered total amount of validator is  $sum_all"
-echo " total interest $total_amount"
-echo "all balance $all_balance"
+echo "total interest to investors $total_amount"
 echo "reserved $amount_reserved"
 echo "balance validator $balance_validator"
+echo "###########################################################"
