@@ -89,6 +89,15 @@ func submitWithdraw(poolIndex string, claimUsersNum, totalinvestors int) []int {
 	return actuallydone
 }
 
+func queryUSDCBalance(nickname string) (string, error) {
+	out, err := common.RunCommandWithOutput("./scripts/show_balance.sh", nickname)
+	if err != nil {
+		logger.Error().Err(err).Msgf("we get error when pay partial principal with error %v", out)
+		return "", err
+	}
+	return out, nil
+}
+
 func payPrincipalPartial(poolIndex string) {
 	out, err := common.RunCommandWithOutput("./scripts/pay_partial_principal.sh", poolIndex, "200000")
 	if err != nil {
