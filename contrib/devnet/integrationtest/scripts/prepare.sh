@@ -75,15 +75,14 @@ indexJunior=$3
 #exit 1
 #fi
 
-
 ret=$(joltify tx spv active-pool $indexJunior --from validator --gas 8000000 --output json -y)
 tx_hash=$(echo $ret | jq -r '.txhash')
 ./scripts/checktx.sh $tx_hash
 # check whether the return value of the function is 0
 if [ $? -eq 0 ]; then
-cecho "GREEN" "Senior pool activation successful"
+cecho "GREEN" "junior pool activation successful"
 else
-cecho "READ" "Senior pool activation failed with $ret"
+cecho "READ" "junior pool activation failed with $ret"
 exit 1
 fi
 

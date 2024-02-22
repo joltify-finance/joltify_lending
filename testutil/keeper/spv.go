@@ -50,7 +50,7 @@ func (m mockKycKeeper) GetInvestorWallets(_ sdk.Context, investorID string) (kyc
 	return kycmoduletypes.Investor{InvestorId: investorID, WalletAddress: Wallets}, nil
 }
 
-func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmoduletypes.ProjectInfo) {
+func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmoduletypes.ProjectInfo, found bool) {
 	b := kycmoduletypes.BasicInfo{
 		Description:    "This is the test info",
 		ProjectsUrl:    "empty",
@@ -130,7 +130,11 @@ func (m mockKycKeeper) GetProjects(ctx sdk.Context) (projectsInfo []*kycmodulety
 		MinBorrowAmount: sdk.NewInt(200),
 	}
 
-	return []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4}
+	a := []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4}
+	if index > int32(len(a)) {
+		return kycmoduletypes.ProjectInfo{}, false
+	}
+	return *a[index], true
 }
 
 func (m mockKycKeeper) GetByWallet(_ sdk.Context, wallet string) (kycmoduletypes.Investor, error) {
