@@ -1,0 +1,19 @@
+  {
+ "messages": [
+  {
+   "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+   "authority": "jolt10d07y265gmmuvt4z0w9aw880jnsr700jszwe96",
+   "plan": {
+    "name": "v016_upgrade",
+    "time": "0001-01-01T00:00:00Z",
+    "height": "185",
+    "info": "this upgrade upgrade the joltify chain to v0.0.14 to add the ibc quota for atom and jolt token",
+    "upgraded_client_state": null
+   }
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "100000000000ujolt",
+"title":"upgrade to v0.0.14",
+"summary":"upgrade to v0.0.14"
+}

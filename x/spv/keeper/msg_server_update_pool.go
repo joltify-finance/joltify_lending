@@ -23,12 +23,10 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
-	allProjects := k.kycKeeper.GetProjects(ctx)
-	if allProjects == nil || int32(len(allProjects)) < poolInfo.LinkedProject {
+	targetProject, ok := k.kycKeeper.GetProject(ctx, poolInfo.LinkedProject)
+	if !ok {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", poolInfo.LinkedProject)
 	}
-
-	targetProject := allProjects[poolInfo.LinkedProject-1]
 
 	// we use the second one as the mock apy
 	apy, _, err := parameterSanitize(targetProject.PayFreq, []string{msg.PoolApy, "0"})

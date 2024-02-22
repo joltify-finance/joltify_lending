@@ -63,5 +63,5 @@ message Projects{
 // Params defines the parameters for the module.
 message Params {
   string project_info  = 1;
-  repeated bytes submitter     = 4 [   (cosmos_proto.scalar) = "cosmos.AddressBytes",   (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  repeated bytes submitter     = 2 [   (cosmos_proto.scalar) = "cosmos.AddressBytes",   (gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
 }

@@ -12,7 +12,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
-	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -44,16 +43,8 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidVersion, "the amount cannot be 0")
 	}
 
-	allProjects := k.kycKeeper.GetProjects(ctx)
-
-	var targetProject *kyctypes.ProjectInfo
-	for _, el := range allProjects {
-		if el.Index == msg.ProjectIndex {
-			targetProject = el
-			break
-		}
-	}
-	if targetProject == nil {
+	targetProject, ok := k.kycKeeper.GetProject(ctx, msg.ProjectIndex)
+	if !ok {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", msg.ProjectIndex)
 	}
 

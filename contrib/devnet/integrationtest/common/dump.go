@@ -165,7 +165,7 @@ func DumpAll(poolIndex, fileName string, needWrite bool, logger zlog.Logger) (SP
 		fileName = time.Now().Format("2006-01-02 15-04") + ".xlsx"
 	}
 	var err error
-	poolSPV, err := dumpPool("0x6aa3f2a59b8599d0ced06bd7ad6edc60ce75908333b3c239d4afc519f585298a", fileName, needWrite)
+	poolSPV, err := dumpPool(poolIndex, fileName, needWrite)
 	if err != nil {
 		log.Error().Err(err).Msg(">>>>error in dump pool")
 		return SPV{}, nil, nil, err

@@ -14,7 +14,11 @@ const (
 	MemStoreKey = "mem_kyc"
 )
 
-var InvestorToWalletsPrefix = "InvestorToWalletsPrefix-" // prefix for keys that store auctions
+var (
+	InvestorToWalletsPrefix = "InvestorToWalletsPrefix-" // prefix for keys that store auctions
+	ProjectInfoPrefix       = "ProjectInfo-"             // prefix for keys that store auctions
+	ProjectInfoNum          = "ProjectNum-"              // prefix for keys that store auctions
+)
 
 func KeyPrefix(p string) []byte {
 	return []byte(p)

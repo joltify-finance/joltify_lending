@@ -1,0 +1,13 @@
+{
+ "messages": [
+  {
+   "@type": "/joltify.kyc.MsgCreateProject",
+   "creator": "jolt10d07y265gmmuvt4z0w9aw880jnsr700jszwe96",
+   "encoded_project": "CAISDjEwMTp2M1NvWW16OHgzGtwBCiZUaGlzIGlzIHRoZSB0ZXN0IGluZm8gZm9yIEpvc2h1YSBBQUFBQRIFZW1wdHkaFkFCQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ2MiC0FCQzEyM2RkZGRkKghyZXNlcnZlZDIeVGhpcyBpcyB0aGUgVGVzdCBQcm9qZWN0IDExMTExOhNleGFtcGxlQGV4YW1wbGUuY29tQgdleGFtcGxlSg5lbXB0eSBsb2dvIHVybFITZW1wdHkgcHJvamVjdCBCcmllZloZZW1wdHkgcHJvamVjdCBkZXNjcmlwdGlvbiIUoBuU226DiQQioDIAEA40tHdShsYo4AMwAToSMTAwMDAwMDAwMDAwMDAwMDAwQgMxMjBIHlBkWGRiAGoHYXVkOnVzZHIBMHoDMTAw"
+  }
+ ],
+ "metadata": "ipfs://CID",
+ "deposit": "1000000000ujolt",
+ "title": "bintest",
+ "summary": "test me"
+}
