@@ -1,6 +1,9 @@
 #!/bin/bash
 all_keys=$1
 
+
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 total_amount=0
 for (( c=1; c<=$all_keys; c++ ))
 do
