@@ -15,11 +15,20 @@ userMnemonic="news tornado sponsor drastic dolphin awful plastic select true liz
 relayerMnemonic="never reject sniff east arctic funny twin feed upper series stay shoot vivid adapt defense economy pledge fetch invite approve ceiling admit gloom exit"
 # 0xa2F728F997f62F47D4262a70947F6c36885dF9fa
 
-DATA=~/.joltify
+DATA=/Users/yb/.tmpdisk/ram
 # remove any old state and config
-rm -rf $DATA
+rm -rf $DATA/joltifydata
 
 BINARY=joltify
+
+HOMEWITHOUTJOLTIFY=$DATA/joltifydata/.joltify
+
+HOME=$DATA/joltifydata
+export $HOME
+
+uphome=$DATA/joltifydata
+
+set -x
 
 # Create new data directory, overwriting any that alread existed
 chainID="joltifydev_1729-1"
@@ -27,32 +36,32 @@ $BINARY init validator --chain-id $chainID --trace
 #cp  $DATA/config/genesis.json /home/yb/development/joltify/joltify_lending/contrib/gen_raw.json
 
 # hacky enable of rest api
-sed -in-place='' 's/enable = false/enable = true/g' $DATA/config/app.toml
+sed -in-place='' 's/enable = false/enable = true/g' $HOMEWITHOUTJOLTIFY/config/app.toml
 
 # change port to 0.0.0.0
-sed -in-place='' 's/enable = false/enable = true/g' $DATA/config/app.toml
+sed -in-place='' 's/enable = false/enable = true/g' $HOMEWITHOUTJOLTIFY/config/app.toml
 
-sed -i -E 's|enable = false|enable = true|g' $DATA/config/app.toml
+sed -i -E 's|enable = false|enable = true|g' $HOMEWITHOUTJOLTIFY/config/app.toml
 
-sed -i -E 's|0uatom|0ujolt|g' $DATA/config/app.toml
+sed -i -E 's|0uatom|0ujolt|g' $HOMEWITHOUTJOLTIFY/config/app.toml
 
-sed -i -E 's|enabled-unsafe-cors = false|enabled-unsafe-cors = true |g' $DATA/config/app.toml
+sed -i -E 's|enabled-unsafe-cors = false|enabled-unsafe-cors = true |g' $HOMEWITHOUTJOLTIFY/config/app.toml
 
 # enable swagger
-sed -i -E 's|swagger = false|swagger = true |g' $DATA/config/app.toml
+sed -i -E 's|swagger = false|swagger = true |g' $HOMEWITHOUTJOLTIFY/config/app.toml
 
-sed -i -E 's|tcp://127.0.0.1:26657|tcp://0.0.0.0:26657|g' $DATA/config/config.toml
+sed -i -E 's|tcp://127.0.0.1:26657|tcp://0.0.0.0:26657|g' $HOMEWITHOUTJOLTIFY/config/config.toml
 
-sed -i -E 's|max_subscription_clients = 100|max_subscription_clients = 1000|g' $DATA/config/config.toml
+sed -i -E 's|max_subscription_clients = 100|max_subscription_clients = 1000|g' $HOMEWITHOUTJOLTIFY/config/config.toml
 
-sed -i -E 's|cors_allowed_origins = \[\]|cors_allowed_origins = \[\"*\"\]|g' $DATA/config/config.toml
+sed -i -E 's|cors_allowed_origins = \[\]|cors_allowed_origins = \[\"*\"\]|g' $HOMEWITHOUTJOLTIFY/config/config.toml
 
 # Set evm tracer to json
-sed -in-place='' 's/tracer = ""/tracer = "json"/g' $DATA/config/app.toml
+sed -in-place='' 's/tracer = ""/tracer = "json"/g' $HOMEWITHOUTJOLTIFY/config/app.toml
 
 # Set client chain id
-sed -in-place='' 's/chain-id = ""/chain-id = "joltify_1729-1"/g' $DATA/config/client.toml
-sed -in-place='' 's/broadcast-mode = "sync"/broadcast-mode = "sync"/g' $DATA/config/client.toml
+sed -in-place='' 's/chain-id = ""/chain-id = "joltify_1729-1"/g' $HOMEWITHOUTJOLTIFY/config/client.toml
+sed -in-place='' 's/broadcast-mode = "sync"/broadcast-mode = "sync"/g' $HOMEWITHOUTJOLTIFY/config/client.toml
 
 # avoid having to use password for keys
 $BINARY config keyring-backend test
@@ -105,21 +114,21 @@ $BINARY gentx $validatorKeyName 1000000000ujolt --keyring-backend test --chain-i
 $BINARY collect-gentxs
 
 # Replace stake with ujolt
-sed -in-place='' 's/stake/ujolt/g' $DATA/config/genesis.json
+sed -in-place='' 's/stake/ujolt/g' $HOMEWITHOUTJOLTIFY/config/genesis.json
 
 # Replace the default evm denom of aphoton with ujolt
-sed -in-place='' 's/aphoton/ajolt/g' $DATA/config/genesis.json
+sed -in-place='' 's/aphoton/ajolt/g' $HOMEWITHOUTJOLTIFY/config/genesis.json
 
 # Zero out the total supply so it gets recalculated during InitGenesis
-jq '.app_state.bank.supply = []' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+jq '.app_state.bank.supply = []' $HOMEWITHOUTJOLTIFY/config/genesis.json|sponge $HOMEWITHOUTJOLTIFY/config/genesis.json
 
 # update the vote
-jq '.app_state.gov.voting_params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
-jq '.app_state.gov.params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+jq '.app_state.gov.voting_params.voting_period = "60s"' $HOMEWITHOUTJOLTIFY/config/genesis.json|sponge $HOMEWITHOUTJOLTIFY/config/genesis.json
+jq '.app_state.gov.params.voting_period = "60s"' $HOMEWITHOUTJOLTIFY/config/genesis.json|sponge $HOMEWITHOUTJOLTIFY/config/genesis.json
 
 
-jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+jq '.app_state.distribution.params.community_tax= "0"' $HOMEWITHOUTJOLTIFY/config/genesis.json|sponge $HOMEWITHOUTJOLTIFY/config/genesis.json
 
-jq '.consensus_params.block.max_gas= "8000000000"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+jq '.consensus_params.block.max_gas= "8000000000"' $HOMEWITHOUTJOLTIFY/config/genesis.json|sponge $HOMEWITHOUTJOLTIFY/config/genesis.json
 
-#jq '.app_state.feemarket.params.base_fee= "100"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+#jq '.app_state.feemarket.params.base_fee= "100"' $HOMEWITHOUTJOLTIFY/config/genesis.json|sponge $HOMEWITHOUTJOLTIFY/config/genesis.json

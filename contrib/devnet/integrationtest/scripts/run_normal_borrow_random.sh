@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 base=1000000000000000000
 cecho(){
     RED="\033[0;31m"

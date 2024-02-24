@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 set -x
 ret=$(joltify tx spv withdraw-principal $1 $2 --from key_$3 --output json -y --gas 80000)
 set +x

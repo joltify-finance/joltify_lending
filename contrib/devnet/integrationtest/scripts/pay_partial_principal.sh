@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 base=1000000000000000000
 amount=$(echo $2*$base | bc)
 ret=$(joltify tx spv pay-principal-partial $1 $amount"ausdc" --from validator --gas 20000000 --output json -y)

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 # Run the loop three times
 for ((i=1; i<=5; i++)); do
     echo "This is loop iteration number $i for checking tx"

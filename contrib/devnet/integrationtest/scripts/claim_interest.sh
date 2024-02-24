@@ -2,6 +2,8 @@
 
 echoerr() { echo "$@" 1>&2; }
 
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 ret=$(joltify tx spv claim-interest $1 --from key_$2 --gas 8000000 --output json -y)
 # get the code from json
 hash=$(echo $ret | jq -r '.txhash')

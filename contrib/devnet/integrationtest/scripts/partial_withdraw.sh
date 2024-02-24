@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 ret=$(joltify tx spv submit-withdrawal-proposal  $1 --from key_$2 --gas 20000000 --output json -y)
 # get the code from json
 hash=$(echo $ret | jq -r '.txhash')

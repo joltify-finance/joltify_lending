@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 bash -x
 # amount is value*base
 base=1000000000000000000

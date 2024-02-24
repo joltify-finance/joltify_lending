@@ -1,6 +1,9 @@
 #!/bin/bash
 # generate n cosmos accounts
 # loop function to generate n cosmos accounts
+
+DATA=/Users/yb/.tmpdisk/ram
+HOME=$DATA/joltifydata
 set -x
 base=1000000000000000000
 all_keys=100
