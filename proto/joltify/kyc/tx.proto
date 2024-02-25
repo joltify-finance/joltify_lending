@@ -1,6 +1,8 @@
 syntax = "proto3";
 package joltify.kyc;
 
+import "joltify/kyc/params.proto";
+
 // this line is used by starport scaffolding # proto/tx/import
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/kyc/types";
@@ -8,6 +10,7 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/kyc/types";
 // Msg defines the Msg service.
 service Msg {
   rpc UploadInvestor (MsgUploadInvestor) returns (MsgUploadInvestorResponse);
+  rpc CreateProject (MsgCreateProject) returns (MSgCreateProjectResponse);
 }
 message MsgUploadInvestor {
   string creator       = 1;
@@ -17,4 +20,13 @@ message MsgUploadInvestor {
 
 message MsgUploadInvestorResponse {
   repeated string wallets = 1;
+}
+
+message MsgCreateProject {
+  string creator       = 1;
+  string encoded_project= 2 ;
+}
+
+message MSgCreateProjectResponse {
+  string project_id = 1;
 }

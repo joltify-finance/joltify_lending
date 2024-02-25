@@ -33,6 +33,15 @@ service Query {
     option (google.api.http).get = "/joltify/kyc/list_investors";
 
   }
+
+  rpc QueryProject (QueryProjectRequest) returns (QueryProjectResponse) {
+    option (google.api.http).get = "/joltify/kyc/query_project/{projectId}";
+  }
+
+  rpc ListAllProjects (ListAllProjectsRequest) returns (ListAllProjectsResponse) {
+    option (google.api.http).get = "/joltify/kyc/list_all_projects";
+  }
+
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
@@ -67,4 +76,23 @@ message ListInvestorsResponse {
   repeated Investor                               investor   = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
+
+message ListAllProjectsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message ListAllProjectsResponse {
+  repeated ProjectInfo project = 1;
+  int32 total_number = 2;
+  cosmos.base.query.v1beta1.PageResponse pagination = 3;
+}
+
+message QueryProjectRequest {
+  int32 projectId = 1;
+}
+
+message QueryProjectResponse {
+  ProjectInfo project = 1;
+}
+
 

@@ -31,7 +31,7 @@ type BankKeeper interface {
 }
 
 type KycKeeper interface {
-	GetProjects(ctx sdk.Context) (projectsInfo []*kyctypes.ProjectInfo)
+	GetProject(ctx sdk.Context, index int32) (val kyctypes.ProjectInfo, found bool)
 	GetInvestorWallets(ctx sdk.Context, investorID string) (kyctypes.Investor, error)
 	GetByWallet(ctx sdk.Context, wallet string) (kyctypes.Investor, error)
 }

@@ -10,6 +10,7 @@ import (
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgUploadInvestor{}, "/joltify.kyc.MsgUploadInvestor", nil)
+	cdc.RegisterConcrete(&MsgCreateProject{}, "/joltify.kyc.MsgCreateProject", nil)
 	// this line is used by starport scaffolding # 2
 }
 

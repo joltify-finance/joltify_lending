@@ -36,11 +36,15 @@ func KycKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 		memStoreKey,
 		"KycParams",
 	)
+
+	mockGovAddr := sdk.AccAddress([]byte("gov"))
+
 	k := keeper.NewKeeper(
 		cdc,
 		storeKey,
 		memStoreKey,
 		paramsSubspace,
+		mockGovAddr,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())

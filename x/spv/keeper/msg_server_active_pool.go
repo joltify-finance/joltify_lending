@@ -3,11 +3,9 @@ package keeper
 import (
 	"context"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
-
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/ethereum/go-ethereum/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -40,16 +38,8 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 	poolInfo1.PoolCreatedTime = ctx.BlockTime()
 	poolInfo1.LastPaymentTime = ctx.BlockTime()
 
-	allProjects := k.kycKeeper.GetProjects(ctx)
-
-	var targetProject *kyctypes.ProjectInfo
-	for _, el := range allProjects {
-		if el.Index == poolInfo1.LinkedProject {
-			targetProject = el
-			break
-		}
-	}
-	if targetProject == nil {
+	targetProject, ok := k.kycKeeper.GetProject(ctx, poolInfo1.LinkedProject)
+	if !ok {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", poolInfo1.LinkedProject)
 	}
 

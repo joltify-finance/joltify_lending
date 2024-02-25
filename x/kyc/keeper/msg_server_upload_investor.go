@@ -94,7 +94,7 @@ func (k msgServer) UploadInvestor(goCtx context.Context, msg *types.MsgUploadInv
 	for _, el := range msg.GetWalletAddress() {
 		_, err := sdk.AccAddressFromBech32(el)
 		if err != nil {
-			return nil, sdkerrors.Wrapf(types.ErrInvalidWallets, "invalid wallets: %v", msg.WalletAddress)
+			return nil, sdkerrors.Wrapf(types.ErrInvalidWallets, "invalid wallets: %v", el)
 		}
 
 		// the wallet has been already registered

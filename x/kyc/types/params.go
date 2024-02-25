@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
-	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/joltify-finance/joltify_lending/client"
-
-	tmrand "github.com/cometbft/cometbft/libs/rand"
-	"github.com/gogo/protobuf/proto"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -20,8 +17,8 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 
 // Parameter keys
 var (
-	KeyProjects     = []byte("projectInfo")
 	KeyKycSubmitter = []byte("kycsubmitters")
+	KeyProjects     = []byte("projectInfo")
 )
 
 // ParamKeyTable the param key table for launch module
@@ -36,49 +33,8 @@ func NewParams() Params {
 		if err != nil {
 			panic(err)
 		}
-		var projects Projects
-		allProjects := make([]*ProjectInfo, 100)
-		projects.Items = allProjects
-		for i := 0; i < 100; i++ {
-			b := BasicInfo{
-				"This is the test info",
-				"empty",
-				"ABC",
-				"ABC123",
-				[]byte("reserved"),
-				"This is the Test Project 1",
-				"example@example.com",
-				"example",
-				"empty logo url",
-				"empty project Brief",
-				"empty project description",
-			}
-			pi := ProjectInfo{
-				Index:                        int32(i + 1),
-				SPVName:                      strconv.Itoa(i) + ":" + tmrand.NewRand().Str(10),
-				ProjectOwner:                 acc,
-				BasicInfo:                    &b,
-				ProjectLength:                480, // 5 mins
-				SeparatePool:                 true,
-				BaseApy:                      types.NewDecWithPrec(10, 2),
-				PayFreq:                      "120",
-				PoolLockedSeconds:            100,
-				PoolTotalBorrowLimit:         100,
-				MarketId:                     "aud:usd",
-				WithdrawRequestWindowSeconds: 30,
-				MinBorrowAmount:              sdkmath.NewInt(100),
-			}
-			pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
-			allProjects[i] = &pi
-		}
 
-		b, err := proto.Marshal(&projects)
-		if err != nil {
-			panic("invalid parameter")
-		}
-
-		data := base64.StdEncoding.EncodeToString(b)
-		return Params{data, []types.AccAddress{acc}}
+		return Params{"", []types.AccAddress{acc}}
 	}
 	return Params{}
 }
@@ -91,17 +47,13 @@ func DefaultParams() Params {
 // ParamSetPairs get the params.ParamSet
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyProjects, &p.ProjectInfo, validateProjectInfo),
 		paramtypes.NewParamSetPair(KeyKycSubmitter, &p.Submitter, validateSubmitter),
+		paramtypes.NewParamSetPair(KeyProjects, &p.ProjectInfo, validateProjectInfo),
 	}
 }
 
 // Validate validates the set of params
 func (p Params) Validate() error {
-	err := validateProjectInfo(p.ProjectInfo)
-	if err != nil {
-		return err
-	}
 	return validateSubmitter(p.Submitter)
 }
 

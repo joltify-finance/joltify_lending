@@ -46,7 +46,7 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo, borrowAmount
 	}
 
 	if poolInfo.CurrentPoolTotalBorrowCounter >= poolInfo.PoolTotalBorrowLimit {
-		return types.ErrPoolBorrowLimit
+		return coserrors.Wrapf(types.ErrPoolBorrowLimit, "current borrow counter is %v and total is %v", poolInfo.CurrentPoolTotalBorrowCounter, poolInfo.PoolTotalBorrowLimit)
 	}
 
 	if poolInfo.CurrentPoolTotalBorrowCounter == 0 && poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds)+poolInfo.GraceTime).Before(blockTime) {
