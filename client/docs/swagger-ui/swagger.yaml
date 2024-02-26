@@ -6707,6 +6707,193 @@ paths:
           type: string
       tags:
         - Quota
+  /joltify/kyc/list_all_projects:
+    get:
+      operationId: kycListAllProjects
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              project:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    index:
+                      type: integer
+                      format: int32
+                    SPV_name:
+                      type: string
+                    basic_info:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        projects_url:
+                          type: string
+                        project_country:
+                          type: string
+                        business_number:
+                          type: string
+                        reserved:
+                          type: string
+                          format: byte
+                        project_name:
+                          type: string
+                        email:
+                          type: string
+                        name:
+                          type: string
+                        project_logo:
+                          type: string
+                        project_brief:
+                          type: string
+                        executive_summary:
+                          type: string
+                    project_owner:
+                      type: string
+                      format: byte
+                    project_length:
+                      type: string
+                      format: uint64
+                    separate_pool:
+                      type: boolean
+                    base_apy:
+                      type: string
+                    pay_freq:
+                      type: string
+                    withdraw_request_window_seconds:
+                      type: integer
+                      format: int32
+                    pool_locked_seconds:
+                      type: integer
+                      format: int32
+                    pool_total_borrow_limit:
+                      type: integer
+                      format: int32
+                    grace_time:
+                      type: string
+                    market_id:
+                      type: string
+                    junior_min_ratio:
+                      type: string
+                    min_borrow_amount:
+                      type: string
+                  description: Market defines an asset in the pricefeed.
+              total_number:
+                type: integer
+                format: int32
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - kyc
   /joltify/kyc/list_investors:
     get:
       summary: Queries a list of ListInvestors items.
@@ -6974,6 +7161,109 @@ paths:
           in: path
           required: true
           type: string
+      tags:
+        - kyc
+  /joltify/kyc/query_project/{projectId}:
+    get:
+      operationId: kycQueryProject
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              project:
+                type: object
+                properties:
+                  index:
+                    type: integer
+                    format: int32
+                  SPV_name:
+                    type: string
+                  basic_info:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                      projects_url:
+                        type: string
+                      project_country:
+                        type: string
+                      business_number:
+                        type: string
+                      reserved:
+                        type: string
+                        format: byte
+                      project_name:
+                        type: string
+                      email:
+                        type: string
+                      name:
+                        type: string
+                      project_logo:
+                        type: string
+                      project_brief:
+                        type: string
+                      executive_summary:
+                        type: string
+                  project_owner:
+                    type: string
+                    format: byte
+                  project_length:
+                    type: string
+                    format: uint64
+                  separate_pool:
+                    type: boolean
+                  base_apy:
+                    type: string
+                  pay_freq:
+                    type: string
+                  withdraw_request_window_seconds:
+                    type: integer
+                    format: int32
+                  pool_locked_seconds:
+                    type: integer
+                    format: int32
+                  pool_total_borrow_limit:
+                    type: integer
+                    format: int32
+                  grace_time:
+                    type: string
+                  market_id:
+                    type: string
+                  junior_min_ratio:
+                    type: string
+                  min_borrow_amount:
+                    type: string
+                description: Market defines an asset in the pricefeed.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          type: integer
+          format: int32
       tags:
         - kyc
   /joltify-finance/joltify_lending/mint/dist:
@@ -50672,6 +50962,32 @@ definitions:
         type: array
         items:
           type: string
+  joltify.kyc.BasicInfo:
+    type: object
+    properties:
+      description:
+        type: string
+      projects_url:
+        type: string
+      project_country:
+        type: string
+      business_number:
+        type: string
+      reserved:
+        type: string
+        format: byte
+      project_name:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      project_logo:
+        type: string
+      project_brief:
+        type: string
+      executive_summary:
+        type: string
   joltify.kyc.Investor:
     type: object
     properties:
@@ -50681,6 +50997,104 @@ definitions:
         type: array
         items:
           type: string
+  joltify.kyc.ListAllProjectsResponse:
+    type: object
+    properties:
+      project:
+        type: array
+        items:
+          type: object
+          properties:
+            index:
+              type: integer
+              format: int32
+            SPV_name:
+              type: string
+            basic_info:
+              type: object
+              properties:
+                description:
+                  type: string
+                projects_url:
+                  type: string
+                project_country:
+                  type: string
+                business_number:
+                  type: string
+                reserved:
+                  type: string
+                  format: byte
+                project_name:
+                  type: string
+                email:
+                  type: string
+                name:
+                  type: string
+                project_logo:
+                  type: string
+                project_brief:
+                  type: string
+                executive_summary:
+                  type: string
+            project_owner:
+              type: string
+              format: byte
+            project_length:
+              type: string
+              format: uint64
+            separate_pool:
+              type: boolean
+            base_apy:
+              type: string
+            pay_freq:
+              type: string
+            withdraw_request_window_seconds:
+              type: integer
+              format: int32
+            pool_locked_seconds:
+              type: integer
+              format: int32
+            pool_total_borrow_limit:
+              type: integer
+              format: int32
+            grace_time:
+              type: string
+            market_id:
+              type: string
+            junior_min_ratio:
+              type: string
+            min_borrow_amount:
+              type: string
+          description: Market defines an asset in the pricefeed.
+      total_number:
+        type: integer
+        format: int32
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
   joltify.kyc.ListInvestorsResponse:
     type: object
     properties:
@@ -50732,6 +51146,70 @@ definitions:
           type: string
           format: byte
     description: Params defines the parameters for the module.
+  joltify.kyc.ProjectInfo:
+    type: object
+    properties:
+      index:
+        type: integer
+        format: int32
+      SPV_name:
+        type: string
+      basic_info:
+        type: object
+        properties:
+          description:
+            type: string
+          projects_url:
+            type: string
+          project_country:
+            type: string
+          business_number:
+            type: string
+          reserved:
+            type: string
+            format: byte
+          project_name:
+            type: string
+          email:
+            type: string
+          name:
+            type: string
+          project_logo:
+            type: string
+          project_brief:
+            type: string
+          executive_summary:
+            type: string
+      project_owner:
+        type: string
+        format: byte
+      project_length:
+        type: string
+        format: uint64
+      separate_pool:
+        type: boolean
+      base_apy:
+        type: string
+      pay_freq:
+        type: string
+      withdraw_request_window_seconds:
+        type: integer
+        format: int32
+      pool_locked_seconds:
+        type: integer
+        format: int32
+      pool_total_borrow_limit:
+        type: integer
+        format: int32
+      grace_time:
+        type: string
+      market_id:
+        type: string
+      junior_min_ratio:
+        type: string
+      min_borrow_amount:
+        type: string
+    description: Market defines an asset in the pricefeed.
   joltify.kyc.QueryByWalletResponse:
     type: object
     properties:
@@ -50766,6 +51244,73 @@ definitions:
               type: string
               format: byte
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  joltify.kyc.QueryProjectResponse:
+    type: object
+    properties:
+      project:
+        type: object
+        properties:
+          index:
+            type: integer
+            format: int32
+          SPV_name:
+            type: string
+          basic_info:
+            type: object
+            properties:
+              description:
+                type: string
+              projects_url:
+                type: string
+              project_country:
+                type: string
+              business_number:
+                type: string
+              reserved:
+                type: string
+                format: byte
+              project_name:
+                type: string
+              email:
+                type: string
+              name:
+                type: string
+              project_logo:
+                type: string
+              project_brief:
+                type: string
+              executive_summary:
+                type: string
+          project_owner:
+            type: string
+            format: byte
+          project_length:
+            type: string
+            format: uint64
+          separate_pool:
+            type: boolean
+          base_apy:
+            type: string
+          pay_freq:
+            type: string
+          withdraw_request_window_seconds:
+            type: integer
+            format: int32
+          pool_locked_seconds:
+            type: integer
+            format: int32
+          pool_total_borrow_limit:
+            type: integer
+            format: int32
+          grace_time:
+            type: string
+          market_id:
+            type: string
+          junior_min_ratio:
+            type: string
+          min_borrow_amount:
+            type: string
+        description: Market defines an asset in the pricefeed.
   joltify.mint.HistoricalDistInfo:
     type: object
     properties:
