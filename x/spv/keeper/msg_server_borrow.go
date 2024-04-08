@@ -40,9 +40,7 @@ func (k msgServer) getAllBorrowed(ctx sdk.Context, poolInfo types.PoolInfo) sdkm
 
 func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo, borrowAmount sdk.Coin) error {
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
-		if poolInfo.PoolStatus != types.PoolInfo_PooLPayPartially {
-			return coserrors.Wrapf(types.ErrPoolNotActive, "pool is not in active status or partially paid status, current: %v", poolInfo.PoolStatus)
-		}
+		return coserrors.Wrapf(types.ErrPoolNotActive, "pool is not in active status current: %v", poolInfo.PoolStatus)
 	}
 
 	if poolInfo.CurrentPoolTotalBorrowCounter >= poolInfo.PoolTotalBorrowLimit {

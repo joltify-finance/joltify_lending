@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"time"
 
 	coserrors "cosmossdk.io/errors"
 
@@ -41,6 +42,15 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
 		return &types.MsgTransferOwnershipResponse{}, coserrors.Wrapf(types.ErrUNEXPECTEDSTATUS, "pool current status is %v", poolInfo.PoolStatus)
+	}
+
+	dueDate := poolInfo.ProjectDueTime
+	firstTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*2))
+	secondTimeStampBeforeProjectDueDate := dueDate.Add(-time.Second * time.Duration(poolInfo.WithdrawRequestWindowSeconds*3))
+
+	currentTime := ctx.BlockTime()
+	if currentTime.After(secondTimeStampBeforeProjectDueDate) && currentTime.Before(firstTimeStampBeforeProjectDueDate) {
+		return nil, coserrors.Wrapf(types.ErrTime, "%v transfer ownership disabled during withdraw request  [%v <-> %v]", currentTime.Local(), secondTimeStampBeforeProjectDueDate.Local(), firstTimeStampBeforeProjectDueDate.Local())
 	}
 
 	// dueDate := poolInfo.ProjectDueTime
