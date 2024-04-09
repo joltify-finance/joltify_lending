@@ -13,6 +13,7 @@ import (
 
 const (
 	RewardTypeJolt = "jolt"
+	RewardTypeSwap = "swap"
 )
 
 type queryServer struct {
@@ -102,9 +103,16 @@ func (s queryServer) RewardFactors(
 		return false
 	})
 
+	var swapFactors types.MultiRewardIndexes
+	s.keeper.IterateSwapRewardIndexes(sdkCtx, func(poolID string, indexes types.RewardIndexes) (stop bool) {
+		swapFactors = swapFactors.With(poolID, indexes)
+		return false
+	})
+
 	return &types.QueryRewardFactorsResponse{
 		JoltSupplyRewardFactors: supplyFactors,
 		JoltBorrowRewardFactors: borrowFactors,
+		SwapRewardFactors:       swapFactors,
 	}, nil
 }
 
@@ -135,6 +143,17 @@ func (s queryServer) queryRewards(
 			res.JoltLiquidityProviderClaims = append(res.JoltLiquidityProviderClaims, hardClaims...)
 		}
 	}
+	if isAllRewards || rewardType == RewardTypeSwap {
+		if hasOwner {
+			swapClaim, foundSwapClaim := s.keeper.GetSwapClaim(ctx, owner)
+			if foundSwapClaim {
+				res.SwapClaims = append(res.SwapClaims, swapClaim)
+			}
+		} else {
+			swapClaims := s.keeper.GetAllSwapClaims(ctx)
+			res.SwapClaims = append(res.SwapClaims, swapClaims...)
+		}
+	}
 
 	return nil
 }
@@ -163,15 +182,22 @@ func (s queryServer) synchronizeRewards(
 	//	res.SavingsClaims[i] = syncedClaim
 	//}
 
+	for i, claim := range res.SwapClaims {
+		syncedClaim, found := s.keeper.GetSynchronizedSwapClaim(ctx, claim.Owner)
+		if !found {
+			return status.Errorf(codes.Internal, "previously found swap claim for owner %s should still be found", claim.Owner)
+		}
+		res.SwapClaims[i] = syncedClaim
+	}
 	return nil
 }
 
 func rewardTypeIsValid(rewardType string) bool {
 	return rewardType == "" ||
-		rewardType == RewardTypeJolt
-	// rewardType == RewardTypeUSDXMinting ||
-	// rewardType == RewardTypeDelegator ||
-	// rewardType == RewardTypeSwap ||
+		rewardType == RewardTypeJolt ||
+		// rewardType == RewardTypeUSDXMinting ||
+		// rewardType == RewardTypeDelegator ||
+		rewardType == RewardTypeSwap
 	// rewardType == RewardTypeSavings ||
 	// rewardType == RewardTypeEarn
 }

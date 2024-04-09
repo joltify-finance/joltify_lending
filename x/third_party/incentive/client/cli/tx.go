@@ -100,6 +100,7 @@ func getCmdClaimSwap() *cobra.Command {
 			selections := types.NewSelectionsFromMap(denomsToClaim)
 
 			msg := types.NewMsgClaimSwapReward(sender.String(), selections)
+			fmt.Printf(">>>2222222222222222>>%v\n", msg.DenomsToClaim)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}

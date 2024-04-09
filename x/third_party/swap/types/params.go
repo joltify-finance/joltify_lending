@@ -13,7 +13,7 @@ var (
 	KeyAllowedPools     = []byte("AllowedPools")
 	KeySwapFee          = []byte("SwapFee")
 	DefaultAllowedPools = AllowedPools{
-		AllowedPool{"abnb", "aswap"},
+		AllowedPool{"abnb", "ujolt"},
 		AllowedPool{"aswap", "ausdt"},
 		AllowedPool{"aswap", "ausdc"},
 		AllowedPool{"aeth", "aswap"},
