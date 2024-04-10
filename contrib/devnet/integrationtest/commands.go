@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"math/big"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/contrib/devnet/integrationtest/common"
@@ -20,6 +21,8 @@ func compareWithinError(a, b, e *big.Int) bool {
 	delta := new(big.Int).Sub(new(big.Int).Abs(a), new(big.Int).Abs(b))
 	return delta.CmpAbs(e) != 1
 }
+
+var transferBefore, transferAfter string
 
 func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error {
 	w, poolInfo, err := common.GetWindow(poolIndex)
@@ -72,7 +75,6 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 			}
 
 			withdrawChange := new(big.Int).Sub(after, before)
-
 			if withdrawChange.Cmp(big.NewInt(0)) == 0 {
 				continue
 			}
@@ -124,8 +126,12 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 	delta := lockedUsd.Sub(types.NewIntFromBigInt(totalTransferedWithdrawed)).Abs()
 
 	if totalTransferedWithdrawed.Cmp(big.NewInt(0)) != 0 {
-		mnsg := fmt.Sprintf("transfer amount is %v and difference between total locked change and withdrawalable change is %v\n", totalTransferedWithdrawed.String(), delta.String())
-		display.showOutput(mnsg, RED)
+		transferBefore, err = queryUSDCBalance("validator")
+		if err != nil {
+			return err
+		}
+		mnsg := fmt.Sprintf("transfer amount is %v (suppose %v)and difference between total locked change and withdrawalable change is %v\n", totalTransferedWithdrawed.String(), transferAmount.String(), delta.String())
+		display.showOutput(mnsg, YELLOW)
 		if !transferAmount.IsZero() {
 			if transferAmount.Equal(types.NewIntFromBigInt(totalTransferedWithdrawed)) {
 				msg := fmt.Sprintf("%v transfer amount is equal to total transfer request", correct)
@@ -140,8 +146,28 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 	totalLockedChange = new(big.Int).Mul(totalLockedChange, big.NewInt(-1))
 	if !compareWithinError(totalWithdrawChange, big.NewInt(0), big.NewInt(10)) || !compareWithinError(totalLockedChange, big.NewInt(0), big.NewInt(10)) {
 		tick := html.UnescapeString("&#" + "10060" + ";")
-		msg := fmt.Sprintf("%v total withdraw change %v and total locked %v\n", tick, totalWithdrawChange.String(), totalLockedChange.String())
-		display.showOutput(msg, WHITE)
+		tickcorrect := html.UnescapeString("&#" + "9989" + ";")
+		transferAfter, err = queryUSDCBalance("validator")
+		if err != nil {
+			return err
+		}
+
+		tbd, ok := new(big.Int).SetString(strings.Trim(transferBefore, "\n"), 10)
+		if !ok {
+			display.showOutput("fail to convert the validator balance "+transferBefore, RED)
+		}
+		taf, ok := new(big.Int).SetString(strings.Trim(transferAfter, "\n"), 10)
+		if !ok {
+			display.showOutput("fail to convert the validator balance after "+transferAfter, RED)
+		}
+
+		if totalLockedChange.Cmp(totalWithdrawChange) == 0 && totalLockedChange.Cmp(new(big.Int).Sub(tbd, taf)) == 0 {
+			msg := fmt.Sprintf("%v total withdraw change %v and total locked %v\n", tickcorrect, totalWithdrawChange.String(), totalLockedChange.String())
+			display.showOutput(msg, GREEN)
+		} else {
+			msg := fmt.Sprintf("%v total withdraw change %v and total locked %v\n (have you clear all withdrawal before submit withdrawal ?)", tick, totalWithdrawChange.String(), totalLockedChange.String())
+			display.showOutput(msg, RED)
+		}
 	}
 	return nil
 }

@@ -547,6 +547,13 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 				if err != nil {
 					logger.Error().Err(err).Msgf("error dumnp all")
 				}
+
+				display.showOutput("please pay partial", RED)
+				out, err := queryUSDCBalance("validator")
+				if err != nil {
+					display.showOutput(err.Error(), RED)
+				}
+				display.showOutput("the current validator balance is "+out, RED)
 				payPrincipalPartial(poolIndex)
 				fileName = fmt.Sprintf("%s-%s.xlsx", baseName, "after")
 				_, _, _, err = common.DumpAll(poolIndex, fileName, true, logger)
@@ -555,7 +562,6 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 				}
 				guiWithdrawAmount = -1
 				display.showOutput("we have processed the withdraw request and pay the principal", BLUE)
-
 			}
 		}
 	}
