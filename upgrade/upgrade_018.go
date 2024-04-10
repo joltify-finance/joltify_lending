@@ -22,6 +22,9 @@ func CreateUpgradeHandlerForV018Upgrade(
 			ctx.Logger().Info("we upgrade to v018")
 		}
 		spvKeeper.IteratePool(ctx, func(poolInfo spvmoduletypes.PoolInfo) bool {
+			if poolInfo.Index == "0xaac7b8bd2bf82a8cc4d7f3647f3ec067ca9cdd9a854d493cc983fdc1cf91ab21" || poolInfo.Index == "0xf5de65c0804ddfd4988996d6c80e228dab89d86ada184830178f94020f80247d" {
+				poolInfo.ProjectLength = 86400 * 3
+			}
 			for {
 				if poolInfo.ProjectDueTime.After(ctx.BlockTime()) {
 					break
