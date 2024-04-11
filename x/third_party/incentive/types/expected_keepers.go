@@ -4,7 +4,9 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
@@ -54,4 +56,18 @@ type JOLTHooks interface {
 type SwapKeeper interface {
 	GetPoolShares(ctx sdk.Context, poolID string) (shares sdkmath.Int, found bool)
 	GetDepositorSharesAmount(ctx sdk.Context, depositor sdk.AccAddress, poolID string) (shares sdkmath.Int, found bool)
+}
+
+// SPVKeeper defines the required methods needed by this modules keeper
+type SPVKeeper interface {
+	AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int)
+	GetPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo, ok bool)
+	GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types.DepositorInfo, found bool)
+}
+
+type NFTKeeper interface {
+	GetClass(ctx sdk.Context, classID string) (nfttypes.Class, bool)
+	UpdateClass(ctx sdk.Context, class nfttypes.Class) error
+	GetNFT(ctx sdk.Context, classID, nftID string) (nfttypes.NFT, bool)
+	Update(ctx sdk.Context, token nfttypes.NFT) error
 }

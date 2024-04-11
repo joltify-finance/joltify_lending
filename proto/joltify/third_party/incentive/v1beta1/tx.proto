@@ -2,6 +2,7 @@ syntax = "proto3";
 package joltify.third_party.incentive.v1beta1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types";
 
@@ -11,6 +12,8 @@ service Msg {
 
   // ClaimSwapReward is a message type used to claim swap rewards
   rpc ClaimSwapReward(MsgClaimSwapReward) returns (MsgClaimSwapRewardResponse);
+
+  rpc ClaimSPVReward(MsgClaimSPVReward) returns (MsgClaimSPVRewardResponse);
 }
 
 // Selection is a pair of denom and multiplier name. It holds the choice of multiplier a user makes when they claim a
@@ -50,3 +53,21 @@ message MsgClaimSwapReward {
 
 // MsgClaimSwapRewardResponse defines the Msg/ClaimSwapReward response type.
 message MsgClaimSwapRewardResponse {}
+
+
+// MsgClaimSPVReward message type used to claim delegator rewards
+message MsgClaimSPVReward {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string sender = 1;
+  string pool_index=2;
+}
+
+// MsgClaimSPVRewardResponse defines the Msg/ClaimSwapReward response type.
+message MsgClaimSPVRewardResponse {
+  string pool_index=1;
+  repeated cosmos.base.v1beta1.Coin rewards = 2
+  [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+}
+

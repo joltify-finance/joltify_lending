@@ -2,6 +2,7 @@ syntax = "proto3";
 package joltify.third_party.incentive.v1beta1;
 
 import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
 import "cosmos_proto/cosmos.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
@@ -88,4 +89,43 @@ message SwapClaim {
     (gogoproto.castrepeated) = "MultiRewardIndexes",
     (gogoproto.nullable) = false
   ];
+}
+
+// SPVClaim stores the swap rewards that can be claimed by owner
+// fixme this is the incorrect message
+message SPVClaim {
+  option (cosmos_proto.implements_interface) = "Claim";
+
+  string linked_nft_id = 1;
+  google.protobuf.Timestamp payment_time = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  repeated  cosmos.base.v1beta1.Coin payment_amount = 3[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+  cosmos.base.v1beta1.Coin borrowed_amount = 4[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
+
+message SPVRewardAccTokens{
+  repeated  cosmos.base.v1beta1.Coin payment_amount = 1[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+}
+
+
+message  SPVRewardAccIndex{
+  string collateral_type = 1;
+  SPVRewardAccTokens  acc_reward = 2
+  [(gogoproto.castrepeated) = "SPVRewardAccTokens", (gogoproto.nullable) = false];
+}
+
+// SPVIncentiveClaim stores the swap rewards that can be claimed by owner
+message SPVIncentiveClaim {
+  option (cosmos_proto.implements_interface) = "Claim";
+
+  repeated  cosmos.base.v1beta1.Coin payment_amount = 1[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
 }

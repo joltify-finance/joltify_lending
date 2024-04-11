@@ -618,6 +618,11 @@ func NewApp(
 		app.bankKeeper,
 	)
 
+	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace, authtypes.NewModuleAddress(govtypes.ModuleName))
+	app.nftKeeper = nftmodulekeeper.NewKeeper(keys[nftmoduletypes.StoreKey], appCodec, app.accountKeeper, app.bankKeeper)
+
+	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper)
+
 	app.incentiveKeeper = incentivekeeper.NewKeeper(
 		appCodec,
 		keys[incentivetypes.StoreKey],
@@ -627,9 +632,12 @@ func NewApp(
 		&joltKeeper,
 		app.accountKeeper,
 		mSwapKeeper,
+		mSpvKeeper,
+		app.nftKeeper,
 	)
 
 	app.swapKeeper = *mSwapKeeper.SetHooks(app.incentiveKeeper.Hooks())
+	app.spvKeeper = *mSpvKeeper.SetHooks(app.incentiveKeeper.Hooks())
 
 	app.VaultKeeper = *vaultmodulekeeper.NewKeeper(
 		appCodec,
@@ -640,10 +648,6 @@ func NewApp(
 		vaultSubspace,
 		app.accountKeeper,
 	)
-
-	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace, authtypes.NewModuleAddress(govtypes.ModuleName))
-	app.nftKeeper = nftmodulekeeper.NewKeeper(keys[nftmoduletypes.StoreKey], appCodec, app.accountKeeper, app.bankKeeper)
-	app.spvKeeper = *spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper)
 
 	// Create Ethermint keepers
 	app.feeMarketKeeper = feemarketkeeper.NewKeeper(
@@ -1146,6 +1150,7 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V017UpgradeName, v1.CreateUpgradeHandlerForV017Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V018UpgradeName, v1.CreateUpgradeHandlerForV018Upgrade(app.mm, app.configurator, app.spvKeeper))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V019UpgradeName, v1.CreateUpgradeHandlerForV019Upgrade(app.mm, app.configurator, app.spvKeeper, app.kycKeeper))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V020UpgradeName, v1.CreateUpgradeHandlerForV020Upgrade(app.mm, app.configurator, app.spvKeeper, app.nftKeeper, app.incentiveKeeper))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
@@ -1196,6 +1201,7 @@ func (app *App) RegisterNodeService(clientCtx client.Context) {
 func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 	modAccAddrs := app.ModuleAccountAddrs()
 	delete(modAccAddrs, authtypes.NewModuleAddress(govtypes.ModuleName).String())
+	delete(modAccAddrs, authtypes.NewModuleAddress(incentivetypes.IncentiveMacc).String())
 
 	return modAccAddrs
 }

@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
+
 	sdkmath "cosmossdk.io/math"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 
 	tmlog "github.com/cometbft/cometbft/libs/log"
 
@@ -61,7 +64,7 @@ func (suite *unitTester) SetupSuite() {
 
 func (suite *unitTester) SetupTest() {
 	suite.ctx = NewTestContext(suite.incentiveStoreKey)
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, nil)
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, nil, nil, nil)
 }
 
 func (suite *unitTester) TearDownTest() {
@@ -69,8 +72,8 @@ func (suite *unitTester) TearDownTest() {
 	suite.ctx = sdk.Context{}
 }
 
-func (suite *unitTester) NewKeeper(paramSubspace types.ParamSubspace, bk types.BankKeeper, hk types.JoltKeeper, ak types.AccountKeeper, swapKeeper types.SwapKeeper) keeper.Keeper {
-	return keeper.NewKeeper(suite.cdc, suite.incentiveStoreKey, paramSubspace, bk, hk, ak, swapKeeper)
+func (suite *unitTester) NewKeeper(paramSubspace types.ParamSubspace, bk types.BankKeeper, hk types.JoltKeeper, ak types.AccountKeeper, swapKeeper types.SwapKeeper, spvKeeper types.SPVKeeper, nftKeeper types.NFTKeeper) keeper.Keeper {
+	return keeper.NewKeeper(suite.cdc, suite.incentiveStoreKey, paramSubspace, bk, hk, ak, swapKeeper, spvKeeper, nftKeeper)
 }
 
 func (suite *unitTester) storeJoltClaim(claim types.JoltLiquidityProviderClaim) {
@@ -375,4 +378,77 @@ func (k *fakeSwapKeeper) GetPoolShares(_ sdk.Context, poolID string) (sdkmath.In
 func (k *fakeSwapKeeper) GetDepositorSharesAmount(_ sdk.Context, depositor sdk.AccAddress, poolID string) (sdkmath.Int, bool) {
 	shares, found := k.depositShares[poolID][depositor.String()]
 	return shares, found
+}
+
+var _ types.SPVKeeper = newFakeSPVKeeper()
+
+// fakeSwapKeeper is a stub swap keeper.
+// It can be used to return values to the incentive keeper without having to initialize a full swap keeper.
+type fakeSPVKeeper struct {
+	poolShares    map[string]sdkmath.Int
+	depositShares map[string](map[string]sdkmath.Int)
+}
+
+func newFakeSPVKeeper() *fakeSPVKeeper {
+	return &fakeSPVKeeper{
+		poolShares:    map[string]sdkmath.Int{},
+		depositShares: map[string](map[string]sdkmath.Int){},
+	}
+}
+
+func (k *fakeSPVKeeper) AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int) {
+}
+
+func (k *fakeSPVKeeper) GetPools(ctx sdk.Context, index string) (poolInfo types2.PoolInfo, ok bool) {
+	poolInfo = types2.PoolInfo{
+		Index:         "test-pool",
+		ReserveFactor: sdk.MustNewDecFromStr("0.15"),
+		PoolNFTIds:    []string{"c1", "c2", "c3", "c4", "c5", "c6"},
+	}
+	return poolInfo, true
+}
+
+func (k *fakeSPVKeeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types2.DepositorInfo, found bool) {
+	return types2.DepositorInfo{}, true
+}
+
+type fakeNFTKeeper struct {
+	nftClass map[string]*nfttypes.Class
+	nft      map[string]*nfttypes.NFT
+}
+
+func newFakeNFTKeeper(nftsClass []*nfttypes.Class, nfts []*nfttypes.NFT) *fakeNFTKeeper {
+	val := make(map[string]*nfttypes.Class)
+	valNFT := make(map[string]*nfttypes.NFT)
+	for _, nft := range nftsClass {
+		val[nft.Id] = nft
+	}
+
+	for _, el := range nfts {
+		valNFT[el.Id] = el
+	}
+	return &fakeNFTKeeper{
+		nftClass: val,
+		nft:      valNFT,
+	}
+}
+
+func (fn fakeNFTKeeper) GetClass(ctx sdk.Context, classID string) (nfttypes.Class, bool) {
+	nft, ok := fn.nftClass[classID]
+	return *nft, ok
+}
+
+func (fn fakeNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nfttypes.NFT, bool) {
+	nft, ok := fn.nft[nftID]
+	return *nft, ok
+}
+
+func (fn fakeNFTKeeper) UpdateClass(ctx sdk.Context, class nfttypes.Class) error {
+	fn.nftClass[class.Id] = &class
+	return nil
+}
+
+func (fn fakeNFTKeeper) Update(ctx sdk.Context, token nfttypes.NFT) error {
+	fn.nft[token.Id] = &token
+	return nil
 }

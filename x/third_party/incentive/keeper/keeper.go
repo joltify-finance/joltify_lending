@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"time"
 
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -20,12 +21,14 @@ type Keeper struct {
 	bankKeeper    types.BankKeeper
 	joltKeeper    types.JoltKeeper
 	swapKeeper    types.SwapKeeper
+	spvKeeper     types.SPVKeeper
+	NftKeeper     types.NFTKeeper
 }
 
 // NewKeeper creates a new keeper
 func NewKeeper(
 	cdc codec.Codec, key storetypes.StoreKey, paramstore types.ParamSubspace, bk types.BankKeeper,
-	joltKeeper types.JoltKeeper, ak types.AccountKeeper, swapKeeper types.SwapKeeper,
+	joltKeeper types.JoltKeeper, ak types.AccountKeeper, swapKeeper types.SwapKeeper, spvKeeper types.SPVKeeper, nftKeeper types.NFTKeeper,
 ) Keeper {
 	if !paramstore.HasKeyTable() {
 		paramstore = paramstore.WithKeyTable(types.ParamKeyTable())
@@ -39,6 +42,8 @@ func NewKeeper(
 		bankKeeper:    bk,
 		joltKeeper:    joltKeeper,
 		swapKeeper:    swapKeeper,
+		spvKeeper:     spvKeeper,
+		NftKeeper:     nftKeeper,
 	}
 }
 
@@ -373,6 +378,162 @@ func (k Keeper) SetSwapRewardAccrualTime(ctx sdk.Context, poolID string, blockTi
 
 func (k Keeper) IterateSwapRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSwapRewardAccrualTimeKeyPrefix)
+	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		poolID := string(iterator.Key())
+		var accrualTime time.Time
+		if err := accrualTime.UnmarshalBinary(iterator.Value()); err != nil {
+			panic(err)
+		}
+		if cb(poolID, accrualTime) {
+			break
+		}
+	}
+}
+
+// GetSPVClaim returns the claim in the store corresponding the the input address.
+func (k Keeper) GetSPVClaim(ctx sdk.Context, addr sdk.AccAddress) (types.SPVClaim, bool) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVClaimKeyPrefix)
+	bz := store.Get(addr)
+	if bz == nil {
+		return types.SPVClaim{}, false
+	}
+	var c types.SPVClaim
+	k.cdc.MustUnmarshal(bz, &c)
+	return c, true
+}
+
+// SetSPVClaim sets the claim in the store corresponding to the input address.
+//func (k Keeper) SetSPVClaim(ctx sdk.Context, c types.SPVClaim) {
+//	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVClaimKeyPrefix)
+//	bz := k.cdc.MustMarshal(&c)
+//	store.Set(c.Owner, bz)
+//}
+
+// DeleteSPVClaim deletes the claim in the store corresponding to the input address.
+func (k Keeper) DeleteSPVClaim(ctx sdk.Context, owner sdk.AccAddress) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVClaimKeyPrefix)
+	store.Delete(owner)
+}
+
+// IterateSPVClaims iterates over all claim  objects in the store and preforms a callback function
+func (k Keeper) IterateSPVClaims(ctx sdk.Context, cb func(c types.SPVClaim) (stop bool)) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVClaimKeyPrefix)
+	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var c types.SPVClaim
+		k.cdc.MustUnmarshal(iterator.Value(), &c)
+		if cb(c) {
+			break
+		}
+	}
+}
+
+// GetAllSPVClaims returns all Claim objects in the store
+//func (k Keeper) GetAllSPVClaims(ctx sdk.Context) types.SPVClaims {
+//	cs := types.SPVClaims{}
+//	k.IterateSPVClaims(ctx, func(c types.SPVClaim) (stop bool) {
+//		cs = append(cs, c)
+//		return false
+//	})
+//	return cs
+//}
+
+// SetSPVReward stores the global reward indexes that track total rewards to a SPV pool.
+func (k Keeper) SetSPVReward(ctx sdk.Context, poolID string, accRewardTokens types.SPVRewardAccTokens) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
+	bz := k.cdc.MustMarshal(&types.SPVRewardAccTokens{
+		PaymentAmount: accRewardTokens.PaymentAmount,
+	})
+	incentivePool := types.Incentiveprefix + poolID
+	store.Set([]byte(incentivePool), bz)
+}
+
+// GetSPVReward fetches the global reward indexes that track total rewards to a SPV pool.
+func (k Keeper) GetSPVReward(ctx sdk.Context, poolID string) (types.SPVRewardAccTokens, bool) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
+	incentivePool := types.Incentiveprefix + poolID
+	bz := store.Get([]byte(incentivePool))
+	if bz == nil {
+		return types.SPVRewardAccTokens{}, false
+	}
+	var accTokens types.SPVRewardAccTokens
+	k.cdc.MustUnmarshal(bz, &accTokens)
+	return accTokens, true
+}
+
+// SetSPVInvestorReward stores the investor reward indexes that track total rewards to a SPV pool.
+func (k Keeper) SetSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string, incentiveTokens sdk.Coins) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
+	bz := k.cdc.MustMarshal(&types.SPVRewardAccTokens{
+		PaymentAmount: incentiveTokens,
+	})
+	incentivePool := types.Incentiveclassprefix + fmt.Sprintf("%s-%s", poolID, walletAddr)
+	store.Set([]byte(incentivePool), bz)
+}
+
+// GetSPVInvestorReward fetches the investor reward indexes that track total rewards to a SPV pool.
+func (k Keeper) GetSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string) (sdk.Coins, bool) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
+	incentivePool := types.Incentiveclassprefix + fmt.Sprintf("%s-%s", poolID, walletAddr)
+	bz := store.Get([]byte(incentivePool))
+	if bz == nil {
+		return sdk.NewCoins(), false
+	}
+	var accTokens types.SPVRewardAccTokens
+	k.cdc.MustUnmarshal(bz, &accTokens)
+	return accTokens.PaymentAmount, true
+}
+
+func (k Keeper) DeleteSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
+	incentivePool := types.Incentiveclassprefix + fmt.Sprintf("%s-%s", poolID, walletAddr)
+	store.Delete([]byte(incentivePool))
+}
+
+// IterateSPVRewardIndexes iterates over all SPV reward index objects in the store and preforms a callback function
+func (k Keeper) IterateSPVRewardIndexes(ctx sdk.Context, cb func(poolID string, accTokens types.SPVRewardAccTokens) (stop bool)) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
+	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var proto types.SPVRewardAccTokens
+		k.cdc.MustUnmarshal(iterator.Value(), &proto)
+		if cb(string(iterator.Key()), proto) {
+			break
+		}
+	}
+}
+
+// GetSPVRewardAccrualTime fetches the last time rewards were accrued for a SPV pool.
+func (k Keeper) GetSPVRewardAccrualTime(ctx sdk.Context, poolID string) (blockTime time.Time, found bool) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSPVRewardAccrualTimeKeyPrefix)
+	incentivePool := types.Incentiveprefix + poolID
+	b := store.Get([]byte(incentivePool))
+	if b == nil {
+		return time.Time{}, false
+	}
+	if err := blockTime.UnmarshalBinary(b); err != nil {
+		panic(err)
+	}
+	return blockTime, true
+}
+
+// SetSPVRewardAccrualTime stores the last time rewards were accrued for a SPV pool.
+func (k Keeper) SetSPVRewardAccrualTime(ctx sdk.Context, poolID string, blockTime time.Time) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSPVRewardAccrualTimeKeyPrefix)
+	bz, err := blockTime.MarshalBinary()
+	if err != nil {
+		panic(err)
+	}
+	incentivePool := types.Incentiveprefix + poolID
+	store.Set([]byte(incentivePool), bz)
+}
+
+func (k Keeper) IterateSPVRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
+	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSPVRewardAccrualTimeKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {

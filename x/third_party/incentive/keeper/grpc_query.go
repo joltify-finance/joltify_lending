@@ -4,6 +4,9 @@ import (
 	"context"
 	"strings"
 
+	coserrors "cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/types/errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -200,4 +203,22 @@ func rewardTypeIsValid(rewardType string) bool {
 		rewardType == RewardTypeSwap
 	// rewardType == RewardTypeSavings ||
 	// rewardType == RewardTypeEarn
+}
+
+func (s queryServer) SPVRewards(ctx context.Context, in *types.QuerySPVRewardsRequest) (*types.QuerySPVRewardsResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	owner, err := sdk.AccAddressFromBech32(in.Owner)
+	if err != nil {
+		return nil, coserrors.Wrapf(errors.ErrInvalidAddress, "invalid address: %s", err)
+	}
+
+	rewards, err := s.keeper.GetSPVRewards(sdkCtx, in.PoolIndex, owner)
+	if err != nil {
+		return nil, coserrors.Wrapf(errors.ErrInvalidRequest, "unable to get spv rewards: %s", err)
+	}
+
+	return &types.QuerySPVRewardsResponse{
+		ClaimableRewards: rewards,
+	}, nil
 }

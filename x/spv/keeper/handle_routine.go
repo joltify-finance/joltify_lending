@@ -39,6 +39,8 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 	poolInfo.LastPaymentTime = poolLatestPaymentTime
 	k.SetPool(ctx, *poolInfo)
 
+	k.AfterSPVInterestPaid(ctx, poolInfo.Index, totalAmountDue)
+
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeRepayInterest,
@@ -90,6 +92,11 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 				panic(err)
 			}
 
+			err = k.hooks.BeforeNFTBurned(ctx, el.PoolIndex, el.DepositorAddress.String(), el.LinkedNFT)
+			if err != nil {
+				ctx.Logger().Error("fail to process the spv incentives before the nft burn", err.Error())
+			}
+
 			err = k.processEachWithdrawReq(ctx, *el, true, ratio)
 			if err != nil {
 				panic(err)
@@ -118,6 +125,11 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 		interest, err := calculateTotalInterest(ctx, el.LinkedNFT, k.NftKeeper, true)
 		if err != nil {
 			panic(err)
+		}
+
+		err = k.hooks.BeforeNFTBurned(ctx, poolInfo.Index, el.DepositorAddress.String(), el.LinkedNFT)
+		if err != nil {
+			ctx.Logger().Error("fail to process the spv incentives before the nft burn", err.Error())
 		}
 
 		err = k.processEachWithdrawReq(ctx, *el, true, ratio)
@@ -247,6 +259,11 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 			panic(err)
 		}
 
+		err = k.hooks.BeforeNFTBurned(ctx, depositor.PoolIndex, depositor.DepositorAddress.String(), depositor.LinkedNFT)
+		if err != nil {
+			ctx.Logger().Error("fail to process the spv incentives before the nft burn", err.Error())
+		}
+
 		err = k.processEachWithdrawReq(ctx, depositor, true, exchangeRatio)
 		if err != nil {
 			ctx.Logger().Error("fail to pay partial principal", err.Error())
@@ -272,6 +289,10 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 		panic(err)
 	}
 
+	err = k.hooks.BeforeNFTBurned(ctx, depositor.PoolIndex, depositor.DepositorAddress.String(), depositor.LinkedNFT)
+	if err != nil {
+		ctx.Logger().Error("fail to process the spv incentives before the nft burn", err.Error())
+	}
 	err = k.processEachWithdrawReq(ctx, depositor, true, exchangeRatio)
 	if err != nil {
 		ctx.Logger().Error("fail to pay partial principal", err.Error())

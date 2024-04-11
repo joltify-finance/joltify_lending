@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/client"
+
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	tmlog "github.com/cometbft/cometbft/libs/log"
@@ -108,6 +110,9 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 		errArgs errArgs
 	}
 	type testCases []testCase
+
+	// we need to set the flag to avoid sending tokens to incentive module
+	client.MAINNETFLAG = "true"
 
 	tests := testCases{
 		{
@@ -364,7 +369,6 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 			err := suite.keeper.SendTimeLockedCoinsToPeriodicVestingAccount(suite.ctx, types2.ModuleName, suite.addrs[0], tc.args.period.Amount, tc.args.period.Length)
 
 			if tc.errArgs.expectErr {
-				suite.Require().Error(err)
 				suite.Require().True(strings.Contains(err.Error(), tc.errArgs.contains))
 			} else {
 				suite.Require().NoError(err)

@@ -1,6 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.incentive.v1beta1;
 
+import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "joltify/third_party/incentive/v1beta1/claims.proto";
@@ -24,6 +25,11 @@ service Query {
   rpc RewardFactors(QueryRewardFactorsRequest) returns (QueryRewardFactorsResponse) {
     option (google.api.http).get = "/joltify/third_party/incentive/v1beta1/reward_factors";
   }
+
+  rpc SPVRewards(QuerySPVRewardsRequest) returns (QuerySPVRewardsResponse) {
+    option (google.api.http).get = "/joltify/third_party/incentive/v1beta1/spv_rewards";
+  }
+
 }
 
 // QueryParamsRequest is the request type for the Query/Params RPC method.
@@ -59,6 +65,11 @@ message QueryRewardsResponse {
     (gogoproto.nullable) = false
   ];
 
+  SPVIncentiveClaim  spv_incentive_claim = 5 [
+    (gogoproto.castrepeated) = "SPVClaims",
+    (gogoproto.nullable) = false
+  ];
+
 }
 
 // QueryRewardFactorsRequest is the request type for the Query/RewardFactors RPC method.
@@ -75,9 +86,23 @@ message QueryRewardFactorsResponse {
     (gogoproto.nullable) = false
   ];
 
-  repeated MultiRewardIndex swap_reward_factors = 4 [
+  repeated MultiRewardIndex swap_reward_factors = 3 [
+    (gogoproto.castrepeated) = "MultiRewardIndexes",
+    (gogoproto.nullable) = false
+  ];
+
+  repeated MultiRewardIndex spv_reward_factors = 4 [
     (gogoproto.castrepeated) = "MultiRewardIndexes",
     (gogoproto.nullable) = false
   ];
 }
 
+message QuerySPVRewardsRequest {
+  string pool_index = 1;
+  string owner = 2;
+}
+
+message QuerySPVRewardsResponse {
+  repeated cosmos.base.v1beta1.Coin claimable_rewards = 1
+  [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+}

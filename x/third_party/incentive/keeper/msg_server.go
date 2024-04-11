@@ -55,3 +55,25 @@ func (k msgServer) ClaimSwapReward(goCtx context.Context, msg *types.MsgClaimSwa
 
 	return &types.MsgClaimSwapRewardResponse{}, nil
 }
+
+func (k msgServer) ClaimSPVReward(goCtx context.Context, msg *types.MsgClaimSPVReward) (*types.MsgClaimSPVRewardResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	sender, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, err
+	}
+
+	amt, err := k.keeper.ClaimSPVReward(ctx, msg.PoolIndex, sender)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.IncentiveMacc, sender, amt)
+	if err != nil {
+		ctx.Logger().Error("failed to send coins from incetive account to user", "user", sender.String(), "error", err)
+		return &types.MsgClaimSPVRewardResponse{}, err
+	}
+
+	return &types.MsgClaimSPVRewardResponse{PoolIndex: msg.PoolIndex, Rewards: amt}, nil
+}

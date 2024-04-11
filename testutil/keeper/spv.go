@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/gogo/protobuf/proto"
@@ -342,6 +344,15 @@ func (m mockPriceFeedKeeper) GetCurrentPrice(ctx sdk.Context, marketID string) (
 	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdk.MustNewDecFromStr("0.7")}, nil
 }
 
+type fakeSPVFunctions struct{}
+
+func (f fakeSPVFunctions) AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int) {
+}
+
+func (f fakeSPVFunctions) BeforeNFTBurned(ctx sdk.Context, poolIndex, investorID string, linkednfts []string) error {
+	return nil
+}
+
 func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, MockAuctionKeeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
@@ -392,6 +403,10 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
+
+	if !k.IsHookSet() {
+		k.SetHooks(&fakeSPVFunctions{})
+	}
 
 	return k, &nftKeeper, &bankKeeper, auctionKeeper, ctx
 }

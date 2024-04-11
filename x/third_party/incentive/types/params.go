@@ -17,6 +17,7 @@ var (
 	KeyClaimEnd                = []byte("ClaimEnd")
 	KeyMultipliers             = []byte("ClaimMultipliers")
 	KeySwapRewardPeriods       = []byte("SwapRewardPeriods")
+	KeySPVRewardPeriods        = []byte("SPVRewardPeriods")
 
 	DefaultMultiRewardPeriods = MultiRewardPeriods{}
 	DefaultMultipliers        = MultipliersPerDenoms{}
@@ -28,12 +29,13 @@ var (
 )
 
 // NewParams returns a new params object
-func NewParams(joltSupply, joltBorrow, swap MultiRewardPeriods, multipliers MultipliersPerDenoms, claimEnd time.Time,
+func NewParams(joltSupply, joltBorrow, swap, spv MultiRewardPeriods, multipliers MultipliersPerDenoms, claimEnd time.Time,
 ) Params {
 	return Params{
 		JoltSupplyRewardPeriods: joltSupply,
 		JoltBorrowRewardPeriods: joltBorrow,
 		SwapRewardPeriods:       swap,
+		SPVRewardPeriods:        spv,
 		ClaimMultipliers:        multipliers,
 		ClaimEnd:                claimEnd,
 	}
@@ -58,6 +60,12 @@ func DefaultParams() Params {
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
 			NewMultiRewardPeriod(true, "abnb:ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 		},
+		// spv
+		MultiRewardPeriods{
+			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
+			NewMultiRewardPeriod(true, "0x4f1f7526042987d595fa135ed33a392a98bcc31f7ad79d6a5928e753ff7e8c8c", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(2000)), sdk.NewCoin("uoppy", sdk.NewInt(100)))),
+		},
+
 		MultipliersPerDenoms{
 			{
 				Denom: "ujolt",
@@ -84,6 +92,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyMultipliers, &p.ClaimMultipliers, validateMultipliersPerDenomParam),
 		paramtypes.NewParamSetPair(KeyClaimEnd, &p.ClaimEnd, validateClaimEndParam),
 		paramtypes.NewParamSetPair(KeySwapRewardPeriods, &p.SwapRewardPeriods, validateMultiRewardPeriodsParam),
+		paramtypes.NewParamSetPair(KeySPVRewardPeriods, &p.SPVRewardPeriods, validateMultiRewardPeriodsParam),
 	}
 }
 
@@ -98,6 +107,14 @@ func (p Params) Validate() error {
 	}
 
 	if err := validateMultiRewardPeriodsParam(p.JoltBorrowRewardPeriods); err != nil {
+		return err
+	}
+
+	if err := validateMultiRewardPeriodsParam(p.SwapRewardPeriods); err != nil {
+		return err
+	}
+
+	if err := validateMultiRewardPeriodsParam(p.SPVRewardPeriods); err != nil {
 		return err
 	}
 
@@ -271,4 +288,15 @@ func (mrps MultiRewardPeriods) Validate() error {
 	}
 
 	return nil
+}
+
+func (m *ParamsV19) ParamSetPairs() paramtypes.ParamSetPairs {
+	return paramtypes.ParamSetPairs{
+		paramtypes.NewParamSetPair(KeyJoltSupplyRewardPeriods, &m.JoltSupplyRewardPeriods, validateMultiRewardPeriodsParam),
+		paramtypes.NewParamSetPair(KeyJoltBorrowRewardPeriods, &m.JoltBorrowRewardPeriods, validateMultiRewardPeriodsParam),
+		paramtypes.NewParamSetPair(KeyMultipliers, &m.ClaimMultipliers, validateMultipliersPerDenomParam),
+		paramtypes.NewParamSetPair(KeyClaimEnd, &m.ClaimEnd, validateClaimEndParam),
+		paramtypes.NewParamSetPair(KeySwapRewardPeriods, &m.SwapRewardPeriods, validateMultiRewardPeriodsParam),
+	}
+
 }

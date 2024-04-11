@@ -12,12 +12,16 @@ var (
 		AccumulationTimes{},
 		MultiRewardIndexes{},
 	)
+	DefaultSPVGenesisRewardState = NewSPVGenesisRewardState(
+		AccumulationTimes{},
+		[]SPVRewardAccIndex{},
+	)
 )
 
 // NewGenesisState returns a new genesis state
 func NewGenesisState(
 	params Params,
-	joltSupplyState, joltBorrowState, swapState GenesisRewardState,
+	joltSupplyState, joltBorrowState, swapState GenesisRewardState, spvState SPVGenesisRewardState,
 	hc JoltLiquidityProviderClaims, sc SwapClaims,
 ) GenesisState {
 	return GenesisState{
@@ -26,6 +30,7 @@ func NewGenesisState(
 		JoltSupplyRewardState:       joltSupplyState,
 		JoltBorrowRewardState:       joltBorrowState,
 		SwapRewardState:             swapState,
+		SpvRewardState:              spvState,
 		JoltLiquidityProviderClaims: hc,
 		SwapClaims:                  sc,
 	}
@@ -37,7 +42,10 @@ func DefaultGenesisState() GenesisState {
 		Params:                      DefaultParams(),
 		JoltSupplyRewardState:       DefaultGenesisRewardState,
 		JoltBorrowRewardState:       DefaultGenesisRewardState,
+		SwapRewardState:             DefaultGenesisRewardState,
+		SpvRewardState:              DefaultSPVGenesisRewardState,
 		JoltLiquidityProviderClaims: DefaultJoltClaims,
+		SwapClaims:                  DefaultSwapClaims,
 	}
 }
 
@@ -64,6 +72,14 @@ func NewGenesisRewardState(accumTimes AccumulationTimes, indexes MultiRewardInde
 	return GenesisRewardState{
 		AccumulationTimes:  accumTimes,
 		MultiRewardIndexes: indexes,
+	}
+}
+
+// NewSPVGenesisRewardState returns a new GenesisRewardState
+func NewSPVGenesisRewardState(accumTimes AccumulationTimes, indexes []SPVRewardAccIndex) SPVGenesisRewardState {
+	return SPVGenesisRewardState{
+		AccumulationTimes: accumTimes,
+		AccRewardIndexs:   indexes,
 	}
 }
 

@@ -1404,33 +1404,6 @@ paths:
 
                               signatures required by gogoproto.
                       title: MultiRewardPeriod supports multiple reward types
-                  claim_multipliers:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        denom:
-                          type: string
-                        multipliers:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              name:
-                                type: string
-                              months_lockup:
-                                type: string
-                                format: int64
-                              factor:
-                                type: string
-                                format: byte
-                            title: >-
-                              Multiplier amount the claim rewards get increased
-                              by, along with how long the claim rewards are
-                              locked
-                      title: >-
-                        MultipliersPerDenom is a map of denoms to a set of
-                        multipliers
                   swap_reward_periods:
                     type: array
                     items:
@@ -1465,6 +1438,67 @@ paths:
 
                               signatures required by gogoproto.
                       title: MultiRewardPeriod supports multiple reward types
+                  SPV_reward_periods:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        active:
+                          type: boolean
+                        collateral_type:
+                          type: string
+                        start:
+                          type: string
+                          format: date-time
+                        end:
+                          type: string
+                          format: date-time
+                        rewards_per_second:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              denom:
+                                type: string
+                              amount:
+                                type: string
+                            description: >-
+                              Coin defines a token with a denomination and an
+                              amount.
+
+
+                              NOTE: The amount field is an Int which implements
+                              the custom method
+
+                              signatures required by gogoproto.
+                      title: MultiRewardPeriod supports multiple reward types
+                  claim_multipliers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        multipliers:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              months_lockup:
+                                type: string
+                                format: int64
+                              factor:
+                                type: string
+                                format: byte
+                            title: >-
+                              Multiplier amount the claim rewards get increased
+                              by, along with how long the claim rewards are
+                              locked
+                      title: >-
+                        MultipliersPerDenom is a map of denoms to a set of
+                        multipliers
                   claim_end:
                     type: string
                     format: date-time
@@ -1549,6 +1583,27 @@ paths:
                     MultiRewardIndex stores reward accumulation information on
                     multiple reward types
               swap_reward_factors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    collateral_type:
+                      type: string
+                    reward_indexes:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          collateral_type:
+                            type: string
+                          reward_factor:
+                            type: string
+                            format: byte
+                        title: RewardIndex stores reward accumulation information
+                  title: >-
+                    MultiRewardIndex stores reward accumulation information on
+                    multiple reward types
+              spv_reward_factors:
                 type: array
                 items:
                   type: object
@@ -1745,6 +1800,29 @@ paths:
                   title: >-
                     SwapClaim stores the swap rewards that can be claimed by
                     owner
+              spv_incentive_claim:
+                type: object
+                properties:
+                  payment_amount:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                title: >-
+                  SPVIncentiveClaim stores the swap rewards that can be claimed
+                  by owner
             description: >-
               QueryRewardsResponse is the response type for the Query/Rewards
               RPC method.
@@ -1794,6 +1872,65 @@ paths:
           in: query
           required: false
           type: boolean
+      tags:
+        - Incentive
+  /joltify/third_party/incentive/v1beta1/spv_rewards:
+    get:
+      operationId: IncentiveSPVRewards
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              claimable_rewards:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: pool_index
+          in: query
+          required: false
+          type: string
+        - name: owner
+          in: query
+          required: false
+          type: string
       tags:
         - Incentive
   /joltify/third_party/jolt/v1beta1/accounts:
@@ -48103,30 +48240,6 @@ definitions:
 
                   signatures required by gogoproto.
           title: MultiRewardPeriod supports multiple reward types
-      claim_multipliers:
-        type: array
-        items:
-          type: object
-          properties:
-            denom:
-              type: string
-            multipliers:
-              type: array
-              items:
-                type: object
-                properties:
-                  name:
-                    type: string
-                  months_lockup:
-                    type: string
-                    format: int64
-                  factor:
-                    type: string
-                    format: byte
-                title: >-
-                  Multiplier amount the claim rewards get increased by, along
-                  with how long the claim rewards are locked
-          title: MultipliersPerDenom is a map of denoms to a set of multipliers
       swap_reward_periods:
         type: array
         items:
@@ -48160,6 +48273,63 @@ definitions:
 
                   signatures required by gogoproto.
           title: MultiRewardPeriod supports multiple reward types
+      SPV_reward_periods:
+        type: array
+        items:
+          type: object
+          properties:
+            active:
+              type: boolean
+            collateral_type:
+              type: string
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+            rewards_per_second:
+              type: array
+              items:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+          title: MultiRewardPeriod supports multiple reward types
+      claim_multipliers:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            multipliers:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  months_lockup:
+                    type: string
+                    format: int64
+                  factor:
+                    type: string
+                    format: byte
+                title: >-
+                  Multiplier amount the claim rewards get increased by, along
+                  with how long the claim rewards are locked
+          title: MultipliersPerDenom is a map of denoms to a set of multipliers
       claim_end:
         type: string
         format: date-time
@@ -48236,30 +48406,6 @@ definitions:
 
                       signatures required by gogoproto.
               title: MultiRewardPeriod supports multiple reward types
-          claim_multipliers:
-            type: array
-            items:
-              type: object
-              properties:
-                denom:
-                  type: string
-                multipliers:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      months_lockup:
-                        type: string
-                        format: int64
-                      factor:
-                        type: string
-                        format: byte
-                    title: >-
-                      Multiplier amount the claim rewards get increased by,
-                      along with how long the claim rewards are locked
-              title: MultipliersPerDenom is a map of denoms to a set of multipliers
           swap_reward_periods:
             type: array
             items:
@@ -48293,6 +48439,63 @@ definitions:
 
                       signatures required by gogoproto.
               title: MultiRewardPeriod supports multiple reward types
+          SPV_reward_periods:
+            type: array
+            items:
+              type: object
+              properties:
+                active:
+                  type: boolean
+                collateral_type:
+                  type: string
+                start:
+                  type: string
+                  format: date-time
+                end:
+                  type: string
+                  format: date-time
+                rewards_per_second:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+              title: MultiRewardPeriod supports multiple reward types
+          claim_multipliers:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                multipliers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      months_lockup:
+                        type: string
+                        format: int64
+                      factor:
+                        type: string
+                        format: byte
+                    title: >-
+                      Multiplier amount the claim rewards get increased by,
+                      along with how long the claim rewards are locked
+              title: MultipliersPerDenom is a map of denoms to a set of multipliers
           claim_end:
             type: string
             format: date-time
@@ -48344,6 +48547,27 @@ definitions:
             MultiRewardIndex stores reward accumulation information on multiple
             reward types
       swap_reward_factors:
+        type: array
+        items:
+          type: object
+          properties:
+            collateral_type:
+              type: string
+            reward_indexes:
+              type: array
+              items:
+                type: object
+                properties:
+                  collateral_type:
+                    type: string
+                  reward_factor:
+                    type: string
+                    format: byte
+                title: RewardIndex stores reward accumulation information
+          title: >-
+            MultiRewardIndex stores reward accumulation information on multiple
+            reward types
+      spv_reward_factors:
         type: array
         items:
           type: object
@@ -48495,9 +48719,47 @@ definitions:
                   MultiRewardIndex stores reward accumulation information on
                   multiple reward types
           title: SwapClaim stores the swap rewards that can be claimed by owner
+      spv_incentive_claim:
+        type: object
+        properties:
+          payment_amount:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+        title: SPVIncentiveClaim stores the swap rewards that can be claimed by owner
     description: >-
       QueryRewardsResponse is the response type for the Query/Rewards RPC
       method.
+  joltify.third_party.incentive.v1beta1.QuerySPVRewardsResponse:
+    type: object
+    properties:
+      claimable_rewards:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
   joltify.third_party.incentive.v1beta1.RewardIndex:
     type: object
     properties:
@@ -48507,6 +48769,24 @@ definitions:
         type: string
         format: byte
     title: RewardIndex stores reward accumulation information
+  joltify.third_party.incentive.v1beta1.SPVIncentiveClaim:
+    type: object
+    properties:
+      payment_amount:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+    title: SPVIncentiveClaim stores the swap rewards that can be claimed by owner
   joltify.third_party.incentive.v1beta1.SwapClaim:
     type: object
     properties:
