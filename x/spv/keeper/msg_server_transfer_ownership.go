@@ -32,7 +32,7 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 	}
 
 	if d.DepositType != types.DepositorInfo_unset {
-		return &types.MsgTransferOwnershipResponse{}, fmt.Errorf("you have submitted the %v request", d.DepositType)
+		return &types.MsgTransferOwnershipResponse{}, fmt.Errorf("you current status is  %v must be in deposit unset to submit the request", d.DepositType)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())

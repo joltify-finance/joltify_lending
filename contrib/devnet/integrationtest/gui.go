@@ -260,10 +260,6 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 				}
 				identifier := input[0]
 				if identifier != 'c' {
-					msg := fmt.Sprintf("invalid input %v", input)
-					display.showOutput(msg, RED)
-
-					ui.Render(display.outPannel)
 					continue
 				}
 				numAccounts, err := strconv.Atoi(input[1:])

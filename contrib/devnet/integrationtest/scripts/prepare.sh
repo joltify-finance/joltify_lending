@@ -3,8 +3,8 @@
 bash -x
 # amount is value*base
 base=1000000000000000000
-junior=$(echo 200000*$base|bc)
-senior=$(echo 800000*$base|bc)
+junior=$(echo 20000000*$base|bc)
+senior=$(echo 80000000*$base|bc)
 all_keys=100
 
 cecho(){

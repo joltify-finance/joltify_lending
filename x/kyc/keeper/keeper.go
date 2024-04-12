@@ -72,6 +72,12 @@ func (k Keeper) SetProject(ctx sdk.Context, p *types.ProjectInfo) (int32, error)
 	return int32(currentNum), nil
 }
 
+func (k Keeper) UpdateProject(ctx sdk.Context, p *types.ProjectInfo) {
+	projectStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
+	projectStore.Set(types.KeyPrefix(string(p.Index)), k.cdc.MustMarshal(p))
+	return
+}
+
 func (k Keeper) GetProject(ctx sdk.Context, index int32) (val types.ProjectInfo, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	bz := store.Get(types.KeyPrefix(string(index)))
@@ -80,4 +86,18 @@ func (k Keeper) GetProject(ctx sdk.Context, index int32) (val types.ProjectInfo,
 	}
 	k.cdc.MustUnmarshal(bz, &val)
 	return val, true
+}
+
+// IteratePool iterates over all deposit objects in the store and performs a callback function
+func (k Keeper) IterateProject(ctx sdk.Context, cb func(poolInfo types.ProjectInfo) (stop bool)) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
+	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var projects types.ProjectInfo
+		k.cdc.MustUnmarshal(iterator.Value(), &projects)
+		if cb(projects) {
+			break
+		}
+	}
 }

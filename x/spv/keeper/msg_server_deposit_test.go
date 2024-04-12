@@ -238,3 +238,42 @@ func (suite *DepositTestSuite) TestDepositWithAmountCorrect() {
 
 	suite.Require().True(depositorData.WithdrawalAmount.Equal(depositAmount.Add(depositAmount)))
 }
+
+func (suite *DepositTestSuite) TestDepositWithAmountIncorrect() {
+	// create the first pool apy 8.8%
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 5, PoolName: "hello", Apy: []string{"8.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
+	resp, err := suite.app.CreatePool(suite.ctx, &req)
+	suite.Require().NoError(err)
+
+	_, err = suite.app.ActivePool(suite.ctx, types.NewMsgActivePool("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", resp.PoolIndex[0]))
+	suite.Require().NoError(err)
+
+	req2 := types.MsgAddInvestors{
+		Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: resp.PoolIndex[1],
+		InvestorID: []string{"2"},
+	}
+	_, err = suite.app.AddInvestors(suite.ctx, &req2)
+	suite.Require().NoError(err)
+
+	pool, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
+	suite.Require().True(found)
+	// suite.Require().True(pool.TargetAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(322))))
+	suite.Require().True(pool.BorrowedAmount.Equal(sdk.NewCoin("aud-ausdc", sdk.NewInt(0))))
+	suite.Require().True(pool.UsableAmount.Equal(sdk.NewCoin("ausdc", sdk.NewInt(0))))
+
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(149))
+	msgDepositor := types.MsgDeposit{
+		Creator:   "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+		PoolIndex: resp.PoolIndex[0],
+		Token:     depositAmount,
+	}
+
+	_, err = suite.app.Deposit(suite.ctx, &msgDepositor)
+	suite.Require().ErrorContains(err, "the deposit amount 149 is less than the minimum deposit amount 150")
+
+	depositAmount = depositAmount.AddAmount(sdk.NewInt(1))
+	msgDepositor.Token = depositAmount
+
+	_, err = suite.app.Deposit(suite.ctx, &msgDepositor)
+	suite.Require().NoError(err)
+}

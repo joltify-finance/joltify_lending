@@ -217,6 +217,36 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		ret, err := k.handleDepositClose(ctx, depositor, poolInfo)
 		return ret, err
 
+	case types.DepositorInfo_unusable:
+		depositor.DepositType = types.DepositorInfo_unset
+		depositor.WithdrawalAmount, err = depositor.WithdrawalAmount.SafeSub(totalWithdraw)
+		if err != nil {
+			return nil, errors.New("withdraw amount too large")
+		}
+
+		if !depositor.WithdrawalAmount.Amount.IsZero() {
+			if depositor.WithdrawalAmount.Amount.Sub(poolInfo.MinDepositAmount).IsNegative() {
+				return nil, coserrors.Wrapf(types.ErrDeposit, "deposit amount %v is less than the minimum deposit amount %v", depositor.WithdrawalAmount.Amount.String(), poolInfo.MinDepositAmount.String())
+			}
+		}
+
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(totalWithdraw))
+		if err != nil {
+			return nil, err
+		}
+
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeWithdrawPrincipal,
+				sdk.NewAttribute(types.AttributeCreator, msg.Creator),
+				sdk.NewAttribute(types.AttributeAmount, totalWithdraw.String()),
+			),
+		)
+
+		k.SetDepositor(ctx, depositor)
+		k.SetPool(ctx, poolInfo)
+		return &types.MsgWithdrawPrincipalResponse{Amount: totalWithdraw.String()}, nil
+
 	case types.DepositorInfo_unset, types.DepositorInfo_withdraw_proposal, types.DepositorInfo_processed:
 		if depositor.DepositType == types.DepositorInfo_unset {
 			poolInfo.UsableAmount = poolInfo.UsableAmount.SubAmount(totalWithdraw.Amount)
@@ -229,6 +259,13 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 		if err != nil {
 			return nil, errors.New("withdraw amount too large")
 		}
+
+		if !depositor.WithdrawalAmount.Amount.IsZero() {
+			if depositor.WithdrawalAmount.Amount.Sub(poolInfo.MinDepositAmount).IsNegative() {
+				return nil, coserrors.Wrapf(types.ErrDeposit, "deposit amount %v is less than the minimum deposit amount %v", depositor.WithdrawalAmount.Amount.String(), poolInfo.MinDepositAmount.String())
+			}
+		}
+
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleAccount, investor, sdk.NewCoins(totalWithdraw))
 		if err != nil {
 			return nil, err

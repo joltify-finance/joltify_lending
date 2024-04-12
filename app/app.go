@@ -1145,6 +1145,7 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V016UpgradeName, v1.CreateUpgradeHandlerForV016Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V017UpgradeName, v1.CreateUpgradeHandlerForV017Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V018UpgradeName, v1.CreateUpgradeHandlerForV018Upgrade(app.mm, app.configurator, app.spvKeeper))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V019UpgradeName, v1.CreateUpgradeHandlerForV019Upgrade(app.mm, app.configurator, app.spvKeeper, app.kycKeeper))
 
 	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {

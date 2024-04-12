@@ -39,6 +39,7 @@ message DepositorInfo {
     unset  = 3;
     processed = 4;
     deactive = 5;
+    unusable = 6;
   }
   DEPOSITTYPE deposit_type = 8;
 
