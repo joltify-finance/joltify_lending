@@ -103,17 +103,18 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 	}
 
 	pi3 := kycmoduletypes.ProjectInfo{
-		Index:           3,
-		SPVName:         "defaultSPV3",
-		ProjectOwner:    acc,
-		BasicInfo:       &b2,
-		ProjectLength:   oneYear, // 1 year
-		PayFreq:         strconv.Itoa(oneMonth),
-		BaseApy:         sdk.NewDecWithPrec(12, 2),
-		MarketId:        "aud:usd",
-		SeparatePool:    false,
-		JuniorMinRatio:  sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount: sdk.NewInt(200),
+		Index:            3,
+		SPVName:          "defaultSPV3",
+		ProjectOwner:     acc,
+		BasicInfo:        &b2,
+		ProjectLength:    oneYear, // 1 year
+		PayFreq:          strconv.Itoa(oneMonth),
+		BaseApy:          sdk.NewDecWithPrec(12, 2),
+		MarketId:         "aud:usd",
+		SeparatePool:     false,
+		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdk.NewInt(200),
+		MinDepositAmount: sdk.NewInt(5),
 	}
 
 	pi4 := kycmoduletypes.ProjectInfo{
@@ -130,7 +131,22 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MinBorrowAmount: sdk.NewInt(200),
 	}
 
-	a := []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4}
+	pi5 := kycmoduletypes.ProjectInfo{
+		Index:            5,
+		SPVName:          "defaultSPV5",
+		ProjectOwner:     acc,
+		BasicInfo:        &b2,
+		ProjectLength:    oneYear, // 1 year
+		PayFreq:          strconv.Itoa(oneWeek),
+		BaseApy:          sdk.NewDecWithPrec(10, 2),
+		MarketId:         "aud:usd",
+		SeparatePool:     false,
+		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdk.NewInt(200),
+		MinDepositAmount: sdk.NewInt(150),
+	}
+
+	a := []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4, &pi5}
 	if index > int32(len(a)) {
 		return kycmoduletypes.ProjectInfo{}, false
 	}

@@ -31,6 +31,10 @@ func GenerateTestProjects() []*ProjectInfo {
 			"empty project Brief",
 			"empty project description",
 		}
+		val, ok := types.NewIntFromString("100000000000000000000")
+		if !ok {
+			panic("fail to convert")
+		}
 		pi := ProjectInfo{
 			Index:                        int32(i + 1),
 			SPVName:                      strconv.Itoa(i) + ":" + rand.NewRand().Str(10),
@@ -45,6 +49,7 @@ func GenerateTestProjects() []*ProjectInfo {
 			MarketId:                     "aud:usd",
 			WithdrawRequestWindowSeconds: 30,
 			MinBorrowAmount:              math.NewInt(100),
+			MinDepositAmount:             val,
 		}
 		pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)
 		allProjects[i] = &pi

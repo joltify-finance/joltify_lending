@@ -542,3 +542,22 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []stri
 
 	return totalRedeem, nil
 }
+
+func (k Keeper) updateDepositorStatus(ctx sdk.Context, poolInfo *types.PoolInfo) {
+	totalAdjust := sdk.NewInt(0)
+
+	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
+		if depositor.DepositType == types.DepositorInfo_unset {
+			if depositor.WithdrawalAmount.Amount.Sub(poolInfo.MinDepositAmount).IsNegative() {
+				depositor.DepositType = types.DepositorInfo_unusable
+				totalAdjust = totalAdjust.Add(depositor.WithdrawalAmount.Amount)
+				k.SetDepositor(ctx, depositor)
+			}
+		}
+		return false
+	})
+
+	// it should never be negative, otherwise panic as serious calculation error
+	poolInfo.UsableAmount = poolInfo.UsableAmount.SubAmount(totalAdjust)
+	k.SetPool(ctx, *poolInfo)
+}

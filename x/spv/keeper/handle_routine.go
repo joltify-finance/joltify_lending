@@ -57,6 +57,9 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	if len(poolInfo.TransferAccounts) == 0 {
 		return false
 	}
+
+	// we rule out the depositors that have less than given min deposit amount
+	k.updateDepositorStatus(ctx, poolInfo)
 	for _, el := range poolInfo.TransferAccounts {
 		d, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {

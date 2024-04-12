@@ -201,6 +201,15 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 
 	getRatio = sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
 	// the ratio should close to 2
+
+	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
+	suite.Require().True(found)
+
+	failedAmount := depositor1.WithdrawalAmount.SubAmount(sdk.NewIntFromUint64(3))
+	withdrawReq.Token = sdk.NewCoin(depositor1.WithdrawalAmount.Denom, failedAmount.Amount)
+	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
+	suite.Require().ErrorContains(err, "deposit amount 3 is less than the minimum deposit amount 5")
+
 	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
 
 	withdrawReq.Token = sdk.NewCoin(depositor1.WithdrawalAmount.Denom, sdk.NewIntFromUint64(100))
