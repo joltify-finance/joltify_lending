@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -172,6 +173,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmou
 
 	rate := CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 
+	//fixme as we put the borrow time as the pool last payment time, so the SPV should pay the extra fee if he borrows a few days after the last cycle
 	var paymentTime time.Time
 	if userPoolLastPaymentTime {
 		paymentTime = poolInfo.LastPaymentTime
@@ -560,4 +562,168 @@ func (k Keeper) updateDepositorStatus(ctx sdk.Context, poolInfo *types.PoolInfo)
 	// it should never be negative, otherwise panic as serious calculation error
 	poolInfo.UsableAmount = poolInfo.UsableAmount.SubAmount(totalAdjust)
 	k.SetPool(ctx, *poolInfo)
+}
+
+func (k Keeper) syncThePayment(ctx sdk.Context, poolInfo *types.PoolInfo) error {
+
+	totalAmountDue, err := k.syncAllInterestToBePaid(ctx, poolInfo)
+	if err != nil {
+		return err
+	}
+
+	if totalAmountDue.IsZero() {
+		// no interest to be paid
+		k.Logger(ctx).Info("no interest to be paid", "pool index", poolInfo.Index)
+		return
+	}
+
+	poolInfo.EscrowInterestAmount = poolInfo.EscrowInterestAmount.Sub(totalAmountDue)
+	if poolInfo.EscrowInterestAmount.IsNegative() {
+		poolInfo.NegativeInterestCounter++
+	} else {
+		poolInfo.NegativeInterestCounter = 0
+	}
+	if poolInfo.NegativeInterestCounter > types.MaxLiquidattion {
+		poolInfo.PoolStatus = types.PoolInfo_Liquidation
+	}
+
+	// finally, we update the poolinfo
+	k.SetPool(ctx, *poolInfo)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRepayInterest,
+			sdk.NewAttribute("amount", totalAmountDue.String()),
+		),
+	)
+	return nil
+
+}
+
+func (k Keeper) syncAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) (sdkmath.Int, error) {
+	nftClasses := poolInfo.PoolNFTIds
+	// the first element is the pool class, we skip it
+	totalPayment := sdkmath.NewInt(0)
+	firstBorrow := true
+	var exchangeRatio sdk.Dec
+
+	if poolInfo.PoolStatus == types.PoolInfo_INACTIVE {
+		return sdk.ZeroInt(), errors.New("no interest to be paid")
+	}
+
+	if poolInfo.InterestPrepayment == nil || poolInfo.InterestPrepayment.Counter == 0 {
+		a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
+		price, err := k.priceFeedKeeper.GetCurrentPrice(ctx, denomConvertToMarketID(a))
+		if err != nil {
+			panic(err)
+		}
+		exchangeRatio = price.Price
+	} else {
+		exchangeRatio = poolInfo.InterestPrepayment.ExchangeRatio
+		poolInfo.InterestPrepayment.Counter--
+		if poolInfo.InterestPrepayment.Counter == 0 {
+			poolInfo.InterestPrepayment = nil
+		}
+	}
+	for _, el := range nftClasses {
+		class, found := k.NftKeeper.GetClass(ctx, el)
+		if !found {
+			panic(found)
+		}
+		var borrowInterest types.BorrowInterest
+		var err error
+		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+		if err != nil {
+			panic(err)
+		}
+		thisBorrowInterest, err := k.syncInterestData(ctx, &borrowInterest, poolInfo.ReserveFactor, firstBorrow, exchangeRatio)
+		if err != nil {
+			return sdkmath.Int{}, err
+		}
+		if thisBorrowInterest.Amount.IsZero() {
+			continue
+		}
+		class.Data, err = types2.NewAnyWithValue(&borrowInterest)
+		if err != nil {
+			panic("pack class any data failed")
+		}
+		err = k.NftKeeper.UpdateClass(ctx, class)
+		if err != nil {
+			return sdkmath.Int{}, err
+		}
+		totalPayment = totalPayment.Add(thisBorrowInterest.Amount)
+		firstBorrow = false
+	}
+	return totalPayment, nil
+}
+
+func (k Keeper) syncInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, time.Time, error) {
+	var payment, paymentToInvestor sdk.Coin
+	var thisPaymentTime time.Time
+	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
+	// currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+	currentTime := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
+
+	latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
+	if firstBorrow {
+		if ctx.BlockTime().Before(latestPaymentTime.Add(time.Duration(interestData.PayFreq) * time.Second)) {
+			return sdk.Coin{}, time.Time{}, errors.New("pay interest too early")
+		}
+	}
+	lastBorrow := interestData.BorrowDetails[len(interestData.BorrowDetails)-1].BorrowedAmount
+	lastBorrowTime := interestData.BorrowDetails[len(interestData.BorrowDetails)-1].TimeStamp
+	delta := lastBorrowTime.Sub(latestPaymentTime)
+	denom := interestData.Payments[0].PaymentAmount.Denom
+	if int32(delta) >= interestData.PayFreq*BASE {
+		// we need to pay the whole month
+		freqRatio := interestData.MonthlyRatio
+		paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
+		if paymentAmount.IsZero() {
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
+		}
+
+		paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
+		reservedAmount := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+		toInvestors := paymentAmountUsd.Sub(reservedAmount)
+		pReserve, found := k.GetReserve(ctx, denom)
+		if !found {
+			k.SetReserve(ctx, sdk.NewCoin(denom, reservedAmount))
+		} else {
+			pReserve = pReserve.AddAmount(reservedAmount)
+			k.SetReserve(ctx, pReserve)
+		}
+		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
+		payment = sdk.NewCoin(denom, paymentAmountUsd)
+		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
+	} else {
+		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
+		if currentTimeTruncated.Before(latestPaymentTime) {
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
+		}
+		deltaTruncated := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
+		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
+		interest := r.Power(uint64(deltaTruncated)).Sub(sdk.OneDec())
+
+		usdInterest := interest.Mul(exchangeRatio)
+		paymentAmountUsd := usdInterest.MulInt(lastBorrow.Amount).TruncateInt()
+		reservedAmountUsd := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+		toInvestors := paymentAmountUsd.Sub(reservedAmountUsd)
+
+		pReserve, found := k.GetReserve(ctx, denom)
+		if !found {
+			k.SetReserve(ctx, sdk.NewCoin(denom, reservedAmountUsd))
+		} else {
+			pReserve = pReserve.AddAmount(reservedAmountUsd)
+			k.SetReserve(ctx, pReserve)
+		}
+		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
+		payment = sdk.NewCoin(denom, paymentAmountUsd)
+		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
+	}
+
+	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
+	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
+	interestData.Payments = append(interestData.Payments, &currentPayment)
+	interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
+	return payment, thisPaymentTime, nil
 }

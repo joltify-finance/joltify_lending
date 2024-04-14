@@ -110,7 +110,15 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to borrow money", msg.Creator)
 	}
 
+	//rule out the account that has less than given minimal deposit
 	k.updateDepositorStatus(ctx, &poolInfo)
+
+	if poolInfo.CurrentPoolTotalBorrowCounter > 1 {
+		err = k.syncThePayment(ctx, &poolInfo)
+		if err != nil {
+			return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "sync payment failed %v", err)
+		}
+	}
 
 	err = k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
 	if err != nil {
