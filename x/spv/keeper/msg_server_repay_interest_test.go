@@ -235,8 +235,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 		panic(err)
 	}
 
-	paymentTime = borrowInterest.Payments[1].PaymentTime
-
+	// we check the interest of the second borrow from mid of the month
 	delta := firstBorrowTime.Add(time.Second * spvkeeper.OneMonth * 2).Sub(secondBorrowTime)
 
 	r := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))

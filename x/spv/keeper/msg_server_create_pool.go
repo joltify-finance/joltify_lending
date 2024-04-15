@@ -113,6 +113,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			OwnerAddress:                  spvAddress,
 			Apy:                           poolApy,
 			TargetAmount:                  targetAmount,
+			MinDepositAmount:              targetProject.MinDepositAmount,
 			PayFreq:                       payfreq,
 			ReserveFactor:                 types.RESERVEFACTOR,
 			PoolNFTIds:                    []string{},

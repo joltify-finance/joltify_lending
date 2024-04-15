@@ -168,6 +168,13 @@ message PoolInfo {
   cosmos.base.v1beta1.Coin min_borrow_amount = 44[
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
+
+  string min_deposit_amount = 45 [
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+
 }
 
 message Interest_prepayment{

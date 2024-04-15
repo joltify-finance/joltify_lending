@@ -55,8 +55,12 @@ func ValidateProject(p ProjectInfo) error {
 		return errors.New("project time related setting cannot be negative")
 	}
 
-	if p.MinBorrowAmount.IsNegative() {
+	if !p.MinBorrowAmount.IsPositive() {
 		return errors.New("min borrow amount cannot be negative")
+	}
+
+	if !p.MinDepositAmount.IsPositive() {
+		return errors.New("min deposit amount cannot be negative")
 	}
 
 	freq, err := strconv.ParseInt(p.PayFreq, 10, 64)

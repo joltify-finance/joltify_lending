@@ -6781,6 +6781,8 @@ paths:
                       type: string
                     min_borrow_amount:
                       type: string
+                    min_deposit_amount:
+                      type: string
                   description: Market defines an asset in the pricefeed.
               total_number:
                 type: integer
@@ -7235,6 +7237,8 @@ paths:
                     type: string
                   min_borrow_amount:
                     type: string
+                  min_deposit_amount:
+                    type: string
                 description: Market defines an asset in the pricefeed.
         default:
           description: An unexpected error response.
@@ -7624,6 +7628,7 @@ paths:
                       - unset
                       - processed
                       - deactive
+                      - unusable
                     default: withdraw_proposal
                   pending_interest:
                     type: object
@@ -7922,6 +7927,8 @@ paths:
                       title: >-
                         the minimum amount of coins that can be withdrawn from
                         the pool for the first time
+                    min_deposit_amount:
+                      type: string
               pagination:
                 type: object
                 properties:
@@ -8376,6 +8383,8 @@ paths:
                     title: >-
                       the minimum amount of coins that can be withdrawn from the
                       pool for the first time
+                  min_deposit_amount:
+                    type: string
         default:
           description: An unexpected error response.
           schema:
@@ -51065,6 +51074,8 @@ definitions:
               type: string
             min_borrow_amount:
               type: string
+            min_deposit_amount:
+              type: string
           description: Market defines an asset in the pricefeed.
       total_number:
         type: integer
@@ -51209,6 +51220,8 @@ definitions:
         type: string
       min_borrow_amount:
         type: string
+      min_deposit_amount:
+        type: string
     description: Market defines an asset in the pricefeed.
   joltify.kyc.QueryByWalletResponse:
     type: object
@@ -51309,6 +51322,8 @@ definitions:
           junior_min_ratio:
             type: string
           min_borrow_amount:
+            type: string
+          min_deposit_amount:
             type: string
         description: Market defines an asset in the pricefeed.
   joltify.mint.HistoricalDistInfo:
@@ -51427,6 +51442,7 @@ definitions:
           - unset
           - processed
           - deactive
+          - unusable
         default: withdraw_proposal
       pending_interest:
         type: object
@@ -51451,6 +51467,7 @@ definitions:
       - unset
       - processed
       - deactive
+      - unusable
     default: withdraw_proposal
   joltify.spv.Interest_prepayment:
     type: object
@@ -51690,6 +51707,8 @@ definitions:
         title: >-
           the minimum amount of coins that can be withdrawn from the pool for
           the first time
+      min_deposit_amount:
+        type: string
   joltify.spv.PoolInfo.POOLSTATUS:
     type: string
     enum:
@@ -51800,6 +51819,7 @@ definitions:
               - unset
               - processed
               - deactive
+              - unusable
             default: withdraw_proposal
           pending_interest:
             type: object
@@ -52058,6 +52078,8 @@ definitions:
               title: >-
                 the minimum amount of coins that can be withdrawn from the pool
                 for the first time
+            min_deposit_amount:
+              type: string
       pagination:
         type: object
         properties:
@@ -52357,6 +52379,8 @@ definitions:
             title: >-
               the minimum amount of coins that can be withdrawn from the pool
               for the first time
+          min_deposit_amount:
+            type: string
   joltify.spv.QueryTotalReserveResponse:
     type: object
     properties:

@@ -6,6 +6,9 @@ import (
 	"testing"
 	"time"
 
+	types2 "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/stretchr/testify/require"
+
 	sdkmath "cosmossdk.io/math"
 
 	"github.com/gogo/protobuf/proto"
@@ -844,4 +847,149 @@ func (suite *claimInterestSuite) TestQueryOutStandingInterest() {
 			break
 		}
 	}
+}
+
+func (suite *claimInterestSuite) TestClaimInterestMultipleMonthWithSomePaymentMissing() {
+	SetupPool(suite)
+
+	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+	poolInfo.PoolTotalBorrowLimit = 100
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	suite.keeper.SetPool(suite.ctx, poolInfo)
+
+	// now we deposit some token and it should be enough to borrow
+	creator1 := suite.investors[0]
+	creator2 := suite.investors[1]
+
+	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	// suite.Require().NoError(err)
+	msgDepositUser1 := &types.MsgDeposit{
+		Creator:   creator1,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount,
+	}
+
+	// user two deposit half of the amount of the user 1
+	msgDepositUser2 := &types.MsgDeposit{
+		Creator:   creator2,
+		PoolIndex: suite.investorPool,
+		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+	}
+
+	_, err := suite.app.Deposit(suite.ctx, msgDepositUser1)
+	suite.Require().NoError(err)
+
+	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
+	suite.Require().NoError(err)
+
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+
+	// now we borrow 1.34e5
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	reqInterest := types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e9))}
+	_, err = suite.app.RepayInterest(suite.ctx, &reqInterest)
+	suite.Require().NoError(err)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
+
+	// now we borrow 1.34e5
+	_, err = suite.app.Borrow(suite.ctx, borrow)
+	suite.Require().NoError(err)
+
+	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
+	suite.Require().True(found)
+
+	// for the rest of 10 month
+	for i := 0; i < 10; i++ {
+		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+		err := suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+		suite.Require().NoError(err)
+	}
+
+	// now we delete some payment info to simulate the missing payment
+	// classid := fmt.Sprintf("%v-0", poolInfo.PoolNFTIds)
+	classInfo1, ok := suite.keeper.NftKeeper.GetClass(suite.ctx, poolInfo.PoolNFTIds[0])
+	suite.Require().True(ok)
+
+	var borrowInterest1 types.BorrowInterest
+	err = proto.Unmarshal(classInfo1.Data.Value, &borrowInterest1)
+	if err != nil {
+		panic(err)
+	}
+
+	classInfo2, ok := suite.keeper.NftKeeper.GetClass(suite.ctx, poolInfo.PoolNFTIds[1])
+	suite.Require().True(ok)
+
+	var borrowInterest2 types.BorrowInterest
+	err = proto.Unmarshal(classInfo2.Data.Value, &borrowInterest2)
+	if err != nil {
+		panic(err)
+	}
+
+	previousLength := len(borrowInterest1.Payments)
+	previousLength2 := len(borrowInterest2.Payments)
+
+	// now we delete 3 last payment
+	borrowInterest1.Payments = borrowInterest1.Payments[:len(borrowInterest1.Payments)-3]
+	require.Equal(suite.T(), previousLength-3, len(borrowInterest1.Payments))
+
+	classInfo1.Data, err = types2.NewAnyWithValue(&borrowInterest1)
+	suite.Require().NoError(err)
+	err = suite.keeper.NftKeeper.UpdateClass(suite.ctx, classInfo1)
+	suite.Require().NoError(err)
+
+	escrowInterestAmount1 := poolInfo.EscrowInterestAmount
+
+	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
+	suite.Require().NoError(err)
+
+	classInfo1after, ok := suite.keeper.NftKeeper.GetClass(suite.ctx, poolInfo.PoolNFTIds[0])
+	suite.Require().True(ok)
+
+	var borrowInterest1after types.BorrowInterest
+	err = proto.Unmarshal(classInfo1after.Data.Value, &borrowInterest1after)
+	if err != nil {
+		panic(err)
+	}
+
+	classInfo2after, ok := suite.keeper.NftKeeper.GetClass(suite.ctx, poolInfo.PoolNFTIds[1])
+	suite.Require().True(ok)
+
+	var borrowInterest2after types.BorrowInterest
+	err = proto.Unmarshal(classInfo2after.Data.Value, &borrowInterest2after)
+	if err != nil {
+		panic(err)
+	}
+
+	suite.Require().Equal(len(borrowInterest1after.Payments), previousLength+1)
+	suite.Require().Equal(len(borrowInterest2after.Payments), previousLength2+1)
+
+	// and the amount should be the same as before deleted
+	first := borrowInterest1after.Payments[1].PaymentAmount.Amount
+	for _, el := range borrowInterest1after.Payments[1:] {
+		suite.Require().True(first.Equal(el.PaymentAmount.Amount))
+	}
+
+	// as each payment is 1545, and we have 3 missing payment and 2 normal payment, so the escrow should be 1545*5
+	suite.Require().True((escrowInterestAmount1.Sub(poolInfo.EscrowInterestAmount)).Equal(sdk.NewInt(1545 * 5)))
 }

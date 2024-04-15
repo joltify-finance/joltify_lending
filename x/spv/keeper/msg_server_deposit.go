@@ -71,18 +71,34 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we update the users deposit data
 	previousDepositor, found := k.GetDepositor(ctx, poolInfo.Index, investor)
 	if !found {
+		if msg.Token.Amount.Sub(poolInfo.MinDepositAmount).IsNegative() {
+			return nil, coserrors.Wrapf(types.ErrDeposit, "the deposit amount %v is less than the minimum deposit amount %v", msg.Token.Amount.String(), poolInfo.MinDepositAmount.String())
+		}
 		depositor := types.DepositorInfo{InvestorId: resp.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdkmath.ZeroInt()), WithdrawalAmount: msg.Token, LinkedNFT: []string{}, DepositType: types.DepositorInfo_unset, PendingInterest: sdk.NewCoin(msg.Token.Denom, sdk.ZeroInt())}
 		k.SetDepositor(ctx, depositor)
-
 	} else {
-		if (previousDepositor.DepositType == types.DepositorInfo_unset) || (previousDepositor.DepositType == types.DepositorInfo_processed) {
-			if previousDepositor.DepositType == types.DepositorInfo_processed {
-				poolInfo.UsableAmount = poolInfo.UsableAmount.Add(previousDepositor.WithdrawalAmount)
-				previousDepositor.DepositType = types.DepositorInfo_unset
-			}
+		switch previousDepositor.DepositType {
+		case types.DepositorInfo_unusable, types.DepositorInfo_processed:
+
+			poolInfo.UsableAmount = poolInfo.UsableAmount.Add(previousDepositor.WithdrawalAmount)
+			previousDepositor.DepositType = types.DepositorInfo_unset
 			previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
+
+			if previousDepositor.WithdrawalAmount.Amount.Sub(poolInfo.MinDepositAmount).IsNegative() {
+				return nil, coserrors.Wrapf(types.ErrDeposit, "the deposit amount %v is less than the minimum deposit amount %v", previousDepositor.WithdrawalAmount.Amount.String(), poolInfo.MinDepositAmount.String())
+			}
 			k.SetDepositor(ctx, previousDepositor)
-		} else {
+
+		case types.DepositorInfo_unset:
+
+			previousDepositor.WithdrawalAmount = previousDepositor.WithdrawalAmount.Add(msg.Token)
+
+			if previousDepositor.WithdrawalAmount.Amount.Sub(poolInfo.MinDepositAmount).IsNegative() {
+				return nil, coserrors.Wrapf(types.ErrDeposit, "the deposit amount %v is less than the minimum deposit amount %v", previousDepositor.WithdrawalAmount.Amount.String(), poolInfo.MinDepositAmount.String())
+			}
+			k.SetDepositor(ctx, previousDepositor)
+
+		default:
 			return nil, coserrors.Wrapf(types.ErrDeposit, "you are not allow to deposit as %v", previousDepositor.DepositType)
 		}
 	}

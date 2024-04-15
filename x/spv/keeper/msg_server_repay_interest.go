@@ -19,8 +19,7 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	var payment, paymentToInvestor sdk.Coin
 	var thisPaymentTime time.Time
 	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
-	// currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
-	currentTime := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
+	latestPaymentDueTime := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 
 	latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 	if firstBorrow {
@@ -28,31 +27,45 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 			return sdk.Coin{}, time.Time{}, errors.New("pay interest too early")
 		}
 	}
-	delta := currentTime.Sub(latestPaymentTime).Seconds()
+	delta := latestPaymentDueTime.Sub(latestPaymentTime)
 	denom := interestData.Payments[0].PaymentAmount.Denom
+	payment = sdk.NewCoin(denom, sdk.ZeroInt())
 	lastBorrow := interestData.BorrowDetails[len(interestData.BorrowDetails)-1].BorrowedAmount
-	if int32(delta) >= interestData.PayFreq*BASE {
-		// we need to pay the whole month
-		freqRatio := interestData.MonthlyRatio
-		paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
-		if paymentAmount.IsZero() {
-			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
-		}
+	if delta >= time.Second*time.Duration(interestData.PayFreq) {
+		for delta > 0 {
+			latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
+			// we need to pay the whole month
+			freqRatio := interestData.MonthlyRatio
+			paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
+			if paymentAmount.IsZero() {
+				return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
+			}
 
-		paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
-		reservedAmount := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
-		toInvestors := paymentAmountUsd.Sub(reservedAmount)
-		pReserve, found := k.GetReserve(ctx, denom)
-		if !found {
-			k.SetReserve(ctx, sdk.NewCoin(denom, reservedAmount))
-		} else {
-			pReserve = pReserve.AddAmount(reservedAmount)
-			k.SetReserve(ctx, pReserve)
+			paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
+			reservedAmount := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+			toInvestors := paymentAmountUsd.Sub(reservedAmount)
+			pReserve, found := k.GetReserve(ctx, denom)
+			if !found {
+				k.SetReserve(ctx, sdk.NewCoin(denom, reservedAmount))
+			} else {
+				pReserve = pReserve.AddAmount(reservedAmount)
+				k.SetReserve(ctx, pReserve)
+			}
+			paymentToInvestor = sdk.NewCoin(denom, toInvestors)
+			thisPayment := sdk.NewCoin(denom, paymentAmountUsd)
+			thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
+
+			// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
+			currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
+			interestData.Payments = append(interestData.Payments, &currentPayment)
+			interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
+			delta = latestPaymentDueTime.Sub(thisPaymentTime)
+			payment = payment.AddAmount(thisPayment.Amount)
 		}
-		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
-		payment = sdk.NewCoin(denom, paymentAmountUsd)
-		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
+		return payment, thisPaymentTime, nil
+
 	} else {
+		latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 		if currentTimeTruncated.Before(latestPaymentTime) {
 			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
@@ -76,13 +89,14 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		paymentToInvestor = sdk.NewCoin(denom, toInvestors)
 		payment = sdk.NewCoin(denom, paymentAmountUsd)
 		thisPaymentTime = latestPaymentTime.Add(time.Duration(interestData.PayFreq*BASE) * time.Second).Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
-	}
 
-	// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
-	currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
-	interestData.Payments = append(interestData.Payments, &currentPayment)
-	interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
-	return payment, thisPaymentTime, nil
+		// since the spv may not pay the interest at exact next payment circle, we need to adjust it here
+		currentPayment := types.PaymentItem{PaymentTime: thisPaymentTime, PaymentAmount: paymentToInvestor, BorrowedAmount: lastBorrow}
+		interestData.Payments = append(interestData.Payments, &currentPayment)
+		interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
+		return payment, thisPaymentTime, nil
+
+	}
 }
 
 // getAllinterestToBePaid returns the total interest to be paid for all the borrows in the pool using the

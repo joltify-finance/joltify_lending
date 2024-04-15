@@ -178,5 +178,5 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 
 	ctx4 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth-1)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx4, &req)
-	suite.Require().ErrorContains(err, "you are in the unexpected status")
+	suite.Require().ErrorContains(err, "is not in unset status (current status withdraw_proposal")
 }

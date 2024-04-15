@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	coserrors "cosmossdk.io/errors"
@@ -27,7 +26,7 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 	}
 
 	if depositor.DepositType != types.DepositorInfo_unset {
-		return nil, errors.New("you are in the unexpected status")
+		return nil, coserrors.Wrapf(types.ErrUNEXPECTEDSTATUS, "depositor %v is not in unset status (current status %v)", msg.Creator, depositor.DepositType)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
