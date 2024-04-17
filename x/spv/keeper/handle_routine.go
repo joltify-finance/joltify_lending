@@ -63,7 +63,9 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	for _, el := range poolInfo.TransferAccounts {
 		d, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
-			panic("should never fail to find the depositor")
+			// TODO this is temporary solution, will be removed in the future
+			ctx.Logger().Error("deposit not found", "addresses", el.String())
+			continue
 		}
 		depositors = append(depositors, &d)
 		totalLockedAmount = totalLockedAmount.Add(d.LockedAmount.Amount)
@@ -234,7 +236,10 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	for _, el := range withdrawAccounts[1:] {
 		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
-			panic("should never fail to find the depositor")
+			// TODO this is temporary solution, will be removed in the future
+			ctx.Logger().Error("###############deposit not found", "addresse", el.String())
+			continue
+			// panic("should never fail to find the depositor")
 		}
 
 		interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
