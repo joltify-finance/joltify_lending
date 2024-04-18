@@ -33,6 +33,10 @@ func (k Keeper) OutstandingInterest(goCtx context.Context, req *types.QueryOutst
 		panic("should never fail to find the pool")
 	}
 
+	if poolInfo.PoolStatus == types.PoolInfo_FROZEN {
+		return &types.QueryOutstandingInterestResponse{Amount: "0"}, nil
+	}
+
 	reserve := poolInfo.ReserveFactor
 	lendNFTs := depositor.LinkedNFT
 	totalInterest, err := calculateTotalOutstandingInterest(ctx, lendNFTs, k.NftKeeper, reserve)
