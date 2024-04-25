@@ -25,13 +25,27 @@ service Query {
     option (google.api.http).get = "/joltify/spv/list_pools";
   }
 
+  // Queries a list of history pools items.
+  rpc ListHistoryPools(QueryListPoolsRequest) returns (QueryListPoolsResponse) {
+    option (google.api.http).get = "/joltify/spv/list_history_pools";
+  }
+
   // Queries a list of QueryPool items.
   rpc QueryPool(QueryQueryPoolRequest) returns (QueryQueryPoolResponse) {
     option (google.api.http).get = "/joltify/spv/query_pool/{pool_index}";
   }
 
+  // Queries a list of history Pool items.
+  rpc QueryHistoryPool(QueryQueryPoolRequest) returns (QueryQueryPoolResponse) {
+    option (google.api.http).get = "/joltify/spv/query_history_pool/{pool_index}";
+  }
+
   rpc Depositor(QueryDepositorRequest) returns (QueryDepositorResponse) {
     option (google.api.http).get = "/joltify/spv/depositor/{walletAddress}";
+  }
+
+  rpc DepositorHistory(QueryDepositorHistoryRequest) returns (QueryHistoryDepositorResponse) {
+    option (google.api.http).get = "/joltify/spv/depositor_history/{walletAddress}";
   }
 
   // Queries a list of AllowedPools items.
@@ -97,8 +111,19 @@ message QueryDepositorRequest {
   string deposit_pool_index = 2;
 }
 
+message QueryDepositorHistoryRequest {
+  string walletAddress = 1;
+  string deposit_pool_index = 2;
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
 message QueryDepositorResponse {
   DepositorInfo depositor =1;
+}
+
+message QueryHistoryDepositorResponse {
+  repeated DepositorInfo depositors =1;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
 message QueryAllowedPoolsRequest {

@@ -16,12 +16,13 @@ const (
 )
 
 const (
-	ProjectsKeyPrefix        = "ProjectsKeyPrefix-"
-	HistoryProjectsKeyPrefix = "HistoryProjectsKeyPrefix-"
-	PoolInvestor             = "poolInvestorsPrefix-"
-	PoolDepositor            = "depositorPrefix-"
-	PoolDepositorHistory     = "depositorhistoryPrefix-"
-	Pool                     = "pool-"
+	ProjectsKeyPrefix    = "ProjectsKeyPrefix-"
+	PoolInvestor         = "poolInvestorsPrefix-"
+	PoolDepositor        = "depositorPrefix-"
+	PoolDepositorHistory = "depositorhistoryPrefix-"
+	Pool                 = "pool-"
+	HistoryPool          = "historyPool-"
+	ArchivePrefix        = "archive-"
 )
 
 func KeyPrefix(p string) []byte {

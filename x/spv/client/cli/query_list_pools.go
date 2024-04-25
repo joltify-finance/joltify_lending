@@ -22,6 +22,7 @@ func CmdListInvestors() *cobra.Command {
 				return err
 			}
 
+			history, _ := cmd.Flags().GetBool(flagHistory)
 			queryClient := types.NewQueryClient(clientCtx)
 
 			params := &types.QueryListPoolsRequest{}
@@ -32,15 +33,23 @@ func CmdListInvestors() *cobra.Command {
 			}
 			params.Pagination = pageReq
 
-			res, err := queryClient.ListPools(cmd.Context(), params)
-			if err != nil {
-				return err
+			var res *types.QueryListPoolsResponse
+			if history {
+				res, err = queryClient.ListHistoryPools(cmd.Context(), params)
+				if err != nil {
+					return err
+				}
+			} else {
+				res, err = queryClient.ListPools(cmd.Context(), params)
+				if err != nil {
+					return err
+				}
 			}
-
 			return clientCtx.PrintProto(res)
 		},
 	}
 
+	cmd.Flags().String(flagHistory, "", "(optional) showing the pool history")
 	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
