@@ -24,3 +24,17 @@ func (k Keeper) QueryPool(goCtx context.Context, req *types.QueryQueryPoolReques
 	}
 	return &types.QueryQueryPoolResponse{PoolInfo: &pool}, nil
 }
+
+func (k Keeper) QueryHistoryPool(goCtx context.Context, req *types.QueryQueryPoolRequest) (*types.QueryQueryPoolResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	pool, ok := k.GetHistoryPools(ctx, req.GetPoolIndex())
+	if !ok {
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "index cannot be found %v", req.GetPoolIndex())
+	}
+	return &types.QueryQueryPoolResponse{PoolInfo: &pool}, nil
+}

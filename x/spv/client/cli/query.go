@@ -31,6 +31,8 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 
 	cmd.AddCommand(CmdDepositor())
 
+	cmd.AddCommand(CmdDepositorHistory())
+
 	cmd.AddCommand(CmdAllowedPools())
 
 	cmd.AddCommand(CmdClaimableInterest())

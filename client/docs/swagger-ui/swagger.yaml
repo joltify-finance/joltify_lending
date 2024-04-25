@@ -7817,6 +7817,579 @@ paths:
           type: string
       tags:
         - spv
+  /joltify/spv/depositor_history/{walletAddress}:
+    get:
+      operationId: spvDepositorHistory
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              depositors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    investor_id:
+                      type: string
+                    depositor_address:
+                      type: string
+                      format: byte
+                    pool_index:
+                      type: string
+                    locked_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    withdrawal_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    incentive_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    linkedNFT:
+                      type: array
+                      items:
+                        type: string
+                    deposit_type:
+                      type: string
+                      enum:
+                        - withdraw_proposal
+                        - transfer_request
+                        - deposit_close
+                        - unset
+                        - processed
+                        - deactive
+                        - unusable
+                      default: withdraw_proposal
+                    pending_interest:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    total_paid_liquidation_amount:
+                      type: string
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: walletAddress
+          in: path
+          required: true
+          type: string
+        - name: deposit_pool_index
+          in: query
+          required: false
+          type: string
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - spv
+  /joltify/spv/list_history_pools:
+    get:
+      summary: Queries a list of history pools items.
+      operationId: spvListHistoryPools
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              pools_info:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    index:
+                      type: string
+                    pool_name:
+                      type: string
+                    linked_project:
+                      type: integer
+                      format: int32
+                    owner_address:
+                      type: string
+                      format: byte
+                    apy:
+                      type: string
+                    principal_paid:
+                      type: boolean
+                    pay_freq:
+                      type: integer
+                      format: int32
+                    reserve_factor:
+                      type: string
+                    pool_nFT_ids:
+                      type: array
+                      items:
+                        type: string
+                      title: |-
+                        string            pool_nFT_class      = 9 [
+                           (cosmos_proto.scalar)  = "cosmos.Class",
+                           (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                           (gogoproto.nullable)   = false
+                         ];
+                    last_payment_time:
+                      type: string
+                      format: date-time
+                    pool_status:
+                      type: string
+                      enum:
+                        - ACTIVE
+                        - INACTIVE
+                        - FROZEN
+                        - PREPARE
+                        - FREEZING
+                        - Liquidation
+                        - PooLPayPartially
+                      default: ACTIVE
+                    borrowed_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    pool_interest:
+                      type: string
+                    project_length:
+                      type: string
+                      format: uint64
+                    usable_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    target_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    pool_type:
+                      type: string
+                      enum:
+                        - JUNIOR
+                        - SENIOR
+                      default: JUNIOR
+                    escrow_interest_amount:
+                      type: string
+                    escrow_principal_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    withdraw_proposal_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    project_due_time:
+                      type: string
+                      format: date-time
+                    withdraw_accounts:
+                      type: array
+                      items:
+                        type: string
+                        format: byte
+                    transfer_accounts:
+                      type: array
+                      items:
+                        type: string
+                        format: byte
+                    withdraw_request_window_seconds:
+                      type: integer
+                      format: int32
+                    pool_locked_seconds:
+                      type: integer
+                      format: int32
+                    pool_total_borrow_limit:
+                      type: integer
+                      format: int32
+                    current_pool_total_borrow_counter:
+                      type: integer
+                      format: int32
+                    pool_created_time:
+                      type: string
+                      format: date-time
+                    pool_first_due_time:
+                      type: string
+                      format: date-time
+                    grace_time:
+                      type: string
+                    negative_interest_counter:
+                      type: integer
+                      format: int32
+                    liquidation_ratio:
+                      type: string
+                    total_liquidation_amount:
+                      type: string
+                    principal_payment_exchange_ratio:
+                      type: string
+                    principal_withdrawal_request_payment_ratio:
+                      type: string
+                    pool_denom_prefix:
+                      type: string
+                    interest_prepayment:
+                      type: object
+                      properties:
+                        counter:
+                          type: integer
+                          format: int32
+                        exchange_ratio:
+                          type: string
+                    processed_transfer_accounts:
+                      type: array
+                      items:
+                        type: string
+                        format: byte
+                    project_name:
+                      type: string
+                    separate_pool:
+                      type: boolean
+                    processed_withdraw_accounts:
+                      type: array
+                      items:
+                        type: string
+                        format: byte
+                    total_transfer_ownership_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    min_borrow_amount:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                      title: >-
+                        the minimum amount of coins that can be withdrawn from
+                        the pool for the first time
+                    min_deposit_amount:
+                      type: string
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - spv
   /joltify/spv/list_pools:
     get:
       summary: Queries a list of Listpools items.
@@ -8273,6 +8846,282 @@ paths:
                     value:
                       type: string
                       format: byte
+      tags:
+        - spv
+  /joltify/spv/query_history_pool/{pool_index}:
+    get:
+      summary: Queries a list of history Pool items.
+      operationId: spvQueryHistoryPool
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              pool_info:
+                type: object
+                properties:
+                  index:
+                    type: string
+                  pool_name:
+                    type: string
+                  linked_project:
+                    type: integer
+                    format: int32
+                  owner_address:
+                    type: string
+                    format: byte
+                  apy:
+                    type: string
+                  principal_paid:
+                    type: boolean
+                  pay_freq:
+                    type: integer
+                    format: int32
+                  reserve_factor:
+                    type: string
+                  pool_nFT_ids:
+                    type: array
+                    items:
+                      type: string
+                    title: |-
+                      string            pool_nFT_class      = 9 [
+                         (cosmos_proto.scalar)  = "cosmos.Class",
+                         (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                         (gogoproto.nullable)   = false
+                       ];
+                  last_payment_time:
+                    type: string
+                    format: date-time
+                  pool_status:
+                    type: string
+                    enum:
+                      - ACTIVE
+                      - INACTIVE
+                      - FROZEN
+                      - PREPARE
+                      - FREEZING
+                      - Liquidation
+                      - PooLPayPartially
+                    default: ACTIVE
+                  borrowed_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  pool_interest:
+                    type: string
+                  project_length:
+                    type: string
+                    format: uint64
+                  usable_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  target_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  pool_type:
+                    type: string
+                    enum:
+                      - JUNIOR
+                      - SENIOR
+                    default: JUNIOR
+                  escrow_interest_amount:
+                    type: string
+                  escrow_principal_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  withdraw_proposal_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  project_due_time:
+                    type: string
+                    format: date-time
+                  withdraw_accounts:
+                    type: array
+                    items:
+                      type: string
+                      format: byte
+                  transfer_accounts:
+                    type: array
+                    items:
+                      type: string
+                      format: byte
+                  withdraw_request_window_seconds:
+                    type: integer
+                    format: int32
+                  pool_locked_seconds:
+                    type: integer
+                    format: int32
+                  pool_total_borrow_limit:
+                    type: integer
+                    format: int32
+                  current_pool_total_borrow_counter:
+                    type: integer
+                    format: int32
+                  pool_created_time:
+                    type: string
+                    format: date-time
+                  pool_first_due_time:
+                    type: string
+                    format: date-time
+                  grace_time:
+                    type: string
+                  negative_interest_counter:
+                    type: integer
+                    format: int32
+                  liquidation_ratio:
+                    type: string
+                  total_liquidation_amount:
+                    type: string
+                  principal_payment_exchange_ratio:
+                    type: string
+                  principal_withdrawal_request_payment_ratio:
+                    type: string
+                  pool_denom_prefix:
+                    type: string
+                  interest_prepayment:
+                    type: object
+                    properties:
+                      counter:
+                        type: integer
+                        format: int32
+                      exchange_ratio:
+                        type: string
+                  processed_transfer_accounts:
+                    type: array
+                    items:
+                      type: string
+                      format: byte
+                  project_name:
+                    type: string
+                  separate_pool:
+                    type: boolean
+                  processed_withdraw_accounts:
+                    type: array
+                    items:
+                      type: string
+                      format: byte
+                  total_transfer_ownership_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  min_borrow_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                    title: >-
+                      the minimum amount of coins that can be withdrawn from the
+                      pool for the first time
+                  min_deposit_amount:
+                    type: string
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: pool_index
+          in: path
+          required: true
+          type: string
       tags:
         - spv
   /joltify/spv/query_pool/{pool_index}:
@@ -52118,6 +52967,124 @@ definitions:
               signatures required by gogoproto.
           total_paid_liquidation_amount:
             type: string
+  joltify.spv.QueryHistoryDepositorResponse:
+    type: object
+    properties:
+      depositors:
+        type: array
+        items:
+          type: object
+          properties:
+            investor_id:
+              type: string
+            depositor_address:
+              type: string
+              format: byte
+            pool_index:
+              type: string
+            locked_amount:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            withdrawal_amount:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            incentive_amount:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            linkedNFT:
+              type: array
+              items:
+                type: string
+            deposit_type:
+              type: string
+              enum:
+                - withdraw_proposal
+                - transfer_request
+                - deposit_close
+                - unset
+                - processed
+                - deactive
+                - unusable
+              default: withdraw_proposal
+            pending_interest:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            total_paid_liquidation_amount:
+              type: string
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
   joltify.spv.QueryListPoolsResponse:
     type: object
     properties:

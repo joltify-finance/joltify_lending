@@ -205,7 +205,7 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, bu
 		return coserrors.Wrapf(err, "fail to update the class")
 	}
 	if burnNFT {
-		err = k.NftKeeper.Burn(ctx, classID, nftID)
+		err = k.ArchiveNFT(ctx, classID, nftID)
 		if err != nil {
 			return coserrors.Wrapf(err, "fail to burn the nft")
 		}
@@ -329,9 +329,9 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 
 func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	// fixme this means the pool is empty
-	if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
-		k.SetHistoryPool(ctx, *poolInfo)
-		k.DelPool(ctx, poolInfo.Index)
+	// if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
+	if k.isEmptyPool(ctx, *poolInfo) {
+		k.ArchivePool(ctx, *poolInfo)
 	}
 
 	borrowedUSD := outboundConvertToUSD(poolInfo.BorrowedAmount.Amount, poolInfo.PrincipalPaymentExchangeRatio)

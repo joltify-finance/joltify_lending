@@ -109,7 +109,7 @@ func (k Keeper) DelPool(ctx sdk.Context, index string) {
 
 // SetHistoryPool sets the pool
 func (k Keeper) SetHistoryPool(ctx sdk.Context, poolInfo types.PoolInfo) {
-	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.HistoryProjectsKeyPrefix))
+	poolsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.HistoryPool))
 	bz := k.cdc.MustMarshal(&poolInfo)
 	poolsStore.Set(types.KeyPrefix(poolInfo.Index), bz)
 }
@@ -263,6 +263,22 @@ func (k Keeper) SetDepositorHistory(ctx sdk.Context, depositor types.DepositorIn
 	depositorPoolStore.Set(key, bz)
 }
 
+// GetHistoryPools gets the poolInfo with given pool index
+func (k Keeper) GetHistoryPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo, ok bool) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.HistoryPool))
+	bz := store.Get(types.KeyPrefix(index))
+	if bz == nil {
+		return poolInfo, false
+	}
+	k.cdc.MustUnmarshal(bz, &poolInfo)
+	return poolInfo, true
+}
+
 // GetDepositorHistory sets the depositor to history store
 func (k Keeper) GetDepositorHistory(ctx sdk.Context, timeStamp time.Time, poolIndex string, addr sdk.AccAddress) (types.DepositorInfo, bool) {
 	gasBefore := ctx.GasMeter().GasConsumed()
@@ -270,6 +286,7 @@ func (k Keeper) GetDepositorHistory(ctx sdk.Context, timeStamp time.Time, poolIn
 		gasAfter := ctx.GasMeter().GasConsumed()
 		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
 	}()
+
 	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositorHistory+poolIndex))
 	var depositor types.DepositorInfo
 	timeBytes, err := timeStamp.MarshalBinary()
@@ -283,6 +300,26 @@ func (k Keeper) GetDepositorHistory(ctx sdk.Context, timeStamp time.Time, poolIn
 	}
 	k.cdc.MustUnmarshal(bz, &depositor)
 	return depositor, true
+}
+
+// IteratorAllDepositorHistory gets all the depositor to history store
+func (k Keeper) IteratorAllDepositorHistory(ctx sdk.Context, poolIndex string, cb func(depositor types.DepositorInfo) (stop bool)) {
+	gasBefore := ctx.GasMeter().GasConsumed()
+	defer func() {
+		gasAfter := ctx.GasMeter().GasConsumed()
+		ctx.GasMeter().RefundGas(gasAfter-gasBefore, "SetPool")
+	}()
+	depositorPoolStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PoolDepositorHistory+poolIndex))
+
+	iterator := sdk.KVStorePrefixIterator(depositorPoolStore, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var depositor types.DepositorInfo
+		k.cdc.MustUnmarshal(iterator.Value(), &depositor)
+		if cb(depositor) {
+			break
+		}
+	}
 }
 
 // SetDepositor sets the depositor

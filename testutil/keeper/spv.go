@@ -196,6 +196,11 @@ type mockNFTKeeper struct {
 	nftsWithClassID map[string]*nft.NFT
 }
 
+func (m mockNFTKeeper) GetOwner(ctx sdk.Context, classID string, nftID string) sdk.AccAddress {
+	// TODO implement me
+	return []byte("owner")
+}
+
 func (m mockNFTKeeper) Burn(ctx sdk.Context, classID string, nftID string) error {
 	key := fmt.Sprintf("%v:%v", classID, nftID)
 	delete(m.nftsWithClassID, key)
@@ -256,17 +261,20 @@ func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
 }
 
 func (m mockNFTKeeper) UpdateClass(ctx sdk.Context, class nft.Class) error {
-	var borrowInterest types.BorrowInterest
-	err := proto.Unmarshal(class.Data.Value, &borrowInterest)
-	if err != nil {
-		panic(err)
-	}
+	//var borrowInterest types.BorrowInterest
+	//err := proto.Unmarshal(class.Data.Value, &borrowInterest)
+	//if err != nil {
+	//	panic(err)
+	//}
 	m.classes[class.Id] = &class
 	return nil
 }
 
 func (m mockNFTKeeper) GetClass(ctx sdk.Context, classID string) (nft.Class, bool) {
 	r, ok := m.classes[classID]
+	if !ok {
+		return nft.Class{}, ok
+	}
 	return *r, ok
 }
 

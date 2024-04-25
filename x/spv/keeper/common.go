@@ -87,7 +87,6 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 			if err != nil {
 				panic(err)
 			}
-
 		}
 	}
 	return totalInterestUsd, nil
@@ -459,8 +458,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		if err != nil {
 			return totalPaidAmount, err
 		}
-		k.DelPool(ctx, poolInfo.Index)
-		k.SetHistoryPool(ctx, poolInfo)
+		k.ArchivePool(ctx, poolInfo)
 
 	} else {
 		k.SetPool(ctx, poolInfo)
@@ -469,8 +467,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	depositor.LinkedNFT = []string{}
 	depositor.WithdrawalAmount = sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.ZeroInt())
 	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
-	k.DelDepositor(ctx, depositor)
-	k.SetDepositorHistory(ctx, depositor)
+	k.ArchieveDepositor(ctx, depositor)
 	return totalPaidAmount, nil
 }
 

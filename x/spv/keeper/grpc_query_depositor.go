@@ -3,6 +3,9 @@ package keeper
 import (
 	"context"
 
+	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"github.com/cosmos/cosmos-sdk/types/query"
+
 	coserrors "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -30,4 +33,36 @@ func (k Keeper) Depositor(goCtx context.Context, req *types.QueryDepositorReques
 	}
 
 	return &types.QueryDepositorResponse{Depositor: &depositor}, nil
+}
+
+func (k Keeper) DepositorHistory(goCtx context.Context, req *types.QueryDepositorHistoryRequest) (*types.QueryHistoryDepositorResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	store := ctx.KVStore(k.storeKey)
+	depositorStores := prefix.NewStore(store, types.KeyPrefix(types.PoolDepositorHistory))
+
+	var depositorInfos []*types.DepositorInfo
+
+	pageRes, err := query.Paginate(depositorStores, req.Pagination, func(key []byte, value []byte) error {
+		var investor types.DepositorInfo
+		if err := k.cdc.Unmarshal(value, &investor); err != nil {
+			return err
+		}
+
+		if investor.DepositorAddress.String() != req.WalletAddress || investor.PoolIndex != req.DepositPoolIndex {
+			return nil
+		}
+
+		depositorInfos = append(depositorInfos, &investor)
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryHistoryDepositorResponse{Depositors: depositorInfos, Pagination: pageRes}, nil
 }
