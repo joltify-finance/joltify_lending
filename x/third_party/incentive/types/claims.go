@@ -11,6 +11,7 @@ import (
 const (
 	JoltLiquidityProviderClaimType = "jolt_liquidity_provider"
 	SwapClaimType                  = "swap"
+	SPVClaimType                   = "spv"
 )
 
 // GetOwner is a getter for Claim Owner
@@ -175,6 +176,47 @@ func (cs SwapClaims) Validate() error {
 
 	return nil
 }
+
+//// GetType returns the claim's type
+//func (c SPVClaim) GetType() string { return SPVClaimType }
+//
+//// GetReward returns the claim's reward coin
+//func (c SPVClaim) GetReward() sdk.Coins { return c.Reward }
+//
+//// GetOwner returns the claim's owner
+//func (c SPVClaim) GetOwner() sdk.AccAddress { return c.Owner }
+//
+//// Validate performs a basic check of a SwapClaim fields
+//func (c SPVClaim) Validate() error {
+//	if err := c.RewardIndexes.Validate(); err != nil {
+//		return err
+//	}
+//	return c.BaseMultiClaim.Validate()
+//}
+//
+//// HasRewardIndex check if a claim has a reward index for the input pool ID.
+//func (c SPVClaim) HasRewardIndex(poolID string) (int64, bool) {
+//	for index, ri := range c.RewardIndexes {
+//		if ri.CollateralType == poolID {
+//			return int64(index), true
+//		}
+//	}
+//	return 0, false
+//}
+
+// // SPVClaims slice of SPVClaim
+type SPVClaims []SPVClaim
+
+//
+//// Validate checks if all the claims are valid.
+//func (cs SPVClaims) Validate() error {
+//	for _, c := range cs {
+//		if err := c.Validate(); err != nil {
+//			return err
+//		}
+//	}
+//	return nil
+//}
 
 // ---------------------- Reward indexes are used internally in the store ----------------------
 

@@ -2,6 +2,7 @@ package incentive
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
@@ -73,6 +74,36 @@ func InitGenesis(
 	for _, mri := range gs.SwapRewardState.MultiRewardIndexes {
 		k.SetSwapRewardIndexes(ctx, mri.CollateralType, mri.RewardIndexes)
 	}
+
+	// SPV
+	for _, gat := range gs.SpvRewardState.AccumulationTimes {
+		if err := ValidateAccumulationTime(gat.PreviousAccumulationTime); err != nil {
+			panic(err.Error())
+		}
+		k.SetSPVRewardAccrualTime(ctx, gat.CollateralType, gat.PreviousAccumulationTime)
+	}
+	for _, mri := range gs.SpvRewardState.AccRewardIndexs {
+		k.SetSPVReward(ctx, mri.CollateralType, mri.AccReward)
+	}
+}
+
+func getSPVGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.SPVGenesisRewardState {
+	var ats types.AccumulationTimes
+	keeper.IterateSPVRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
+		ctype = strings.TrimPrefix(ctype, types.Incentiveprefix)
+		ats = append(ats, types.NewAccumulationTime(ctype, accTime))
+		return false
+	})
+
+	var mris []types.SPVRewardAccIndex
+	keeper.IterateSPVRewardIndexes(ctx, func(ctype string, indexes types.SPVRewardAccTokens) bool {
+		// we need to remove the preifx
+		ctype = strings.TrimPrefix(ctype, types.Incentiveprefix)
+		mris = append(mris, types.SPVRewardAccIndex{ctype, indexes})
+		return false
+	})
+
+	return types.NewSPVGenesisRewardState(ats, mris)
 }
 
 func getSwapGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {
@@ -102,8 +133,12 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types.GenesisState {
 	swapClaims := k.GetAllSwapClaims(ctx)
 	swapRewardState := getSwapGenesisRewardState(ctx, k)
 
+	// fixme we need to fix the spv claims later
+	// spvClaims := k.GetAllSPVClaims(ctx)
+	spvRewardState := getSPVGenesisRewardState(ctx, k)
+
 	return types.NewGenesisState(
-		params, joltSupplyRewardState, joltBorrowRewardState, swapRewardState, joltClaims, swapClaims,
+		params, joltSupplyRewardState, joltBorrowRewardState, swapRewardState, spvRewardState, joltClaims, swapClaims,
 	)
 }
 
@@ -151,7 +186,5 @@ func ValidateAccumulationTime(previousAccumulationTime time.Time) error {
 	if previousAccumulationTime.Equal(time.Time{}) {
 		return fmt.Errorf("accumulation time is not set")
 	}
-	return nil
-
 	return nil
 }

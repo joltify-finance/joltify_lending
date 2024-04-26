@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="0" failures="0" errors="0" time="2.806796">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/joltify-finance/joltify_lending/app" timestamp="2024-04-24T12:30:10+10:00">
+		<properties>
+			<property name="go.version" value="go1.21.4 linux/amd64"></property>
+		</properties>
+	</testsuite>
+</testsuites>

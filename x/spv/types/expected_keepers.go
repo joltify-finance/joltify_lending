@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,4 +56,10 @@ type NFTKeeper interface {
 
 type PriceFeedKeeper interface {
 	GetCurrentPrice(ctx sdk.Context, marketID string) (types2.CurrentPrice, error)
+}
+
+// SPVHooks are event hooks called when the interest is paid to the SPV pool
+type SPVHooks interface {
+	AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int)
+	BeforeNFTBurned(ctx sdk.Context, poolIndex, investorID string, linkednfts []string) error
 }

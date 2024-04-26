@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -608,6 +609,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	// skip the test now
 	setupPool(suite)
+	// suite.keeper.SetHooks(&fakeSPVFunctions{})
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
@@ -788,6 +790,8 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 
 	withdraw.Creator = suite.investors[1]
 	withdraw.Token = withdraw.Token.AddAmount(sdk.OneInt())
+
+	fmt.Printf(">>>>>>>.is hook set>>>>>>>>%v\n", suite.keeper.IsHookSet())
 	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &withdraw)
 	suite.Require().NoError(err)
 

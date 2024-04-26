@@ -323,7 +323,7 @@ func (suite *SynchronizeSwapRewardTests) TestGetSyncedClaim_ClaimUnchangedWhenNo
 
 	swapKeeper := newFakeSwapKeeper().
 		addDeposit(poolID_1, owner, i(1e9))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, swapKeeper)
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, swapKeeper, nil, nil)
 
 	claim := types.SwapClaim{
 		BaseMultiClaim: types.BaseMultiClaim{
@@ -356,7 +356,7 @@ func (suite *SynchronizeSwapRewardTests) TestGetSyncedClaim_ClaimUpdatedWhenMiss
 	owner := arbitraryAddress()
 
 	// owner has no shares in any pool
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, newFakeSwapKeeper())
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, newFakeSwapKeeper(), nil, nil)
 
 	claim := types.SwapClaim{
 		BaseMultiClaim: types.BaseMultiClaim{
@@ -416,7 +416,7 @@ func (suite *SynchronizeSwapRewardTests) TestGetSyncedClaim_ClaimUpdatedWhenMiss
 	swapKeeper := newFakeSwapKeeper().
 		addDeposit(poolid1, owner, i(1e9)).
 		addDeposit(poolid2, owner, i(1e9))
-	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, swapKeeper)
+	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, swapKeeper, nil, nil)
 
 	claim := types.SwapClaim{
 		BaseMultiClaim: types.BaseMultiClaim{

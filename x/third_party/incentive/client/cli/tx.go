@@ -32,6 +32,7 @@ func GetTxCmd() *cobra.Command {
 		// getCmdClaimDelegator(),
 		getCmdClaimSwap(),
 		// getCmdClaimSavings(),
+		getCmdClaimSPV(),
 	}
 
 	for _, cmd := range cmds {
@@ -86,8 +87,8 @@ func getCmdClaimSwap() *cobra.Command {
 		Short: "claim sender's swap rewards using given multipliers",
 		Long:  `Claim sender's outstanding swap rewards using given multipliers`,
 		Example: strings.Join([]string{
-			fmt.Sprintf(`  $ %s tx %s claim-swap --%s swp=large --%s ukava=small`, version.AppName, types.ModuleName, multiplierFlag, multiplierFlag),
-			fmt.Sprintf(`  $ %s tx %s claim-swap --%s swp=large,ukava=small`, version.AppName, types.ModuleName, multiplierFlag),
+			fmt.Sprintf(`$ %s tx %s claim-swap --%s swp=large --%s ukava=small`, version.AppName, types.ModuleName, multiplierFlag, multiplierFlag),
+			fmt.Sprintf(`$ %s tx %s claim-swap --%s swp=large,ukava=small`, version.AppName, types.ModuleName, multiplierFlag),
 		}, "\n"),
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -109,6 +110,32 @@ func getCmdClaimSwap() *cobra.Command {
 	cmd.Flags().StringToStringVarP(&denomsToClaim, multiplierFlag, multiplierFlagShort, nil, "specify the denoms to claim, each with a multiplier lockup")
 	if err := cmd.MarkFlagRequired(multiplierFlag); err != nil {
 		panic(err)
+	}
+	return cmd
+}
+
+func getCmdClaimSPV() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "claim-spv [pool-index]",
+		Short: "claim sender's RWA rewards ",
+		Args:  cobra.ExactArgs(1),
+		Example: strings.Join([]string{
+			fmt.Sprintf(`  $ %s tx %s claim-spv examplepool`, version.AppName, types.ModuleName),
+		}, "\n"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			sender := cliCtx.GetFromAddress()
+			poolIndex := args[0]
+			msg := types.NewMsgClaimSPVReward(sender.String(), poolIndex)
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
+		},
 	}
 	return cmd
 }

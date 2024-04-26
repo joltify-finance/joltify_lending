@@ -14,6 +14,13 @@ func (k Keeper) GetParams(ctx sdk.Context) types.Params {
 	return p
 }
 
+// legacy function GetParamsV19 returns the params from the store
+func (k Keeper) GetParamsV19(ctx sdk.Context) types.ParamsV19 {
+	var p types.ParamsV19
+	k.paramSubspace.GetParamSet(ctx, &p)
+	return p
+}
+
 // SetParams sets params on the store
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)

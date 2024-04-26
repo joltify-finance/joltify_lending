@@ -20,4 +20,6 @@ var (
 	ErrInvalidClaimType              = sdkerrors.Register(ModuleName, 11, "invalid claim type")
 	ErrDecreasingRewardFactor        = sdkerrors.Register(ModuleName, 13, "found new reward factor less than an old reward factor")
 	ErrInvalidClaimDenoms            = sdkerrors.Register(ModuleName, 14, "invalid claim denoms")
+	ErrInvalidNFT                    = sdkerrors.Register(ModuleName, 15, "invalid NFT")
+	ErrInvalidRequest                = sdkerrors.Register(ModuleName, 16, "invalid SPV claim query request")
 )

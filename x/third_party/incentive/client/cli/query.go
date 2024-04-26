@@ -39,6 +39,7 @@ func GetQueryCmd() *cobra.Command {
 		queryParamsCmd(),
 		queryRewardsCmd(),
 		queryRewardFactorsCmd(),
+		querySPVRewardsCmd(),
 	}
 
 	for _, cmd := range cmds {
@@ -146,5 +147,35 @@ func queryRewardFactorsCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().String(flagDenom, "", "(optional) filter reward factors by denom")
+	return cmd
+}
+
+func querySPVRewardsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "spv-rewards",
+		Short: "query spv rewards",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query rewards with optional flags for owner and type
+			Example:
+			$ %s query %s spv-rewards [pool-index] [investor]
+			`,
+				version.AppName, types.ModuleName)),
+		Args: cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			poolIndex := args[0]
+			fromAddr := args[1]
+			queryClient := types.NewQueryClient(cliCtx)
+			resp, err := queryClient.SPVRewards(cmd.Context(), &types.QuerySPVRewardsRequest{PoolIndex: poolIndex, Owner: fromAddr})
+			if err != nil {
+				return err
+			}
+			return cliCtx.PrintProto(resp)
+		},
+	}
 	return cmd
 }

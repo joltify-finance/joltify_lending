@@ -41,7 +41,7 @@ message NftInfo{
 	google.protobuf.Timestamp last_liquidation_payment_time = 6 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 	uint32  payment_offset= 7;
 	uint32  liquidation_payment_offset= 8;
-
+	uint32 incentive_payment_offset= 9;
 }
 
 message PaymentItem {
@@ -53,8 +53,20 @@ message PaymentItem {
 	cosmos.base.v1beta1.Coin borrowed_amount = 3[
 		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
 		(gogoproto.nullable) = false];
-
 }
+
+message IncentivePaymentItem {
+	google.protobuf.Timestamp payment_time = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	repeated  cosmos.base.v1beta1.Coin payment_amount = 2[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+
+	cosmos.base.v1beta1.Coin borrowed_amount = 3[
+		(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+		(gogoproto.nullable) = false];
+}
+
+
 message BorrowInterest{
 	string pool_index  =1 ;
 	string      apy      = 2 [
@@ -99,6 +111,8 @@ message BorrowInterest{
 		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
 		(gogoproto.nullable)   = false
 	];
+
+	repeated IncentivePaymentItem  incentive_payments = 12;
 }
 
 message Liquidation_item{

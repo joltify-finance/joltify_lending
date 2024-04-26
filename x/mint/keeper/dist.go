@@ -3,6 +3,8 @@ package keeper
 import (
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/client"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
@@ -10,18 +12,24 @@ import (
 )
 
 func (k Keeper) FirstDist(ctx sdk.Context) error {
-	firstDrop, ok := sdk.NewIntFromString("10000000000000")
-	if !ok {
-		panic("should never fail")
-	}
-	newCoins := sdk.NewCoins(sdk.NewCoin("ujolt", firstDrop))
-	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, newCoins)
-	if err != nil {
-		return err
-	}
-	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, incentivetypes.ModuleName, newCoins)
-	if err != nil {
-		return err
+	if client.MAINNETFLAG == "false" {
+		firstDrop, ok := sdk.NewIntFromString("1000000000000000000")
+		if !ok {
+			panic("should never fail")
+		}
+
+		c1 := sdk.NewCoin("ujolt", firstDrop)
+		c2 := sdk.NewCoin("abnb", firstDrop)
+		c3 := sdk.NewCoin("uoppy", firstDrop)
+		newCoins := sdk.NewCoins(c1, c2, c3)
+		err := k.bankKeeper.MintCoins(ctx, types.ModuleName, newCoins)
+		if err != nil {
+			return err
+		}
+		err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, incentivetypes.ModuleName, newCoins)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

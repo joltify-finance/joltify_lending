@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"cosmossdk.io/math"
+
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -25,6 +27,7 @@ type (
 		NftKeeper       types.NFTKeeper
 		priceFeedKeeper types.PriceFeedKeeper
 		auctionKeeper   types.AuctionKeeper
+		hooks           types.SPVHooks
 	}
 )
 
@@ -56,7 +59,21 @@ func NewKeeper(
 		NftKeeper:       nftKeeper,
 		priceFeedKeeper: pricefeedkeeper,
 		auctionKeeper:   auctionKeeper,
+		hooks:           nil,
 	}
+}
+
+// SetHooks adds hooks to the keeper.
+func (k *Keeper) SetHooks(sh types.SPVHooks) *Keeper {
+	if k.hooks != nil {
+		panic("cannot set SPV hooks twice")
+	}
+	k.hooks = sh
+	return k
+}
+
+func (k *Keeper) IsHookSet() bool {
+	return k.hooks != nil
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
@@ -159,6 +176,22 @@ func (k Keeper) GetPools(ctx sdk.Context, index string) (poolInfo types.PoolInfo
 	}
 	k.cdc.MustUnmarshal(bz, &poolInfo)
 	return poolInfo, true
+}
+
+func (k Keeper) GetPoolBorrowed(ctx sdk.Context, poolIndex string) (borrowed math.Int, ok bool) {
+	pool, ok := k.GetPools(ctx, poolIndex)
+	if !ok {
+		return borrowed, false
+	}
+	return pool.BorrowedAmount.Amount, true
+}
+
+func (k Keeper) GetDepositorTotalBorrowedAmount(ctx sdk.Context, depositor sdk.AccAddress, poolID string) (borrowed math.Int, found bool) {
+	depositorInfo, found := k.GetDepositor(ctx, poolID, depositor)
+	if !found {
+		return borrowed, false
+	}
+	return depositorInfo.TotalPaidLiquidationAmount, true
 }
 
 // GetReserve gets the poolInfo with given pool index

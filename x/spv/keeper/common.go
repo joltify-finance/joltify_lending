@@ -411,6 +411,11 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 		panic(err)
 	}
 
+	err = k.hooks.BeforeNFTBurned(ctx, depositor.PoolIndex, depositor.DepositorAddress.String(), depositor.LinkedNFT)
+	if err != nil {
+		ctx.Logger().Error("fail to process the spv incentives before the nft burn", err.Error())
+	}
+
 	err = k.processEachWithdrawReq(ctx, depositor, true, poolInfo.PrincipalPaymentExchangeRatio)
 	if err != nil {
 		ctx.Logger().Error("fail to process partial principal", err.Error())

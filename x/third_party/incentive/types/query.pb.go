@@ -6,6 +6,8 @@ package types
 import (
 	context "context"
 	fmt "fmt"
+	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
@@ -181,6 +183,7 @@ func (m *QueryRewardsRequest) GetUnsynchronized() bool {
 type QueryRewardsResponse struct {
 	JoltLiquidityProviderClaims JoltLiquidityProviderClaims `protobuf:"bytes,1,rep,name=jolt_liquidity_provider_claims,json=joltLiquidityProviderClaims,proto3,castrepeated=JoltLiquidityProviderClaims" json:"jolt_liquidity_provider_claims"`
 	SwapClaims                  SwapClaims                  `protobuf:"bytes,4,rep,name=swap_claims,json=swapClaims,proto3,castrepeated=SwapClaims" json:"swap_claims"`
+	SpvIncentiveClaim           SPVIncentiveClaim           `protobuf:"bytes,5,opt,name=spv_incentive_claim,json=spvIncentiveClaim,proto3,castrepeated=SPVClaims" json:"spv_incentive_claim"`
 }
 
 func (m *QueryRewardsResponse) Reset()         { *m = QueryRewardsResponse{} }
@@ -230,6 +233,13 @@ func (m *QueryRewardsResponse) GetSwapClaims() SwapClaims {
 	return nil
 }
 
+func (m *QueryRewardsResponse) GetSpvIncentiveClaim() SPVIncentiveClaim {
+	if m != nil {
+		return m.SpvIncentiveClaim
+	}
+	return SPVIncentiveClaim{}
+}
+
 // QueryRewardFactorsRequest is the request type for the Query/RewardFactors RPC method.
 type QueryRewardFactorsRequest struct {
 }
@@ -271,7 +281,8 @@ var xxx_messageInfo_QueryRewardFactorsRequest proto.InternalMessageInfo
 type QueryRewardFactorsResponse struct {
 	JoltSupplyRewardFactors MultiRewardIndexes `protobuf:"bytes,1,rep,name=jolt_supply_reward_factors,json=joltSupplyRewardFactors,proto3,castrepeated=MultiRewardIndexes" json:"jolt_supply_reward_factors"`
 	JoltBorrowRewardFactors MultiRewardIndexes `protobuf:"bytes,2,rep,name=jolt_borrow_reward_factors,json=joltBorrowRewardFactors,proto3,castrepeated=MultiRewardIndexes" json:"jolt_borrow_reward_factors"`
-	SwapRewardFactors       MultiRewardIndexes `protobuf:"bytes,4,rep,name=swap_reward_factors,json=swapRewardFactors,proto3,castrepeated=MultiRewardIndexes" json:"swap_reward_factors"`
+	SwapRewardFactors       MultiRewardIndexes `protobuf:"bytes,3,rep,name=swap_reward_factors,json=swapRewardFactors,proto3,castrepeated=MultiRewardIndexes" json:"swap_reward_factors"`
+	SpvRewardFactors        MultiRewardIndexes `protobuf:"bytes,4,rep,name=spv_reward_factors,json=spvRewardFactors,proto3,castrepeated=MultiRewardIndexes" json:"spv_reward_factors"`
 }
 
 func (m *QueryRewardFactorsResponse) Reset()         { *m = QueryRewardFactorsResponse{} }
@@ -328,6 +339,109 @@ func (m *QueryRewardFactorsResponse) GetSwapRewardFactors() MultiRewardIndexes {
 	return nil
 }
 
+func (m *QueryRewardFactorsResponse) GetSpvRewardFactors() MultiRewardIndexes {
+	if m != nil {
+		return m.SpvRewardFactors
+	}
+	return nil
+}
+
+type QuerySPVRewardsRequest struct {
+	PoolIndex string `protobuf:"bytes,1,opt,name=pool_index,json=poolIndex,proto3" json:"pool_index,omitempty"`
+	Owner     string `protobuf:"bytes,2,opt,name=owner,proto3" json:"owner,omitempty"`
+}
+
+func (m *QuerySPVRewardsRequest) Reset()         { *m = QuerySPVRewardsRequest{} }
+func (m *QuerySPVRewardsRequest) String() string { return proto.CompactTextString(m) }
+func (*QuerySPVRewardsRequest) ProtoMessage()    {}
+func (*QuerySPVRewardsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7b45a75759d396e5, []int{6}
+}
+func (m *QuerySPVRewardsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QuerySPVRewardsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QuerySPVRewardsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QuerySPVRewardsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySPVRewardsRequest.Merge(m, src)
+}
+func (m *QuerySPVRewardsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QuerySPVRewardsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySPVRewardsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QuerySPVRewardsRequest proto.InternalMessageInfo
+
+func (m *QuerySPVRewardsRequest) GetPoolIndex() string {
+	if m != nil {
+		return m.PoolIndex
+	}
+	return ""
+}
+
+func (m *QuerySPVRewardsRequest) GetOwner() string {
+	if m != nil {
+		return m.Owner
+	}
+	return ""
+}
+
+type QuerySPVRewardsResponse struct {
+	ClaimableRewards github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=claimable_rewards,json=claimableRewards,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"claimable_rewards"`
+}
+
+func (m *QuerySPVRewardsResponse) Reset()         { *m = QuerySPVRewardsResponse{} }
+func (m *QuerySPVRewardsResponse) String() string { return proto.CompactTextString(m) }
+func (*QuerySPVRewardsResponse) ProtoMessage()    {}
+func (*QuerySPVRewardsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7b45a75759d396e5, []int{7}
+}
+func (m *QuerySPVRewardsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QuerySPVRewardsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QuerySPVRewardsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QuerySPVRewardsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySPVRewardsResponse.Merge(m, src)
+}
+func (m *QuerySPVRewardsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QuerySPVRewardsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuerySPVRewardsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QuerySPVRewardsResponse proto.InternalMessageInfo
+
+func (m *QuerySPVRewardsResponse) GetClaimableRewards() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.ClaimableRewards
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*QueryParamsRequest)(nil), "joltify.third_party.incentive.v1beta1.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "joltify.third_party.incentive.v1beta1.QueryParamsResponse")
@@ -335,6 +449,8 @@ func init() {
 	proto.RegisterType((*QueryRewardsResponse)(nil), "joltify.third_party.incentive.v1beta1.QueryRewardsResponse")
 	proto.RegisterType((*QueryRewardFactorsRequest)(nil), "joltify.third_party.incentive.v1beta1.QueryRewardFactorsRequest")
 	proto.RegisterType((*QueryRewardFactorsResponse)(nil), "joltify.third_party.incentive.v1beta1.QueryRewardFactorsResponse")
+	proto.RegisterType((*QuerySPVRewardsRequest)(nil), "joltify.third_party.incentive.v1beta1.QuerySPVRewardsRequest")
+	proto.RegisterType((*QuerySPVRewardsResponse)(nil), "joltify.third_party.incentive.v1beta1.QuerySPVRewardsResponse")
 }
 
 func init() {
@@ -342,49 +458,61 @@ func init() {
 }
 
 var fileDescriptor_7b45a75759d396e5 = []byte{
-	// 659 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x95, 0x4f, 0x4f, 0xd4, 0x4e,
-	0x18, 0xc7, 0x77, 0x96, 0x85, 0xdf, 0xcf, 0xd9, 0x68, 0xe2, 0xb0, 0x89, 0x6b, 0x31, 0x85, 0xac,
-	0xd1, 0x70, 0xa1, 0x85, 0x35, 0x48, 0xd4, 0x98, 0xc8, 0x9a, 0x18, 0xff, 0x26, 0x58, 0x3c, 0x79,
-	0x69, 0x66, 0xb7, 0x43, 0x19, 0x52, 0x66, 0xca, 0x74, 0xca, 0x52, 0x8f, 0xfa, 0x06, 0x48, 0x7c,
-	0x17, 0x72, 0xf7, 0xe0, 0x2b, 0xe0, 0x48, 0xc2, 0xc5, 0x93, 0x1a, 0xf0, 0x85, 0x98, 0x4e, 0xa7,
-	0x2b, 0x5d, 0xdd, 0xa4, 0x8b, 0xe1, 0xd6, 0x3e, 0x4f, 0xbf, 0xcf, 0xf7, 0xf3, 0x3c, 0xf3, 0xa7,
-	0x70, 0x69, 0x8b, 0x07, 0x92, 0x6e, 0x24, 0xb6, 0xdc, 0xa4, 0xc2, 0x73, 0x43, 0x2c, 0x64, 0x62,
-	0x53, 0xd6, 0x23, 0x4c, 0xd2, 0x5d, 0x62, 0xef, 0x2e, 0x75, 0x89, 0xc4, 0x4b, 0xf6, 0x4e, 0x4c,
-	0x44, 0x62, 0x85, 0x82, 0x4b, 0x8e, 0x6e, 0x69, 0x89, 0x75, 0x46, 0x62, 0x0d, 0x24, 0x96, 0x96,
-	0x18, 0x0d, 0x9f, 0xfb, 0x5c, 0x29, 0xec, 0xf4, 0x29, 0x13, 0x1b, 0x37, 0x7c, 0xce, 0xfd, 0x80,
-	0xd8, 0x38, 0xa4, 0x36, 0x66, 0x8c, 0x4b, 0x2c, 0x29, 0x67, 0x91, 0xce, 0xb6, 0xcb, 0xd1, 0xf4,
-	0x02, 0x4c, 0xb7, 0xc7, 0xd4, 0x84, 0x58, 0xe0, 0x5c, 0xd3, 0x6a, 0x40, 0xf4, 0x3a, 0xed, 0x68,
-	0x4d, 0x05, 0x1d, 0xb2, 0x13, 0x93, 0x48, 0xb6, 0xba, 0x70, 0xba, 0x10, 0x8d, 0x42, 0xce, 0x22,
-	0x82, 0x5e, 0xc0, 0xa9, 0x4c, 0xdc, 0x04, 0x73, 0x60, 0xbe, 0xde, 0x5e, 0xb0, 0x4a, 0x0d, 0xc0,
-	0xca, 0xca, 0x74, 0x6a, 0x87, 0xdf, 0x66, 0x2b, 0x8e, 0x2e, 0xd1, 0x92, 0xda, 0xc3, 0x21, 0x7d,
-	0x2c, 0xbc, 0xdc, 0x1a, 0x35, 0xe0, 0x24, 0xef, 0x33, 0x22, 0x94, 0xc5, 0x25, 0x27, 0x7b, 0x41,
-	0xb3, 0xb0, 0x2e, 0xd4, 0x77, 0xae, 0x4c, 0x42, 0xd2, 0xac, 0xaa, 0x1c, 0xcc, 0x42, 0x6f, 0x92,
-	0x90, 0xa0, 0xdb, 0xf0, 0x4a, 0xcc, 0xa2, 0x84, 0xf5, 0x36, 0x05, 0x67, 0xf4, 0x1d, 0xf1, 0x9a,
-	0x13, 0x73, 0x60, 0xfe, 0x7f, 0x67, 0x28, 0xda, 0x3a, 0xa8, 0xc2, 0x46, 0xd1, 0x56, 0xf7, 0x76,
-	0x00, 0xa0, 0x99, 0x76, 0xe3, 0x06, 0x74, 0x27, 0xa6, 0x1e, 0x95, 0x89, 0x1b, 0x0a, 0xbe, 0x4b,
-	0x3d, 0x22, 0xdc, 0x6c, 0xca, 0x4d, 0x30, 0x37, 0x31, 0x5f, 0x6f, 0xaf, 0x96, 0x6c, 0xfa, 0x39,
-	0x0f, 0xe4, 0xcb, 0xbc, 0xd6, 0x9a, 0x2e, 0xf5, 0x38, 0xad, 0xd4, 0xb9, 0x99, 0x0e, 0xe2, 0xd3,
-	0xf7, 0xd9, 0x99, 0xd1, 0xdf, 0x44, 0xce, 0xcc, 0xd6, 0xe8, 0x24, 0x22, 0xb0, 0x1e, 0xf5, 0x71,
-	0x98, 0x93, 0xd5, 0x14, 0xd9, 0x62, 0x49, 0xb2, 0xf5, 0x3e, 0x0e, 0x33, 0x10, 0xa4, 0x41, 0xe0,
-	0x20, 0x14, 0x39, 0x30, 0x1a, 0x3c, 0xb7, 0x66, 0xe0, 0xf5, 0x33, 0xc3, 0x7a, 0x82, 0x7b, 0x92,
-	0x8b, 0xc1, 0x26, 0x39, 0x9c, 0x80, 0xc6, 0xdf, 0xb2, 0x7a, 0xa0, 0xfb, 0x00, 0x1a, 0x6a, 0xa0,
-	0x51, 0x1c, 0x86, 0x41, 0xe2, 0xea, 0xf5, 0xdb, 0xc8, 0x3e, 0xd3, 0xc3, 0x5c, 0x29, 0x89, 0xfc,
-	0x2a, 0x0e, 0x24, 0xcd, 0x7c, 0x9e, 0x31, 0x8f, 0xec, 0x75, 0x0c, 0x4d, 0x8e, 0x86, 0x33, 0x24,
-	0x72, 0xae, 0xa5, 0x35, 0xd7, 0x95, 0x6b, 0x01, 0xed, 0x37, 0x52, 0x97, 0x0b, 0xc1, 0xfb, 0xc3,
-	0x48, 0xd5, 0x0b, 0x46, 0xea, 0x28, 0xd7, 0x22, 0xd2, 0x07, 0x00, 0xa7, 0xd5, 0x4a, 0x0e, 0xb1,
-	0xd4, 0x2e, 0x8e, 0xe5, 0x6a, 0xea, 0x57, 0xa0, 0x68, 0x1f, 0xd7, 0xe0, 0xa4, 0x5a, 0x4a, 0xf4,
-	0x19, 0xc0, 0xa9, 0xec, 0xb8, 0xa2, 0x7b, 0x25, 0xcd, 0xff, 0xbc, 0x3f, 0x8c, 0xfb, 0xe7, 0x91,
-	0x66, 0xfb, 0xa6, 0xb5, 0xfc, 0xfe, 0xf8, 0xe7, 0xc7, 0xaa, 0x8d, 0x16, 0xec, 0x71, 0xae, 0x33,
-	0xf4, 0x05, 0xc0, 0xff, 0xf4, 0x99, 0x46, 0x63, 0xd9, 0x17, 0xef, 0x1f, 0xe3, 0xc1, 0xb9, 0xb4,
-	0x9a, 0xfd, 0xae, 0x62, 0x5f, 0x44, 0x56, 0x49, 0x76, 0xa1, 0x81, 0x8f, 0x01, 0xbc, 0x5c, 0xdc,
-	0x17, 0x8f, 0xc6, 0xc7, 0x28, 0x1e, 0x4f, 0x63, 0xf5, 0x1f, 0x2a, 0xe8, 0x76, 0x1e, 0xaa, 0x76,
-	0x56, 0xd0, 0xf2, 0x58, 0xed, 0xe4, 0x7b, 0xb8, 0xd3, 0x3d, 0x3c, 0x31, 0xc1, 0xd1, 0x89, 0x09,
-	0x7e, 0x9c, 0x98, 0x60, 0xff, 0xd4, 0xac, 0x1c, 0x9d, 0x9a, 0x95, 0xaf, 0xa7, 0x66, 0xe5, 0xed,
-	0x53, 0x9f, 0xca, 0xcd, 0xb8, 0x6b, 0xf5, 0xf8, 0x76, 0x5e, 0x7a, 0x61, 0x83, 0x32, 0xcc, 0x7a,
-	0x24, 0x7f, 0x77, 0x03, 0xc2, 0x3c, 0xca, 0x7c, 0x7b, 0x6f, 0x84, 0x69, 0xfa, 0x23, 0x88, 0xba,
-	0x53, 0xea, 0x37, 0x76, 0xe7, 0x57, 0x00, 0x00, 0x00, 0xff, 0xff, 0x4c, 0x33, 0xb5, 0x9c, 0xbe,
-	0x07, 0x00, 0x00,
+	// 860 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0x4f, 0x6f, 0xe3, 0x44,
+	0x14, 0xef, 0xf4, 0x1f, 0x74, 0x22, 0xd0, 0x66, 0x1a, 0xb1, 0x59, 0x17, 0xdc, 0xca, 0x08, 0x94,
+	0x4b, 0xec, 0x36, 0xb0, 0x2c, 0x2c, 0x5a, 0xc4, 0x66, 0x25, 0xc4, 0x02, 0x2b, 0x05, 0x07, 0xf5,
+	0xc0, 0xc5, 0xf2, 0x9f, 0x69, 0x3a, 0x8b, 0x3b, 0x33, 0xf5, 0x4c, 0x92, 0x1a, 0x4e, 0xc0, 0x17,
+	0x58, 0x69, 0xcf, 0xdc, 0x11, 0xdc, 0x39, 0xf0, 0x05, 0xd8, 0x03, 0x87, 0x95, 0x7a, 0xe1, 0x04,
+	0xa8, 0xe5, 0x83, 0x20, 0x8f, 0xc7, 0x49, 0x9c, 0x52, 0xc9, 0x29, 0xea, 0xa9, 0xce, 0x9b, 0x79,
+	0xbf, 0x3f, 0xf3, 0xde, 0xbc, 0x29, 0xdc, 0x7b, 0xcc, 0x62, 0x49, 0x0e, 0x52, 0x47, 0x1e, 0x92,
+	0x24, 0xf2, 0xb8, 0x9f, 0xc8, 0xd4, 0x21, 0x34, 0xc4, 0x54, 0x92, 0x11, 0x76, 0x46, 0x7b, 0x01,
+	0x96, 0xfe, 0x9e, 0x73, 0x3c, 0xc4, 0x49, 0x6a, 0xf3, 0x84, 0x49, 0x86, 0xde, 0xd0, 0x29, 0xf6,
+	0x4c, 0x8a, 0x3d, 0x49, 0xb1, 0x75, 0x8a, 0x61, 0x86, 0x4c, 0x1c, 0x31, 0xe1, 0x04, 0xbe, 0x98,
+	0xe2, 0x84, 0x8c, 0xd0, 0x1c, 0xc6, 0x68, 0x0c, 0xd8, 0x80, 0xa9, 0x4f, 0x27, 0xfb, 0xd2, 0xd1,
+	0x57, 0x07, 0x8c, 0x0d, 0x62, 0xec, 0xf8, 0x9c, 0x38, 0x3e, 0xa5, 0x4c, 0xfa, 0x92, 0x30, 0x2a,
+	0xf4, 0x6a, 0xa7, 0x9a, 0xda, 0x30, 0xf6, 0xc9, 0xd1, 0x82, 0x39, 0xdc, 0x4f, 0xfc, 0x22, 0xc7,
+	0x6a, 0x40, 0xf4, 0x79, 0xe6, 0xb8, 0xa7, 0x82, 0x2e, 0x3e, 0x1e, 0x62, 0x21, 0xad, 0x00, 0x6e,
+	0x96, 0xa2, 0x82, 0x33, 0x2a, 0x30, 0xfa, 0x14, 0xae, 0xe7, 0xc9, 0x4d, 0xb0, 0x03, 0x5a, 0xb5,
+	0x4e, 0xdb, 0xae, 0x74, 0x40, 0x76, 0x0e, 0xd3, 0x5d, 0x7d, 0xf6, 0xe7, 0xf6, 0x92, 0xab, 0x21,
+	0x2c, 0xa9, 0x39, 0x5c, 0x3c, 0xf6, 0x93, 0xa8, 0xa0, 0x46, 0x0d, 0xb8, 0xc6, 0xc6, 0x14, 0x27,
+	0x8a, 0x62, 0xc3, 0xcd, 0x7f, 0xa0, 0x6d, 0x58, 0x4b, 0xd4, 0x3e, 0x4f, 0xa6, 0x1c, 0x37, 0x97,
+	0xd5, 0x1a, 0xcc, 0x43, 0x5f, 0xa4, 0x1c, 0xa3, 0x37, 0xe1, 0xcb, 0x43, 0x2a, 0x52, 0x1a, 0x1e,
+	0x26, 0x8c, 0x92, 0xaf, 0x71, 0xd4, 0x5c, 0xd9, 0x01, 0xad, 0x17, 0xdd, 0xb9, 0xa8, 0xf5, 0xe3,
+	0x0a, 0x6c, 0x94, 0x69, 0xb5, 0xb7, 0x9f, 0x01, 0x34, 0x33, 0x37, 0x5e, 0x4c, 0x8e, 0x87, 0x24,
+	0x22, 0x32, 0xf5, 0x78, 0xc2, 0x46, 0x24, 0xc2, 0x89, 0x97, 0x9f, 0x72, 0x13, 0xec, 0xac, 0xb4,
+	0x6a, 0x9d, 0xfb, 0x15, 0x4d, 0x7f, 0xc2, 0x62, 0xf9, 0x59, 0x81, 0xd5, 0xd3, 0x50, 0x0f, 0x32,
+	0xa4, 0xee, 0xeb, 0xd9, 0x41, 0xfc, 0xf4, 0xd7, 0xf6, 0xd6, 0xe5, 0x7b, 0x84, 0xbb, 0xf5, 0xf8,
+	0xf2, 0x45, 0x84, 0x61, 0x4d, 0x8c, 0x7d, 0x5e, 0x28, 0x5b, 0x55, 0xca, 0x76, 0x2b, 0x2a, 0xeb,
+	0x8f, 0x7d, 0x9e, 0x0b, 0x41, 0x5a, 0x08, 0x9c, 0x84, 0x84, 0x0b, 0xc5, 0xe4, 0x1b, 0x7d, 0x03,
+	0x37, 0x05, 0x1f, 0x79, 0x13, 0x88, 0x9c, 0xaf, 0xb9, 0xa6, 0xaa, 0xff, 0x6e, 0x55, 0xba, 0xde,
+	0xfe, 0xc3, 0x22, 0x98, 0xd3, 0xd6, 0x35, 0xed, 0x46, 0xbf, 0xb7, 0xaf, 0x59, 0xeb, 0x82, 0x8f,
+	0xca, 0xbb, 0xac, 0x2d, 0x78, 0x6b, 0xa6, 0x52, 0x1f, 0xf9, 0xa1, 0x64, 0xc9, 0xa4, 0x43, 0x7f,
+	0x5f, 0x85, 0xc6, 0x7f, 0xad, 0xea, 0x6a, 0x3e, 0x01, 0xd0, 0x50, 0xd5, 0x14, 0x43, 0xce, 0xe3,
+	0xd4, 0xd3, 0xcd, 0x73, 0x90, 0x6f, 0xd3, 0x95, 0xbc, 0x53, 0xd1, 0xc0, 0xa3, 0x61, 0x2c, 0x49,
+	0xce, 0xf3, 0x90, 0x46, 0xf8, 0xa4, 0x6b, 0x68, 0xfd, 0x68, 0x7e, 0x05, 0x0b, 0xf7, 0x66, 0x86,
+	0xd9, 0x57, 0xac, 0x25, 0x69, 0x53, 0x49, 0x01, 0x4b, 0x12, 0x36, 0x9e, 0x97, 0xb4, 0x7c, 0xcd,
+	0x92, 0xba, 0x8a, 0xb5, 0x2c, 0xe9, 0x7b, 0x00, 0x37, 0x55, 0x1b, 0xcd, 0x69, 0x59, 0xb9, 0x3e,
+	0x2d, 0xf5, 0x8c, 0xaf, 0xac, 0xe2, 0x5b, 0x00, 0x51, 0xd6, 0x65, 0x73, 0x22, 0x56, 0xaf, 0x4f,
+	0xc4, 0x0d, 0xc1, 0x47, 0x25, 0x0d, 0xd6, 0x23, 0xf8, 0x8a, 0xea, 0xa6, 0x7e, 0x6f, 0x7f, 0x6e,
+	0x1e, 0xbd, 0x06, 0x21, 0x67, 0x2c, 0xf6, 0x48, 0x96, 0xab, 0x87, 0xd2, 0x46, 0x16, 0x51, 0x60,
+	0xd3, 0x71, 0xb5, 0x3c, 0x33, 0xae, 0xac, 0xa7, 0x00, 0xde, 0xbc, 0x80, 0xa7, 0x5b, 0xf3, 0x04,
+	0xd6, 0xd5, 0x2d, 0xf2, 0x83, 0x18, 0x6b, 0xcf, 0x45, 0x43, 0xde, 0xb2, 0xf3, 0x97, 0xc4, 0xce,
+	0x5e, 0x92, 0x89, 0xb5, 0x07, 0x8c, 0xd0, 0xee, 0xae, 0xb6, 0xd3, 0x1a, 0x10, 0x79, 0x38, 0x0c,
+	0xec, 0x90, 0x1d, 0x39, 0xfa, 0xd9, 0xc9, 0xff, 0xb4, 0x45, 0xf4, 0x95, 0x93, 0x0d, 0x47, 0xa1,
+	0x12, 0x84, 0x7b, 0x63, 0xc2, 0xa2, 0x15, 0x74, 0x7e, 0x58, 0x87, 0x6b, 0x4a, 0x15, 0xfa, 0x05,
+	0xc0, 0xf5, 0x7c, 0x28, 0xa3, 0xf7, 0x2a, 0x1e, 0xf0, 0xc5, 0x57, 0xc2, 0xb8, 0x7b, 0x95, 0xd4,
+	0xfc, 0x14, 0xac, 0xdb, 0xdf, 0x9d, 0xfe, 0xf3, 0x74, 0xd9, 0x41, 0x6d, 0x67, 0x91, 0x47, 0x0b,
+	0xfd, 0x0a, 0xe0, 0x0b, 0xda, 0x0e, 0x5a, 0x88, 0xbe, 0x5c, 0x55, 0xe3, 0xfd, 0x2b, 0xe5, 0x6a,
+	0xed, 0xef, 0x28, 0xed, 0xbb, 0xc8, 0xae, 0xa8, 0x5d, 0x17, 0x19, 0x9d, 0x02, 0xf8, 0x52, 0xb9,
+	0xf5, 0x3f, 0x5c, 0x5c, 0x46, 0x79, 0x0e, 0x1a, 0xf7, 0xff, 0x07, 0x82, 0xb6, 0x73, 0x4f, 0xd9,
+	0xb9, 0x83, 0x6e, 0x2f, 0x64, 0xa7, 0xb8, 0xa7, 0xe8, 0x37, 0x00, 0xe1, 0xb4, 0xcd, 0xd1, 0xbd,
+	0x45, 0x04, 0x5d, 0xb8, 0x6e, 0xc6, 0x07, 0x57, 0x4d, 0xd7, 0x66, 0xee, 0x2a, 0x33, 0x6f, 0xa3,
+	0x4e, 0x45, 0x33, 0xd3, 0xc1, 0x23, 0xba, 0xc1, 0xb3, 0x33, 0x13, 0x3c, 0x3f, 0x33, 0xc1, 0xdf,
+	0x67, 0x26, 0x78, 0x72, 0x6e, 0x2e, 0x3d, 0x3f, 0x37, 0x97, 0xfe, 0x38, 0x37, 0x97, 0xbe, 0xfc,
+	0x78, 0xe6, 0xd6, 0x69, 0xdc, 0xf6, 0x01, 0xa1, 0x3e, 0x0d, 0x71, 0xf1, 0xdb, 0x8b, 0x31, 0x8d,
+	0x08, 0x1d, 0x38, 0x27, 0x97, 0x30, 0xaa, 0xbb, 0x19, 0xac, 0xab, 0x7f, 0xbb, 0xde, 0xfa, 0x37,
+	0x00, 0x00, 0xff, 0xff, 0x0f, 0x02, 0x73, 0xc7, 0x8e, 0x0a, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -405,6 +533,7 @@ type QueryClient interface {
 	Rewards(ctx context.Context, in *QueryRewardsRequest, opts ...grpc.CallOption) (*QueryRewardsResponse, error)
 	// Rewards queries the reward factors.
 	RewardFactors(ctx context.Context, in *QueryRewardFactorsRequest, opts ...grpc.CallOption) (*QueryRewardFactorsResponse, error)
+	SPVRewards(ctx context.Context, in *QuerySPVRewardsRequest, opts ...grpc.CallOption) (*QuerySPVRewardsResponse, error)
 }
 
 type queryClient struct {
@@ -442,6 +571,15 @@ func (c *queryClient) RewardFactors(ctx context.Context, in *QueryRewardFactorsR
 	return out, nil
 }
 
+func (c *queryClient) SPVRewards(ctx context.Context, in *QuerySPVRewardsRequest, opts ...grpc.CallOption) (*QuerySPVRewardsResponse, error) {
+	out := new(QuerySPVRewardsResponse)
+	err := c.cc.Invoke(ctx, "/joltify.third_party.incentive.v1beta1.Query/SPVRewards", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Params queries module params.
@@ -450,6 +588,7 @@ type QueryServer interface {
 	Rewards(context.Context, *QueryRewardsRequest) (*QueryRewardsResponse, error)
 	// Rewards queries the reward factors.
 	RewardFactors(context.Context, *QueryRewardFactorsRequest) (*QueryRewardFactorsResponse, error)
+	SPVRewards(context.Context, *QuerySPVRewardsRequest) (*QuerySPVRewardsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -464,6 +603,9 @@ func (*UnimplementedQueryServer) Rewards(ctx context.Context, req *QueryRewardsR
 }
 func (*UnimplementedQueryServer) RewardFactors(ctx context.Context, req *QueryRewardFactorsRequest) (*QueryRewardFactorsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RewardFactors not implemented")
+}
+func (*UnimplementedQueryServer) SPVRewards(ctx context.Context, req *QuerySPVRewardsRequest) (*QuerySPVRewardsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SPVRewards not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -524,6 +666,24 @@ func _Query_RewardFactors_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_SPVRewards_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuerySPVRewardsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).SPVRewards(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/joltify.third_party.incentive.v1beta1.Query/SPVRewards",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).SPVRewards(ctx, req.(*QuerySPVRewardsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "joltify.third_party.incentive.v1beta1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -539,6 +699,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RewardFactors",
 			Handler:    _Query_RewardFactors_Handler,
+		},
+		{
+			MethodName: "SPVRewards",
+			Handler:    _Query_SPVRewards_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -668,6 +832,16 @@ func (m *QueryRewardsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size, err := m.SpvIncentiveClaim.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
 	if len(m.SwapClaims) > 0 {
 		for iNdEx := len(m.SwapClaims) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -742,6 +916,20 @@ func (m *QueryRewardFactorsResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 	_ = i
 	var l int
 	_ = l
+	if len(m.SpvRewardFactors) > 0 {
+		for iNdEx := len(m.SpvRewardFactors) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.SpvRewardFactors[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
 	if len(m.SwapRewardFactors) > 0 {
 		for iNdEx := len(m.SwapRewardFactors) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -753,7 +941,7 @@ func (m *QueryRewardFactorsResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 				i = encodeVarintQuery(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x1a
 		}
 	}
 	if len(m.JoltBorrowRewardFactors) > 0 {
@@ -774,6 +962,80 @@ func (m *QueryRewardFactorsResponse) MarshalToSizedBuffer(dAtA []byte) (int, err
 		for iNdEx := len(m.JoltSupplyRewardFactors) - 1; iNdEx >= 0; iNdEx-- {
 			{
 				size, err := m.JoltSupplyRewardFactors[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QuerySPVRewardsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QuerySPVRewardsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QuerySPVRewardsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Owner) > 0 {
+		i -= len(m.Owner)
+		copy(dAtA[i:], m.Owner)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Owner)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.PoolIndex) > 0 {
+		i -= len(m.PoolIndex)
+		copy(dAtA[i:], m.PoolIndex)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.PoolIndex)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QuerySPVRewardsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QuerySPVRewardsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QuerySPVRewardsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.ClaimableRewards) > 0 {
+		for iNdEx := len(m.ClaimableRewards) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ClaimableRewards[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -856,6 +1118,8 @@ func (m *QueryRewardsResponse) Size() (n int) {
 			n += 1 + l + sovQuery(uint64(l))
 		}
 	}
+	l = m.SpvIncentiveClaim.Size()
+	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
 
@@ -888,6 +1152,44 @@ func (m *QueryRewardFactorsResponse) Size() (n int) {
 	}
 	if len(m.SwapRewardFactors) > 0 {
 		for _, e := range m.SwapRewardFactors {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if len(m.SpvRewardFactors) > 0 {
+		for _, e := range m.SpvRewardFactors {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *QuerySPVRewardsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.PoolIndex)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Owner)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QuerySPVRewardsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.ClaimableRewards) > 0 {
+		for _, e := range m.ClaimableRewards {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -1265,6 +1567,39 @@ func (m *QueryRewardsResponse) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SpvIncentiveClaim", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.SpvIncentiveClaim.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
@@ -1433,7 +1768,7 @@ func (m *QueryRewardFactorsResponse) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SwapRewardFactors", wireType)
 			}
@@ -1464,6 +1799,238 @@ func (m *QueryRewardFactorsResponse) Unmarshal(dAtA []byte) error {
 			}
 			m.SwapRewardFactors = append(m.SwapRewardFactors, MultiRewardIndex{})
 			if err := m.SwapRewardFactors[len(m.SwapRewardFactors)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SpvRewardFactors", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SpvRewardFactors = append(m.SpvRewardFactors, MultiRewardIndex{})
+			if err := m.SpvRewardFactors[len(m.SpvRewardFactors)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QuerySPVRewardsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QuerySPVRewardsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QuerySPVRewardsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PoolIndex", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PoolIndex = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Owner = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QuerySPVRewardsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QuerySPVRewardsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QuerySPVRewardsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ClaimableRewards", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ClaimableRewards = append(m.ClaimableRewards, types.Coin{})
+			if err := m.ClaimableRewards[len(m.ClaimableRewards)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

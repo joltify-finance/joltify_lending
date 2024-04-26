@@ -46,7 +46,6 @@ func newParams() types.Params {
 	data := base64.StdEncoding.EncodeToString(mProjects)
 
 	return types.Params{ProjectInfo: data, Submitter: []sdk.AccAddress{acc}}
-
 }
 
 func TestParamsQuery(t *testing.T) {
@@ -68,5 +67,4 @@ func TestParamsQuery(t *testing.T) {
 	err = proto.Unmarshal(mb, &projects)
 	require.NoError(t, err)
 	require.EqualValues(t, params.ProjectInfo, response.GetParams().ProjectInfo)
-
 }

@@ -16,7 +16,6 @@ option (gogoproto.goproto_getters_all) = false;
 // AccumulationTime stores the previous reward distribution time and its corresponding collateral type
 message AccumulationTime {
   string collateral_type = 1;
-
   google.protobuf.Timestamp previous_accumulation_time = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
 
@@ -29,6 +28,16 @@ message GenesisRewardState {
       [(gogoproto.castrepeated) = "MultiRewardIndexes", (gogoproto.nullable) = false];
 }
 
+
+// GenesisRewardState groups together the global state for a particular reward so it can be exported in genesis.
+message SPVGenesisRewardState {
+  repeated AccumulationTime accumulation_times = 1
+  [(gogoproto.castrepeated) = "AccumulationTimes", (gogoproto.nullable) = false];
+
+  repeated SPVRewardAccIndex  acc_reward_indexs = 2 [(gogoproto.nullable) = false];
+}
+
+
 // GenesisState is the state that must be provided at genesis.
 message GenesisState {
   Params params = 1 [(gogoproto.nullable) = false];
@@ -39,11 +48,14 @@ message GenesisState {
 
   GenesisRewardState swap_reward_state = 4 [(gogoproto.nullable) = false];
 
-  repeated JoltLiquidityProviderClaim jolt_liquidity_provider_claims = 5
+  SPVGenesisRewardState spv_reward_state = 5 [(gogoproto.nullable) = false];
+
+  repeated JoltLiquidityProviderClaim jolt_liquidity_provider_claims = 6
       [(gogoproto.castrepeated) = "JoltLiquidityProviderClaims", (gogoproto.nullable) = false];
 
-  repeated SwapClaim swap_claims = 6 [
+  repeated SwapClaim swap_claims = 7 [
     (gogoproto.castrepeated) = "SwapClaims",
     (gogoproto.nullable) = false
   ];
+
 }
