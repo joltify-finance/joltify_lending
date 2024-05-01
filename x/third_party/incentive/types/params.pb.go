@@ -244,8 +244,6 @@ type ParamsV19 struct {
 	ClaimEnd                time.Time            `protobuf:"bytes,6,opt,name=claim_end,json=claimEnd,proto3,stdtime" json:"claim_end"`
 }
 
-
-
 func (m *ParamsV19) Reset()         { *m = ParamsV19{} }
 func (m *ParamsV19) String() string { return proto.CompactTextString(m) }
 func (*ParamsV19) ProtoMessage()    {}

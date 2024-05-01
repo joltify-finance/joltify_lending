@@ -108,13 +108,12 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 		if !found {
 			continue
 		}
-		err := k.NftKeeper.Burn(ctx, ids[0], ids[1])
+		err := k.ArchiveNFT(ctx, ids[0], ids[1])
 		if err != nil {
-			return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(err, "burn nft failed")
+			return &types.MsgWithdrawPrincipalResponse{}, coserrors.Wrapf(err, "archive nft failed")
 		}
 	}
-	k.SetDepositorHistory(ctx, depositor)
-	k.DelDepositor(ctx, depositor)
+	k.ArchieveDepositor(ctx, depositor)
 	poolInfo.ProcessedTransferAccounts = deleteElement(poolInfo.ProcessedTransferAccounts, depositor.DepositorAddress)
 	poolInfo.ProcessedWithdrawAccounts = deleteElement(poolInfo.ProcessedWithdrawAccounts, depositor.DepositorAddress)
 
@@ -135,8 +134,7 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 			k.SetReserve(ctx, reserve)
 		}
 
-		k.DelPool(ctx, poolInfo.Index)
-		k.SetHistoryPool(ctx, poolInfo)
+		k.ArchivePool(ctx, poolInfo)
 
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(

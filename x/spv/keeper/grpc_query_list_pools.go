@@ -37,3 +37,31 @@ func (k Keeper) ListPools(goCtx context.Context, req *types.QueryListPoolsReques
 
 	return &types.QueryListPoolsResponse{PoolsInfo: poolsInfos, Pagination: pageRes}, nil
 }
+
+func (k Keeper) ListHistoryPools(goCtx context.Context, req *types.QueryListPoolsRequest) (*types.QueryListPoolsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	store := ctx.KVStore(k.storeKey)
+	investorStores := prefix.NewStore(store, types.KeyPrefix(types.HistoryPool))
+
+	var poolsInfos []*types.PoolInfo
+
+	pageRes, err := query.Paginate(investorStores, req.Pagination, func(key []byte, value []byte) error {
+		var poolInfo types.PoolInfo
+		if err := k.cdc.Unmarshal(value, &poolInfo); err != nil {
+			return err
+		}
+
+		poolsInfos = append(poolsInfos, &poolInfo)
+		return nil
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryListPoolsResponse{PoolsInfo: poolsInfos, Pagination: pageRes}, nil
+}

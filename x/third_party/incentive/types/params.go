@@ -298,5 +298,4 @@ func (m *ParamsV19) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyClaimEnd, &m.ClaimEnd, validateClaimEndParam),
 		paramtypes.NewParamSetPair(KeySwapRewardPeriods, &m.SwapRewardPeriods, validateMultiRewardPeriodsParam),
 	}
-
 }

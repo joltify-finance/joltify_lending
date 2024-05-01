@@ -76,6 +76,7 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 				}
 				k.HandlePrincipalPayment(ctx, &poolInfo)
 			}
+
 			k.SetPool(ctx, poolInfo)
 		}
 		return false
