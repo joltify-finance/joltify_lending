@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
+	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -91,6 +92,24 @@ func CreateUpgradeHandlerForV021Upgrade(
 				panic("fail to update final payment" + err.Error())
 			}
 		}
+
+		// fix the incorrect reward store
+		rewards, ok := incentiveKeeper.GetSPVReward(ctx, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9")
+		if !ok {
+			panic("fail to find the reward")
+		}
+
+		var newrewards sdk.Coins
+		for _, el := range rewards.PaymentAmount {
+			amt := el.Amount.Quo(sdk.NewInt(1e12))
+			c := sdk.NewCoin("ujolt", amt)
+			newrewards.Add(c)
+		}
+
+		rt := types2.SPVRewardAccTokens{
+			PaymentAmount: newrewards,
+		}
+		incentiveKeeper.SetSPVReward(ctx, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", rt)
 		return mm.RunMigrations(ctx, configurator, vm)
 	}
 }
