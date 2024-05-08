@@ -6,7 +6,6 @@ import (
 
 	"cosmossdk.io/math"
 
-	"github.com/cometbft/cometbft/libs/rand"
 	"github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -37,7 +36,7 @@ func GenerateTestProjects() []*ProjectInfo {
 		}
 		pi := ProjectInfo{
 			Index:                        int32(i + 1),
-			SPVName:                      strconv.Itoa(i) + ":" + rand.NewRand().Str(10),
+			SPVName:                      strconv.Itoa(i) + ":" + "test projects",
 			ProjectOwner:                 acc,
 			BasicInfo:                    &b,
 			ProjectLength:                480, // 5 mins
