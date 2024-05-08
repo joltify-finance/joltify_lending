@@ -26,6 +26,7 @@ var (
 
 	IncentiveMacc = ModuleName
 	oneYear       = time.Hour * 24 * 365
+	TIME_LAYOUT   = "2006-01-02 15:04:05"
 )
 
 // NewParams returns a new params object
@@ -43,6 +44,12 @@ func NewParams(joltSupply, joltBorrow, swap, spv MultiRewardPeriods, multipliers
 
 // DefaultParams returns default params for incentive module
 func DefaultParams() Params {
+
+	timeNow, err := time.Parse(TIME_LAYOUT, "2024-05-08 00:00:00")
+	if err != nil {
+		panic(err)
+	}
+
 	params := NewParams(
 		// suply
 		MultiRewardPeriods{
@@ -52,18 +59,18 @@ func DefaultParams() Params {
 		// borrow
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
-			NewMultiRewardPeriod(true, "abnb", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
-			NewMultiRewardPeriod(true, "ausdc", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
+			NewMultiRewardPeriod(true, "abnb", timeNow.Add(-1*oneYear), timeNow.Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
+			NewMultiRewardPeriod(true, "ausdc", timeNow.Add(-1*oneYear), timeNow.Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 		},
 		// swap
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
-			NewMultiRewardPeriod(true, "abnb:ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
+			NewMultiRewardPeriod(true, "abnb:ujolt", timeNow.Add(-1*oneYear), timeNow.Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(2378)))),
 		},
 		// spv
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
-			NewMultiRewardPeriod(true, "0x4f1f7526042987d595fa135ed33a392a98bcc31f7ad79d6a5928e753ff7e8c8c", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(2000)), sdk.NewCoin("uoppy", sdk.NewInt(100)))),
+			NewMultiRewardPeriod(true, "0x4f1f7526042987d595fa135ed33a392a98bcc31f7ad79d6a5928e753ff7e8c8c", timeNow.Add(-1*oneYear), timeNow.Add(oneYear), sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(2000)), sdk.NewCoin("uoppy", sdk.NewInt(100)))),
 		},
 
 		MultipliersPerDenoms{
@@ -74,7 +81,7 @@ func DefaultParams() Params {
 				},
 			},
 		},
-		time.Now().Add(oneYear),
+		timeNow.Add(oneYear),
 	)
 	return params
 }
