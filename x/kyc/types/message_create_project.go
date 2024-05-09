@@ -70,6 +70,11 @@ func ValidateProject(p ProjectInfo) error {
 	if freq < 0 {
 		return errors.New("pay freq cannot be negative")
 	}
+
+	if p.ProjectLength%uint64(freq) != 0 {
+		return errors.New("project length should be multiple of pay freq")
+	}
+
 	return nil
 }
 
