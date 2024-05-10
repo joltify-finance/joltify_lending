@@ -209,7 +209,8 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmou
 
 	// we start the project
 	if len(poolInfo.PoolNFTIds) == 1 {
-		poolInfo.ProjectDueTime = ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.ProjectLength))
+		pl := ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.ProjectLength))
+		poolInfo.ProjectDueTime = pl.Truncate(time.Duration(poolInfo.PayFreq) * time.Second)
 		poolInfo.PoolFirstDueTime = poolInfo.ProjectDueTime
 	}
 

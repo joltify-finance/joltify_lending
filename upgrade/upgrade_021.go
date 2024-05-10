@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -11,6 +12,7 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	"github.com/cosmos/gogoproto/proto"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
+	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"
 
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 )
@@ -110,6 +112,22 @@ func CreateUpgradeHandlerForV021Upgrade(
 			PaymentAmount: newrewards,
 		}
 		incentiveKeeper.SetSPVReward(ctx, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", rt)
+
+		// we now update the project due time
+		spvKeeper.IteratePool(ctx, func(poolInfo spvmoduletypes.PoolInfo) bool {
+			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_PooLPayPartially {
+				previousDueTime := poolInfo.ProjectDueTime
+				if poolInfo.ProjectDueTime.Before(poolInfo.LastPaymentTime) {
+					fmt.Printf("we have to correct the due time")
+					previousDueTime = poolInfo.LastPaymentTime.Add(time.Duration(poolInfo.PayFreq) * time.Second)
+				}
+
+				poolInfo.ProjectDueTime = previousDueTime.Truncate(time.Duration(poolInfo.PayFreq) * time.Second)
+				spvKeeper.SetPool(ctx, poolInfo)
+			}
+			return false
+		})
+
 		return mm.RunMigrations(ctx, configurator, vm)
 	}
 }
