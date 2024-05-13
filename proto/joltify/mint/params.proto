@@ -9,23 +9,15 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/mint/types";
 message Params {
   option (gogoproto.goproto_stringer) = false;
 
-  uint64 halfCount = 1 [(gogoproto.moretags) = "yaml:\"half_Count\""];
-  string first_provisions = 2 [
+  string first_provisions = 1 [
     (gogoproto.moretags) = "yaml:\"each_provisions\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-
-  string current_provisions = 3 [
-    (gogoproto.moretags) = "yaml:\"each_provisions\"",
+  string node_sPY = 2   [
+    (gogoproto.moretags) = "yaml:\"node_aPY\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-
-  string unit=4;
-  string community_provisions = 5[
-  (gogoproto.moretags) = "yaml:\"each_provisions\"",
-  (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-  (gogoproto.nullable) = false
-  ];
+  string unit=3;
 }

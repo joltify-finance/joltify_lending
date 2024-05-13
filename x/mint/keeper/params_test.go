@@ -21,9 +21,7 @@ func TestGetParams(t *testing.T) {
 	params := types.DefaultParams()
 	k.SetParams(ctx, params)
 	require.EqualValues(t, params, k.GetParams(ctx))
-	require.EqualValues(t, params.FirstProvisions, k.CurrentProvision(ctx))
 	require.EqualValues(t, params.FirstProvisions, k.FirstProvision(ctx))
 	require.EqualValues(t, params.Unit, k.Unit(ctx))
-	require.EqualValues(t, params.CommunityProvisions, k.CommunityProvision(ctx))
-	require.EqualValues(t, params.HalfCount, k.HalfCount(ctx))
+	require.EqualValues(t, params.NodeSPY, k.GetNodeAPY(ctx))
 }

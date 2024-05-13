@@ -72,8 +72,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	var typePrefix string
 	// sort the pool and returned otherwise the test may fail as it assume the pool comes with senior first
 	for index, targetAmount := range msg.TargetTokenAmount {
-
-		if targetAmount.Denom != types.SupportedToken {
+		if !isSupportedTokens(targetAmount.Denom) {
 			return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", "unsupported token")
 		}
 

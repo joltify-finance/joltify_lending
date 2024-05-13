@@ -85,6 +85,10 @@ func InitGenesis(
 	for _, mri := range gs.SpvRewardState.AccRewardIndexs {
 		k.SetSPVReward(ctx, mri.CollateralType, mri.AccReward)
 	}
+
+	for _, eachInvestor := range gs.SpvRewardState.SpvInvestors {
+		k.SetSPVInvestorReward(ctx, eachInvestor.Pool, eachInvestor.Wallet, eachInvestor.Reward)
+	}
 }
 
 func getSPVGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.SPVGenesisRewardState {
@@ -103,7 +107,18 @@ func getSPVGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.SPVGe
 		return false
 	})
 
-	return types.NewSPVGenesisRewardState(ats, mris)
+	var spvInvestors []*types.SPVGenRewardInvestorState
+	keeper.IterateSPVInvestorReward(ctx, func(key string, reward types.SPVRewardAccTokens) bool {
+		out := strings.TrimPrefix(key, types.Incentiveclassprefix)
+		data := strings.Split(out, "-")
+		poolID := data[0]
+		walletAddr := data[1]
+		fmt.Printf(">>>%v:%v\n", data, poolID)
+		spvInvestors = append(spvInvestors, &types.SPVGenRewardInvestorState{Wallet: walletAddr, Pool: poolID, Reward: reward.PaymentAmount})
+		return false
+	})
+
+	return types.NewSPVGenesisRewardState(ats, mris, spvInvestors)
 }
 
 func getSwapGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {

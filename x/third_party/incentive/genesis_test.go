@@ -1,7 +1,6 @@
 package incentive_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -190,6 +189,11 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 				CollateralType: "bnb",
 				AccReward:      a,
 			}},
+			[]*types.SPVGenRewardInvestorState{{
+				Pool:   "spv:1",
+				Wallet: suite.addrs[0].String(),
+				Reward: sdk.NewCoins(sdk.NewCoin("jolt", sdk.NewInt(1e9))),
+			}},
 		),
 
 		types.JoltLiquidityProviderClaims{
@@ -233,8 +237,6 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 	)
 
 	exportedGenesisState := incentive.ExportGenesis(ctx, tApp.GetIncentiveKeeper())
-	fmt.Printf("%v\n", exportedGenesisState.String())
-	fmt.Printf("%v\n", genesisState.String())
 	suite.True(exportedGenesisState.String() == genesisState.String())
 	// suite.Equal(genesisState.String(), exportedGenesisState.String())
 }

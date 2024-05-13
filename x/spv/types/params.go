@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -21,11 +22,13 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	// 100 usdc
-	amt, ok := sdk.NewIntFromString("100000000000000000000")
+	// amt, ok := sdk.NewIntFromString("100000000000000000000")
+	amt, ok := sdk.NewIntFromString("10000000000000000")
 	if !ok {
 		panic("invalid threshold setting")
 	}
-	return Params{BurnThreshold: sdk.NewCoin(SupportedToken, amt)}
+	us := sdk.NewCoin("ausdc", amt)
+	return Params{BurnThreshold: sdk.NewCoins(us)}
 }
 
 // DefaultParams returns a default set of parameters
@@ -40,13 +43,25 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	}
 }
 
+func isSupportedTokens(token string) bool {
+	supported := strings.Split(SupportedToken, ",")
+	for _, val := range supported {
+		if val == token {
+			return true
+		}
+	}
+	return false
+}
+
 func validateBurnToken(i interface{}) error {
-	co, ok := i.(sdk.Coin)
+	co, ok := i.(sdk.Coins)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
-	if co.Denom != SupportedToken {
-		return fmt.Errorf("we only accept ausdc and current is %v", co.Denom)
+	for _, c := range co {
+		if !isSupportedTokens(c.Denom) {
+			return fmt.Errorf("we only accept %s as supported tokens", SupportedToken)
+		}
 	}
 	return nil
 }

@@ -5,32 +5,46 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/client"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 )
 
-func (k Keeper) FirstDist(ctx sdk.Context) error {
-	if client.MAINNETFLAG == "false" {
-		firstDrop, ok := sdk.NewIntFromString("1000000000000000000")
-		if !ok {
-			panic("should never fail")
-		}
+const MAXMINT = 100000000
 
-		c1 := sdk.NewCoin("ujolt", firstDrop)
-		c2 := sdk.NewCoin("abnb", firstDrop)
-		c3 := sdk.NewCoin("uoppy", firstDrop)
-		newCoins := sdk.NewCoins(c1, c2, c3)
-		err := k.bankKeeper.MintCoins(ctx, types.ModuleName, newCoins)
-		if err != nil {
-			return err
-		}
-		err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, incentivetypes.ModuleName, newCoins)
-		if err != nil {
-			return err
-		}
+func (k Keeper) FirstDist(ctx sdk.Context) error {
+	if client.MAINNETFLAG == "unittest" {
+		return nil
 	}
+
+	base := sdk.NewInt(1000000)
+	firstDropIncentive := sdk.NewInt(100000)
+
+	c1 := sdk.NewCoin("ujolt", firstDropIncentive.Mul(base))
+	incentiveReceived := sdk.NewCoins(c1)
+
+	firstDropCommunity := sdk.NewInt(20000000)
+	c2 := sdk.NewCoin("ujolt", firstDropCommunity.Mul(base))
+
+	minttedCoin := incentiveReceived.Add(c2)
+
+	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, minttedCoin)
+	if err != nil {
+		return err
+	}
+	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, incentivetypes.ModuleName, incentiveReceived)
+	if err != nil {
+		return err
+	}
+
+	err = k.distributionKeeper.FundCommunityPool(ctx, sdk.NewCoins(c2), k.accountKeeper.GetModuleAddress(types.ModuleName))
+	if err != nil {
+		panic("fail to fund the community pool" + err.Error())
+	}
+
 	return nil
 }
 
@@ -54,45 +68,49 @@ func (k Keeper) GetDistInfo(ctx sdk.Context) (h types.HistoricalDistInfo) {
 	return h
 }
 
-func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params) error {
-	newCoins := sdk.NewCoins(sdk.NewCoin("ujolt", pa.CurrentProvisions.TruncateInt()))
-	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, newCoins)
+func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params, delta time.Duration) (sdk.Coins, error) {
+	truncatedDelta := int64(delta.Truncate(time.Second).Seconds())
+	interestFactor := CalculateInterestFactor(pa.NodeSPY, sdkmath.NewInt(truncatedDelta))
+
+	totalBoned := k.stakingKeeper.TotalBondedTokens(ctx)
+
+	minttedAmt := interestFactor.Sub(sdk.OneDec()).MulInt(totalBoned)
+	minttedCoins := sdk.NewCoins(sdk.NewCoin("ujolt", minttedAmt.TruncateInt()))
+
+	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, minttedCoins)
 	if err != nil {
-		return err
+		return sdk.Coins{}, err
 	}
 
-	amountToCommunity := pa.CurrentProvisions.Mul(sdk.MustNewDecFromStr("0.15"))
-	communityCoins := sdk.NewCoins(sdk.NewCoin("ujolt", amountToCommunity.TruncateInt()))
-	feeCollector := newCoins.Sub(communityCoins...)
-
-	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.feeCollectorName, feeCollector)
+	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, k.feeCollectorName, minttedCoins)
 	if err != nil {
-		return err
-	}
-
-	addr := k.accountKeeper.GetModuleAddress(types.ModuleName)
-	err = k.distributionKeeper.FundCommunityPool(ctx, communityCoins, addr)
-	if err != nil {
-		return err
+		return sdk.Coins{}, err
 	}
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeMint,
-			sdk.NewAttribute(types.AttributeKeyEachProvisions, pa.CurrentProvisions.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, newCoins.String()),
+			sdk.NewAttribute(types.AttributeKeySPY, pa.NodeSPY.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, minttedCoins.String()),
 		),
 	)
 
-	return nil
+	return minttedCoins, nil
 }
 
 func (k Keeper) DoDistribute(ctx sdk.Context) {
 	h := k.GetDistInfo(ctx)
 	pa := k.GetParams(ctx)
-	if pa.CurrentProvisions.TruncateInt().IsZero() {
+	if pa.NodeSPY.IsZero() {
 		return
 	}
+
+	base := sdk.NewInt(1000000)
+	maxMint := base.Mul(sdk.NewInt(MAXMINT))
+	if h.TotalMintCoins.AmountOf("ujolt").GTE(maxMint) {
+		return
+	}
+
 	previousDistTime := h.PayoutTime
 	currentTime := ctx.BlockTime()
 	delta := currentTime.Sub(previousDistTime)
@@ -106,6 +124,7 @@ func (k Keeper) DoDistribute(ctx sdk.Context) {
 		}
 
 	case "minute":
+		// we distribute the token every 5 minutes
 		truncatedDelta = delta.Truncate(time.Second)
 		if truncatedDelta < time.Second*60 {
 			return
@@ -114,15 +133,11 @@ func (k Keeper) DoDistribute(ctx sdk.Context) {
 		panic("invalid unit")
 	}
 
-	err := k.mintCoinsAndDistribute(ctx, pa)
+	minttedAmt, err := k.mintCoinsAndDistribute(ctx, pa, delta)
 	if err != nil {
 		ctx.Logger().Error("fail to mint the token", "mint", err.Error())
 	}
 	h.PayoutTime = currentTime
-	h.DistributedRound++
-	if h.DistributedRound > 0 && h.DistributedRound%pa.HalfCount == 0 {
-		pa.CurrentProvisions = pa.CurrentProvisions.QuoTruncate(sdk.MustNewDecFromStr("2"))
-	}
+	h.TotalMintCoins = h.TotalMintCoins.Add(minttedAmt.Sort()...)
 	k.SetDistInfo(ctx, h)
-	k.SetParams(ctx, pa)
 }
