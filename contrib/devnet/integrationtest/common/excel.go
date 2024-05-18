@@ -63,7 +63,6 @@ func WriteDataToExcel(sheetName string, data [][]string, fileName string) {
 			return
 		}
 		err = f.SetSheetRow(sheetName, cell, &data[idx])
-
 		if err != nil {
 			fmt.Printf(">>>>set sheet row error %v\n", err)
 			return

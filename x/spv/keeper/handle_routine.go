@@ -248,10 +248,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	for _, el := range withdrawAccounts[1:] {
 		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
-			// TODO this is temporary solution, will be removed in the future and return to panic
-			ctx.Logger().Error("###############deposit not found", "addresse", el.String())
-			continue
-			// panic("should never fail to find the depositor")
+			panic("should never fail to find the depositor")
 		}
 
 		interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)

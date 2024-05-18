@@ -15,6 +15,7 @@ var (
 	DefaultSPVGenesisRewardState = NewSPVGenesisRewardState(
 		AccumulationTimes{},
 		[]SPVRewardAccIndex{},
+		[]*SPVGenRewardInvestorState{},
 	)
 )
 
@@ -76,10 +77,11 @@ func NewGenesisRewardState(accumTimes AccumulationTimes, indexes MultiRewardInde
 }
 
 // NewSPVGenesisRewardState returns a new GenesisRewardState
-func NewSPVGenesisRewardState(accumTimes AccumulationTimes, indexes []SPVRewardAccIndex) SPVGenesisRewardState {
+func NewSPVGenesisRewardState(accumTimes AccumulationTimes, indexes []SPVRewardAccIndex, spvinvestorsRewards []*SPVGenRewardInvestorState) SPVGenesisRewardState {
 	return SPVGenesisRewardState{
 		AccumulationTimes: accumTimes,
 		AccRewardIndexs:   indexes,
+		SpvInvestors:      spvinvestorsRewards,
 	}
 }
 

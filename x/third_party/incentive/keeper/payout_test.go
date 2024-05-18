@@ -112,7 +112,7 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 	type testCases []testCase
 
 	// we need to set the flag to avoid sending tokens to incentive module
-	client.MAINNETFLAG = "true"
+	client.MAINNETFLAG = "unittest"
 
 	tests := testCases{
 		{
@@ -360,7 +360,6 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 			)
 
 			if tc.args.mintModAccountCoins {
-				fmt.Printf(">>>>>%v\n", tc.args.period.Amount)
 				err := fundModuleAccount(suite.app.GetBankKeeper(), suite.ctx, types2.ModuleName, tc.args.period.Amount)
 				suite.Require().NoError(err)
 

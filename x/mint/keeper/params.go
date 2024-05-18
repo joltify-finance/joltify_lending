@@ -9,10 +9,8 @@ import (
 func (k Keeper) GetParams(ctx sdk.Context) types.Params {
 	return types.NewParams(
 		k.FirstProvision(ctx),
-		k.CurrentProvision(ctx),
 		k.Unit(ctx),
-		k.CommunityProvision(ctx),
-		k.HalfCount(ctx),
+		k.GetNodeAPY(ctx),
 	)
 }
 
@@ -21,9 +19,8 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
-// CurrentProvision returns the CurrentProvision param
-func (k Keeper) CurrentProvision(ctx sdk.Context) (res sdk.Dec) {
-	k.paramstore.Get(ctx, types.KeyCurrentProvision, &res)
+func (k Keeper) GetNodeAPY(ctx sdk.Context) (res sdk.Dec) {
+	k.paramstore.Get(ctx, types.NodeSPY, &res)
 	return
 }
 
@@ -36,17 +33,5 @@ func (k Keeper) FirstProvision(ctx sdk.Context) (res sdk.Dec) {
 // Unit returns the CurrentProvision param
 func (k Keeper) Unit(ctx sdk.Context) (res string) {
 	k.paramstore.Get(ctx, types.KeyUnit, &res)
-	return
-}
-
-// CommunityProvision returns the CurrentProvision param
-func (k Keeper) CommunityProvision(ctx sdk.Context) (res sdk.Dec) {
-	k.paramstore.Get(ctx, types.KeyCommunityProvision, &res)
-	return
-}
-
-// HalfCount returns the half count param
-func (k Keeper) HalfCount(ctx sdk.Context) (res uint64) {
-	k.paramstore.Get(ctx, types.KeyHalfCount, &res)
 	return
 }

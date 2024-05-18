@@ -2,6 +2,7 @@ syntax = "proto3";
 package joltify.third_party.incentive.v1beta1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "joltify/third_party/incentive/v1beta1/claims.proto";
 import "joltify/third_party/incentive/v1beta1/params.proto";
 import "google/protobuf/timestamp.proto";
@@ -35,8 +36,17 @@ message SPVGenesisRewardState {
   [(gogoproto.castrepeated) = "AccumulationTimes", (gogoproto.nullable) = false];
 
   repeated SPVRewardAccIndex  acc_reward_indexs = 2 [(gogoproto.nullable) = false];
+  repeated SPVGenRewardInvestorState spv_investors = 8;
 }
 
+message SPVGenRewardInvestorState {
+  string wallet = 1;
+  string pool = 2;
+  repeated  cosmos.base.v1beta1.Coin reward = 3[
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false];
+
+}
 
 // GenesisState is the state that must be provided at genesis.
 message GenesisState {

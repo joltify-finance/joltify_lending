@@ -17,7 +17,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		panic(err)
 	}
 
-	h := types.HistoricalDistInfo{}
+	h := types.HistoricalDistInfo{PayoutTime: ctx.BlockTime(), TotalMintCoins: sdk.NewCoins()}
 	k.SetDistInfo(ctx, h)
 }
 

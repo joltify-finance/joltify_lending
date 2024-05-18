@@ -1,6 +1,10 @@
 package keeper
 
 import (
+	"strings"
+
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
@@ -10,6 +14,19 @@ func (k Keeper) GetParams(ctx sdk.Context) types.Params {
 	var param types.Params
 	k.paramstore.GetParamSet(ctx, &param)
 	return param
+}
+
+// GetParams get all parameters as types.Params
+func (k Keeper) GetParamsV21(ctx sdk.Context) sdkmath.Int {
+	ret := k.paramstore.GetRaw(ctx, types.KeyBurnThreshold)
+	out := strings.Split(string(ret), "\"")
+
+	amt, ok := sdk.NewIntFromString(out[len(out)-2])
+	if !ok {
+		panic("fail to convert")
+	}
+
+	return amt
 }
 
 // SetParams set the params

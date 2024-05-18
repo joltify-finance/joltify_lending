@@ -3,6 +3,8 @@ package mint_test
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	tmlog "github.com/cometbft/cometbft/libs/log"
 	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
@@ -15,22 +17,31 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
-	genesisState := types.GenesisState{
-		Params: types.DefaultParams(),
-		// this line is used by starport scaffolding # genesis/test/state
-	}
 	lg := tmlog.TestingLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
 	k := tApp.GetMintKeeper()
-	mint.InitGenesis(ctx, k, genesisState)
+
+	genesisState := types.GenesisState{
+		Params: types.DefaultParams(),
+		HistoricalDistInfo: &types.HistoricalDistInfo{
+			PayoutTime:     ctx.BlockTime(),
+			TotalMintCoins: sdk.NewCoins(),
+		},
+	}
+
+	k.SetParams(ctx, genesisState.Params)
+	k.SetDistInfo(ctx, *genesisState.HistoricalDistInfo)
+	_ = genesisState
 	got := mint.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
 
 	history := got.Params
+
+	historyTime := got.HistoricalDistInfo.PayoutTime
+
 	defaultparam := types.DefaultParams()
-	assert.Equal(t, history.CommunityProvisions, defaultparam.CommunityProvisions)
-	assert.Equal(t, history.CurrentProvisions, defaultparam.CurrentProvisions)
-	assert.Equal(t, history.HalfCount, defaultparam.GetHalfCount())
 	assert.Equal(t, history.FirstProvisions, defaultparam.FirstProvisions)
+	assert.Equal(t, history.NodeSPY, defaultparam.NodeSPY)
+	assert.True(t, historyTime.Equal(ctx.BlockTime()))
 }

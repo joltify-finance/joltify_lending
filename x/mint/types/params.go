@@ -14,23 +14,14 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 
 var (
 	KeyFirstProvision     = []byte("FirstProvision")
-	DefaultFirstProvision = sdk.MustNewDecFromStr("85616438.3562")
-	KeyCurrentProvision   = []byte("CurrentProvision")
-)
-
-var (
-	DefaultHalfCount = uint64(60 * 24 * 365)
-	KeyHalfCount     = []byte("HalfCount")
+	DefaultFirstProvision = sdk.MustNewDecFromStr("0")
+	DefaultNodeSPY        = sdk.MustNewDecFromStr("1.000000002440418609")
+	NodeSPY               = []byte("NodeSPY")
 )
 
 var (
 	KeyUnit     = []byte("Unit")
 	DefaultUnit = "minute"
-)
-
-var (
-	KeyCommunityProvision     = []byte("CommunityProvision")
-	DefaultCommunityProvision = sdk.MustNewDecFromStr("50000000000000")
 )
 
 // ParamKeyTable the param key table for launch module
@@ -41,17 +32,13 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams(
 	firstProvision sdk.Dec,
-	currentProvision sdk.Dec,
 	unit string,
-	communityProvision sdk.Dec,
-	halfCount uint64,
+	nodeSPY sdk.Dec,
 ) Params {
 	return Params{
-		FirstProvisions:     firstProvision,
-		CurrentProvisions:   currentProvision,
-		Unit:                unit,
-		CommunityProvisions: communityProvision,
-		HalfCount:           halfCount,
+		FirstProvisions: firstProvision,
+		Unit:            unit,
+		NodeSPY:         nodeSPY,
 	}
 }
 
@@ -59,10 +46,8 @@ func NewParams(
 func DefaultParams() Params {
 	params := NewParams(
 		DefaultFirstProvision,
-		DefaultFirstProvision,
 		DefaultUnit,
-		DefaultCommunityProvision,
-		DefaultHalfCount,
+		DefaultNodeSPY,
 	)
 	return params
 }
@@ -72,9 +57,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyFirstProvision, &p.FirstProvisions, validateEachProvision),
 		paramtypes.NewParamSetPair(KeyUnit, &p.Unit, validateUnit),
-		paramtypes.NewParamSetPair(KeyCommunityProvision, &p.CommunityProvisions, validateEachProvision),
-		paramtypes.NewParamSetPair(KeyHalfCount, &p.HalfCount, validateHalfCount),
-		paramtypes.NewParamSetPair(KeyCurrentProvision, &p.CurrentProvisions, validateEachProvision),
+		paramtypes.NewParamSetPair(NodeSPY, &p.NodeSPY, validateSPY),
 	}
 }
 
@@ -86,9 +69,11 @@ func (p Params) Validate() error {
 	if err := validateUnit(p.Unit); err != nil {
 		return err
 	}
-	if err := validateHalfCount(p.HalfCount); err != nil {
+
+	if err := validateSPY(p.NodeSPY); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -98,15 +83,13 @@ func (p Params) String() string {
 	return string(out)
 }
 
-// validateTotalCount validates the TotalDays param
-func validateHalfCount(v interface{}) error {
-	halfCount, ok := v.(uint64)
+func validateSPY(v interface{}) error {
+	nodeAPY, ok := v.(sdk.Dec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", v)
 	}
-
-	if halfCount < 1 {
-		return fmt.Errorf("total Count should not be larger than 1")
+	if nodeAPY.IsNil() || nodeAPY.IsNegative() {
+		return fmt.Errorf("nodeAPY should not be nil or negtive")
 	}
 	return nil
 }
