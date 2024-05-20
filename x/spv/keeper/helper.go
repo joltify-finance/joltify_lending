@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
 func denomConvertToLocalAndUsd(in string) (string, string) {
@@ -29,14 +28,4 @@ func deleteElement(slice []sdk.AccAddress, element sdk.AccAddress) []sdk.AccAddr
 	}
 	// Element not found, return original slice
 	return slice
-}
-
-func isSupportedTokens(token string) bool {
-	supported := strings.Split(types.SupportedToken, ",")
-	for _, val := range supported {
-		if val == token {
-			return true
-		}
-	}
-	return false
 }

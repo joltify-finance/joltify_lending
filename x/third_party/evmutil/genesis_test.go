@@ -3,8 +3,6 @@ package evmutil_test
 import (
 	"testing"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
-
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/suite"
 
@@ -19,7 +17,6 @@ type genesisTestSuite struct {
 }
 
 func (suite *genesisTestSuite) SetupTest() {
-	types2.SupportedToken = "ausdc"
 	suite.Suite.SetupTest()
 }
 

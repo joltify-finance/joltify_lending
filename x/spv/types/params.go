@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -43,25 +42,14 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	}
 }
 
-func isSupportedTokens(token string) bool {
-	supported := strings.Split(SupportedToken, ",")
-	for _, val := range supported {
-		if val == token {
-			return true
-		}
-	}
-	return false
-}
-
 func validateBurnToken(i interface{}) error {
 	co, ok := i.(sdk.Coins)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
-	for _, c := range co {
-		if !isSupportedTokens(c.Denom) {
-			return fmt.Errorf("we only accept %s as supported tokens", SupportedToken)
-		}
+
+	if !co.IsValid() {
+		return fmt.Errorf("invalid coins: %s", co)
 	}
 	return nil
 }

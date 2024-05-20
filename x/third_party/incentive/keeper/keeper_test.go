@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"testing"
 	"time"
 
@@ -31,7 +30,6 @@ type KeeperTestSuite struct {
 
 // SetupTest is run automatically before each suite test
 func (suite *KeeperTestSuite) SetupTest() {
-	types.SupportedToken = "ausdc"
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
 

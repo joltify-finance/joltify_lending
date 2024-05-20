@@ -3,8 +3,6 @@ package vault_test
 import (
 	"testing"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
-
 	keepertest "github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/testutil/nullify"
 	"github.com/joltify-finance/joltify_lending/x/vault"
@@ -13,7 +11,6 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
-	types2.SupportedToken = "ausdc"
 	genesisState := types.GenesisState{
 		Params: types.DefaultParams(),
 

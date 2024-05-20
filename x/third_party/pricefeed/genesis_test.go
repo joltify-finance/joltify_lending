@@ -1,7 +1,6 @@
 package pricefeed_test
 
 import (
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"testing"
 
 	tmlog "github.com/cometbft/cometbft/libs/log"
@@ -27,7 +26,6 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	types.SupportedToken = "ausdc"
 	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.ctx = suite.tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 	suite.keeper = suite.tApp.GetPriceFeedKeeper()

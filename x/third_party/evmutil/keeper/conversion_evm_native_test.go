@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 	"math/big"
 	"testing"
 
@@ -19,7 +18,6 @@ type ConversionTestSuite struct {
 }
 
 func TestConversionTestSuite(t *testing.T) {
-	types2.SupportedToken = "ausdc"
 	suite.Run(t, new(ConversionTestSuite))
 }
 

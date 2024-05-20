@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
@@ -19,7 +18,6 @@ type invariantTestSuite struct {
 }
 
 func (suite *invariantTestSuite) SetupTest() {
-	types2.SupportedToken = "ausdc"
 	suite.Suite.SetupTest()
 	suite.invariants = make(map[string]map[string]sdk.Invariant)
 	keeper.RegisterInvariants(suite, suite.Keeper)

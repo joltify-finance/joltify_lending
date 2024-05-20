@@ -5,8 +5,6 @@ import (
 	"math/big"
 	"testing"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
-
 	"github.com/stretchr/testify/suite"
 
 	sdkmath "cosmossdk.io/math"
@@ -22,7 +20,6 @@ type convertCosmosCoinToERC20Suite struct {
 }
 
 func TestConversionCosmosNativeToEvmSuite(t *testing.T) {
-	types2.SupportedToken = "ausdc"
 	suite.Run(t, new(convertCosmosCoinToERC20Suite))
 }
 
@@ -195,7 +192,6 @@ type convertCosmosCoinFromERC20Suite struct {
 
 func (suite *convertCosmosCoinFromERC20Suite) SetupTest() {
 	var err error
-	types2.SupportedToken = "ausdc"
 	suite.Suite.SetupTest()
 
 	suite.denom = "magic"
