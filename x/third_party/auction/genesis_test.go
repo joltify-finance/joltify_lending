@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/x/spv/types"
+
 	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -32,6 +34,7 @@ var (
 )
 
 func TestInitGenesis(t *testing.T) {
+	types.SupportedToken = "ausdc"
 	t.Run("valid", func(t *testing.T) {
 		// setup keepers
 		lg := tmlog.TestingLogger()

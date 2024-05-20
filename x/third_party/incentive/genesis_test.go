@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	types3 "github.com/joltify-finance/joltify_lending/x/spv/types"
+
 	tmlog "github.com/cometbft/cometbft/libs/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
@@ -36,6 +38,7 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
+	types3.SupportedToken = "ausdc"
 	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.app = tApp
 	k := tApp.GetIncentiveKeeper()

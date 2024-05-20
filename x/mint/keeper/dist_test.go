@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/x/spv/types"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -20,6 +22,7 @@ import (
 )
 
 func TestFirstDist(t *testing.T) {
+	types.SupportedToken = "ausdc"
 	lg := tmlog.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	k := tApp.GetMintKeeper()
@@ -37,6 +40,7 @@ func TestFirstDist(t *testing.T) {
 }
 
 func TestMintCoinsAndDistribute(t *testing.T) {
+	types.SupportedToken = "ausdc"
 	lg := tmlog.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	k := tApp.GetMintKeeper()
