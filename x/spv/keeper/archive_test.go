@@ -23,6 +23,7 @@ type ArchiveTestSuite struct {
 }
 
 func TestArchiveTestSuite(t *testing.T) {
+	types.SupportedToken = "ausdc"
 	suite.Run(t, new(ArchiveTestSuite))
 }
 

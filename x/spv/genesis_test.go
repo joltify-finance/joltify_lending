@@ -11,6 +11,7 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
+	types.SupportedToken = "ausdc"
 	genesisState := types.GenesisState{
 		Params: types.DefaultParams(),
 

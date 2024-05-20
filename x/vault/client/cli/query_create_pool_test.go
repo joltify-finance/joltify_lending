@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"testing"
 
+	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
+
 	app2 "github.com/joltify-finance/joltify_lending/app"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -73,6 +75,7 @@ func networkWithCreatePoolObjects(t *testing.T, n int, maxValidator uint32) (*ne
 }
 
 func TestShowCreatePool(t *testing.T) {
+	types2.SupportedToken = "ausdc"
 	app2.SetSDKConfig()
 	net, objs := networkWithCreatePoolObjects(t, 2, 3)
 	ctx := net.Validators[0].ClientCtx

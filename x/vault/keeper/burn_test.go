@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"testing"
 
+	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -72,6 +74,7 @@ func prepare(t *testing.T) (*joltapp.TestApp, sdk.Context, []sdk.AccAddress) {
 }
 
 func TestProcessAccountLeft(t *testing.T) {
+	types2.SupportedToken = "ausdc"
 	app, ctx, creators := prepare(t)
 	app.VaultKeeper.SetStoreFeeAmount(ctx, sdk.NewCoins(sdk.NewCoin("mock", sdk.NewInt(12))))
 	app.VaultKeeper.ProcessAccountLeft(ctx)

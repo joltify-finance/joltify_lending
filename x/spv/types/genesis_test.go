@@ -9,6 +9,7 @@ import (
 )
 
 func TestGenesisState_Validate(t *testing.T) {
+	types.SupportedToken = "ausdc"
 	for _, tc := range []struct {
 		desc     string
 		genState *types.GenesisState

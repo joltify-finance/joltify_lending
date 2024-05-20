@@ -28,6 +28,7 @@ import (
 )
 
 func setupApp(t *testing.T) (sdk.Context, *spvkeeper.Keeper) {
+	types.SupportedToken = "ausdc"
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 

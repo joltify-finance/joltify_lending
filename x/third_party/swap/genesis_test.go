@@ -1,6 +1,7 @@
 package swap_test
 
 import (
+	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/app"
@@ -147,5 +148,6 @@ func (suite *genesisTestSuite) Test_LegacyJSONConversion() {
 }
 
 func TestGenesisTestSuite(t *testing.T) {
+	types2.SupportedToken = "ausdc"
 	suite.Run(t, new(genesisTestSuite))
 }
