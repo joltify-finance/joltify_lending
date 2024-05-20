@@ -194,6 +194,20 @@ func (k Keeper) GetDepositorTotalBorrowedAmount(ctx sdk.Context, depositor sdk.A
 	return depositorInfo.TotalPaidLiquidationAmount, true
 }
 
+func (k Keeper) IterSPVReserve(ctx sdk.Context, cb func(coin sdk.Coin) (stop bool)) {
+	storeKey := fmt.Sprintf("%v%v", types.ProjectsKeyPrefix, "reserve")
+	reserveStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(storeKey))
+	iterator := sdk.KVStorePrefixIterator(reserveStore, []byte{})
+	defer iterator.Close()
+	for ; iterator.Valid(); iterator.Next() {
+		var coin sdk.Coin
+		k.cdc.MustUnmarshal(iterator.Value(), &coin)
+		if cb(coin) {
+			break
+		}
+	}
+}
+
 // GetReserve gets the poolInfo with given pool index
 func (k Keeper) GetReserve(ctx sdk.Context, denom string) (amount sdk.Coin, ok bool) {
 	storeKey := fmt.Sprintf("%v%v", types.ProjectsKeyPrefix, "reserve")

@@ -69,10 +69,15 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 
 	poolTypes := []string{types.Junior, types.Senior}
 	indexHashResp := make([]string, 0, 2)
+
+	pa := k.GetParams(ctx)
+	supportedTokens := pa.BurnThreshold
+
 	var typePrefix string
 	// sort the pool and returned otherwise the test may fail as it assume the pool comes with senior first
 	for index, targetAmount := range msg.TargetTokenAmount {
-		if !isSupportedTokens(targetAmount.Denom) {
+		tcs := sdk.NewCoins(targetAmount)
+		if !tcs.DenomsSubsetOf(supportedTokens) {
 			return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", "unsupported token")
 		}
 

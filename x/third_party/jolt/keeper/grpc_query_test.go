@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
-
 	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
@@ -30,7 +28,6 @@ type grpcQueryTestSuite struct {
 }
 
 func (suite *grpcQueryTestSuite) SetupTest() {
-	types.SupportedToken = "ausdc"
 	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
 

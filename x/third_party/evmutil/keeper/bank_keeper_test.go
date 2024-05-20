@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
-
 	sdkmath "cosmossdk.io/math"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,7 +23,6 @@ type evmBankKeeperTestSuite struct {
 }
 
 func (suite *evmBankKeeperTestSuite) SetupTest() {
-	types2.SupportedToken = "ausdc"
 	suite.Suite.SetupTest()
 }
 

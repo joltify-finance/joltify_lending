@@ -2,7 +2,6 @@ package cli_test
 
 import (
 	"fmt"
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"testing"
 
 	tmcli "github.com/cometbft/cometbft/libs/cli"
@@ -22,7 +21,6 @@ import (
 )
 
 func TestListInvestors(t *testing.T) {
-	types.SupportedToken = "ausdc"
 	app2.SetSDKConfig()
 	k2 := keyring.NewInMemory(getCodec())
 	_, _, err := k2.NewMnemonic("0",

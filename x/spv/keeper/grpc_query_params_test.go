@@ -10,7 +10,6 @@ import (
 )
 
 func TestParamsQuery(t *testing.T) {
-	types.SupportedToken = "ausdc"
 	keeper, _, _, _, ctx := testkeeper.SpvKeeper(t)
 	wctx := sdk.WrapSDKContext(ctx)
 	params := types.DefaultParams()

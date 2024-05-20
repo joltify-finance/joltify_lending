@@ -3,8 +3,6 @@ package mint_test
 import (
 	"testing"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	tmlog "github.com/cometbft/cometbft/libs/log"
@@ -19,7 +17,6 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
-	types2.SupportedToken = "ausdc"
 	lg := tmlog.TestingLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})

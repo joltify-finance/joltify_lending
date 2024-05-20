@@ -11,7 +11,6 @@ import (
 )
 
 func TestActivatePool(t *testing.T) {
-	types.SupportedToken = "ausdc"
 	config := app.SetSDKConfig()
 	utils.SetBech32AddressPrefixes(config)
 	lapp, _, _, _, _, wctx := setupMsgServer(t)

@@ -1,7 +1,6 @@
 package auction_test
 
 import (
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
@@ -18,7 +17,6 @@ type abciTestSuite struct {
 }
 
 func (suite *abciTestSuite) SetupTest() {
-	types2.SupportedToken = "ausdc"
 	suite.Suite.SetupTest(4)
 }
 

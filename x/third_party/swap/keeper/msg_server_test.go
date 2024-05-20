@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
-
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
@@ -28,7 +26,6 @@ type msgServerTestSuite struct {
 }
 
 func (suite *msgServerTestSuite) SetupTest() {
-	types2.SupportedToken = "ausdc"
 	suite.Suite.SetupTest()
 	suite.msgServer = keeper.NewMsgServerImpl(suite.Keeper)
 }

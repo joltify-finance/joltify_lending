@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"testing"
 	"time"
 
@@ -19,7 +18,6 @@ type auctionTestSuite struct {
 }
 
 func (suite *auctionTestSuite) SetupTest() {
-	types.SupportedToken = "ausdc"
 	suite.Suite.SetupTest(4)
 }
 
