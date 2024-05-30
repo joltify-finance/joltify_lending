@@ -30,7 +30,7 @@ func GenerateTestProjects() []*ProjectInfo {
 			"empty project Brief",
 			"empty project description",
 		}
-		val, ok := types.NewIntFromString("100000000000000000000")
+		val, ok := types.NewIntFromString("100000000")
 		if !ok {
 			panic("fail to convert")
 		}
@@ -45,7 +45,7 @@ func GenerateTestProjects() []*ProjectInfo {
 			PayFreq:                      "120",
 			PoolLockedSeconds:            100,
 			PoolTotalBorrowLimit:         100,
-			MarketId:                     "aud:usd",
+			MarketId:                     "usd:usd",
 			WithdrawRequestWindowSeconds: 30,
 			MinBorrowAmount:              math.NewInt(100),
 			MinDepositAmount:             val,

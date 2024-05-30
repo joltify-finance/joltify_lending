@@ -1,7 +1,7 @@
 #!/bin/bash
 set -x
 
-base=1000000000000000000
+base=1000000
 amount=$(echo $2*$base | bc)
 ret=$(joltify tx spv withdraw-principal  $1 $amount"ausdc" --from key_$3 --gas 80000 --output json -y)
 # get the code from json

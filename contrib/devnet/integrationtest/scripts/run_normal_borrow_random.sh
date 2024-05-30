@@ -1,6 +1,6 @@
 #!/bin/bash
 
-base=1000000000000000000
+base=1000000
 cecho(){
     RED="\033[0;31m"
     GREEN="\033[0;32m"  # <-- [0 means not bold

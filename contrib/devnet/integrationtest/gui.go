@@ -187,7 +187,7 @@ func (o *outputData) showOutput(msg string, color string) {
 }
 
 func getprice() common.SPV {
-	result, err := common.RunCommandWithOutput("joltify", "q", "pricefeed", "price", "aud:usd", "--output", "json")
+	result, err := common.RunCommandWithOutput("joltify", "q", "pricefeed", "price", "usd:usd", "--output", "json")
 	if err != nil {
 		panic(err)
 	}

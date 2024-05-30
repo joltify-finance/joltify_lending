@@ -6,7 +6,7 @@ for (( c=1; c<=$all_keys; c++ ))
 do
   ret=$(joltify q bank balances  $(joltify keys show key_$c -a)  --output json)
   balance=$(echo $ret | jq -r '.balances[0].amount')
-  interest=$(echo $balance - 5000000000000000000000000 | bc)
+  interest=$(echo $balance - 5000000000000 | bc)
   total_amount=$(echo $total_amount+ $interest | bc)
   echo ">>$c>$balance"
 done

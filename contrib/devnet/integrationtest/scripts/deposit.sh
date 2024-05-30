@@ -1,6 +1,6 @@
 #!/bin/bash
 
-base=1000000000000000000
+base=1000000
 amount=$(echo $2*$base | bc)
 ret=$(joltify tx spv deposit $1 $amount"ausdc" --from key_$3 --output json -y)
 # get the code from json
