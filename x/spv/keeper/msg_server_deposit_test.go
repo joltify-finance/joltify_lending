@@ -89,7 +89,17 @@ func (suite *DepositTestSuite) TestDeposit() {
 				expectedErr: errors.New("the given investor is not allowed to invest jolt1m28h5mu57ugcpfw2sp5t9chdp69akzc6ze5r0j: unauthorized operation"),
 			},
 		},
-
+		{
+			name: "cannot deposit less than min deposit",
+			args: args{
+				msgDeposit: &types.MsgDeposit{
+					Creator:   "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl",
+					PoolIndex: resp.PoolIndex[1],
+					Token:     sdk.NewCoin("ausdc", sdk.NewInt(1)),
+				},
+				expectedErr: errors.New("the deposit amount 1 is less than the minimum deposit amount 10: fail to deposit"),
+			},
+		},
 		{
 			name: "can deposit as expected",
 			args: args{

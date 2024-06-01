@@ -76,7 +76,7 @@ func main() {
 			defer wg.Done()
 			var cmd *exec.Cmd
 			if withdraw {
-				cmd = exec.Command("./withdraw_principal.sh", poolIndex, "1000000000000ausdc", strconv.Itoa(offset+index+1))
+				cmd = exec.Command("./withdraw_principal.sh", poolIndex, "1000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", strconv.Itoa(offset+index+1))
 			} else {
 				valueStr := strconv.FormatFloat(value, 'f', 6, 64)
 				// run the shell scripts

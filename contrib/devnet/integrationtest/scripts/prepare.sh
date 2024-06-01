@@ -35,7 +35,7 @@ done
 # remove the first comma of all investors
 allInvestors=${allInvestors:1}
 
-ret=$(joltify tx spv create-pool $2 $1 0.15 0.0875 $junior"ausdc" $senior"ausdc"  --from validator --gas 8000000 --output json -y)
+ret=$(joltify tx spv create-pool $2 $1 0.15 0.0875 $junior"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" $senior"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3"  --from validator --gas 8000000 --output json -y)
 # get the code from the json
 tx_hash=$(echo $ret | jq -r '.txhash')
 ./scripts/checktx.sh $tx_hash

@@ -50,8 +50,14 @@ func TestMsgSERvCreatePool(t *testing.T) {
 	_, err = lapp.CreatePool(ctx, &req)
 	require.Error(t, err)
 
-	// invalid demon
+	// invalid demon from market
 	req = types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("invalid", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
+	_, err = lapp.CreatePool(ctx, &req)
+	require.ErrorContains(t, err, "invalid parameter from market: conversion factor")
+
+	pa := k.GetParams(ctx)
+	pa.Markets = append(pa.Markets, types.Moneymarket{Denom: "invalid", ConversionFactor: 6})
+	k.SetParams(ctx, pa)
 	_, err = lapp.CreatePool(ctx, &req)
 	require.ErrorContains(t, err, "unsupported token")
 

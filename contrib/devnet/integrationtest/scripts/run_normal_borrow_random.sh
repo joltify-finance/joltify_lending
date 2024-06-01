@@ -30,7 +30,7 @@ indexJunior=$thispool
 
 
 #amount=$(echo 150000*$base|bc)
-#ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_1 -y --output json --gas 800000)
+#ret=$(joltify tx spv deposit $indexJunior $amount"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" --from key_1 -y --output json --gas 800000)
 #code=$(echo $ret | jq -r '.code')
 #if [ $code -eq 0 ]; then
 #	cecho "GREEN" "deposit successful"
@@ -40,7 +40,7 @@ indexJunior=$thispool
 #
 #
 #
-#ret=$(joltify tx spv deposit $indexJunior $amount"ausdc" --from key_2 -y --output json --gas 800000)
+#ret=$(joltify tx spv deposit $indexJunior $amount"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" --from key_2 -y --output json --gas 800000)
 #code=$(echo $ret | jq -r '.code')
 #if [ $code -eq 0 ]; then
 #	cecho "GREEN" "deposit successful"
@@ -53,7 +53,7 @@ indexJunior=$thispool
 amount=$(echo 200000*$base|bc)
 # run the borrow for junior
 set -x
-ret=$(joltify tx spv  borrow $indexJunior $amount"ausdc" --from validator -y --output json --gas 20000000)
+ret=$(joltify tx spv  borrow $indexJunior $amount"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" --from validator -y --output json --gas 20000000)
 # get the code from json
 code=$(echo $ret | jq -r '.txhash')
 ./scripts/checktx.sh $code
@@ -67,7 +67,7 @@ fi
 
 echo "last borrow"
 
-ret=$(joltify tx spv  borrow $indexJunior 100"ausdc" --from validator -y --output json --gas 20000000)
+ret=$(joltify tx spv  borrow $indexJunior 100"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" --from validator -y --output json --gas 20000000)
 code=$(echo $ret | jq -r '.txhash')
 ./scripts/checktx.sh $code
 # get the code from json

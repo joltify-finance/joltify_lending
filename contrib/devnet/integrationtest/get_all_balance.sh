@@ -18,7 +18,7 @@ echo $validator_ret
 # now we check the payment ?= recevied
 ret=$(joltify q spv total-reserve --output json)
 coins=$(echo $ret | jq -r '.coins')
-amount_reserved=${coins%ausdc}
+amount_reserved=${coins%ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3}
 ret=$(joltify q bank balances  $(joltify keys show validator -a)  --output json)
 balance_validator=$(echo $ret | jq -r '.balances[1].amount')
 

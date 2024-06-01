@@ -33,7 +33,7 @@ const (
 	BLUE      = "blue"
 	YELLOW    = "yellow"
 	WHITE     = "white"
-	denom     = "ausdc"
+	denom     = "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3"
 	needWrite = false
 )
 
@@ -187,7 +187,7 @@ func (o *outputData) showOutput(msg string, color string) {
 }
 
 func getprice() common.SPV {
-	result, err := common.RunCommandWithOutput("joltify", "q", "pricefeed", "price", "usd:usd", "--output", "json")
+	result, err := common.RunCommandWithOutput("joltify", "q", "pricefeed", "price", "aud:usd", "--output", "json")
 	if err != nil {
 		panic(err)
 	}
@@ -423,7 +423,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 
 						var bb, ba *big.Int
 						for _, el := range depositorsa[i].Balances {
-							if el.Denom == "ausdc" {
+							if el.Denom == "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" {
 								bb, ok = new(big.Int).SetString(el.Amount, 10)
 								if !ok {
 									panic("should never fail")
@@ -432,7 +432,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 						}
 
 						for _, el := range depositorsb[i].Balances {
-							if el.Denom == "ausdc" {
+							if el.Denom == "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" {
 								ba, ok = new(big.Int).SetString(el.Amount, 10)
 								if !ok {
 									panic("should never fail")

@@ -25,7 +25,6 @@ func (k Keeper) GetParamsV21(ctx sdk.Context) sdkmath.Int {
 	if !ok {
 		panic("fail to convert")
 	}
-
 	return amt
 }
 

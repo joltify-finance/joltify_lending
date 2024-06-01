@@ -6,11 +6,18 @@ import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
 
+message Moneymarket{
+  string denom = 1;
+  int32 conversion_factor = 2;
+}
+
+
 // Params defines the parameters for the module.
 message Params {
   repeated cosmos.base.v1beta1.Coin burn_threshold = 1[
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
   option (gogoproto.goproto_stringer) = false;
-  
+  repeated  Moneymarket markets = 2[
+    (gogoproto.nullable) = false];
 }

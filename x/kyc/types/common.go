@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"cosmossdk.io/math"
-
 	"github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -30,7 +28,7 @@ func GenerateTestProjects() []*ProjectInfo {
 			"empty project Brief",
 			"empty project description",
 		}
-		val, ok := types.NewIntFromString("100000000")
+		val, ok := types.NewIntFromString("1000000000000000000")
 		if !ok {
 			panic("fail to convert")
 		}
@@ -47,7 +45,7 @@ func GenerateTestProjects() []*ProjectInfo {
 			PoolTotalBorrowLimit:         100,
 			MarketId:                     "usd:usd",
 			WithdrawRequestWindowSeconds: 30,
-			MinBorrowAmount:              math.NewInt(100),
+			MinBorrowAmount:              val,
 			MinDepositAmount:             val,
 		}
 		pi.BasicInfo.ProjectName = fmt.Sprintf("this is the project %v", i)

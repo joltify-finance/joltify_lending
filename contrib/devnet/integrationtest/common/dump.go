@@ -85,7 +85,7 @@ func dumpInvestorsAndInterest(poolIndex, fileName string, needWrite bool, logger
 			}
 			amountAusdc := "0"
 			for _, coin := range balances.Balances {
-				if coin.Denom == "ausdc" {
+				if coin.Denom == "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3" {
 					amountAusdc = coin.Amount
 				}
 			}
