@@ -1131,7 +1131,6 @@ func (app *App) setupUpgradeHandlers() {
 			subspace.WithKeyTable(keyTable)
 		}
 	}
-
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
