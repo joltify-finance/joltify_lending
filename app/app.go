@@ -53,7 +53,6 @@ import (
 	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	"github.com/evmos/ethermint/x/feemarket"
-	v1 "github.com/joltify-finance/joltify_lending/upgrade"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -1133,64 +1132,6 @@ func (app *App) setupUpgradeHandlers() {
 		}
 	}
 
-	app.upgradeKeeper.SetUpgradeHandler(v1.V003UpgradeName, v1.CreateUpgradeHandlerForV003Upgrade(app.mm, &app.VaultKeeper, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V004UpgradeName, v1.CreateUpgradeHandlerForV004Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V005UpgradeName, v1.CreateUpgradeHandlerForV005Upgrade(app.mm, &app.VaultKeeper, app.configurator, app.incentiveKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V006UpgradeName, v1.CreateUpgradeHandlerForV006Upgrade(app.mm, app.evmutilKeeper, app.evmKeeper, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V007UpgradeName, v1.CreateUpgradeHandlerForV007Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V008UpgradeName, v1.CreateUpgradeHandlerForV008Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V009UpgradeName, v1.CreateUpgradeHandlerForV009Upgrade(app.mm, app.configurator, app.accountKeeper, app.bankKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V010UpgradeName, v1.CreateUpgradeHandlerForV010Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeName, v1.CreateUpgradeHandlerForV013Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V014UpgradeName, v1.CreateUpgradeHandlerForV014Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V015UpgradeName, v1.CreateUpgradeHandlerForV015Upgrade(app.mm, app.configurator, app.spvKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V016UpgradeName, v1.CreateUpgradeHandlerForV016Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V017UpgradeName, v1.CreateUpgradeHandlerForV017Upgrade(app.mm, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V018UpgradeName, v1.CreateUpgradeHandlerForV018Upgrade(app.mm, app.configurator, app.spvKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V019UpgradeName, v1.CreateUpgradeHandlerForV019Upgrade(app.mm, app.configurator, app.spvKeeper, app.kycKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V020UpgradeName, v1.CreateUpgradeHandlerForV020Upgrade(app.mm, app.configurator, app.spvKeeper, app.nftKeeper, app.incentiveKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V021UpgradeName, v1.CreateUpgradeHandlerForV021Upgrade(app.mm, app.configurator, app.incentiveKeeper, app.spvKeeper, app.nftKeeper))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V022UpgradeName, v1.CreateUpgradeHandlerForV022Upgrade(app.mm, app.configurator, app.spvKeeper, app.mintKeeper, app.incentiveKeeper))
-
-	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
-	if err != nil {
-		panic(err)
-	}
-
-	if upgradeInfo.Name == v1.V005UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added:   []string{kycmoduletypes.StoreKey, nftmoduletypes.StoreKey, spvmoduletypes.StoreKey},
-			Deleted: []string{"cdp", "issuance"},
-		}
-		// configure store loader that checks if version == upgradeHeight and applies store upgrades
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
-	}
-
-	if upgradeInfo.Name == v1.V006UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{evmtypes.StoreKey, evmutiltypes.StoreKey, feemarkettypes.StoreKey},
-		}
-		// configure store loader that checks if version == upgradeHeight and applies store upgrades
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
-	}
-
-	if upgradeInfo.Name == v1.V008UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{crisistypes.StoreKey, consensusparamtypes.ModuleName},
-		}
-		// configure store loader that checks if version == upgradeHeight and applies store upgrades
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
-	}
-
-	if upgradeInfo.Name == v1.V013UpgradeName && !app.upgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{quotamoduletypes.StoreKey},
-		}
-		// configure store loader that checks if version == upgradeHeight and applies store upgrades
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
-	}
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
