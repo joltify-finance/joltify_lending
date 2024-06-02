@@ -66,17 +66,18 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 
 	acc, _ := sdk.AccAddressFromBech32("jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0")
 	pi1 := kycmoduletypes.ProjectInfo{
-		Index:           1,
-		SPVName:         "defaultSPV",
-		ProjectOwner:    acc,
-		BasicInfo:       &b,
-		ProjectLength:   31536000, // 1 year
-		PayFreq:         "15768000",
-		BaseApy:         sdk.NewDecWithPrec(12, 2),
-		MarketId:        "aud:usd",
-		SeparatePool:    false,
-		JuniorMinRatio:  sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount: sdk.NewInt(200),
+		Index:            1,
+		SPVName:          "defaultSPV",
+		ProjectOwner:     acc,
+		BasicInfo:        &b,
+		ProjectLength:    31536000, // 1 year
+		PayFreq:          "15768000",
+		BaseApy:          sdk.NewDecWithPrec(12, 2),
+		MarketId:         "aud:usd",
+		SeparatePool:     false,
+		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdk.NewInt(2000000),
+		MinDepositAmount: sdk.NewInt(1000000),
 	}
 
 	b2 := kycmoduletypes.BasicInfo{
@@ -91,17 +92,18 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 	}
 
 	pi2 := kycmoduletypes.ProjectInfo{
-		Index:           2,
-		SPVName:         "defaultSPV2",
-		ProjectOwner:    acc,
-		BasicInfo:       &b2,
-		ProjectLength:   31536000, // 1 year
-		PayFreq:         "15768000",
-		BaseApy:         sdk.NewDecWithPrec(12, 2),
-		MarketId:        "aud:usd",
-		SeparatePool:    false,
-		JuniorMinRatio:  sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount: sdk.NewInt(200),
+		Index:            2,
+		SPVName:          "defaultSPV2",
+		ProjectOwner:     acc,
+		BasicInfo:        &b2,
+		ProjectLength:    31536000, // 1 year
+		PayFreq:          "15768000",
+		BaseApy:          sdk.NewDecWithPrec(12, 2),
+		MarketId:         "aud:usd",
+		SeparatePool:     false,
+		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdk.NewInt(200000000000000),
+		MinDepositAmount: sdk.NewInt(10000000000000),
 	}
 
 	pi3 := kycmoduletypes.ProjectInfo{
@@ -115,22 +117,23 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
 		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200),
-		MinDepositAmount: sdk.NewInt(5),
+		MinBorrowAmount:  sdk.NewInt(200000000000000),
+		MinDepositAmount: sdk.NewInt(5000000000000),
 	}
 
 	pi4 := kycmoduletypes.ProjectInfo{
-		Index:           4,
-		SPVName:         "defaultSPV3",
-		ProjectOwner:    acc,
-		BasicInfo:       &b2,
-		ProjectLength:   oneYear, // 1 year
-		PayFreq:         strconv.Itoa(oneWeek),
-		BaseApy:         sdk.NewDecWithPrec(10, 2),
-		MarketId:        "aud:usd",
-		SeparatePool:    false,
-		JuniorMinRatio:  sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount: sdk.NewInt(200),
+		Index:            4,
+		SPVName:          "defaultSPV3",
+		ProjectOwner:     acc,
+		BasicInfo:        &b2,
+		ProjectLength:    oneYear, // 1 year
+		PayFreq:          strconv.Itoa(oneWeek),
+		BaseApy:          sdk.NewDecWithPrec(10, 2),
+		MarketId:         "aud:usd",
+		SeparatePool:     false,
+		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdk.NewInt(200000000000000),
+		MinDepositAmount: sdk.NewInt(100000000000000),
 	}
 
 	pi5 := kycmoduletypes.ProjectInfo{
@@ -144,8 +147,8 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
 		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200),
-		MinDepositAmount: sdk.NewInt(150),
+		MinBorrowAmount:  sdk.NewInt(200000000000000),
+		MinDepositAmount: sdk.NewInt(150000000000000),
 	}
 
 	a := []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4, &pi5}

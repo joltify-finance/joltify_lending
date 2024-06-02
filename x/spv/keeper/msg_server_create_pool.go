@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"strconv"
 	"strings"
 
@@ -70,6 +71,12 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	poolTypes := []string{types.Junior, types.Senior}
 	indexHashResp := make([]string, 0, 2)
 
+	gap := 18 - types.PRECISION
+
+	adj := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(gap)), nil)
+	minBorrowAmount := targetProject.MinBorrowAmount.Quo(sdk.NewIntFromBigInt(adj))
+	minDeposit := targetProject.MinDepositAmount.Quo(sdk.NewIntFromBigInt(adj))
+
 	pa := k.GetParams(ctx)
 	supportedTokens := pa.BurnThreshold
 
@@ -117,7 +124,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			OwnerAddress:                  spvAddress,
 			Apy:                           poolApy,
 			TargetAmount:                  targetAmount,
-			MinDepositAmount:              targetProject.MinDepositAmount,
+			MinDepositAmount:              minDeposit,
 			PayFreq:                       payfreq,
 			ReserveFactor:                 types.RESERVEFACTOR,
 			PoolNFTIds:                    []string{},
@@ -135,7 +142,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track transferred accounts when we close the pool
 			ProcessedWithdrawAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track the withdrawal accounts when we close the pool
 			TotalTransferOwnershipAmount:  sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.ZeroInt()),
-			MinBorrowAmount:               sdk.NewCoin(targetAmount.Denom, targetProject.MinBorrowAmount),
+			MinBorrowAmount:               sdk.NewCoin(targetAmount.Denom, minBorrowAmount),
 			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
 			PoolLockedSeconds:             targetProject.PoolLockedSeconds,
 			PoolTotalBorrowLimit:          targetProject.PoolTotalBorrowLimit,
