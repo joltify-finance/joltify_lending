@@ -1134,7 +1134,7 @@ func (app *App) setupUpgradeHandlers() {
 		}
 	}
 
-	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator, app.kycKeeper, app.spvKeeper))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeNameTestnet, v1.CreateUpgradeHandlerForV011TestnetUpgrade(app.mm, app.configurator, app.spvKeeper, app.mintKeeper, app.incentiveKeeper))
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
