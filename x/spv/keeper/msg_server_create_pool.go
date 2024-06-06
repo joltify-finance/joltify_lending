@@ -71,13 +71,32 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	poolTypes := []string{types.Junior, types.Senior}
 	indexHashResp := make([]string, 0, 2)
 
-	gap := 18 - types.PRECISION
+	pa := k.GetParams(ctx)
+
+	var conversion int32
+
+	conversion = -1
+
+	for _, market := range pa.Markets {
+		if market.GetDenom() == msg.TargetTokenAmount[0].Denom {
+			conversion = market.GetConversionFactor()
+			break
+		}
+	}
+
+	if conversion < 0 {
+		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter from market: %v", "conversion factor")
+	}
+
+	gap := 18 - conversion
+	if gap < 0 {
+		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", "conversion factor")
+	}
 
 	adj := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(gap)), nil)
 	minBorrowAmount := targetProject.MinBorrowAmount.Quo(sdk.NewIntFromBigInt(adj))
 	minDeposit := targetProject.MinDepositAmount.Quo(sdk.NewIntFromBigInt(adj))
 
-	pa := k.GetParams(ctx)
 	supportedTokens := pa.BurnThreshold
 
 	var typePrefix string

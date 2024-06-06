@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	v1 "github.com/joltify-finance/joltify_lending/upgrade"
+
 	quotamodule "github.com/joltify-finance/joltify_lending/x/quota"
 	quotamodulekeeper "github.com/joltify-finance/joltify_lending/x/quota/keeper"
 	quotamoduletypes "github.com/joltify-finance/joltify_lending/x/quota/types"
@@ -1131,6 +1133,8 @@ func (app *App) setupUpgradeHandlers() {
 			subspace.WithKeyTable(keyTable)
 		}
 	}
+
+	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator, app.kycKeeper, app.spvKeeper))
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.

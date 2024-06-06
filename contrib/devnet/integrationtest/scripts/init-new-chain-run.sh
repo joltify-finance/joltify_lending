@@ -1,5 +1,6 @@
 #! /bin/bash
 base=1000000000000000000
+base2=1000000
 
 validatorMnemonic="equip town gesture square tomorrow volume nephew minute witness beef rich gadget actress egg sing secret pole winter alarm law today check violin uncover"
 #jolt1a33x0juy5t8a0zgksfz50yluw8jyvy764p9ych
@@ -60,12 +61,12 @@ set -x
 # Create validator keys and add account to genesis
 validatorKeyName="validator"
 printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover
-$BINARY add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
+$BINARY add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3,123456usd-ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 # Create faucet keys and add account to genesis
 faucetKeyName="faucet"
 printf "$faucetMnemonic\n" | $BINARY keys add $faucetKeyName --recover
-$BINARY add-genesis-account $faucetKeyName 2000000000000000ujolt,100000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
+$BINARY add-genesis-account $faucetKeyName 2000000000000000ujolt,100000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 evmFaucetKeyName="evm-faucet"
 printf "$evmFaucetMnemonic\n" | $BINARY keys add $evmFaucetKeyName  --recover
@@ -73,13 +74,13 @@ $BINARY add-genesis-account $evmFaucetKeyName 100000000000000ujolt
 
 userKeyName="user"
 printf "$userMnemonic\n" | $BINARY keys add $userKeyName --recover
-$BINARY add-genesis-account $userKeyName  200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
+$BINARY add-genesis-account $userKeyName  200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
-$BINARY add-genesis-account jolt1kdgjxwdk4w5pexwhtvek009pnp4qw07f4s89ea   200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
+$BINARY add-genesis-account jolt1kdgjxwdk4w5pexwhtvek009pnp4qw07f4s89ea   200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 
 #ibc test account
-$BINARY add-genesis-account jolt1nlrlywakama45q59cqfx3sksf4xdkup6d439zk 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000000000000000ausdc
+$BINARY add-genesis-account jolt1nlrlywakama45q59cqfx3sksf4xdkup6d439zk 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 
 relayerKeyName="relayer"
@@ -94,10 +95,10 @@ do
   address=$(echo $a | jq -r '.address')
 
   # transfer amount
-  amount=$(echo 5000000*$base|bc)
+  amount=$(echo 5000000*$base2|bc)
   amountAtom=10000000
 
-  $BINARY add-genesis-account $address $amount"ausdc",$amountAtom"ujolt"
+  $BINARY add-genesis-account $address $amount"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",$amountAtom"ujolt"
 done
 
 # Create a delegation tx for the validator and add to genesis

@@ -100,3 +100,8 @@ func (k Keeper) IterateProject(ctx sdk.Context, cb func(poolInfo types.ProjectIn
 		}
 	}
 }
+
+func (k Keeper) DeleteProject(ctx sdk.Context, index int32) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
+	store.Delete(types.KeyPrefix(string(index)))
+}

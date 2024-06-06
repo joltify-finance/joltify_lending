@@ -40,7 +40,7 @@ while true; do
 done
 
 
-ret=$(joltify tx pricefeed postprice aud:usd 1.0 253402300799 -y --from validator --output json)
+ret=$(joltify tx pricefeed postprice usd:usd 1.0 253402300799 -y --from validator --output json)
 code=$(echo $ret | jq -r '.txhash')
 bash scripts/checktx.sh $code
   # check whether the return value of the function is 0
@@ -52,7 +52,7 @@ bash scripts/checktx.sh $code
   fi
 
 
-ret=$(joltify tx pricefeed postprice usdc:usd 1.0 253402300799 -y --from validator --output json)
+ret=$(joltify tx pricefeed postprice usd:usd 1.0 253402300799 -y --from validator --output json)
 code=$(echo $ret | jq -r '.txhash')
 bash scripts/checktx.sh $code
   # check whether the return value of the function is 0

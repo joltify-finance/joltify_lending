@@ -97,7 +97,7 @@
               "amount": "100000000000000000000000000000"
             },
             {
-              "denom": "ausdc",
+              "denom": "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",
               "amount": "100000000000000000000000000000"
             },
             {
@@ -118,7 +118,7 @@
               "amount": "100000000000000000000000"
             },
             {
-              "denom": "ausdc",
+              "denom": "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",
               "amount": "100000000000000000000000000000"
             },
             {
@@ -139,7 +139,7 @@
               "amount": "100000000000000000000000000000"
             },
             {
-              "denom": "ausdc",
+              "denom": "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",
               "amount": "100000000000000000000000000000"
             },
             {
@@ -523,7 +523,7 @@
             "keeper_reward_percentage": "0.020000000000000000"
           },
           {
-            "denom": "ausdc",
+            "denom": "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",
             "borrow_limit": {
               "has_max_limit": false,
               "maximum_limit": "1000000000000000.000000000000000000",

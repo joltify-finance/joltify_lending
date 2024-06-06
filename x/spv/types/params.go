@@ -11,6 +11,7 @@ import (
 var (
 	_                paramtypes.ParamSet = (*Params)(nil)
 	KeyBurnThreshold                     = []byte("burnthreshold")
+	KeyMoneyMarket                       = []byte("moneymarket")
 )
 
 // ParamKeyTable the param key table for launch module
@@ -27,7 +28,13 @@ func NewParams() Params {
 		panic("invalid threshold setting")
 	}
 	us := sdk.NewCoin("ausdc", amt)
-	return Params{BurnThreshold: sdk.NewCoins(us)}
+
+	market := Moneymarket{
+		Denom:            "ausdc",
+		ConversionFactor: 6,
+	}
+
+	return Params{BurnThreshold: sdk.NewCoins(us), Markets: []Moneymarket{market}}
 }
 
 // DefaultParams returns a default set of parameters
@@ -39,6 +46,7 @@ func DefaultParams() Params {
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyBurnThreshold, &p.BurnThreshold, validateBurnToken),
+		paramtypes.NewParamSetPair(KeyMoneyMarket, &p.Markets, validateMoneyMarket),
 	}
 }
 
@@ -50,6 +58,20 @@ func validateBurnToken(i interface{}) error {
 
 	if !co.IsValid() {
 		return fmt.Errorf("invalid coins: %s", co)
+	}
+	return nil
+}
+
+func validateMoneyMarket(i interface{}) error {
+	co, ok := i.([]Moneymarket)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	for _, el := range co {
+		if el.ConversionFactor > 18 {
+			return fmt.Errorf("invalid conversion factor: %d", el.ConversionFactor)
+		}
 	}
 	return nil
 }
