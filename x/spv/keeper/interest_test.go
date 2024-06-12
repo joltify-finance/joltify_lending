@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -130,6 +131,25 @@ func (suite *InterestTestSuite) TestCalculateInterestFactor() {
 
 	result := CalculateInterestFactor(spy, sdk.NewIntFromUint64(uint64(payfreq)))
 	suite.Require().True(apyEachPayment.Sub(result).Abs().LTE(sdk.NewDecWithPrec(1, 8)))
+}
+
+func (suite *InterestTestSuite) TestCalculateInterestPerSecond() {
+	testapy := sdk.MustNewDecFromStr("0.18")
+
+	adjMonthAPY := sdk.OneDec().Add(testapy)
+
+	val, err := apyTospy(adjMonthAPY, uint64(OneYear))
+
+	fmt.Printf(">>>>val is %v\n", val.String())
+
+	result := (val.Sub(sdk.OneDec())).Mul(sdk.NewDec(OneYear))
+
+	gap := testapy.Sub(result)
+
+	fmt.Printf(">>>>%v===%v(%v)\n", result, gap, gap.Quo(testapy))
+
+	suite.Require().NoError(err)
+	fmt.Printf(">>>>%v\n", val.String())
 }
 
 type InterestTestSuite struct {

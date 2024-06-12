@@ -27,6 +27,7 @@ type (
 		NftKeeper       types.NFTKeeper
 		priceFeedKeeper types.PriceFeedKeeper
 		auctionKeeper   types.AuctionKeeper
+		incentivekeeper types.IncentiveKeeper
 		hooks           types.SPVHooks
 	}
 )
@@ -42,6 +43,7 @@ func NewKeeper(
 	nftKeeper types.NFTKeeper,
 	pricefeedkeeper types.PriceFeedKeeper,
 	auctionKeeper types.AuctionKeeper,
+	incentiveKeeper types.IncentiveKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -59,8 +61,14 @@ func NewKeeper(
 		NftKeeper:       nftKeeper,
 		priceFeedKeeper: pricefeedkeeper,
 		auctionKeeper:   auctionKeeper,
+		incentivekeeper: incentiveKeeper,
 		hooks:           nil,
 	}
+}
+
+func (k *Keeper) SetIncentiveKeeper(incentiveKeeper types.IncentiveKeeper) *Keeper {
+	k.incentivekeeper = incentiveKeeper
+	return k
 }
 
 // SetHooks adds hooks to the keeper.

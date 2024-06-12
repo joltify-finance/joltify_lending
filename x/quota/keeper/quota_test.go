@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -440,4 +441,13 @@ func TestWhiteList(t *testing.T) {
 	require.False(t, found)
 	found = keeper.WhetherOnwhitelist(ctx, "t1", "jolt1h8m4p5vlaup3jzxv3k0tkvwamzel3regpsw5j2")
 	require.True(t, found)
+}
+
+func TestSubsetof(t *testing.T) {
+	co1 := sdk.NewCoins(sdk.NewCoin("ibc65d0bec6dad96c7f5043d1e54e54b6bb5d5b3aec3ff6cebb75b9e059f3580ea3", sdk.NewInt(123)))
+	target := sdk.NewCoins(sdk.NewCoin("ibc65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdk.NewInt(123)), sdk.NewCoin("ibc9117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E", sdk.NewInt(2234)))
+
+	ret := co1.DenomsSubsetOf(target)
+
+	fmt.Printf(">>>>>%v\n", ret)
 }

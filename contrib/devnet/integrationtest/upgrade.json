@@ -6,7 +6,7 @@
    "plan": {
     "name": "v022_upgrade",
     "time": "0001-01-01T00:00:00Z",
-    "height": "140",
+    "height": "50",
     "info":"{\"binaries\":{\"linux/amd64\":\"https://gitlab.com/api/v4/projects/42057472/packages/generic/joltify-linux-amd64-v0.0.16-testnet/v0.0.16-testnet/joltify\"}}",
     "upgraded_client_state": null
    }

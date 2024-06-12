@@ -10,6 +10,7 @@ const (
 	MaxLiquidattion = 12
 	Senior          = "senior"
 	Junior          = "junior"
+	JOLTPRECISION   = 1e6
 )
 
 var RESERVEFACTOR = sdk.NewDecWithPrec(15, 2)

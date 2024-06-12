@@ -26,6 +26,23 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
+// update spv reward tokens
+func (k Keeper) SetSPVRewardTokens(ctx sdk.Context, poolId string, rewardTokens sdk.Coins) {
+	params := k.GetParams(ctx)
+	for i, el := range params.SPVRewardPeriods {
+		if !el.Active {
+			continue
+		}
+		if el.CollateralType == poolId {
+			el.RewardsPerSecond = rewardTokens
+			params.SPVRewardPeriods[i] = el
+			break
+		}
+		continue
+	}
+	k.SetParams(ctx, params)
+}
+
 // GetJoltSupplyRewardPeriods returns the reward period with the specified collateral type if it's found in the params
 func (k Keeper) GetJoltSupplyRewardPeriods(ctx sdk.Context, denom string) (types.MultiRewardPeriod, bool) {
 	params := k.GetParams(ctx)

@@ -77,6 +77,8 @@ func (suite *withDrawPrincipalSuite) SetupTest() {
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%
 
+	k.SetParams(ctx, types.NewTestParams())
+
 	suite.ctx = ctx
 	suite.keeper = k
 	suite.app = lapp
