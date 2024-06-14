@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	V011UpgradeName = "v011_upgrade_testnet"
+	V011UpgradeName = "v011_upgrade_testnet_2"
 	oneyear         = time.Hour * 24 * 365
 )
 
@@ -43,10 +43,15 @@ func CreateUpgradeHandlerForV011Upgrade(
 			Poolid: "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9",
 			Spy:    "1.000000005262847188",
 		}
-		spvparams := spvKeeper.GetParams(ctx)
-		spvparams.Incentives = append(spvparams.Incentives, myIncentive)
-		spvKeeper.SetParams(ctx, spvparams)
 
+		newparams := spvmoduletypes.Params{
+			BurnThreshold: sdk.NewCoins(),
+			Markets:       []spvmoduletypes.Moneymarket{},
+			Incentives:    []spvmoduletypes.Incentive{myIncentive},
+		}
+		b, m := spvKeeper.GetParamsFromV22(ctx)
+		spvKeeper.SetParams(ctx, newparams)
+		spvKeeper.SetParamsFromV22(ctx, b, m)
 		paget := spvKeeper.GetParams(ctx)
 
 		fmt.Printf(">>>>>%v\n", paget.String())

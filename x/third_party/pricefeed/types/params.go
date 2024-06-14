@@ -93,7 +93,7 @@ func GenDefaultMarket() Markets {
 	}
 
 	m10 := Market{
-		MarketID:   "aud:usd",
+		MarketID:   "usd:usd",
 		BaseAsset:  "aud",
 		QuoteAsset: "usd",
 		Active:     true,
