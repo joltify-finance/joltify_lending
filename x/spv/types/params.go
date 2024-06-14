@@ -12,6 +12,7 @@ var (
 	_                paramtypes.ParamSet = (*Params)(nil)
 	KeyBurnThreshold                     = []byte("burnthreshold")
 	KeyMoneyMarket                       = []byte("moneymarket")
+	KeyIncentive                         = []byte("incentive")
 )
 
 // ParamKeyTable the param key table for launch module
@@ -19,8 +20,8 @@ func ParamKeyTable() paramtypes.KeyTable {
 	return paramtypes.NewKeyTable().RegisterParamSet(&Params{})
 }
 
-// NewParams creates a new Params instance
-func NewParams() Params {
+// NewTestParams creates a new Params instance
+func NewTestParams() Params {
 	// 100 usdc
 	// amt, ok := sdk.NewIntFromString("100000000000000000000")
 	amt, ok := sdk.NewIntFromString("10000000000000000")
@@ -37,6 +38,24 @@ func NewParams() Params {
 	return Params{BurnThreshold: sdk.NewCoins(us), Markets: []Moneymarket{market}}
 }
 
+// NewParams creates a new Params instance
+func NewParams() Params {
+	// 100 usdc
+	// amt, ok := sdk.NewIntFromString("100000000000000000000")
+	amt, ok := sdk.NewIntFromString("10000000000000000")
+	if !ok {
+		panic("invalid threshold setting")
+	}
+	us := sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", amt)
+
+	market := Moneymarket{
+		Denom:            "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",
+		ConversionFactor: 6,
+	}
+
+	return Params{BurnThreshold: sdk.NewCoins(us), Markets: []Moneymarket{market}}
+}
+
 // DefaultParams returns a default set of parameters
 func DefaultParams() Params {
 	return NewParams()
@@ -47,6 +66,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyBurnThreshold, &p.BurnThreshold, validateBurnToken),
 		paramtypes.NewParamSetPair(KeyMoneyMarket, &p.Markets, validateMoneyMarket),
+		paramtypes.NewParamSetPair(KeyIncentive, &p.Incentives, validateIncentive),
 	}
 }
 
@@ -58,6 +78,23 @@ func validateBurnToken(i interface{}) error {
 
 	if !co.IsValid() {
 		return fmt.Errorf("invalid coins: %s", co)
+	}
+	return nil
+}
+
+func validateIncentive(i interface{}) error {
+	co, ok := i.([]Incentive)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+	for _, el := range co {
+		if el.Poolid == "" {
+			return fmt.Errorf("invalid pool id: %s", el.Poolid)
+		}
+		_, err := sdk.NewDecFromStr(el.Spy)
+		if err != nil {
+			return fmt.Errorf("invalid spy: %s with err %v", el.Spy, err)
+		}
 	}
 	return nil
 }

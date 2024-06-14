@@ -63,7 +63,7 @@ func DefaultParams() Params {
 		// spv
 		MultiRewardPeriods{
 			// NewMultiRewardPeriod(true, "ujolt", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100)))),
-			NewMultiRewardPeriod(true, "0x4f1f7526042987d595fa135ed33a392a98bcc31f7ad79d6a5928e753ff7e8c8c", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(2000)), sdk.NewCoin("uoppy", sdk.NewInt(100)))),
+			NewMultiRewardPeriod(true, "0x4f1f7526042987d595fa135ed33a392a98bcc31f7ad79d6a5928e753ff7e8c8c", time.Now().Add(-1*oneYear), time.Now().Add(oneYear), sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(0)))),
 		},
 
 		MultipliersPerDenoms{

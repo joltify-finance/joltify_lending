@@ -11,6 +11,11 @@ message Moneymarket{
   int32 conversion_factor = 2;
 }
 
+message Incentive{
+  string poolid = 1;
+  string spy = 2;
+}
+
 
 // Params defines the parameters for the module.
 message Params {
@@ -18,6 +23,10 @@ message Params {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false];
   option (gogoproto.goproto_stringer) = false;
+
   repeated  Moneymarket markets = 2[
+    (gogoproto.nullable) = false];
+
+  repeated  Incentive incentives = 3[
     (gogoproto.nullable) = false];
 }

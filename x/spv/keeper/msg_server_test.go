@@ -11,6 +11,13 @@ import (
 )
 
 func setupMsgServer(t testing.TB) (types.MsgServer, *keeper.Keeper, types.NFTKeeper, types.BankKeeper, keepertest.MockAuctionKeeper, context.Context) {
-	k, nftType, bankKeeper, auctionKeeper, ctx := keepertest.SpvKeeper(t)
+	k, nftType, bankKeeper, auctionKeeper, _, ctx := keepertest.SpvKeeper(t)
+	k.SetParams(ctx, types.NewTestParams())
 	return keeper.NewMsgServerImpl(*k), k, nftType, bankKeeper, auctionKeeper, sdk.WrapSDKContext(ctx)
+}
+
+func setupMsgServerWithIncentiveKeeper(t testing.TB) (types.MsgServer, *keeper.Keeper, types.NFTKeeper, types.BankKeeper, keepertest.MockAuctionKeeper, keepertest.FakeIncentiveKeeper, context.Context) {
+	k, nftType, bankKeeper, auctionKeeper, incentiveKeeper, ctx := keepertest.SpvKeeper(t)
+	k.SetParams(ctx, types.NewTestParams())
+	return keeper.NewMsgServerImpl(*k), k, nftType, bankKeeper, auctionKeeper, incentiveKeeper, sdk.WrapSDKContext(ctx)
 }

@@ -622,7 +622,7 @@ func NewApp(
 	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace, authtypes.NewModuleAddress(govtypes.ModuleName))
 	app.nftKeeper = nftmodulekeeper.NewKeeper(keys[nftmoduletypes.StoreKey], appCodec, app.accountKeeper, app.bankKeeper)
 
-	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper)
+	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper, app.incentiveKeeper)
 
 	app.incentiveKeeper = incentivekeeper.NewKeeper(
 		appCodec,
@@ -639,6 +639,7 @@ func NewApp(
 
 	app.swapKeeper = *mSwapKeeper.SetHooks(app.incentiveKeeper.Hooks())
 	app.spvKeeper = *mSpvKeeper.SetHooks(app.incentiveKeeper.Hooks())
+	app.spvKeeper = *mSpvKeeper.SetIncentiveKeeper(app.incentiveKeeper)
 
 	app.VaultKeeper = *vaultmodulekeeper.NewKeeper(
 		appCodec,
@@ -829,7 +830,6 @@ func NewApp(
 		pricefeedtypes.ModuleName,
 		// Add all remaining modules with an empty end blocker below since cosmos 0.45.0 requires it
 		capabilitytypes.ModuleName,
-		incentivetypes.ModuleName,
 		// issuancetypes.ModuleName,
 		minttypes.ModuleName,
 		slashingtypes.ModuleName,
@@ -842,6 +842,7 @@ func NewApp(
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
+		incentivetypes.ModuleName,
 		quotamoduletypes.ModuleName,
 		ibcratelimittypes.ModuleName,
 		upgradetypes.ModuleName,
@@ -1134,7 +1135,7 @@ func (app *App) setupUpgradeHandlers() {
 		}
 	}
 
-	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator, app.kycKeeper, app.spvKeeper))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator, app.kycKeeper, app.spvKeeper, app.QuotaKeeper, app.incentiveKeeper))
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.

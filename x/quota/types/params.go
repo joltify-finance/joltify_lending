@@ -30,8 +30,8 @@ func NewParams() Params {
 	// the coin list is the amount of USD for the given token, 100jolt means 100 USD value of jolt
 
 	if client.MAINNETFLAG == "false" {
-		loweramount1 := strings.ToLower("300e189117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E,10000e18ujolt")
-		loweramount2 := strings.ToLower("10e189117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E,100e18ujolt")
+		loweramount1 := "300e189117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E,10000e18ujolt"
+		loweramount2 := "10e189117A26BA81E29FA4F78F57DC2BD90CD3D26848101BA880445F119B22A1E254E,100e18ujolt"
 		quota, err := sdk.ParseCoinsNormalized(loweramount1)
 		if err != nil {
 			panic(err)

@@ -39,6 +39,11 @@ func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 		}
 		dueTime := poolInfo.LastPaymentTime.Add(time.Second * time.Duration(poolInfo.PayFreq))
 		poolReady := poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_FREEZING || poolInfo.PoolStatus == types.PoolInfo_PooLPayPartially
+
+		// we update the incentives
+
+		k.UpdateIncentive(ctx, poolInfo)
+
 		if dueTime.Before(currentTime) && poolReady {
 			// dueTime is the time to pay the interest for the whole cycle
 			err := k.HandleInterest(ctx, &poolInfo)

@@ -63,3 +63,7 @@ type SPVHooks interface {
 	AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int)
 	BeforeNFTBurned(ctx sdk.Context, poolIndex, investorID string, linkednfts []string) error
 }
+
+type IncentiveKeeper interface {
+	SetSPVRewardTokens(ctx sdk.Context, poolId string, rewardTokens sdk.Coins)
+}

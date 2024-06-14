@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	sdkmath "cosmossdk.io/math"
-
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/gogo/protobuf/proto"
@@ -355,6 +354,18 @@ func (m mockPriceFeedKeeper) GetCurrentPrice(ctx sdk.Context, marketID string) (
 	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdk.MustNewDecFromStr("0.7")}, nil
 }
 
+type FakeIncentiveKeeper struct {
+	poolIncentive map[string]sdk.Coins
+}
+
+func (f FakeIncentiveKeeper) GetPoolIncentive() map[string]sdk.Coins {
+	return f.poolIncentive
+}
+
+func (f FakeIncentiveKeeper) SetSPVRewardTokens(ctx sdk.Context, poolId string, rewardTokens sdk.Coins) {
+	f.poolIncentive[poolId] = rewardTokens
+}
+
 type fakeSPVFunctions struct{}
 
 func (f fakeSPVFunctions) AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int) {
@@ -364,7 +375,7 @@ func (f fakeSPVFunctions) BeforeNFTBurned(ctx sdk.Context, poolIndex, investorID
 	return nil
 }
 
-func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, MockAuctionKeeper, sdk.Context) {
+func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, MockAuctionKeeper, FakeIncentiveKeeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
@@ -391,6 +402,9 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 		nftsWithClassID: make(map[string]*nft.NFT),
 	}
 	priceFeedKeeper := mockPriceFeedKeeper{}
+	incentiveKeeper := FakeIncentiveKeeper{
+		poolIncentive: make(map[string]sdk.Coins),
+	}
 	bankKeeper := mockbankKeeper{make(map[string]sdk.Coins)}
 	auctionKeeper := MockAuctionKeeper{
 		AuctionAmount: make([]sdk.Coin, 1),
@@ -408,6 +422,7 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 		nftKeeper,
 		priceFeedKeeper,
 		auctionKeeper,
+		incentiveKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
@@ -419,5 +434,5 @@ func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper,
 		k.SetHooks(&fakeSPVFunctions{})
 	}
 
-	return k, &nftKeeper, &bankKeeper, auctionKeeper, ctx
+	return k, &nftKeeper, &bankKeeper, auctionKeeper, incentiveKeeper, ctx
 }
