@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	V011UpgradeName = "v011_upgrade_testnet"
+	V011UpgradeName = "v011_upgrade_testnet_2"
 	oneyear         = time.Hour * 24 * 365
 )
 
