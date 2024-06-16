@@ -11,8 +11,6 @@ import (
 	quotamodulekeeper "github.com/joltify-finance/joltify_lending/x/quota/keeper"
 	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"
 
-	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
-
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
@@ -60,13 +58,13 @@ func CreateUpgradeHandlerForV011Upgrade(
 
 		fmt.Printf(">>>>>%v\n", paget.String())
 
-		kycKeeper.IterateProject(ctx, func(projectInfo kycmoduletypes.ProjectInfo) bool {
-			if strings.Contains(projectInfo.SPVName, "test projects") {
-				fmt.Printf("now we delete project %s\n", projectInfo.SPVName)
-				kycKeeper.DeleteProject(ctx, projectInfo.Index)
-			}
-			return false
-		})
+		//kycKeeper.IterateProject(ctx, func(projectInfo kycmoduletypes.ProjectInfo) bool {
+		//	if strings.Contains(projectInfo.SPVName, "test projects") {
+		//		fmt.Printf("now we delete project %s\n", projectInfo.SPVName)
+		//		kycKeeper.DeleteProject(ctx, projectInfo.Index)
+		//	}
+		//	return false
+		//})
 
 		// update the quota demon !!!!
 		quotaParams := quotaKeeper.GetParams(ctx)
