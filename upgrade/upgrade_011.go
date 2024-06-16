@@ -109,7 +109,7 @@ func CreateUpgradeHandlerForV011Upgrade(
 		// update the incentive module parameter
 		currentTime := ctx.BlockTime()
 		incentiveParams := incentiveKeeper.GetParams(ctx)
-		addedIncentive := incentivetypes.NewMultiRewardPeriod(true, "0x3a0e72aefc820a7ec5a04cd3b987df8794d5adc48df082a5f8c2aba80a5f6e20", currentTime.Add(-1*24*time.Hour), time.Now().Add(oneyear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(0))))
+		addedIncentive := incentivetypes.NewMultiRewardPeriod(true, "0x3a0e72aefc820a7ec5a04cd3b987df8794d5adc48df082a5f8c2aba80a5f6e20", currentTime.Add(-1*24*time.Hour), currentTime.Add(oneyear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(0))))
 
 		incentiveParams.SPVRewardPeriods = append(incentiveParams.SPVRewardPeriods, addedIncentive)
 		incentiveKeeper.SetParams(ctx, incentiveParams)
