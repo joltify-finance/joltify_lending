@@ -13,7 +13,6 @@ const (
 func CreateUpgradeHandlerForV012Upgrade(
 	mm *module.Manager,
 	configurator module.Configurator,
-
 ) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
