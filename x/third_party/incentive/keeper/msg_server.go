@@ -69,6 +69,10 @@ func (k msgServer) ClaimSPVReward(goCtx context.Context, msg *types.MsgClaimSPVR
 		return nil, err
 	}
 
+	if amt.IsZero() {
+		return &types.MsgClaimSPVRewardResponse{PoolIndex: msg.PoolIndex}, nil
+	}
+
 	err = k.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.IncentiveMacc, sender, amt)
 	if err != nil {
 		ctx.Logger().Error("failed to send coins from incetive account to user", "user", sender.String(), "error", err)
