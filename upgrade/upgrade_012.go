@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	V012UpgradeName = "v012_upgrade"
+	V012UpgradeName = "v012_upgrade_testnet"
 )
 
 func CreateUpgradeHandlerForV012Upgrade(
