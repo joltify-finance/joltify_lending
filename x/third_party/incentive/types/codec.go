@@ -14,12 +14,14 @@ import (
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgClaimJoltReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimJoltReward", nil)
 	cdc.RegisterConcrete(&MsgClaimSwapReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimSwapReward", nil)
+	cdc.RegisterConcrete(&MsgClaimSPVReward{}, "/joltify.third_party.incentive.v1beta1.MsgClaimSPVReward", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgClaimJoltReward{},
 		&MsgClaimSwapReward{},
+		&MsgClaimSPVReward{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
