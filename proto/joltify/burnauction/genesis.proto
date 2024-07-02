@@ -1,0 +1,12 @@
+syntax = "proto3";
+package joltify.burnauction;
+
+import "gogoproto/gogo.proto";
+import "joltify/burnauction/params.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/burnauction/types";
+
+// GenesisState defines the burnauction module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+}

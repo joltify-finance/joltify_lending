@@ -8,6 +8,11 @@ import (
 	"os"
 	"path/filepath"
 
+	burnauctionmodule "github.com/joltify-finance/joltify_lending/x/burnauction"
+	burnauctionmoduletypes "github.com/joltify-finance/joltify_lending/x/burnauction/types"
+
+	burnauctionmodulekeeper "github.com/joltify-finance/joltify_lending/x/burnauction/keeper"
+
 	v1 "github.com/joltify-finance/joltify_lending/upgrade"
 
 	quotamodule "github.com/joltify-finance/joltify_lending/x/quota"
@@ -219,6 +224,7 @@ var (
 		evmutil.AppModuleBasic{},
 		swap.AppModuleBasic{},
 		capability.AppModuleBasic{},
+		burnauctionmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -237,13 +243,14 @@ var (
 		// issuancetypes.ModuleAccountName: {authtypes.Minter, authtypes.Burner},
 		// cdptypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
 		// cdptypes.LiquidatorMacc:      {authtypes.Minter, authtypes.Burner},
-		jolttypes.ModuleName:         {authtypes.Minter, authtypes.Burner},
-		incentivetypes.ModuleName:    nil,
-		spvmoduletypes.ModuleAccount: {authtypes.Minter, authtypes.Burner},
-		nftmoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		evmtypes.ModuleName:          {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
-		evmutiltypes.ModuleName:      {authtypes.Minter, authtypes.Burner},
-		swaptypes.ModuleName:         nil,
+		jolttypes.ModuleName:              {authtypes.Minter, authtypes.Burner},
+		incentivetypes.ModuleName:         nil,
+		spvmoduletypes.ModuleAccount:      {authtypes.Minter, authtypes.Burner},
+		nftmoduletypes.ModuleName:         {authtypes.Minter, authtypes.Burner},
+		evmtypes.ModuleName:               {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
+		evmutiltypes.ModuleName:           {authtypes.Minter, authtypes.Burner},
+		swaptypes.ModuleName:              nil,
+		burnauctionmoduletypes.ModuleName: nil,
 	}
 )
 
@@ -312,6 +319,7 @@ type App struct {
 	VaultKeeper             vaultmodulekeeper.Keeper
 	kycKeeper               kycmodulekeeper.Keeper
 	spvKeeper               spvmodulekeeper.Keeper
+	burnauctionKeeper       burnauctionmodulekeeper.Keeper
 	nftKeeper               nftmodulekeeper.Keeper
 	swapKeeper              swapkeeper.Keeper
 	ibcQuota                *ibcratelimit.IBCMiddleware
@@ -395,6 +403,7 @@ func NewApp(
 		vaultmoduletypes.StoreKey,
 		kycmoduletypes.StoreKey,
 		spvmoduletypes.StoreKey,
+		burnauctionmoduletypes.StoreKey,
 		nftmoduletypes.StoreKey,
 		quotamoduletypes.StoreKey,
 		evmtypes.StoreKey,
@@ -445,6 +454,7 @@ func NewApp(
 	evmutilSubspace := app.ParamsKeeper.Subspace(evmutiltypes.ModuleName)
 	swapSubspace := app.ParamsKeeper.Subspace(swaptypes.ModuleName)
 	quotaSubspace := app.ParamsKeeper.Subspace(quotamoduletypes.ModuleName)
+	burnAuctionSubspace := app.ParamsKeeper.Subspace(burnauctionmoduletypes.ModuleName)
 	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(appCodec, keys[consensusparamtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 
 	// baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
@@ -651,6 +661,12 @@ func NewApp(
 		app.accountKeeper,
 	)
 
+	app.burnauctionKeeper = *burnauctionmodulekeeper.NewKeeper(
+		appCodec,
+		keys[burnauctionmoduletypes.StoreKey],
+		keys[burnauctionmoduletypes.MemStoreKey],
+		burnAuctionSubspace, app.accountKeeper, app.bankKeeper, app.auctionKeeper)
+
 	// Create Ethermint keepers
 	app.feeMarketKeeper = feemarketkeeper.NewKeeper(
 		appCodec,
@@ -771,6 +787,7 @@ func NewApp(
 		evmutil.NewAppModule(app.evmutilKeeper, app.bankKeeper, app.accountKeeper),
 		swap.NewAppModule(app.swapKeeper, app.accountKeeper),
 		crisis.NewAppModule(app.crisisKeeper, skipGenesisInvariants, app.ParamsKeeper.Subspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
+		burnauctionmodule.NewAppModule(appCodec, app.burnauctionKeeper, app.accountKeeper, app.bankKeeper),
 	)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -818,6 +835,7 @@ func NewApp(
 		paramstypes.ModuleName,
 		authz.ModuleName,
 		evmutiltypes.ModuleName,
+		burnauctionmoduletypes.ModuleName,
 	)
 
 	// Warning: Some end blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -857,6 +875,7 @@ func NewApp(
 		paramstypes.ModuleName,
 		authz.ModuleName,
 		evmutiltypes.ModuleName,
+		burnauctionmoduletypes.ModuleName,
 	)
 
 	// Warning: Some init genesis methods must run before others. Ensure the dependencies are understood before modifying this list
@@ -896,6 +915,7 @@ func NewApp(
 		vestingtypes.ModuleName,
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
+		burnauctionmoduletypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(app.crisisKeeper)
@@ -1104,6 +1124,20 @@ func (app *App) RegisterTendermintService(clientCtx client.Context) {
 // }
 
 func (app *App) setupUpgradeHandlers() {
+	upgradeInfo, err := app.upgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Name == "v013_upgrade" {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{burnauctionmoduletypes.StoreKey},
+		}
+
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
 	// Set param key table for params module migration
 	for _, subspace := range app.ParamsKeeper.GetSubspaces() {
 		subspace := subspace
@@ -1137,6 +1171,7 @@ func (app *App) setupUpgradeHandlers() {
 
 	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator, app.kycKeeper, app.spvKeeper, app.QuotaKeeper, app.incentiveKeeper))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeName, v1.CreateUpgradeHandlerForV013Upgrade(app.mm, app.configurator))
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
