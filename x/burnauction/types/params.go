@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
 )
@@ -10,9 +11,8 @@ import (
 var _ paramtypes.ParamSet = (*Params)(nil)
 
 var (
-	KeySupportCoins = []byte("SupportCoins")
-	// TODO: Determine the default value
-	DefaultSupportCoins int32 = 0
+	KeySupportCoins      = []byte("auction_burn_threshold")
+	DefaultBurnThreshold = sdk.NewCoins(sdk.NewCoin(" ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3  ", sdk.NewInt(15e6)))
 )
 
 // ParamKeyTable the param key table for launch module
@@ -22,30 +22,30 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams(
-	supportCoins int32,
+	burnThreshold sdk.Coins,
 ) Params {
 	return Params{
-		SupportCoins: supportCoins,
+		BurnThreshold: burnThreshold,
 	}
 }
 
 // DefaultParams returns a default set of parameters
 func DefaultParams() Params {
 	return NewParams(
-		DefaultSupportCoins,
+		DefaultBurnThreshold,
 	)
 }
 
 // ParamSetPairs get the params.ParamSet
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeySupportCoins, &p.SupportCoins, validateSupportCoins),
+		paramtypes.NewParamSetPair(KeySupportCoins, &p.BurnThreshold, validateBurnThreshold),
 	}
 }
 
 // Validate validates the set of params
 func (p Params) Validate() error {
-	if err := validateSupportCoins(p.SupportCoins); err != nil {
+	if err := validateBurnThreshold(p.BurnThreshold); err != nil {
 		return err
 	}
 
@@ -58,15 +58,20 @@ func (p Params) String() string {
 	return string(out)
 }
 
-// validateSupportCoins validates the SupportCoins param
-func validateSupportCoins(v interface{}) error {
-	supportCoins, ok := v.(int32)
+// validateBurnThreshold validates the SupportCoins param
+func validateBurnThreshold(v interface{}) error {
+	burnThreshold, ok := v.(sdk.Coins)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", v)
 	}
 
-	// TODO implement validation
-	_ = supportCoins
+	if burnThreshold.IsZero() {
+		return fmt.Errorf("burn threshold should not be zero")
+	}
+
+	if !burnThreshold.IsValid() {
+		return fmt.Errorf("invalid support coins: %s", burnThreshold)
+	}
 
 	return nil
 }
