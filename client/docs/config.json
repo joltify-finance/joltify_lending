@@ -181,6 +181,23 @@
       }
     },
     {
+      "url": "./tmp-swagger-gen/joltify/burnauction/query.swagger.json",
+      "tags": {
+        "rename": {
+          "Query": "burnauction"
+        }
+      },
+      "operationIds": {
+        "rename": [
+          {
+            "type": "regex",
+            "from": "(.*)",
+            "to": "burnauction$1"
+          }
+        ]
+      }
+    },
+    {
       "url": "./tmp-swagger-gen/joltify/vault/query.swagger.json",
       "tags": {
         "rename": {
