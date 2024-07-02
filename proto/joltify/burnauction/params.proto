@@ -1,0 +1,13 @@
+syntax = "proto3";
+package joltify.burnauction;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "joltify/x/burnauction/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+
+  int32 supportCoins = 1 [(gogoproto.moretags) = "yaml:\"support_coins\""];
+}
