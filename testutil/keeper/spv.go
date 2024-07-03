@@ -182,9 +182,9 @@ func (m mockAccKeeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtype
 }
 
 func (m mockAccKeeper) GetModuleAccount(ctx sdk.Context, name string) authtypes.ModuleAccountI {
-	addr := authtypes.NewModuleAddress(types.ModuleAccount)
+	addr := authtypes.NewModuleAddress(name)
 	baseAcc := authtypes.NewBaseAccountWithAddress(addr)
-	return authtypes.NewModuleAccount(baseAcc, types.ModuleName, "mint")
+	return authtypes.NewModuleAccount(baseAcc, name, "mint")
 }
 
 func (m mockAccKeeper) GetModuleAddress(name string) sdk.AccAddress {
@@ -322,8 +322,11 @@ func (m mockbankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom s
 }
 
 func (m mockbankKeeper) GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
-	// TODO implement me
-	panic("implement me")
+	coins := sdk.NewCoins()
+	for _, v := range m.BankData[addr.String()] {
+		coins = coins.Add(v)
+	}
+	return coins
 }
 
 func (m mockbankKeeper) SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
@@ -341,12 +344,18 @@ type mockPriceFeedKeeper struct{}
 type MockAuctionKeeper struct {
 	AuctionAmount []sdk.Coin
 	SellerBid     []string
+	mockbank      *mockbankKeeper
 }
 
 func (m MockAuctionKeeper) StartSurplusAuction(ctx sdk.Context, seller string, lot sdk.Coin, bidDenom string) (uint64, error) {
 	m.AuctionAmount[0] = lot
 	m.SellerBid[0] = seller
 	m.SellerBid[1] = bidDenom
+
+	moduleAddr := authtypes.NewModuleAddress(seller)
+	if m.mockbank != nil {
+		m.mockbank.BankData[moduleAddr.String()] = m.mockbank.BankData[moduleAddr.String()].Sub(lot)
+	}
 	return 1, nil
 }
 
