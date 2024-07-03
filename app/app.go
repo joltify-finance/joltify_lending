@@ -1129,7 +1129,7 @@ func (app *App) setupUpgradeHandlers() {
 		panic(err)
 	}
 
-	if upgradeInfo.Name == "v013_upgrade" {
+	if upgradeInfo.Name == "v013_upgrade_testnet" {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{burnauctionmoduletypes.StoreKey},
 		}

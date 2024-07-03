@@ -31,8 +31,14 @@ func NewParams(
 
 // DefaultParams returns a default set of parameters
 func DefaultParams() Params {
+	threshold := DefaultBurnThreshold
+	threshold.Add(sdk.NewCoin("uatom", sdk.NewInt(10e6)))
+
+	amt, _ := sdk.NewIntFromString("10000000000000000000")
+	threshold.Add(sdk.NewCoin("ausdc", amt))
+	threshold.Add(sdk.NewCoin("ujolt", sdk.NewInt(13e6)))
 	return NewParams(
-		DefaultBurnThreshold,
+		threshold,
 	)
 }
 
