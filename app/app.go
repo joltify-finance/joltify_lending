@@ -250,7 +250,7 @@ var (
 		evmtypes.ModuleName:               {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 		evmutiltypes.ModuleName:           {authtypes.Minter, authtypes.Burner},
 		swaptypes.ModuleName:              nil,
-		burnauctionmoduletypes.ModuleName: nil,
+		burnauctionmoduletypes.ModuleName: {authtypes.Burner},
 	}
 )
 
