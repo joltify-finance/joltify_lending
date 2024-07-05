@@ -7424,9 +7424,23 @@ paths:
                   payout_time:
                     type: string
                     format: date-time
-                  distributed_round:
-                    type: string
-                    format: uint64
+                  total_mint_coins:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
             description: >-
               QueryParamsResponse is response type for the Query/Params RPC
               method.
@@ -7468,16 +7482,11 @@ paths:
                 description: params holds all the parameters of this module.
                 type: object
                 properties:
-                  halfCount:
-                    type: string
-                    format: uint64
                   first_provisions:
                     type: string
-                  current_provisions:
+                  node_sPY:
                     type: string
                   unit:
-                    type: string
-                  community_provisions:
                     type: string
             description: >-
               QueryParamsResponse is response type for the Query/Params RPC
@@ -8807,20 +8816,41 @@ paths:
                 type: object
                 properties:
                   burn_threshold:
-                    type: object
-                    properties:
-                      denom:
-                        type: string
-                      amount:
-                        type: string
-                    description: >-
-                      Coin defines a token with a denomination and an amount.
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
 
 
-                      NOTE: The amount field is an Int which implements the
-                      custom method
+                        NOTE: The amount field is an Int which implements the
+                        custom method
 
-                      signatures required by gogoproto.
+                        signatures required by gogoproto.
+                  markets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        conversion_factor:
+                          type: integer
+                          format: int32
+                  incentives:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        poolid:
+                          type: string
+                        spy:
+                          type: string
             description: >-
               QueryParamsResponse is response type for the Query/Params RPC
               method.
@@ -9443,6 +9473,117 @@ paths:
           type: string
       tags:
         - spv
+  /demoChain/burnauction/balance:
+    get:
+      summary: Queries a list of Balance items.
+      operationId: burnauctionBalance
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              moduleAddress:
+                type: string
+              tokens:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - burnauction
+  /demoChain/burnauction/params:
+    get:
+      summary: Parameters queries the parameters of the module.
+      operationId: burnauctionParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                description: params holds all the parameters of this module.
+                type: object
+                properties:
+                  burn_threshold:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+            description: >-
+              QueryParamsResponse is response type for the Query/Params RPC
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - burnauction
   /joltify/vault/createPool:
     get:
       summary: Queries a list of createPool items.
@@ -52461,22 +52602,28 @@ definitions:
       payout_time:
         type: string
         format: date-time
-      distributed_round:
-        type: string
-        format: uint64
+      total_mint_coins:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
   joltify.mint.Params:
     type: object
     properties:
-      halfCount:
-        type: string
-        format: uint64
       first_provisions:
         type: string
-      current_provisions:
+      node_sPY:
         type: string
       unit:
-        type: string
-      community_provisions:
         type: string
     description: Params defines the parameters for the module.
   joltify.mint.QueryHistoryDistResponse:
@@ -52489,9 +52636,23 @@ definitions:
           payout_time:
             type: string
             format: date-time
-          distributed_round:
-            type: string
-            format: uint64
+          total_mint_coins:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
     description: QueryParamsResponse is response type for the Query/Params RPC method.
   joltify.mint.QueryParamsResponse:
     type: object
@@ -52500,16 +52661,11 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
         properties:
-          halfCount:
-            type: string
-            format: uint64
           first_provisions:
             type: string
-          current_provisions:
+          node_sPY:
             type: string
           unit:
-            type: string
-          community_provisions:
             type: string
     description: QueryParamsResponse is response type for the Query/Params RPC method.
   joltify.spv.DepositorInfo:
@@ -52598,6 +52754,13 @@ definitions:
       - deactive
       - unusable
     default: withdraw_proposal
+  joltify.spv.Incentive:
+    type: object
+    properties:
+      poolid:
+        type: string
+      spy:
+        type: string
   joltify.spv.Interest_prepayment:
     type: object
     properties:
@@ -52606,21 +52769,50 @@ definitions:
         format: int32
       exchange_ratio:
         type: string
+  joltify.spv.Moneymarket:
+    type: object
+    properties:
+      denom:
+        type: string
+      conversion_factor:
+        type: integer
+        format: int32
   joltify.spv.Params:
     type: object
     properties:
       burn_threshold:
-        type: object
-        properties:
-          denom:
-            type: string
-          amount:
-            type: string
-        description: |-
-          Coin defines a token with a denomination and an amount.
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
 
-          NOTE: The amount field is an Int which implements the custom method
-          signatures required by gogoproto.
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+      markets:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            conversion_factor:
+              type: integer
+              format: int32
+      incentives:
+        type: array
+        items:
+          type: object
+          properties:
+            poolid:
+              type: string
+            spy:
+              type: string
     description: Params defines the parameters for the module.
   joltify.spv.PoolInfo:
     type: object
@@ -53366,20 +53558,41 @@ definitions:
         type: object
         properties:
           burn_threshold:
-            type: object
-            properties:
-              denom:
-                type: string
-              amount:
-                type: string
-            description: >-
-              Coin defines a token with a denomination and an amount.
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
 
 
-              NOTE: The amount field is an Int which implements the custom
-              method
+                NOTE: The amount field is an Int which implements the custom
+                method
 
-              signatures required by gogoproto.
+                signatures required by gogoproto.
+          markets:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                conversion_factor:
+                  type: integer
+                  format: int32
+          incentives:
+            type: array
+            items:
+              type: object
+              properties:
+                poolid:
+                  type: string
+                spy:
+                  type: string
     description: QueryParamsResponse is response type for the Query/Params RPC method.
   joltify.spv.QueryPoolInvestorsResponse:
     type: object
@@ -53638,6 +53851,68 @@ definitions:
     properties:
       amount:
         type: string
+  joltify.burnauction.Params:
+    type: object
+    properties:
+      burn_threshold:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+    description: Params defines the parameters for the module.
+  joltify.burnauction.QueryBalanceResponse:
+    type: object
+    properties:
+      moduleAddress:
+        type: string
+      tokens:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+  joltify.burnauction.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        description: params holds all the parameters of this module.
+        type: object
+        properties:
+          burn_threshold:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+    description: QueryParamsResponse is response type for the Query/Params RPC method.
   joltify.vault.CoinsQuota:
     type: object
     properties:

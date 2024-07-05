@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package joltify.burnauction;
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/burnauction/types";
+
+// Msg defines the Msg service.
+service Msg {
+  rpc Submitrequest (MsgSubmitrequest) returns (MsgSubmitrequestResponse);
+}
+message MsgSubmitrequest {
+  string creator = 1;
+  string tokens  = 2;
+}
+
+message MsgSubmitrequestResponse {}
+
