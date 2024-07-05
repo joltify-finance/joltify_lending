@@ -1173,6 +1173,7 @@ func (app *App) setupUpgradeHandlers() {
 	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeName, v1.CreateUpgradeHandlerForV013Upgrade(app.mm, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeNameHotfix, v1.CreateUpgradeHandlerForV013HotfixUpgrade(app.mm, app.configurator))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeNameHotfix2, v1.CreateUpgradeHandlerForV013Hotfix2Upgrade(app.mm, app.configurator, app.accountKeeper))
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
