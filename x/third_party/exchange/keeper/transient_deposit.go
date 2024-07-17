@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // SetTransientDeposit sets a subaccount's deposit in the transient store for a given denom.

@@ -4,8 +4,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
 	"github.com/InjectiveLabs/metrics"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // MoveRewardPointsToPending moves the reward points to the pending pools

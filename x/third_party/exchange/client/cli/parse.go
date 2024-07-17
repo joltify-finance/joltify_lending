@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 
-	exchangetypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	exchangetypes "github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 func parseSubmitFeeDiscountProposalFlags(fs *pflag.FlagSet) (*exchangetypes.FeeDiscountProposal, error) {

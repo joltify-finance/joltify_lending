@@ -12,9 +12,9 @@ import (
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
-	insurancetypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/insurance/types"
-	oracletypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/oracle/types"
-	wasmxtypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/wasmx/types"
+	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	wasmxtypes "github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 
 // BankKeeper defines the expected bank keeper methods.

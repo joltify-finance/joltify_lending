@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/exported"
-	v2 "github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/migrations/v2"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/exported"
+	v2 "github.com/joltify-finance/joltify_lending/x/third_party/exchange/migrations/v2"
 )
 
 type Migrator struct {

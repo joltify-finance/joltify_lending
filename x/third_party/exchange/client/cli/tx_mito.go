@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/cobra"
 
 	cliflags "github.com/InjectiveLabs/injective-core/cli/flags"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
-	wasmxtypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/wasmx/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
+	wasmxtypes "github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 
 type Slippage struct {

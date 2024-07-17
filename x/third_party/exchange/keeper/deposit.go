@@ -10,9 +10,9 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
 
-	auctiontypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/auction/types"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
 	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
+	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // MigrateExchangeBalances migrates the subaccount deposits for the new trading from bank balance flow.

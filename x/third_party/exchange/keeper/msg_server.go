@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 var _ types.MsgServer = MsgServer{}

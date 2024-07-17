@@ -5,14 +5,14 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 
-	insurancetypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/insurance/types"
+	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
 
 	"cosmossdk.io/errors"
 	"github.com/InjectiveLabs/metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 func (k *Keeper) moveCoinsIntoInsuranceFund(

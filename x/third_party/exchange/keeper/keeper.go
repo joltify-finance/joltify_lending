@@ -11,7 +11,7 @@ import (
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // Keeper of this module maintains collections of exchange.

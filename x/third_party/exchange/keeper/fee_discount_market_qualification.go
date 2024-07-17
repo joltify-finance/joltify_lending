@@ -7,7 +7,7 @@ import (
 
 	"github.com/InjectiveLabs/metrics"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // CheckAndSetFeeDiscountAccountActivityIndicator sets the transient active account indicator if applicable for fee discount for the given market

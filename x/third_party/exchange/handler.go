@@ -9,9 +9,9 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	log "github.com/xlab/suplog"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
 )
 
 func NewHandler(k keeper.Keeper) sdk.Handler {

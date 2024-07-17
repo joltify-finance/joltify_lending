@@ -7,8 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	oracletypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/oracle/types"
-	peggytypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/peggy/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	peggytypes "github.com/joltify-finance/joltify_lending/x/third_party/peggy/types"
 )
 
 var BinaryOptionsMarketRefundFlagPrice = sdk.NewDec(-1)

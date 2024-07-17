@@ -1,10 +1,10 @@
 package v2
 
 import (
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/exported"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/exported"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 func Migrate(

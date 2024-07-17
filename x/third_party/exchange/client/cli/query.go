@@ -6,22 +6,25 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/InjectiveLabs/injective-core/cli"
-	cliflags "github.com/InjectiveLabs/injective-core/cli/flags"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // GetQueryCmd returns the parent command for all modules/bank CLi query commands.
 func GetQueryCmd() *cobra.Command {
-	cmd := cli.ModuleRootCommand(types.ModuleName, true)
+	txCmd := &cobra.Command{
+		Use:   types.ModuleName,
+		Short: "transaction commands for the auction module",
+	}
 
-	cmd.AddCommand(
+	txCmd.AddCommand(
 		GetAllSpotMarkets(),
 		GetAllDerivativeMarkets(),
 		GetSpotMarket(),
@@ -34,31 +37,69 @@ func GetQueryCmd() *cobra.Command {
 		GetSubaccountIDFromInjAddressCmd(),
 		GetAllBinaryOptionsMarketsCmd(),
 	)
-	return cmd
+	return txCmd
 }
 
 // GetAllSpotMarkets queries all active spot markets
 func GetAllSpotMarkets() *cobra.Command {
-	cmd := cli.QueryCmd("spot-markets",
-		"Gets all active spot markets",
-		types.NewQueryClient,
-		&types.QuerySpotMarketsRequest{
-			Status: "Active",
-		}, cli.FlagsMapping{
-			"MarketIds": cli.Flag{Flag: FlagMarketIDs},
-		}, cli.ArgsMapping{})
-	cmd.Long = "Gets all active spot markets. If the height is not provided, it will use the latest height from context."
-	cmd.Flags().String(FlagMarketIDs, "", "filter by market IDs, comma-separated")
+	cmd := &cobra.Command{
+		Use:   "Gets all active spot markets",
+		Short: "spot-markets",
+		Long:  "Gets all active spot markets. If the height is not provided, it will use the latest height from context.",
+		Args:  cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := types.QuerySpotMarketsRequest{
+				Status: "Active",
+			}
+			res, err := queryClient.SpotMarkets(context.Background(), &params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "spot-markets")
 	return cmd
 }
 
 // GetSpotMarket queries a single spot market
 func GetSpotMarket() *cobra.Command {
-	cmd := cli.QueryCmd("spot-market <market_id>",
-		"Gets a single spot market",
-		types.NewQueryClient,
-		&types.QuerySpotMarketRequest{}, cli.FlagsMapping{}, cli.ArgsMapping{})
-	cmd.Long = "Gets a single spot market by ID. If the height is not provided, it will use the latest height from context."
+	cmd := &cobra.Command{
+		Use:   "sport-market [market_id]",
+		Short: "Gets a single spot market",
+		Long:  "Gets a single spot market by ID. If the height is not provided, it will use the latest height from context.",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			id := args[0]
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := types.QuerySpotMarketsRequest{
+				Status:    "Active",
+				MarketIds: []string{id},
+			}
+			res, err := queryClient.SpotMarkets(context.Background(), &params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -95,7 +136,7 @@ func GetSubaccountDeposits() *cobra.Command {
 		},
 	}
 
-	cliflags.AddQueryFlagsToCmd(cmd)
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -124,8 +165,8 @@ func GetSubaccountDeposit() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
-	cliflags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -153,8 +194,8 @@ func GetAllDerivativeMarkets() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
-	cliflags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -182,8 +223,8 @@ func GetDerivativeMarket() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
-	cliflags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -212,8 +253,8 @@ func GetExchangeParamsCmd() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
-	cliflags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -236,6 +277,7 @@ func GetEthAddressFromInjAddressCmd() *cobra.Command {
 			return clientCtx.PrintString(address + "\n")
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -259,6 +301,7 @@ func GetSubaccountIDFromInjAddressCmd() *cobra.Command {
 			return clientCtx.PrintString(subaccountId + "\n")
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -279,6 +322,7 @@ func GetInjAddressFromEthAddressCmd() *cobra.Command {
 			return clientCtx.PrintString(sdk.AccAddress(address.Bytes()).String() + "\n")
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -331,7 +375,7 @@ func GetAllBinaryOptionsMarketsCmd() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+	flags.AddQueryFlagsToCmd(cmd)
 
-	cliflags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }

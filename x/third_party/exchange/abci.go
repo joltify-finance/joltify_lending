@@ -8,9 +8,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/keeper"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
 	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 type BlockHandler struct {

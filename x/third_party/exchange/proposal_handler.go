@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/xlab/suplog"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/keeper"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // NewExchangeProposalHandler creates a governance handler to manage new exchange proposal types.

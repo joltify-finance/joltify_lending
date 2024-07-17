@@ -8,8 +8,8 @@ import (
 
 	"github.com/InjectiveLabs/metrics"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/keeper/ordermatching"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper/ordermatching"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 func (k *Keeper) getSpotLimitOrderbookIterator(ctx sdk.Context, marketID common.Hash, isBuy bool) storetypes.Iterator {

@@ -8,9 +8,9 @@ import (
 
 	"github.com/InjectiveLabs/metrics"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
-	insurancetypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/insurance/types"
-	oracletypes "github.com/InjectiveLabs/injective-core/injective-chain/modules/oracle/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
+	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 )
 
 func (k *Keeper) ExpiryFuturesMarketLaunch(

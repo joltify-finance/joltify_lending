@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/exported"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/exported"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -19,9 +19,9 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/client/cli"
-	exchangekeeper "github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/keeper"
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/client/cli"
+	exchangekeeper "github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 
 	"github.com/InjectiveLabs/metrics"
 )

@@ -13,7 +13,7 @@ import (
 
 	"github.com/InjectiveLabs/metrics"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // IncrementSubaccountTradeNonce increments the subaccount's trade nonce and returns the new subaccount trade nonce.

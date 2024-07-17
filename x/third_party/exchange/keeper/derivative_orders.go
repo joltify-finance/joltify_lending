@@ -11,7 +11,7 @@ import (
 
 	"github.com/InjectiveLabs/metrics"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 // CancelAllRestingDerivativeLimitOrdersForSubaccount cancels all of the derivative limit orders for a given subaccount and marketID.

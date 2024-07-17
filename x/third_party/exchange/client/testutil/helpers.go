@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/modules/exchange/client/cli"
+	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/client/cli"
 )
 
 // commonArgs is args for CLI test commands
