@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/client/flags"
+
 	"cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -13,40 +15,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 
-	cliflags "github.com/InjectiveLabs/injective-core/cli/flags"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
-	wasmxtypes "github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
-
-type Slippage struct {
-	MaxPenalty   *sdk.Dec `json:"max_penalty,omitempty"`
-	MinIncentive *sdk.Dec `json:"min_incentive,omitempty"`
-}
-
-type VaultSubscribe struct {
-	Slippage *Slippage `json:"slippage,omitempty"`
-}
-
-type BasicVaultRedeemArgs struct {
-	LpTokenBurnAmount math.Int `json:"lp_token_burn_amount"`
-	Slippage          Slippage `json:"slippage,omitempty"`
-}
-
-type VaultRedeem struct {
-	BasicVaultRedeemArgs
-	RedemptionType string `json:"redemption_type,omitempty"`
-}
-
-type VaultSubscribeRedeem struct {
-	Subscribe *VaultSubscribe `json:"subscribe,omitempty"`
-	Redeem    interface{}     `json:"redeem,omitempty"`
-}
-
-type VaultInput struct {
-	VaultSubaccountId  string               `json:"vault_subaccount_id"`
-	TraderSubaccountId string               `json:"trader_subaccount_id"`
-	Msg                VaultSubscribeRedeem `json:"msg"`
-}
 
 const (
 	MIN_INCENTIVE_DISABLED_FLAG = 101
@@ -141,21 +111,21 @@ func NewSubscribeToSpotVaultTxCmd() *cobra.Command {
 
 			fromAddress := clientCtx.GetFromAddress().String()
 
-			vaultSubscribe := VaultSubscribe{
+			vaultSubscribe := types.VaultSubscribe{
 				Slippage: nil,
 			}
 
-			forwardMsg := VaultSubscribeRedeem{
+			forwardMsg := types.VaultSubscribeRedeem{
 				Subscribe: &vaultSubscribe,
 			}
 
-			vaultInput := VaultInput{
+			vaultInput := types.VaultInput{
 				Msg:                forwardMsg,
 				VaultSubaccountId:  vaultSubaccountId,
 				TraderSubaccountId: traderSubaccountId,
 			}
 
-			execData := wasmxtypes.ExecutionData{
+			execData := types.ExecutionData{
 				Origin: fromAddress,
 				Name:   "VaultSubscribe",
 				Args:   vaultInput,
@@ -185,7 +155,8 @@ func NewSubscribeToSpotVaultTxCmd() *cobra.Command {
 	cmd.Flags().String(FlagSubscriptionQuoteAmount, "", "quote amount to subscribe with")
 	cmd.Flags().String(FlagSubscriptionBaseAmount, "", "base amount to subscribe with")
 
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
+
 	return cmd
 }
 
@@ -282,21 +253,21 @@ func NewSubscribeToAmmVaultTxCmd() *cobra.Command {
 				return slippageErr
 			}
 
-			vaultSubscribe := VaultSubscribe{
+			vaultSubscribe := types.VaultSubscribe{
 				Slippage: &slippage,
 			}
 
-			forwardMsg := VaultSubscribeRedeem{
+			forwardMsg := types.VaultSubscribeRedeem{
 				Subscribe: &vaultSubscribe,
 			}
 
-			vaultInput := VaultInput{
+			vaultInput := types.VaultInput{
 				Msg:                forwardMsg,
 				VaultSubaccountId:  vaultSubaccountId,
 				TraderSubaccountId: traderSubaccountId,
 			}
 
-			execData := wasmxtypes.ExecutionData{
+			execData := types.ExecutionData{
 				Origin: fromAddress,
 				Name:   "VaultSubscribe",
 				Args:   vaultInput,
@@ -327,7 +298,7 @@ func NewSubscribeToAmmVaultTxCmd() *cobra.Command {
 	cmd.Flags().
 		Int64(FlagSubscriptionMaxPenalty, MAX_PENALTY_DEFAULT_VALUE, "max penalty % to accept when redeeming only with single side <0,100>; 1 by default")
 
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -361,23 +332,23 @@ func NewRedeemFromSpotVaultTxCmd() *cobra.Command {
 				return slippageErr
 			}
 
-			vaultRedeem := VaultRedeem{
-				BasicVaultRedeemArgs: BasicVaultRedeemArgs{
+			vaultRedeem := types.VaultRedeem{
+				BasicVaultRedeemArgs: types.BasicVaultRedeemArgs{
 					LpTokenBurnAmount: lpTokenBurnAmount.Amount,
 					Slippage:          slippage,
 				},
 				RedemptionType: "FixedBaseAndQuote",
 			}
 
-			vaultInput := VaultInput{
+			vaultInput := types.VaultInput{
 				TraderSubaccountId: traderSubaccountId,
 				VaultSubaccountId:  vaultSubaccountId,
-				Msg: VaultSubscribeRedeem{
+				Msg: types.VaultSubscribeRedeem{
 					Redeem: &vaultRedeem,
 				},
 			}
 
-			execData := wasmxtypes.ExecutionData{
+			execData := types.ExecutionData{
 				Origin: fromAddress,
 				Name:   "VaultRedeem",
 				Args:   vaultInput,
@@ -407,7 +378,7 @@ func NewRedeemFromSpotVaultTxCmd() *cobra.Command {
 
 	cmd.Flags().
 		Int64(FlagSubscriptionMaxPenalty, MAX_PENALTY_DEFAULT_VALUE, "max penalty % to accept when redeeming only with single side <0,100>; 1 by default")
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -441,23 +412,23 @@ func NewRedeemFromAmmVaultTxCmd() *cobra.Command {
 				return slippageErr
 			}
 
-			vaultRedeem := VaultRedeem{
-				BasicVaultRedeemArgs: BasicVaultRedeemArgs{
+			vaultRedeem := types.VaultRedeem{
+				BasicVaultRedeemArgs: types.BasicVaultRedeemArgs{
 					LpTokenBurnAmount: lpTokenBurnAmount.Amount,
 					Slippage:          slippage,
 				},
 				RedemptionType: "FixedBaseAndQuote",
 			}
 
-			vaultInput := VaultInput{
+			vaultInput := types.VaultInput{
 				TraderSubaccountId: traderSubaccountId,
 				VaultSubaccountId:  vaultSubaccountId,
-				Msg: VaultSubscribeRedeem{
+				Msg: types.VaultSubscribeRedeem{
 					Redeem: &vaultRedeem,
 				},
 			}
 
-			execData := wasmxtypes.ExecutionData{
+			execData := types.ExecutionData{
 				Origin: fromAddress,
 				Name:   "VaultRedeem",
 				Args:   vaultInput,
@@ -487,7 +458,7 @@ func NewRedeemFromAmmVaultTxCmd() *cobra.Command {
 
 	cmd.Flags().
 		Int64(FlagSubscriptionMaxPenalty, MAX_PENALTY_DEFAULT_VALUE, "max penalty % to accept when redeeming only with single side <0,100>; 1 by default")
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -543,21 +514,21 @@ func NewSubscribeToDerivativeVaultTxCmd() *cobra.Command {
 				return slippageErr
 			}
 
-			vaultSubscribe := VaultSubscribe{
+			vaultSubscribe := types.VaultSubscribe{
 				Slippage: &slippage,
 			}
 
-			forwardMsg := VaultSubscribeRedeem{
+			forwardMsg := types.VaultSubscribeRedeem{
 				Subscribe: &vaultSubscribe,
 			}
 
-			vaultInput := VaultInput{
+			vaultInput := types.VaultInput{
 				Msg:                forwardMsg,
 				VaultSubaccountId:  vaultSubaccountId,
 				TraderSubaccountId: traderSubaccountId,
 			}
 
-			execData := wasmxtypes.ExecutionData{
+			execData := types.ExecutionData{
 				Origin: fromAddress,
 				Name:   "VaultSubscribe",
 				Args:   vaultInput,
@@ -587,7 +558,7 @@ func NewSubscribeToDerivativeVaultTxCmd() *cobra.Command {
 
 	cmd.Flags().
 		Int64(FlagSubscriptionMaxPenalty, MAX_PENALTY_DEFAULT_VALUE, "max penalty % to accept when subscribing without position <0,100>; 1 by default")
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -636,23 +607,23 @@ func NewRedeemFromDerivativeVaultTxCmd() *cobra.Command {
 				return slippageErr
 			}
 
-			vaultRedeem := VaultRedeem{
-				BasicVaultRedeemArgs: BasicVaultRedeemArgs{
+			vaultRedeem := types.VaultRedeem{
+				BasicVaultRedeemArgs: types.BasicVaultRedeemArgs{
 					LpTokenBurnAmount: lpTokenBurnAmount.Amount,
 					Slippage:          slippage,
 				},
 				RedemptionType: redemptionType,
 			}
 
-			vaultInput := VaultInput{
+			vaultInput := types.VaultInput{
 				VaultSubaccountId:  vaultSubaccountId,
 				TraderSubaccountId: traderSubaccountId,
-				Msg: VaultSubscribeRedeem{
+				Msg: types.VaultSubscribeRedeem{
 					Redeem: &vaultRedeem,
 				},
 			}
 
-			execData := wasmxtypes.ExecutionData{
+			execData := types.ExecutionData{
 				Origin: fromAddress,
 				Name:   "VaultRedeem",
 				Args:   vaultInput,
@@ -683,7 +654,7 @@ func NewRedeemFromDerivativeVaultTxCmd() *cobra.Command {
 
 	cmd.Flags().
 		Int64(FlagSubscriptionMaxPenalty, MAX_PENALTY_DEFAULT_VALUE, "max penalty % to accept when redeeming without position <0,100>; 1 by default")
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -734,7 +705,7 @@ func NewPrivilegedExecuteContractTxCmd() *cobra.Command {
 				return err
 			}
 
-			execData := wasmxtypes.ExecutionData{
+			execData := types.ExecutionData{
 				Origin: asMap["origin"].(string),
 				Name:   asMap["name"].(string),
 				Args:   asMap["args"],
@@ -763,25 +734,25 @@ func NewPrivilegedExecuteContractTxCmd() *cobra.Command {
 
 	cmd.Flags().
 		String(FlagFunds, "", "funds to pass to the contract")
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
-func getSlippage(cmd *cobra.Command) (Slippage, error) {
+func getSlippage(cmd *cobra.Command) (types.Slippage, error) {
 	maxPenaltyFlag, maxPenaltyErr := cmd.Flags().GetInt64(FlagSubscriptionMaxPenalty)
 	if maxPenaltyErr != nil {
-		return Slippage{}, maxPenaltyErr
+		return types.Slippage{}, maxPenaltyErr
 	}
 
 	if maxPenaltyFlag < 0 || maxPenaltyFlag > 100 {
-		return Slippage{}, fmt.Errorf(
+		return types.Slippage{}, fmt.Errorf(
 			"max penalty has to be within <0,100>, but %d was given",
 			maxPenaltyFlag,
 		)
 	}
 
 	penaltyDec := sdk.NewDecFromInt(math.NewInt(maxPenaltyFlag))
-	slippage := Slippage{
+	slippage := types.Slippage{
 		MaxPenalty: &penaltyDec,
 	}
 

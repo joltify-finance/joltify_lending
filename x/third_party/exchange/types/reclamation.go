@@ -3,9 +3,9 @@ package types
 import (
 	"fmt"
 
-	sdksecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	"github.com/evmos/ethermint/crypto/ethsecp256k1"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/crypto/ethsecp256k1"
+	sdksecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

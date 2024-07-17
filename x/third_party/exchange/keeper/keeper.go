@@ -31,7 +31,6 @@ type Keeper struct {
 	wasmViewKeeper       types.WasmViewKeeper
 	wasmxExecutionKeeper types.WasmxExecutionKeeper
 
-	svcTags   metrics.Tags
 	authority string
 }
 

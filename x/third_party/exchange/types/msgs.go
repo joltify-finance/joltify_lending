@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 
+	"github.com/evmos/ethermint/crypto/ethsecp256k1"
+
 	"cosmossdk.io/errors"
 	sdksecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,9 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/crypto/ethsecp256k1"
 	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
-	wasmxtypes "github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 
 const RouterKey = ModuleName
@@ -1407,7 +1407,7 @@ func (msg *MsgPrivilegedExecuteContract) ValidateBasic() error {
 		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.ContractAddress)
 	}
 
-	var e wasmxtypes.ExecutionData
+	var e ExecutionData
 	if err := json.Unmarshal([]byte(msg.Data), &e); err != nil {
 		return errors.Wrap(err, msg.Data)
 	}

@@ -3,7 +3,6 @@ package keeper
 import (
 	"cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
-	"github.com/InjectiveLabs/metrics"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -48,14 +47,12 @@ func (k *Keeper) MigrateExchangeBalances(ctx sdk.Context, balance types.Balance)
 
 func (k *Keeper) executeDeposit(ctx sdk.Context, msg *types.MsgDeposit) error {
 	if !k.IsDenomValid(ctx, msg.Amount.Denom) {
-		metrics.ReportFuncError(k.svcTags)
 		return sdkerrors.ErrInvalidCoins
 	}
 
 	senderAddr, _ := sdk.AccAddressFromBech32(msg.Sender)
 
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, senderAddr, types.ModuleName, sdk.NewCoins(msg.Amount)); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		k.Logger(ctx).Error("subaccount deposit failed", "senderAddr", senderAddr.String(), "coin", msg.Amount.String())
 		return errors.Wrap(err, "deposit failed")
 	}
@@ -241,6 +238,7 @@ func (k *Keeper) SetDepositOrSendToBank(
 	deposit types.Deposit,
 	isPreventingBankCharge bool,
 ) {
+	telemetry.
 	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	amountToSendToBank := deposit.AvailableBalance.TruncateInt()
