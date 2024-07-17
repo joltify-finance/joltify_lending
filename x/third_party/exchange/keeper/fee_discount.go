@@ -6,8 +6,6 @@ import (
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -15,8 +13,6 @@ func (k *Keeper) PersistFeeDiscountStakingInfoUpdates(
 	ctx sdk.Context,
 	stakingInfo *FeeDiscountStakingInfo,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if stakingInfo == nil {
 		return
 	}
@@ -105,15 +101,11 @@ func (k *Keeper) getFeeDiscountConfigForMarket(
 	marketID common.Hash,
 	stakingInfo *FeeDiscountStakingInfo,
 ) *FeeDiscountConfig {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	isQualifiedForFeeDiscounts := k.IsMarketQualifiedForFeeDiscount(ctx, marketID)
 	return NewFeeDiscountConfig(isQualifiedForFeeDiscounts, stakingInfo)
 }
 
 func (k *Keeper) InitialFetchAndUpdateActiveAccountFeeDiscountStakingInfo(ctx sdk.Context) *FeeDiscountStakingInfo {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accounts := k.GetAllAccountsActivelyTradingQualifiedMarketsInBlockForFeeDiscounts(ctx)
 	schedule := k.GetFeeDiscountSchedule(ctx)
 
@@ -199,8 +191,6 @@ func (k *Keeper) CalculateStakedAmountWithoutCache(
 	trader sdk.AccAddress,
 	maxDelegations uint16,
 ) sdkmath.Int {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	delegations := k.StakingKeeper.GetDelegatorDelegations(ctx, trader, maxDelegations)
 	totalStaked := sdk.ZeroInt()
 
@@ -225,8 +215,6 @@ func (k *Keeper) CalculateStakedAmountWithCache(
 	trader sdk.AccAddress,
 	feeDiscountConfig *FeeDiscountConfig,
 ) sdkmath.Int {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	maxDelegations := uint16(10)
 	delegations := k.StakingKeeper.GetDelegatorDelegations(ctx, trader, maxDelegations)
 

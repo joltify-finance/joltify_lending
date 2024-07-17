@@ -9,7 +9,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
 
-	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
@@ -32,8 +31,8 @@ func (k *Keeper) MigrateExchangeBalances(ctx sdk.Context, balance types.Balance)
 	}
 
 	newDeposits := &types.Deposit{
-		AvailableBalance: balance.Deposits.AvailableBalance.Sub(balanceChangeAmount.ToDec()),
-		TotalBalance:     balance.Deposits.TotalBalance.Sub(balanceChangeAmount.ToDec()),
+		AvailableBalance: balance.Deposits.AvailableBalance.Sub(sdk.NewDecFromInt(balanceChangeAmount)),
+		TotalBalance:     balance.Deposits.TotalBalance.Sub(sdk.NewDecFromInt(balanceChangeAmount)),
 	}
 	k.SetDeposit(ctx, subaccountID, denom, newDeposits)
 
@@ -74,7 +73,7 @@ func (k *Keeper) executeDeposit(ctx sdk.Context, msg *types.MsgDeposit) error {
 		k.AccountKeeper.SetAccount(ctx, k.AccountKeeper.NewAccountWithAddress(ctx, recipientAddr))
 	}
 
-	if err := k.IncrementDepositForNonDefaultSubaccount(ctx, subaccountID, msg.Amount.Denom, msg.Amount.Amount.ToDec()); err != nil {
+	if err := k.IncrementDepositForNonDefaultSubaccount(ctx, subaccountID, msg.Amount.Denom, sdk.NewDecFromInt(msg.Amount.Amount)); err != nil {
 		return err
 	}
 
@@ -93,21 +92,18 @@ func (k *Keeper) ExecuteWithdraw(ctx sdk.Context, msg *types.MsgWithdraw) error 
 	subaccountID := types.MustGetSubaccountIDOrDeriveFromNonce(withdrawDestAddr, msg.SubaccountId)
 
 	denom := msg.Amount.Denom
-	amount := msg.Amount.Amount.ToDec()
+	amount := sdk.NewDecFromInt(msg.Amount.Amount)
 
 	if !k.IsDenomValid(ctx, denom) {
-		metrics.ReportFuncError(k.svcTags)
 		return sdkerrors.ErrInvalidCoins
 	}
 
 	if err := k.DecrementDeposit(ctx, subaccountID, denom, amount); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return errors.Wrap(err, "withdrawal failed")
 	}
 
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, withdrawDestAddr, sdk.NewCoins(msg.Amount))
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		k.Logger(ctx).Error("subaccount withdrawal failed", "senderAddr", withdrawDestAddr.String(), "coin", msg.Amount.String())
 		return errors.Wrap(err, "withdrawal failed")
 	}
@@ -139,7 +135,7 @@ func (k *Keeper) GetSpendableFunds(
 
 	// combine bankBalance + dust from subaccount deposits to get the total spendable funds
 	bankBalance := k.bankKeeper.GetBalance(ctx, types.SubaccountIDToSdkAddress(subaccountID), denom)
-	return bankBalance.Amount.ToDec().Add(subaccountDeposits.AvailableBalance)
+	return sdk.NewDecFromInt(bankBalance.Amount).Add(subaccountDeposits.AvailableBalance)
 }
 
 func (k *Keeper) GetAllSpendableFunds(
@@ -154,7 +150,7 @@ func (k *Keeper) GetAllSpendableFunds(
 	if types.IsDefaultSubaccountID(subaccountID) {
 		bankBalances := k.bankKeeper.GetAllBalances(ctx, types.SubaccountIDToSdkAddress(subaccountID))
 		for _, balance := range bankBalances {
-			funds := spendableFunds[balance.Denom].Add(balance.Amount.ToDec())
+			funds := spendableFunds[balance.Denom].Add(sdk.NewDecFromInt(balance.Amount))
 			spendableFunds[balance.Denom] = funds
 		}
 	}
@@ -167,8 +163,6 @@ func (k *Keeper) GetDeposit(
 	subaccountID common.Hash,
 	denom string,
 ) *types.Deposit {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	key := types.GetDepositKey(subaccountID, denom)
 
@@ -198,8 +192,6 @@ func (k *Keeper) SetDeposit(
 	denom string,
 	deposit *types.Deposit,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	key := types.GetDepositKey(subaccountID, denom)
 	bz := k.cdc.MustMarshal(deposit)
@@ -238,9 +230,6 @@ func (k *Keeper) SetDepositOrSendToBank(
 	deposit types.Deposit,
 	isPreventingBankCharge bool,
 ) {
-	telemetry.
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	amountToSendToBank := deposit.AvailableBalance.TruncateInt()
 
 	// for default subaccounts, if the integer part of the available deposit funds are non-zero, send them to bank
@@ -255,21 +244,21 @@ func (k *Keeper) SetDepositOrSendToBank(
 			sdk.NewCoins(sdk.NewCoin(denom, amountToSendToBank)),
 		)
 
-		deposit.AvailableBalance = deposit.AvailableBalance.Sub(amountToSendToBank.ToDec())
-		deposit.TotalBalance = deposit.TotalBalance.Sub(amountToSendToBank.ToDec())
+		deposit.AvailableBalance = deposit.AvailableBalance.Sub(sdk.NewDecFromInt(amountToSendToBank))
+		deposit.TotalBalance = deposit.TotalBalance.Sub(sdk.NewDecFromInt(amountToSendToBank))
 	} else {
 		shouldChargeFromBank := !isPreventingBankCharge && deposit.AvailableBalance.IsNegative() && types.IsDefaultSubaccountID(subaccountID)
 
 		if shouldChargeFromBank {
 			amountToChargeFromBank := amountToSendToBank.Abs()
 
-			if availableBalanceAfterCharge := deposit.AvailableBalance.Add(amountToChargeFromBank.ToDec()); availableBalanceAfterCharge.IsNegative() {
+			if availableBalanceAfterCharge := deposit.AvailableBalance.Add(sdk.NewDecFromInt(amountToChargeFromBank)); availableBalanceAfterCharge.IsNegative() {
 				amountToChargeFromBank = amountToChargeFromBank.AddRaw(1)
 			}
 
 			if err := k.chargeBank(ctx, types.SubaccountIDToSdkAddress(subaccountID), denom, amountToChargeFromBank); err == nil {
-				deposit.AvailableBalance = deposit.AvailableBalance.Add(amountToChargeFromBank.ToDec())
-				deposit.TotalBalance = deposit.TotalBalance.Add(amountToChargeFromBank.ToDec())
+				deposit.AvailableBalance = deposit.AvailableBalance.Add(sdk.NewDecFromInt(amountToChargeFromBank))
+				deposit.TotalBalance = deposit.TotalBalance.Add(sdk.NewDecFromInt(amountToChargeFromBank))
 			}
 		}
 	}
@@ -282,8 +271,6 @@ func (k *Keeper) GetDeposits(
 	ctx sdk.Context,
 	subaccountID common.Hash,
 ) map[string]*types.Deposit {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	keyPrefix := types.GetDepositKeyPrefixBySubaccountID(subaccountID)
 	depositStore := prefix.NewStore(store, keyPrefix)
@@ -324,8 +311,6 @@ type SendToAuctionCoin struct {
 }
 
 func (k *Keeper) WithdrawAllAuctionBalances(ctx sdk.Context) []SendToAuctionCoin {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	depositStore := prefix.NewStore(store, types.GetDepositKeyPrefixBySubaccountID(types.AuctionSubaccountID))
 	iterator := depositStore.Iterator(nil, nil)
@@ -377,14 +362,14 @@ func (k *Keeper) WithdrawAllAuctionBalances(ctx sdk.Context) []SendToAuctionCoin
 
 	for _, balance := range balances {
 		if balance.SubaccountId != "" {
-			if err := k.DecrementDeposit(ctx, common.HexToHash(balance.SubaccountId), balance.Denom, balance.Amount.ToDec()); err != nil {
+			if err := k.DecrementDeposit(ctx, common.HexToHash(balance.SubaccountId), balance.Denom, sdk.NewDecFromInt(balance.Amount)); err != nil {
 				k.Logger(ctx).Error("WithdrawAllAuctionBalances DecrementDeposit fail:", err)
 				continue
 			}
 		}
 
-		if balance.Denom == chaintypes.InjectiveCoin {
-			injBurnAmount := sdk.NewCoins(sdk.NewCoin(chaintypes.InjectiveCoin, balance.Amount))
+		if balance.Denom == "ujolt" {
+			injBurnAmount := sdk.NewCoins(sdk.NewCoin("ujolt", balance.Amount))
 			if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, injBurnAmount); err != nil {
 				k.Logger(ctx).Error("BurnCoins fail:", err)
 			}
@@ -402,8 +387,6 @@ func (k *Keeper) WithdrawAllAuctionBalances(ctx sdk.Context) []SendToAuctionCoin
 func (k *Keeper) GetAllExchangeBalances(
 	ctx sdk.Context,
 ) []types.Balance {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	depositStore := prefix.NewStore(store, types.DepositsPrefix)
 	iterator := depositStore.Iterator(nil, nil)
@@ -440,7 +423,6 @@ func (k *Keeper) chargeBank(ctx sdk.Context, account sdk.AccAddress, denom strin
 	}
 
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, account, types.ModuleName, sdk.NewCoins(coin)); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		k.Logger(ctx).Error("bank charge failed", "account", account.String(), "coin", coin.String())
 		return errors.Wrap(err, "bank charge failed")
 	}
@@ -450,12 +432,10 @@ func (k *Keeper) chargeBank(ctx sdk.Context, account sdk.AccAddress, denom strin
 func (k *Keeper) chargeAvailableDeposits(ctx sdk.Context, subaccountID common.Hash, denom string, amount sdk.Dec) error {
 	deposit := k.GetDeposit(ctx, subaccountID, denom)
 	if deposit.IsEmpty() {
-		metrics.ReportFuncError(k.svcTags)
 		return errors.Wrapf(types.ErrInsufficientDeposit, "Deposits for subaccountID %s asset %s not found", subaccountID.Hex(), denom)
 	}
 
 	if deposit.AvailableBalance.LT(amount) {
-		metrics.ReportFuncError(k.svcTags)
 		return errors.Wrapf(types.ErrInsufficientDeposit, "Insufficient Deposits for subaccountID %s asset %s. Balance decrement %s exceeds Available Balance %s ", subaccountID.Hex(), denom, amount.String(), deposit.AvailableBalance.String())
 	}
 
@@ -472,8 +452,6 @@ func (k *Keeper) chargeAccount(
 	denom string,
 	amount sdk.Dec,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if amount.IsZero() {
 		return nil
 	}
@@ -498,7 +476,7 @@ func (k *Keeper) chargeBankAndIncrementTotalDeposits(
 	sender := types.SubaccountIDToSdkAddress(subaccountID)
 	// round up decimal portion (if exists) - truncation is fine here since we do Ceil first
 	intAmount := amount.Ceil().TruncateInt()
-	decAmount := intAmount.ToDec()
+	decAmount := sdk.NewDecFromInt(intAmount)
 
 	if err := k.chargeBank(ctx, sender, denom, intAmount); err != nil {
 		return err
@@ -521,8 +499,6 @@ func (k *Keeper) incrementAvailableBalanceOrBank(
 	denom string,
 	amount sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if amount.IsZero() {
 		return
 	}
@@ -539,8 +515,6 @@ func (k *Keeper) UpdateDepositWithDelta(
 	denom string,
 	depositDelta *types.DepositDelta,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if depositDelta.IsEmpty() {
 		return
 	}
@@ -558,8 +532,6 @@ func (k *Keeper) UpdateDepositWithDeltaWithoutBankCharge(
 	denom string,
 	depositDelta *types.DepositDelta,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if depositDelta.IsEmpty() {
 		return
 	}
@@ -576,9 +548,7 @@ func (k *Keeper) IncrementDepositWithCoinOrSendToBank(
 	subaccountID common.Hash,
 	coin sdk.Coin,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
-	decAmount := coin.Amount.ToDec()
+	decAmount := sdk.NewDecFromInt(coin.Amount)
 	k.IncrementDepositOrSendToBank(ctx, subaccountID, coin.Denom, decAmount)
 }
 
@@ -589,8 +559,6 @@ func (k *Keeper) IncrementDepositForNonDefaultSubaccount(
 	denom string,
 	amount sdk.Dec,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if types.IsDefaultSubaccountID(subaccountID) {
 		return errors.Wrap(types.ErrBadSubaccountID, subaccountID.Hex())
 	}
@@ -609,8 +577,6 @@ func (k *Keeper) IncrementDepositOrSendToBank(
 	denom string,
 	amount sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	deposit := k.GetDeposit(ctx, subaccountID, denom)
 	deposit.AvailableBalance = deposit.AvailableBalance.Add(amount)
 	deposit.TotalBalance = deposit.TotalBalance.Add(amount)
@@ -624,8 +590,6 @@ func (k *Keeper) DecrementDeposit(
 	denom string,
 	amount sdk.Dec,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if amount.IsZero() {
 		return nil
 	}
@@ -634,7 +598,6 @@ func (k *Keeper) DecrementDeposit(
 
 	// usually available balance check is sufficient, but in case of a bug, we check total balance as well
 	if deposit.IsEmpty() || deposit.AvailableBalance.LT(amount) || deposit.TotalBalance.LT(amount) {
-		metrics.ReportFuncError(k.svcTags)
 		return types.ErrInsufficientDeposit
 	}
 	deposit.AvailableBalance = deposit.AvailableBalance.Sub(amount)
@@ -651,13 +614,11 @@ func (k *Keeper) DecrementDepositOrChargeFromBank(
 	denom string,
 	amount sdk.Dec,
 ) (chargeAmount sdk.Dec, err error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if types.IsDefaultSubaccountID(subaccountID) {
 		sender := types.SubaccountIDToSdkAddress(subaccountID)
 		// round up decimal portion (if exists) - truncation is fine here since we do Ceil first
 		intAmount := amount.Ceil().TruncateInt()
-		chargeAmount = intAmount.ToDec()
+		chargeAmount = sdk.NewDecFromInt(intAmount)
 		err = k.chargeBank(ctx, sender, denom, intAmount)
 		return chargeAmount, err
 	}

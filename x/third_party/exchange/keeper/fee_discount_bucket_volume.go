@@ -4,8 +4,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -15,8 +13,6 @@ func (k *Keeper) GetFeeDiscountTotalAccountVolume(
 	account sdk.AccAddress,
 	currBucketStartTimestamp int64,
 ) sdk.Dec {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	currBucketVolume := k.GetFeeDiscountAccountVolumeInBucket(ctx, currBucketStartTimestamp, account)
 	pastBucketVolume := k.GetPastBucketTotalVolume(ctx, account)
 	totalVolume := currBucketVolume.Add(pastBucketVolume)
@@ -30,8 +26,6 @@ func (k *Keeper) GetFeeDiscountAccountVolumeInBucket(
 	bucketStartTimestamp int64,
 	account sdk.AccAddress,
 ) sdk.Dec {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetFeeDiscountAccountVolumeInBucketKey(bucketStartTimestamp, account))
 	if bz == nil {
@@ -46,8 +40,6 @@ func (k *Keeper) DeleteFeeDiscountAccountVolumeInBucket(
 	bucketStartTimestamp int64,
 	account sdk.AccAddress,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Delete(types.GetFeeDiscountAccountVolumeInBucketKey(bucketStartTimestamp, account))
 }
@@ -59,8 +51,6 @@ func (k *Keeper) UpdateFeeDiscountAccountVolumeInBucket(
 	bucketStartTimestamp int64,
 	addedPoints sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if addedPoints.IsZero() {
 		return
 	}
@@ -77,8 +67,6 @@ func (k *Keeper) SetFeeDiscountAccountVolumeInBucket(
 	account sdk.AccAddress,
 	points sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	key := types.GetFeeDiscountAccountVolumeInBucketKey(bucketStartTimestamp, account)
@@ -88,8 +76,6 @@ func (k *Keeper) SetFeeDiscountAccountVolumeInBucket(
 
 // DeleteAllAccountVolumeInAllBucketsWithMetadata deletes all total volume in all buckets for all accounts
 func (k *Keeper) DeleteAllAccountVolumeInAllBucketsWithMetadata(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	allVolumes := k.GetAllAccountVolumeInAllBuckets(ctx)
 
 	accounts := make([]sdk.AccAddress, 0)
@@ -120,8 +106,6 @@ func (k *Keeper) DeleteAllAccountVolumeInAllBucketsWithMetadata(ctx sdk.Context)
 
 // GetAllAccountVolumeInAllBuckets gets all total volume in all buckets for all accounts
 func (k *Keeper) GetAllAccountVolumeInAllBuckets(ctx sdk.Context) []*types.FeeDiscountBucketVolumeAccounts {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountVolumeInAllBuckets := make([]*types.FeeDiscountBucketVolumeAccounts, 0)
 	accountVolumeMap := make(map[int64][]*types.AccountVolume)
 
@@ -157,8 +141,6 @@ func (k *Keeper) GetAllAccountVolumeInAllBuckets(ctx sdk.Context) []*types.FeeDi
 
 // GetOldestBucketStartTimestamp gets the oldest bucket start timestamp.
 func (k *Keeper) GetOldestBucketStartTimestamp(ctx sdk.Context) (startTimestamp int64) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	appendVolumes := func(bucketStartTimestamp int64, _ sdk.AccAddress, _ sdk.Dec) (stop bool) {
 		startTimestamp = bucketStartTimestamp
 		return true
@@ -173,8 +155,6 @@ func (k *Keeper) iterateAccountVolume(
 	ctx sdk.Context,
 	process func(bucketStartTimestamp int64, account sdk.AccAddress, totalVolume sdk.Dec) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	pastBucketVolumeStore := prefix.NewStore(store, types.FeeDiscountBucketAccountVolumePrefix)
@@ -192,8 +172,6 @@ func (k *Keeper) iterateAccountVolume(
 
 // GetAllAccountVolumeInBucket gets all total volume in a given bucket for all accounts
 func (k *Keeper) GetAllAccountVolumeInBucket(ctx sdk.Context, bucketStartTimestamp int64) []*types.AccountVolume {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountVolumes := make([]*types.AccountVolume, 0)
 
 	appendFees := func(account sdk.AccAddress, totalVolume sdk.Dec) (stop bool) {
@@ -214,8 +192,6 @@ func (k *Keeper) iterateAccountVolumeInBucket(
 	bucketStartTimestamp int64,
 	process func(account sdk.AccAddress, totalVolume sdk.Dec) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	iteratorKey := types.FeeDiscountBucketAccountVolumePrefix
