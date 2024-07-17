@@ -18,8 +18,6 @@ func (k *Keeper) SetTransientPosition(
 	marketID, subaccountID common.Hash,
 	position *types.Position,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	positionStore := prefix.NewStore(store, types.DerivativePositionsPrefix)
 
@@ -32,8 +30,6 @@ func (k *Keeper) SetTransientPosition(
 func (k *Keeper) EmitAllTransientPositionUpdates(
 	ctx sdk.Context,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 
 	iterator := sdk.KVStorePrefixIterator(store, types.DerivativePositionsPrefix)

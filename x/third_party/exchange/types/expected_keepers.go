@@ -13,7 +13,7 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
 	wasmxtypes "github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 

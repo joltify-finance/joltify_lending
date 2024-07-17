@@ -34,8 +34,6 @@ func (k *Keeper) getMatchedSpotLimitOrderClearingResults(
 	transientBuyOrders []*types.SpotLimitOrder,
 	transientSellOrders []*types.SpotLimitOrder,
 ) *ordermatching.SpotOrderbookMatchingResults {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	buyOrdersIterator := k.getSpotLimitOrderbookIterator(ctx, marketID, true)
 	sellOrdersIterator := k.getSpotLimitOrderbookIterator(ctx, marketID, false)
 	buyOrderbook := ordermatching.NewSpotLimitOrderbook(k.cdc, buyOrdersIterator, transientBuyOrders, true)
@@ -128,8 +126,6 @@ func (k *Keeper) getMarketOrderStateExpansionsAndClearingPrice(
 	feeDiscountConfig *FeeDiscountConfig,
 	takerFeeRate sdk.Dec,
 ) (spotLimitOrderStateExpansions, spotMarketOrderStateExpansions []*spotOrderStateExpansion, clearingPrice, clearingQuantity sdk.Dec) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	isLimitBuy := !isMarketBuy
 	limitOrdersIterator := k.getSpotLimitOrderbookIterator(ctx, market.MarketID(), isLimitBuy)
 	limitOrderbook := ordermatching.NewSpotLimitOrderbook(k.cdc, limitOrdersIterator, nil, isLimitBuy)
@@ -195,8 +191,6 @@ func (k *Keeper) GetFillableSpotLimitOrdersByMarketDirection(
 	isBuy bool,
 	maxQuantity sdk.Dec,
 ) (limitOrders []*types.SpotLimitOrder, clearingPrice, clearingQuantity sdk.Dec) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	limitOrders = make([]*types.SpotLimitOrder, 0)
 	clearingQuantity = sdk.ZeroDec()
 	notional := sdk.ZeroDec()

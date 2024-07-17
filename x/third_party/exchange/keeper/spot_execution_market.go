@@ -14,8 +14,6 @@ func (k *Keeper) ExecuteSpotMarketOrders(
 	marketOrderIndicator *types.MarketOrderIndicator,
 	stakingInfo *FeeDiscountStakingInfo,
 ) *SpotBatchExecutionData {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var (
 		marketID                     = common.HexToHash(marketOrderIndicator.MarketId)
 		isMarketBuy                  = marketOrderIndicator.IsBuy
@@ -163,8 +161,6 @@ func (k *Keeper) PersistSingleSpotMarketOrderExecution(
 }
 
 func (k *Keeper) PersistSpotMarketOrderExecution(ctx sdk.Context, batchSpotExecutionData []*SpotBatchExecutionData, spotVwapData SpotVwapInfo) types.TradingRewardPoints {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	tradingRewardPoints := types.NewTradingRewardPoints()
 	for batchIdx := range batchSpotExecutionData {
 		execution := batchSpotExecutionData[batchIdx]

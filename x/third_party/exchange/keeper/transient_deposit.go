@@ -16,8 +16,6 @@ func (k *Keeper) SetTransientDeposit(
 	denom string,
 	deposit *types.Deposit,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	key := types.GetDepositKey(subaccountID, denom)
 	bz := k.cdc.MustMarshal(deposit)
@@ -28,8 +26,6 @@ func (k *Keeper) SetTransientDeposit(
 func (k *Keeper) EmitAllTransientDepositUpdates(
 	ctx sdk.Context,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	depositStore := prefix.NewStore(store, types.DepositsPrefix)
 

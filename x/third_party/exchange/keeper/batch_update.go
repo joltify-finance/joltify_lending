@@ -26,8 +26,6 @@ func (k *Keeper) ExecuteBatchUpdateOrders(
 	derivativeOrdersToCreate []*types.DerivativeOrder,
 	binaryOptionsOrdersToCreate []*types.DerivativeOrder,
 ) (*types.MsgBatchUpdateOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var (
 		spotMarkets          = make(map[common.Hash]*types.SpotMarket)
 		derivativeMarkets    = make(map[common.Hash]*types.DerivativeMarket)

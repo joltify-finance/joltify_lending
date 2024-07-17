@@ -12,24 +12,18 @@ import (
 
 // IsSpotExchangeEnabled returns true if Spot Exchange is enabled
 func (k *Keeper) IsSpotExchangeEnabled(ctx sdk.Context) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	return store.Has(types.SpotExchangeEnabledKey)
 }
 
 // SetSpotExchangeEnabled sets the indicator to enable spot exchange
 func (k *Keeper) SetSpotExchangeEnabled(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Set(types.SpotExchangeEnabledKey, []byte{1})
 }
 
 // HasSpotMarket returns true if SpotMarket exists by ID.
 func (k *Keeper) HasSpotMarket(ctx sdk.Context, marketID common.Hash, isEnabled bool) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	marketStore := prefix.NewStore(store, types.GetSpotMarketKey(isEnabled))
 	return marketStore.Has(marketID.Bytes())
@@ -37,8 +31,6 @@ func (k *Keeper) HasSpotMarket(ctx sdk.Context, marketID common.Hash, isEnabled 
 
 // GetSpotMarket returns Spot Market from marketID.
 func (k *Keeper) GetSpotMarket(ctx sdk.Context, marketID common.Hash, isEnabled bool) *types.SpotMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	marketStore := prefix.NewStore(store, types.GetSpotMarketKey(isEnabled))
@@ -114,8 +106,6 @@ func FullSpotMarketWithMidPriceToB(k *Keeper) func(sdk.Context, *types.FullSpotM
 
 // FindSpotMarkets returns a filtered list of SpotMarkets.
 func (k *Keeper) FindSpotMarkets(ctx sdk.Context, filter SpotMarketFilter) []*types.SpotMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	spotMarkets := make([]*types.SpotMarket, 0)
 	appendPair := func(m *types.SpotMarket) (stop bool) {
 		if !filter(m) {
@@ -132,8 +122,6 @@ func (k *Keeper) FindSpotMarkets(ctx sdk.Context, filter SpotMarketFilter) []*ty
 
 // FindFullSpotMarkets returns a filtered list of FullSpotMarkets.
 func (k *Keeper) FindFullSpotMarkets(ctx sdk.Context, filter SpotMarketFilter, fillers ...FullSpotMarketFiller) []*types.FullSpotMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	spotMarkets := make([]*types.FullSpotMarket, 0)
 	appendPair := func(m *types.SpotMarket) (stop bool) {
 		if !filter(m) {
@@ -155,14 +143,10 @@ func (k *Keeper) FindFullSpotMarkets(ctx sdk.Context, filter SpotMarketFilter, f
 
 // GetAllSpotMarkets returns all SpotMarkets.
 func (k *Keeper) GetAllSpotMarkets(ctx sdk.Context) []*types.SpotMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	return k.FindSpotMarkets(ctx, AllSpotMarketFilter)
 }
 
 func (k *Keeper) ScheduleSpotMarketParamUpdate(ctx sdk.Context, p *types.SpotMarketParamUpdateProposal) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	marketID := common.HexToHash(p.MarketId)
 
@@ -174,8 +158,6 @@ func (k *Keeper) ScheduleSpotMarketParamUpdate(ctx sdk.Context, p *types.SpotMar
 
 // IterateSpotMarketParamUpdates iterates over SpotMarketParamUpdates calling process on each pair.
 func (k *Keeper) IterateSpotMarketParamUpdates(ctx sdk.Context, process func(*types.SpotMarketParamUpdateProposal) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	paramUpdateStore := prefix.NewStore(store, types.SpotMarketParamUpdateScheduleKey)
 
@@ -247,7 +229,6 @@ func (k *Keeper) handleSpotMakerFeeIncrease(ctx sdk.Context, buyOrderbook []*typ
 }
 
 func (k *Keeper) ExecuteSpotMarketParamUpdateProposal(ctx sdk.Context, p *types.SpotMarketParamUpdateProposal) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 	marketID := common.HexToHash(p.MarketId)
 	prevMarket := k.GetSpotMarketByID(ctx, marketID)
 	if prevMarket == nil {
@@ -282,8 +263,6 @@ func (k *Keeper) ExecuteSpotMarketParamUpdateProposal(ctx sdk.Context, p *types.
 }
 
 func (k *Keeper) GetSpotMarketByID(ctx sdk.Context, marketID common.Hash) *types.SpotMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	market := k.GetSpotMarket(ctx, marketID, true)
 	if market != nil {
 		return market
@@ -298,8 +277,6 @@ func (k *Keeper) UpdateSpotMarketParam(
 	makerFeeRate, takerFeeRate, relayerFeeShareRate, minPriceTickSize, minQuantityTickSize *sdk.Dec,
 	status types.MarketStatus,
 ) *types.SpotMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	market := k.GetSpotMarketByID(ctx, marketID)
 
 	isActiveStatusChange := market.IsActive() && status != types.MarketStatus_Active || (market.IsInactive() && status == types.MarketStatus_Active)
@@ -323,8 +300,6 @@ func (k *Keeper) UpdateSpotMarketParam(
 }
 
 func (k *Keeper) SpotMarketLaunch(ctx sdk.Context, ticker, baseDenom, quoteDenom string, minPriceTickSize, minQuantityTickSize sdk.Dec) (*types.SpotMarket, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	exchangeParams := k.GetParams(ctx)
 
 	makerFeeRate := exchangeParams.DefaultSpotMakerFeeRate
@@ -340,8 +315,6 @@ func (k *Keeper) SpotMarketLaunchWithCustomFees(
 	minPriceTickSize, minQuantityTickSize sdk.Dec,
 	makerFeeRate, takerFeeRate, relayerFeeShareRate sdk.Dec,
 ) (*types.SpotMarket, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if !k.IsDenomValid(ctx, baseDenom) {
 		metrics.ReportFuncCall(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidBaseDenom, "denom %s does not exist in supply", baseDenom)
@@ -380,8 +353,6 @@ func (k *Keeper) SpotMarketLaunchWithCustomFees(
 
 // SetSpotMarketStatus sets SpotMarket's status.
 func (k *Keeper) SetSpotMarketStatus(ctx sdk.Context, marketID common.Hash, status types.MarketStatus) (*types.SpotMarket, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	isEnabled := false
 
 	market := k.GetSpotMarket(ctx, marketID, isEnabled)
@@ -406,8 +377,6 @@ func (k *Keeper) SetSpotMarketStatus(ctx sdk.Context, marketID common.Hash, stat
 
 // SetSpotMarket sets SpotMarket in keeper.
 func (k *Keeper) SetSpotMarket(ctx sdk.Context, spotMarket *types.SpotMarket) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	marketID := common.HexToHash(spotMarket.MarketId)
 	isEnabled := true
@@ -425,8 +394,6 @@ func (k *Keeper) SetSpotMarket(ctx sdk.Context, spotMarket *types.SpotMarket) {
 
 // DeleteSpotMarket deletes SpotMarket from keeper (needed for moving to another hash).
 func (k *Keeper) DeleteSpotMarket(ctx sdk.Context, marketID common.Hash, isEnabled bool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	marketStore := prefix.NewStore(store, types.GetSpotMarketKey(isEnabled))
@@ -440,8 +407,6 @@ func (k *Keeper) DeleteSpotMarket(ctx sdk.Context, marketID common.Hash, isEnabl
 
 // IterateSpotMarkets iterates over SpotMarkets calling process on each pair.
 func (k *Keeper) IterateSpotMarkets(ctx sdk.Context, isEnabled *bool, process func(*types.SpotMarket) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	var marketStore prefix.Store
@@ -466,8 +431,6 @@ func (k *Keeper) IterateSpotMarkets(ctx sdk.Context, isEnabled *bool, process fu
 
 // IterateForceCloseSpotMarkets iterates over Spot market settlement infos calling process on each info.
 func (k *Keeper) IterateForceCloseSpotMarkets(ctx sdk.Context, process func(common.Hash) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	marketStore := prefix.NewStore(store, types.SpotMarketForceCloseInfoKey)
 
@@ -486,8 +449,6 @@ func (k *Keeper) IterateForceCloseSpotMarkets(ctx sdk.Context, process func(comm
 
 // GetAllForceClosedSpotMarketIDStrings returns all spot markets to force close.
 func (k *Keeper) GetAllForceClosedSpotMarketIDStrings(ctx sdk.Context) []string {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketForceCloseInfos := make([]string, 0)
 	appendMarketSettlementInfo := func(i common.Hash) (stop bool) {
 		marketForceCloseInfos = append(marketForceCloseInfos, i.Hex())
@@ -500,8 +461,6 @@ func (k *Keeper) GetAllForceClosedSpotMarketIDStrings(ctx sdk.Context) []string 
 
 // GetAllForceClosedSpotMarketIDs returns all spot markets to force close.
 func (k *Keeper) GetAllForceClosedSpotMarketIDs(ctx sdk.Context) []common.Hash {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketForceCloseInfos := make([]common.Hash, 0)
 	appendMarketSettlementInfo := func(i common.Hash) (stop bool) {
 		marketForceCloseInfos = append(marketForceCloseInfos, i)
@@ -514,8 +473,6 @@ func (k *Keeper) GetAllForceClosedSpotMarketIDs(ctx sdk.Context) []common.Hash {
 
 // GetSpotMarketForceCloseInfo gets the SpotMarketForceCloseInfo from the keeper.
 func (k *Keeper) GetSpotMarketForceCloseInfo(ctx sdk.Context, marketID common.Hash) *common.Hash {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	settlementStore := prefix.NewStore(store, types.SpotMarketForceCloseInfoKey)
 
@@ -530,8 +487,6 @@ func (k *Keeper) GetSpotMarketForceCloseInfo(ctx sdk.Context, marketID common.Ha
 
 // SetSpotMarketForceCloseInfo saves the SpotMarketSettlementInfo to the keeper.
 func (k *Keeper) SetSpotMarketForceCloseInfo(ctx sdk.Context, marketID common.Hash) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	settlementStore := prefix.NewStore(store, types.SpotMarketForceCloseInfoKey)
 	settlementStore.Set(marketID.Bytes(), marketID.Bytes())
@@ -539,8 +494,6 @@ func (k *Keeper) SetSpotMarketForceCloseInfo(ctx sdk.Context, marketID common.Ha
 
 // DeleteSpotMarketForceCloseInfo deletes the SpotMarketForceCloseInfo from the keeper.
 func (k *Keeper) DeleteSpotMarketForceCloseInfo(ctx sdk.Context, marketID common.Hash) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	settlementStore := prefix.NewStore(store, types.SpotMarketForceCloseInfoKey)
 
@@ -553,8 +506,6 @@ func (k *Keeper) DeleteSpotMarketForceCloseInfo(ctx sdk.Context, marketID common
 }
 
 func (k *Keeper) ProcessForceClosedSpotMarkets(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	spotMarketIDsToForceClose := k.GetAllForceClosedSpotMarketIDs(ctx)
 
 	for _, marketID := range spotMarketIDsToForceClose {

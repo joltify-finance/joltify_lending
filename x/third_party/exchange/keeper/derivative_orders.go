@@ -23,8 +23,6 @@ func (k *Keeper) CancelAllRestingDerivativeLimitOrdersForSubaccount(
 	shouldCancelReduceOnly bool,
 	shouldCancelVanilla bool,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := market.MarketID()
 	restingBuyOrderHashes := k.GetAllRestingDerivativeLimitOrderHashesBySubaccountAndMarket(ctx, marketID, true, subaccountID)
 	restingSellOrderHashes := k.GetAllRestingDerivativeLimitOrderHashesBySubaccountAndMarket(ctx, marketID, false, subaccountID)
@@ -56,8 +54,6 @@ func (k *Keeper) CancelRestingDerivativeLimitOrdersForSubaccountUpToBalance(
 	subaccountID common.Hash,
 	freeingUpBalance sdk.Dec,
 ) (freedUpBalance sdk.Dec) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	freedUpBalance = sdk.ZeroDec()
 
 	marketID := market.MarketID()
@@ -108,8 +104,6 @@ func (k *Keeper) CancelAllRestingDerivativeLimitOrders(
 	ctx sdk.Context,
 	market DerivativeMarketI,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := market.MarketID()
 
 	buyOrders := k.GetAllDerivativeLimitOrdersByMarketDirection(ctx, marketID, true)
@@ -137,8 +131,6 @@ func (k *Keeper) GetAllRestingDerivativeLimitOrderHashesBySubaccountAndMarket(
 	isBuy bool,
 	subaccountID common.Hash,
 ) (orderHashes []common.Hash) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orderHashes = make([]common.Hash, 0)
 	appendOrderHash := func(orderHash common.Hash) (stop bool) {
 		orderHashes = append(orderHashes, orderHash)
@@ -163,8 +155,6 @@ func (k *Keeper) IterateRestingDerivativeLimitOrderHashesBySubaccount(
 	subaccountID common.Hash,
 	process func(orderHash common.Hash) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	orderIndexStore := prefix.NewStore(store, types.GetDerivativeLimitOrderIndexPrefix(marketID, isBuy, subaccountID))
 	var iterator storetypes.Iterator
@@ -194,8 +184,6 @@ func (k *Keeper) CancelRestingDerivativeLimitOrder(
 	shouldCancelReduceOnly bool,
 	shouldCancelVanilla bool,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := market.MarketID()
 	// 1. Add back the margin hold to available balance
 	order := k.GetDerivativeLimitOrderBySubaccountIDAndHash(ctx, marketID, isBuy, subaccountID, orderHash)
@@ -237,8 +225,6 @@ func (k *Keeper) SetNewDerivativeLimitOrderWithMetadata(
 	metadata *types.SubaccountOrderbookMetadata,
 	marketID common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.DerivativeLimitOrdersPrefix)
 	ordersIndexStore := prefix.NewStore(store, types.DerivativeLimitOrdersIndexPrefix)
@@ -288,8 +274,6 @@ func (k *Keeper) UpdateDerivativeLimitOrdersFromFilledDeltas(
 	isResting bool,
 	filledDeltas []*types.DerivativeLimitOrderDelta,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if len(filledDeltas) == 0 {
 		return
 	}
@@ -386,8 +370,6 @@ func (k *Keeper) SetPostOnlyDerivativeLimitOrderWithMetadata(
 	metadata *types.SubaccountOrderbookMetadata,
 	marketID common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	k.SetNewDerivativeLimitOrderWithMetadata(ctx, order, metadata, marketID)
 
 	newOrdersEvent := &types.EventNewDerivativeOrders{
@@ -414,8 +396,6 @@ func (k *Keeper) DeleteDerivativeLimitOrderByFields(
 	isBuy bool,
 	hash common.Hash,
 ) *types.DerivativeLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.DerivativeLimitOrdersPrefix)
 	priceKey := types.GetLimitOrderByPriceKeyPrefix(marketID, isBuy, price, hash)
@@ -437,8 +417,6 @@ func (k *Keeper) DeleteDerivativeLimitOrder(
 	marketID common.Hash,
 	order *types.DerivativeLimitOrder,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var (
 		subaccountID = order.SubaccountID()
 		isBuy        = order.IsBuy()
@@ -483,8 +461,6 @@ func (k *Keeper) GetAllDerivativeLimitOrdersByMarketDirection(
 	marketID common.Hash,
 	isBuy bool,
 ) (orders []*types.DerivativeLimitOrder) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orders = make([]*types.DerivativeLimitOrder, 0)
 	appendOrder := func(order *types.DerivativeLimitOrder) (stop bool) {
 		orders = append(orders, order)
@@ -579,8 +555,6 @@ func (k *Keeper) IterateDerivativeLimitOrdersByMarketDirection(
 	isBuy bool,
 	process func(order *types.DerivativeLimitOrder) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	prefixKey := types.DerivativeLimitOrdersPrefix
 	prefixKey = append(prefixKey, types.MarketDirectionPrefix(marketID, isBuy)...)
@@ -611,8 +585,6 @@ func (k *Keeper) GetDerivativeLimitOrderBySubaccountIDAndHash(
 	subaccountID common.Hash,
 	orderHash common.Hash,
 ) *types.DerivativeLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.DerivativeLimitOrdersPrefix)
 	ordersIndexStore := prefix.NewStore(store, types.DerivativeLimitOrdersIndexPrefix)
@@ -660,8 +632,6 @@ func fetchPriceKeyFromOrdersIndexStore(
 
 // GetAllDerivativeAndBinaryOptionsLimitOrderbook returns all orderbooks for all derivative markets.
 func (k *Keeper) GetAllDerivativeAndBinaryOptionsLimitOrderbook(ctx sdk.Context) []types.DerivativeOrderBook {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	markets := k.GetAllDerivativeAndBinaryOptionsMarkets(ctx)
 
 	orderbook := make([]types.DerivativeOrderBook, 0, len(markets)*2)
@@ -691,8 +661,6 @@ func (k *Keeper) GetComputedDerivativeLimitOrderbook(
 	isBuy bool,
 	limit uint64,
 ) (priceLevel []*types.Level) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	priceLevel = make([]*types.Level, 0, limit)
 
 	appendPriceLevel := func(order *types.DerivativeLimitOrder) (stop bool) {
@@ -725,8 +693,6 @@ func (k *Keeper) GetAllTraderDerivativeLimitOrders(
 	marketID common.Hash,
 	subaccountID common.Hash,
 ) []*types.TrimmedDerivativeLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orders := make([]*types.TrimmedDerivativeLimitOrder, 0)
 
 	store := k.getStore(ctx)
@@ -753,8 +719,6 @@ func (k *Keeper) GetDerivativeLimitOrdersByAddress(
 	marketID common.Hash,
 	accountAddress sdk.AccAddress,
 ) []*types.TrimmedDerivativeLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orders := make([]*types.TrimmedDerivativeLimitOrder, 0)
 
 	store := k.getStore(ctx)
@@ -828,8 +792,6 @@ func (k *Keeper) IterateDerivativeLimitOrdersBySubaccount(
 	subaccountID common.Hash,
 	process func(orderKey []byte) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	orderIndexStore := prefix.NewStore(store, types.GetDerivativeLimitOrderIndexPrefix(marketID, isBuy, subaccountID))
 	var iterator storetypes.Iterator
@@ -856,8 +818,6 @@ func (k *Keeper) IterateDerivativeLimitOrdersByAddress(
 	accountAddress sdk.AccAddress,
 	process func(orderKey []byte) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	orderIndexStore := prefix.NewStore(store, types.GetDerivativeLimitOrderIndexByAccountAddressPrefix(marketID, isBuy, accountAddress))
 	var iterator storetypes.Iterator

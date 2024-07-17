@@ -15,7 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/ethereum/go-ethereum/common"
 
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
 )
 
 const RouterKey = ModuleName

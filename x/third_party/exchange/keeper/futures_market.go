@@ -10,7 +10,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
 )
 
 func (k *Keeper) ExpiryFuturesMarketLaunch(
@@ -18,8 +18,6 @@ func (k *Keeper) ExpiryFuturesMarketLaunch(
 	ticker, quoteDenom, oracleBase string, oracleQuote string, oracleScaleFactor uint32, oracleType oracletypes.OracleType, expiry int64,
 	initialMarginRatio, maintenanceMarginRatio, makerFeeRate, takerFeeRate, minPriceTickSize, minQuantityTickSize sdk.Dec,
 ) (*types.DerivativeMarket, *types.ExpiryFuturesMarketInfo, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	exchangeParams := k.GetParams(ctx)
 	relayerFeeShareRate := exchangeParams.RelayerFeeShareRate
 
@@ -103,8 +101,6 @@ func (k *Keeper) ExpiryFuturesMarketLaunch(
 
 // GetExpiryFuturesMarketInfo gets the expiry futures market's market info from the keeper.
 func (k *Keeper) GetExpiryFuturesMarketInfo(ctx sdk.Context, marketID common.Hash) *types.ExpiryFuturesMarketInfo {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	expiryFuturesMarketInfoStore := prefix.NewStore(store, types.ExpiryFuturesMarketInfoPrefix)
 
@@ -120,8 +116,6 @@ func (k *Keeper) GetExpiryFuturesMarketInfo(ctx sdk.Context, marketID common.Has
 
 // SetExpiryFuturesMarketInfo saves the expiry futures market's market info to the keeper.
 func (k *Keeper) SetExpiryFuturesMarketInfo(ctx sdk.Context, marketID common.Hash, marketInfo *types.ExpiryFuturesMarketInfo) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	expiryFuturesMarketInfoStore := prefix.NewStore(store, types.ExpiryFuturesMarketInfoPrefix)
 	key := marketID.Bytes()
@@ -137,8 +131,6 @@ func (k *Keeper) SetExpiryFuturesMarketInfo(ctx sdk.Context, marketID common.Has
 
 // DeleteExpiryFuturesMarketInfo deletes the expiry futures market's market info from the keeper.
 func (k *Keeper) DeleteExpiryFuturesMarketInfo(ctx sdk.Context, marketID common.Hash) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	expiryFuturesMarketInfoStore := prefix.NewStore(store, types.ExpiryFuturesMarketInfoPrefix)
 	expiryFuturesMarketInfoStore.Delete(marketID.Bytes())
@@ -146,8 +138,6 @@ func (k *Keeper) DeleteExpiryFuturesMarketInfo(ctx sdk.Context, marketID common.
 
 // SetExpiryFuturesMarketInfoByTimestamp saves the expiry futures market's market info index to the keeper.
 func (k *Keeper) SetExpiryFuturesMarketInfoByTimestamp(ctx sdk.Context, marketID common.Hash, timestamp int64) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	key := types.GetExpiryFuturesMarketInfoByTimestampKey(timestamp, marketID)
 	store.Set(key, marketID.Bytes())
@@ -155,8 +145,6 @@ func (k *Keeper) SetExpiryFuturesMarketInfoByTimestamp(ctx sdk.Context, marketID
 
 // DeleteExpiryFuturesMarketInfoByTimestamp deletes the expiry futures market's market info index from the keeper.
 func (k *Keeper) DeleteExpiryFuturesMarketInfoByTimestamp(ctx sdk.Context, marketID common.Hash, timestamp int64) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	key := types.GetExpiryFuturesMarketInfoByTimestampKey(timestamp, marketID)
 	store.Delete(key)
@@ -164,8 +152,6 @@ func (k *Keeper) DeleteExpiryFuturesMarketInfoByTimestamp(ctx sdk.Context, marke
 
 // GetAllExpiryFuturesMarketInfoStates returns all expiry futures market's market infos.
 func (k *Keeper) GetAllExpiryFuturesMarketInfoStates(ctx sdk.Context) []types.ExpiryFuturesMarketInfoState {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketInfoStates := make([]types.ExpiryFuturesMarketInfoState, 0)
 	appendMarketInfo := func(p *types.ExpiryFuturesMarketInfo, marketID common.Hash) (stop bool) {
 		marketInfoState := types.ExpiryFuturesMarketInfoState{
@@ -181,8 +167,6 @@ func (k *Keeper) GetAllExpiryFuturesMarketInfoStates(ctx sdk.Context) []types.Ex
 
 // IterateExpiryFuturesMarketInfos iterates over expiry futures market's market info calling process on each market info.
 func (k *Keeper) IterateExpiryFuturesMarketInfos(ctx sdk.Context, process func(*types.ExpiryFuturesMarketInfo, common.Hash) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	expiryFuturesMarketInfoStore := prefix.NewStore(store, types.ExpiryFuturesMarketInfoPrefix)

@@ -9,8 +9,6 @@ import (
 func (k *Keeper) ProcessFeeDiscountBuckets(
 	ctx sdk.Context,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	currBucketStartTimestamp := k.GetFeeDiscountCurrentBucketStartTimestamp(ctx)
 	if currBucketStartTimestamp == 0 {
 		return

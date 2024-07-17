@@ -107,8 +107,6 @@ func (k *Keeper) getAvailableRewardsToPayout(
 func (k *Keeper) ProcessTradingRewards(
 	ctx sdk.Context,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	blockTime := ctx.BlockTime().Unix()
 
 	currentCampaignEndTimestamp := k.GetCurrentCampaignEndTimestamp(ctx)
@@ -173,8 +171,6 @@ func (k *Keeper) DistributeTradingRewards(
 	rewardReceiver sdk.AccAddress,
 	rewards sdk.Coins,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if rewards.Len() == 0 {
 		return
 	}

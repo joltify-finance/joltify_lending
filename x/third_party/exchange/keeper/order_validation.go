@@ -299,8 +299,6 @@ func (k *Keeper) resizeNewReduceOnlyIfRequired(
 	position *types.Position,
 	betterOrEqualOrders *SubaccountOrderResults,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	existingClosingQuantity := betterOrEqualOrders.GetCumulativeEOBReduceOnlyQuantity().Add(betterOrEqualOrders.GetCumulativeEOBVanillaQuantity())
 	reducibleQuantity := position.Quantity.Sub(existingClosingQuantity)
 
@@ -340,8 +338,6 @@ func (k *Keeper) cancelReduceOnlyOrders(
 	totalReduceOnlyCancelQuantity sdk.Dec,
 	ordersToCancel []*types.SubaccountOrderData,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if len(ordersToCancel) == 0 {
 		return
 	}

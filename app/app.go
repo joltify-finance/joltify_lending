@@ -10,6 +10,12 @@ import (
 
 	burnauctionmodule "github.com/joltify-finance/joltify_lending/x/burnauction"
 	burnauctionmoduletypes "github.com/joltify-finance/joltify_lending/x/burnauction/types"
+	exchangetypes "github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
+	orcmodule "github.com/joltify-finance/joltify_lending/x/third_party/ocr"
+	ocrtypes "github.com/joltify-finance/joltify_lending/x/third_party/ocr/types"
+	oracle "github.com/joltify-finance/joltify_lending/x/third_party/oracle"
+	oraclenmodule "github.com/joltify-finance/joltify_lending/x/third_party/oracle"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 
 	burnauctionmodulekeeper "github.com/joltify-finance/joltify_lending/x/burnauction/keeper"
 
@@ -74,11 +80,14 @@ import (
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"
+	exchangekeeper "github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	joltkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
+	orckeeper "github.com/joltify-finance/joltify_lending/x/third_party/ocr/keeper"
+	oraclekeeper "github.com/joltify-finance/joltify_lending/x/third_party/oracle/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
 	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
@@ -174,6 +183,7 @@ import (
 	joltparams "github.com/joltify-finance/joltify_lending/app/params"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
 	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
+	exchangemodule "github.com/joltify-finance/joltify_lending/x/third_party/exchange"
 
 	dbm "github.com/cometbft/cometbft-db"
 )
@@ -225,6 +235,9 @@ var (
 		swap.AppModuleBasic{},
 		capability.AppModuleBasic{},
 		burnauctionmodule.AppModuleBasic{},
+		oraclenmodule.AppModule{},
+		exchangemodule.AppModule{},
+		orcmodule.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -251,6 +264,9 @@ var (
 		evmutiltypes.ModuleName:           {authtypes.Minter, authtypes.Burner},
 		swaptypes.ModuleName:              nil,
 		burnauctionmoduletypes.ModuleName: {authtypes.Burner},
+		exchangetypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
+		oracletypes.ModuleName:            nil,
+		ocrtypes.ModuleName:               nil,
 	}
 )
 
@@ -313,15 +329,20 @@ type App struct {
 	// issuanceKeeper   issuancekeeper.Keeper
 	pricefeedKeeper pricefeedkeeper.Keeper
 	// cdpKeeper        cdpkeeper.Keeper
-	joltKeeper              joltkeeper.Keeper
-	incentiveKeeper         incentivekeeper.Keeper
-	feeGrantKeeper          feegrantkeeper.Keeper
-	VaultKeeper             vaultmodulekeeper.Keeper
-	kycKeeper               kycmodulekeeper.Keeper
-	spvKeeper               spvmodulekeeper.Keeper
-	burnauctionKeeper       burnauctionmodulekeeper.Keeper
-	nftKeeper               nftmodulekeeper.Keeper
-	swapKeeper              swapkeeper.Keeper
+	joltKeeper        joltkeeper.Keeper
+	incentiveKeeper   incentivekeeper.Keeper
+	feeGrantKeeper    feegrantkeeper.Keeper
+	VaultKeeper       vaultmodulekeeper.Keeper
+	kycKeeper         kycmodulekeeper.Keeper
+	spvKeeper         spvmodulekeeper.Keeper
+	burnauctionKeeper burnauctionmodulekeeper.Keeper
+	nftKeeper         nftmodulekeeper.Keeper
+	swapKeeper        swapkeeper.Keeper
+
+	exchangeKeeper exchangekeeper.Keeper
+	ocrkeeper      orckeeper.Keeper
+	oracleKeeper   oraclekeeper.Keeper
+
 	ibcQuota                *ibcratelimit.IBCMiddleware
 	QuotaKeeper             quotamodulekeeper.Keeper
 	RateLimitingICS4Wrapper *ibcratelimit.ICS4Wrapper
@@ -330,6 +351,8 @@ type App struct {
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
+
+	ScopedOracleKeeper capabilitykeeper.ScopedKeeper
 
 	// the module manager
 	mm *module.Manager
@@ -411,9 +434,12 @@ func NewApp(
 		evmutiltypes.StoreKey,
 		swaptypes.StoreKey,
 		consensusparamtypes.StoreKey,
+		oracletypes.StoreKey,
+		ocrtypes.StoreKey,
+		exchangetypes.StoreKey,
 	)
-	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey, ocrtypes.TStoreKey, exchangetypes.TStoreKey)
+	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, oracletypes.MemStoreKey)
 
 	app := &App{
 		BaseApp:           bApp,
@@ -455,6 +481,11 @@ func NewApp(
 	swapSubspace := app.ParamsKeeper.Subspace(swaptypes.ModuleName)
 	quotaSubspace := app.ParamsKeeper.Subspace(quotamoduletypes.ModuleName)
 	burnAuctionSubspace := app.ParamsKeeper.Subspace(burnauctionmoduletypes.ModuleName)
+
+	oracleSpace := app.ParamsKeeper.Subspace(oracletypes.ModuleName)
+	exchangeSpace := app.ParamsKeeper.Subspace(exchangetypes.ModuleName)
+	orcSpace := app.ParamsKeeper.Subspace(ocrtypes.ModuleName)
+
 	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(appCodec, keys[consensusparamtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 
 	// baseAppLegacySS := app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable())
@@ -651,6 +682,54 @@ func NewApp(
 	app.spvKeeper = *mSpvKeeper.SetHooks(app.incentiveKeeper.Hooks())
 	app.spvKeeper = *mSpvKeeper.SetIncentiveKeeper(app.incentiveKeeper)
 
+	app.ocrkeeper = orckeeper.NewKeeper(
+		appCodec,
+		keys[ocrtypes.StoreKey],
+		tkeys[ocrtypes.TStoreKey],
+		app.bankKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
+	scopedOracleKeeper := app.capabilityKeeper.ScopeToModule(oracletypes.ModuleName)
+	app.ScopedOracleKeeper = scopedOracleKeeper
+	app.oracleKeeper = oraclekeeper.NewKeeper(
+		appCodec,
+		keys[oracletypes.StoreKey],
+		keys[oracletypes.MemStoreKey],
+		app.accountKeeper,
+		app.bankKeeper,
+		app.ibcKeeper.ChannelKeeper,
+		&app.ibcKeeper.PortKeeper,
+		scopedOracleKeeper,
+		&app.ocrkeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
+	app.ocrkeeper.SetHooks(ocrtypes.NewMultiOcrHooks(
+		app.oracleKeeper.Hooks(),
+	))
+
+	app.exchangeKeeper = exchangekeeper.NewKeeper(
+		appCodec,
+		keys[exchangetypes.StoreKey],
+		tkeys[exchangetypes.TStoreKey],
+		app.accountKeeper,
+		app.bankKeeper,
+		&app.oracleKeeper,
+		&app.InsuranceKeeper,
+		&app.distrKeeper,
+		app.stakingKeeper,
+		app.MsgServiceRouter(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
+	oracleModule := oracle.NewAppModule(
+		app.oracleKeeper,
+		app.accountKeeper,
+		app.bankKeeper,
+		oracleSpace,
+	)
+
 	app.VaultKeeper = *vaultmodulekeeper.NewKeeper(
 		appCodec,
 		keys[vaultmoduletypes.StoreKey],
@@ -737,6 +816,8 @@ func NewApp(
 		// register the governance hooks
 		),
 	)
+
+	app.exchangeKeeper.SetGovKeeper(app.govKeeper)
 
 	// register the staking hooks
 	// NOTE: These keepers are passed by reference above, so they will contain these hooks.

@@ -9,8 +9,6 @@ import (
 
 // GetFeeDiscountSchedule fetches the FeeDiscountSchedule.
 func (k *Keeper) GetFeeDiscountSchedule(ctx sdk.Context) *types.FeeDiscountSchedule {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.FeeDiscountScheduleKey)
 	if bz == nil {
@@ -24,16 +22,12 @@ func (k *Keeper) GetFeeDiscountSchedule(ctx sdk.Context) *types.FeeDiscountSched
 
 // DeleteFeeDiscountSchedule deletes the FeeDiscountSchedule.
 func (k *Keeper) DeleteFeeDiscountSchedule(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Delete(types.FeeDiscountScheduleKey)
 }
 
 // SetFeeDiscountSchedule sets the FeeDiscountSchedule.
 func (k *Keeper) SetFeeDiscountSchedule(ctx sdk.Context, schedule *types.FeeDiscountSchedule) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := k.cdc.MustMarshal(schedule)
 	store.Set(types.FeeDiscountScheduleKey, bz)

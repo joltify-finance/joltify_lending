@@ -14,8 +14,6 @@ func (k *Keeper) ExecuteDerivativeLimitOrderMatching(
 	stakingInfo *FeeDiscountStakingInfo,
 	modifiedPositionCache ModifiedPositionCache,
 ) *DerivativeBatchExecutionData {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := matchedMarketDirection.MarketId
 
 	market, markPrice := k.GetDerivativeOrBinaryOptionsMarketWithMarkPrice(ctx, marketID, true)
@@ -152,8 +150,6 @@ func (k *Keeper) PersistDerivativeMatchingExecution(
 	derivativeVwapData DerivativeVwapInfo,
 	tradingRewardPoints types.TradingRewardPoints,
 ) types.TradingRewardPoints {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	for batchIdx := range batchDerivativeMatchingExecutionData {
 		execution := batchDerivativeMatchingExecutionData[batchIdx]
 		if execution == nil {

@@ -29,8 +29,6 @@ func NewSpotMsgServerImpl(keeper Keeper) SpotMsgServer {
 }
 
 func (k SpotMsgServer) InstantSpotMarketLaunch(goCtx context.Context, msg *types.MsgInstantSpotMarketLaunch) (*types.MsgInstantSpotMarketLaunchResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// check if the market launch proposal already exists
@@ -61,8 +59,6 @@ func (k SpotMsgServer) InstantSpotMarketLaunch(goCtx context.Context, msg *types
 }
 
 func (k SpotMsgServer) CreateSpotLimitOrder(goCtx context.Context, msg *types.MsgCreateSpotLimitOrder) (*types.MsgCreateSpotLimitOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	account, _ := sdk.AccAddressFromBech32(msg.Sender)
@@ -178,8 +174,6 @@ func (k *Keeper) createSpotLimitOrder(
 }
 
 func (k SpotMsgServer) CreateSpotMarketOrder(goCtx context.Context, msg *types.MsgCreateSpotMarketOrder) (*types.MsgCreateSpotMarketOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if k.IsPostOnlyMode(ctx) {
@@ -283,8 +277,6 @@ func (k SpotMsgServer) CreateSpotMarketOrder(goCtx context.Context, msg *types.M
 }
 
 func (k SpotMsgServer) BatchCreateSpotLimitOrders(goCtx context.Context, msg *types.MsgBatchCreateSpotLimitOrders) (*types.MsgBatchCreateSpotLimitOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	// Naive, unoptimized implementation
 	orderHashes := make([]string, len(msg.Orders))
 
@@ -320,8 +312,6 @@ func (k SpotMsgServer) BatchCreateSpotLimitOrders(goCtx context.Context, msg *ty
 }
 
 func (k SpotMsgServer) CancelSpotOrder(goCtx context.Context, msg *types.MsgCancelSpotOrder) (*types.MsgCancelSpotOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	var (
@@ -386,8 +376,6 @@ func (k *Keeper) cancelSpotLimitOrderByOrderHash(
 }
 
 func (k SpotMsgServer) BatchCancelSpotOrders(goCtx context.Context, msg *types.MsgBatchCancelSpotOrders) (*types.MsgBatchCancelSpotOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	// Naive, unoptimized implementation
 	successes := make([]bool, len(msg.Data))
 	for idx := range msg.Data {

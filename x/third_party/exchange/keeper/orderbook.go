@@ -260,8 +260,6 @@ func (k *Keeper) GetOrderbookPriceLevels(
 
 // GetOrderbookSequence gets the orderbook sequence for a given marketID.
 func (k *Keeper) GetOrderbookSequence(ctx sdk.Context, marketID common.Hash) uint64 {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	sequenceStore := prefix.NewStore(store, types.OrderbookSequencePrefix)
 	bz := sequenceStore.Get(marketID.Bytes())
@@ -274,8 +272,6 @@ func (k *Keeper) GetOrderbookSequence(ctx sdk.Context, marketID common.Hash) uin
 
 // GetAllOrderbookSequences gets all the orderbook sequences.
 func (k *Keeper) GetAllOrderbookSequences(ctx sdk.Context) []*types.OrderbookSequence {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	sequenceStore := prefix.NewStore(store, types.OrderbookSequencePrefix)
 
@@ -298,8 +294,6 @@ func (k *Keeper) GetAllOrderbookSequences(ctx sdk.Context) []*types.OrderbookSeq
 
 // SetOrderbookSequence sets the orderbook sequence for a given marketID.
 func (k *Keeper) SetOrderbookSequence(ctx sdk.Context, marketID common.Hash, sequence uint64) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	sequenceStore := prefix.NewStore(store, types.OrderbookSequencePrefix)
 	sequenceStore.Set(marketID.Bytes(), sdk.Uint64ToBigEndian(sequence))

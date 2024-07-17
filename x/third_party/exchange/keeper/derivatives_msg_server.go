@@ -30,7 +30,6 @@ func NewDerivativesMsgServerImpl(keeper Keeper) DerivativesMsgServer {
 }
 
 func (k DerivativesMsgServer) InstantPerpetualMarketLaunch(goCtx context.Context, msg *types.MsgInstantPerpetualMarketLaunch) (*types.MsgInstantPerpetualMarketLaunchResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -75,7 +74,6 @@ func (k DerivativesMsgServer) InstantPerpetualMarketLaunch(goCtx context.Context
 }
 
 func (k DerivativesMsgServer) InstantExpiryFuturesMarketLaunch(goCtx context.Context, msg *types.MsgInstantExpiryFuturesMarketLaunch) (*types.MsgInstantExpiryFuturesMarketLaunchResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -115,7 +113,6 @@ func (k DerivativesMsgServer) InstantExpiryFuturesMarketLaunch(goCtx context.Con
 }
 
 func (k DerivativesMsgServer) CreateDerivativeLimitOrder(goCtx context.Context, msg *types.MsgCreateDerivativeLimitOrder) (*types.MsgCreateDerivativeLimitOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -146,7 +143,6 @@ func (k *Keeper) createDerivativeLimitOrder(
 	market DerivativeMarketI,
 	markPrice sdk.Dec,
 ) (hash common.Hash, err error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	subaccountID := types.MustGetSubaccountIDOrDeriveFromNonce(sender, order.OrderInfo.SubaccountId)
 
@@ -186,7 +182,6 @@ func (k *Keeper) createDerivativeLimitOrder(
 }
 
 func (k DerivativesMsgServer) BatchCreateDerivativeLimitOrders(goCtx context.Context, msg *types.MsgBatchCreateDerivativeLimitOrders) (*types.MsgBatchCreateDerivativeLimitOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	sender := sdk.MustAccAddressFromBech32(msg.Sender)
@@ -297,7 +292,6 @@ func (k *Keeper) createDerivativeMarketOrder(ctx sdk.Context, sender sdk.AccAddr
 }
 
 func (k DerivativesMsgServer) CreateDerivativeMarketOrder(goCtx context.Context, msg *types.MsgCreateDerivativeMarketOrder) (*types.MsgCreateDerivativeMarketOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -326,7 +320,6 @@ func (k DerivativesMsgServer) CreateDerivativeMarketOrder(goCtx context.Context,
 }
 
 func (k DerivativesMsgServer) CancelDerivativeOrder(goCtx context.Context, msg *types.MsgCancelDerivativeOrder) (*types.MsgCancelDerivativeOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -466,7 +459,6 @@ func (k *Keeper) cancelDerivativeOrderByOrderHash(
 }
 
 func (k DerivativesMsgServer) BatchCancelDerivativeOrders(goCtx context.Context, msg *types.MsgBatchCancelDerivativeOrders) (*types.MsgBatchCancelDerivativeOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	successes := make([]bool, len(msg.Data))
 	for idx := range msg.Data {
@@ -490,7 +482,6 @@ func (k DerivativesMsgServer) BatchCancelDerivativeOrders(goCtx context.Context,
 }
 
 func (k DerivativesMsgServer) IncreasePositionMargin(goCtx context.Context, msg *types.MsgIncreasePositionMargin) (*types.MsgIncreasePositionMarginResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 

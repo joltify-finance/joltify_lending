@@ -11,8 +11,6 @@ import (
 
 // GetCampaignRewardPendingPool fetches the trading reward pool corresponding to a given start timestamp.
 func (k *Keeper) GetCampaignRewardPendingPool(ctx sdk.Context, startTimestamp int64) *types.CampaignRewardPool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetCampaignRewardPendingPoolKey(startTimestamp))
 	if bz == nil {
@@ -26,16 +24,12 @@ func (k *Keeper) GetCampaignRewardPendingPool(ctx sdk.Context, startTimestamp in
 
 // DeleteCampaignRewardPendingPool deletes the trading reward pool corresponding to a given start timestamp.
 func (k *Keeper) DeleteCampaignRewardPendingPool(ctx sdk.Context, startTimestamp int64) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Delete(types.GetCampaignRewardPendingPoolKey(startTimestamp))
 }
 
 // SetCampaignRewardPendingPool sets the trading reward pool corresponding to a given start timestamp.
 func (k *Keeper) SetCampaignRewardPendingPool(ctx sdk.Context, rewardPool *types.CampaignRewardPool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := k.cdc.MustMarshal(rewardPool)
 	store.Set(types.GetCampaignRewardPendingPoolKey(rewardPool.StartTimestamp), bz)
@@ -43,8 +37,6 @@ func (k *Keeper) SetCampaignRewardPendingPool(ctx sdk.Context, rewardPool *types
 
 // GetAllCampaignRewardPendingPools gets all campaign reward pools
 func (k *Keeper) GetAllCampaignRewardPendingPools(ctx sdk.Context) []*types.CampaignRewardPool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	rewardPools := make([]*types.CampaignRewardPool, 0)
 
 	appendPool := func(pool *types.CampaignRewardPool) (stop bool) {
@@ -58,8 +50,6 @@ func (k *Keeper) GetAllCampaignRewardPendingPools(ctx sdk.Context) []*types.Camp
 
 // GetFirstCampaignRewardPendingPool gets the first campaign reward pool.
 func (k *Keeper) GetFirstCampaignRewardPendingPool(ctx sdk.Context) (rewardPool *types.CampaignRewardPool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	appendPool := func(pool *types.CampaignRewardPool) (stop bool) {
 		rewardPool = pool
 		return true
@@ -75,8 +65,6 @@ func (k *Keeper) IterateCampaignRewardPendingPools(
 	shouldReverseIterate bool,
 	process func(*types.CampaignRewardPool) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	rewardPoolStore := prefix.NewStore(store, types.TradingRewardCampaignRewardPendingPoolPrefix)

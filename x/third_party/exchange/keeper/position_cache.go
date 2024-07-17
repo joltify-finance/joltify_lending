@@ -84,8 +84,6 @@ func (c ModifiedPositionCache) HasPositionBeenModified(marketID, subaccountID co
 }
 
 func (k *Keeper) AppendModifiedSubaccountsByMarket(ctx sdk.Context, marketID common.Hash, subaccountIDs []common.Hash) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if len(subaccountIDs) == 0 {
 		return
 	}
@@ -120,8 +118,6 @@ func (k *Keeper) AppendModifiedSubaccountsByMarket(ctx sdk.Context, marketID com
 }
 
 func (k *Keeper) GetModifiedSubaccountsByMarket(ctx sdk.Context, marketID common.Hash) *types.SubaccountIDs {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	modifiedPositionsStore := prefix.NewStore(store, types.DerivativePositionModifiedSubaccountPrefix)
 

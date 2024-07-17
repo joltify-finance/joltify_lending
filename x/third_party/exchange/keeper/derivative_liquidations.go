@@ -20,8 +20,6 @@ func (k *Keeper) moveCoinsIntoInsuranceFund(
 	market DerivativeMarketI,
 	insuranceFundPaymentAmount sdkmath.Int,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := market.MarketID()
 
 	if !k.insuranceKeeper.HasInsuranceFund(ctx, marketID) {
@@ -50,8 +48,6 @@ func (k DerivativesMsgServer) handlePositiveLiquidationPayout(
 	liquidatorAddr sdk.AccAddress,
 	positionSubaccountID common.Hash,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	liquidatorRewardShareRate := k.GetLiquidatorRewardShareRate(ctx)
 
 	insuranceFundOrAuctionPaymentAmount := surplusAmount.Mul(sdk.OneDec().Sub(liquidatorRewardShareRate)).TruncateInt()
@@ -79,8 +75,6 @@ func (k *Keeper) PayDeficitFromInsuranceFund(
 	marketID common.Hash,
 	absoluteDeficitAmount sdk.Dec,
 ) (remainingAbsoluteDeficitAmount sdk.Dec, err error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if absoluteDeficitAmount.IsZero() {
 		return sdk.ZeroDec(), nil
 	}
@@ -114,8 +108,6 @@ func (k *Keeper) cancelAllOrdersFromTraderInCurrentMarket(
 	market *types.DerivativeMarket,
 	subaccountID common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if err := k.CancelAllRestingDerivativeLimitOrdersForSubaccount(ctx, market, subaccountID, false, true); err != nil {
 		k.Logger(ctx).Error("CancelAllRestingDerivativeLimitOrdersForSubaccount fail:", err)
 	}
@@ -133,8 +125,6 @@ func (k DerivativesMsgServer) handleNegativeLiquidationPayout(
 	positionSubaccountID common.Hash,
 	lostFundsFromAvailableDuringPayout sdk.Dec,
 ) (shouldSettleMarket bool, err error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	shouldSettleMarket = false
 
 	marketID := market.MarketID()
@@ -184,8 +174,6 @@ func (k DerivativesMsgServer) handleNegativeLiquidationPayout(
 }
 
 func (k DerivativesMsgServer) EmergencySettleMarket(goCtx context.Context, msg *types.MsgEmergencySettleMarket) (*types.MsgEmergencySettleMarketResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	_, err := k.liquidatePosition(goCtx, &types.MsgLiquidatePosition{
 		Sender:       msg.Sender,
 		MarketId:     msg.MarketId,
@@ -195,13 +183,10 @@ func (k DerivativesMsgServer) EmergencySettleMarket(goCtx context.Context, msg *
 }
 
 func (k DerivativesMsgServer) LiquidatePosition(goCtx context.Context, msg *types.MsgLiquidatePosition) (*types.MsgLiquidatePositionResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 	return k.liquidatePosition(goCtx, msg, false)
 }
 
 func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *types.MsgLiquidatePosition, isEmergencySettlingMarket bool) (*types.MsgLiquidatePositionResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	cacheCtx, writeCache := ctx.CacheContext()
 
@@ -412,8 +397,6 @@ func (k DerivativesMsgServer) pauseMarketAndScheduleForSettlement(
 	ctx sdk.Context,
 	market *types.DerivativeMarket,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	settlementPrice, err := k.GetDerivativeMarketPrice(ctx, market.OracleBase, market.OracleQuote, market.OracleScaleFactor, market.OracleType)
 	if err != nil || settlementPrice.IsZero() || settlementPrice.IsNegative() {
 		metrics.ReportFuncError(k.svcTags)

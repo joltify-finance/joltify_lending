@@ -14,8 +14,6 @@ func (k *Keeper) GetFeeDiscountAccountTierInfo(
 	ctx sdk.Context,
 	account sdk.AccAddress,
 ) *types.FeeDiscountTierTTL {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetFeeDiscountAccountTierKey(account))
 	if bz == nil {
@@ -32,8 +30,6 @@ func (k *Keeper) DeleteFeeDiscountAccountTierInfo(
 	ctx sdk.Context,
 	account sdk.AccAddress,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Delete(types.GetFeeDiscountAccountTierKey(account))
 }
@@ -44,8 +40,6 @@ func (k *Keeper) SetFeeDiscountAccountTierInfo(
 	account sdk.AccAddress,
 	tierTTL *types.FeeDiscountTierTTL,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	key := types.GetFeeDiscountAccountTierKey(account)
@@ -55,8 +49,6 @@ func (k *Keeper) SetFeeDiscountAccountTierInfo(
 
 // DeleteAllFeeDiscountAccountTierInfo deletes all accounts' fee discount Tier and TTL info.
 func (k *Keeper) DeleteAllFeeDiscountAccountTierInfo(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	allAccountTiers := k.GetAllFeeDiscountAccountTierInfo(ctx)
 	for _, accountTier := range allAccountTiers {
 		account, _ := sdk.AccAddressFromBech32(accountTier.Account)
@@ -66,8 +58,6 @@ func (k *Keeper) DeleteAllFeeDiscountAccountTierInfo(ctx sdk.Context) {
 
 // GetAllFeeDiscountAccountTierInfo gets all accounts' fee discount Tier and TTL info
 func (k *Keeper) GetAllFeeDiscountAccountTierInfo(ctx sdk.Context) []*types.FeeDiscountAccountTierTTL {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountTierTTL := make([]*types.FeeDiscountAccountTierTTL, 0)
 
 	appendTiers := func(account sdk.AccAddress, tierInfo *types.FeeDiscountTierTTL) (stop bool) {
@@ -87,8 +77,6 @@ func (k *Keeper) iterateFeeDiscountAccountTierInfo(
 	ctx sdk.Context,
 	process func(account sdk.AccAddress, tierInfo *types.FeeDiscountTierTTL) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	accountTierStore := prefix.NewStore(store, types.FeeDiscountAccountTierPrefix)

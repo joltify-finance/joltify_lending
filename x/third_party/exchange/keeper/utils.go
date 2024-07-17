@@ -48,8 +48,6 @@ func (k *Keeper) checkIfMarketLaunchProposalExist(
 	proposalType string,
 	marketID common.Hash,
 ) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	exists := false
 	params := k.govKeeper.GetParams(ctx)
 	// Note: we do 10 * voting period to iterate all active proposals safely

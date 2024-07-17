@@ -10,8 +10,6 @@ import (
 
 // GetIsOptedOutOfRewards returns if the account is opted out of rewards
 func (k *Keeper) GetIsOptedOutOfRewards(ctx sdk.Context, account sdk.AccAddress) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetIsOptedOutOfRewardsKey(account))
 	if bz == nil {
@@ -23,8 +21,6 @@ func (k *Keeper) GetIsOptedOutOfRewards(ctx sdk.Context, account sdk.AccAddress)
 
 // SetIsOptedOutOfRewards sets if the account is opted out of rewards
 func (k *Keeper) SetIsOptedOutOfRewards(ctx sdk.Context, account sdk.AccAddress, isOptedOut bool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	key := types.GetIsOptedOutOfRewardsKey(account)
 
@@ -39,8 +35,6 @@ func (k *Keeper) SetIsOptedOutOfRewards(ctx sdk.Context, account sdk.AccAddress,
 
 // GetAllOptedOutRewardAccounts gets all accounts that have opted out of rewards
 func (k *Keeper) GetAllOptedOutRewardAccounts(ctx sdk.Context) []string {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	registeredDMMs := make([]string, 0)
 	appendDMMs := func(account sdk.AccAddress, isRegisteredDMM bool) (stop bool) {
 		if isRegisteredDMM {
@@ -59,8 +53,6 @@ func (k *Keeper) iterateOptedOutRewardAccounts(
 	ctx sdk.Context,
 	process func(account sdk.AccAddress, isOptedOut bool) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	rewardsOptOutStore := prefix.NewStore(store, types.IsOptedOutOfRewardsPrefix)

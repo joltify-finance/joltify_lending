@@ -64,8 +64,6 @@ func (k *Keeper) NewDerivativeMarketOrderbook(
 	funding *types.PerpetualMarketFunding,
 	positionStates map[common.Hash]*PositionState,
 ) *DerivativeMarketOrderbook {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if len(derivativeMarketOrders) == 0 {
 		return nil
 	}

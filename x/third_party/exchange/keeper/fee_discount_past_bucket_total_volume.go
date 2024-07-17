@@ -14,8 +14,6 @@ func (k *Keeper) GetPastBucketTotalVolume(
 	ctx sdk.Context,
 	account sdk.AccAddress,
 ) sdk.Dec {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetFeeDiscountPastBucketAccountVolumeKey(account))
 	if bz == nil {
@@ -30,8 +28,6 @@ func (k *Keeper) IncrementPastBucketTotalVolume(
 	account sdk.AccAddress,
 	addedBucketTotalFeesAmount sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	currVolume := k.GetPastBucketTotalVolume(ctx, account)
 	newVolume := currVolume.Add(addedBucketTotalFeesAmount)
 
@@ -44,8 +40,6 @@ func (k *Keeper) DecrementPastBucketTotalVolume(
 	account sdk.AccAddress,
 	removedBucketTotalFeesAmount sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	currVolume := k.GetPastBucketTotalVolume(ctx, account)
 	newVolume := currVolume.Sub(removedBucketTotalFeesAmount)
 
@@ -58,8 +52,6 @@ func (k *Keeper) SetPastBucketTotalVolume(
 	account sdk.AccAddress,
 	volume sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := types.DecToDecBytes(volume)
 	store.Set(types.GetFeeDiscountPastBucketAccountVolumeKey(account), bz)
@@ -70,16 +62,12 @@ func (k *Keeper) DeletePastBucketTotalVolume(
 	ctx sdk.Context,
 	account sdk.AccAddress,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Delete(types.GetFeeDiscountPastBucketAccountVolumeKey(account))
 }
 
 // DeleteAllPastBucketTotalVolume deletes the total volume in past buckets for all accounts
 func (k *Keeper) DeleteAllPastBucketTotalVolume(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountVolumes := k.GetAllPastBucketTotalVolume(ctx)
 	for _, a := range accountVolumes {
 		account, _ := sdk.AccAddressFromBech32(a.Account)
@@ -89,8 +77,6 @@ func (k *Keeper) DeleteAllPastBucketTotalVolume(ctx sdk.Context) {
 
 // GetAllPastBucketTotalVolume gets all total volume in past buckets for all accounts
 func (k *Keeper) GetAllPastBucketTotalVolume(ctx sdk.Context) []*types.AccountVolume {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountVolumes := make([]*types.AccountVolume, 0)
 
 	appendFees := func(account sdk.AccAddress, volume sdk.Dec) (stop bool) {
@@ -110,8 +96,6 @@ func (k *Keeper) iteratePastBucketTotalVolume(
 	ctx sdk.Context,
 	process func(account sdk.AccAddress, totalVolume sdk.Dec) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	pastBucketVolumeStore := prefix.NewStore(store, types.FeeDiscountAccountPastBucketTotalVolumePrefix)

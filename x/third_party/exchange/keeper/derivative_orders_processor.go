@@ -65,8 +65,6 @@ func (k *Keeper) GetDerivativeMatchingExecutionData(
 	positionStates map[common.Hash]*PositionState,
 	feeDiscountConfig *FeeDiscountConfig,
 ) *DerivativeMatchingExpansionData {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var (
 		buyOrderbook  = k.NewDerivativeLimitOrderbook(ctx, true, transientBuyOrders, market, markPrice, funding, positionStates)
 		sellOrderbook = k.NewDerivativeLimitOrderbook(ctx, false, transientSellOrders, market, markPrice, funding, positionStates)
@@ -212,8 +210,6 @@ func (k *Keeper) ExecuteDerivativeMarketOrderImmediately(
 	positionStates map[common.Hash]*PositionState,
 	isLiquidation bool,
 ) (*types.DerivativeMarketOrderResults, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketBuyOrders := make([]*types.DerivativeMarketOrder, 0)
 	marketSellOrders := make([]*types.DerivativeMarketOrder, 0)
 
@@ -290,8 +286,6 @@ func (k *Keeper) GetDerivativeMarketOrderExecutionData(
 	feeDiscountConfig *FeeDiscountConfig,
 	isLiquidation bool,
 ) (derivativeMarketOrderExecutionData *DerivativeMarketOrderExpansionData) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	derivativeMarketOrderExecutionData = &DerivativeMarketOrderExpansionData{}
 
 	var (
@@ -382,8 +376,6 @@ func (k *Keeper) executeDerivativeMarketOrders(
 	ctx sdk.Context,
 	matchingOrderbook *DerivativeMarketExecutionOrderbook,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var (
 		isMarketBuy     = matchingOrderbook.isMarketBuy
 		marketOrderbook = matchingOrderbook.marketOrderbook
@@ -436,8 +428,6 @@ func (k *Keeper) processDerivativeMarketOrderbookMatchingResults(
 	tradeRewardsMultiplier sdk.Dec,
 	feeDiscountConfig *FeeDiscountConfig,
 ) ([]*DerivativeOrderStateExpansion, []*types.DerivativeMarketOrderCancel) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	stateExpansions := make([]*DerivativeOrderStateExpansion, len(marketOrders))
 	ordersToCancel := make([]*types.DerivativeMarketOrderCancel, 0, len(marketOrders))
 
@@ -599,8 +589,6 @@ func (k *Keeper) applyPositionDeltaAndGetDerivativeMarketOrderStateExpansion(
 	tradeRewardMultiplier sdk.Dec,
 	feeDiscountConfig *FeeDiscountConfig,
 ) *DerivativeOrderStateExpansion {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if fillQuantity.IsNil() {
 		fillQuantity = sdk.ZeroDec()
 	}
@@ -743,8 +731,6 @@ func (k *Keeper) applyPositionDeltaAndGetDerivativeLimitOrderStateExpansion(
 	feeDiscountConfig *FeeDiscountConfig,
 	isLiquidation bool,
 ) *DerivativeOrderStateExpansion {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var executionPrice sdk.Dec
 	if clearingPrice.IsNil() {
 		executionPrice = order.OrderInfo.Price
@@ -884,8 +870,6 @@ func (k *Keeper) adjustPositionMarginIfNecessary(
 	position *types.Position,
 	availableBalanceChange, totalBalanceChange sdk.Dec,
 ) (sdk.Dec, sdk.Dec) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	// if available balance delta is negative, it means sell order was matched at better price implying a higher fee
 	// we need to charge trader for the higher fee
 	hasPositiveAvailableBalanceDelta := !availableBalanceChange.IsNegative()

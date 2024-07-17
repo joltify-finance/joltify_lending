@@ -10,8 +10,6 @@ import (
 )
 
 func (k *Keeper) ProcessHourlyFundings(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	blockTime := ctx.BlockTime().Unix()
 
 	firstMarketInfoState := k.GetFirstPerpetualMarketInfoState(ctx)
@@ -100,8 +98,6 @@ func getNextIntervalTimestamp(currTime, interval int64) int64 {
 }
 
 func (k *Keeper) PersistPerpetualFundingInfo(ctx sdk.Context, perpetualVwapInfo DerivativeVwapInfo) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketIDs := perpetualVwapInfo.GetSortedPerpetualMarketIDs()
 	blockTime := ctx.BlockTime().Unix()
 

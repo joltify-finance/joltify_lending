@@ -48,8 +48,6 @@ func (k *Keeper) NewDerivativeLimitOrderbook(
 	funding *types.PerpetualMarketFunding,
 	positionStates map[common.Hash]*PositionState,
 ) *DerivativeLimitOrderbook {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	prefixKey := types.DerivativeLimitOrdersPrefix
 	prefixKey = append(prefixKey, types.MarketDirectionPrefix(market.MarketID(), isBuy)...)

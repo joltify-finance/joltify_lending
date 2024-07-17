@@ -10,7 +10,7 @@ import (
 	"github.com/InjectiveLabs/metrics"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
 )
 
 const (
@@ -18,8 +18,6 @@ const (
 )
 
 func (k *Keeper) PersistVwapInfo(ctx sdk.Context, spotVwapInfo *SpotVwapInfo, derivativeVwapInfo *DerivativeVwapInfo) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	blockTime := ctx.BlockTime()
 
 	if spotVwapInfo != nil {
@@ -64,8 +62,6 @@ func (k *Keeper) PersistVwapInfo(ctx sdk.Context, spotVwapInfo *SpotVwapInfo, de
 }
 
 func (k *Keeper) AppendTradeRecord(ctx sdk.Context, marketID common.Hash, tradeRecord *types.TradeRecord) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	existingOrEmptyRecord, _ := k.GetHistoricalTradeRecords(ctx, marketID, tradeRecord.Timestamp-types.MaxHistoricalTradeRecordAge)
 	existingOrEmptyRecord.LatestTradeRecords = append(existingOrEmptyRecord.LatestTradeRecords, tradeRecord)
 
@@ -73,8 +69,6 @@ func (k *Keeper) AppendTradeRecord(ctx sdk.Context, marketID common.Hash, tradeR
 }
 
 func (k *Keeper) GetAllHistoricalTradeRecords(ctx sdk.Context) []*types.TradeRecords {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	allTradeRecords := make([]*types.TradeRecords, 0)
 	store := ctx.KVStore(k.storeKey)
 
@@ -94,8 +88,6 @@ func (k *Keeper) GetAllHistoricalTradeRecords(ctx sdk.Context) []*types.TradeRec
 }
 
 func (k *Keeper) CleanupHistoricalTradeRecords(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	before := ctx.BlockTime().Unix() - types.MaxHistoricalTradeRecordAge
 	onlyEnabled := true
 
@@ -133,8 +125,6 @@ func (k *Keeper) cleanupMarketHistoricalTradeRecords(ctx sdk.Context, marketID c
 }
 
 func (k *Keeper) setHistoricalTradeRecords(ctx sdk.Context, marketID common.Hash, entry *types.TradeRecords) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	bz := k.cdc.MustMarshal(entry)
@@ -143,8 +133,6 @@ func (k *Keeper) setHistoricalTradeRecords(ctx sdk.Context, marketID common.Hash
 
 // GetHistoricalTradeRecords returns the historical trade records for a market starting from the `from` time.
 func (k *Keeper) GetHistoricalTradeRecords(ctx sdk.Context, marketID common.Hash, from int64) (entry *types.TradeRecords, omitted bool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	entry = &types.TradeRecords{
 		MarketId: marketID.Hex(),
 	}
@@ -326,8 +314,6 @@ func (k *Keeper) GetMarketVolatility(ctx sdk.Context, marketID common.Hash, opti
 	rawTrades []*types.TradeRecord,
 	meta *oracletypes.MetadataStatistics,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	maxAge := int64(0)
 	groupingSec := int64(GROUPING_SECONDS_DEFAULT)
 	includeRawHistory := false

@@ -28,8 +28,6 @@ func NewBinaryOptionsMsgServerImpl(keeper Keeper) BinaryOptionsMsgServer {
 }
 
 func (k BinaryOptionsMsgServer) InstantBinaryOptionsMarketLaunch(goCtx context.Context, msg *types.MsgInstantBinaryOptionsMarketLaunch) (*types.MsgInstantBinaryOptionsMarketLaunchResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	senderAddr, _ := sdk.AccAddressFromBech32(msg.Sender)
@@ -75,8 +73,6 @@ func (k BinaryOptionsMsgServer) InstantBinaryOptionsMarketLaunch(goCtx context.C
 }
 
 func (k BinaryOptionsMsgServer) CreateBinaryOptionsLimitOrder(goCtx context.Context, msg *types.MsgCreateBinaryOptionsLimitOrder) (*types.MsgCreateBinaryOptionsLimitOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	account, _ := sdk.AccAddressFromBech32(msg.Sender)
@@ -106,8 +102,6 @@ func (k BinaryOptionsMsgServer) CreateBinaryOptionsLimitOrder(goCtx context.Cont
 }
 
 func (k BinaryOptionsMsgServer) CreateBinaryOptionsMarketOrder(goCtx context.Context, msg *types.MsgCreateBinaryOptionsMarketOrder) (*types.MsgCreateBinaryOptionsMarketOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	account, _ := sdk.AccAddressFromBech32(msg.Sender)
@@ -142,8 +136,6 @@ func (k BinaryOptionsMsgServer) CreateBinaryOptionsMarketOrder(goCtx context.Con
 }
 
 func (k BinaryOptionsMsgServer) CancelBinaryOptionsOrder(goCtx context.Context, msg *types.MsgCancelBinaryOptionsOrder) (*types.MsgCancelBinaryOptionsOrderResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	var (
@@ -164,8 +156,6 @@ func (k BinaryOptionsMsgServer) CancelBinaryOptionsOrder(goCtx context.Context, 
 }
 
 func (k BinaryOptionsMsgServer) AdminUpdateBinaryOptionsMarket(goCtx context.Context, msg *types.MsgAdminUpdateBinaryOptionsMarket) (*types.MsgAdminUpdateBinaryOptionsMarketResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	marketID := common.HexToHash(msg.MarketId)
@@ -235,8 +225,6 @@ func (k BinaryOptionsMsgServer) AdminUpdateBinaryOptionsMarket(goCtx context.Con
 }
 
 func (k BinaryOptionsMsgServer) BatchCancelBinaryOptionsOrders(goCtx context.Context, msg *types.MsgBatchCancelBinaryOptionsOrders) (*types.MsgBatchCancelBinaryOptionsOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	successes := make([]bool, len(msg.Data))
 	for idx := range msg.Data {
 		if _, err := k.CancelBinaryOptionsOrder(goCtx, &types.MsgCancelBinaryOptionsOrder{

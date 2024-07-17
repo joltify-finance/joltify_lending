@@ -7,7 +7,7 @@ import (
 	"github.com/InjectiveLabs/metrics"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
 )
 
 type DeficitPositions struct {
@@ -16,8 +16,6 @@ type DeficitPositions struct {
 }
 
 func (k *Keeper) ProcessMarketsScheduledToSettle(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketSettlementInfos := k.GetAllScheduledSettlementDerivativeMarkets(ctx)
 
 	for _, marketSettlementInfo := range marketSettlementInfos {
@@ -63,8 +61,6 @@ func (k *Keeper) ProcessMarketsScheduledToSettle(ctx sdk.Context) {
 }
 
 func (k *Keeper) ProcessMatureExpiryFutureMarkets(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	iterator := sdk.KVStorePrefixIterator(store, types.ExpiryFuturesMarketInfoByTimestampPrefix)
 
@@ -280,8 +276,6 @@ func (k *Keeper) executeSocializedLoss(
 	settlementPrice sdk.Dec,
 	closingFeeRate sdk.Dec,
 ) []DeficitPositions {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := market.MarketID()
 	marketType := market.GetMarketType()
 
@@ -414,8 +408,6 @@ func (k *Keeper) closeAllPositionsWithSettlePrice(
 	marketFunding *types.PerpetualMarketFunding,
 	deficitPositions []DeficitPositions,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	depositDeltas := types.NewDepositDeltas()
 	marketID := market.MarketID()
 
@@ -516,8 +508,6 @@ func (k *Keeper) SettleMarket(
 	closingFeeRate sdk.Dec,
 	settlementPrice *sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := market.MarketID()
 	derivativePositions := k.GetAllPositionsByMarket(ctx, marketID)
 	marketFunding := k.GetPerpetualMarketFunding(ctx, marketID)

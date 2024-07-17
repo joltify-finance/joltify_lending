@@ -12,29 +12,23 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
 )
 
 // IsDerivativesExchangeEnabled returns true if Derivatives Exchange is enabled
 func (k *Keeper) IsDerivativesExchangeEnabled(ctx sdk.Context) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	return store.Has(types.DerivativeExchangeEnabledKey)
 }
 
 // SetDerivativesExchangeEnabled sets the indicator to enable derivatives exchange
 func (k *Keeper) SetDerivativesExchangeEnabled(ctx sdk.Context) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Set(types.DerivativeExchangeEnabledKey, []byte{1})
 }
 
 // GetDerivativeMarketPrice fetches the Derivative Market's mark price.
 func (k *Keeper) GetDerivativeMarketPrice(ctx sdk.Context, oracleBase, oracleQuote string, oracleScaleFactor uint32, oracleType oracletypes.OracleType) (*sdk.Dec, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var price *sdk.Dec
 
 	if oracleType == oracletypes.OracleType_Provider {
@@ -57,8 +51,6 @@ func (k *Keeper) GetDerivativeMarketPrice(ctx sdk.Context, oracleBase, oracleQuo
 
 // GetDerivativeMarketCumulativePrice fetches the Derivative Market's (unscaled) cumulative price
 func (k *Keeper) GetDerivativeMarketCumulativePrice(ctx sdk.Context, oracleBase, oracleQuote string, oracleType oracletypes.OracleType) (*sdk.Dec, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	cumulativePrice := k.OracleKeeper.GetCumulativePrice(ctx, oracleType, oracleBase, oracleQuote)
 	if cumulativePrice == nil || cumulativePrice.IsNil() {
 		metrics.ReportFuncError(k.svcTags)
@@ -70,8 +62,6 @@ func (k *Keeper) GetDerivativeMarketCumulativePrice(ctx sdk.Context, oracleBase,
 
 // HasDerivativeMarket returns true the if the derivative market exists in the store.
 func (k *Keeper) HasDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEnabled bool) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	marketStore := prefix.NewStore(store, types.GetDerivativeMarketPrefix(isEnabled))
 	return marketStore.Has(marketID.Bytes())
@@ -79,8 +69,6 @@ func (k *Keeper) HasDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEn
 
 // GetDerivativeMarketAndStatus returns the Derivative Market by marketID and isEnabled status.
 func (k *Keeper) GetDerivativeMarketAndStatus(ctx sdk.Context, marketID common.Hash) (*types.DerivativeMarket, bool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	isEnabled := true
 	market := k.GetDerivativeMarket(ctx, marketID, isEnabled)
 	if market == nil {
@@ -109,8 +97,6 @@ func (k *Keeper) GetDerivativeMarketWithMarkPrice(ctx sdk.Context, marketID comm
 
 // GetDerivativeMarket fetches the Derivative Market from the store by marketID.
 func (k *Keeper) GetDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEnabled bool) *types.DerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	marketStore := prefix.NewStore(store, types.GetDerivativeMarketPrefix(isEnabled))
@@ -126,8 +112,6 @@ func (k *Keeper) GetDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEn
 }
 
 func (k *Keeper) GetDerivativeMarketByID(ctx sdk.Context, marketID common.Hash) *types.DerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	market := k.GetDerivativeMarket(ctx, marketID, true)
 	if market != nil {
 		return market
@@ -143,8 +127,6 @@ func (k *Keeper) SetDerivativeMarketWithInfo(
 	perpetualMarketInfo *types.PerpetualMarketInfo,
 	expiryFuturesMarketInfo *types.ExpiryFuturesMarketInfo,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	k.SetDerivativeMarket(ctx, market)
 	marketID := market.MarketID()
 
@@ -183,8 +165,6 @@ func (k *Keeper) SetDerivativeMarketWithInfo(
 
 // SetDerivativeMarket saves derivative market in keeper.
 func (k *Keeper) SetDerivativeMarket(ctx sdk.Context, market *types.DerivativeMarket) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	isEnabled := false
@@ -207,8 +187,6 @@ func (k *Keeper) SetDerivativeMarket(ctx sdk.Context, market *types.DerivativeMa
 
 // DeleteDerivativeMarket deletes DerivativeMarket from the markets store (needed for moving to another hash).
 func (k *Keeper) DeleteDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEnabled bool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	marketStore := prefix.NewStore(store, types.GetDerivativeMarketPrefix(isEnabled))
@@ -221,8 +199,6 @@ func (k *Keeper) DeleteDerivativeMarket(ctx sdk.Context, marketID common.Hash, i
 }
 
 func (k *Keeper) GetDerivativeMarketInfo(ctx sdk.Context, marketID common.Hash, isEnabled bool) *types.DerivativeMarketInfo {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	market, markPrice := k.GetDerivativeMarketWithMarkPrice(ctx, marketID, isEnabled)
 	if market == nil {
 		return nil
@@ -240,8 +216,6 @@ func (k *Keeper) GetDerivativeMarketInfo(ctx sdk.Context, marketID common.Hash, 
 }
 
 func (k *Keeper) GetFullDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEnabled bool) *types.FullDerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	market, markPrice := k.GetDerivativeMarketWithMarkPrice(ctx, marketID, isEnabled)
 	if market == nil {
 		return nil
@@ -319,8 +293,6 @@ func FullDerivativeMarketWithMidPriceToB(k *Keeper) func(sdk.Context, *types.Ful
 }
 
 func (k *Keeper) FindFullDerivativeMarkets(ctx sdk.Context, filter MarketFilter, fillers ...FullDerivativeMarketFiller) []*types.FullDerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	fullMarkets := make([]*types.FullDerivativeMarket, 0)
 
 	// Add default fillers
@@ -351,15 +323,11 @@ func (k *Keeper) FindFullDerivativeMarkets(ctx sdk.Context, filter MarketFilter,
 }
 
 func (k *Keeper) GetAllFullDerivativeMarkets(ctx sdk.Context) []*types.FullDerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	return k.FindFullDerivativeMarkets(ctx, AllMarketFilter)
 }
 
 // FindDerivativeMarkets returns a filtered list of derivative markets.
 func (k *Keeper) FindDerivativeMarkets(ctx sdk.Context, filter MarketFilter) []*types.DerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	markets := make([]*types.DerivativeMarket, 0)
 	appendMarket := func(p *types.DerivativeMarket) (stop bool) {
 		if filter(p) {
@@ -374,15 +342,11 @@ func (k *Keeper) FindDerivativeMarkets(ctx sdk.Context, filter MarketFilter) []*
 
 // GetAllDerivativeMarkets returns all derivative markets.
 func (k *Keeper) GetAllDerivativeMarkets(ctx sdk.Context) []*types.DerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	return k.FindDerivativeMarkets(ctx, AllMarketFilter)
 }
 
 // GetAllActiveDerivativeMarkets returns all active derivative markets.
 func (k *Keeper) GetAllActiveDerivativeMarkets(ctx sdk.Context) []*types.DerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	markets := make([]*types.DerivativeMarket, 0)
 	appendMarket := func(p *types.DerivativeMarket) (stop bool) {
 		if p.Status == types.MarketStatus_Active {
@@ -398,8 +362,6 @@ func (k *Keeper) GetAllActiveDerivativeMarkets(ctx sdk.Context) []*types.Derivat
 
 // GetAllMatchingDenomDerivativeMarkets returns all derivative markets which have a matching denom.
 func (k *Keeper) GetAllMatchingDenomDerivativeMarkets(ctx sdk.Context, denom string) []*types.DerivativeMarket {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	markets := make([]*types.DerivativeMarket, 0)
 	appendMarket := func(p *types.DerivativeMarket) (stop bool) {
 		if p.QuoteDenom == denom {
@@ -415,8 +377,6 @@ func (k *Keeper) GetAllMatchingDenomDerivativeMarkets(ctx sdk.Context, denom str
 
 // IterateDerivativeMarkets iterates over derivative markets calling process on each market.
 func (k *Keeper) IterateDerivativeMarkets(ctx sdk.Context, isEnabled *bool, process func(*types.DerivativeMarket) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	var marketStore prefix.Store
@@ -590,8 +550,6 @@ func (k *Keeper) handleDerivativeFeeIncreaseForConditionals(ctx sdk.Context, ord
 }
 
 func (k *Keeper) ExecuteDerivativeMarketParamUpdateProposal(ctx sdk.Context, p *types.DerivativeMarketParamUpdateProposal) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := common.HexToHash(p.MarketId)
 	prevMarket := k.GetDerivativeMarketByID(ctx, marketID)
 
@@ -654,8 +612,6 @@ func (k *Keeper) UpdateDerivativeMarketParam(
 	status types.MarketStatus,
 	oracleParams *types.OracleParams,
 ) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	market := k.GetDerivativeMarketByID(ctx, marketID)
 
 	isActiveStatusChange := market.IsActive() && status != types.MarketStatus_Active || (market.IsInactive() && status == types.MarketStatus_Active)
@@ -728,8 +684,6 @@ func (k *Keeper) UpdateDerivativeMarketParam(
 }
 
 func (k *Keeper) ScheduleDerivativeMarketParamUpdate(ctx sdk.Context, p *types.DerivativeMarketParamUpdateProposal) error {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	marketID := common.HexToHash(p.MarketId)
 	paramUpdateStore := prefix.NewStore(store, types.DerivativeMarketParamUpdateScheduleKey)
@@ -740,8 +694,6 @@ func (k *Keeper) ScheduleDerivativeMarketParamUpdate(ctx sdk.Context, p *types.D
 
 // IterateDerivativeMarketParamUpdates iterates over DerivativeMarketParamUpdates calling process on each pair.
 func (k *Keeper) IterateDerivativeMarketParamUpdates(ctx sdk.Context, process func(*types.DerivativeMarketParamUpdateProposal) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getTransientStore(ctx)
 	paramUpdateStore := prefix.NewStore(store, types.DerivativeMarketParamUpdateScheduleKey)
 
@@ -760,8 +712,6 @@ func (k *Keeper) IterateDerivativeMarketParamUpdates(ctx sdk.Context, process fu
 
 // IterateScheduledSettlementDerivativeMarkets iterates over derivative market settlement infos calling process on each info.
 func (k *Keeper) IterateScheduledSettlementDerivativeMarkets(ctx sdk.Context, process func(types.DerivativeMarketSettlementInfo) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	marketStore := prefix.NewStore(store, types.DerivativeMarketScheduledSettlementInfo)
 
@@ -780,8 +730,6 @@ func (k *Keeper) IterateScheduledSettlementDerivativeMarkets(ctx sdk.Context, pr
 
 // GetAllScheduledSettlementDerivativeMarkets returns all DerivativeMarketSettlementInfos.
 func (k *Keeper) GetAllScheduledSettlementDerivativeMarkets(ctx sdk.Context) []types.DerivativeMarketSettlementInfo {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketSettlementInfos := make([]types.DerivativeMarketSettlementInfo, 0)
 	appendMarketSettlementInfo := func(i types.DerivativeMarketSettlementInfo) (stop bool) {
 		marketSettlementInfos = append(marketSettlementInfos, i)
@@ -794,8 +742,6 @@ func (k *Keeper) GetAllScheduledSettlementDerivativeMarkets(ctx sdk.Context) []t
 
 // GetDerivativesMarketScheduledSettlementInfo gets the DerivativeMarketSettlementInfo from the keeper.
 func (k *Keeper) GetDerivativesMarketScheduledSettlementInfo(ctx sdk.Context, marketID common.Hash) *types.DerivativeMarketSettlementInfo {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	settlementStore := prefix.NewStore(store, types.DerivativeMarketScheduledSettlementInfo)
 
@@ -811,8 +757,6 @@ func (k *Keeper) GetDerivativesMarketScheduledSettlementInfo(ctx sdk.Context, ma
 
 // SetDerivativesMarketScheduledSettlementInfo saves the DerivativeMarketSettlementInfo to the keeper.
 func (k *Keeper) SetDerivativesMarketScheduledSettlementInfo(ctx sdk.Context, settlementInfo *types.DerivativeMarketSettlementInfo) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	marketID := common.HexToHash(settlementInfo.MarketId)
 	settlementStore := prefix.NewStore(store, types.DerivativeMarketScheduledSettlementInfo)
@@ -823,8 +767,6 @@ func (k *Keeper) SetDerivativesMarketScheduledSettlementInfo(ctx sdk.Context, se
 
 // DeleteDerivativesMarketScheduledSettlementInfo deletes the DerivativeMarketSettlementInfo from the keeper.
 func (k *Keeper) DeleteDerivativesMarketScheduledSettlementInfo(ctx sdk.Context, marketID common.Hash) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	settlementStore := prefix.NewStore(store, types.DerivativeMarketScheduledSettlementInfo)
 

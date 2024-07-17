@@ -15,8 +15,6 @@ func (k *Keeper) SetPosition(
 	marketID, subaccountID common.Hash,
 	position *types.Position,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	k.SetTransientPosition(ctx, marketID, subaccountID, position)
 
 	store := k.getStore(ctx)
@@ -36,8 +34,6 @@ func (k *Keeper) GetPosition(
 	ctx sdk.Context,
 	marketID, subaccountID common.Hash,
 ) *types.Position {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	positionStore := prefix.NewStore(store, types.DerivativePositionsPrefix)
@@ -58,8 +54,6 @@ func (k *Keeper) HasPosition(
 	ctx sdk.Context,
 	marketID, subaccountID common.Hash,
 ) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	positionStore := prefix.NewStore(store, types.DerivativePositionsPrefix)
 
@@ -71,8 +65,6 @@ func (k *Keeper) DeletePosition(
 	ctx sdk.Context,
 	marketID, subaccountID common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	k.InvalidateConditionalOrdersIfNoMarginLocked(ctx, marketID, subaccountID, true, nil, nil)
 
 	store := k.getStore(ctx)
@@ -84,8 +76,6 @@ func (k *Keeper) DeletePosition(
 
 // GetAllPositionsByMarket returns all positions in a given derivative market
 func (k *Keeper) GetAllPositionsByMarket(ctx sdk.Context, marketID common.Hash) []*types.DerivativePosition {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	positions := make([]*types.DerivativePosition, 0)
 	appendPosition := func(p *types.Position, key []byte) (stop bool) {
 		subaccountID := types.GetSubaccountIDFromPositionKey(key)
@@ -105,8 +95,6 @@ func (k *Keeper) GetAllPositionsByMarket(ctx sdk.Context, marketID common.Hash) 
 
 // IteratePositionsByMarket Iterates over all the positions in a given market calling process on each position.
 func (k *Keeper) IteratePositionsByMarket(ctx sdk.Context, marketID common.Hash, process func(*types.Position, []byte) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	positionStore := prefix.NewStore(store, append(types.DerivativePositionsPrefix, marketID.Bytes()...))
 
@@ -125,8 +113,6 @@ func (k *Keeper) IteratePositionsByMarket(ctx sdk.Context, marketID common.Hash,
 
 // GetAllActivePositionsBySubaccountID returns all active positions for a given subaccountID
 func (k *Keeper) GetAllActivePositionsBySubaccountID(ctx sdk.Context, subaccountID common.Hash) []types.DerivativePosition {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	markets := k.GetAllActiveDerivativeMarkets(ctx)
 	positions := make([]types.DerivativePosition, 0)
 
@@ -149,8 +135,6 @@ func (k *Keeper) GetAllActivePositionsBySubaccountID(ctx sdk.Context, subaccount
 
 // GetAllPositions returns all positions.
 func (k *Keeper) GetAllPositions(ctx sdk.Context) []types.DerivativePosition {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	positions := make([]types.DerivativePosition, 0)
 	appendPosition := func(p *types.Position, key []byte) (stop bool) {
 		subaccountID, marketID := types.GetSubaccountAndMarketIDFromPositionKey(key)
@@ -169,8 +153,6 @@ func (k *Keeper) GetAllPositions(ctx sdk.Context) []types.DerivativePosition {
 
 // IteratePositions iterates over all positions calling process on each position.
 func (k *Keeper) IteratePositions(ctx sdk.Context, process func(*types.Position, []byte) (stop bool)) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	positionStore := prefix.NewStore(store, types.DerivativePositionsPrefix)
 	iterator := positionStore.Iterator(nil, nil)

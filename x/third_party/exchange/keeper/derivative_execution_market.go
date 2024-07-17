@@ -12,8 +12,6 @@ func (k *Keeper) ExecuteDerivativeMarketOrderMatching(
 	matchedMarketDirection *types.MatchedMarketDirection,
 	stakingInfo *FeeDiscountStakingInfo,
 ) *DerivativeBatchExecutionData {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := matchedMarketDirection.MarketId
 
 	market, markPrice := k.GetDerivativeOrBinaryOptionsMarketWithMarkPrice(ctx, marketID, true)
@@ -128,8 +126,6 @@ func (k *Keeper) PersistDerivativeMarketOrderExecution(
 	tradingRewardPoints types.TradingRewardPoints,
 	modifiedPositionCache ModifiedPositionCache,
 ) types.TradingRewardPoints {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	for _, derivativeExecutionData := range batchDerivativeExecutionData {
 		tradingRewardPoints = k.PersistSingleDerivativeMarketOrderExecution(ctx, derivativeExecutionData, derivativeVwapData, tradingRewardPoints, modifiedPositionCache, false)
 	}

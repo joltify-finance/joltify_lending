@@ -4,7 +4,7 @@ package joltify.third_party.oracle.v1beta1;
 import "joltify/third_party/oracle/v1beta1/oracle.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types";
+option go_package =    "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types";
 
 // GenesisState defines the oracle module's genesis state.
 message GenesisState {

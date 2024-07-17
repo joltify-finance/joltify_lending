@@ -21,8 +21,6 @@ func (k *Keeper) SetNewSpotLimitOrder(
 	isBuy bool,
 	orderHash common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	// set main spot order store
@@ -51,8 +49,6 @@ func (k *Keeper) SetConditionalSpotMarketOrder(
 	marketID common.Hash,
 	markPrice sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.SpotConditionalMarketOrdersPrefix)
 	ordersIndexStore := prefix.NewStore(store, types.SpotConditionalMarketOrdersIndexPrefix)
@@ -78,8 +74,6 @@ func (k *Keeper) SetConditionalSpotLimitOrder(
 	marketID common.Hash,
 	markPrice sdk.Dec,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.SpotConditionalLimitOrdersPrefix)
 	ordersIndexStore := prefix.NewStore(store, types.SpotConditionalLimitOrdersIndexPrefix)
@@ -106,8 +100,6 @@ func (k *Keeper) CancelAllSpotLimitOrders(
 	subaccountID common.Hash,
 	marketID common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	restingBuyOrders := k.GetAllSpotLimitOrdersBySubaccountAndMarket(ctx, marketID, true, subaccountID)
 	restingSellOrders := k.GetAllSpotLimitOrdersBySubaccountAndMarket(ctx, marketID, false, subaccountID)
 	transientBuyOrders := k.GetAllTransientSpotLimitOrdersBySubaccountAndMarket(ctx, marketID, true, subaccountID)
@@ -136,8 +128,6 @@ func (k *Keeper) CancelAllRestingLimitOrdersFromSpotMarket(
 	market *types.SpotMarket,
 	marketID common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	cancelFunc := func(order *types.SpotLimitOrder) bool {
 		err := k.cancelSpotLimitOrderByOrderHash(ctx, order.SubaccountID(), order.Hash(), market, marketID)
 		return err != nil
@@ -154,8 +144,6 @@ func (k *Keeper) GetAllSpotLimitOrdersBySubaccountAndMarket(
 	isBuy bool,
 	subaccountID common.Hash,
 ) []*types.SpotLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orders := make([]*types.SpotLimitOrder, 0)
 
 	store := k.getStore(ctx)
@@ -181,8 +169,6 @@ func (k *Keeper) GetAllTraderSpotLimitOrders(
 	marketID common.Hash,
 	subaccountID common.Hash,
 ) []*types.TrimmedSpotLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orders := make([]*types.TrimmedSpotLimitOrder, 0)
 
 	store := k.getStore(ctx)
@@ -209,8 +195,6 @@ func (k *Keeper) GetAccountAddressSpotLimitOrders(
 	marketID common.Hash,
 	accountAddress sdk.AccAddress,
 ) []*types.TrimmedSpotLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orders := make([]*types.TrimmedSpotLimitOrder, 0)
 
 	store := k.getStore(ctx)
@@ -295,8 +279,6 @@ func (k *Keeper) IterateSpotLimitOrdersBySubaccount(
 	subaccountID common.Hash,
 	process func(orderKey []byte) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	orderIndexStore := prefix.NewStore(store, types.GetSpotLimitOrderIndexPrefix(marketID, isBuy, subaccountID))
 	var iterator storetypes.Iterator
@@ -323,8 +305,6 @@ func (k *Keeper) IterateSpotLimitOrdersByAccountAddress(
 	accountAddress sdk.AccAddress,
 	process func(orderKey []byte) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	orderIndexStore := prefix.NewStore(store, types.GetSpotLimitOrderIndexByAccountAddressPrefix(marketID, isBuy, accountAddress))
 	var iterator storetypes.Iterator
@@ -352,8 +332,6 @@ func (k *Keeper) CancelSpotLimitOrder(
 	isBuy bool,
 	order *types.SpotLimitOrder,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	// 1. Add back the margin hold to available balance
 	marginHold, marginDenom := order.GetUnfilledMarginHoldAndMarginDenom(market, false)
 
@@ -376,8 +354,6 @@ func (k *Keeper) UpdateSpotLimitOrder(
 	marketID common.Hash,
 	orderDelta *types.SpotLimitOrderDelta,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	isBuy := orderDelta.Order.IsBuy()
@@ -406,8 +382,6 @@ func (k *Keeper) GetSpotLimitOrderByPrice(
 	price sdk.Dec,
 	orderHash common.Hash,
 ) *types.SpotLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	ordersStore := prefix.NewStore(store, types.SpotLimitOrdersPrefix)
@@ -430,8 +404,6 @@ func (k *Keeper) GetSpotLimitOrderBySubaccountID(
 	subaccountID common.Hash,
 	orderHash common.Hash,
 ) *types.SpotLimitOrder {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.SpotLimitOrdersPrefix)
 	ordersIndexStore := prefix.NewStore(store, types.SpotLimitOrdersIndexPrefix)
@@ -472,8 +444,6 @@ func (k *Keeper) DeleteSpotLimitOrder(
 	isBuy bool,
 	order *types.SpotLimitOrder,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersIndexStore := prefix.NewStore(store, types.SpotLimitOrdersIndexPrefix)
 	subaccountKey := types.GetLimitOrderIndexKey(marketID, isBuy, order.SubaccountID(), common.BytesToHash(order.OrderHash))
@@ -515,8 +485,6 @@ func (k *Keeper) GetBestSpotLimitOrderPrice(
 	marketID common.Hash,
 	isBuy bool,
 ) *sdk.Dec {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var bestOrder *types.SpotLimitOrder
 	appendOrder := func(order *types.SpotLimitOrder) (stop bool) {
 		bestOrder = order
@@ -539,8 +507,6 @@ func (k *Keeper) GetAllSpotLimitOrdersByMarketDirection(
 	marketID common.Hash,
 	isBuy bool,
 ) (orders []*types.SpotLimitOrder) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	orders = make([]*types.SpotLimitOrder, 0)
 	appendOrder := func(order *types.SpotLimitOrder) (stop bool) {
 		orders = append(orders, order)
@@ -558,8 +524,6 @@ func (k *Keeper) GetComputedSpotLimitOrderbook(
 	isBuy bool,
 	limit uint64,
 ) (priceLevel []*types.Level) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	priceLevel = make([]*types.Level, 0, limit)
 
 	appendPriceLevel := func(order *types.SpotLimitOrder) (stop bool) {
@@ -593,8 +557,6 @@ func (k *Keeper) IterateSpotLimitOrdersByMarketDirection(
 	isBuy bool,
 	process func(order *types.SpotLimitOrder) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	prefixKey := types.SpotLimitOrdersPrefix
 	prefixKey = append(prefixKey, types.MarketDirectionPrefix(marketID, isBuy)...)
@@ -618,8 +580,6 @@ func (k *Keeper) IterateSpotLimitOrdersByMarketDirection(
 }
 
 func (k *Keeper) GetAllSpotLimitOrderbook(ctx sdk.Context) []types.SpotOrderBook {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	markets := k.GetAllSpotMarkets(ctx)
 	orderbook := make([]types.SpotOrderBook, 0, len(markets)*2)
 	for _, market := range markets {
@@ -723,8 +683,6 @@ func (k *Keeper) GetConditionalSpotMarketOrderBySubaccountIDAndHash(
 	subaccountID common.Hash,
 	orderHash common.Hash,
 ) (order *types.SpotMarketOrder, direction bool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.SpotConditionalMarketOrdersPrefix)
 	ordersIndexStore := prefix.NewStore(store, types.SpotConditionalMarketOrdersIndexPrefix)
@@ -747,8 +705,6 @@ func (k *Keeper) GetConditionalSpotLimitOrderBySubaccountIDAndHash(
 	subaccountID common.Hash,
 	orderHash common.Hash,
 ) (order *types.SpotLimitOrder, direction bool) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	ordersStore := prefix.NewStore(store, types.SpotConditionalLimitOrdersPrefix)
 	ordersIndexStore := prefix.NewStore(store, types.SpotConditionalLimitOrdersIndexPrefix)
@@ -764,8 +720,6 @@ func (k *Keeper) GetConditionalSpotLimitOrderBySubaccountIDAndHash(
 }
 
 func (k *Keeper) ExecuteAtomicSpotMarketOrder(ctx sdk.Context, market *types.SpotMarket, marketOrder *types.SpotMarketOrder, feeRate sdk.Dec) *types.SpotMarketOrderResults {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := market.MarketID()
 
 	stakingInfo, feeDiscountConfig := k.getFeeDiscountConfigAndStakingInfoForMarket(ctx, marketID)

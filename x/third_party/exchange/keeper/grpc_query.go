@@ -15,8 +15,6 @@ import (
 var _ types.QueryServer = &Keeper{}
 
 func (k *Keeper) QueryExchangeParams(c context.Context, _ *types.QueryExchangeParamsRequest) (*types.QueryExchangeParamsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	params := k.GetParams(ctx)
@@ -29,8 +27,6 @@ func (k *Keeper) QueryExchangeParams(c context.Context, _ *types.QueryExchangePa
 }
 
 func (k *Keeper) SubaccountTradeNonce(c context.Context, req *types.QuerySubaccountTradeNonceRequest) (*types.QuerySubaccountTradeNonceResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	nonce := k.GetSubaccountTradeNonce(ctx, common.HexToHash(req.SubaccountId))
@@ -43,8 +39,6 @@ func (k *Keeper) SubaccountTradeNonce(c context.Context, req *types.QuerySubacco
 }
 
 func (k *Keeper) SubaccountDeposit(c context.Context, req *types.QuerySubaccountDepositRequest) (*types.QuerySubaccountDepositResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	deposits := k.GetDeposit(ctx, common.HexToHash(req.SubaccountId), req.Denom)
@@ -57,8 +51,6 @@ func (k *Keeper) SubaccountDeposit(c context.Context, req *types.QuerySubaccount
 }
 
 func (k *Keeper) SubaccountDeposits(c context.Context, req *types.QuerySubaccountDepositsRequest) (*types.QuerySubaccountDepositsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var subaccountID common.Hash
@@ -84,8 +76,6 @@ func (k *Keeper) SubaccountDeposits(c context.Context, req *types.QuerySubaccoun
 }
 
 func (k *Keeper) ExchangeBalances(c context.Context, _ *types.QueryExchangeBalancesRequest) (*types.QueryExchangeBalancesResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	balances := k.GetAllExchangeBalances(ctx)
@@ -269,8 +259,6 @@ func (k *Keeper) DenomDecimals(c context.Context, req *types.QueryDenomDecimalsR
 }
 
 func (k *Keeper) SpotMarkets(c context.Context, req *types.QuerySpotMarketsRequest) (*types.QuerySpotMarketsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var status types.MarketStatus
@@ -296,8 +284,6 @@ func (k *Keeper) SpotMarkets(c context.Context, req *types.QuerySpotMarketsReque
 }
 
 func (k *Keeper) SpotMarket(c context.Context, req *types.QuerySpotMarketRequest) (*types.QuerySpotMarketResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -315,8 +301,6 @@ func (k *Keeper) SpotMarket(c context.Context, req *types.QuerySpotMarketRequest
 }
 
 func (k *Keeper) FullSpotMarkets(c context.Context, req *types.QueryFullSpotMarketsRequest) (*types.QueryFullSpotMarketsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var status types.MarketStatus
@@ -347,8 +331,6 @@ func (k *Keeper) FullSpotMarkets(c context.Context, req *types.QueryFullSpotMark
 }
 
 func (k *Keeper) FullSpotMarket(c context.Context, req *types.QueryFullSpotMarketRequest) (*types.QueryFullSpotMarketResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -371,8 +353,6 @@ func (k *Keeper) FullSpotMarket(c context.Context, req *types.QueryFullSpotMarke
 }
 
 func (k *Keeper) SpotOrderbook(c context.Context, req *types.QuerySpotOrderbookRequest) (*types.QuerySpotOrderbookResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -407,8 +387,6 @@ func (k *Keeper) SpotOrderbook(c context.Context, req *types.QuerySpotOrderbookR
 }
 
 func (k *Keeper) SpotOrdersByHashes(c context.Context, req *types.QuerySpotOrdersByHashesRequest) (*types.QuerySpotOrdersByHashesResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -432,8 +410,6 @@ func (k *Keeper) SpotOrdersByHashes(c context.Context, req *types.QuerySpotOrder
 }
 
 func (k *Keeper) DerivativeOrdersByHashes(c context.Context, req *types.QueryDerivativeOrdersByHashesRequest) (*types.QueryDerivativeOrdersByHashesResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -457,8 +433,6 @@ func (k *Keeper) DerivativeOrdersByHashes(c context.Context, req *types.QueryDer
 }
 
 func (k *Keeper) TraderSpotOrders(c context.Context, req *types.QueryTraderSpotOrdersRequest) (*types.QueryTraderSpotOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -472,8 +446,6 @@ func (k *Keeper) TraderSpotOrders(c context.Context, req *types.QueryTraderSpotO
 }
 
 func (k *Keeper) AccountAddressSpotOrders(c context.Context, req *types.QueryAccountAddressSpotOrdersRequest) (*types.QueryAccountAddressSpotOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -491,8 +463,6 @@ func (k *Keeper) AccountAddressSpotOrders(c context.Context, req *types.QueryAcc
 }
 
 func (k *Keeper) TraderSpotOrdersToCancelUpToAmountRequest(c context.Context, req *types.QueryTraderSpotOrdersToCancelUpToAmountRequest) (*types.QueryTraderSpotOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -525,8 +495,6 @@ func (k *Keeper) TraderSpotOrdersToCancelUpToAmountRequest(c context.Context, re
 }
 
 func (k *Keeper) TraderDerivativeOrdersToCancelUpToAmountRequest(c context.Context, req *types.QueryTraderDerivativeOrdersToCancelUpToAmountRequest) (*types.QueryTraderDerivativeOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -559,8 +527,6 @@ func (k *Keeper) TraderDerivativeOrdersToCancelUpToAmountRequest(c context.Conte
 }
 
 func (k *Keeper) TraderSpotTransientOrders(c context.Context, req *types.QueryTraderSpotOrdersRequest) (*types.QueryTraderSpotOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -574,8 +540,6 @@ func (k *Keeper) TraderSpotTransientOrders(c context.Context, req *types.QueryTr
 }
 
 func (k *Keeper) SpotMidPriceAndTOB(c context.Context, req *types.QuerySpotMidPriceAndTOBRequest) (*types.QuerySpotMidPriceAndTOBResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -596,8 +560,6 @@ func (k *Keeper) SpotMidPriceAndTOB(c context.Context, req *types.QuerySpotMidPr
 }
 
 func (k *Keeper) DerivativeMidPriceAndTOB(c context.Context, req *types.QueryDerivativeMidPriceAndTOBRequest) (*types.QueryDerivativeMidPriceAndTOBResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -613,8 +575,6 @@ func (k *Keeper) DerivativeMidPriceAndTOB(c context.Context, req *types.QueryDer
 }
 
 func (k *Keeper) DerivativeOrderbook(c context.Context, req *types.QueryDerivativeOrderbookRequest) (*types.QueryDerivativeOrderbookResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -634,8 +594,6 @@ func (k *Keeper) DerivativeOrderbook(c context.Context, req *types.QueryDerivati
 }
 
 func (k *Keeper) TraderDerivativeOrders(c context.Context, req *types.QueryTraderDerivativeOrdersRequest) (*types.QueryTraderDerivativeOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -649,8 +607,6 @@ func (k *Keeper) TraderDerivativeOrders(c context.Context, req *types.QueryTrade
 }
 
 func (k *Keeper) AccountAddressDerivativeOrders(c context.Context, req *types.QueryAccountAddressDerivativeOrdersRequest) (*types.QueryAccountAddressDerivativeOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -668,8 +624,6 @@ func (k *Keeper) AccountAddressDerivativeOrders(c context.Context, req *types.Qu
 }
 
 func (k *Keeper) TraderDerivativeTransientOrders(c context.Context, req *types.QueryTraderDerivativeOrdersRequest) (*types.QueryTraderDerivativeOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -683,8 +637,6 @@ func (k *Keeper) TraderDerivativeTransientOrders(c context.Context, req *types.Q
 }
 
 func (k *Keeper) SubaccountOrders(c context.Context, req *types.QuerySubaccountOrdersRequest) (*types.QuerySubaccountOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -702,8 +654,6 @@ func (k *Keeper) SubaccountOrders(c context.Context, req *types.QuerySubaccountO
 }
 
 func (k *Keeper) DerivativeMarkets(c context.Context, req *types.QueryDerivativeMarketsRequest) (*types.QueryDerivativeMarketsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var status types.MarketStatus
@@ -735,8 +685,6 @@ func (k *Keeper) DerivativeMarkets(c context.Context, req *types.QueryDerivative
 }
 
 func (k *Keeper) DerivativeMarket(c context.Context, req *types.QueryDerivativeMarketRequest) (*types.QueryDerivativeMarketResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -754,8 +702,6 @@ func (k *Keeper) DerivativeMarket(c context.Context, req *types.QueryDerivativeM
 }
 
 func (k *Keeper) DerivativeMarketAddress(_ context.Context, req *types.QueryDerivativeMarketAddressRequest) (*types.QueryDerivativeMarketAddressResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := common.HexToHash(req.MarketId)
 
 	res := &types.QueryDerivativeMarketAddressResponse{
@@ -767,8 +713,6 @@ func (k *Keeper) DerivativeMarketAddress(_ context.Context, req *types.QueryDeri
 }
 
 func (k *Keeper) ExchangeModuleState(c context.Context, req *types.QueryModuleStateRequest) (*types.QueryModuleStateResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryModuleStateResponse{
@@ -778,8 +722,6 @@ func (k *Keeper) ExchangeModuleState(c context.Context, req *types.QueryModuleSt
 }
 
 func (k *Keeper) PerpetualMarketInfo(c context.Context, req *types.QueryPerpetualMarketInfoRequest) (*types.QueryPerpetualMarketInfoResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryPerpetualMarketInfoResponse{
@@ -790,8 +732,6 @@ func (k *Keeper) PerpetualMarketInfo(c context.Context, req *types.QueryPerpetua
 }
 
 func (k *Keeper) ExpiryFuturesMarketInfo(c context.Context, req *types.QueryExpiryFuturesMarketInfoRequest) (*types.QueryExpiryFuturesMarketInfoResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryExpiryFuturesMarketInfoResponse{
@@ -802,8 +742,6 @@ func (k *Keeper) ExpiryFuturesMarketInfo(c context.Context, req *types.QueryExpi
 }
 
 func (k *Keeper) PerpetualMarketFunding(c context.Context, req *types.QueryPerpetualMarketFundingRequest) (*types.QueryPerpetualMarketFundingResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryPerpetualMarketFundingResponse{
@@ -814,8 +752,6 @@ func (k *Keeper) PerpetualMarketFunding(c context.Context, req *types.QueryPerpe
 }
 
 func (k *Keeper) Positions(c context.Context, req *types.QueryPositionsRequest) (*types.QueryPositionsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryPositionsResponse{
@@ -826,8 +762,6 @@ func (k *Keeper) Positions(c context.Context, req *types.QueryPositionsRequest) 
 }
 
 func (k *Keeper) SubaccountPositions(c context.Context, req *types.QuerySubaccountPositionsRequest) (*types.QuerySubaccountPositionsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QuerySubaccountPositionsResponse{
@@ -838,8 +772,6 @@ func (k *Keeper) SubaccountPositions(c context.Context, req *types.QuerySubaccou
 }
 
 func (k *Keeper) SubaccountPositionInMarket(c context.Context, req *types.QuerySubaccountPositionInMarketRequest) (*types.QuerySubaccountPositionInMarketResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QuerySubaccountPositionInMarketResponse{
@@ -850,8 +782,6 @@ func (k *Keeper) SubaccountPositionInMarket(c context.Context, req *types.QueryS
 }
 
 func (k *Keeper) SubaccountEffectivePositionInMarket(c context.Context, req *types.QuerySubaccountEffectivePositionInMarketRequest) (*types.QuerySubaccountEffectivePositionInMarketResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)
@@ -881,8 +811,6 @@ func (k *Keeper) SubaccountEffectivePositionInMarket(c context.Context, req *typ
 }
 
 func (k *Keeper) SubaccountOrderMetadata(c context.Context, req *types.QuerySubaccountOrderMetadataRequest) (*types.QuerySubaccountOrderMetadataResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	subaccountOrderbookMetadata := make([]types.SubaccountOrderbookMetadataWithMarket, 0)
@@ -908,8 +836,6 @@ func (k *Keeper) SubaccountOrderMetadata(c context.Context, req *types.QuerySuba
 }
 
 func (k *Keeper) TradeRewardPoints(c context.Context, req *types.QueryTradeRewardPointsRequest) (*types.QueryTradeRewardPointsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	accounts := make([]sdk.AccAddress, 0, len(req.Accounts))
@@ -936,8 +862,6 @@ func (k *Keeper) TradeRewardPoints(c context.Context, req *types.QueryTradeRewar
 }
 
 func (k *Keeper) PendingTradeRewardPoints(c context.Context, req *types.QueryTradeRewardPointsRequest) (*types.QueryTradeRewardPointsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	accounts := make([]sdk.AccAddress, 0, len(req.Accounts))
@@ -964,8 +888,6 @@ func (k *Keeper) PendingTradeRewardPoints(c context.Context, req *types.QueryTra
 }
 
 func (k *Keeper) TradeRewardCampaign(c context.Context, req *types.QueryTradeRewardCampaignRequest) (*types.QueryTradeRewardCampaignResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryTradeRewardCampaignResponse{
@@ -985,8 +907,6 @@ func (k *Keeper) TradeRewardCampaign(c context.Context, req *types.QueryTradeRew
 }
 
 func (k *Keeper) IsOptedOutOfRewards(c context.Context, req *types.QueryIsOptedOutOfRewardsRequest) (*types.QueryIsOptedOutOfRewardsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 	account, err := sdk.AccAddressFromBech32(req.Account)
 	if err != nil {
@@ -1001,8 +921,6 @@ func (k *Keeper) IsOptedOutOfRewards(c context.Context, req *types.QueryIsOptedO
 }
 
 func (k *Keeper) OptedOutOfRewardsAccounts(c context.Context, req *types.QueryOptedOutOfRewardsAccountsRequest) (*types.QueryOptedOutOfRewardsAccountsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryOptedOutOfRewardsAccountsResponse{
@@ -1013,8 +931,6 @@ func (k *Keeper) OptedOutOfRewardsAccounts(c context.Context, req *types.QueryOp
 }
 
 func (k *Keeper) FeeDiscountAccountInfo(c context.Context, req *types.QueryFeeDiscountAccountInfoRequest) (*types.QueryFeeDiscountAccountInfoResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 	account, err := sdk.AccAddressFromBech32(req.Account)
 	if err != nil {
@@ -1061,8 +977,6 @@ func (k *Keeper) FeeDiscountAccountInfo(c context.Context, req *types.QueryFeeDi
 }
 
 func (k *Keeper) FeeDiscountSchedule(c context.Context, req *types.QueryFeeDiscountScheduleRequest) (*types.QueryFeeDiscountScheduleResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryFeeDiscountScheduleResponse{
@@ -1072,8 +986,6 @@ func (k *Keeper) FeeDiscountSchedule(c context.Context, req *types.QueryFeeDisco
 }
 
 func (k *Keeper) GetAllBalancesWithBalanceHolds(ctx sdk.Context) []*types.BalanceWithMarginHold {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	balanceHolds := make(map[string]map[string]sdk.Dec)
 
 	balances := k.GetAllExchangeBalances(ctx)
@@ -1131,8 +1043,6 @@ func (k *Keeper) GetAllBalancesWithBalanceHolds(ctx sdk.Context) []*types.Balanc
 }
 
 func (k *Keeper) BalanceWithBalanceHolds(c context.Context, req *types.QueryBalanceWithBalanceHoldsRequest) (*types.QueryBalanceWithBalanceHoldsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryBalanceWithBalanceHoldsResponse{
@@ -1143,8 +1053,6 @@ func (k *Keeper) BalanceWithBalanceHolds(c context.Context, req *types.QueryBala
 }
 
 func (k *Keeper) BalanceMismatches(c context.Context, req *types.QueryBalanceMismatchesRequest) (*types.QueryBalanceMismatchesResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	balancesWithBalanceHolds := k.GetAllBalancesWithBalanceHolds(ctx)
@@ -1178,8 +1086,6 @@ func (k *Keeper) BalanceMismatches(c context.Context, req *types.QueryBalanceMis
 }
 
 func (k *Keeper) FeeDiscountTierStatistics(c context.Context, req *types.QueryFeeDiscountTierStatisticsRequest) (*types.QueryFeeDiscountTierStatisticsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	tierCount := len(k.GetFeeDiscountSchedule(ctx).TierInfos)
@@ -1263,8 +1169,6 @@ func (k *Keeper) FeeDiscountTierStatistics(c context.Context, req *types.QueryFe
 // }
 
 func (k *Keeper) MitoVaultInfos(c context.Context, req *types.MitoVaultInfosRequest) (*types.MitoVaultInfosResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	var (
@@ -1307,8 +1211,6 @@ func (k *Keeper) MitoVaultInfos(c context.Context, req *types.MitoVaultInfosRequ
 }
 
 func (k *Keeper) HistoricalTradeRecords(c context.Context, req *types.QueryHistoricalTradeRecordsRequest) (*types.QueryHistoricalTradeRecordsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	res := &types.QueryHistoricalTradeRecordsResponse{}
@@ -1324,8 +1226,6 @@ func (k *Keeper) HistoricalTradeRecords(c context.Context, req *types.QueryHisto
 }
 
 func (k *Keeper) MarketVolatility(c context.Context, req *types.QueryMarketVolatilityRequest) (*types.QueryMarketVolatilityResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	vol, rawHistory, meta := k.GetMarketVolatility(sdk.UnwrapSDKContext(c), common.HexToHash(req.MarketId), req.TradeHistoryOptions)
 	res := &types.QueryMarketVolatilityResponse{
 		Volatility:      vol,
@@ -1336,8 +1236,6 @@ func (k *Keeper) MarketVolatility(c context.Context, req *types.QueryMarketVolat
 }
 
 func (k *Keeper) QueryMarketIDFromVault(c context.Context, req *types.QueryMarketIDFromVaultRequest) (*types.QueryMarketIDFromVaultResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 	marketID, err := k.QueryMarketID(ctx, req.VaultAddress)
 	if err != nil {
@@ -1352,8 +1250,6 @@ func (k *Keeper) QueryMarketIDFromVault(c context.Context, req *types.QueryMarke
 }
 
 func (k *Keeper) BinaryOptionsMarkets(c context.Context, req *types.QueryBinaryMarketsRequest) (*types.QueryBinaryMarketsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 	m := k.GetAllBinaryOptionsMarkets(ctx)
 
@@ -1382,8 +1278,6 @@ func (k *Keeper) BinaryOptionsMarkets(c context.Context, req *types.QueryBinaryM
 }
 
 func (k *Keeper) TraderDerivativeConditionalOrders(c context.Context, req *types.QueryTraderDerivativeConditionalOrdersRequest) (*types.QueryTraderDerivativeConditionalOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 
 	marketID := common.HexToHash(req.MarketId)

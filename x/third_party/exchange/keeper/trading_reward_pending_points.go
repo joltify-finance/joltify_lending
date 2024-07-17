@@ -10,8 +10,6 @@ import (
 
 // MoveRewardPointsToPending moves the reward points to the pending pools
 func (k *Keeper) MoveRewardPointsToPending(ctx sdk.Context, allAccountPoints []*types.TradingRewardAccountPoints, totalPoints sdk.Dec, pendingPoolStartTimestamp int64) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	for _, accountPoint := range allAccountPoints {
 		k.SetAccountCampaignTradingRewardPendingPoints(ctx, accountPoint.Account, pendingPoolStartTimestamp, accountPoint.Points)
 		k.DeleteAccountCampaignTradingRewardPoints(ctx, accountPoint.Account)
@@ -23,8 +21,6 @@ func (k *Keeper) MoveRewardPointsToPending(ctx sdk.Context, allAccountPoints []*
 
 // GetCampaignTradingRewardPendingPoints fetches the trading reward points for a given account.
 func (k *Keeper) GetCampaignTradingRewardPendingPoints(ctx sdk.Context, account sdk.AccAddress, pendingPoolStartTimestamp int64) sdk.Dec {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetTradingRewardAccountPendingPointsKey(account, pendingPoolStartTimestamp))
 	if bz == nil {
@@ -35,8 +31,6 @@ func (k *Keeper) GetCampaignTradingRewardPendingPoints(ctx sdk.Context, account 
 
 // DeleteAccountCampaignTradingRewardPendingPoints deletes the trading reward points for a given account.
 func (k *Keeper) DeleteAccountCampaignTradingRewardPendingPoints(ctx sdk.Context, account sdk.AccAddress, pendingPoolStartTimestamp int64) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Delete(types.GetTradingRewardAccountPendingPointsKey(account, pendingPoolStartTimestamp))
 }
@@ -48,8 +42,6 @@ func (k *Keeper) UpdateAccountCampaignTradingRewardPendingPoints(
 	addedPoints sdk.Dec,
 	pendingPoolStartTimestamp int64,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if addedPoints.IsZero() {
 		return
 	}
@@ -61,8 +53,6 @@ func (k *Keeper) UpdateAccountCampaignTradingRewardPendingPoints(
 
 // SetAccountCampaignTradingRewardPendingPoints sets the trading reward points for a given account.
 func (k *Keeper) SetAccountCampaignTradingRewardPendingPoints(ctx sdk.Context, account sdk.AccAddress, pendingPoolStartTimestamp int64, points sdk.Dec) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	key := types.GetTradingRewardAccountPendingPointsKey(account, pendingPoolStartTimestamp)
@@ -72,8 +62,6 @@ func (k *Keeper) SetAccountCampaignTradingRewardPendingPoints(ctx sdk.Context, a
 
 // GetAllTradingRewardCampaignAccountPendingPoints gets the trading reward points for all accounts
 func (k *Keeper) GetAllTradingRewardCampaignAccountPendingPoints(ctx sdk.Context) (accountPoints []*types.TradingRewardCampaignAccountPendingPoints) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountPoints = make([]*types.TradingRewardCampaignAccountPendingPoints, 0)
 
 	appendPoints := func(pendingPoolStartTimestamp int64, account sdk.AccAddress, points sdk.Dec) (stop bool) {
@@ -107,8 +95,6 @@ func (k *Keeper) IterateAccountCampaignTradingRewardPendingPoints(
 	ctx sdk.Context,
 	process func(pendingPoolStartTimestamp int64, account sdk.AccAddress, points sdk.Dec) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	pointsStore := prefix.NewStore(store, types.TradingRewardAccountPendingPointsPrefix)
@@ -129,8 +115,6 @@ func (k *Keeper) IterateAccountCampaignTradingRewardPendingPoints(
 
 // GetAllAccountCampaignTradingRewardPendingPointsForPool gets the trading reward points for all accounts
 func (k *Keeper) GetAllAccountCampaignTradingRewardPendingPointsForPool(ctx sdk.Context, pendingPoolStartTimestamp int64) (accountPoints []*types.TradingRewardCampaignAccountPoints) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountPoints = make([]*types.TradingRewardCampaignAccountPoints, 0)
 
 	appendPoints := func(points *types.TradingRewardCampaignAccountPoints) (stop bool) {
@@ -148,8 +132,6 @@ func (k *Keeper) IterateAccountCampaignTradingRewardPendingPointsForPool(
 	pendingPoolStartTimestamp int64,
 	process func(*types.TradingRewardCampaignAccountPoints) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	pointsStore := prefix.NewStore(store, types.GetTradingRewardAccountPendingPointsPrefix(pendingPoolStartTimestamp))
@@ -174,8 +156,6 @@ func (k *Keeper) IterateAccountCampaignTradingRewardPendingPointsForPool(
 
 // GetAllAccountTradingRewardPendingPointsForPool gets the trading reward points for all accounts
 func (k *Keeper) GetAllAccountTradingRewardPendingPointsForPool(ctx sdk.Context, pendingPoolStartTimestamp int64) (accountPoints []*types.TradingRewardAccountPoints) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountPoints = make([]*types.TradingRewardAccountPoints, 0)
 
 	appendPoints := func(points *types.TradingRewardAccountPoints) (stop bool) {
@@ -189,8 +169,6 @@ func (k *Keeper) GetAllAccountTradingRewardPendingPointsForPool(ctx sdk.Context,
 
 // GetAllAccountCampaignTradingRewardPendingPointsWithTotalPointsForPool gets the trading reward points for all accounts
 func (k *Keeper) GetAllAccountCampaignTradingRewardPendingPointsWithTotalPointsForPool(ctx sdk.Context, pendingPoolStartTimestamp int64) (accountPoints []*types.TradingRewardAccountPoints, totalPoints sdk.Dec) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	accountPoints = make([]*types.TradingRewardAccountPoints, 0)
 	totalPoints = sdk.ZeroDec()
 
@@ -210,8 +188,6 @@ func (k *Keeper) IterateAccountTradingRewardPendingPointsForPool(
 	pendingPoolStartTimestamp int64,
 	process func(*types.TradingRewardAccountPoints) (stop bool),
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 
 	pointsStore := prefix.NewStore(store, types.GetTradingRewardAccountPendingPointsPrefix(pendingPoolStartTimestamp))
@@ -239,8 +215,6 @@ func (k *Keeper) GetTotalTradingRewardPendingPoints(
 	ctx sdk.Context,
 	pendingPoolStartTimestamp int64,
 ) sdk.Dec {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetTradingRewardTotalPendingPointsKey(pendingPoolStartTimestamp))
 	if bz == nil {
@@ -255,8 +229,6 @@ func (k *Keeper) IncrementTotalTradingRewardPendingPoints(
 	points sdk.Dec,
 	pendingPoolStartTimestamp int64,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	currPoints := k.GetTotalTradingRewardPendingPoints(ctx, pendingPoolStartTimestamp)
 	newPoints := currPoints.Add(points)
 	k.SetTotalTradingRewardPendingPoints(ctx, newPoints, pendingPoolStartTimestamp)
@@ -268,8 +240,6 @@ func (k *Keeper) SetTotalTradingRewardPendingPoints(
 	points sdk.Dec,
 	pendingPoolStartTimestamp int64,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	bz := types.DecToDecBytes(points)
 	store.Set(types.GetTradingRewardTotalPendingPointsKey(pendingPoolStartTimestamp), bz)
@@ -280,8 +250,6 @@ func (k *Keeper) DeleteTotalTradingRewardPendingPoints(
 	ctx sdk.Context,
 	pendingPoolStartTimestamp int64,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	store := k.getStore(ctx)
 	store.Delete(types.GetTradingRewardTotalPendingPointsKey(pendingPoolStartTimestamp))
 }

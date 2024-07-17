@@ -13,8 +13,6 @@ func (k *Keeper) ExecuteSpotLimitOrderMatching(
 	matchedMarketDirection *types.MatchedMarketDirection,
 	stakingInfo *FeeDiscountStakingInfo,
 ) *SpotBatchExecutionData {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	marketID := matchedMarketDirection.MarketId
 	market := k.GetSpotMarket(ctx, marketID, true)
 	if market == nil {
@@ -124,8 +122,6 @@ func (k *Keeper) GetSpotLimitMatchingBatchExecutionData(
 }
 
 func (k *Keeper) PersistSpotMatchingExecution(ctx sdk.Context, batchSpotMatchingExecutionData []*SpotBatchExecutionData, spotVwapData SpotVwapInfo, tradingRewardPoints types.TradingRewardPoints) types.TradingRewardPoints {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	// Persist Spot Matching execution data
 	for batchIdx := range batchSpotMatchingExecutionData {
 		execution := batchSpotMatchingExecutionData[batchIdx]

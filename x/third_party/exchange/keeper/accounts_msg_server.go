@@ -32,8 +32,6 @@ func (k AccountsMsgServer) BatchUpdateOrders(
 	goCtx context.Context,
 	msg *types.MsgBatchUpdateOrders,
 ) (*types.MsgBatchUpdateOrdersResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	sender, _ := sdk.AccAddressFromBech32(msg.Sender)
 
@@ -57,8 +55,6 @@ func (k AccountsMsgServer) Deposit(
 	goCtx context.Context,
 	msg *types.MsgDeposit,
 ) (*types.MsgDepositResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if err := k.executeDeposit(ctx, msg); err != nil {
@@ -72,8 +68,6 @@ func (k AccountsMsgServer) Withdraw(
 	goCtx context.Context,
 	msg *types.MsgWithdraw,
 ) (*types.MsgWithdrawResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if err := k.ExecuteWithdraw(ctx, msg); err != nil {
@@ -86,8 +80,6 @@ func (k AccountsMsgServer) SubaccountTransfer(
 	goCtx context.Context,
 	msg *types.MsgSubaccountTransfer,
 ) (*types.MsgSubaccountTransferResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	sender := sdk.MustAccAddressFromBech32(msg.Sender)
@@ -120,8 +112,6 @@ func (k AccountsMsgServer) ExternalTransfer(
 	goCtx context.Context,
 	msg *types.MsgExternalTransfer,
 ) (*types.MsgExternalTransferResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	sender := sdk.MustAccAddressFromBech32(msg.Sender)
@@ -162,8 +152,6 @@ func (k AccountsMsgServer) RewardsOptOut(
 	goCtx context.Context,
 	msg *types.MsgRewardsOptOut,
 ) (*types.MsgRewardsOptOutResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	account, _ := sdk.AccAddressFromBech32(msg.Sender)
@@ -182,7 +170,6 @@ func (k AccountsMsgServer) ReclaimLockedFunds(
 	goCtx context.Context,
 	msg *types.MsgReclaimLockedFunds,
 ) (*types.MsgReclaimLockedFundsResponse, error) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if err := msg.ValidateBasic(); err != nil {

@@ -19,8 +19,6 @@ func (k *Keeper) setCid(
 	isBuy bool,
 	orderHash common.Hash,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if cid == "" {
 		return
 	}
@@ -43,8 +41,6 @@ func (k *Keeper) existsCid(
 	subaccountID common.Hash,
 	cid string,
 ) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	key := types.GetSubaccountCidKey(subaccountID, cid)
 
 	tStore := k.getTransientStore(ctx)
@@ -62,8 +58,6 @@ func (k *Keeper) deleteCid(
 	subaccountID common.Hash,
 	cid string,
 ) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	if cid == "" {
 		return
 	}
@@ -86,8 +80,6 @@ func (k *Keeper) getOrderHashByCid(
 	subaccountID common.Hash,
 	cid string,
 ) (exists bool, orderHash common.Hash) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	var store storetypes.KVStore
 
 	if isTransient {

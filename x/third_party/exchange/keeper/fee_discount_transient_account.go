@@ -9,8 +9,6 @@ import (
 )
 
 func (k *Keeper) HasFeeRewardTransientActiveAccountIndicator(ctx sdk.Context, account sdk.AccAddress) bool {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	// use transient store key
 	tStore := k.getTransientStore(ctx)
 
@@ -19,8 +17,6 @@ func (k *Keeper) HasFeeRewardTransientActiveAccountIndicator(ctx sdk.Context, ac
 }
 
 func (k *Keeper) setFeeRewardTransientActiveAccountIndicator(ctx sdk.Context, account sdk.AccAddress) {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	// use transient store key
 	tStore := k.getTransientStore(ctx)
 
@@ -33,8 +29,6 @@ func (k *Keeper) setFeeRewardTransientActiveAccountIndicator(ctx sdk.Context, ac
 func (k *Keeper) GetAllAccountsActivelyTradingQualifiedMarketsInBlockForFeeDiscounts(
 	ctx sdk.Context,
 ) []sdk.AccAddress {
-	defer metrics.ReportFuncCallAndTiming(k.svcTags)()
-
 	tStore := k.getTransientStore(ctx)
 	accountStore := prefix.NewStore(tStore, types.FeeDiscountAccountOrderIndicatorPrefix)
 
