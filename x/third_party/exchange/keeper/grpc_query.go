@@ -7,8 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -57,7 +55,6 @@ func (k *Keeper) SubaccountDeposits(c context.Context, req *types.QuerySubaccoun
 	if subaccount := req.GetSubaccount(); subaccount != nil {
 		subaccountId, err := subaccount.GetSubaccountID()
 		if err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 
@@ -289,7 +286,6 @@ func (k *Keeper) SpotMarket(c context.Context, req *types.QuerySpotMarketRequest
 	marketID := common.HexToHash(req.MarketId)
 	market := k.GetSpotMarket(ctx, marketID, true)
 	if market == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrSpotMarketNotFound
 	}
 
@@ -336,7 +332,6 @@ func (k *Keeper) FullSpotMarket(c context.Context, req *types.QueryFullSpotMarke
 	marketID := common.HexToHash(req.MarketId)
 	market := k.GetSpotMarket(ctx, marketID, true)
 	if market == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrSpotMarketNotFound
 	}
 
@@ -451,7 +446,6 @@ func (k *Keeper) AccountAddressSpotOrders(c context.Context, req *types.QueryAcc
 	marketID := common.HexToHash(req.MarketId)
 	accountAddress, err := sdk.AccAddressFromBech32(req.AccountAddress)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrInvalidAddress
 	}
 
@@ -468,14 +462,12 @@ func (k *Keeper) TraderSpotOrdersToCancelUpToAmountRequest(c context.Context, re
 	marketID := common.HexToHash(req.MarketId)
 	market := k.GetSpotMarket(ctx, marketID, true)
 	if market == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrSpotMarketNotFound
 	}
 
 	subaccountID := common.HexToHash(req.SubaccountId)
 
 	if req.Strategy != types.CancellationStrategy_UnspecifiedOrder && (req.ReferencePrice == nil || req.ReferencePrice.IsNil()) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrInvalidPrice
 	}
 
@@ -483,7 +475,6 @@ func (k *Keeper) TraderSpotOrdersToCancelUpToAmountRequest(c context.Context, re
 	ordersToCancel, hasProcessedFullAmount := GetSpotOrdersToCancelUpToAmount(market, traderOrders, req.Strategy, req.ReferencePrice, req.BaseAmount, req.QuoteAmount)
 
 	if !hasProcessedFullAmount {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrTransientOrdersUpToCancelNotSupported
 	}
 
@@ -500,14 +491,12 @@ func (k *Keeper) TraderDerivativeOrdersToCancelUpToAmountRequest(c context.Conte
 	marketID := common.HexToHash(req.MarketId)
 	market := k.GetDerivativeMarket(ctx, marketID, true)
 	if market == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrDerivativeMarketNotFound
 	}
 
 	subaccountID := common.HexToHash(req.SubaccountId)
 
 	if req.Strategy != types.CancellationStrategy_UnspecifiedOrder && (req.ReferencePrice == nil || req.ReferencePrice.IsNil()) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrInvalidPrice
 	}
 
@@ -515,7 +504,6 @@ func (k *Keeper) TraderDerivativeOrdersToCancelUpToAmountRequest(c context.Conte
 	ordersToCancel, hasProcessedFullAmount := GetDerivativeOrdersToCancelUpToAmount(market, traderOrders, req.Strategy, req.ReferencePrice, req.QuoteAmount)
 
 	if !hasProcessedFullAmount {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrTransientOrdersUpToCancelNotSupported
 	}
 
@@ -545,7 +533,6 @@ func (k *Keeper) SpotMidPriceAndTOB(c context.Context, req *types.QuerySpotMidPr
 	marketID := common.HexToHash(req.MarketId)
 	market := k.GetSpotMarket(ctx, marketID, true)
 	if market == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrSpotMarketNotFound
 	}
 
@@ -612,7 +599,6 @@ func (k *Keeper) AccountAddressDerivativeOrders(c context.Context, req *types.Qu
 	marketID := common.HexToHash(req.MarketId)
 	accountAddress, err := sdk.AccAddressFromBech32(req.AccountAddress)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrInvalidAddress
 	}
 
@@ -690,7 +676,6 @@ func (k *Keeper) DerivativeMarket(c context.Context, req *types.QueryDerivativeM
 	marketID := common.HexToHash(req.MarketId)
 	market := k.GetFullDerivativeMarket(ctx, marketID, true)
 	if market == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrDerivativeMarketNotFound
 	}
 
@@ -1116,13 +1101,13 @@ func (k *Keeper) FeeDiscountTierStatistics(c context.Context, req *types.QueryFe
 // func (k *Keeper) MitoVaultInfo(c context.Context, req *types.MitoVaultInfosRequest) (*types.MitoVaultInfosResponse, error) {
 // 	masterWasmContract, err := sdk.AccAddressFromBech32(req.ContractAddress)
 // 	if err != nil {
-// 		metrics.ReportFuncError(k.svcTags)
+//
 // 		return nil, err
 // 	}
 
 // 	totalLPTokenSupply, err := k.QueryTotalSupply(ctx, masterWasmContract, poolSubaccountId)
 // 	if err != nil {
-// 		metrics.ReportFuncError(k.svcTags)
+//
 // 		return nil, err
 // 	}
 
@@ -1136,7 +1121,7 @@ func (k *Keeper) FeeDiscountTierStatistics(c context.Context, req *types.QueryFe
 // 		spotMarket := k.GetSpotMarketByID(ctx, marketId)
 
 // 		if spotMarket == nil {
-// 			metrics.ReportFuncError(k.svcTags)
+//
 // 			return nil, sdkerrors.Wrap(types.ErrMarketInvalid, marketId.String())
 // 		}
 
@@ -1168,47 +1153,47 @@ func (k *Keeper) FeeDiscountTierStatistics(c context.Context, req *types.QueryFe
 // return res, nil
 // }
 
-func (k *Keeper) MitoVaultInfos(c context.Context, req *types.MitoVaultInfosRequest) (*types.MitoVaultInfosResponse, error) {
-	ctx := sdk.UnwrapSDKContext(c)
-
-	var (
-		derivativeContractAddresses []string
-		masterContractAddresses     []string
-		cw20ContractAddresses       []string
-		spotContractAddresses       []string
-	)
-
-	// TODO fix me, how to find out code ids?
-	derivativeCodeID := uint64(2)
-	masterCodeID := uint64(3)
-	cw20CodeID := uint64(4)
-	spotCodeID := uint64(5)
-
-	k.wasmViewKeeper.IterateContractsByCode(ctx, derivativeCodeID, func(addr sdk.AccAddress) bool {
-		derivativeContractAddresses = append(derivativeContractAddresses, addr.String())
-		return false
-	})
-	k.wasmViewKeeper.IterateContractsByCode(ctx, masterCodeID, func(addr sdk.AccAddress) bool {
-		masterContractAddresses = append(masterContractAddresses, addr.String())
-		return false
-	})
-	k.wasmViewKeeper.IterateContractsByCode(ctx, cw20CodeID, func(addr sdk.AccAddress) bool {
-		cw20ContractAddresses = append(cw20ContractAddresses, addr.String())
-		return false
-	})
-	k.wasmViewKeeper.IterateContractsByCode(ctx, spotCodeID, func(addr sdk.AccAddress) bool {
-		spotContractAddresses = append(spotContractAddresses, addr.String())
-		return false
-	})
-
-	res := &types.MitoVaultInfosResponse{
-		MasterAddresses:     masterContractAddresses,
-		DerivativeAddresses: derivativeContractAddresses,
-		SpotAddresses:       spotContractAddresses,
-		Cw20Addresses:       cw20ContractAddresses,
-	}
-	return res, nil
-}
+//func (k *Keeper) MitoVaultInfos(c context.Context, req *types.MitoVaultInfosRequest) (*types.MitoVaultInfosResponse, error) {
+//	ctx := sdk.UnwrapSDKContext(c)
+//
+//	var (
+//		derivativeContractAddresses []string
+//		masterContractAddresses     []string
+//		cw20ContractAddresses       []string
+//		spotContractAddresses       []string
+//	)
+//
+//	// TODO fix me, how to find out code ids?
+//	derivativeCodeID := uint64(2)
+//	masterCodeID := uint64(3)
+//	cw20CodeID := uint64(4)
+//	spotCodeID := uint64(5)
+//
+//	k.wasmViewKeeper.IterateContractsByCode(ctx, derivativeCodeID, func(addr sdk.AccAddress) bool {
+//		derivativeContractAddresses = append(derivativeContractAddresses, addr.String())
+//		return false
+//	})
+//	k.wasmViewKeeper.IterateContractsByCode(ctx, masterCodeID, func(addr sdk.AccAddress) bool {
+//		masterContractAddresses = append(masterContractAddresses, addr.String())
+//		return false
+//	})
+//	k.wasmViewKeeper.IterateContractsByCode(ctx, cw20CodeID, func(addr sdk.AccAddress) bool {
+//		cw20ContractAddresses = append(cw20ContractAddresses, addr.String())
+//		return false
+//	})
+//	k.wasmViewKeeper.IterateContractsByCode(ctx, spotCodeID, func(addr sdk.AccAddress) bool {
+//		spotContractAddresses = append(spotContractAddresses, addr.String())
+//		return false
+//	})
+//
+//	res := &types.MitoVaultInfosResponse{
+//		MasterAddresses:     masterContractAddresses,
+//		DerivativeAddresses: derivativeContractAddresses,
+//		SpotAddresses:       spotContractAddresses,
+//		Cw20Addresses:       cw20ContractAddresses,
+//	}
+//	return res, nil
+//}
 
 func (k *Keeper) HistoricalTradeRecords(c context.Context, req *types.QueryHistoricalTradeRecordsRequest) (*types.QueryHistoricalTradeRecordsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
@@ -1239,7 +1224,6 @@ func (k *Keeper) QueryMarketIDFromVault(c context.Context, req *types.QueryMarke
 	ctx := sdk.UnwrapSDKContext(c)
 	marketID, err := k.QueryMarketID(ctx, req.VaultAddress)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -1291,9 +1275,6 @@ func (k *Keeper) TraderDerivativeConditionalOrders(c context.Context, req *types
 }
 
 func (k *Keeper) MarketAtomicExecutionFeeMultiplier(c context.Context, req *types.QueryMarketAtomicExecutionFeeMultiplierRequest) (*types.QueryMarketAtomicExecutionFeeMultiplierResponse, error) {
-	metrics.ReportFuncCall(k.svcTags)
-	defer metrics.ReportFuncTiming(k.svcTags)()
-
 	ctx := sdk.UnwrapSDKContext(c)
 	marketID := common.HexToHash(req.MarketId)
 	marketType, err := k.GetMarketType(ctx, marketID, true)

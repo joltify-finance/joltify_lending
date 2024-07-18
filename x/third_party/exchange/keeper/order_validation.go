@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
@@ -50,13 +50,11 @@ func (k *Keeper) ensureValidDerivativeOrder(
 
 	// enforce that post only limit orders don't cross the top of the book
 	if (derivativeOrder.OrderType.IsPostOnly() || isPostOnlyMode) && doesOrderCrossTopOfBook {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, types.ErrExceedsTopOfBookPrice
 	}
 
 	// enforce that market orders cross TOB
 	if !derivativeOrder.IsConditional() && isMarketOrder && !doesOrderCrossTopOfBook {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, types.ErrSlippageExceedsWorstPrice
 	}
 
@@ -90,7 +88,6 @@ func (k *Keeper) ensureValidDerivativeOrder(
 	// only limit number of conditional (both market & limit) & regular limit orders
 	shouldRestrictOrderSideCount := derivativeOrder.IsConditional() || !isMarketOrder
 	if shouldRestrictOrderSideCount && metadata.GetOrderSideCount() >= k.GetMaxDerivativeOrderSideCount(ctx) {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, types.ErrExceedsOrderSideCount
 	}
 
@@ -123,7 +120,6 @@ func (k *Keeper) ensureValidDerivativeOrder(
 			// inner IF is checking that we have some margin locked on the opposite side
 			oppositeMetadata := k.GetSubaccountOrderbookMetadata(ctx, marketID, subaccountID, !derivativeOrder.IsBuy())
 			if oppositeMetadata.VanillaLimitOrderCount == 0 && oppositeMetadata.VanillaConditionalOrderCount == 0 {
-				metrics.ReportFuncError(k.svcTags)
 				return orderHash, errors.Wrapf(types.ErrNoMarginLocked, "Should have a position or open vanilla orders before posting conditional reduce-only orders")
 			}
 		}
@@ -150,7 +146,6 @@ func (k *Keeper) ensureValidDerivativeOrder(
 
 		if derivativeOrder.IsReduceOnly() {
 			if position == nil {
-				metrics.ReportFuncError(k.svcTags)
 				return orderHash, errors.Wrapf(types.ErrPositionNotFound, "Position for marketID %s subaccountID %s not found", marketID, subaccountID)
 			}
 
@@ -357,7 +352,7 @@ func (k *Keeper) ensureValidAccessLevelForAtomicExecution(
 		return types.ErrInvalidAccessLevel
 	case types.AtomicMarketOrderAccessLevel_SmartContractsOnly:
 		if !k.wasmViewKeeper.HasContractInfo(ctx, sender) { // sender is not a smart-contract
-			metrics.ReportFuncError(k.svcTags)
+
 			return types.ErrInvalidAccessLevel
 		}
 	}

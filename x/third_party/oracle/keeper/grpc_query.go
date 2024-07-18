@@ -205,7 +205,6 @@ func (k *Keeper) OraclePrice(c context.Context, req *types.QueryOraclePriceReque
 	pricePairState := k.GetPricePairState(ctx, req.OracleType, req.Base, req.Quote)
 
 	if pricePairState == nil || pricePairState.PairPrice.IsNil() {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidOracleRequest, "type %s base %s quote %s", req.OracleType.String(), req.Base, req.Quote)
 	}
 

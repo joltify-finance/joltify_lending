@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -67,7 +67,6 @@ func (k *Keeper) CancelAllConditionalDerivativeOrdersBySubaccountIDAndMarket(ctx
 			continue
 		}
 		if err := k.CancelConditionalDerivativeMarketOrder(ctx, market, subaccountID, &isTriggerPriceHigher, hash); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		}
 	}
@@ -77,7 +76,6 @@ func (k *Keeper) CancelAllConditionalDerivativeOrdersBySubaccountIDAndMarket(ctx
 			continue
 		}
 		if err := k.CancelConditionalDerivativeMarketOrder(ctx, market, subaccountID, &isTriggerPriceHigher, hash); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		}
 	}
@@ -87,7 +85,6 @@ func (k *Keeper) CancelAllConditionalDerivativeOrdersBySubaccountIDAndMarket(ctx
 			continue
 		}
 		if err := k.CancelConditionalDerivativeLimitOrder(ctx, market, subaccountID, &isTriggerPriceHigher, hash); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		}
 	}
@@ -97,7 +94,6 @@ func (k *Keeper) CancelAllConditionalDerivativeOrdersBySubaccountIDAndMarket(ctx
 			continue
 		}
 		if err := k.CancelConditionalDerivativeLimitOrder(ctx, market, subaccountID, &isTriggerPriceHigher, hash); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		}
 	}
@@ -134,7 +130,7 @@ func (k *Keeper) CancelConditionalDerivativeMarketOrder(
 	order, direction := k.GetConditionalDerivativeMarketOrderBySubaccountIDAndHash(ctx, marketID, isTriggerPriceHigher, subaccountID, orderHash)
 	if order == nil {
 		k.Logger(ctx).Debug("Conditional Derivative Market Order doesn't exist to cancel", "marketId", marketID, "subaccountID", subaccountID, "orderHash", orderHash.Hex())
-		metrics.ReportFuncError(k.svcTags)
+
 		return errors.Wrap(types.ErrOrderDoesntExist, "Conditional Derivative Market Order doesn't exist")
 	}
 
@@ -178,7 +174,7 @@ func (k *Keeper) CancelConditionalDerivativeLimitOrder(
 	order, direction := k.GetConditionalDerivativeLimitOrderBySubaccountIDAndHash(ctx, marketID, isTriggerPriceHigher, subaccountID, orderHash)
 	if order == nil {
 		k.Logger(ctx).Debug("Conditional Derivative Limit Order doesn't exist to cancel", "marketId", marketID, "subaccountID", subaccountID, "orderHash", orderHash)
-		metrics.ReportFuncError(k.svcTags)
+
 		return errors.Wrap(types.ErrOrderDoesntExist, "Conditional Derivative Limit Order doesn't exist")
 	}
 

@@ -43,7 +43,7 @@ func (k Keeper) RequestBandIBCRates(goCtx context.Context, msg *types.MsgRequest
 
 	if err := k.RequestBandIBCOraclePrices(ctx, bandIBCOracleRequest); err != nil {
 		k.Logger(ctx).Error(err.Error())
-		metrics.ReportFuncError(k.svcTags)
+
 		return nil, err
 	}
 

@@ -3,7 +3,6 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/InjectiveLabs/metrics"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 

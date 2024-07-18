@@ -9,7 +9,6 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 
-	"github.com/InjectiveLabs/metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/ethereum/go-ethereum/common"

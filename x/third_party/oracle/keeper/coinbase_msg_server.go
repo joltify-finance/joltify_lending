@@ -31,13 +31,11 @@ func (k CoinbaseMsgServer) RelayCoinbaseMessages(c context.Context, msg *types.M
 	for idx := range msg.Messages {
 		err := types.ValidateCoinbaseSignature(msg.Messages[idx], msg.Signatures[idx])
 		if err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 
 		newCoinbasePriceState, err := types.ParseCoinbaseMessage(msg.Messages[idx])
 		if err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 
@@ -57,7 +55,6 @@ func (k CoinbaseMsgServer) RelayCoinbaseMessages(c context.Context, msg *types.M
 		}
 
 		if err = k.SetCoinbasePriceState(ctx, newCoinbasePriceState); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 	}

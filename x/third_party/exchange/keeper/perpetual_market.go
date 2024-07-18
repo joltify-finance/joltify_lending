@@ -6,8 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
 	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
@@ -26,33 +24,28 @@ func (k *Keeper) PerpetualMarketLaunch(
 	}
 
 	if !k.IsDenomValid(ctx, quoteDenom) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, errors.Wrapf(types.ErrInvalidQuoteDenom, "denom %s does not exist in supply", quoteDenom)
 	}
 
 	marketID := types.NewPerpetualMarketID(ticker, quoteDenom, oracleBase, oracleQuote, oracleType)
 
 	if k.HasDerivativeMarket(ctx, marketID, true) || k.HasDerivativeMarket(ctx, marketID, false) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, errors.Wrapf(types.ErrPerpetualMarketExists, "ticker %s quoteDenom %s", ticker, quoteDenom)
 	}
 
 	if oracleType == oracletypes.OracleType_BandIBC {
 		nonIBCBandMarketID := types.NewPerpetualMarketID(ticker, quoteDenom, oracleBase, oracleQuote, oracletypes.OracleType_Band)
 		if k.HasDerivativeMarket(ctx, nonIBCBandMarketID, true) || k.HasDerivativeMarket(ctx, nonIBCBandMarketID, false) {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, nil, errors.Wrapf(types.ErrPerpetualMarketExists, "marketID %s with a promoted Band IBC oracle already exists ticker %s quoteDenom %s", nonIBCBandMarketID.Hex(), ticker, quoteDenom)
 		}
 	}
 
 	_, err := k.GetDerivativeMarketPrice(ctx, oracleBase, oracleQuote, oracleScaleFactor, oracleType)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, err
 	}
 
 	if !k.insuranceKeeper.HasInsuranceFund(ctx, marketID) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, errors.Wrapf(insurancetypes.ErrInsuranceFundNotFound, "ticker %s marketID %s", ticker, marketID.Hex())
 	}
 

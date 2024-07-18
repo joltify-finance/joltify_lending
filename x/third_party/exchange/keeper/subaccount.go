@@ -11,8 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/go-test/deep"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 

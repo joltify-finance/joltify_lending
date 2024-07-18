@@ -8,7 +8,6 @@ import (
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
 
 	"cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
@@ -23,18 +22,15 @@ func (k *Keeper) moveCoinsIntoInsuranceFund(
 	marketID := market.MarketID()
 
 	if !k.insuranceKeeper.HasInsuranceFund(ctx, marketID) {
-		metrics.ReportFuncError(k.svcTags)
 		return insurancetypes.ErrInsuranceFundNotFound
 	}
 
 	if err := k.insuranceKeeper.DepositIntoInsuranceFund(ctx, marketID, insuranceFundPaymentAmount); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return err
 	}
 
 	coinAmount := sdk.NewCoins(sdk.NewCoin(market.GetQuoteDenom(), insuranceFundPaymentAmount))
 	if err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, insurancetypes.ModuleName, coinAmount); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return err
 	}
 
@@ -52,7 +48,7 @@ func (k DerivativesMsgServer) handlePositiveLiquidationPayout(
 
 	insuranceFundOrAuctionPaymentAmount := surplusAmount.Mul(sdk.OneDec().Sub(liquidatorRewardShareRate)).TruncateInt()
 
-	liquidatorPayout := surplusAmount.Sub(insuranceFundOrAuctionPaymentAmount.ToDec())
+	liquidatorPayout := surplusAmount.Sub(sdk.NewDecFromInt(insuranceFundOrAuctionPaymentAmount))
 
 	if liquidatorPayout.IsPositive() {
 		k.IncrementDepositOrSendToBank(ctx, types.SdkAddressToSubaccountID(liquidatorAddr), market.QuoteDenom, liquidatorPayout)
@@ -82,7 +78,6 @@ func (k *Keeper) PayDeficitFromInsuranceFund(
 	insuranceFund := k.insuranceKeeper.GetInsuranceFund(ctx, marketID)
 
 	if insuranceFund == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return absoluteDeficitAmount, insurancetypes.ErrInsuranceFundNotFound
 	}
 
@@ -93,11 +88,10 @@ func (k *Keeper) PayDeficitFromInsuranceFund(
 	}
 
 	if err := k.insuranceKeeper.WithdrawFromInsuranceFund(ctx, marketID, withdrawalAmount); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return absoluteDeficitAmount, err
 	}
 
-	remainingAbsoluteDeficitAmount = absoluteDeficitAmount.Sub(withdrawalAmount.ToDec())
+	remainingAbsoluteDeficitAmount = absoluteDeficitAmount.Sub(sdk.NewDecFromInt(withdrawalAmount))
 
 	return remainingAbsoluteDeficitAmount, nil
 }
@@ -161,7 +155,6 @@ func (k DerivativesMsgServer) handleNegativeLiquidationPayout(
 	k.SetDeposit(ctx, positionSubaccountID, market.QuoteDenom, deposits)
 
 	if absoluteDeficitAmount, err = k.PayDeficitFromInsuranceFund(ctx, marketID, absoluteDeficitAmount); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return shouldSettleMarket, err
 	}
 
@@ -201,13 +194,12 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 	market, markPrice := k.GetDerivativeMarketWithMarkPrice(cacheCtx, marketID, true)
 	if market == nil {
 		k.Logger(ctx).Error("active derivative market doesn't exist", "marketID", marketID.Hex())
-		metrics.ReportFuncError(k.svcTags)
+
 		return nil, errors.Wrapf(types.ErrDerivativeMarketNotFound, "active derivative market for marketID %s not found", marketID.Hex())
 	}
 
 	position := k.GetPosition(cacheCtx, marketID, positionSubaccountID)
 	if position == nil || position.Quantity.IsZero() {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrPositionNotFound, "subaccountID %s marketID %s", positionSubaccountID.Hex(), marketID.Hex())
 	}
 
@@ -220,14 +212,12 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 	shouldLiquidate := (position.IsLong && markPrice.LTE(liquidationPrice)) || (position.IsShort() && markPrice.GTE(liquidationPrice))
 
 	if !shouldLiquidate {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrPositionNotLiquidable, "%s position liquidation price is %s but mark price is %s", position.GetDirectionString(), liquidationPrice.String(), markPrice.String())
 	}
 
 	// Step 1a: Cancel all reduce-only limit orders created by the position holder in the given market
 	k.CancelAllTransientDerivativeLimitOrdersBySubaccountID(cacheCtx, market, positionSubaccountID)
 	if err := k.CancelAllRestingDerivativeLimitOrdersForSubaccount(cacheCtx, market, positionSubaccountID, true, true); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -248,7 +238,6 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 	subaccountNonce := k.IncrementSubaccountTradeNonce(cacheCtx, positionSubaccountID)
 	orderHash, err := liquidationMarketOrder.ComputeOrderHash(subaccountNonce.Nonce, marketID.Hex())
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -289,7 +278,6 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 
 		// for emergency settling markets, we allow an invalid order, all order state changes are reverted later anyways
 		if err != nil && !isEmergencySettlingMarket {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 
@@ -302,7 +290,6 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 	fundsBeforeLiquidation := k.GetSpendableFunds(cacheCtx, positionSubaccountID, market.QuoteDenom)
 
 	if _, err := k.ExecuteDerivativeMarketOrderImmediately(cacheCtx, market, markPrice, funding, liquidationMarketOrder, positionStates, true); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -349,7 +336,6 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 			positionSubaccountID,
 			lostFundsFromAvailableDuringPayout,
 		); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 	} else if payout.IsPositive() {
@@ -361,7 +347,6 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 			liquidatorAddr,
 			positionSubaccountID,
 		); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 	}
@@ -383,7 +368,6 @@ func (k DerivativesMsgServer) liquidatePosition(goCtx context.Context, msg *type
 
 	if shouldSettleMarket {
 		if err = k.pauseMarketAndScheduleForSettlement(ctx, market); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, err
 		}
 	} else {
@@ -399,7 +383,6 @@ func (k DerivativesMsgServer) pauseMarketAndScheduleForSettlement(
 ) error {
 	settlementPrice, err := k.GetDerivativeMarketPrice(ctx, market.OracleBase, market.OracleQuote, market.OracleScaleFactor, market.OracleType)
 	if err != nil || settlementPrice.IsZero() || settlementPrice.IsNegative() {
-		metrics.ReportFuncError(k.svcTags)
 		return err
 	}
 

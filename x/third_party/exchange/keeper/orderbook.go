@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"sort"
 
-	"github.com/InjectiveLabs/metrics"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,7 +20,6 @@ func (k *Keeper) GetOrderbookPriceLevelQuantity(
 	isSpot bool,
 	price sdk.Dec,
 ) sdk.Dec {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -59,7 +57,6 @@ func (k *Keeper) SetOrderbookPriceLevelQuantity(
 	price,
 	quantity sdk.Dec,
 ) {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -92,7 +89,6 @@ func (k *Keeper) IncrementOrderbookPriceLevelQuantity(
 	price,
 	quantity sdk.Dec,
 ) {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -115,7 +111,6 @@ func (k *Keeper) DecrementOrderbookPriceLevelQuantity(
 	price,
 	quantity sdk.Dec,
 ) {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -134,7 +129,6 @@ func (k *Keeper) GetAllTransientOrderbookUpdates(
 	ctx sdk.Context,
 	isSpot bool,
 ) []*types.Orderbook {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -169,7 +163,6 @@ func (k *Keeper) IterateTransientOrderbookPriceLevels(
 	isSpot bool,
 	process func(marketID common.Hash, isBuy bool, priceLevel *types.Level) (stop bool),
 ) {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -207,7 +200,6 @@ func (k *Keeper) GetOrderbookPriceLevels(
 	limitCumulativeNotional *sdk.Dec, // optionally retrieve only top positions up to this cumulative notional value (useful when calc. worst price for BUY)
 	limitCumulativeQuantity *sdk.Dec, // optionally retrieve only top positions up to this cumulative quantity value (useful when calc. worst price for SELL)
 ) []*types.Level {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -304,7 +296,6 @@ func (k *Keeper) IncrementOrderbookSequence(
 	ctx sdk.Context,
 	marketID common.Hash,
 ) uint64 {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 
@@ -319,7 +310,6 @@ func (k *Keeper) IncrementOrderbookSequence(
 func (k *Keeper) IncrementSequenceAndEmitAllTransientOrderbookUpdates(
 	ctx sdk.Context,
 ) {
-	metrics.ReportFuncCall(k.svcTags)
 	doneFn := metrics.ReportFuncTiming(k.svcTags)
 	defer doneFn()
 

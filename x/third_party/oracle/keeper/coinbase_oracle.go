@@ -77,7 +77,6 @@ func (k *Keeper) SetCoinbasePriceState(ctx sdk.Context, priceData *types.Coinbas
 		if lastPriceData.Timestamp == priceData.Timestamp {
 			return nil
 		} else if lastPriceData.Timestamp > priceData.Timestamp {
-			metrics.ReportFuncError(k.svcTags)
 			return errors.Wrapf(types.ErrBadCoinbaseMessageTimestamp, "existing price data timestamp is %d but got %d", lastPriceData.Timestamp, priceData.Timestamp)
 		}
 	}

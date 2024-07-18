@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	sdkerrors "cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
@@ -242,7 +241,7 @@ func (k *Keeper) ExecuteBatchUpdateOrders(
 			price, err := k.GetDerivativeMarketPrice(ctx, market.OracleBase, market.OracleQuote, market.OracleScaleFactor, market.OracleType)
 			if err != nil {
 				k.Logger(ctx).Debug("failed to create derivative limit order for market with no mark price", "marketID", marketID.Hex())
-				metrics.ReportFuncError(k.svcTags)
+
 				continue
 			}
 			markPrices[marketID] = *price

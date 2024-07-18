@@ -9,8 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -30,7 +28,6 @@ func (k *Keeper) CancelAllRestingDerivativeLimitOrdersForSubaccount(
 	for _, hash := range restingBuyOrderHashes {
 		isBuy := true
 		if err := k.CancelRestingDerivativeLimitOrder(ctx, market, subaccountID, &isBuy, hash, shouldCancelReduceOnly, shouldCancelVanilla); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		}
 	}
@@ -38,7 +35,6 @@ func (k *Keeper) CancelAllRestingDerivativeLimitOrdersForSubaccount(
 	for _, hash := range restingSellOrderHashes {
 		isBuy := false
 		if err := k.CancelRestingDerivativeLimitOrder(ctx, market, subaccountID, &isBuy, hash, shouldCancelReduceOnly, shouldCancelVanilla); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		}
 	}
@@ -69,7 +65,6 @@ func (k *Keeper) CancelRestingDerivativeLimitOrdersForSubaccountUpToBalance(
 		isBuy := true
 		order := k.GetDerivativeLimitOrderBySubaccountIDAndHash(ctx, marketID, &isBuy, subaccountID, hash)
 		if err := k.CancelRestingDerivativeLimitOrder(ctx, market, subaccountID, &isBuy, hash, false, true); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		} else {
 			notional := order.OrderInfo.Price.Mul(order.OrderInfo.Quantity)
@@ -87,7 +82,6 @@ func (k *Keeper) CancelRestingDerivativeLimitOrdersForSubaccountUpToBalance(
 		isBuy := false
 		order := k.GetDerivativeLimitOrderBySubaccountIDAndHash(ctx, marketID, &isBuy, subaccountID, hash)
 		if err := k.CancelRestingDerivativeLimitOrder(ctx, market, subaccountID, &isBuy, hash, false, true); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		} else {
 			notional := order.OrderInfo.Price.Mul(order.OrderInfo.Quantity)
@@ -189,7 +183,7 @@ func (k *Keeper) CancelRestingDerivativeLimitOrder(
 	order := k.GetDerivativeLimitOrderBySubaccountIDAndHash(ctx, marketID, isBuy, subaccountID, orderHash)
 	if order == nil {
 		k.Logger(ctx).Debug("Resting Derivative Limit Order doesn't exist to cancel", "marketId", marketID, "subaccountID", subaccountID, "orderHash", orderHash)
-		metrics.ReportFuncError(k.svcTags)
+
 		return errors.Wrap(types.ErrOrderDoesntExist, "Derivative Limit Order doesn't exist")
 	}
 

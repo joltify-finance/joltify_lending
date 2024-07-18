@@ -34,7 +34,6 @@ func (k BandMsgServer) RelayBandRates(goCtx context.Context, msg *types.MsgRelay
 	relayer, _ := sdk.AccAddressFromBech32(msg.Relayer)
 
 	if !k.IsBandRelayer(ctx, relayer) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrRelayerNotAuthorized
 	}
 

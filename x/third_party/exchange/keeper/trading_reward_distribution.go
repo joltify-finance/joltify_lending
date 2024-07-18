@@ -4,8 +4,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/InjectiveLabs/metrics"
-
 	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
@@ -90,7 +88,7 @@ func (k *Keeper) getAvailableRewardsToPayout(
 		coinsToDistributeFromPool := sdk.NewCoins(sdk.NewCoin(rewardCoin.Denom, totalReward))
 
 		if err := k.DistributionKeeper.DistributeFromFeePool(ctx, coinsToDistributeFromPool, types.TempRewardsSenderAddress); err != nil {
-			metrics.ReportFuncError(k.svcTags)
+
 			k.Logger(ctx).Error(
 				"DistributeFromFeePool failed", "totalCoins: ", coinsToDistributeFromPool.String(), "receiver: ", types.TempRewardsSenderAddress.String(), "err", err.Error(),
 			)
@@ -119,7 +117,7 @@ func (k *Keeper) ProcessTradingRewards(
 
 		if !doesCurrentCampaignExist {
 			// should never happen
-			metrics.ReportFuncError(k.svcTags)
+
 			k.Logger(ctx).Error("Ending the current reward token campaign failed")
 			return
 		}
@@ -177,7 +175,6 @@ func (k *Keeper) DistributeTradingRewards(
 
 	err := k.bankKeeper.SendCoins(ctx, types.TempRewardsSenderAddress, rewardReceiver, rewards)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		k.Logger(ctx).Error("reward token transfer failed", "rewardReceiver", rewardReceiver.String(), "rewards", rewards.String(), "err", err.Error())
 	}
 }

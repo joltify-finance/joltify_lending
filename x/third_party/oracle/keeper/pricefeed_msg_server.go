@@ -35,7 +35,6 @@ func (k PricefeedMsgServer) RelayPriceFeedPrice(goCtx context.Context, msg *type
 	for idx := range msg.Price {
 		base, quote, price := msg.Base[idx], msg.Quote[idx], msg.Price[idx]
 		if !k.IsPriceFeedRelayer(ctx, base, quote, relayer) {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, errors.Wrapf(types.ErrRelayerNotAuthorized, "base %s quote %s relayer %s", base, quote, relayer.String())
 		}
 

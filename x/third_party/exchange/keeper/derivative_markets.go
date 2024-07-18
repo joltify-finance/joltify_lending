@@ -8,11 +8,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 )
 
 // IsDerivativesExchangeEnabled returns true if Derivatives Exchange is enabled
@@ -41,7 +39,6 @@ func (k *Keeper) GetDerivativeMarketPrice(ctx sdk.Context, oracleBase, oracleQuo
 	}
 
 	if price == nil || price.IsNil() {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidOracle, "type %s base %s quote %s", oracleType.String(), oracleBase, oracleQuote)
 	}
 	scaledPrice := types.GetScaledPrice(*price, oracleScaleFactor)
@@ -53,7 +50,6 @@ func (k *Keeper) GetDerivativeMarketPrice(ctx sdk.Context, oracleBase, oracleQuo
 func (k *Keeper) GetDerivativeMarketCumulativePrice(ctx sdk.Context, oracleBase, oracleQuote string, oracleType oracletypes.OracleType) (*sdk.Dec, error) {
 	cumulativePrice := k.OracleKeeper.GetCumulativePrice(ctx, oracleType, oracleBase, oracleQuote)
 	if cumulativePrice == nil || cumulativePrice.IsNil() {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidOracle, "type %s base %s quote %s", oracleType.String(), oracleBase, oracleQuote)
 	}
 
@@ -70,7 +66,7 @@ func (k *Keeper) HasDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEn
 // GetDerivativeMarketAndStatus returns the Derivative Market by marketID and isEnabled status.
 func (k *Keeper) GetDerivativeMarketAndStatus(ctx sdk.Context, marketID common.Hash) (*types.DerivativeMarket, bool) {
 	isEnabled := true
-	market := k.GetDerivativeMarket(ctx, marketID, isEnabled)
+	market := k.GetDerivativeMarket(ctx, marketID, true)
 	if market == nil {
 		isEnabled = false
 		market = k.GetDerivativeMarket(ctx, marketID, isEnabled)
@@ -88,7 +84,6 @@ func (k *Keeper) GetDerivativeMarketWithMarkPrice(ctx sdk.Context, marketID comm
 
 	price, err := k.GetDerivativeMarketPrice(ctx, market.OracleBase, market.OracleQuote, market.OracleScaleFactor, market.OracleType)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, sdk.Dec{}
 	}
 
@@ -554,7 +549,6 @@ func (k *Keeper) ExecuteDerivativeMarketParamUpdateProposal(ctx sdk.Context, p *
 	prevMarket := k.GetDerivativeMarketByID(ctx, marketID)
 
 	if prevMarket == nil {
-		metrics.ReportFuncCall(k.svcTags)
 		return fmt.Errorf("market is not available, market_id %s", p.MarketId)
 	}
 

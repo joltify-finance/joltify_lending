@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"github.com/InjectiveLabs/metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper/ordermatching"

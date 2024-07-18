@@ -2,7 +2,7 @@ package keeper
 
 import (
 	sdkerrors "cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"

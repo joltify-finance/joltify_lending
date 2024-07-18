@@ -4,14 +4,12 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	log "github.com/xlab/suplog"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 )
 
 func (k *Keeper) BinaryOptionsMarketLaunch(
@@ -32,24 +30,20 @@ func (k *Keeper) BinaryOptionsMarketLaunch(
 	marketID := types.NewBinaryOptionsMarketID(ticker, quoteDenom, oracleSymbol, oracleProvider, oracleType)
 
 	if !k.IsDenomValid(ctx, quoteDenom) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidQuoteDenom, "denom %s does not exist in supply", quoteDenom)
 	}
 
 	if market, _ := k.GetBinaryOptionsMarketAndStatus(ctx, marketID); market != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrBinaryOptionsMarketExists, "ticker %s quoteDenom %s", ticker, quoteDenom)
 	}
 
 	// Enforce that the provider exists, but not necessarily that the oracle price for the symbol exists
 	if k.OracleKeeper.GetProviderInfo(ctx, oracleProvider) == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidOracle, "oracle provider %s does not exist", oracleProvider)
 	}
 
 	// Enforce that expiration is in the future
 	if settlementTimestamp <= ctx.BlockTime().Unix() {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidSettlement, "settlement timestamp %d is in the past", settlementTimestamp)
 	}
 
@@ -105,12 +99,12 @@ func (k *Keeper) GetAllBinaryOptionsMarketsToExpire(ctx sdk.Context) []*types.Bi
 		market := k.GetBinaryOptionsMarketByID(ctx, marketID)
 
 		if market == nil {
-			log.Infof("binary options market does not exist, marketID=%s", marketID.Hex())
+			k.Logger(ctx).Error("binary options market does not exist", "marketID", marketID.Hex())
 			continue
 		}
 
 		if market.Status == types.MarketStatus_Expired {
-			log.Infof("the binary options market was going to be expired but have Expired status? marketID=%s", marketID.Hex())
+			k.Logger(ctx).Error("the binary options market was going to be expired but have Expired status", "marketID", marketID.Hex())
 			continue
 		}
 
@@ -127,11 +121,11 @@ func (k *Keeper) GetAllScheduledBinaryOptionsMarketsToForciblySettle(ctx sdk.Con
 		market := k.GetBinaryOptionsMarketByID(ctx, marketID)
 
 		if market == nil {
-			log.Infof("binary options market does not exist, marketID=%s", marketID.Hex())
+			k.Logger(ctx).Error("binary options market does not exist", "marketID", marketID.Hex())
 			return false
 		}
 		if market.SettlementPrice == nil || market.SettlementPrice.IsNil() {
-			log.Infof("the binary options market was going to be forcefully settled but has no settlement price? marketID=%s", marketID.Hex())
+			k.Logger(ctx).Error("the binary options market was going to be forcefully settled but has no settlement price", "marketID", marketID.Hex())
 		}
 
 		markets = append(markets, market)
@@ -154,12 +148,12 @@ func (k *Keeper) GetAllBinaryOptionsMarketsToNaturallySettle(ctx sdk.Context) []
 		market := k.GetBinaryOptionsMarketByID(ctx, marketID)
 
 		if market == nil {
-			log.Infof("binary options market does not exist, marketID=%s", marketID.Hex())
+			k.Logger(ctx).Error("binary options market does not exist", "marketID", marketID.Hex())
 			continue
 		}
 		// end iteration early if the first market hasn't matured yet
 		if market.Status == types.MarketStatus_Demolished {
-			log.Infof("the binary options market was going to be naturally settled but has Demolished status? marketID=%s", marketID.Hex())
+			k.Logger(ctx).Error("the binary options market was going to be naturally settled but has Demolished status", "marketID", marketID.Hex())
 			continue
 		}
 
@@ -178,7 +172,7 @@ func (k *Keeper) GetAllBinaryOptionsMarketsToNaturallySettle(ctx sdk.Context) []
 				}
 			} else {
 				// market will be settled with nil price which gets overwritten just before the settlement with -1
-				log.Infof("the binary options market was going to be naturally settled but has no settlement price? marketID=%s", marketID.Hex())
+				k.Logger(ctx).Error("the binary options market was going to be naturally settled but has no settlement price", "marketID", marketID.Hex())
 			}
 		}
 
@@ -259,7 +253,7 @@ func (k *Keeper) GetBinaryOptionsMarketByID(ctx sdk.Context, marketID common.Has
 // GetBinaryOptionsMarketAndStatus returns the binary options market by marketID and isEnabled status.
 func (k *Keeper) GetBinaryOptionsMarketAndStatus(ctx sdk.Context, marketID common.Hash) (*types.BinaryOptionsMarket, bool) {
 	isEnabled := true
-	market := k.GetBinaryOptionsMarket(ctx, marketID, isEnabled)
+	market := k.GetBinaryOptionsMarket(ctx, marketID, true)
 	if market == nil {
 		isEnabled = false
 		market = k.GetBinaryOptionsMarket(ctx, marketID, isEnabled)
@@ -467,11 +461,9 @@ func (k *Keeper) ExecuteBinaryOptionsMarketParamUpdateProposal(ctx sdk.Context, 
 	market := k.GetBinaryOptionsMarketByID(ctx, marketID)
 
 	if market == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return fmt.Errorf("market is not available, market_id %s", p.MarketId)
 	}
 	if market.Status == types.MarketStatus_Demolished {
-		metrics.ReportFuncError(k.svcTags)
 		return errors.Wrapf(types.ErrInvalidMarketStatus, "can't update market that was demolished already")
 	}
 

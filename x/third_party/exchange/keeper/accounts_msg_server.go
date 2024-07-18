@@ -3,28 +3,24 @@ package keeper
 import (
 	"context"
 
-	"github.com/InjectiveLabs/metrics"
+	"github.com/evmos/ethermint/crypto/ethsecp256k1"
+
 	sdksecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/injective-core/injective-chain/crypto/ethsecp256k1"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 type AccountsMsgServer struct {
 	Keeper
-	svcTags metrics.Tags
 }
 
 // AccountsMsgServerImpl returns an implementation of the bank MsgServer interface for the provided Keeper for account functions.
 func AccountsMsgServerImpl(keeper Keeper) AccountsMsgServer {
 	return AccountsMsgServer{
 		Keeper: keeper,
-		svcTags: metrics.Tags{
-			"svc": "acc_msg_h",
-		},
 	}
 }
 
@@ -87,10 +83,9 @@ func (k AccountsMsgServer) SubaccountTransfer(
 	dstSubaccountID := types.MustGetSubaccountIDOrDeriveFromNonce(sender, msg.DestinationSubaccountId)
 
 	denom := msg.Amount.Denom
-	amount := msg.Amount.Amount.ToDec()
+	amount := sdk.NewDecFromInt(msg.Amount.Amount)
 
 	if err := k.Keeper.DecrementDeposit(ctx, srcSubaccountID, denom, amount); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -119,10 +114,9 @@ func (k AccountsMsgServer) ExternalTransfer(
 	dstSubaccountID := common.HexToHash(msg.DestinationSubaccountId)
 
 	denom := msg.Amount.Denom
-	amount := msg.Amount.Amount.ToDec()
+	amount := sdk.NewDecFromInt(msg.Amount.Amount)
 
 	if err := k.Keeper.DecrementDeposit(ctx, srcSubaccountID, denom, amount); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 

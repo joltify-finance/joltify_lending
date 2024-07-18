@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	sdkerrors "cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
@@ -34,7 +34,7 @@ func (k SpotMsgServer) InstantSpotMarketLaunch(goCtx context.Context, msg *types
 	// check if the market launch proposal already exists
 	marketID := types.NewSpotMarketID(msg.BaseDenom, msg.QuoteDenom)
 	if k.checkIfMarketLaunchProposalExist(ctx, types.ProposalTypeSpotMarketLaunch, marketID) {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("the spot market launch proposal already exists: marketID=%s", marketID.Hex())
 		return nil, sdkerrors.Wrapf(types.ErrMarketLaunchProposalAlreadyExists, "the spot market launch proposal already exists: marketID=%s", marketID.Hex())
 	}
@@ -42,7 +42,7 @@ func (k SpotMsgServer) InstantSpotMarketLaunch(goCtx context.Context, msg *types
 	senderAddr, _ := sdk.AccAddressFromBech32(msg.Sender)
 	_, err := k.SpotMarketLaunch(ctx, msg.Ticker, msg.BaseDenom, msg.QuoteDenom, msg.MinPriceTickSize, msg.MinQuantityTickSize)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("failed launching spot market", err)
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (k SpotMsgServer) InstantSpotMarketLaunch(goCtx context.Context, msg *types
 	fee := k.GetParams(ctx).SpotMarketInstantListingFee
 	err = k.DistributionKeeper.FundCommunityPool(ctx, sdk.Coins{fee}, senderAddr)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("failed launching spot market", err)
 		return nil, err
 	}
@@ -91,7 +91,6 @@ func (k *Keeper) createSpotLimitOrder(
 	subaccountNonce := k.IncrementSubaccountTradeNonce(ctx, subaccountID)
 	orderHash, err := order.ComputeOrderHash(subaccountNonce.Nonce)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, err
 	}
 
@@ -100,21 +99,19 @@ func (k *Keeper) createSpotLimitOrder(
 		market = k.GetSpotMarket(ctx, marketID, true)
 		if market == nil {
 			k.Logger(ctx).Error("active spot market doesn't exist", "marketId", order.MarketId)
-			metrics.ReportFuncError(k.svcTags)
+
 			return orderHash, sdkerrors.Wrapf(types.ErrSpotMarketNotFound, "active spot market doesn't exist %s", order.MarketId)
 		}
 	}
 
 	// 3. Reject if order does not comply to the market's min tick size
 	if err := order.CheckTickSize(market.MinPriceTickSize, market.MinQuantityTickSize); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, err
 	}
 
 	// 4. Check for post-only orders (or if in post-only mode) if order crosses tob
 	isPostOnlyMode := k.IsPostOnlyMode(ctx)
 	if (order.OrderType.IsPostOnly() || isPostOnlyMode) && k.SpotOrderCrossesTopOfBook(ctx, order) {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, types.ErrExceedsTopOfBookPrice
 	}
 
@@ -193,12 +190,11 @@ func (k SpotMsgServer) CreateSpotMarketOrder(goCtx context.Context, msg *types.M
 	market := k.GetSpotMarket(ctx, marketID, true)
 	if market == nil {
 		k.Logger(ctx).Error("active spot market doesn't exist", "marketId", msg.Order.MarketId)
-		metrics.ReportFuncError(k.svcTags)
+
 		return nil, sdkerrors.Wrapf(types.ErrSpotMarketNotFound, "active spot market doesn't exist %s", msg.Order.MarketId)
 	}
 
 	if err := msg.Order.CheckTickSize(market.MinPriceTickSize, market.MinQuantityTickSize); err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -221,7 +217,6 @@ func (k SpotMsgServer) CreateSpotMarketOrder(goCtx context.Context, msg *types.M
 
 	orderHash, err := msg.Order.ComputeOrderHash(subaccountNonce.Nonce)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -231,13 +226,12 @@ func (k SpotMsgServer) CreateSpotMarketOrder(goCtx context.Context, msg *types.M
 	bestPrice := k.GetBestSpotLimitOrderPrice(ctx, marketID, !msg.Order.IsBuy())
 
 	if bestPrice == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, types.ErrNoLiquidity
 	} else if msg.Order.IsBuy() && msg.Order.OrderInfo.Price.LT(*bestPrice) ||
 		!msg.Order.IsBuy() && msg.Order.OrderInfo.Price.GT(*bestPrice) {
 		// If market buy order worst price less than best sell order price
 		// or market sell order worst price greater than best buy order price
-		metrics.ReportFuncError(k.svcTags)
+
 		return nil, types.ErrSlippageExceedsWorstPrice
 	}
 
@@ -291,7 +285,7 @@ func (k SpotMsgServer) BatchCreateSpotLimitOrders(goCtx context.Context, msg *ty
 
 	for idx := range msg.Orders {
 		if orderHash, err := k.createSpotLimitOrder(ctx, sender, &msg.Orders[idx], nil); err != nil {
-			metrics.ReportFuncError(k.svcTags)
+
 			sdkerror := &sdkerrors.Error{}
 			if errors.As(err, &sdkerror) {
 				orderHashes[idx] = fmt.Sprintf("%d", sdkerror.ABCICode())
@@ -353,7 +347,7 @@ func (k *Keeper) cancelSpotLimitOrderByOrderHash(
 ) (err error) {
 	if market == nil || !market.StatusSupportsOrderCancellations() {
 		k.Logger(ctx).Error("active spot market doesn't exist")
-		metrics.ReportFuncError(k.svcTags)
+
 		return sdkerrors.Wrapf(types.ErrSpotMarketNotFound, "active spot market doesn't exist %s", marketID.Hex())
 	}
 
@@ -386,7 +380,6 @@ func (k SpotMsgServer) BatchCancelSpotOrders(goCtx context.Context, msg *types.M
 			OrderHash:    msg.Data[idx].OrderHash,
 			Cid:          msg.Data[idx].Cid,
 		}); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 		} else {
 			successes[idx] = true
 		}

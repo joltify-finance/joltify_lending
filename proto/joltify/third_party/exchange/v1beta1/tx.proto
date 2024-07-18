@@ -64,8 +64,8 @@ service Msg {
 
   // PrivilegedExecuteContract defines a method for executing a Cosmwasm
   // contract from the exchange module with privileged capabilities.
-  rpc PrivilegedExecuteContract(MsgPrivilegedExecuteContract)
-      returns (MsgPrivilegedExecuteContractResponse);
+  //rpc PrivilegedExecuteContract(MsgPrivilegedExecuteContract)
+   //   returns (MsgPrivilegedExecuteContractResponse);
 
   // CreateDerivativeLimitOrder defines a method for creating a new derivative
   // limit order.

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	sdkerrors "cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
@@ -30,7 +30,6 @@ func NewDerivativesMsgServerImpl(keeper Keeper) DerivativesMsgServer {
 }
 
 func (k DerivativesMsgServer) InstantPerpetualMarketLaunch(goCtx context.Context, msg *types.MsgInstantPerpetualMarketLaunch) (*types.MsgInstantPerpetualMarketLaunchResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	sender := sdk.MustAccAddressFromBech32(msg.Sender)
@@ -45,7 +44,7 @@ func (k DerivativesMsgServer) InstantPerpetualMarketLaunch(goCtx context.Context
 	// check if the market launch proposal already exists
 	marketID := types.NewPerpetualMarketID(msg.Ticker, msg.QuoteDenom, msg.OracleBase, msg.OracleQuote, msg.OracleType)
 	if k.checkIfMarketLaunchProposalExist(ctx, types.ProposalTypePerpetualMarketLaunch, marketID) {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("the perpetual market launch proposal already exists: marketID=%s", marketID.Hex())
 		return nil, sdkerrors.Wrapf(types.ErrMarketLaunchProposalAlreadyExists, "the perpetual market launch proposal already exists: marketID=%s", marketID.Hex())
 	}
@@ -54,7 +53,7 @@ func (k DerivativesMsgServer) InstantPerpetualMarketLaunch(goCtx context.Context
 	fee := k.GetParams(ctx).DerivativeMarketInstantListingFee
 	err := k.DistributionKeeper.FundCommunityPool(ctx, sdk.Coins{fee}, senderAddr)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("failed launching derivative market", err)
 		return nil, err
 	}
@@ -65,7 +64,7 @@ func (k DerivativesMsgServer) InstantPerpetualMarketLaunch(goCtx context.Context
 		msg.MakerFeeRate, msg.TakerFeeRate, msg.MinPriceTickSize, msg.MinQuantityTickSize,
 	)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("failed launching derivative market", err)
 		return nil, err
 	}
@@ -74,7 +73,6 @@ func (k DerivativesMsgServer) InstantPerpetualMarketLaunch(goCtx context.Context
 }
 
 func (k DerivativesMsgServer) InstantExpiryFuturesMarketLaunch(goCtx context.Context, msg *types.MsgInstantExpiryFuturesMarketLaunch) (*types.MsgInstantExpiryFuturesMarketLaunchResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if !k.GetIsInstantDerivativeMarketLaunchEnabled(ctx) {
@@ -84,7 +82,7 @@ func (k DerivativesMsgServer) InstantExpiryFuturesMarketLaunch(goCtx context.Con
 	// check if the market launch proposal already exists
 	marketID := types.NewExpiryFuturesMarketID(msg.Ticker, msg.QuoteDenom, msg.OracleBase, msg.OracleQuote, msg.OracleType, msg.Expiry)
 	if k.checkIfMarketLaunchProposalExist(ctx, types.ProposalTypeExpiryFuturesMarketLaunch, marketID) {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("the expiry futures market launch proposal already exists: marketID=%s", marketID.Hex())
 		return nil, sdkerrors.Wrapf(types.ErrMarketLaunchProposalAlreadyExists, "the expiry futures market launch proposal already exists: marketID=%s", marketID.Hex())
 	}
@@ -93,7 +91,7 @@ func (k DerivativesMsgServer) InstantExpiryFuturesMarketLaunch(goCtx context.Con
 	fee := k.GetParams(ctx).DerivativeMarketInstantListingFee
 	err := k.DistributionKeeper.FundCommunityPool(ctx, sdk.Coins{fee}, senderAddr)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("failed launching derivative market", err)
 		return nil, err
 	}
@@ -104,7 +102,7 @@ func (k DerivativesMsgServer) InstantExpiryFuturesMarketLaunch(goCtx context.Con
 		msg.InitialMarginRatio, msg.MaintenanceMarginRatio,
 		msg.MakerFeeRate, msg.TakerFeeRate, msg.MinPriceTickSize, msg.MinQuantityTickSize,
 	); err != nil {
-		metrics.ReportFuncError(k.svcTags)
+
 		k.Logger(ctx).Error("failed launching derivative market", err)
 		return nil, err
 	}
@@ -113,7 +111,6 @@ func (k DerivativesMsgServer) InstantExpiryFuturesMarketLaunch(goCtx context.Con
 }
 
 func (k DerivativesMsgServer) CreateDerivativeLimitOrder(goCtx context.Context, msg *types.MsgCreateDerivativeLimitOrder) (*types.MsgCreateDerivativeLimitOrderResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	account, _ := sdk.AccAddressFromBech32(msg.Sender)
@@ -121,13 +118,12 @@ func (k DerivativesMsgServer) CreateDerivativeLimitOrder(goCtx context.Context, 
 	market, markPrice := k.GetDerivativeMarketWithMarkPrice(ctx, msg.Order.MarketID(), true)
 	if market == nil || markPrice.IsNil() {
 		k.Logger(ctx).Error("active derivative market with valid mark price doesn't exist", "marketId", msg.Order.MarketId, "mark price", markPrice.String())
-		metrics.ReportFuncError(k.svcTags)
+
 		return nil, sdkerrors.Wrapf(types.ErrDerivativeMarketNotFound, "active derivative market for marketID %s not found", msg.Order.MarketId)
 	}
 
 	orderHash, err := k.createDerivativeLimitOrder(ctx, account, &msg.Order, market, markPrice)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -143,7 +139,6 @@ func (k *Keeper) createDerivativeLimitOrder(
 	market DerivativeMarketI,
 	markPrice sdk.Dec,
 ) (hash common.Hash, err error) {
-
 	subaccountID := types.MustGetSubaccountIDOrDeriveFromNonce(sender, order.OrderInfo.SubaccountId)
 
 	// set the actual subaccountID value in the order, since it might be a nonce value
@@ -157,7 +152,6 @@ func (k *Keeper) createDerivativeLimitOrder(
 
 	orderHash, err := k.ensureValidDerivativeOrder(ctx, order, market, metadata, markPrice, false, nil, isMaker)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, err
 	}
 
@@ -182,7 +176,6 @@ func (k *Keeper) createDerivativeLimitOrder(
 }
 
 func (k DerivativesMsgServer) BatchCreateDerivativeLimitOrders(goCtx context.Context, msg *types.MsgBatchCreateDerivativeLimitOrders) (*types.MsgBatchCreateDerivativeLimitOrdersResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	sender := sdk.MustAccAddressFromBech32(msg.Sender)
 
@@ -213,7 +206,7 @@ func (k DerivativesMsgServer) BatchCreateDerivativeLimitOrders(goCtx context.Con
 		}
 
 		if orderHash, err := k.createDerivativeLimitOrder(ctx, sender, &msg.Orders[idx], fullMarket.Market, fullMarket.MarkPrice); err != nil {
-			metrics.ReportFuncError(k.svcTags)
+
 			sdkerror := &sdkerrors.Error{}
 			if errors.As(err, &sdkerror) {
 				orderHashes[idx] = fmt.Sprintf("%d", sdkerror.ABCICode())
@@ -248,7 +241,6 @@ func (k *Keeper) createDerivativeMarketOrder(ctx sdk.Context, sender sdk.AccAddr
 	var orderMarginHold sdk.Dec
 	orderHash, err = k.ensureValidDerivativeOrder(ctx, derivativeOrder, market, metadata, markPrice, true, &orderMarginHold, false)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return orderHash, nil, err
 	}
 
@@ -292,7 +284,6 @@ func (k *Keeper) createDerivativeMarketOrder(ctx sdk.Context, sender sdk.AccAddr
 }
 
 func (k DerivativesMsgServer) CreateDerivativeMarketOrder(goCtx context.Context, msg *types.MsgCreateDerivativeMarketOrder) (*types.MsgCreateDerivativeMarketOrderResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	account, _ := sdk.AccAddressFromBech32(msg.Sender)
@@ -300,13 +291,12 @@ func (k DerivativesMsgServer) CreateDerivativeMarketOrder(goCtx context.Context,
 	market, markPrice := k.GetDerivativeMarketWithMarkPrice(ctx, msg.Order.MarketID(), true)
 	if market == nil {
 		k.Logger(ctx).Error("active derivative market doesn't exist", "marketId", msg.Order.MarketId)
-		metrics.ReportFuncError(k.svcTags)
+
 		return nil, sdkerrors.Wrapf(types.ErrDerivativeMarketNotFound, "active derivative market for marketID %s not found", msg.Order.MarketId)
 	}
 
 	orderHash, results, err := k.createDerivativeMarketOrder(ctx, account, &msg.Order, market, markPrice)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, err
 	}
 
@@ -320,7 +310,6 @@ func (k DerivativesMsgServer) CreateDerivativeMarketOrder(goCtx context.Context,
 }
 
 func (k DerivativesMsgServer) CancelDerivativeOrder(goCtx context.Context, msg *types.MsgCancelDerivativeOrder) (*types.MsgCancelDerivativeOrderResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	var (
@@ -367,7 +356,7 @@ func (k *Keeper) cancelDerivativeOrderByOrderHash(
 	// Reject if derivative market id does not reference an active derivative market
 	if market == nil || !market.StatusSupportsOrderCancellations() {
 		k.Logger(ctx).Debug("active derivative market doesn't exist", "marketID", marketID)
-		metrics.ReportFuncError(k.svcTags)
+
 		return sdkerrors.Wrapf(types.ErrDerivativeMarketNotFound, "active derivative market doesn't exist %s", marketID.Hex())
 	}
 
@@ -459,7 +448,6 @@ func (k *Keeper) cancelDerivativeOrderByOrderHash(
 }
 
 func (k DerivativesMsgServer) BatchCancelDerivativeOrders(goCtx context.Context, msg *types.MsgBatchCancelDerivativeOrders) (*types.MsgBatchCancelDerivativeOrdersResponse, error) {
-
 	successes := make([]bool, len(msg.Data))
 	for idx := range msg.Data {
 		if _, err := k.CancelDerivativeOrder(goCtx, &types.MsgCancelDerivativeOrder{
@@ -470,7 +458,6 @@ func (k DerivativesMsgServer) BatchCancelDerivativeOrders(goCtx context.Context,
 			OrderMask:    msg.Data[idx].OrderMask,
 			Cid:          msg.Data[idx].Cid,
 		}); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 		} else {
 			successes[idx] = true
 		}
@@ -482,7 +469,6 @@ func (k DerivativesMsgServer) BatchCancelDerivativeOrders(goCtx context.Context,
 }
 
 func (k DerivativesMsgServer) IncreasePositionMargin(goCtx context.Context, msg *types.MsgIncreasePositionMargin) (*types.MsgIncreasePositionMarginResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	var (
@@ -495,7 +481,7 @@ func (k DerivativesMsgServer) IncreasePositionMargin(goCtx context.Context, msg 
 	market := k.GetDerivativeMarket(ctx, marketID, true)
 	if market == nil {
 		k.Logger(ctx).Error("active derivative market doesn't exist", "marketId", marketID)
-		metrics.ReportFuncError(k.svcTags)
+
 		return nil, sdkerrors.Wrapf(types.ErrDerivativeMarketNotFound, "active derivative market for marketID %s not found", marketID.Hex())
 	}
 
@@ -506,7 +492,6 @@ func (k DerivativesMsgServer) IncreasePositionMargin(goCtx context.Context, msg 
 
 	position := k.GetPosition(ctx, marketID, destinationSubaccountID)
 	if position == nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, sdkerrors.Wrapf(types.ErrPositionNotFound, "subaccountID %s marketID %s", destinationSubaccountID.Hex(), marketID.Hex())
 	}
 

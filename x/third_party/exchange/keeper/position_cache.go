@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"sort"
 
-	"github.com/InjectiveLabs/metrics"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"

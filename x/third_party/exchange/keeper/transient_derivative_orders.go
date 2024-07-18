@@ -10,8 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -297,7 +295,6 @@ func (k *Keeper) CancelTransientDerivativeLimitOrdersForSubaccountUpToBalance(
 		}
 
 		if err := k.CancelTransientDerivativeLimitOrder(ctx, market, order); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		} else {
 			notional := order.OrderInfo.Price.Mul(order.OrderInfo.Quantity)
@@ -313,7 +310,6 @@ func (k *Keeper) CancelTransientDerivativeLimitOrdersForSubaccountUpToBalance(
 		}
 
 		if err := k.CancelTransientDerivativeLimitOrder(ctx, market, order); err != nil {
-			metrics.ReportFuncError(k.svcTags)
 			continue
 		} else {
 			notional := order.OrderInfo.Price.Mul(order.OrderInfo.Quantity)
@@ -461,7 +457,7 @@ func (k *Keeper) CancelTransientDerivativeLimitOrder(
 		position := k.GetPosition(ctx, marketID, subaccountID)
 		if position == nil {
 			k.Logger(ctx).Error("Derivative Position doesn't exist", "marketId", marketID, "subaccountID", subaccountID, "orderHash", order.Hash().Hex())
-			metrics.ReportFuncError(k.svcTags)
+
 			return errors.Wrapf(types.ErrPositionNotFound, "marketId %s subaccountID %s orderHash %s", marketID, subaccountID.Hex(), order.Hash().Hex())
 		}
 	}

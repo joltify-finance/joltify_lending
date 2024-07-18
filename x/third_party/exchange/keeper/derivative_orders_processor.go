@@ -4,8 +4,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -245,12 +243,10 @@ func (k *Keeper) ExecuteDerivativeMarketOrderImmediately(
 
 	if isLiquidation { // no partial liquidation for now supported, yet no reason not to allow it for atomic orders
 		if marketOrder.IsBuy() && !derivativeMarketOrderExecution.MarketBuyClearingQuantity.Equal(marketOrder.OrderInfo.Quantity) {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, types.ErrNoLiquidity
 		}
 
 		if !marketOrder.IsBuy() && !derivativeMarketOrderExecution.MarketSellClearingQuantity.Equal(marketOrder.OrderInfo.Quantity) {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, types.ErrNoLiquidity
 		}
 	}

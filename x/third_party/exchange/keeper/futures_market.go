@@ -6,11 +6,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 )
 
 func (k *Keeper) ExpiryFuturesMarketLaunch(
@@ -29,37 +27,31 @@ func (k *Keeper) ExpiryFuturesMarketLaunch(
 	}
 
 	if !k.IsDenomValid(ctx, quoteDenom) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, errors.Wrapf(types.ErrInvalidQuoteDenom, "denom %s does not exist in supply", quoteDenom)
 	}
 
 	marketID := types.NewExpiryFuturesMarketID(ticker, quoteDenom, oracleBase, oracleQuote, oracleType, expiry)
 	if k.HasDerivativeMarket(ctx, marketID, true) || k.HasDerivativeMarket(ctx, marketID, false) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, errors.Wrapf(types.ErrExpiryFuturesMarketExists, "ticker %s quoteDenom %s oracle base %s quote %s expiry %d", ticker, quoteDenom, oracleBase, oracleQuote, expiry)
 	}
 
 	if oracleType == oracletypes.OracleType_BandIBC {
 		nonIBCBandMarketID := types.NewExpiryFuturesMarketID(ticker, quoteDenom, oracleBase, oracleQuote, oracletypes.OracleType_Band, expiry)
 		if k.HasDerivativeMarket(ctx, nonIBCBandMarketID, true) || k.HasDerivativeMarket(ctx, nonIBCBandMarketID, false) {
-			metrics.ReportFuncError(k.svcTags)
 			return nil, nil, errors.Wrapf(types.ErrExpiryFuturesMarketExists, "marketID %s with a promoted Band IBC oracle already exists ticker %s quoteDenom %s", nonIBCBandMarketID.Hex(), ticker, quoteDenom)
 		}
 	}
 
 	if expiry <= ctx.BlockTime().Unix() {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, errors.Wrapf(types.ErrExpiryFuturesMarketExpired, "ticker %s quoteDenom %s oracleBase %s oracleQuote %s expiry %d expired. Current blocktime %d", ticker, quoteDenom, oracleBase, oracleQuote, expiry, ctx.BlockTime().Unix())
 	}
 
 	_, err := k.GetDerivativeMarketPrice(ctx, oracleBase, oracleQuote, oracleScaleFactor, oracleType)
 	if err != nil {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, err
 	}
 
 	if !k.insuranceKeeper.HasInsuranceFund(ctx, marketID) {
-		metrics.ReportFuncError(k.svcTags)
 		return nil, nil, errors.Wrapf(insurancetypes.ErrInsuranceFundNotFound, "ticker %s marketID %s", ticker, marketID.Hex())
 	}
 

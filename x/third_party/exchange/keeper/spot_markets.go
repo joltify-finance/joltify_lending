@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"cosmossdk.io/errors"
-	"github.com/InjectiveLabs/metrics"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -232,7 +231,6 @@ func (k *Keeper) ExecuteSpotMarketParamUpdateProposal(ctx sdk.Context, p *types.
 	marketID := common.HexToHash(p.MarketId)
 	prevMarket := k.GetSpotMarketByID(ctx, marketID)
 	if prevMarket == nil {
-		metrics.ReportFuncCall(k.svcTags)
 		return errors.Wrapf(types.ErrMarketInvalid, "market is not available, market_id %s", p.MarketId)
 	}
 
@@ -316,18 +314,15 @@ func (k *Keeper) SpotMarketLaunchWithCustomFees(
 	makerFeeRate, takerFeeRate, relayerFeeShareRate sdk.Dec,
 ) (*types.SpotMarket, error) {
 	if !k.IsDenomValid(ctx, baseDenom) {
-		metrics.ReportFuncCall(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidBaseDenom, "denom %s does not exist in supply", baseDenom)
 	}
 
 	if !k.IsDenomValid(ctx, quoteDenom) {
-		metrics.ReportFuncCall(k.svcTags)
 		return nil, errors.Wrapf(types.ErrInvalidQuoteDenom, "denom %s does not exist in supply", quoteDenom)
 	}
 
 	marketID := types.NewSpotMarketID(baseDenom, quoteDenom)
 	if k.HasSpotMarket(ctx, marketID, true) || k.HasSpotMarket(ctx, marketID, false) {
-		metrics.ReportFuncCall(k.svcTags)
 		return nil, errors.Wrapf(types.ErrSpotMarketExists, "ticker %s baseDenom %s quoteDenom %s", ticker, baseDenom, quoteDenom)
 	}
 
