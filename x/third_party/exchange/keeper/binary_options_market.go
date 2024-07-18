@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
@@ -172,7 +173,7 @@ func (k *Keeper) GetAllBinaryOptionsMarketsToNaturallySettle(ctx sdk.Context) []
 				}
 			} else {
 				// market will be settled with nil price which gets overwritten just before the settlement with -1
-				k.Logger(ctx).Error("the binary options market was going to be naturally settled but has no settlement price", "marketID", marketID.Hex())
+				k.Logger(ctx).Error("the binary options market was going to be naturally settled but has no oracle price", "marketID", marketID.Hex())
 			}
 		}
 

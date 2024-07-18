@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -67,6 +69,14 @@ func (k *Keeper) Logger(ctx sdk.Context) log.Logger {
 
 func (k *Keeper) SetGovKeeper(gk types.GovKeeper) {
 	k.govKeeper = gk
+}
+
+func (k *Keeper) SetWasmKeepers(
+	wk wasmkeeper.Keeper,
+	wxk types.WasmxExecutionKeeper,
+) {
+	k.wasmViewKeeper = types.WasmViewKeeper(wk)
+	k.wasmxExecutionKeeper = wxk
 }
 
 func (k *Keeper) getStore(ctx sdk.Context) sdk.KVStore {

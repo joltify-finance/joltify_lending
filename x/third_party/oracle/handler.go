@@ -7,8 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	log "github.com/xlab/suplog"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/oracle/keeper"

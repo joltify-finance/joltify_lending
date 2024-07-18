@@ -18,6 +18,7 @@ type MsgServer struct {
 	DerivativesMsgServer
 	BinaryOptionsMsgServer
 	AccountsMsgServer
+	WasmMsgServer
 	Keeper
 }
 
@@ -29,6 +30,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 		DerivativesMsgServer:   NewDerivativesMsgServerImpl(keeper),
 		BinaryOptionsMsgServer: NewBinaryOptionsMsgServerImpl(keeper),
 		AccountsMsgServer:      AccountsMsgServerImpl(keeper),
+		WasmMsgServer:          NewWasmMsgServerImpl(keeper),
 		Keeper:                 keeper,
 	}
 }

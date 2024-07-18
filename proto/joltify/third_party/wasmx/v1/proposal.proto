@@ -2,7 +2,7 @@ syntax = "proto3";
 package joltify.third_party.wasmx.v1;
 
 import "cosmos_proto/cosmos.proto";
-import "cosmwasm/wasm/v1/proposal_legacy.proto";
+import "joltify/third_party/cosmwasm/wasm/v1/proposal_legacy.proto";
 import "gogoproto/gogo.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types";

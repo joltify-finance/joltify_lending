@@ -253,6 +253,7 @@ func (k *Keeper) GetAllMarketIDsWithQuoteDenoms(ctx sdk.Context) []*MarketIDQuot
 }
 
 func (k *Keeper) GetMarketAtomicExecutionFeeMultiplier(ctx sdk.Context, marketId common.Hash, marketType types.MarketType) sdk.Dec {
+
 	store := k.getStore(ctx)
 	takerFeeStore := prefix.NewStore(store, types.AtomicMarketOrderTakerFeeMultiplierKey)
 

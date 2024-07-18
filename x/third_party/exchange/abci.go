@@ -4,35 +4,24 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/InjectiveLabs/metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
 type BlockHandler struct {
 	k keeper.Keeper
-
-	svcTags metrics.Tags
 }
 
 func NewBlockHandler(k keeper.Keeper) *BlockHandler {
 	return &BlockHandler{
 		k: k,
-
-		svcTags: metrics.Tags{
-			"svc": "exchange_b",
-		},
 	}
 }
 
 func (h *BlockHandler) BeginBlocker(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
 
 	// swap the gas meter with a threadsafe version
 	h.k.ProcessHourlyFundings(ctx)
@@ -49,13 +38,10 @@ func (h *BlockHandler) BeginBlocker(ctx sdk.Context) {
 }
 
 func (h *BlockHandler) EndBlocker(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
 
 	// swap the gas meter with a threadsafe version
-	ctx = ctx.WithGasMeter(chaintypes.NewThreadsafeInfiniteGasMeter()).
-		WithBlockGasMeter(chaintypes.NewThreadsafeInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter()).
+		WithBlockGasMeter(sdk.NewInfiniteGasMeter())
 
 	/** =========== Stage 1: Process all orders in parallel =========== */
 

@@ -9,8 +9,6 @@ import (
 	bandoracle "github.com/joltify-finance/joltify_lending/x/third_party/oracle/bandchain/oracle/types"
 
 	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
-
-	"github.com/InjectiveLabs/metrics"
 )
 
 // ChanCloseInit defines a wrapper function for the channel Keeper's function

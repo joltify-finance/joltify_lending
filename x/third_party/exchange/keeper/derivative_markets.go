@@ -66,7 +66,7 @@ func (k *Keeper) HasDerivativeMarket(ctx sdk.Context, marketID common.Hash, isEn
 // GetDerivativeMarketAndStatus returns the Derivative Market by marketID and isEnabled status.
 func (k *Keeper) GetDerivativeMarketAndStatus(ctx sdk.Context, marketID common.Hash) (*types.DerivativeMarket, bool) {
 	isEnabled := true
-	market := k.GetDerivativeMarket(ctx, marketID, true)
+	market := k.GetDerivativeMarket(ctx, marketID, isEnabled)
 	if market == nil {
 		isEnabled = false
 		market = k.GetDerivativeMarket(ctx, marketID, isEnabled)
@@ -549,6 +549,7 @@ func (k *Keeper) ExecuteDerivativeMarketParamUpdateProposal(ctx sdk.Context, p *
 	prevMarket := k.GetDerivativeMarketByID(ctx, marketID)
 
 	if prevMarket == nil {
+		metrics.ReportFuncCall(k.svcTags)
 		return fmt.Errorf("market is not available, market_id %s", p.MarketId)
 	}
 

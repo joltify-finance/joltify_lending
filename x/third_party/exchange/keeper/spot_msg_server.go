@@ -15,16 +15,12 @@ import (
 
 type SpotMsgServer struct {
 	Keeper
-	svcTags metrics.Tags
 }
 
 // NewSpotMsgServerImpl returns an implementation of the bank MsgServer interface for the provided Keeper for spot market functions.
 func NewSpotMsgServerImpl(keeper Keeper) SpotMsgServer {
 	return SpotMsgServer{
 		Keeper: keeper,
-		svcTags: metrics.Tags{
-			"svc": "spot_msg_h",
-		},
 	}
 }
 

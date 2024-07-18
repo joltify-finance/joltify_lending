@@ -9,6 +9,7 @@ import (
 )
 
 func (k *Keeper) SetTradingRewardsMarketQualificationForAllQualifyingMarkets(ctx sdk.Context, campaignInfo *types.TradingRewardCampaignInfo) {
+
 	marketIDQuoteDenoms := k.GetAllMarketIDsWithQuoteDenoms(ctx)
 
 	quoteDenomMap := make(map[string]struct{})
@@ -29,6 +30,7 @@ func (k *Keeper) SetTradingRewardsMarketQualificationForAllQualifyingMarkets(ctx
 
 // IsMarketQualifiedForTradingRewards returns true if the given marketID qualifies for trading rewards
 func (k *Keeper) IsMarketQualifiedForTradingRewards(ctx sdk.Context, marketID common.Hash) bool {
+
 	store := k.getStore(ctx)
 	bz := store.Get(types.GetCampaignMarketQualificationKey(marketID))
 	if bz == nil {
@@ -40,12 +42,14 @@ func (k *Keeper) IsMarketQualifiedForTradingRewards(ctx sdk.Context, marketID co
 
 // DeleteTradingRewardsMarketQualification deletes the market's trading reward qualification indicator
 func (k *Keeper) DeleteTradingRewardsMarketQualification(ctx sdk.Context, marketID common.Hash) {
+
 	store := k.getStore(ctx)
 	store.Delete(types.GetCampaignMarketQualificationKey(marketID))
 }
 
 // DeleteAllTradingRewardsMarketQualifications deletes the trading reward qualifications for all markets
 func (k *Keeper) DeleteAllTradingRewardsMarketQualifications(ctx sdk.Context) {
+
 	marketIDs, _ := k.GetAllTradingRewardsMarketQualification(ctx)
 	for _, marketID := range marketIDs {
 		k.DeleteTradingRewardsMarketQualification(ctx, marketID)
@@ -54,6 +58,7 @@ func (k *Keeper) DeleteAllTradingRewardsMarketQualifications(ctx sdk.Context) {
 
 // SetTradingRewardsMarketQualification sets the market's trading reward qualification indicator
 func (k *Keeper) SetTradingRewardsMarketQualification(ctx sdk.Context, marketID common.Hash, isQualified bool) {
+
 	store := k.getStore(ctx)
 	qualificationBz := []byte{types.TrueByte}
 	if !isQualified {
@@ -64,6 +69,7 @@ func (k *Keeper) SetTradingRewardsMarketQualification(ctx sdk.Context, marketID 
 
 // GetAllTradingRewardsMarketQualification gets all market qualification statuses
 func (k *Keeper) GetAllTradingRewardsMarketQualification(ctx sdk.Context) ([]common.Hash, []bool) {
+
 	marketIDs := make([]common.Hash, 0)
 	isQualified := make([]bool, 0)
 
@@ -82,6 +88,7 @@ func (k *Keeper) iterateTradingRewardsMarketQualifications(
 	ctx sdk.Context,
 	process func(common.Hash, bool) (stop bool),
 ) {
+
 	store := k.getStore(ctx)
 
 	marketQualificationStore := prefix.NewStore(store, types.TradingRewardMarketQualificationPrefix)
@@ -102,6 +109,7 @@ func (k *Keeper) CheckQuoteAndSetTradingRewardQualification(
 	marketID common.Hash,
 	quoteDenom string,
 ) {
+
 	if campaign := k.GetCampaignInfo(ctx); campaign != nil {
 		disqualified := false
 		for _, disqualifiedMarketID := range campaign.DisqualifiedMarketIds {

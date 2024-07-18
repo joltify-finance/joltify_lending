@@ -22,8 +22,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/client/cli"
 	exchangekeeper "github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
-
-	"github.com/InjectiveLabs/metrics"
 )
 
 // type check to ensure the interface is properly implemented
@@ -85,7 +83,6 @@ const ConsensusVersion = 2
 type AppModule struct {
 	AppModuleBasic
 
-	svcTags        metrics.Tags
 	keeper         exchangekeeper.Keeper
 	accountKeeper  authkeeper.AccountKeeper
 	bankKeeper     bankkeeper.Keeper
@@ -111,9 +108,6 @@ func NewAppModule(
 		bankKeeper:     bankKeeper,
 		blockHandler:   NewBlockHandler(keeper),
 		legacySubspace: legacySubspace,
-		svcTags: metrics.Tags{
-			"svc": "exchange_m",
-		},
 	}
 }
 

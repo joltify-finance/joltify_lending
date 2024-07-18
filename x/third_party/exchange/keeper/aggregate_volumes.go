@@ -2,11 +2,11 @@ package keeper
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/influxdata/influxdb/pkg/deep"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -323,7 +323,7 @@ func (k *Keeper) IsMarketAggregateVolumeValid(ctx sdk.Context) bool {
 
 	computedVolumes := k.GetAllComputedMarketAggregateVolumes(ctx)
 
-	if !reflect.DeepEqual(aggregateVolumes, computedVolumes) {
+	if diff := deep.Equal(aggregateVolumes, computedVolumes); diff != nil {
 		fmt.Println("❌ Market aggregated volume doesnt equal volumes derived from subaccount aggregate volumes")
 		fmt.Println("1️⃣ Market volumes", aggregateVolumes)
 		fmt.Println("2️⃣ Volumes from subaccount volumes", computedVolumes)

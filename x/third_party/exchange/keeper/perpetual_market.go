@@ -8,7 +8,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 )
 
 func (k *Keeper) PerpetualMarketLaunch(

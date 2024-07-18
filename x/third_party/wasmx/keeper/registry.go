@@ -6,7 +6,6 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 
@@ -164,7 +163,7 @@ func (k *Keeper) DeregisterContract(
 		ContractAddress: contractAddress.String(),
 	})
 
-	contractBalance := k.bankKeeper.GetBalance(ctx, contractAddress, chaintypes.InjectiveCoin)
+	contractBalance := k.bankKeeper.GetBalance(ctx, contractAddress, "ujolt")
 	maxAvailableGas := contractBalance.Amount.QuoRaw(int64(registeredContract.GasPrice)).Uint64()
 
 	params := k.GetParams(ctx)
@@ -212,7 +211,7 @@ func (k *Keeper) DeactivateContract(
 
 	registeredContract.IsExecutable = false
 	k.SetContract(ctx, contractAddress, *registeredContract)
-	contractBalance := k.bankKeeper.GetBalance(ctx, contractAddress, chaintypes.InjectiveCoin)
+	contractBalance := k.bankKeeper.GetBalance(ctx, contractAddress, "ujolt")
 	maxAvailableGas := contractBalance.Amount.QuoRaw(int64(registeredContract.GasPrice)).Uint64()
 	params := k.GetParams(ctx)
 	deactivateHookGas := params.MaxContractGasLimit

@@ -2,12 +2,14 @@ package exchange
 
 import (
 	"fmt"
+	"os"
 	"runtime/debug"
+
+	"github.com/rs/zerolog"
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	log "github.com/xlab/suplog"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 
@@ -153,14 +155,14 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 }
 
 func Recover(err *error) { // nolint:all
+	// fixme we do not need to have the recover!!
+	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	if r := recover(); r != nil {
-		*err = errors.Wrapf(sdkerrors.ErrPanic, "%v", r) // nolint:all
-
 		if e, ok := r.(error); ok {
-			log.WithError(e).Errorln("exchange msg handler panicked with an error")
-			log.Debugln(string(debug.Stack()))
+			logger.Error().Err(e).Msg("ocr msg handler panicked with an error")
+			logger.Info().Msg(string(debug.Stack()))
 		} else {
-			log.Errorln(r)
+			logger.Err(r.(error))
 		}
 	}
 }

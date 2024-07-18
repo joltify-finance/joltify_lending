@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/x/group/client/cli"
+
 	"github.com/CosmWasm/wasmd/x/wasm/ioutils"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -19,8 +21,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/InjectiveLabs/injective-core/cli"
-	cliflags "github.com/InjectiveLabs/injective-core/cli/flags"
 	"github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 
@@ -117,7 +117,7 @@ func NewContractRegistrationRequestProposalTxCmd() *cobra.Command {
 	cmd.Flags().String(govcli.FlagDescription, "", "description of proposal")
 	cmd.Flags().String(govcli.FlagDeposit, "", "deposit of proposal")
 
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -171,7 +171,7 @@ func NewContractDeregistrationRequestProposalTxCmd() *cobra.Command {
 	cmd.Flags().String(govcli.FlagDescription, "", "description of proposal")
 	cmd.Flags().String(govcli.FlagDeposit, "", "deposit of proposal")
 
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -398,7 +398,7 @@ $ %s tx xwasm "batch-store-code-proposal \
 	cmd.Flags().String(govcli.FlagTitle, "", "Title of proposal")
 	cmd.Flags().String(govcli.FlagDescription, "", "Description of proposal")
 	cmd.Flags().String(govcli.FlagDeposit, "", "deposit of proposal")
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -475,7 +475,7 @@ func ContractParamsUpdateTxCmd() *cobra.Command {
 	cmd.Flags().Uint64(FlagContractGasPrice, 1000000000, "gas price in inj to use for the contract execution")
 	cmd.Flags().String(FlagContractAdmin, "", "contract admin allowed to perform changes")
 
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -516,7 +516,7 @@ func ContractActivateTxCmd() *cobra.Command {
 
 	cmd.Flags().String(FlagContractAddress, "", "contract address ")
 
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -557,7 +557,7 @@ func ContractDeactivateTxCmd() *cobra.Command {
 
 	cmd.Flags().String(FlagContractAddress, "", "contract address ")
 
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 
@@ -604,7 +604,7 @@ func ExecuteContractCompatCmd() *cobra.Command {
 	}
 
 	cmd.Flags().String(flagAmount, "", "Coins to send to the contract along with command")
-	cliflags.AddTxFlagsToCmd(cmd)
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
 

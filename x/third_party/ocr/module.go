@@ -19,8 +19,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/ocr/client/cli"
 	ocrkeeper "github.com/joltify-finance/joltify_lending/x/third_party/ocr/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/ocr/types"

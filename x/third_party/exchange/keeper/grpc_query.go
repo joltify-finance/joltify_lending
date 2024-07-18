@@ -1153,47 +1153,47 @@ func (k *Keeper) FeeDiscountTierStatistics(c context.Context, req *types.QueryFe
 // return res, nil
 // }
 
-//func (k *Keeper) MitoVaultInfos(c context.Context, req *types.MitoVaultInfosRequest) (*types.MitoVaultInfosResponse, error) {
-//	ctx := sdk.UnwrapSDKContext(c)
-//
-//	var (
-//		derivativeContractAddresses []string
-//		masterContractAddresses     []string
-//		cw20ContractAddresses       []string
-//		spotContractAddresses       []string
-//	)
-//
-//	// TODO fix me, how to find out code ids?
-//	derivativeCodeID := uint64(2)
-//	masterCodeID := uint64(3)
-//	cw20CodeID := uint64(4)
-//	spotCodeID := uint64(5)
-//
-//	k.wasmViewKeeper.IterateContractsByCode(ctx, derivativeCodeID, func(addr sdk.AccAddress) bool {
-//		derivativeContractAddresses = append(derivativeContractAddresses, addr.String())
-//		return false
-//	})
-//	k.wasmViewKeeper.IterateContractsByCode(ctx, masterCodeID, func(addr sdk.AccAddress) bool {
-//		masterContractAddresses = append(masterContractAddresses, addr.String())
-//		return false
-//	})
-//	k.wasmViewKeeper.IterateContractsByCode(ctx, cw20CodeID, func(addr sdk.AccAddress) bool {
-//		cw20ContractAddresses = append(cw20ContractAddresses, addr.String())
-//		return false
-//	})
-//	k.wasmViewKeeper.IterateContractsByCode(ctx, spotCodeID, func(addr sdk.AccAddress) bool {
-//		spotContractAddresses = append(spotContractAddresses, addr.String())
-//		return false
-//	})
-//
-//	res := &types.MitoVaultInfosResponse{
-//		MasterAddresses:     masterContractAddresses,
-//		DerivativeAddresses: derivativeContractAddresses,
-//		SpotAddresses:       spotContractAddresses,
-//		Cw20Addresses:       cw20ContractAddresses,
-//	}
-//	return res, nil
-//}
+func (k *Keeper) MitoVaultInfos(c context.Context, req *types.MitoVaultInfosRequest) (*types.MitoVaultInfosResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+
+	var (
+		derivativeContractAddresses []string
+		masterContractAddresses     []string
+		cw20ContractAddresses       []string
+		spotContractAddresses       []string
+	)
+
+	// TODO fix me, how to find out code ids?
+	derivativeCodeID := uint64(2)
+	masterCodeID := uint64(3)
+	cw20CodeID := uint64(4)
+	spotCodeID := uint64(5)
+
+	k.wasmViewKeeper.IterateContractsByCode(ctx, derivativeCodeID, func(addr sdk.AccAddress) bool {
+		derivativeContractAddresses = append(derivativeContractAddresses, addr.String())
+		return false
+	})
+	k.wasmViewKeeper.IterateContractsByCode(ctx, masterCodeID, func(addr sdk.AccAddress) bool {
+		masterContractAddresses = append(masterContractAddresses, addr.String())
+		return false
+	})
+	k.wasmViewKeeper.IterateContractsByCode(ctx, cw20CodeID, func(addr sdk.AccAddress) bool {
+		cw20ContractAddresses = append(cw20ContractAddresses, addr.String())
+		return false
+	})
+	k.wasmViewKeeper.IterateContractsByCode(ctx, spotCodeID, func(addr sdk.AccAddress) bool {
+		spotContractAddresses = append(spotContractAddresses, addr.String())
+		return false
+	})
+
+	res := &types.MitoVaultInfosResponse{
+		MasterAddresses:     masterContractAddresses,
+		DerivativeAddresses: derivativeContractAddresses,
+		SpotAddresses:       spotContractAddresses,
+		Cw20Addresses:       cw20ContractAddresses,
+	}
+	return res, nil
+}
 
 func (k *Keeper) HistoricalTradeRecords(c context.Context, req *types.QueryHistoricalTradeRecordsRequest) (*types.QueryHistoricalTradeRecordsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
@@ -1275,6 +1275,9 @@ func (k *Keeper) TraderDerivativeConditionalOrders(c context.Context, req *types
 }
 
 func (k *Keeper) MarketAtomicExecutionFeeMultiplier(c context.Context, req *types.QueryMarketAtomicExecutionFeeMultiplierRequest) (*types.QueryMarketAtomicExecutionFeeMultiplierResponse, error) {
+	metrics.ReportFuncCall(k.svcTags)
+	defer metrics.ReportFuncTiming(k.svcTags)()
+
 	ctx := sdk.UnwrapSDKContext(c)
 	marketID := common.HexToHash(req.MarketId)
 	marketType, err := k.GetMarketType(ctx, marketID, true)

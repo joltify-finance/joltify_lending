@@ -4,8 +4,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
 )
 
@@ -94,8 +92,8 @@ func (k *Keeper) GetBandReferencePrice(ctx sdk.Context, base, quote string) *sdk
 		return nil
 	}
 
-	baseRate := basePriceState.Rate.ToDec()
-	quoteRate := quotePriceState.Rate.ToDec()
+	baseRate := sdk.NewDecFromInt(basePriceState.Rate)
+	quoteRate := sdk.NewDecFromInt(quotePriceState.Rate)
 
 	if baseRate.IsNil() || quoteRate.IsNil() || !baseRate.IsPositive() || !quoteRate.IsPositive() {
 		return nil

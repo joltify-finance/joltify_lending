@@ -83,7 +83,7 @@ func (k AccountsMsgServer) SubaccountTransfer(
 	dstSubaccountID := types.MustGetSubaccountIDOrDeriveFromNonce(sender, msg.DestinationSubaccountId)
 
 	denom := msg.Amount.Denom
-	amount := sdk.NewDecFromInt(msg.Amount.Amount)
+	amount := msg.Amount.Amount.ToDec()
 
 	if err := k.Keeper.DecrementDeposit(ctx, srcSubaccountID, denom, amount); err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func (k AccountsMsgServer) ExternalTransfer(
 	dstSubaccountID := common.HexToHash(msg.DestinationSubaccountId)
 
 	denom := msg.Amount.Denom
-	amount := sdk.NewDecFromInt(msg.Amount.Amount)
+	amount := msg.Amount.Amount.ToDec()
 
 	if err := k.Keeper.DecrementDeposit(ctx, srcSubaccountID, denom, amount); err != nil {
 		return nil, err

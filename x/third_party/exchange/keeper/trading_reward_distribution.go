@@ -4,7 +4,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
 )
 
@@ -26,9 +25,9 @@ func (k *Keeper) distributeTradingRewardsForAccount(
 			continue
 		}
 
-		accountRewardAmount := accountPoints.Points.Mul(availableRewardForDenom.ToDec()).Quo(totalPoints).TruncateInt()
+		accountRewardAmount := accountPoints.Points.Mul(sdk.NewDecFromInt(availableRewardForDenom)).Quo(totalPoints).TruncateInt()
 
-		if coin.Denom == chaintypes.InjectiveCoin && accountRewardAmount.GT(injRewardStakedRequirementThreshold) {
+		if coin.Denom == "ujolt" && accountRewardAmount.GT(injRewardStakedRequirementThreshold) {
 			maxDelegations := uint16(10)
 			stakedINJ := k.CalculateStakedAmountWithoutCache(ctx, accountPoints.Account, maxDelegations)
 			minRewardAboveThreshold := injRewardStakedRequirementThreshold
@@ -84,7 +83,7 @@ func (k *Keeper) getAvailableRewardsToPayout(
 
 	for _, rewardCoin := range maxCampaignRewards {
 		amountInPool := feePool.CommunityPool.AmountOf(rewardCoin.Denom)
-		totalReward := sdk.MinDec(rewardCoin.Amount.ToDec(), amountInPool).TruncateInt()
+		totalReward := sdk.MinDec(sdk.NewDecFromInt(rewardCoin.Amount), amountInPool).TruncateInt()
 		coinsToDistributeFromPool := sdk.NewCoins(sdk.NewCoin(rewardCoin.Denom, totalReward))
 
 		if err := k.DistributionKeeper.DistributeFromFeePool(ctx, coinsToDistributeFromPool, types.TempRewardsSenderAddress); err != nil {

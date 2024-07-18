@@ -15,7 +15,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/ethereum/go-ethereum/common"
 
-	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle_bak/types"
+	oracletypes "github.com/joltify-finance/joltify_lending/x/third_party/oracle/types"
+	wasmxtypes "github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 
 const RouterKey = ModuleName
@@ -1407,7 +1408,7 @@ func (msg *MsgPrivilegedExecuteContract) ValidateBasic() error {
 		return errors.Wrap(sdkerrors.ErrInvalidAddress, msg.ContractAddress)
 	}
 
-	var e ExecutionData
+	var e wasmxtypes.ExecutionData
 	if err := json.Unmarshal([]byte(msg.Data), &e); err != nil {
 		return errors.Wrap(err, msg.Data)
 	}

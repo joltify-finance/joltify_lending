@@ -8,9 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
-	"github.com/InjectiveLabs/injective-core/injective-chain/app/ante"
-	chaintypes "github.com/InjectiveLabs/injective-core/injective-chain/types"
+	"github.com/joltify-finance/joltify_lending/app/ante"
 	"github.com/joltify-finance/joltify_lending/x/third_party/wasmx/types"
 )
 
@@ -467,5 +465,5 @@ func (k *Keeper) DoesContractExist(ctx sdk.Context, contractAddr sdk.AccAddress)
 
 func CalculateFee(gas, gasPrice uint64) sdk.Coin {
 	amount := sdk.NewIntFromUint64(gasPrice).Mul(sdk.NewIntFromUint64(gas))
-	return sdk.NewCoin(chaintypes.InjectiveCoin, amount)
+	return sdk.NewCoin("ujolt", amount)
 }

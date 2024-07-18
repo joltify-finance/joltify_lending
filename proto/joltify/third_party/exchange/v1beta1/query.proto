@@ -352,10 +352,10 @@ service Query {
   }
 
   // Retrieves market making pool info
-//  rpc MitoVaultInfos(MitoVaultInfosRequest) returns (MitoVaultInfosResponse) {
-//    option (google.api.http).get =
-//        "/joltify/third_party/exchange/v1beta1/mito_vault_infos";
-//  }
+  rpc MitoVaultInfos(MitoVaultInfosRequest) returns (MitoVaultInfosResponse) {
+    option (google.api.http).get =
+        "/joltify/third_party/exchange/v1beta1/mito_vault_infos";
+  }
 
   // QueryMarketIDFromVault returns the market ID for a given vault subaccount
   // ID

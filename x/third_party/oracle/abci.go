@@ -4,32 +4,20 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/InjectiveLabs/metrics"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/oracle/keeper"
 )
 
 type BlockHandler struct {
 	k keeper.Keeper
-
-	svcTags metrics.Tags
 }
 
 func NewBlockHandler(k keeper.Keeper) *BlockHandler {
 	return &BlockHandler{
 		k: k,
-
-		svcTags: metrics.Tags{
-			"svc": "oracle_b",
-		},
 	}
 }
 
 func (h *BlockHandler) BeginBlocker(ctx sdk.Context) {
-	metrics.ReportFuncCall(h.svcTags)
-	doneFn := metrics.ReportFuncTiming(h.svcTags)
-	defer doneFn()
-
 	bandIBCParams := h.k.GetBandIBCParams(ctx)
 	// Request oracle prices using band IBC in frequent intervals
 	if bandIBCParams.BandIbcEnabled && ctx.BlockHeight()%bandIBCParams.IbcRequestInterval == 0 {
@@ -50,7 +38,6 @@ func (h *BlockHandler) RequestAllBandIBCRates(ctx sdk.Context) {
 	bandIBCOracleRequests := h.k.GetAllBandIBCOracleRequests(ctx)
 
 	if len(bandIBCOracleRequests) == 0 {
-		metrics.ReportFuncError(h.svcTags)
 		return
 	}
 
@@ -58,7 +45,6 @@ func (h *BlockHandler) RequestAllBandIBCRates(ctx sdk.Context) {
 		err := h.k.RequestBandIBCOraclePrices(ctx, req)
 		if err != nil {
 			ctx.Logger().Error(err.Error())
-			metrics.ReportFuncError(h.svcTags)
 		}
 	}
 }

@@ -3,8 +3,6 @@ package types
 import (
 	"fmt"
 
-	"github.com/evmos/ethermint/crypto/ethsecp256k1"
-
 	sdksecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

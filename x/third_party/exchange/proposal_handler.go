@@ -6,7 +6,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/ethereum/go-ethereum/common"
-	log "github.com/xlab/suplog"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/exchange/types"
@@ -758,7 +757,7 @@ func handleBatchCommunityPoolSpendProposal(ctx sdk.Context, k keeper.Keeper, p *
 			return err
 		}
 
-		log.Infoln("transferred from the community pool to recipient", "amount", proposal.Amount.String(), "recipient", proposal.Recipient)
+		k.Logger(ctx).Info("transferred from the community pool to recipient", "amount", proposal.Amount.String(), "recipient", proposal.Recipient)
 	}
 
 	return nil

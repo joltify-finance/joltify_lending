@@ -56,7 +56,6 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 }
 
 func Recover(err *error) { // nolint:all
-
 	// fixme we do not need to have the recover!!
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	if r := recover(); r != nil {

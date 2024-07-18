@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"github.com/InjectiveLabs/metrics"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -20,8 +19,6 @@ type Keeper struct {
 	accountKeeper  authkeeper.AccountKeeper
 	bankKeeper     types.BankKeeper
 	exchangeKeeper *exchangekeeper.Keeper
-
-	svcTags metrics.Tags
 
 	authority string
 }
@@ -42,9 +39,6 @@ func NewKeeper(
 		bankKeeper:     bk,
 		exchangeKeeper: ek,
 		authority:      authority,
-		svcTags: metrics.Tags{
-			"svc": "insurance_k",
-		},
 	}
 }
 

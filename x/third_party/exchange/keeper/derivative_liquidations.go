@@ -8,6 +8,7 @@ import (
 	insurancetypes "github.com/joltify-finance/joltify_lending/x/third_party/insurance/types"
 
 	"cosmossdk.io/errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 
