@@ -1,0 +1,9 @@
+syntax = "proto3";
+package joltify.third_party.dydxprotocol.accountplus;
+
+import "joltify/third_party/dydxprotocol/accountplus/accountplus.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/accountplus/types";
+
+// Module genesis state
+message GenesisState { repeated AccountState accounts = 1; }

@@ -1,0 +1,20 @@
+syntax = "proto3";
+package joltify.third_party.dydxprotocol.clob;
+
+import "gogoproto/gogo.proto";
+import "joltify/third_party/dydxprotocol/clob/block_rate_limit_config.proto";
+import "joltify/third_party/dydxprotocol/clob/clob_pair.proto";
+import "joltify/third_party/dydxprotocol/clob/equity_tier_limit_config.proto";
+import "joltify/third_party/dydxprotocol/clob/liquidations_config.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/clob/types";
+
+// GenesisState defines the clob module's genesis state.
+message GenesisState {
+  repeated ClobPair clob_pairs = 1 [ (gogoproto.nullable) = false ];
+  LiquidationsConfig liquidations_config = 2 [ (gogoproto.nullable) = false ];
+  BlockRateLimitConfiguration block_rate_limit_config = 3
+      [ (gogoproto.nullable) = false ];
+  EquityTierLimitConfiguration equity_tier_limit_config = 4
+      [ (gogoproto.nullable) = false ];
+}

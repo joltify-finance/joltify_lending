@@ -7,12 +7,11 @@ import (
 	fmt "fmt"
 	_ "github.com/cosmos/cosmos-proto"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
-	types "github.com/cosmos/cosmos-sdk/types"
+	types1 "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
+	_ "github.com/cosmos/gogoproto/types"
 	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
-	_ "google.golang.org/protobuf/types/known/durationpb"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -113,15 +112,15 @@ type PoolInfo struct {
 	PoolNFTIds                             []string                                        `protobuf:"bytes,9,rep,name=pool_nFT_ids,json=poolNFTIds,proto3" json:"pool_nFT_ids,omitempty"`
 	LastPaymentTime                        time.Time                                       `protobuf:"bytes,10,opt,name=last_payment_time,json=lastPaymentTime,proto3,stdtime" json:"last_payment_time"`
 	PoolStatus                             PoolInfo_POOLSTATUS                             `protobuf:"varint,11,opt,name=pool_status,json=poolStatus,proto3,enum=joltify.spv.PoolInfo_POOLSTATUS" json:"pool_status,omitempty"`
-	BorrowedAmount                         types.Coin                                      `protobuf:"bytes,12,opt,name=borrowed_amount,json=borrowedAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed_amount"`
+	BorrowedAmount                         types1.Coin                                     `protobuf:"bytes,12,opt,name=borrowed_amount,json=borrowedAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"borrowed_amount"`
 	PoolInterest                           github_com_cosmos_cosmos_sdk_types.Dec          `protobuf:"bytes,13,opt,name=pool_interest,json=poolInterest,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"pool_interest"`
 	ProjectLength                          uint64                                          `protobuf:"varint,14,opt,name=project_length,json=projectLength,proto3" json:"project_length,omitempty"`
-	UsableAmount                           types.Coin                                      `protobuf:"bytes,15,opt,name=usable_amount,json=usableAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"usable_amount"`
-	TargetAmount                           types.Coin                                      `protobuf:"bytes,16,opt,name=target_amount,json=targetAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"target_amount"`
+	UsableAmount                           types1.Coin                                     `protobuf:"bytes,15,opt,name=usable_amount,json=usableAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"usable_amount"`
+	TargetAmount                           types1.Coin                                     `protobuf:"bytes,16,opt,name=target_amount,json=targetAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"target_amount"`
 	PoolType                               PoolInfo_POOLTYPE                               `protobuf:"varint,17,opt,name=pool_type,json=poolType,proto3,enum=joltify.spv.PoolInfo_POOLTYPE" json:"pool_type,omitempty"`
 	EscrowInterestAmount                   github_com_cosmos_cosmos_sdk_types.Int          `protobuf:"bytes,18,opt,name=escrow_interest_amount,json=escrowInterestAmount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"escrow_interest_amount"`
-	EscrowPrincipalAmount                  types.Coin                                      `protobuf:"bytes,19,opt,name=escrow_principal_amount,json=escrowPrincipalAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"escrow_principal_amount"`
-	WithdrawProposalAmount                 types.Coin                                      `protobuf:"bytes,20,opt,name=withdraw_proposal_amount,json=withdrawProposalAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"withdraw_proposal_amount"`
+	EscrowPrincipalAmount                  types1.Coin                                     `protobuf:"bytes,19,opt,name=escrow_principal_amount,json=escrowPrincipalAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"escrow_principal_amount"`
+	WithdrawProposalAmount                 types1.Coin                                     `protobuf:"bytes,20,opt,name=withdraw_proposal_amount,json=withdrawProposalAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"withdraw_proposal_amount"`
 	ProjectDueTime                         time.Time                                       `protobuf:"bytes,21,opt,name=project_due_time,json=projectDueTime,proto3,stdtime" json:"project_due_time"`
 	WithdrawAccounts                       []github_com_cosmos_cosmos_sdk_types.AccAddress `protobuf:"bytes,22,rep,name=withdraw_accounts,json=withdrawAccounts,proto3,casttype=github.com/cosmos/cosmos-sdk/types.AccAddress" json:"withdraw_accounts,omitempty"`
 	TransferAccounts                       []github_com_cosmos_cosmos_sdk_types.AccAddress `protobuf:"bytes,23,rep,name=transfer_accounts,json=transferAccounts,proto3,casttype=github.com/cosmos/cosmos-sdk/types.AccAddress" json:"transfer_accounts,omitempty"`
@@ -143,9 +142,9 @@ type PoolInfo struct {
 	ProjectName                            string                                          `protobuf:"bytes,40,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`
 	SeparatePool                           bool                                            `protobuf:"varint,41,opt,name=separate_pool,json=separatePool,proto3" json:"separate_pool,omitempty"`
 	ProcessedWithdrawAccounts              []github_com_cosmos_cosmos_sdk_types.AccAddress `protobuf:"bytes,42,rep,name=processed_withdraw_accounts,json=processedWithdrawAccounts,proto3,casttype=github.com/cosmos/cosmos-sdk/types.AccAddress" json:"processed_withdraw_accounts,omitempty"`
-	TotalTransferOwnershipAmount           types.Coin                                      `protobuf:"bytes,43,opt,name=total_transfer_ownership_amount,json=totalTransferOwnershipAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"total_transfer_ownership_amount"`
+	TotalTransferOwnershipAmount           types1.Coin                                     `protobuf:"bytes,43,opt,name=total_transfer_ownership_amount,json=totalTransferOwnershipAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"total_transfer_ownership_amount"`
 	// the minimum amount of coins that can be withdrawn from the pool for the first time
-	MinBorrowAmount  types.Coin                             `protobuf:"bytes,44,opt,name=min_borrow_amount,json=minBorrowAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"min_borrow_amount"`
+	MinBorrowAmount  types1.Coin                            `protobuf:"bytes,44,opt,name=min_borrow_amount,json=minBorrowAmount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"min_borrow_amount"`
 	MinDepositAmount github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,45,opt,name=min_deposit_amount,json=minDepositAmount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"min_deposit_amount"`
 }
 
@@ -245,11 +244,11 @@ func (m *PoolInfo) GetPoolStatus() PoolInfo_POOLSTATUS {
 	return PoolInfo_ACTIVE
 }
 
-func (m *PoolInfo) GetBorrowedAmount() types.Coin {
+func (m *PoolInfo) GetBorrowedAmount() types1.Coin {
 	if m != nil {
 		return m.BorrowedAmount
 	}
-	return types.Coin{}
+	return types1.Coin{}
 }
 
 func (m *PoolInfo) GetProjectLength() uint64 {
@@ -259,18 +258,18 @@ func (m *PoolInfo) GetProjectLength() uint64 {
 	return 0
 }
 
-func (m *PoolInfo) GetUsableAmount() types.Coin {
+func (m *PoolInfo) GetUsableAmount() types1.Coin {
 	if m != nil {
 		return m.UsableAmount
 	}
-	return types.Coin{}
+	return types1.Coin{}
 }
 
-func (m *PoolInfo) GetTargetAmount() types.Coin {
+func (m *PoolInfo) GetTargetAmount() types1.Coin {
 	if m != nil {
 		return m.TargetAmount
 	}
-	return types.Coin{}
+	return types1.Coin{}
 }
 
 func (m *PoolInfo) GetPoolType() PoolInfo_POOLTYPE {
@@ -280,18 +279,18 @@ func (m *PoolInfo) GetPoolType() PoolInfo_POOLTYPE {
 	return PoolInfo_JUNIOR
 }
 
-func (m *PoolInfo) GetEscrowPrincipalAmount() types.Coin {
+func (m *PoolInfo) GetEscrowPrincipalAmount() types1.Coin {
 	if m != nil {
 		return m.EscrowPrincipalAmount
 	}
-	return types.Coin{}
+	return types1.Coin{}
 }
 
-func (m *PoolInfo) GetWithdrawProposalAmount() types.Coin {
+func (m *PoolInfo) GetWithdrawProposalAmount() types1.Coin {
 	if m != nil {
 		return m.WithdrawProposalAmount
 	}
-	return types.Coin{}
+	return types1.Coin{}
 }
 
 func (m *PoolInfo) GetProjectDueTime() time.Time {
@@ -413,18 +412,18 @@ func (m *PoolInfo) GetProcessedWithdrawAccounts() []github_com_cosmos_cosmos_sdk
 	return nil
 }
 
-func (m *PoolInfo) GetTotalTransferOwnershipAmount() types.Coin {
+func (m *PoolInfo) GetTotalTransferOwnershipAmount() types1.Coin {
 	if m != nil {
 		return m.TotalTransferOwnershipAmount
 	}
-	return types.Coin{}
+	return types1.Coin{}
 }
 
-func (m *PoolInfo) GetMinBorrowAmount() types.Coin {
+func (m *PoolInfo) GetMinBorrowAmount() types1.Coin {
 	if m != nil {
 		return m.MinBorrowAmount
 	}
-	return types.Coin{}
+	return types1.Coin{}
 }
 
 type InterestPrepayment struct {

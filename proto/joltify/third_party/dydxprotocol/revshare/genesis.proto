@@ -1,0 +1,12 @@
+syntax = "proto3";
+package joltify.third_party.dydxprotocol.revshare;
+
+import "gogoproto/gogo.proto";
+import "joltify/third_party/dydxprotocol/revshare/params.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/revshare/types";
+
+// GenesisState defines `x/revshare`'s genesis state.
+message GenesisState {
+  MarketMapperRevenueShareParams params = 1 [ (gogoproto.nullable) = false ];
+}
