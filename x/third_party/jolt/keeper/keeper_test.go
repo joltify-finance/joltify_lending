@@ -1,11 +1,13 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -14,10 +16,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
@@ -28,7 +26,7 @@ type KeeperTestSuite struct {
 	keeper        keeper.Keeper
 	auctionKeeper auctionkeeper.Keeper
 	app           app.TestApp
-	ctx           sdk.Context
+	ctx           context.Context
 	addrs         []sdk.AccAddress
 }
 
@@ -37,20 +35,17 @@ func (suite *KeeperTestSuite) SetupTest() {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
 
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	tApp.InitializeFromGenesisStates(nil, nil)
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)
-	k := tApp.GetJoltKeeper()
 	suite.app = tApp
-	suite.ctx = ctx
-	suite.keeper = k
+	suite.ctx = tApp.Ctx
+	suite.keeper = tApp.GetJoltKeeper()
 	suite.addrs = addrs
 }
 
 func (suite *KeeperTestSuite) TestGetSetDeleteDeposit() {
-	dep := types2.NewDeposit(sdk.AccAddress("test"), sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(100))),
-		types2.SupplyInterestFactors{types2.NewSupplyInterestFactor("", sdk.MustNewDecFromStr("0"))})
+	dep := types2.NewDeposit(sdk.AccAddress("test"), sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(100))),
+		types2.SupplyInterestFactors{types2.NewSupplyInterestFactor("", sdkmath.LegacyMustNewDecFromStr("0"))})
 
 	_, f := suite.keeper.GetDeposit(suite.ctx, sdk.AccAddress("test"))
 	suite.Require().False(f)
@@ -69,7 +64,7 @@ func (suite *KeeperTestSuite) TestGetSetDeleteDeposit() {
 
 func (suite *KeeperTestSuite) TestIterateDeposits() {
 	for i := 0; i < 5; i++ {
-		dep := types2.NewDeposit(sdk.AccAddress("test"+fmt.Sprint(i)), sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(100))), types2.SupplyInterestFactors{})
+		dep := types2.NewDeposit(sdk.AccAddress("test"+fmt.Sprint(i)), sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(100))), types2.SupplyInterestFactors{})
 		suite.Require().NotPanics(func() { suite.keeper.SetDeposit(suite.ctx, dep) })
 	}
 	var deposits []types2.Deposit
@@ -82,9 +77,9 @@ func (suite *KeeperTestSuite) TestIterateDeposits() {
 
 func (suite *KeeperTestSuite) TestGetSetDeleteInterestRateModel() {
 	denom := "test"
-	model := types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10"))
-	borrowLimit := types2.NewBorrowLimit(false, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5"))
-	moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdk.NewInt(1000000), model, sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec())
+	model := types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
+	borrowLimit := types2.NewBorrowLimit(false, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.5"))
+	moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdkmath.NewInt(1000000), model, sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec())
 
 	_, f := suite.keeper.GetMoneyMarket(suite.ctx, denom)
 	suite.Require().False(f)
@@ -119,9 +114,9 @@ func (suite *KeeperTestSuite) TestIterateInterestRateModels() {
 	for i := 0; i < 5; i++ {
 		// Initialize a new money market
 		denom := testDenom + strconv.Itoa(i)
-		model := types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10"))
-		borrowLimit := types2.NewBorrowLimit(false, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5"))
-		moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdk.NewInt(1000000), model, sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec())
+		model := types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
+		borrowLimit := types2.NewBorrowLimit(false, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.5"))
+		moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdkmath.NewInt(1000000), model, sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec())
 
 		// Store money market in the module's store
 		suite.Require().NotPanics(func() { suite.keeper.SetMoneyMarket(suite.ctx, denom, moneyMarket) })
@@ -165,27 +160,27 @@ func (suite *KeeperTestSuite) TestGetSetBorrowedCoins_Empty() {
 	suite.Require().Empty(coins)
 }
 
-func (suite *KeeperTestSuite) getAccountCoins(acc authtypes.AccountI) sdk.Coins {
+func (suite *KeeperTestSuite) getAccountCoins(acc sdk.AccountI) sdk.Coins {
 	bk := suite.app.GetBankKeeper()
 	return bk.GetAllBalances(suite.ctx, acc.GetAddress())
 }
 
-func (suite *KeeperTestSuite) getAccount(addr sdk.AccAddress) authtypes.AccountI {
+func (suite *KeeperTestSuite) getAccount(addr sdk.AccAddress) sdk.AccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetAccount(suite.ctx, addr)
 }
 
-func (suite *KeeperTestSuite) getAccountAtCtx(addr sdk.AccAddress, ctx sdk.Context) authtypes.AccountI {
+func (suite *KeeperTestSuite) getAccountAtCtx(addr sdk.AccAddress, ctx context.Context) sdk.AccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetAccount(ctx, addr)
 }
 
-func (suite *KeeperTestSuite) getModuleAccount(name string) authtypes.ModuleAccountI {
+func (suite *KeeperTestSuite) getModuleAccount(name string) sdk.ModuleAccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetModuleAccount(suite.ctx, name)
 }
 
-func (suite *KeeperTestSuite) getModuleAccountAtCtx(name string, ctx sdk.Context) authtypes.ModuleAccountI {
+func (suite *KeeperTestSuite) getModuleAccountAtCtx(name string, ctx context.Context) sdk.ModuleAccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetModuleAccount(ctx, name)
 }

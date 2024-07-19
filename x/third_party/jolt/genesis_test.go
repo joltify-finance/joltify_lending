@@ -1,11 +1,14 @@
 package jolt_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -13,7 +16,6 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -25,16 +27,16 @@ type GenesisTestSuite struct {
 
 	app     app.TestApp
 	genTime time.Time
-	ctx     sdk.Context
+	ctx     context.Context
 	keeper  keeper.Keeper
 	addrs   []sdk.AccAddress
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.genTime = tmtime.Canonical(time.Date(2021, 1, 1, 1, 1, 1, 1, time.UTC))
-	suite.ctx = tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genTime})
-	suite.keeper = tApp.GetJoltKeeper()
+	// suite.ctx = tApp.Ctx
+	// suite.keeper = tApp.GetJoltKeeper()
 	suite.app = tApp
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(3)
@@ -42,39 +44,39 @@ func (suite *GenesisTestSuite) SetupTest() {
 }
 
 func (suite *GenesisTestSuite) Test_InitExportGenesis() {
-	loanToValue, _ := sdk.NewDecFromStr("0.6")
+	loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
 	params := types2.NewParams(
 		types2.MoneyMarkets{
 			types2.NewMoneyMarket(
 				"ujolt",
 				types2.NewBorrowLimit(
 					false,
-					sdk.NewDec(1e15),
+					sdkmath.LegacyNewDec(1e15),
 					loanToValue,
 				),
 				"joltify:usd",
-				sdk.NewInt(1e6),
+				sdkmath.NewInt(1e6),
 				types2.NewInterestRateModel(
-					sdk.MustNewDecFromStr("0.05"),
-					sdk.MustNewDecFromStr("2"),
-					sdk.MustNewDecFromStr("0.8"),
-					sdk.MustNewDecFromStr("10"),
+					sdkmath.LegacyMustNewDecFromStr("0.05"),
+					sdkmath.LegacyMustNewDecFromStr("2"),
+					sdkmath.LegacyMustNewDecFromStr("0.8"),
+					sdkmath.LegacyMustNewDecFromStr("10"),
 				),
-				sdk.MustNewDecFromStr("0.05"),
-				sdk.ZeroDec(),
+				sdkmath.LegacyMustNewDecFromStr("0.05"),
+				sdkmath.LegacyZeroDec(),
 			),
 		},
-		sdk.NewDec(10),
+		sdkmath.LegacyNewDec(10),
 	)
 
 	deposits := types2.Deposits{
 		types2.NewDeposit(
 			suite.addrs[0],
-			sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1e8))), // 100 ujolt
+			sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1e8))), // 100 ujolt
 			types2.SupplyInterestFactors{
 				{
 					Denom: "ujolt",
-					Value: sdk.NewDec(1),
+					Value: sdkmath.LegacyNewDec(1),
 				},
 			},
 		),
@@ -88,11 +90,11 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 	borrows := types2.Borrows{
 		types2.NewBorrow(
 			suite.addrs[1],
-			sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1e7))), // 10 ujolt
+			sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1e7))), // 10 ujolt
 			types2.BorrowInterestFactors{
 				{
 					Denom: "ujolt",
-					Value: sdk.NewDec(1),
+					Value: sdkmath.LegacyNewDec(1),
 				},
 			},
 		),
@@ -103,8 +105,8 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 		totalBorrowed = totalBorrowed.Add(borrow.Amount...)
 	}
 
-	supplyInterestFactor := sdk.MustNewDecFromStr("1.0001")
-	borrowInterestFactor := sdk.MustNewDecFromStr("1.1234")
+	supplyInterestFactor := sdkmath.LegacyMustNewDecFromStr("1.0001")
+	borrowInterestFactor := sdkmath.LegacyMustNewDecFromStr("1.1234")
 	accuralTimes := types2.GenesisAccumulationTimes{
 		types2.NewGenesisAccumulationTime("ujolt", suite.genTime, supplyInterestFactor, borrowInterestFactor),
 	}
@@ -119,14 +121,15 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 		sdk.Coins{},
 	)
 
-	suite.NotPanics(
-		func() {
-			suite.app.InitializeFromGenesisStatesWithTime(
-				suite.genTime, nil, nil,
-				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGenesis)},
-			)
-		},
+	mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+		suite.genTime, nil, nil,
+		app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGenesis)},
 	)
+	suite.app = mapp
+	suite.app.App = mapp.App
+	suite.ctx = mapp.Ctx
+	suite.app.Ctx = mapp.Ctx
+	suite.keeper = mapp.GetJoltKeeper()
 
 	var expectedDeposits types2.Deposits
 	for _, deposit := range deposits {
@@ -186,7 +189,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 	expectedGenesis := joltGenesis
 	expectedGenesis.Deposits = expectedDeposits
 	expectedGenesis.Borrows = expectedBorrows
-	exportedGenesis := jolt.ExportGenesis(suite.ctx, suite.keeper)
+	exportedGenesis := jolt.ExportGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper)
 	suite.Equal(expectedGenesis, exportedGenesis)
 }
 

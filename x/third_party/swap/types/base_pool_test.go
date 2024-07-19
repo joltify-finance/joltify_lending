@@ -5,10 +5,9 @@ import (
 	"math/big"
 	"testing"
 
-	types "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 
 	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,9 +26,9 @@ func s(str string) sdkmath.Int {
 	return num
 }
 
-// d creates a new sdk.Dec from a string
-func d(str string) sdk.Dec {
-	return sdk.MustNewDecFromStr(str)
+// d creates a new sdkmath.LegacyDec from a string
+func d(str string) sdkmath.LegacyDec {
+	return sdkmath.LegacyMustNewDecFromStr(str)
 }
 
 // exp takes a sdkmath.Int and computes the power
@@ -419,7 +418,7 @@ func TestBasePool_Swap_ExactInput(t *testing.T) {
 		reservesA      sdkmath.Int
 		reservesB      sdkmath.Int
 		exactInput     sdkmath.Int
-		fee            sdk.Dec
+		fee            sdkmath.LegacyDec
 		expectedOutput sdkmath.Int
 		expectedFee    sdkmath.Int
 	}{
@@ -477,7 +476,7 @@ func TestBasePool_Swap_ExactOutput(t *testing.T) {
 		reservesA     sdkmath.Int
 		reservesB     sdkmath.Int
 		exactOutput   sdkmath.Int
-		fee           sdk.Dec
+		fee           sdkmath.LegacyDec
 		expectedInput sdkmath.Int
 		expectedFee   sdkmath.Int
 	}{
@@ -531,7 +530,7 @@ func TestBasePool_Swap_ExactOutput(t *testing.T) {
 func TestBasePool_Panics_Swap_ExactInput(t *testing.T) {
 	testCases := []struct {
 		swap sdkmath.Int
-		fee  sdk.Dec
+		fee  sdkmath.LegacyDec
 	}{
 		{i(0), d("0.003")},
 		{i(-1), d("0.003")},
@@ -561,7 +560,7 @@ func TestBasePool_Panics_Swap_ExactInput(t *testing.T) {
 func TestBasePool_Panics_Swap_ExactOutput(t *testing.T) {
 	testCases := []struct {
 		swap sdkmath.Int
-		fee  sdk.Dec
+		fee  sdkmath.LegacyDec
 	}{
 		{i(0), d("0.003")},
 		{i(-1), d("0.003")},

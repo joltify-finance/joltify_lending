@@ -1,24 +1,25 @@
 package keeper
 
 import (
+	"context"
 	"sort"
 
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // LiqData holds liquidation-related data
 type LiqData struct {
-	price            sdk.Dec
-	ltv              sdk.Dec
-	conversionFactor sdk.Int
+	price            sdkmath.LegacyDec
+	ltv              sdkmath.LegacyDec
+	conversionFactor sdkmath.Int
 }
 
 // AttemptKeeperLiquidation enables a keeper to liquidate an individual borrower's position
-func (k Keeper) AttemptKeeperLiquidation(ctx sdk.Context, keeper sdk.AccAddress, borrower sdk.AccAddress) error {
+func (k Keeper) AttemptKeeperLiquidation(ctx context.Context, keeper sdk.AccAddress, borrower sdk.AccAddress) error {
 	deposit, found := k.GetDeposit(ctx, borrower)
 	if !found {
 		return types2.ErrDepositNotFound
@@ -51,7 +52,7 @@ func (k Keeper) AttemptKeeperLiquidation(ctx sdk.Context, keeper sdk.AccAddress,
 		return err
 	}
 	if isWithinRange {
-		return sdkerrors.Wrapf(types2.ErrBorrowNotLiquidatable, "position is within valid LTV range")
+		return errorsmod.Wrapf(types2.ErrBorrowNotLiquidatable, "position is within valid LTV range")
 	}
 
 	// Sending coins to auction module with keeper address getting % of the profits
@@ -73,9 +74,10 @@ func (k Keeper) AttemptKeeperLiquidation(ctx sdk.Context, keeper sdk.AccAddress,
 }
 
 // SeizeDeposits seizes a list of deposits and sends them to auction
-func (k Keeper) SeizeDeposits(ctx sdk.Context, keeper sdk.AccAddress, deposit types2.Deposit,
+func (k Keeper) SeizeDeposits(rctx context.Context, keeper sdk.AccAddress, deposit types2.Deposit,
 	borrow types2.Borrow, dDenoms, bDenoms []string,
 ) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	liqMap, err := k.LoadLiquidationData(ctx, deposit, borrow)
 	if err != nil {
 		return err
@@ -86,7 +88,7 @@ func (k Keeper) SeizeDeposits(ctx sdk.Context, keeper sdk.AccAddress, deposit ty
 	for _, depCoin := range deposit.Amount {
 		mm, _ := k.GetMoneyMarket(ctx, depCoin.Denom)
 		keeperReward := mm.KeeperRewardPercentage.MulInt(depCoin.Amount).TruncateInt()
-		if keeperReward.GT(sdk.ZeroInt()) {
+		if keeperReward.GT(sdkmath.ZeroInt()) {
 			// Send keeper their reward
 			keeperCoin := sdk.NewCoin(depCoin.Denom, keeperReward)
 			keeperRewardCoins = append(keeperRewardCoins, keeperCoin)
@@ -108,7 +110,7 @@ func (k Keeper) SeizeDeposits(ctx sdk.Context, keeper sdk.AccAddress, deposit ty
 	depositCoinValues := types2.NewValuationMap()
 	for _, deposit := range aucDeposits {
 		dData := liqMap[deposit.Denom]
-		dCoinUsdValue := sdk.NewDecFromInt(deposit.Amount).Quo(sdk.NewDecFromInt(dData.conversionFactor)).Mul(dData.price)
+		dCoinUsdValue := sdkmath.LegacyNewDecFromInt(deposit.Amount).Quo(sdkmath.LegacyNewDecFromInt(dData.conversionFactor)).Mul(dData.price)
 		depositCoinValues.Increment(deposit.Denom, dCoinUsdValue)
 	}
 
@@ -116,7 +118,7 @@ func (k Keeper) SeizeDeposits(ctx sdk.Context, keeper sdk.AccAddress, deposit ty
 	borrowCoinValues := types2.NewValuationMap()
 	for _, bCoin := range borrow.Amount {
 		bData := liqMap[bCoin.Denom]
-		bCoinUsdValue := sdk.NewDecFromInt(bCoin.Amount).Quo(sdk.NewDecFromInt(bData.conversionFactor)).Mul(bData.price)
+		bCoinUsdValue := sdkmath.LegacyNewDecFromInt(bCoin.Amount).Quo(sdkmath.LegacyNewDecFromInt(bData.conversionFactor)).Mul(bData.price)
 		borrowCoinValues.Increment(bCoin.Denom, bCoinUsdValue)
 	}
 
@@ -147,8 +149,8 @@ func (k Keeper) SeizeDeposits(ctx sdk.Context, keeper sdk.AccAddress, deposit ty
 }
 
 // StartAuctions attempts to start auctions for seized assets
-func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows, deposits sdk.Coins,
-	depositCoinValues, borrowCoinValues types2.ValuationMap, ltv sdk.Dec, liqMap map[string]LiqData,
+func (k Keeper) StartAuctions(ctx context.Context, borrower sdk.AccAddress, borrows, deposits sdk.Coins,
+	depositCoinValues, borrowCoinValues types2.ValuationMap, ltv sdkmath.LegacyDec, liqMap map[string]LiqData,
 ) (sdk.Coins, error) {
 	// Sort keys to ensure deterministic behavior
 	bKeys := borrowCoinValues.GetSortedKeys()
@@ -156,8 +158,8 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 
 	// Set up auction constants
 	returnAddrs := []sdk.AccAddress{borrower}
-	weights := []sdkmath.Int{sdk.NewInt(100)}
-	debt := sdk.NewCoin("debt", sdk.ZeroInt())
+	weights := []sdkmath.Int{sdkmath.NewInt(100)}
+	debt := sdk.NewCoin("debt", sdkmath.ZeroInt())
 
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleAccountName)
 	maccCoins := k.bankKeeper.SpendableCoins(ctx, macc.GetAddress())
@@ -169,7 +171,7 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 
 		for _, dKey := range dKeys {
 			dValue := depositCoinValues.Get(dKey)
-			if maxLotSize.Equal(sdk.ZeroDec()) {
+			if maxLotSize.Equal(sdkmath.LegacyZeroDec()) {
 				break // exit out of the loop if we have cleared the full amount
 			}
 
@@ -177,7 +179,7 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 				bid := sdk.NewCoin(bKey, borrows.AmountOf(bKey))
 
 				lotSize := maxLotSize.MulInt(liqMap[dKey].conversionFactor).Quo(liqMap[dKey].price)
-				if lotSize.TruncateInt().Equal(sdk.ZeroInt()) {
+				if lotSize.TruncateInt().Equal(sdkmath.ZeroInt()) {
 					continue
 				}
 				lot := sdk.NewCoin(dKey, lotSize.TruncateInt())
@@ -222,14 +224,14 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 					deposits = deposits.Sub(lot)
 				}
 				// Update max lot size
-				maxLotSize = sdk.ZeroDec()
+				maxLotSize = sdkmath.LegacyZeroDec()
 			} else { // We can only start an auction for the partial borrow amount
 				maxBid := dValue.Mul(ltv)
 				bidSize := maxBid.MulInt(liqMap[bKey].conversionFactor).Quo(liqMap[bKey].price)
 				bid := sdk.NewCoin(bKey, bidSize.TruncateInt())
 				lot := sdk.NewCoin(dKey, deposits.AmountOf(dKey))
 
-				if bid.Amount.Equal(sdk.ZeroInt()) || lot.Amount.Equal(sdk.ZeroInt()) {
+				if bid.Amount.Equal(sdkmath.ZeroInt()) || lot.Amount.Equal(sdkmath.ZeroInt()) {
 					continue
 				}
 
@@ -282,7 +284,7 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 	// Send any remaining deposit back to the original borrower
 	for _, dKey := range dKeys {
 		remaining := deposits.AmountOf(dKey)
-		if remaining.GT(sdk.ZeroInt()) {
+		if remaining.GT(sdkmath.ZeroInt()) {
 			returnCoin := sdk.NewCoins(sdk.NewCoin(dKey, remaining))
 			err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types2.ModuleAccountName, borrower, returnCoin)
 			if err != nil {
@@ -295,30 +297,30 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 }
 
 // IsWithinValidLtvRange compares a borrow and deposit to see if it's within a valid LTV range at current prices
-func (k Keeper) IsWithinValidLtvRange(ctx sdk.Context, deposit types2.Deposit, borrow types2.Borrow) (bool, sdk.Dec, error) {
+func (k Keeper) IsWithinValidLtvRange(ctx context.Context, deposit types2.Deposit, borrow types2.Borrow) (bool, sdkmath.LegacyDec, error) {
 	liqMap, err := k.LoadLiquidationData(ctx, deposit, borrow)
 	if err != nil {
-		return false, sdk.Dec{}, err
+		return false, sdkmath.LegacyDec{}, err
 	}
 
-	totalBorrowableUSDAmount := sdk.ZeroDec()
+	totalBorrowableUSDAmount := sdkmath.LegacyZeroDec()
 	for _, depCoin := range deposit.Amount {
 		lData := liqMap[depCoin.Denom]
-		usdValue := sdk.NewDecFromInt(depCoin.Amount).Quo(sdk.NewDecFromInt(lData.conversionFactor)).Mul(lData.price)
+		usdValue := sdkmath.LegacyNewDecFromInt(depCoin.Amount).Quo(sdkmath.LegacyNewDecFromInt(lData.conversionFactor)).Mul(lData.price)
 		borrowableUSDAmountForDeposit := usdValue.Mul(lData.ltv)
 		totalBorrowableUSDAmount = totalBorrowableUSDAmount.Add(borrowableUSDAmountForDeposit)
 	}
 
-	totalBorrowedUSDAmount := sdk.ZeroDec()
+	totalBorrowedUSDAmount := sdkmath.LegacyZeroDec()
 	for _, coin := range borrow.Amount {
 		lData := liqMap[coin.Denom]
-		usdValue := sdk.NewDecFromInt(coin.Amount).Quo(sdk.NewDecFromInt(lData.conversionFactor)).Mul(lData.price)
+		usdValue := sdkmath.LegacyNewDecFromInt(coin.Amount).Quo(sdkmath.LegacyNewDecFromInt(lData.conversionFactor)).Mul(lData.price)
 		totalBorrowedUSDAmount = totalBorrowedUSDAmount.Add(usdValue)
 	}
 
-	var ratio sdk.Dec
-	if totalBorrowableUSDAmount.Equal(sdk.ZeroDec()) {
-		ratio = sdk.MustNewDecFromStr("10000")
+	var ratio sdkmath.LegacyDec
+	if totalBorrowableUSDAmount.Equal(sdkmath.LegacyZeroDec()) {
+		ratio = sdkmath.LegacyMustNewDecFromStr("10000")
 	} else {
 		ratio = totalBorrowedUSDAmount.Quo(totalBorrowableUSDAmount)
 	}
@@ -331,17 +333,17 @@ func (k Keeper) IsWithinValidLtvRange(ctx sdk.Context, deposit types2.Deposit, b
 
 // GetStoreLTV calculates the user's current LTV based on their deposits/borrows in the store
 // and does not include any outsanding interest.
-func (k Keeper) GetStoreLTV(ctx sdk.Context, addr sdk.AccAddress) (sdk.Dec, error) {
+func (k Keeper) GetStoreLTV(ctx context.Context, addr sdk.AccAddress) (sdkmath.LegacyDec, error) {
 	// Fetch deposits and parse coin denoms
 	deposit, found := k.GetDeposit(ctx, addr)
 	if !found {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 
 	// Fetch borrow balances and parse coin denoms
 	borrow, found := k.GetBorrow(ctx, addr)
 	if !found {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 
 	return k.CalculateLtv(ctx, deposit, borrow)
@@ -349,18 +351,18 @@ func (k Keeper) GetStoreLTV(ctx sdk.Context, addr sdk.AccAddress) (sdk.Dec, erro
 
 // CalculateLtv calculates the potential LTV given a user's deposits and borrows.
 // The boolean returned indicates if the LTV should be added to the store's LTV index.
-func (k Keeper) CalculateLtv(ctx sdk.Context, deposit types2.Deposit, borrow types2.Borrow) (sdk.Dec, error) {
+func (k Keeper) CalculateLtv(ctx context.Context, deposit types2.Deposit, borrow types2.Borrow) (sdkmath.LegacyDec, error) {
 	// Load required liquidation data for every deposit/borrow denom
 	liqMap, err := k.LoadLiquidationData(ctx, deposit, borrow)
 	if err != nil {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 
 	// Build valuation map to hold deposit coin USD valuations
 	depositCoinValues := types2.NewValuationMap()
 	for _, depCoin := range deposit.Amount {
 		dData := liqMap[depCoin.Denom]
-		dCoinUsdValue := sdk.NewDecFromInt(depCoin.Amount).Quo(sdk.NewDecFromInt(dData.conversionFactor)).Mul(dData.price)
+		dCoinUsdValue := sdkmath.LegacyNewDecFromInt(depCoin.Amount).Quo(sdkmath.LegacyNewDecFromInt(dData.conversionFactor)).Mul(dData.price)
 		depositCoinValues.Increment(depCoin.Denom, dCoinUsdValue)
 	}
 
@@ -368,14 +370,14 @@ func (k Keeper) CalculateLtv(ctx sdk.Context, deposit types2.Deposit, borrow typ
 	borrowCoinValues := types2.NewValuationMap()
 	for _, bCoin := range borrow.Amount {
 		bData := liqMap[bCoin.Denom]
-		bCoinUsdValue := sdk.NewDecFromInt(bCoin.Amount).Quo(sdk.NewDecFromInt(bData.conversionFactor)).Mul(bData.price)
+		bCoinUsdValue := sdkmath.LegacyNewDecFromInt(bCoin.Amount).Quo(sdkmath.LegacyNewDecFromInt(bData.conversionFactor)).Mul(bData.price)
 		borrowCoinValues.Increment(bCoin.Denom, bCoinUsdValue)
 	}
 
 	// User doesn't have any deposits, catch divide by 0 error
 	sumDeposits := depositCoinValues.Sum()
-	if sumDeposits.Equal(sdk.ZeroDec()) {
-		return sdk.ZeroDec(), nil
+	if sumDeposits.Equal(sdkmath.LegacyZeroDec()) {
+		return sdkmath.LegacyZeroDec(), nil
 	}
 
 	// Loan-to-Value ratio
@@ -383,7 +385,7 @@ func (k Keeper) CalculateLtv(ctx sdk.Context, deposit types2.Deposit, borrow typ
 }
 
 // LoadLiquidationData returns liquidation data, deposit, borrow
-func (k Keeper) LoadLiquidationData(ctx sdk.Context, deposit types2.Deposit, borrow types2.Borrow) (map[string]LiqData, error) {
+func (k Keeper) LoadLiquidationData(ctx context.Context, deposit types2.Deposit, borrow types2.Borrow) (map[string]LiqData, error) {
 	liqMap := make(map[string]LiqData)
 
 	borrowDenoms := getDenoms(borrow.Amount)
@@ -394,7 +396,7 @@ func (k Keeper) LoadLiquidationData(ctx sdk.Context, deposit types2.Deposit, bor
 	for _, denom := range denoms {
 		mm, found := k.GetMoneyMarket(ctx, denom)
 		if !found {
-			return liqMap, sdkerrors.Wrapf(types2.ErrMarketNotFound, "no market found for denom %s", denom)
+			return liqMap, errorsmod.Wrapf(types2.ErrMarketNotFound, "no market found for denom %s", denom)
 		}
 
 		priceData, err := k.pricefeedKeeper.GetCurrentPrice(ctx, mm.SpotMarketID)

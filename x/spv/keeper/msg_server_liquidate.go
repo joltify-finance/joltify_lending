@@ -6,6 +6,8 @@ import (
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
+
+	storetypes "cosmossdk.io/store/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 
@@ -13,7 +15,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLiquidator, totalPoolBorrowed sdk.Coin, paidAmount sdkmath.Int) (sdkmath.Int, error) {
+func (k Keeper) doUpdateLiquidationInfo(rctx context.Context, el string, amountFromLiquidator, totalPoolBorrowed sdk.Coin, paidAmount sdkmath.Int) (sdkmath.Int, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	class, found := k.NftKeeper.GetClass(ctx, el)
 	if !found {
 		panic(found)
@@ -27,7 +30,7 @@ func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLi
 
 	lastBorrow := borrowInterest.BorrowDetails[len(borrowInterest.BorrowDetails)-1].BorrowedAmount
 	if paidAmount.IsZero() {
-		paidAmount = sdk.NewDecFromInt(amountFromLiquidator.Amount).Mul(sdk.NewDecFromInt(lastBorrow.Amount)).Quo(sdk.NewDecFromInt(totalPoolBorrowed.Amount)).TruncateInt()
+		paidAmount = sdkmath.LegacyNewDecFromInt(amountFromLiquidator.Amount).Mul(sdkmath.LegacyNewDecFromInt(lastBorrow.Amount)).Quo(sdkmath.LegacyNewDecFromInt(totalPoolBorrowed.Amount)).TruncateInt()
 	}
 
 	if borrowInterest.LiquidationItems == nil {
@@ -49,23 +52,23 @@ func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLi
 	}
 	err = k.NftKeeper.UpdateClass(ctx, class)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	return paidAmount, nil
 }
 
-func (k Keeper) handleLiquidation(ctx sdk.Context, poolInfo types.PoolInfo, amount sdk.Coin) error {
+func (k Keeper) handleLiquidation(ctx context.Context, poolInfo types.PoolInfo, amount sdk.Coin) error {
 	nftClasses := poolInfo.PoolNFTIds
 	totalBorrowed := poolInfo.BorrowedAmount
 	// the first element is the pool class, we skip it
-	totalPaid := sdk.ZeroInt()
+	totalPaid := sdkmath.ZeroInt()
 	for i, el := range nftClasses {
 		if i == 0 {
 			// we will handle the fist element later
 			continue
 		}
-		amountPaid, err := k.doUpdateLiquidationInfo(ctx, el, amount, totalBorrowed, sdk.ZeroInt())
+		amountPaid, err := k.doUpdateLiquidationInfo(ctx, el, amount, totalBorrowed, sdkmath.ZeroInt())
 		if err != nil {
 			return err
 		}
@@ -85,10 +88,10 @@ func (k Keeper) handleLiquidation(ctx sdk.Context, poolInfo types.PoolInfo, amou
 	return nil
 }
 
-func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*types.MsgLiquidateResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
+func (k msgServer) Liquidate(rctx context.Context, msg *types.MsgLiquidate) (*types.MsgLiquidateResponse, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 
 	liquidator, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {

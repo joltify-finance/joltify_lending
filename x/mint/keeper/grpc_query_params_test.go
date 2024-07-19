@@ -3,24 +3,23 @@ package keeper_test
 import (
 	"testing"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
+	"cosmossdk.io/log"
+
+	"github.com/stretchr/testify/require"
+
 	"github.com/joltify-finance/joltify_lending/app"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestParamsQuery(t *testing.T) {
-	lg := tmlog.NewNopLogger()
+	lg := log.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
+	ctx := tApp.NewContext(true)
 
 	keeper := tApp.GetMintKeeper()
 
-	wctx := sdk.WrapSDKContext(ctx)
+	wctx := ctx
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)
 

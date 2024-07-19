@@ -1,15 +1,15 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/stretchr/testify/suite"
 
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
@@ -22,7 +22,7 @@ type KeeperTestSuite struct {
 	keeper keeper.Keeper
 
 	app app.TestApp
-	ctx sdk.Context
+	ctx context.Context
 
 	genesisTime time.Time
 	addrs       []sdk.AccAddress
@@ -39,11 +39,11 @@ func (suite *KeeperTestSuite) SetupTest() {
 }
 
 func (suite *KeeperTestSuite) SetupApp() {
-	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.app = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 
-	suite.ctx = suite.app.NewContext(true, tmprototypes.Header{Time: suite.genesisTime})
+	suite.ctx = suite.app.NewContext(true)
 }
 
 type accrualtime struct {
@@ -68,11 +68,11 @@ func (suite *KeeperTestSuite) TestIterateHardSupplyRewardAccrualTimes() {
 	expectedAccrualTimes := nonEmptyAccrualTimes
 
 	for _, at := range expectedAccrualTimes {
-		suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, at.denom, at.time)
+		suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), at.denom, at.time)
 	}
 
 	var actualAccrualTimes []accrualtime
-	suite.keeper.IterateJoltSupplyRewardAccrualTimes(suite.ctx, func(denom string, accrualTime time.Time) bool {
+	suite.keeper.IterateJoltSupplyRewardAccrualTimes(sdk.UnwrapSDKContext(suite.ctx), func(denom string, accrualTime time.Time) bool {
 		actualAccrualTimes = append(actualAccrualTimes, accrualtime{denom: denom, time: accrualTime})
 		return false
 	})
@@ -86,11 +86,11 @@ func (suite *KeeperTestSuite) TestIterateHardBorrowrRewardAccrualTimes() {
 	expectedAccrualTimes := nonEmptyAccrualTimes
 
 	for _, at := range expectedAccrualTimes {
-		suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(suite.ctx, at.denom, at.time)
+		suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), at.denom, at.time)
 	}
 
 	var actualAccrualTimes []accrualtime
-	suite.keeper.IterateJoltBorrowRewardAccrualTimes(suite.ctx, func(denom string, accrualTime time.Time) bool {
+	suite.keeper.IterateJoltBorrowRewardAccrualTimes(sdk.UnwrapSDKContext(suite.ctx), func(denom string, accrualTime time.Time) bool {
 		actualAccrualTimes = append(actualAccrualTimes, accrualtime{denom: denom, time: accrualTime})
 		return false
 	})

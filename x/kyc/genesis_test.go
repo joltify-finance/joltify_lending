@@ -65,7 +65,7 @@ func TestT2(t *testing.T) {
 		BasicInfo:                    &b,
 		ProjectLength:                480, // 5 mins
 		SeparatePool:                 true,
-		BaseApy:                      sdk.NewDecWithPrec(10, 2),
+		BaseApy:                      sdkmath.LegacyNewDecWithPrec(10, 2),
 		PayFreq:                      "120",
 		PoolLockedSeconds:            100,
 		PoolTotalBorrowLimit:         100,

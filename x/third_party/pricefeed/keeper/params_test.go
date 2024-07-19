@@ -1,19 +1,17 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
-
+	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
@@ -23,13 +21,17 @@ type KeeperTestSuite struct {
 
 	keeper keeper.Keeper
 	addrs  []sdk.AccAddress
-	ctx    sdk.Context
+	ctx    context.Context
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
-	tApp.InitializeFromGenesisStates(nil, nil,
+	// suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	// suite.ctx = suite.tApp.NewContext(false)
+	// suite.keeper = suite.tApp.GetPriceFeedKeeper()
+
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	ctx := tApp.Ctx
+	tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 		NewPricefeedGenStateMulti(),
 	)
 	suite.keeper = tApp.GetPriceFeedKeeper()
@@ -41,7 +43,8 @@ func (suite *KeeperTestSuite) SetupTest() {
 
 func (suite *KeeperTestSuite) TestGetSetOracles() {
 	params := suite.keeper.GetParams(suite.ctx)
-	suite.Equal([]sdk.AccAddress(nil), params.Markets[0].Oracles)
+	acc, err := sdk.AccAddressFromBech32("jolt15qdefkmwswysgg4qxgqpqr35k3m49pkxu8ygkq")
+	suite.Equal([]sdk.AccAddress{acc}, params.Markets[0].Oracles)
 
 	params.Markets[0].Oracles = suite.addrs
 	suite.NotPanics(func() { suite.keeper.SetParams(suite.ctx, params) })

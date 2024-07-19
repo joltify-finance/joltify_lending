@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	v015pricefeed "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/legacy/v0_15"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
@@ -320,13 +321,13 @@ func (s *migrateTestSuite) TestMigrate_PostedPrices() {
 		{
 			MarketID:      "market-1",
 			OracleAddress: s.addresses[0],
-			Price:         sdk.MustNewDecFromStr("1.2"),
+			Price:         sdkmath.LegacyMustNewDecFromStr("1.2"),
 			Expiry:        time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			MarketID:      "market-2",
 			OracleAddress: s.addresses[1],
-			Price:         sdk.MustNewDecFromStr("1.899"),
+			Price:         sdkmath.LegacyMustNewDecFromStr("1.899"),
 			Expiry:        time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC),
 		},
 	}
@@ -334,13 +335,13 @@ func (s *migrateTestSuite) TestMigrate_PostedPrices() {
 		{
 			MarketID:      "market-1",
 			OracleAddress: s.addresses[0],
-			Price:         sdk.MustNewDecFromStr("1.2"),
+			Price:         sdkmath.LegacyMustNewDecFromStr("1.2"),
 			Expiry:        time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			MarketID:      "market-2",
 			OracleAddress: s.addresses[1],
-			Price:         sdk.MustNewDecFromStr("1.899"),
+			Price:         sdkmath.LegacyMustNewDecFromStr("1.899"),
 			Expiry:        time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC),
 		},
 	}

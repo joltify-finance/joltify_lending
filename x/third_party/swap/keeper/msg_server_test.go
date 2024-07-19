@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
@@ -49,7 +47,7 @@ func (suite *msgServerTestSuite) TestDeposit_CreatePool() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	res, err := suite.msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), deposit)
+	res, err := suite.msgServer.Deposit(suite.Ctx, deposit)
 	suite.Require().Equal(&types.MsgDepositResponse{}, res)
 	suite.Require().NoError(err)
 
@@ -96,12 +94,12 @@ func (suite *msgServerTestSuite) TestDeposit_DeadlineExceeded() {
 		suite.BankKeeper.GetBalance(suite.Ctx, depositor.GetAddress(), pool.TokenA),
 		suite.BankKeeper.GetBalance(suite.Ctx, depositor.GetAddress(), pool.TokenB),
 		"0.01",
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
-	res, err := suite.msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), deposit)
+	res, err := suite.msgServer.Deposit(suite.Ctx, deposit)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), deposit.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Unix(), deposit.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 
@@ -128,7 +126,7 @@ func (suite *msgServerTestSuite) TestDeposit_ExistingPool() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	res, err := suite.msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), deposit)
+	res, err := suite.msgServer.Deposit(suite.Ctx, deposit)
 	suite.Require().Equal(&types.MsgDepositResponse{}, res)
 	suite.Require().NoError(err)
 
@@ -192,7 +190,7 @@ func (suite *msgServerTestSuite) TestDeposit_ExistingPool_SlippageFailure() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	res, err := suite.msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), deposit)
+	res, err := suite.msgServer.Deposit(suite.Ctx, deposit)
 	suite.Require().Nil(res)
 	suite.EqualError(err, "slippage 4.000000000000000000 > limit 0.010000000000000000: slippage exceeded")
 	suite.Nil(res)
@@ -208,7 +206,7 @@ func (suite *msgServerTestSuite) TestWithdraw_AllShares() {
 	suite.Require().NoError(pool.Validate())
 	suite.Keeper.SetParams(suite.Ctx, types.NewParams(types.AllowedPools{pool}, types.DefaultSwapFee))
 
-	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdk.MustNewDecFromStr("1"))
+	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdkmath.LegacyMustNewDecFromStr("1"))
 	suite.Require().NoError(err)
 
 	withdraw := types.NewMsgWithdraw(
@@ -219,8 +217,8 @@ func (suite *msgServerTestSuite) TestWithdraw_AllShares() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	res, err := suite.msgServer.Withdraw(sdk.WrapSDKContext(suite.Ctx), withdraw)
+	suite.Ctx = suite.App.NewContext(true)
+	res, err := suite.msgServer.Withdraw(suite.Ctx, withdraw)
 	suite.Require().Equal(&types.MsgWithdrawResponse{}, res)
 	suite.Require().NoError(err)
 
@@ -261,7 +259,7 @@ func (suite *msgServerTestSuite) TestWithdraw_PartialShares() {
 	suite.Require().NoError(pool.Validate())
 	suite.Keeper.SetParams(suite.Ctx, types.NewParams(types.AllowedPools{pool}, types.DefaultSwapFee))
 
-	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdk.MustNewDecFromStr("1"))
+	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdkmath.LegacyMustNewDecFromStr("1"))
 	suite.Require().NoError(err)
 
 	minTokenA := sdk.NewCoin("ukava", sdkmath.NewInt(4999999))
@@ -275,8 +273,8 @@ func (suite *msgServerTestSuite) TestWithdraw_PartialShares() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	res, err := suite.msgServer.Withdraw(sdk.WrapSDKContext(suite.Ctx), withdraw)
+	suite.Ctx = suite.App.NewContext(true)
+	res, err := suite.msgServer.Withdraw(suite.Ctx, withdraw)
 	suite.Require().Equal(&types.MsgWithdrawResponse{}, res)
 	suite.Require().NoError(err)
 
@@ -319,7 +317,7 @@ func (suite *msgServerTestSuite) TestWithdraw_SlippageFailure() {
 	suite.Require().NoError(pool.Validate())
 	suite.Keeper.SetParams(suite.Ctx, types.NewParams(types.AllowedPools{pool}, types.DefaultSwapFee))
 
-	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdk.MustNewDecFromStr("1"))
+	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdkmath.LegacyMustNewDecFromStr("1"))
 	suite.Require().NoError(err)
 
 	minTokenA := sdk.NewCoin("ukava", sdkmath.NewInt(5e6))
@@ -333,7 +331,7 @@ func (suite *msgServerTestSuite) TestWithdraw_SlippageFailure() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	res, err := suite.msgServer.Withdraw(sdk.WrapSDKContext(suite.Ctx), withdraw)
+	res, err := suite.msgServer.Withdraw(suite.Ctx, withdraw)
 	suite.Require().Nil(res)
 	suite.EqualError(err, "minimum withdraw not met: slippage exceeded")
 	suite.Nil(res)
@@ -351,12 +349,12 @@ func (suite *msgServerTestSuite) TestWithdraw_DeadlineExceeded() {
 		sdkmath.NewInt(2e6),
 		sdk.NewCoin("ukava", sdkmath.NewInt(1e6)),
 		sdk.NewCoin("usdx", sdkmath.NewInt(5e6)),
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
-	res, err := suite.msgServer.Withdraw(sdk.WrapSDKContext(suite.Ctx), withdraw)
+	res, err := suite.msgServer.Withdraw(suite.Ctx, withdraw)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), withdraw.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Unix(), withdraw.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 
@@ -382,8 +380,8 @@ func (suite *msgServerTestSuite) TestSwapExactForTokens() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	res, err := suite.msgServer.SwapExactForTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
+	suite.Ctx = suite.App.NewContext(true)
+	res, err := suite.msgServer.SwapExactForTokens(suite.Ctx, swapMsg)
 	suite.Require().Equal(&types.MsgSwapExactForTokensResponse{}, res)
 	suite.Require().NoError(err)
 
@@ -446,8 +444,8 @@ func (suite *msgServerTestSuite) TestSwapExactForTokens_SlippageFailure() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	res, err := suite.msgServer.SwapExactForTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
+	suite.Ctx = suite.App.NewContext(true)
+	res, err := suite.msgServer.SwapExactForTokens(suite.Ctx, swapMsg)
 	suite.Require().Nil(res)
 	suite.EqualError(err, "slippage 0.010000123252155223 > limit 0.010000000000000000: slippage exceeded")
 	suite.Nil(res)
@@ -464,12 +462,12 @@ func (suite *msgServerTestSuite) TestSwapExactForTokens_DeadlineExceeded() {
 		sdk.NewCoin("ukava", sdkmath.NewInt(5e6)),
 		sdk.NewCoin("usdx", sdkmath.NewInt(25e5)),
 		"0.01",
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
-	res, err := suite.msgServer.SwapExactForTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
+	res, err := suite.msgServer.SwapExactForTokens(suite.Ctx, swapMsg)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 
@@ -495,8 +493,8 @@ func (suite *msgServerTestSuite) TestSwapForExactTokens() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	res, err := suite.msgServer.SwapForExactTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
+	suite.Ctx = suite.App.NewContext(true)
+	res, err := suite.msgServer.SwapForExactTokens(suite.Ctx, swapMsg)
 	suite.Require().Equal(&types.MsgSwapForExactTokensResponse{}, res)
 	suite.Require().NoError(err)
 
@@ -559,8 +557,8 @@ func (suite *msgServerTestSuite) TestSwapForExactTokens_SlippageFailure() {
 		time.Now().Add(10*time.Minute).Unix(),
 	)
 
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-	res, err := suite.msgServer.SwapForExactTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
+	suite.Ctx = suite.App.NewContext(true)
+	res, err := suite.msgServer.SwapForExactTokens(suite.Ctx, swapMsg)
 	suite.Require().Nil(res)
 	suite.EqualError(err, "slippage 0.010000979019022939 > limit 0.010000000000000000: slippage exceeded")
 	suite.Nil(res)
@@ -577,12 +575,12 @@ func (suite *msgServerTestSuite) TestSwapForExactTokens_DeadlineExceeded() {
 		sdk.NewCoin("ukava", sdkmath.NewInt(5e6)),
 		sdk.NewCoin("usdx", sdkmath.NewInt(25e5)),
 		"0.01",
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
-	res, err := suite.msgServer.SwapForExactTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
+	res, err := suite.msgServer.SwapForExactTokens(suite.Ctx, swapMsg)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 

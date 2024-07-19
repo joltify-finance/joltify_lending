@@ -1,17 +1,20 @@
 package keeper
 
 import (
+	"context"
+
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
 // Withdraw returns some or all of a deposit back to original depositor
-func (k Keeper) Withdraw(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+func (k Keeper) Withdraw(rctx context.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// Call incentive hooks
 	existingDeposit, found := k.GetDeposit(ctx, depositor)
 	if !found {
-		return sdkerrors.Wrapf(types2.ErrDepositNotFound, "no deposit found for %s", depositor)
+		return errorsmod.Wrapf(types2.ErrDepositNotFound, "no deposit found for %s", depositor)
 	}
 	k.BeforeDepositModified(ctx, existingDeposit)
 
@@ -43,7 +46,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Co
 		return err
 	}
 	if !valid {
-		return sdkerrors.Wrapf(types2.ErrInvalidWithdrawAmount, "proposed withdraw outside loan-to-value range")
+		return errorsmod.Wrapf(types2.ErrInvalidWithdrawAmount, "proposed withdraw outside loan-to-value range")
 	}
 
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types2.ModuleAccountName, depositor, amount)
@@ -56,7 +59,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Co
 		if !sdk.NewCoins(coin).DenomsSubsetOf(proposedDeposit.Amount) {
 			depositIndex, removed := deposit.Index.RemoveInterestFactor(coin.Denom)
 			if !removed {
-				return sdkerrors.Wrapf(types2.ErrInvalidIndexFactorDenom, "%s", coin.Denom)
+				return errorsmod.Wrapf(types2.ErrInvalidIndexFactorDenom, "%s", coin.Denom)
 			}
 			deposit.Index = depositIndex
 		}

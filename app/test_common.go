@@ -7,59 +7,53 @@ import (
 	"testing"
 	"time"
 
-	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
-	"github.com/evmos/ethermint/app"
-
-	"github.com/ethereum/go-ethereum/common"
-	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
-
-	sdkmath "cosmossdk.io/math"
-
-	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
-	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
-
-	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
-
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
-
-	tmjson "github.com/cometbft/cometbft/libs/json"
-	tmlog "github.com/cometbft/cometbft/libs/log"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
-	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	tmtypes "github.com/cometbft/cometbft/types"
-
-	tmdb "github.com/cometbft/cometbft-db"
-	abci "github.com/cometbft/cometbft/abci/types"
+	storetypes "cosmossdk.io/store/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
 	distkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/require"
+
+	dbm "github.com/cosmos/cosmos-db"
+
+	pruningtypes "cosmossdk.io/store/pruning/types"
+
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+
+	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
+
+	sdkmath "cosmossdk.io/math"
+
+	"cosmossdk.io/log"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+
+	abci "github.com/cometbft/cometbft/abci/types"
 	mintkeeper "github.com/joltify-finance/joltify_lending/x/mint/keeper"
 	minttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	joltkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
-	"github.com/stretchr/testify/require"
 )
 
 var (
-	emptyTime            time.Time
 	testChainID                = "joltifytest_888-1"
 	defaultInitialHeight int64 = 1
 )
@@ -82,49 +76,37 @@ type TestApp struct {
 // NewTestApp creates a new TestApp
 //
 // Note, it also sets the sdk config with the app's address prefix, coin type, etc.
-func NewTestApp(logger tmlog.Logger, rootDir string) TestApp {
+func NewTestApp(logger log.Logger, rootDir string) TestApp {
 	SetSDKConfig()
-	return NewTestAppFromSealed(logger, rootDir)
+	return NewTestAppFromSealed(logger, rootDir, nil)
+}
+
+func NewTestAppWithGenesis(logger log.Logger, rootDir string, genesisBytes []byte) TestApp {
+	SetSDKConfig()
+	return NewTestAppFromSealed(logger, rootDir, genesisBytes)
 }
 
 func genesisStateWithValSet(
 	app *App, genesisState GenesisState,
-	valSet *tmtypes.ValidatorSet, genAccs []authtypes.GenesisAccount,
+	valSet []*stakingtypes.Validator, genAccs []authtypes.GenesisAccount,
 	balances ...banktypes.Balance,
 ) GenesisState {
 	// set genesis accounts
 	// authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
 	// genesisState[authtypes.ModuleName] = app.AppCodec().MustMarshalJSON(authGenesis)
 
-	validators := make([]stakingtypes.Validator, 0, len(valSet.Validators))
-	delegations := make([]stakingtypes.Delegation, 0, len(valSet.Validators))
+	validators := make([]stakingtypes.Validator, 0, len(valSet))
+	delegations := make([]stakingtypes.Delegation, 0, len(valSet))
 
-	bondAmt := sdk.DefaultPowerReduction.Mul(sdk.NewInt(1000000))
+	bondAmt := sdk.DefaultPowerReduction.Mul(sdkmath.NewInt(1000000))
 
-	for _, val := range valSet.Validators {
-		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
-		if err != nil {
-			panic(err)
-		}
-		pkAny, err := codectypes.NewAnyWithValue(pk)
-		if err != nil {
-			panic(err)
-		}
-		validator := stakingtypes.Validator{
-			OperatorAddress:   sdk.ValAddress(val.Address).String(),
-			ConsensusPubkey:   pkAny,
-			Jailed:            false,
-			Status:            stakingtypes.Bonded,
-			Tokens:            bondAmt,
-			DelegatorShares:   sdk.OneDec(),
-			Description:       stakingtypes.Description{},
-			UnbondingHeight:   int64(0),
-			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			MinSelfDelegation: sdk.ZeroInt(),
-		}
-		validators = append(validators, validator)
-		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdk.OneDec()))
+	for _, val := range valSet {
+
+		val.DelegatorShares = sdkmath.LegacyOneDec()
+		val.Tokens = bondAmt
+		val.Status = stakingtypes.Bonded
+		validators = append(validators, *val)
+		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), val.GetOperator(), sdkmath.LegacyOneDec()))
 
 	}
 	// set validators and delegations
@@ -158,58 +140,61 @@ func genesisStateWithValSet(
 var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 
 // NewTestAppFromSealed creates a TestApp without first setting sdk config.
-func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
-	encCfg := MakeEncodingConfig()
+func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) TestApp {
+	mdb := dbm.NewMemDB()
 	app := NewApp(
-		logger, tmdb.NewMemDB(), rootDir, nil, encCfg,
-		Options{},
-		0,
+		logger, mdb, nil,
+		true,
 		simtestutil.NewAppOptionsWithFlagHome(rootDir),
 		baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(pruningtypes.PruningOptionDefault)),
 		baseapp.SetMinGasPrices("0stake"),
 		baseapp.SetChainID("joltifytest_888-1"),
 	)
 
-	privVal := ed25519.GenPrivKey()
-	pubKey, err := cryptocodec.ToTmPubKeyInterface(privVal.PubKey())
+	encCfg := app.EncodingConfig()
+
+	_, pubKey, addr := testdata.KeyTestPubAddr()
+	valAddr := sdk.ValAddress(addr)
+	val, err := stakingtypes.NewValidator(valAddr.String(), pubKey, stakingtypes.Description{Moniker: "test"})
 	if err != nil {
 		panic(err)
 	}
-
-	// create validator set with single validator
-	validator := tmtypes.NewValidator(pubKey, 1)
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
 
 	// generate genesis account
 	senderPrivKey := secp256k1.GenPrivKey()
 	acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
 	balance := banktypes.Balance{
 		Address: acc.GetAddress().String(),
-		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(12300000000000000))),
+		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(12300000000000000))),
 	}
 
-	genesisState := NewDefaultGenesisState(encCfg.Marshaler)
-	genesisState = genesisStateWithValSet(app, genesisState, valSet, []authtypes.GenesisAccount{acc}, balance)
+	if genbytes == nil {
 
-	stateBytes, err := tmjson.MarshalIndent(genesisState, "", " ")
-	if err != nil {
-		panic(err)
+		genesisState := NewDefaultGenesisState(encCfg.Marshaler)
+		genesisState = genesisStateWithValSet(app, genesisState, []*stakingtypes.Validator{&val}, []authtypes.GenesisAccount{acc}, balance)
+
+		stateBytes, err := tmjson.MarshalIndent(genesisState, "", " ")
+		if err != nil {
+			panic(err)
+		}
+		genbytes = stateBytes
 	}
 
+	currentTime := time.Now().UTC()
 	// Initialize the chain
 	app.InitChain(
-		abci.RequestInitChain{
+		&abci.RequestInitChain{
+			Time:            currentTime,
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: DefaultConsensusParams,
-			AppStateBytes:   stateBytes,
+			AppStateBytes:   genbytes,
 			ChainId:         "joltifytest_888-1",
 		},
 	)
 
-	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: time.Now().UTC()}
-
-	ctx := app.BaseApp.NewContext(false, header)
-	ctx = ctx.WithBlockGasMeter(sdk.NewGasMeter(1000000000000000000))
+	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: currentTime}
+	ctx := app.NewContextLegacy(false, header)
+	ctx = ctx.WithBlockGasMeter(storetypes.NewGasMeter(1000000000000000000))
 	return TestApp{App: *app, Ctx: ctx}
 }
 
@@ -227,9 +212,6 @@ func (tApp TestApp) GetAuctionKeeper() auctionkeeper.Keeper     { return tApp.au
 func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.pricefeedKeeper }
 func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.joltKeeper }
 func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.incentiveKeeper }
-func (tApp TestApp) GetEVMKeeper() evmkeeper.Keeper             { return *tApp.evmKeeper }
-func (tApp TestApp) GetEVMUtilKeeper() evmutilkeeper.Keeper     { return tApp.evmutilKeeper }
-func (tApp TestApp) GetFeeMarketKeeper() feemarketkeeper.Keeper { return tApp.feeMarketKeeper }
 func (tApp TestApp) GetSwapKeeper() swapkeeper.Keeper           { return tApp.swapKeeper }
 
 // LegacyAmino returns the app's amino codec.
@@ -242,30 +224,52 @@ func (app *App) AppCodec() codec.Codec {
 	return app.appCodec
 }
 
+func (app *App) TxConfig() client.TxConfig {
+	return app.txConfig
+}
+
 // InitializeFromGenesisStates calls InitChain on the app using the provided genesis states.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStates(genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(emptyTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+func (tApp TestApp) InitializeFromGenesisStates(t *testing.T, gentime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(gentime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+
+	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	tApp.Ctx = mapp.Ctx
+	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(gentime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
+	mapp.Ctx = tApp.Ctx
+	return mapp
 }
 
 // InitializeFromGenesisStatesWithTime calls InitChain on the app using the provided genesis states and time.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTime(genTime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+func (tApp TestApp) InitializeFromGenesisStatesWithTime(t *testing.T, genTime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+
+	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	tApp.Ctx = mapp.Ctx
+	tApp.App = mapp.App
+	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(genTime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
+	mapp.Ctx = tApp.Ctx
+	return mapp
 }
 
 // InitializeFromGenesisStatesWithTimeAndChainID calls InitChain on the app using the provided genesis states, time, and chain id.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(genTime time.Time, chainID string,
+func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(t *testing.T, genTime time.Time, chainID string,
 	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState,
 ) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, chainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, chainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+
+	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	tApp.Ctx = mapp.Ctx
+	tApp.App = mapp.App
+	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(genTime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
+	return mapp
 }
 
-// InitializeFromGenesisStatesWithTimeAndChainIDAndHeight calls InitChain on the app using the provided genesis states and other parameters.
-// If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
-	// Create a default genesis state and overwrite with provided values
+func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
+	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState,
+) []byte {
 	encoding := MakeEncodingConfig()
 	genesisState := NewDefaultGenesisState(encoding.Marshaler)
 	for _, state := range genesisStates {
@@ -274,16 +278,15 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		}
 	}
 
-	privVal := ed25519.GenPrivKey()
-	pubKey, err := cryptocodec.ToTmPubKeyInterface(privVal.PubKey())
+	_, pubKey, addr := testdata.KeyTestPubAddr()
+	valAddr := sdk.ValAddress(addr)
+	val, err := stakingtypes.NewValidator(valAddr.String(), pubKey, stakingtypes.Description{Moniker: "test"})
 	if err != nil {
 		panic(err)
 	}
 
 	// create validator set with single validator
-	validator := tmtypes.NewValidator(pubKey, 1)
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
-	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(100000000000000))
+	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(100000000000000))
 	coins = coins.Add(defaultCoins)
 	var balances []banktypes.Balance
 	if len(genAccs) == 0 {
@@ -305,31 +308,65 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		}
 	}
 
-	genesisState = genesisStateWithValSet(&tApp.App, genesisState, valSet, genAccs, balances...)
+	genesisState = genesisStateWithValSet(&tApp.App, genesisState, []*stakingtypes.Validator{&val}, genAccs, balances...)
+	// Initialize the chain
+	stateBytes, err := json.Marshal(genesisState)
+	if err != nil {
+		panic(err)
+	}
+	return stateBytes
+}
+
+// InitializeFromGenesisStatesWithTimeAndChainIDAndHeight calls InitChain on the app using the provided genesis states and other parameters.
+// If any module genesis states are missing, defaults are used.
+func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) []byte {
+	// Create a default genesis state and overwrite with provided values
+	encoding := MakeEncodingConfig()
+	genesisState := NewDefaultGenesisState(encoding.Marshaler)
+	for _, state := range genesisStates {
+		for k, v := range state {
+			genesisState[k] = v
+		}
+	}
+
+	_, pubKey, addr := testdata.KeyTestPubAddr()
+	valAddr := sdk.ValAddress(addr)
+	val, err := stakingtypes.NewValidator(valAddr.String(), pubKey, stakingtypes.Description{Moniker: "test"})
+	if err != nil {
+		panic(err)
+	}
+
+	// create validator set with single validator
+	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(100000000000000))
+	coins = coins.Add(defaultCoins)
+	var balances []banktypes.Balance
+	if len(genAccs) == 0 {
+		senderPrivKey := secp256k1.GenPrivKey()
+		acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
+		balanceItem := banktypes.Balance{
+			Address: acc.GetAddress().String(),
+			Coins:   coins,
+		}
+		genAccs = []authtypes.GenesisAccount{acc}
+		balances = []banktypes.Balance{balanceItem}
+	} else {
+		for _, el := range genAccs {
+			balanceItem := banktypes.Balance{
+				Address: el.GetAddress().String(),
+				Coins:   coins,
+			}
+			balances = append(balances, balanceItem)
+		}
+	}
+
+	genesisState = genesisStateWithValSet(&tApp.App, genesisState, []*stakingtypes.Validator{&val}, genAccs, balances...)
 	// Initialize the chain
 	stateBytes, err := json.Marshal(genesisState)
 	if err != nil {
 		panic(err)
 	}
 
-	tApp.InitChain(
-		abci.RequestInitChain{
-			Time:          genTime,
-			Validators:    []abci.ValidatorUpdate{},
-			AppStateBytes: stateBytes,
-			ChainId:       chainID,
-			// Set consensus params, which is needed by x/feemarket
-			ConsensusParams: app.DefaultConsensusParams,
-			InitialHeight:   initialHeight,
-		},
-	)
-	tApp.Commit()
-	tApp.BeginBlock(abci.RequestBeginBlock{
-		Header: tmproto.Header{
-			Height: tApp.LastBlockHeight() + 1, Time: genTime, ChainID: chainID,
-		},
-	})
-	return tApp
+	return stateBytes
 }
 
 // RandomAddress non-deterministically generates a new address, discarding the private key.

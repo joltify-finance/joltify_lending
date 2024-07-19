@@ -1,12 +1,15 @@
 package legacy
 
 import (
+	"context"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
+	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	nftmodulekeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	"github.com/cosmos/gogoproto/proto"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -60,23 +63,23 @@ func CreateUpgradeHandlerForV020Upgrade(
 	nftKeeper nftmodulekeeper.Keeper,
 	incentiveKeeper incentivemodulekeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v020")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v020")
 		}
-		defaultAmount, _ := sdk.NewIntFromString("200000000000000000000")
+		defaultAmount, _ := sdkmath.NewIntFromString("200000000000000000000")
 		spvKeeper.IteratePool(ctx, func(poolInfo spvmoduletypes.PoolInfo) bool {
 			poolInfo.MinDepositAmount = defaultAmount
 			spvKeeper.SetPool(ctx, poolInfo)
-			updatenftmodule(ctx, nftKeeper, poolInfo.PoolNFTIds)
+			updatenftmodule(sdk.UnwrapSDKContext(ctx), nftKeeper, poolInfo.PoolNFTIds)
 			return false
 		})
 
-		paOld := incentiveKeeper.GetParamsV19(ctx)
+		paOld := incentiveKeeper.GetParamsV19(sdk.UnwrapSDKContext(ctx))
 
 		// we give 3000 jolt per day to the pool with 3466b9
 		rewards := incentivetypes.MultiRewardPeriods{
-			incentivetypes.NewMultiRewardPeriod(true, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", ctx.BlockTime().Add(-time.Hour), ctx.BlockTime().Add(time.Hour*24*365), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(34722222222222222)))),
+			incentivetypes.NewMultiRewardPeriod(true, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", sdk.UnwrapSDKContext(ctx).BlockTime().Add(-time.Hour), sdk.UnwrapSDKContext(ctx).BlockTime().Add(time.Hour*24*365), sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(34722222222222222)))),
 		}
 
 		newParamns := incentivetypes.Params{
@@ -88,7 +91,7 @@ func CreateUpgradeHandlerForV020Upgrade(
 			SPVRewardPeriods:        rewards,
 		}
 
-		incentiveKeeper.SetParams(ctx, newParamns)
+		incentiveKeeper.SetParams(sdk.UnwrapSDKContext(ctx), newParamns)
 
 		return mm.RunMigrations(ctx, configurator, vm)
 	}

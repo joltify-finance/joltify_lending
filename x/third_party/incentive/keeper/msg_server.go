@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	sdkerrors "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 )
@@ -70,7 +70,7 @@ func (k msgServer) ClaimSPVReward(goCtx context.Context, msg *types.MsgClaimSPVR
 	}
 
 	if amt.IsZero() {
-		return &types.MsgClaimSPVRewardResponse{}, sdkerrors.Wrap(types.ErrZeroClaim, "zero claim")
+		return &types.MsgClaimSPVRewardResponse{}, errorsmod.Wrap(types.ErrZeroClaim, "zero claim")
 	}
 
 	err = k.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.IncentiveMacc, sender, amt)

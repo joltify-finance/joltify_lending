@@ -3,6 +3,8 @@ package spv_test
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	keepertest "github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/testutil/nullify"
 	"github.com/joltify-finance/joltify_lending/x/spv"
@@ -18,8 +20,8 @@ func TestGenesis(t *testing.T) {
 	}
 
 	k, _, _, _, _, ctx := keepertest.SpvKeeper(t)
-	spv.InitGenesis(ctx, *k, genesisState)
-	got := spv.ExportGenesis(ctx, *k)
+	spv.InitGenesis(sdk.UnwrapSDKContext(ctx), *k, genesisState)
+	got := spv.ExportGenesis(sdk.UnwrapSDKContext(ctx), *k)
 	require.NotNil(t, got)
 
 	nullify.Fill(&genesisState)

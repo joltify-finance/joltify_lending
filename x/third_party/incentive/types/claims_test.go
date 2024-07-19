@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
-// d is a helper function for creating sdk.Dec values in tests
-func d(str string) sdk.Dec { return sdk.MustNewDecFromStr(str) }
+// d is a helper function for creating sdkmath.LegacyDec values in tests
+func d(str string) sdkmath.LegacyDec { return sdkmath.LegacyMustNewDecFromStr(str) }
 
 // c is a helper function for created sdk.Coin types in tests
 func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
@@ -19,11 +21,11 @@ func cs(coins ...sdk.Coin) sdk.Coins { return sdk.NewCoins(coins...) }
 
 func TestRewardIndexes(t *testing.T) {
 	t.Run("With", func(t *testing.T) {
-		arbitraryDec := sdk.MustNewDecFromStr("0.1")
+		arbitraryDec := sdkmath.LegacyMustNewDecFromStr("0.1")
 
 		type args struct {
 			denom  string
-			factor sdk.Dec
+			factor sdkmath.LegacyDec
 		}
 		testcases := []struct {
 			name          string
@@ -70,10 +72,10 @@ func TestRewardIndexes(t *testing.T) {
 		}
 	})
 	t.Run("Get", func(t *testing.T) {
-		arbitraryDec := sdk.MustNewDecFromStr("0.1")
+		arbitraryDec := sdkmath.LegacyMustNewDecFromStr("0.1")
 
 		type expected struct {
-			factor sdk.Dec
+			factor sdkmath.LegacyDec
 			found  bool
 		}
 		testcases := []struct {
@@ -118,7 +120,7 @@ func TestRewardIndexes(t *testing.T) {
 		testcases := []struct {
 			name          string
 			rewardIndexes RewardIndexes
-			multiplier    sdk.Dec
+			multiplier    sdkmath.LegacyDec
 			expected      RewardIndexes
 		}{
 			{
@@ -177,7 +179,7 @@ func TestRewardIndexes(t *testing.T) {
 		testcases := []struct {
 			name          string
 			rewardIndexes RewardIndexes
-			divisor       sdk.Dec
+			divisor       sdkmath.LegacyDec
 			expected      expected
 		}{
 			{
@@ -365,7 +367,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 	arbitraryRewardIndexes := RewardIndexes{
 		{
 			CollateralType: "reward",
-			RewardFactor:   sdk.MustNewDecFromStr("0.1"),
+			RewardFactor:   sdkmath.LegacyMustNewDecFromStr("0.1"),
 		},
 	}
 
@@ -585,12 +587,12 @@ func TestMultiRewardIndexes(t *testing.T) {
 }
 
 var normalRewardIndexes = RewardIndexes{
-	NewRewardIndex("jolt", sdk.MustNewDecFromStr("0.000001")),
-	NewRewardIndex("ujolt", sdk.MustNewDecFromStr("0.1")),
+	NewRewardIndex("jolt", sdkmath.LegacyMustNewDecFromStr("0.000001")),
+	NewRewardIndex("ujolt", sdkmath.LegacyMustNewDecFromStr("0.1")),
 }
 
 var invalidRewardIndexes = RewardIndexes{
-	RewardIndex{"jolt", sdk.MustNewDecFromStr("-0.01")},
+	RewardIndex{"jolt", sdkmath.LegacyMustNewDecFromStr("-0.01")},
 }
 
 func appendUniqueRewardIndex(indexes RewardIndexes) RewardIndexes {
@@ -604,6 +606,6 @@ func appendUniqueRewardIndex(indexes RewardIndexes) RewardIndexes {
 
 	return append(
 		indexes,
-		NewRewardIndex(uniqueDenom, sdk.MustNewDecFromStr("0.02")),
+		NewRewardIndex(uniqueDenom, sdkmath.LegacyMustNewDecFromStr("0.02")),
 	)
 }

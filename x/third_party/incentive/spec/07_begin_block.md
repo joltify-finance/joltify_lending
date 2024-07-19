@@ -8,7 +8,7 @@ At the start of each block, rewards are accumulated for each reward time. Accumu
 
 ```go
 // BeginBlocker runs at the start of every block
-func BeginBlocker(ctx sdk.Context, k keeper.Keeper) {
+func BeginBlocker(ctx context.Context, k keeper.Keeper) {
 
 	params := k.GetParams(ctx)
 

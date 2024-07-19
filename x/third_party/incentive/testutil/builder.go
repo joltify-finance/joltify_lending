@@ -3,6 +3,8 @@ package testutil
 import (
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
@@ -117,7 +119,7 @@ func (builder IncentiveGenesisBuilder) simpleRewardPeriod(ctype string, rewardsP
 func newZeroRewardIndexesFromCoins(coins ...sdk.Coin) types3.RewardIndexes {
 	var ri types3.RewardIndexes
 	for _, coin := range coins {
-		ri = ri.With(coin.Denom, sdk.ZeroDec())
+		ri = ri.With(coin.Denom, sdkmath.LegacyZeroDec())
 	}
 	return ri
 }
@@ -158,12 +160,12 @@ func (builder JoltGenesisBuilder) WithInitializedMoneyMarket(market types2.Money
 
 	builder.PreviousAccumulationTimes = append(
 		builder.PreviousAccumulationTimes,
-		types2.NewGenesisAccumulationTime(market.Denom, builder.genesisTime, sdk.OneDec(), sdk.OneDec()),
+		types2.NewGenesisAccumulationTime(market.Denom, builder.genesisTime, sdkmath.LegacyOneDec(), sdkmath.LegacyOneDec()),
 	)
 	return builder
 }
 
-func (builder JoltGenesisBuilder) WithMinBorrow(minUSDValue sdk.Dec) JoltGenesisBuilder {
+func (builder JoltGenesisBuilder) WithMinBorrow(minUSDValue sdkmath.LegacyDec) JoltGenesisBuilder {
 	builder.Params.MinimumBorrowUSDValue = minUSDValue
 	return builder
 }
@@ -173,18 +175,18 @@ func NewStandardMoneyMarket(denom string) types2.MoneyMarket {
 		denom,
 		types2.NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
-			sdk.MustNewDecFromStr("0.6"),
+			sdkmath.LegacyNewDec(1e15),
+			sdkmath.LegacyMustNewDecFromStr("0.6"),
 		),
 		denom+":usd",
-		sdk.NewInt(1e6),
+		sdkmath.NewInt(1e6),
 		types2.NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.05"),
-			sdk.MustNewDecFromStr("2"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("10"),
+			sdkmath.LegacyMustNewDecFromStr("0.05"),
+			sdkmath.LegacyMustNewDecFromStr("2"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("10"),
 		),
-		sdk.MustNewDecFromStr("0.05"),
-		sdk.ZeroDec(),
+		sdkmath.LegacyMustNewDecFromStr("0.05"),
+		sdkmath.LegacyZeroDec(),
 	)
 }

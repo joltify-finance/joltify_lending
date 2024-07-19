@@ -3,6 +3,7 @@ package types_test
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/x/quota/types"
@@ -60,20 +61,20 @@ func testGenesis() *types.GenesisState {
 func TestGenesisState_Validate(t *testing.T) {
 	ht := types.HistoricalAmount{
 		100,
-		sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(100))),
+		sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(100))),
 		1,
 	}
 
 	cq := types.CoinsQuota{
 		ModuleName: "testmodule",
 		History:    []*types.HistoricalAmount{&ht},
-		CoinsSum:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(100))),
+		CoinsSum:   sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(100))),
 	}
 
 	cqNoModuleName := types.CoinsQuota{
 		ModuleName: "",
 		History:    []*types.HistoricalAmount{&ht},
-		CoinsSum:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(100))),
+		CoinsSum:   sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(100))),
 	}
 
 	cqNoCoinsNoCoins := types.CoinsQuota{

@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	sdkmath "cosmossdk.io/math"
+
+	"cosmossdk.io/log"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
 	"github.com/stretchr/testify/require"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -47,7 +48,7 @@ func TestAuctionBidding(t *testing.T) {
 		bid         sdk.Coin
 		debt        sdk.Coin
 		addresses   []sdk.AccAddress
-		weights     []sdk.Int
+		weights     []sdkmath.Int
 	}
 
 	type bidArgs struct {
@@ -69,7 +70,7 @@ func TestAuctionBidding(t *testing.T) {
 	}{
 		{
 			"basic: auction doesn't exist",
-			auctionArgs{Surplus, "", c("token1", 1), c("token2", 1), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, "", c("token1", 1), c("token2", 1), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("token2", 10)},
 			types2.ErrAuctionNotFound,
@@ -81,7 +82,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"basic: closed auction",
-			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("token2", 10)},
 			types2.ErrAuctionHasExpired,
@@ -94,7 +95,7 @@ func TestAuctionBidding(t *testing.T) {
 		{
 			// This is the first bid on an auction with NO bids
 			"surplus: normal",
-			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("token2", 10)},
 			nil,
@@ -106,7 +107,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"surplus: second bidder",
-			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			[]bidArgs{{buyer, c("token2", 10)}},
 			bidArgs{secondBuyer, c("token2", 11)},
 			nil,
@@ -118,7 +119,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"surplus: invalid bid denom",
-			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 10), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("badtoken", 10)},
 			types2.ErrInvalidBidDenom,
@@ -130,7 +131,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"surplus: invalid bid (less than)",
-			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 0), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 0), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			[]bidArgs{{buyer, c("token2", 100)}},
 			bidArgs{buyer, c("token2", 99)},
 			types2.ErrBidTooSmall,
@@ -142,7 +143,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"surplus: invalid bid (equal)",
-			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 0), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 0), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("token2", 0)}, // min bid is technically 0 at default 5%, but it's capped at 1
 			types2.ErrBidTooSmall,
@@ -154,7 +155,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"surplus: invalid bid (less than min increment)",
-			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 0), sdk.Coin{}, []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Surplus, modName, c("token1", 100), c("token2", 0), sdk.Coin{}, []sdk.AccAddress{}, []sdkmath.Int{}},
 			[]bidArgs{{buyer, c("token2", 100)}},
 			bidArgs{buyer, c("token2", 104)}, // min bid is 105 at default 5%
 			types2.ErrBidTooSmall,
@@ -166,7 +167,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"debt: normal",
-			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdk.Int{}}, // initial bid, lot
+			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdkmath.Int{}}, // initial bid, lot
 			nil,
 			bidArgs{buyer, c("token1", 10)},
 			nil,
@@ -178,7 +179,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"debt: second bidder",
-			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdk.Int{}}, // initial bid, lot
+			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdkmath.Int{}}, // initial bid, lot
 			[]bidArgs{{buyer, c("token1", 10)}},
 			bidArgs{secondBuyer, c("token1", 9)},
 			nil,
@@ -190,7 +191,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"debt: invalid lot denom",
-			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdk.Int{}}, // initial bid, lot
+			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdkmath.Int{}}, // initial bid, lot
 			nil,
 			bidArgs{buyer, c("badtoken", 10)},
 			types2.ErrInvalidLotDenom,
@@ -202,7 +203,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"debt: invalid lot size (larger)",
-			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("token1", 21)},
 			types2.ErrLotTooLarge,
@@ -214,7 +215,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"debt: invalid lot size (equal)",
-			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Debt, modName, c("token1", 20), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("token1", 20)},
 			types2.ErrLotTooLarge,
@@ -226,7 +227,7 @@ func TestAuctionBidding(t *testing.T) {
 		},
 		{
 			"debt: invalid lot size (larger than min increment)",
-			auctionArgs{Debt, modName, c("token1", 60), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdk.Int{}},
+			auctionArgs{Debt, modName, c("token1", 60), c("token2", 100), c("debt", 100), []sdk.AccAddress{}, []sdkmath.Int{}},
 			nil,
 			bidArgs{buyer, c("token1", 58)}, // max lot at default 5% is 57
 			types2.ErrLotTooLarge,
@@ -444,9 +445,10 @@ func TestAuctionBidding(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Setup test
 
-			lg := tmlog.TestingLogger()
+			lg := log.NewTestLogger(t)
 			tApp := app.NewTestApp(lg, t.TempDir())
 
+			tApp.Ctx = tApp.Ctx.WithBlockTime(someTime)
 			// Set up module account
 			modName := "jolt"
 			modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(modName), nil, 0, 0)
@@ -472,9 +474,9 @@ func TestAuctionBidding(t *testing.T) {
 			moduleGs := tApp.AppCodec().MustMarshalJSON(auctionGs)
 			gs := app.GenesisState{types2.ModuleName: moduleGs}
 
-			tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
+			tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil, authGS, gs)
 
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: someTime})
+			ctx := tApp.Ctx
 			keeper := tApp.GetAuctionKeeper()
 			bank := tApp.GetBankKeeper()
 

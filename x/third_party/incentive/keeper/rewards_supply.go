@@ -3,6 +3,8 @@ package keeper
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
@@ -10,7 +12,8 @@ import (
 
 // AccumulateJoltSupplyRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateJoltSupplyRewards(ctx sdk.Context, rewardPeriod types2.MultiRewardPeriod) {
+func (k Keeper) AccumulateJoltSupplyRewards(rctx sdk.Context, rewardPeriod types2.MultiRewardPeriod) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	previousAccrualTime, found := k.GetPreviousJoltSupplyRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
 		previousAccrualTime = ctx.BlockTime()
@@ -37,7 +40,7 @@ func (k Keeper) AccumulateJoltSupplyRewards(ctx sdk.Context, rewardPeriod types2
 // getJoltSupplyTotalSourceShares fetches the sum of all source shares for a supply reward.
 // In the case of jolt supply, this is the total supplied divided by the supply interest factor.
 // This gives the "pre interest" value of the total supplied.
-func (k Keeper) getJoltSupplyTotalSourceShares(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) getJoltSupplyTotalSourceShares(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	totalSuppliedCoins, found := k.joltKeeper.GetSuppliedCoins(ctx)
 	if !found {
 		// assume no coins have been supplied
@@ -48,11 +51,11 @@ func (k Keeper) getJoltSupplyTotalSourceShares(ctx sdk.Context, denom string) sd
 	interestFactor, found := k.joltKeeper.GetSupplyInterestFactor(ctx, denom)
 	if !found {
 		// assume nothing has been borrowed so the factor starts at it's default value
-		interestFactor = sdk.OneDec()
+		interestFactor = sdkmath.LegacyOneDec()
 	}
 
 	// return supplied/factor to get the "pre interest" value of the current total supplied
-	return sdk.NewDecFromInt(totalSupplied).Quo(interestFactor)
+	return sdkmath.LegacyNewDecFromInt(totalSupplied).Quo(interestFactor)
 }
 
 // InitializeJoltSupplyReward initializes the supply-side of a jolt liquidity provider claim
@@ -99,7 +102,7 @@ func (k Keeper) SynchronizeJoltSupplyReward(ctx sdk.Context, deposit hardtypes.D
 // synchronizeSingleJoltSupplyReward synchronizes a single rewarded supply denom in a jolt claim.
 // It returns the claim without setting in the store.
 // The public methods for accessing and modifying claims are preferred over this one. Direct modification of claims is easy to get wrong.
-func (k Keeper) synchronizeSingleJoltSupplyReward(ctx sdk.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdk.Dec) types2.JoltLiquidityProviderClaim {
+func (k Keeper) synchronizeSingleJoltSupplyReward(ctx sdk.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdkmath.LegacyDec) types2.JoltLiquidityProviderClaim {
 	globalRewardIndexes, found := k.GetJoltSupplyRewardIndexes(ctx, denom)
 	if !found {
 		// The global factor is only not found if
@@ -203,7 +206,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx sdk.Context, claim types2.JoltLi
 		for _, globalRewardIndex := range globalRewardIndexes {
 			userRewardIndex, foundUserRewardIndex := userRewardIndexes.RewardIndexes.GetRewardIndex(globalRewardIndex.CollateralType)
 			if !foundUserRewardIndex {
-				userRewardIndex = types2.NewRewardIndex(globalRewardIndex.CollateralType, sdk.ZeroDec())
+				userRewardIndex = types2.NewRewardIndex(globalRewardIndex.CollateralType, sdkmath.LegacyZeroDec())
 				userRewardIndexes.RewardIndexes = append(userRewardIndexes.RewardIndexes, userRewardIndex)
 				claim.SupplyRewardIndexes[userRewardIndexIndex].RewardIndexes = append(claim.SupplyRewardIndexes[userRewardIndexIndex].RewardIndexes, userRewardIndex)
 			}
@@ -218,7 +221,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx sdk.Context, claim types2.JoltLi
 			if !found {
 				continue
 			}
-			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdk.NewDecFromInt(deposit.Amount.AmountOf(ri.CollateralType))).QuoInt(sdk.NewInt(1e12)).RoundInt()
+			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdkmath.LegacyNewDecFromInt(deposit.Amount.AmountOf(ri.CollateralType))).QuoInt(sdkmath.NewInt(1e12)).RoundInt()
 			if newRewardsAmount.IsZero() || newRewardsAmount.IsNegative() {
 				continue
 			}
@@ -253,7 +256,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx sdk.Context, claim types2.JoltLi
 		for _, globalRewardIndex := range globalRewardIndexes {
 			userRewardIndex, foundUserRewardIndex := userRewardIndexes.RewardIndexes.GetRewardIndex(globalRewardIndex.CollateralType)
 			if !foundUserRewardIndex {
-				userRewardIndex = types2.NewRewardIndex(globalRewardIndex.CollateralType, sdk.ZeroDec())
+				userRewardIndex = types2.NewRewardIndex(globalRewardIndex.CollateralType, sdkmath.LegacyZeroDec())
 				userRewardIndexes.RewardIndexes = append(userRewardIndexes.RewardIndexes, userRewardIndex)
 				claim.BorrowRewardIndexes[userRewardIndexIndex].RewardIndexes = append(claim.BorrowRewardIndexes[userRewardIndexIndex].RewardIndexes, userRewardIndex)
 			}
@@ -268,7 +271,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx sdk.Context, claim types2.JoltLi
 			if !found {
 				continue
 			}
-			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdk.NewDecFromInt(borrow.Amount.AmountOf(ri.CollateralType))).QuoInt(sdk.NewInt(1e12)).TruncateInt()
+			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdkmath.LegacyNewDecFromInt(borrow.Amount.AmountOf(ri.CollateralType))).QuoInt(sdkmath.NewInt(1e12)).TruncateInt()
 			if newRewardsAmount.IsZero() || newRewardsAmount.IsNegative() {
 				continue
 			}

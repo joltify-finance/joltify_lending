@@ -1,22 +1,24 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	coserrors "cosmossdk.io/errors"
+	nfttypes "cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
 // ArchieveDepositor archives the depositor
-func (k Keeper) ArchieveDepositor(ctx sdk.Context, depositor types.DepositorInfo) {
+func (k Keeper) ArchieveDepositor(ctx context.Context, depositor types.DepositorInfo) {
 	k.SetDepositorHistory(ctx, depositor)
 	k.DelDepositor(ctx, depositor)
 }
 
 // ArchiveNFT archives the NFT
-func (k Keeper) ArchiveNFT(ctx sdk.Context, classID, nftID string) error {
+func (k Keeper) ArchiveNFT(rctx context.Context, classID, nftID string) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	thisNFT, ok := k.NftKeeper.GetNFT(ctx, classID, nftID)
 	if !ok {
 		return coserrors.Wrap(types.ErrNFTNotFound, fmt.Sprintf("classID: %v, nftID: %v", classID, nftID))
@@ -41,7 +43,7 @@ func (k Keeper) ArchiveNFT(ctx sdk.Context, classID, nftID string) error {
 	return nil
 }
 
-func (k Keeper) GetOrCreate(ctx sdk.Context, classID string) (nfttypes.Class, error) {
+func (k Keeper) GetOrCreate(ctx context.Context, classID string) (nfttypes.Class, error) {
 	archiveClassID := fmt.Sprintf("%v%v", types.ArchivePrefix, classID)
 
 	var ok bool
@@ -62,7 +64,7 @@ func (k Keeper) GetOrCreate(ctx sdk.Context, classID string) (nfttypes.Class, er
 }
 
 // ArchiveClass archives the class
-func (k Keeper) ArchiveClass(ctx sdk.Context, classID string) {
+func (k Keeper) ArchiveClass(ctx context.Context, classID string) {
 	_, err := k.GetOrCreate(ctx, classID)
 	if err != nil {
 		panic("should never failed to get or create the class" + err.Error())
@@ -78,7 +80,7 @@ func (k Keeper) ArchiveClass(ctx sdk.Context, classID string) {
 }
 
 // ArchivePool archives the pool
-func (k Keeper) ArchivePool(ctx sdk.Context, poolInfo types.PoolInfo) {
+func (k Keeper) ArchivePool(ctx context.Context, poolInfo types.PoolInfo) {
 	k.DelPool(ctx, poolInfo.Index)
 	poolInfo.Index = fmt.Sprintf("%v%v", types.ArchivePrefix, poolInfo.Index)
 	for i, el := range poolInfo.PoolNFTIds {

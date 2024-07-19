@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -14,7 +16,7 @@ var (
 	KeyMinimumBorrowUSDValue     = []byte("MinimumBorrowUSDValue")
 	KeySurplusAuctionThreshold   = []byte("SurplusAuctionThreshold")
 	DefaultMoneyMarkets          = MoneyMarkets{}
-	DefaultMinimumBorrowUSDValue = sdk.NewDec(10) // $10 USD minimum borrow value
+	DefaultMinimumBorrowUSDValue = sdkmath.LegacyNewDec(10) // $10 USD minimum borrow value
 	DefaultAccumulationTimes     = GenesisAccumulationTimes{}
 	DefaultTotalSupplied         = sdk.Coins{}
 	DefaultTotalBorrowed         = sdk.Coins{}
@@ -24,7 +26,7 @@ var (
 )
 
 // NewBorrowLimit returns a new BorrowLimit
-func NewBorrowLimit(hasMaxLimit bool, maximumLimit, loanToValue sdk.Dec) BorrowLimit {
+func NewBorrowLimit(hasMaxLimit bool, maximumLimit, loanToValue sdkmath.LegacyDec) BorrowLimit {
 	return BorrowLimit{
 		HasMaxLimit:  hasMaxLimit,
 		MaximumLimit: maximumLimit,
@@ -40,7 +42,7 @@ func (bl BorrowLimit) Validate() error {
 	if bl.LoanToValue.IsNegative() {
 		return fmt.Errorf("loan-to-value must be a non-negative decimal: %s", bl.LoanToValue)
 	}
-	if bl.LoanToValue.GT(sdk.OneDec()) {
+	if bl.LoanToValue.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("loan-to-value cannot be greater than 1.0: %s", bl.LoanToValue)
 	}
 	return nil
@@ -61,8 +63,8 @@ func (bl BorrowLimit) Equal(blCompareTo BorrowLimit) bool {
 }
 
 // NewMoneyMarket returns a new MoneyMarket
-func NewMoneyMarket(denom string, borrowLimit BorrowLimit, spotMarketID string, conversionFactor sdk.Int,
-	interestRateModel InterestRateModel, reserveFactor, keeperRewardPercentage sdk.Dec,
+func NewMoneyMarket(denom string, borrowLimit BorrowLimit, spotMarketID string, conversionFactor sdkmath.Int,
+	interestRateModel InterestRateModel, reserveFactor, keeperRewardPercentage sdkmath.LegacyDec,
 ) MoneyMarket {
 	return MoneyMarket{
 		Denom:                  denom,
@@ -85,7 +87,7 @@ func (mm MoneyMarket) Validate() error {
 		return err
 	}
 
-	if mm.ConversionFactor.IsNil() || mm.ConversionFactor.LT(sdk.OneInt()) {
+	if mm.ConversionFactor.IsNil() || mm.ConversionFactor.LT(sdkmath.OneInt()) {
 		return fmt.Errorf("conversion '%s' factor must be ≥ one", mm.ConversionFactor)
 	}
 
@@ -93,11 +95,11 @@ func (mm MoneyMarket) Validate() error {
 		return err
 	}
 
-	if mm.ReserveFactor.IsNegative() || mm.ReserveFactor.GT(sdk.OneDec()) {
+	if mm.ReserveFactor.IsNegative() || mm.ReserveFactor.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("reserve factor must be between 0.0-1.0")
 	}
 
-	if mm.KeeperRewardPercentage.IsNegative() || mm.KeeperRewardPercentage.GT(sdk.OneDec()) {
+	if mm.KeeperRewardPercentage.IsNegative() || mm.KeeperRewardPercentage.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("keeper reward percentage must be between 0.0-1.0")
 	}
 
@@ -144,7 +146,7 @@ func (mms MoneyMarkets) Validate() error {
 }
 
 // NewInterestRateModel returns a new InterestRateModel
-func NewInterestRateModel(baseRateAPY, baseMultiplier, kink, jumpMultiplier sdk.Dec) InterestRateModel {
+func NewInterestRateModel(baseRateAPY, baseMultiplier, kink, jumpMultiplier sdkmath.LegacyDec) InterestRateModel {
 	return InterestRateModel{
 		BaseRateAPY:    baseRateAPY,
 		BaseMultiplier: baseMultiplier,
@@ -155,7 +157,7 @@ func NewInterestRateModel(baseRateAPY, baseMultiplier, kink, jumpMultiplier sdk.
 
 // Validate InterestRateModel param
 func (irm InterestRateModel) Validate() error {
-	if irm.BaseRateAPY.IsNegative() || irm.BaseRateAPY.GT(sdk.OneDec()) {
+	if irm.BaseRateAPY.IsNegative() || irm.BaseRateAPY.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("base rate APY must be in the inclusive range 0.0-1.0")
 	}
 
@@ -163,7 +165,7 @@ func (irm InterestRateModel) Validate() error {
 		return fmt.Errorf("base multiplier must not be negative")
 	}
 
-	if irm.Kink.IsNegative() || irm.Kink.GT(sdk.OneDec()) {
+	if irm.Kink.IsNegative() || irm.Kink.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("kink must be in the inclusive range 0.0-1.0")
 	}
 
@@ -195,175 +197,175 @@ func (irm InterestRateModel) Equal(irmCompareTo InterestRateModel) bool {
 type InterestRateModels []InterestRateModel
 
 // NewParams returns a new params object
-func NewParams(moneyMarkets MoneyMarkets, minimumBorrowUSDValue sdk.Dec) Params {
+func NewParams(moneyMarkets MoneyMarkets, minimumBorrowUSDValue sdkmath.LegacyDec) Params {
 	return Params{
 		MoneyMarkets:            moneyMarkets,
 		MinimumBorrowUSDValue:   minimumBorrowUSDValue,
-		SurplusAuctionThreshold: sdk.NewInt(50),
+		SurplusAuctionThreshold: sdkmath.NewInt(50),
 	}
 }
 
 // DefaultParams returns default params for jolt module
 func DefaultParams() Params {
-	loanToValue, _ := sdk.NewDecFromStr("0.8")
-	loanToValueStable, _ := sdk.NewDecFromStr("0.95")
-	loanToValueJolt, _ := sdk.NewDecFromStr("0.2")
+	loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.8")
+	loanToValueStable, _ := sdkmath.LegacyNewDecFromStr("0.95")
+	loanToValueJolt, _ := sdkmath.LegacyNewDecFromStr("0.2")
 
 	m1 := NewMoneyMarket(
 		"ujolt",
 		NewBorrowLimit(
 			true,
-			sdk.NewDec(1.2e14),
+			sdkmath.LegacyNewDec(1.2e14),
 			loanToValueJolt,
 		),
 		"jolt:usd",
-		sdk.NewInt(1e6),
+		sdkmath.NewInt(1e6),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m2 := NewMoneyMarket(
 		"abnb",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"bnb:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m3 := NewMoneyMarket(
 		"ausdt",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValueStable,
 		),
 		"usdt:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.08"),
-			sdk.MustNewDecFromStr("1"),
-			sdk.MustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("1"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
 		),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m4 := NewMoneyMarket(
 		"ausdc",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValueStable,
 		),
 		"usdc:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.08"),
-			sdk.MustNewDecFromStr("1"),
-			sdk.MustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("1"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
 		),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m5 := NewMoneyMarket(
 		"aeth",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"eth:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m6 := NewMoneyMarket(
 		"uatom",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"atom:usd",
-		sdk.NewInt(1e6),
+		sdkmath.NewInt(1e6),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m7 := NewMoneyMarket(
 		"aeth",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"bnb:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m8 := NewMoneyMarket(
 		"abtc",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"bnb:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	params := NewParams(
 		MoneyMarkets{m1, m2, m3, m4, m5, m6, m7, m8},
-		sdk.NewDec(10),
+		sdkmath.LegacyNewDec(10),
 	)
 
 	return params
@@ -400,7 +402,7 @@ func (p Params) Validate() error {
 }
 
 func validateMinimumBorrowUSDValue(i interface{}) error {
-	minBorrowVal, ok := i.(sdk.Dec)
+	minBorrowVal, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -422,7 +424,7 @@ func validateMoneyMarketParams(i interface{}) error {
 }
 
 func validateSurplusAuctionThreshold(i interface{}) error {
-	a, ok := i.(sdk.Int)
+	a, ok := i.(sdkmath.Int)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}

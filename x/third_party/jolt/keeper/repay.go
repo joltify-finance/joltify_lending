@@ -1,13 +1,17 @@
 package keeper
 
 import (
+	"context"
+
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
 // Repay borrowed funds
-func (k Keeper) Repay(ctx sdk.Context, sender, owner sdk.AccAddress, coins sdk.Coins) error {
+func (k Keeper) Repay(rctx context.Context, sender, owner sdk.AccAddress, coins sdk.Coins) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// Check borrow exists here to avoid duplicating store read in ValidateRepay
 	borrow, found := k.GetBorrow(ctx, owner)
 	if !found {
@@ -44,7 +48,7 @@ func (k Keeper) Repay(ctx sdk.Context, sender, owner sdk.AccAddress, coins sdk.C
 		if coin.Amount.Equal(borrow.Amount.AmountOf(coin.Denom)) {
 			borrowIndex, removed := borrow.Index.RemoveInterestFactor(coin.Denom)
 			if !removed {
-				return sdkerrors.Wrapf(types2.ErrInvalidIndexFactorDenom, "%s", coin.Denom)
+				return errorsmod.Wrapf(types2.ErrInvalidIndexFactorDenom, "%s", coin.Denom)
 			}
 			borrow.Index = borrowIndex
 		}
@@ -81,46 +85,46 @@ func (k Keeper) Repay(ctx sdk.Context, sender, owner sdk.AccAddress, coins sdk.C
 }
 
 // ValidateRepay validates a requested loan repay
-func (k Keeper) ValidateRepay(ctx sdk.Context, sender, owner sdk.AccAddress, coins sdk.Coins) error {
-	assetPriceCache := map[string]sdk.Dec{}
+func (k Keeper) ValidateRepay(ctx context.Context, sender, owner sdk.AccAddress, coins sdk.Coins) error {
+	assetPriceCache := map[string]sdkmath.LegacyDec{}
 
 	// Get the total USD value of user's existing borrows
-	existingBorrowUSDValue := sdk.ZeroDec()
+	existingBorrowUSDValue := sdkmath.LegacyZeroDec()
 	existingBorrow, found := k.GetBorrow(ctx, owner)
 	if found {
 		for _, coin := range existingBorrow.Amount {
 			moneyMarket, found := k.GetMoneyMarket(ctx, coin.Denom)
 			if !found {
-				return sdkerrors.Wrapf(types2.ErrMarketNotFound, "no money market found for denom %s", coin.Denom)
+				return errorsmod.Wrapf(types2.ErrMarketNotFound, "no money market found for denom %s", coin.Denom)
 			}
 
 			assetPrice, ok := assetPriceCache[coin.Denom]
 			if !ok { // Fetch current asset price and store in local cache
 				assetPriceInfo, err := k.pricefeedKeeper.GetCurrentPrice(ctx, moneyMarket.SpotMarketID)
 				if err != nil {
-					return sdkerrors.Wrapf(types2.ErrPriceNotFound, "no price found for market %s", moneyMarket.SpotMarketID)
+					return errorsmod.Wrapf(types2.ErrPriceNotFound, "no price found for market %s", moneyMarket.SpotMarketID)
 				}
 				assetPriceCache[coin.Denom] = assetPriceInfo.Price
 				assetPrice = assetPriceInfo.Price
 			}
 
 			// Calculate this borrow coin's USD value and add it to the total previous borrowed USD value
-			coinUSDValue := sdk.NewDecFromInt(coin.Amount).Quo(sdk.NewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
+			coinUSDValue := sdkmath.LegacyNewDecFromInt(coin.Amount).Quo(sdkmath.LegacyNewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
 			existingBorrowUSDValue = existingBorrowUSDValue.Add(coinUSDValue)
 		}
 	}
 
 	senderCoins := k.bankKeeper.SpendableCoins(ctx, sender)
-	repayTotalUSDValue := sdk.ZeroDec()
+	repayTotalUSDValue := sdkmath.LegacyZeroDec()
 	for _, repayCoin := range coins {
 		// Check that sender holds enough tokens to make the proposed payment
 		if senderCoins.AmountOf(repayCoin.Denom).LT(repayCoin.Amount) {
-			return sdkerrors.Wrapf(types2.ErrInsufficientBalanceForRepay, "account can only repay up to %s%s", senderCoins.AmountOf(repayCoin.Denom), repayCoin.Denom)
+			return errorsmod.Wrapf(types2.ErrInsufficientBalanceForRepay, "account can only repay up to %s%s", senderCoins.AmountOf(repayCoin.Denom), repayCoin.Denom)
 		}
 
 		moneyMarket, found := k.GetMoneyMarket(ctx, repayCoin.Denom)
 		if !found {
-			return sdkerrors.Wrapf(types2.ErrMarketNotFound, "no money market found for denom %s", repayCoin.Denom)
+			return errorsmod.Wrapf(types2.ErrMarketNotFound, "no money market found for denom %s", repayCoin.Denom)
 		}
 
 		// Calculate this coin's USD value and add it to the repay's total USD value
@@ -128,12 +132,12 @@ func (k Keeper) ValidateRepay(ctx sdk.Context, sender, owner sdk.AccAddress, coi
 		if !ok { // Fetch current asset price and store in local cache
 			assetPriceInfo, err := k.pricefeedKeeper.GetCurrentPrice(ctx, moneyMarket.SpotMarketID)
 			if err != nil {
-				return sdkerrors.Wrapf(types2.ErrPriceNotFound, "no price found for market %s", moneyMarket.SpotMarketID)
+				return errorsmod.Wrapf(types2.ErrPriceNotFound, "no price found for market %s", moneyMarket.SpotMarketID)
 			}
 			assetPriceCache[repayCoin.Denom] = assetPriceInfo.Price
 			assetPrice = assetPriceInfo.Price
 		}
-		coinUSDValue := sdk.NewDecFromInt(repayCoin.Amount).Quo(sdk.NewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
+		coinUSDValue := sdkmath.LegacyNewDecFromInt(repayCoin.Amount).Quo(sdkmath.LegacyNewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
 		repayTotalUSDValue = repayTotalUSDValue.Add(coinUSDValue)
 	}
 
@@ -142,9 +146,9 @@ func (k Keeper) ValidateRepay(ctx sdk.Context, sender, owner sdk.AccAddress, coi
 	// invalid range is not allowed
 	// Unless the user is fully repaying their loan
 	proposedBorrowNewUSDValue := existingBorrowUSDValue.Sub(repayTotalUSDValue)
-	isFullRepayment := coins.IsEqual(existingBorrow.Amount)
+	isFullRepayment := coins.Equal(existingBorrow.Amount)
 	if proposedBorrowNewUSDValue.LT(k.GetMinimumBorrowUSDValue(ctx)) && !isFullRepayment {
-		return sdkerrors.Wrapf(types2.ErrBelowMinimumBorrowValue, "the proposed borrow's USD value $%s is below the minimum borrow limit $%s", proposedBorrowNewUSDValue, k.GetMinimumBorrowUSDValue(ctx))
+		return errorsmod.Wrapf(types2.ErrBelowMinimumBorrowValue, "the proposed borrow's USD value $%s is below the minimum borrow limit $%s", proposedBorrowNewUSDValue, k.GetMinimumBorrowUSDValue(ctx))
 	}
 
 	return nil

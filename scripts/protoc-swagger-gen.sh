@@ -4,10 +4,9 @@ set -eo pipefail
 
 mkdir -p ./tmp-swagger-gen
 
-echo "cloning cosmos v0.47.4"
-git clone --depth 1 --branch v0.47.4 https://github.com/cosmos/cosmos-sdk.git tmp_repo
+echo "cloning cosmos v0.50.8"
+git clone --depth 1 --branch v0.50.8 https://github.com/cosmos/cosmos-sdk.git tmp_repo
 
-cosmos_sdk_dir=$(go list -f '{{ .Dir }}' -m github.com/cosmos/cosmos-sdk)
 
 cd proto
 proto_dirs=$(find ./joltify ../tmp_repo/proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)

@@ -1,9 +1,11 @@
 package keeper_test
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
@@ -11,8 +13,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/burnauction/types"
 
 	testkeeper "github.com/joltify-finance/joltify_lending/testutil/keeper"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestAuction(t *testing.T) {
@@ -25,60 +25,60 @@ func TestAuction(t *testing.T) {
 	require.True(t, balance.Empty())
 
 	burntokens := sdk.NewCoins(
-		sdk.NewCoin("afake", sdk.NewInt(100)),
-		sdk.NewCoin("bfake", sdk.NewInt(200)),
-		sdk.NewCoin("cfake", sdk.NewInt(300)),
+		sdk.NewCoin("afake", sdkmath.NewInt(100)),
+		sdk.NewCoin("bfake", sdkmath.NewInt(200)),
+		sdk.NewCoin("cfake", sdkmath.NewInt(300)),
 	)
 
 	k.SetParams(ctx, types.Params{
 		BurnThreshold: burntokens,
 	})
 
-	tb := sdk.NewCoins(sdk.NewCoin("afake", sdk.NewInt(1)))
+	tb := sdk.NewCoins(sdk.NewCoin("afake", sdkmath.NewInt(1)))
 	sender := sdk.AccAddress([]byte("sender"))
 	err := bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, tb)
 	require.NoError(t, err)
 
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(tb))
+	require.True(t, balance.Equal(tb))
 
 	// we put more token
-	tb = tb.Add(sdk.NewCoin("bfake", sdk.NewInt(1)))
-	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("bfake", sdk.NewInt(1))))
+	tb = tb.Add(sdk.NewCoin("bfake", sdkmath.NewInt(1)))
+	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("bfake", sdkmath.NewInt(1))))
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(tb))
+	require.True(t, balance.Equal(tb))
 
 	// we put more token
-	tb = tb.Add(sdk.NewCoin("afake", sdk.NewInt(99)))
-	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("afake", sdk.NewInt(99))))
+	tb = tb.Add(sdk.NewCoin("afake", sdkmath.NewInt(99)))
+	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("afake", sdkmath.NewInt(99))))
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(sdk.NewCoins(sdk.NewCoin("bfake", sdk.NewInt(1)))))
+	require.True(t, balance.Equal(sdk.NewCoins(sdk.NewCoin("bfake", sdkmath.NewInt(1)))))
 
 	// we add c coin
-	tb = tb.Add(sdk.NewCoin("cfake", sdk.NewInt(1)))
-	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("cfake", sdk.NewInt(1))))
+	tb = tb.Add(sdk.NewCoin("cfake", sdkmath.NewInt(1)))
+	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("cfake", sdkmath.NewInt(1))))
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(sdk.NewCoins(sdk.NewCoin("bfake", sdk.NewInt(1)), sdk.NewCoin("cfake", sdk.NewInt(1)))))
+	require.True(t, balance.Equal(sdk.NewCoins(sdk.NewCoin("bfake", sdkmath.NewInt(1)), sdk.NewCoin("cfake", sdkmath.NewInt(1)))))
 	prebalance := balance
 
 	// coin not in threshold
-	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("ffake", sdk.NewInt(1))))
+	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, sdk.NewCoins(sdk.NewCoin("ffake", sdkmath.NewInt(1))))
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(prebalance.Add(sdk.NewCoin("ffake", sdk.NewInt(1)))))
+	require.True(t, balance.Equal(prebalance.Add(sdk.NewCoin("ffake", sdkmath.NewInt(1)))))
 
 	// empty balance
 	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, burntokens)
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(sdk.NewCoins(sdk.NewCoin("ffake", sdk.NewInt(1)))))
+	require.True(t, balance.Equal(sdk.NewCoins(sdk.NewCoin("ffake", sdkmath.NewInt(1)))))
 }

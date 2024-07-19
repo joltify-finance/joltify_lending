@@ -8,7 +8,7 @@ At the end of each block, the current price is calculated as the median of all r
 
 ```go
 // EndBlocker updates the current pricefeed
-func EndBlocker(ctx sdk.Context, k Keeper) {
+func EndBlocker(ctx context.Context, k Keeper) {
 	// Update the current price of each asset.
 	for _, market := range k.GetMarkets(ctx) {
 		if market.Active {

@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"fmt"
 	"strings"
 
@@ -24,12 +25,12 @@ var (
 		AllowedPool{"aswap", "uosmo"},
 		AllowedPool{"aswap", "ujuno"},
 	}
-	DefaultSwapFee = sdk.MustNewDecFromStr("0.02")
-	MaxSwapFee     = sdk.OneDec()
+	DefaultSwapFee = sdkmath.LegacyMustNewDecFromStr("0.02")
+	MaxSwapFee     = sdkmath.LegacyOneDec()
 )
 
 // NewParams returns a new params object
-func NewParams(pairs AllowedPools, swapFee sdk.Dec) Params {
+func NewParams(pairs AllowedPools, swapFee sdkmath.LegacyDec) Params {
 	return Params{
 		AllowedPools: pairs,
 		SwapFee:      swapFee,
@@ -84,7 +85,7 @@ func validateAllowedPoolsParams(i interface{}) error {
 }
 
 func validateSwapFee(i interface{}) error {
-	swapFee, ok := i.(sdk.Dec)
+	swapFee, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}

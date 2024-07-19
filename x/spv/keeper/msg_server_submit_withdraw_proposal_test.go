@@ -1,8 +1,11 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -18,7 +21,7 @@ type withdrawProposalSuite struct {
 	keeper       *spvkeeper.Keeper
 	nftKeeper    types.NFTKeeper
 	app          types.MsgServer
-	ctx          sdk.Context
+	ctx          context.Context
 	investorPool string
 	investors    []string
 }
@@ -43,7 +46,7 @@ func (suite *withdrawProposalSuite) SetupTest() {
 
 func setupWithdrawProposal(suite *withdrawProposalSuite) {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.15"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.15"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -67,7 +70,7 @@ func setupWithdrawProposal(suite *withdrawProposalSuite) {
 	creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
 	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
 
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -81,10 +84,10 @@ func setupWithdrawProposal(suite *withdrawProposalSuite) {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
@@ -139,14 +142,14 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	currentBlockTime := suite.ctx.BlockTime()
+	currentBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 
-	ctx1 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*3-1)))
+	ctx1 := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*3-1)))
 	req := types.MsgSubmitWithdrawProposal{Creator: suite.investors[0], PoolIndex: suite.investorPool}
 	_, err := suite.app.SubmitWithdrawProposal(ctx1, &req)
 	suite.Require().ErrorContains(err, "submit the proposal too early")
 
-	ctx2 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*2+1)))
+	ctx2 := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*2+1)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx2, &req)
 	suite.Require().ErrorContains(err, "submit the proposal too late")
 
@@ -157,7 +160,7 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 	suite.Require().True(poolInfo.WithdrawProposalAmount.Amount.IsZero())
 	withdrawable := poolInfo.UsableAmount
 	borrowed := poolInfo.BorrowedAmount
-	ctx3 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*3)))
+	ctx3 := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*3)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx3, &req)
 	suite.Require().NoError(err)
 
@@ -176,7 +179,7 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 	suite.Require().Equal(poolInfo.UsableAmount.String(), withdrawable.Sub(depositor.WithdrawalAmount).String())
 	suite.Require().Equal(poolInfo.BorrowedAmount.String(), borrowed.String())
 
-	ctx4 := suite.ctx.WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth-1)))
+	ctx4 := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-spvkeeper.OneMonth-1)))
 	_, err = suite.app.SubmitWithdrawProposal(ctx4, &req)
 	suite.Require().ErrorContains(err, "is not in unset status (current status withdraw_proposal")
 }

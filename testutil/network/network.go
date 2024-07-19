@@ -10,14 +10,14 @@ import (
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 
-	tmdb "github.com/cometbft/cometbft-db"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/stretchr/testify/assert"
 
+	pruningtypes "cosmossdk.io/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -41,7 +41,6 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 		cfg = configs[0]
 	}
 
-	cfg.EnableTMLogging = true
 	net, err := network.New(t, t.TempDir(), cfg)
 	assert.NoError(t, err)
 	t.Cleanup(net.Cleanup)
@@ -65,20 +64,14 @@ func DefaultConfig() network.Config {
 		AccountRetriever:  authtypes.AccountRetriever{},
 		AppConstructor: func(val network.ValidatorI) servertypes.Application {
 			localApp := app.NewApp(
-				val.GetCtx().Logger,
-				tmdb.NewMemDB(),
-				val.GetCtx().Config.RootDir,
-				nil,
-				encoding,
-				app.Options{
-					EVMMaxGasWanted: 10000,
-				},
-				0,
-				simtestutil.EmptyAppOptions{},
-				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
-				baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
-				baseapp.SetChainID(randomChainID),
+				val.GetCtx().Logger, dbm.NewMemDB(), nil,
+				true,
+				simtestutil.NewAppOptionsWithFlagHome(val.GetCtx().Config.RootDir),
+				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(pruningtypes.PruningOptionDefault)),
+				baseapp.SetMinGasPrices("0stake"),
+				baseapp.SetChainID("joltifytest_888-1"),
 			)
+
 			return localApp
 		},
 

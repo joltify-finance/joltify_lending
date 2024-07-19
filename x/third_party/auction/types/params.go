@@ -1,15 +1,15 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
-var emptyDec = sdk.Dec{}
+var emptyDec = sdkmath.LegacyDec{}
 
 // Defaults for auction params
 const (
@@ -32,7 +32,7 @@ const (
 
 var (
 	// DefaultIncrement is the smallest percent change a new bid must have from the old one
-	DefaultIncrement       = sdk.MustNewDecFromStr("0.05")
+	DefaultIncrement       = sdkmath.LegacyMustNewDecFromStr("0.05")
 	KeyForwardBidDuration  = []byte("ForwardBidDuration")
 	KeyReverseBidDuration  = []byte("ReverseBidDuration")
 	KeyMaxAuctionDuration  = []byte("MaxAuctionDuration")
@@ -46,7 +46,7 @@ func NewParams(
 	maxAuctionDuration, forwardBidDuration, reverseBidDuration time.Duration,
 	incrementSurplus,
 	incrementDebt,
-	incrementCollateral sdk.Dec,
+	incrementCollateral sdkmath.LegacyDec,
 ) Params {
 	return Params{
 		MaxAuctionDuration:  maxAuctionDuration,
@@ -147,7 +147,7 @@ func validateMaxAuctionDurationParam(i interface{}) error {
 }
 
 func validateIncrementSurplusParam(i interface{}) error {
-	incrementSurplus, ok := i.(sdk.Dec)
+	incrementSurplus, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -164,7 +164,7 @@ func validateIncrementSurplusParam(i interface{}) error {
 }
 
 func validateIncrementDebtParam(i interface{}) error {
-	incrementDebt, ok := i.(sdk.Dec)
+	incrementDebt, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -181,7 +181,7 @@ func validateIncrementDebtParam(i interface{}) error {
 }
 
 func validateIncrementCollateralParam(i interface{}) error {
-	incrementCollateral, ok := i.(sdk.Dec)
+	incrementCollateral, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
