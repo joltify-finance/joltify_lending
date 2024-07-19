@@ -5,6 +5,11 @@ package types
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	time "time"
+
 	_ "github.com/cosmos/cosmos-proto"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
@@ -13,17 +18,15 @@ import (
 	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "google.golang.org/protobuf/types/known/durationpb"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ = proto.Marshal
-var _ = fmt.Errorf
-var _ = math.Inf
-var _ = time.Kitchen
+var (
+	_ = proto.Marshal
+	_ = fmt.Errorf
+	_ = math.Inf
+	_ = time.Kitchen
+)
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -107,7 +110,7 @@ type PoolInfo struct {
 	ReserveFactor github_com_cosmos_cosmos_sdk_types.Dec        `protobuf:"bytes,8,opt,name=reserve_factor,json=reserveFactor,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"reserve_factor"`
 	//  string            pool_nFT_class      = 9 [
 	//    (cosmos_proto.scalar)  = "cosmos.Class",
-	//    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+	//    (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
 	//    (gogoproto.nullable)   = false
 	//  ];
 	PoolNFTIds                             []string                                        `protobuf:"bytes,9,rep,name=pool_nFT_ids,json=poolNFTIds,proto3" json:"pool_nFT_ids,omitempty"`
@@ -155,9 +158,11 @@ func (*PoolInfo) ProtoMessage()    {}
 func (*PoolInfo) Descriptor() ([]byte, []int) {
 	return fileDescriptor_353391ba5ffe1b1b, []int{0}
 }
+
 func (m *PoolInfo) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *PoolInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_PoolInfo.Marshal(b, m, deterministic)
@@ -170,12 +175,15 @@ func (m *PoolInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
+
 func (m *PoolInfo) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_PoolInfo.Merge(m, src)
 }
+
 func (m *PoolInfo) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *PoolInfo) XXX_DiscardUnknown() {
 	xxx_messageInfo_PoolInfo.DiscardUnknown(m)
 }
@@ -438,9 +446,11 @@ func (*InterestPrepayment) ProtoMessage()    {}
 func (*InterestPrepayment) Descriptor() ([]byte, []int) {
 	return fileDescriptor_353391ba5ffe1b1b, []int{1}
 }
+
 func (m *InterestPrepayment) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *InterestPrepayment) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_InterestPrepayment.Marshal(b, m, deterministic)
@@ -453,12 +463,15 @@ func (m *InterestPrepayment) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
+
 func (m *InterestPrepayment) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_InterestPrepayment.Merge(m, src)
 }
+
 func (m *InterestPrepayment) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *InterestPrepayment) XXX_DiscardUnknown() {
 	xxx_messageInfo_InterestPrepayment.DiscardUnknown(m)
 }
@@ -483,9 +496,11 @@ func (*PoolWithInvestors) ProtoMessage()    {}
 func (*PoolWithInvestors) Descriptor() ([]byte, []int) {
 	return fileDescriptor_353391ba5ffe1b1b, []int{2}
 }
+
 func (m *PoolWithInvestors) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *PoolWithInvestors) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_PoolWithInvestors.Marshal(b, m, deterministic)
@@ -498,12 +513,15 @@ func (m *PoolWithInvestors) XXX_Marshal(b []byte, deterministic bool) ([]byte, e
 		return b[:n], nil
 	}
 }
+
 func (m *PoolWithInvestors) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_PoolWithInvestors.Merge(m, src)
 }
+
 func (m *PoolWithInvestors) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *PoolWithInvestors) XXX_DiscardUnknown() {
 	xxx_messageInfo_PoolWithInvestors.DiscardUnknown(m)
 }
@@ -535,9 +553,11 @@ func (*PoolDepositedInvestors) ProtoMessage()    {}
 func (*PoolDepositedInvestors) Descriptor() ([]byte, []int) {
 	return fileDescriptor_353391ba5ffe1b1b, []int{3}
 }
+
 func (m *PoolDepositedInvestors) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *PoolDepositedInvestors) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_PoolDepositedInvestors.Marshal(b, m, deterministic)
@@ -550,12 +570,15 @@ func (m *PoolDepositedInvestors) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
+
 func (m *PoolDepositedInvestors) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_PoolDepositedInvestors.Merge(m, src)
 }
+
 func (m *PoolDepositedInvestors) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *PoolDepositedInvestors) XXX_DiscardUnknown() {
 	xxx_messageInfo_PoolDepositedInvestors.DiscardUnknown(m)
 }
@@ -1260,6 +1283,7 @@ func encodeVarintPoolinfo(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+
 func (m *PoolInfo) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1456,9 +1480,11 @@ func (m *PoolDepositedInvestors) Size() (n int) {
 func sovPoolinfo(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
+
 func sozPoolinfo(x uint64) (n int) {
 	return sovPoolinfo(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
+
 func (m *PoolInfo) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2799,6 +2825,7 @@ func (m *PoolInfo) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func (m *InterestPrepayment) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2902,6 +2929,7 @@ func (m *InterestPrepayment) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func (m *PoolWithInvestors) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -3016,6 +3044,7 @@ func (m *PoolWithInvestors) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func (m *PoolDepositedInvestors) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -3130,6 +3159,7 @@ func (m *PoolDepositedInvestors) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func skipPoolinfo(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0

@@ -3,12 +3,12 @@ package legacy
 import (
 	"fmt"
 
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	ethermint "github.com/evmos/ethermint/types"
 )
 

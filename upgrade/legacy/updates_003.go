@@ -1,9 +1,9 @@
 package legacy
 
 import (
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
 )
 

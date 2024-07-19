@@ -8,7 +8,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 )
 
 func (i *ICS4Wrapper) whecherOnWhiteBanList(ctx sdk.Context, data []byte) (bool, bool, error) {

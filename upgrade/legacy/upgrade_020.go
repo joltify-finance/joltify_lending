@@ -3,10 +3,10 @@ package legacy
 import (
 	"time"
 
+	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	nftmodulekeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	"github.com/cosmos/gogoproto/proto"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"

@@ -10,17 +10,17 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
+	"cosmossdk.io/x/nft"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/nft"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	tmdb "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/keeper"

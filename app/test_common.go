@@ -22,11 +22,11 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 
+	pruningtypes "cosmossdk.io/store"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	tmlog "github.com/cometbft/cometbft/libs/log"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
-	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 

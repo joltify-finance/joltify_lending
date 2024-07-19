@@ -7,9 +7,9 @@ import (
 
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
+	nfttypes "cosmossdk.io/x/nft"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gogo/protobuf/proto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"

@@ -12,7 +12,7 @@ import (
 	types3 "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 
-	"github.com/cosmos/cosmos-sdk/x/nft"
+	"cosmossdk.io/x/nft"
 
 	sdkmath "cosmossdk.io/math"
 

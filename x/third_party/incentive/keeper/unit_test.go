@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
+	nfttypes "cosmossdk.io/x/nft"
 
 	sdkmath "cosmossdk.io/math"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	storetypes "cosmossdk.io/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 
 	tmlog "github.com/cometbft/cometbft/libs/log"
@@ -16,10 +16,10 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
+	"cosmossdk.io/store"
 	db "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/suite"

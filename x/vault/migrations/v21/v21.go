@@ -2,9 +2,9 @@
 package v21
 
 import (
+	"cosmossdk.io/store/prefix"
+	types2 "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	types2 "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/cosmos/cosmos-sdk/types"
 	types3 "github.com/joltify-finance/joltify_lending/x/vault/types"
 )

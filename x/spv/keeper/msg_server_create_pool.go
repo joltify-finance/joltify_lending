@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	coserrors "cosmossdk.io/errors"
+	"cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )

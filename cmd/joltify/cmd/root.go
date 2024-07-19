@@ -12,7 +12,7 @@ import (
 	ethermintserver "github.com/evmos/ethermint/server"
 	servercfg "github.com/evmos/ethermint/server/config"
 
-	"github.com/cosmos/ibc-go/v7/testing/simapp"
+	"github.com/cosmos/ibc-go/v8/testing/simapp"
 
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmcli "github.com/cometbft/cometbft/libs/cli"

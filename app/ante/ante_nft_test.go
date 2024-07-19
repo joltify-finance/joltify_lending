@@ -5,17 +5,17 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	tmdb "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
+	nfttypes "cosmossdk.io/x/nft"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	storetypes "cosmossdk.io/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
+	"cosmossdk.io/store/prefix"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 

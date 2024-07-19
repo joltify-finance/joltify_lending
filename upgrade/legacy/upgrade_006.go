@@ -1,9 +1,9 @@
 package legacy
 
 import (
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"

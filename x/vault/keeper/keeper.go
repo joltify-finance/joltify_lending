@@ -7,7 +7,7 @@ import (
 
 	"github.com/cometbft/cometbft/libs/log"
 
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	storetypes "cosmossdk.io/store/types"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 

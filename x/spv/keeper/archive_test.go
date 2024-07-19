@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"

@@ -1,9 +1,9 @@
 package legacy
 
 import (
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"

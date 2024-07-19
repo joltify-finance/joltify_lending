@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	coserrors "cosmossdk.io/errors"
+	nfttypes "cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 

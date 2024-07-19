@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
+
 	burnauctionmodule "github.com/joltify-finance/joltify_lending/x/burnauction"
 	burnauctionmoduletypes "github.com/joltify-finance/joltify_lending/x/burnauction/types"
 
@@ -22,7 +24,7 @@ import (
 	ibcratelimit "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit"
 	ibcratelimittypes "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit/types"
 
-	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
+	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -54,9 +56,9 @@ import (
 
 	vaultmodule "github.com/joltify-finance/joltify_lending/x/vault"
 
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/server/config"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	ibcporttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+	ibcporttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	"github.com/evmos/ethermint/x/feemarket"
@@ -65,11 +67,11 @@ import (
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 
+	nftmoduletypes "cosmossdk.io/x/nft"
+	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	nftmoduletypes "github.com/cosmos/cosmos-sdk/x/nft"
-	nftmodulekeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
-	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -87,15 +89,22 @@ import (
 	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
 	vaultmoduletypes "github.com/joltify-finance/joltify_lending/x/vault/types"
 
-	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-
 	"github.com/joltify-finance/joltify_lending/x/mint"
 	mintkeeper "github.com/joltify-finance/joltify_lending/x/mint/keeper"
 	minttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
 
+	"cosmossdk.io/x/evidence"
+	evidencekeeper "cosmossdk.io/x/evidence/keeper"
+	evidencetypes "cosmossdk.io/x/evidence/types"
+	"cosmossdk.io/x/feegrant"
+	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
+	feegrantmodule "cosmossdk.io/x/feegrant/module"
+	"cosmossdk.io/x/upgrade"
+	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
+	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/server/api"
@@ -115,30 +124,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/cosmos/cosmos-sdk/x/capability"
-	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	ethermintconfig "github.com/evmos/ethermint/server/config"
-
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/cosmos/cosmos-sdk/x/evidence"
-	evidencekeeper "github.com/cosmos/cosmos-sdk/x/evidence/keeper"
-	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
-	"github.com/cosmos/cosmos-sdk/x/feegrant"
-	feegrantkeeper "github.com/cosmos/cosmos-sdk/x/feegrant/keeper"
-	feegrantmodule "github.com/cosmos/cosmos-sdk/x/feegrant/module"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	paramproposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
@@ -148,28 +145,27 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/cosmos/cosmos-sdk/x/upgrade"
-	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	"github.com/cosmos/ibc-go/modules/capability"
+	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	ethermintconfig "github.com/evmos/ethermint/server/config"
 	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
 	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 
-	"github.com/cosmos/ibc-go/v7/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v7/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v7/modules/core/02-client"
-	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
-	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
+	"github.com/cosmos/ibc-go/v8/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v8/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client"
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
-	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
+	nftmodule "cosmossdk.io/x/nft/module"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	tmlog "github.com/cometbft/cometbft/libs/log"
-	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/joltify-finance/joltify_lending/app/ante"
 	joltparams "github.com/joltify-finance/joltify_lending/app/params"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
@@ -196,7 +192,7 @@ var (
 		staking.AppModuleBasic{},
 		mint.AppModuleBasic{},
 		distr.AppModuleBasic{},
-		gov.NewAppModuleBasic(getGovProposalHandlers()),
+		gov.NewAppModuleBasic(),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
@@ -348,22 +344,6 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, ".joltify")
-}
-
-func getGovProposalHandlers() []govclient.ProposalHandler {
-	var govProposalHandlers []govclient.ProposalHandler
-	// this line is used by starport scaffolding # stargate/app/govProposalHandlers
-
-	govProposalHandlers = append(govProposalHandlers,
-		paramsclient.ProposalHandler,
-		upgradeclient.LegacyProposalHandler,
-		upgradeclient.LegacyCancelProposalHandler,
-		ibcclientclient.UpdateClientProposalHandler,
-		ibcclientclient.UpgradeProposalHandler,
-		// this line is used by starport scaffolding # stargate/app/govProposalHandler
-	)
-
-	return govProposalHandlers
 }
 
 // NewApp returns a reference to an initialized App.
@@ -764,7 +744,7 @@ func NewApp(
 		params.NewAppModule(app.ParamsKeeper),
 		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName)),
 		ibc.NewAppModule(app.ibcKeeper),
-		upgrade.NewAppModule(app.upgradeKeeper),
+		upgrade.NewAppModule(app.upgradeKeeper, addresscodec.NewBech32Codec(sdk.Bech32PrefixAccAddr)),
 		evidence.NewAppModule(*app.evidenceKeeper),
 		transferModule,
 		vesting.NewAppModule(app.accountKeeper, app.bankKeeper),
@@ -1068,13 +1048,8 @@ func (app *App) SimulationManager() *module.SimulationManager {
 func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
 
-	// Register legacy REST routes
-	// rpc.RegisterRoutes(clientCtx, apiSvr.Router)
-	// ModuleBasics.RegisterRESTRoutes(clientCtx, apiSvr.Router)
-	// RegisterLegacyTxRoutes(clientCtx, apiSvr.Router)
-
 	// Register GRPC Gateway routes
-	tmservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
+	cmtservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
@@ -1107,7 +1082,7 @@ func (app *App) RegisterTxService(clientCtx client.Context) {
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
 // It registers the standard tendermint grpc endpoints on the app's grpc server.
 func (app *App) RegisterTendermintService(clientCtx client.Context) {
-	tmservice.RegisterTendermintService(clientCtx, app.BaseApp.GRPCQueryRouter(), app.interfaceRegistry, app.Query)
+	cmtservice.RegisterTendermintService(clientCtx, app.BaseApp.GRPCQueryRouter(), app.interfaceRegistry, app.Query)
 }
 
 // loadBlockedMaccAddrs returns a map indicating the blocked status of each module account address

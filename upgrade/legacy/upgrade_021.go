@@ -7,9 +7,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	"github.com/cosmos/gogoproto/proto"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 

@@ -7,7 +7,7 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"

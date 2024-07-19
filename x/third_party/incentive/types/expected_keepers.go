@@ -2,9 +2,9 @@ package types
 
 import (
 	sdkmath "cosmossdk.io/math"
+	nfttypes "cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"

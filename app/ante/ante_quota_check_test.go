@@ -9,14 +9,14 @@ import (
 
 	"github.com/cometbft/cometbft/libs/log"
 
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	tmdb "github.com/cometbft/cometbft-db"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"

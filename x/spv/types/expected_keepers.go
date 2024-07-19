@@ -4,9 +4,9 @@ import (
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
+	nfttypes "cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
 	kyctypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 )
 

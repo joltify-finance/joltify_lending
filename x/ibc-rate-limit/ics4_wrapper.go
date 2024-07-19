@@ -11,11 +11,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
-	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
-	"github.com/cosmos/ibc-go/v7/modules/core/exported"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
+	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	"github.com/joltify-finance/joltify_lending/x/ibc-rate-limit/types"
 )

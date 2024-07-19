@@ -8082,7 +8082,7 @@ paths:
                       title: |-
                         string            pool_nFT_class      = 9 [
                            (cosmos_proto.scalar)  = "cosmos.Class",
-                           (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                           (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
                            (gogoproto.nullable)   = false
                          ];
                     last_payment_time:
@@ -8440,7 +8440,7 @@ paths:
                       title: |-
                         string            pool_nFT_class      = 9 [
                            (cosmos_proto.scalar)  = "cosmos.Class",
-                           (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                           (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
                            (gogoproto.nullable)   = false
                          ];
                     last_payment_time:
@@ -8917,7 +8917,7 @@ paths:
                     title: |-
                       string            pool_nFT_class      = 9 [
                          (cosmos_proto.scalar)  = "cosmos.Class",
-                         (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                         (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
                          (gogoproto.nullable)   = false
                        ];
                   last_payment_time:
@@ -9193,7 +9193,7 @@ paths:
                     title: |-
                       string            pool_nFT_class      = 9 [
                          (cosmos_proto.scalar)  = "cosmos.Class",
-                         (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                         (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
                          (gogoproto.nullable)   = false
                        ];
                   last_payment_time:
@@ -52843,7 +52843,7 @@ definitions:
         title: |-
           string            pool_nFT_class      = 9 [
              (cosmos_proto.scalar)  = "cosmos.Class",
-             (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+             (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
              (gogoproto.nullable)   = false
            ];
       last_payment_time:
@@ -53311,7 +53311,7 @@ definitions:
               title: |-
                 string            pool_nFT_class      = 9 [
                    (cosmos_proto.scalar)  = "cosmos.Class",
-                   (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                   (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
                    (gogoproto.nullable)   = false
                  ];
             last_payment_time:
@@ -53633,7 +53633,7 @@ definitions:
             title: |-
               string            pool_nFT_class      = 9 [
                  (cosmos_proto.scalar)  = "cosmos.Class",
-                 (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/x/nft.Class",
+                 (gogoproto.customtype) = "cosmossdk.io/x/nft.Class",
                  (gogoproto.nullable)   = false
                ];
           last_payment_time:
