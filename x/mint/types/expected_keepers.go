@@ -4,7 +4,6 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // AccountKeeper defines the expected account keeper used for simulations (noalias)
@@ -24,7 +23,5 @@ type BankKeeper interface {
 }
 
 type DistributionKeeper interface {
-	GetFeePool(ctx context.Context) (feePool distrtypes.FeePool)
-	SetFeePool(ctx context.Context, feePool distrtypes.FeePool)
 	FundCommunityPool(ctx context.Context, amount sdk.Coins, sender sdk.AccAddress) error
 }

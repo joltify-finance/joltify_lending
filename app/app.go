@@ -10,7 +10,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/runtime"
 
-	"cosmossdk.io/log"
 
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 
