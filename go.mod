@@ -269,6 +269,14 @@ replace (
 
 	github.com/evmos/ethermint => github.com/joltify-finance/ethermint v0.1.3-joltify
 
+
+
+	//cosmossdk.io/client/v2 => github.com/crypto-org-chain/cosmos-sdk/client/v2 v2.0.0-20240626040048-36295f051595
+	//cosmossdk.io/store => github.com/crypto-org-chain/cosmos-sdk/store v0.0.0-20240626040048-36295f051595
+	//cosmossdk.io/x/tx => github.com/crypto-org-chain/cosmos-sdk/x/tx v0.0.0-20240626040048-36295f051595
+	//github.com/cosmos/cosmos-sdk => github.com/crypto-org-chain/cosmos-sdk v0.50.6-0.20240715031529-5a1594f17924
+
+
 	// See https://github.com/cosmos/cosmos-sdk/pull/10401, https://github.com/cosmos/cosmos-sdk/commit/0592ba6158cd0bf49d894be1cef4faeec59e8320
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.0
 	// Use the cosmos modified protobufs

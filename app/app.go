@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"cosmossdk.io/log"
+
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 
 	burnauctionmodule "github.com/joltify-finance/joltify_lending/x/burnauction"
@@ -165,13 +167,12 @@ import (
 	nftmodule "cosmossdk.io/x/nft/module"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/joltify-finance/joltify_lending/app/ante"
 	joltparams "github.com/joltify-finance/joltify_lending/app/params"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
 	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
 
-	dbm "github.com/cometbft/cometbft-db"
+	dbm "github.com/cosmos/cosmos-db"
 )
 
 const (
@@ -348,7 +349,7 @@ func init() {
 
 // NewApp returns a reference to an initialized App.
 func NewApp(
-	logger tmlog.Logger,
+	logger log.Logger,
 	db dbm.DB,
 	homePath string,
 	traceStore io.Writer,
@@ -367,7 +368,7 @@ func NewApp(
 	bApp.SetVersion(version.Version)
 	bApp.SetInterfaceRegistry(interfaceRegistry)
 
-	keys := sdk.NewKVStoreKeys(
+	keys := storetypes.NewKVStoreKeys(
 		authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey,
@@ -392,8 +393,8 @@ func NewApp(
 		swaptypes.StoreKey,
 		consensusparamtypes.StoreKey,
 	)
-	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
+	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
 	app := &App{
 		BaseApp:           bApp,
@@ -1150,8 +1151,8 @@ func (app *App) setupUpgradeHandlers() {
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
-func (app *App) RegisterNodeService(clientCtx client.Context) {
-	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter())
+func (app *App) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
+	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter(), cfg)
 }
 
 // BlockedModuleAccountAddrs returns all the app's blocked module account

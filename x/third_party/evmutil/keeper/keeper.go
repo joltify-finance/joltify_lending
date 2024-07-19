@@ -99,8 +99,10 @@ func (k Keeper) SetAccount(ctx sdk.Context, account types.Account) error {
 	store := ctx.KVStore(k.storeKey)
 	accountKey := types.AccountStoreKey(account.Address)
 
+	balance := k.GetBalance(ctx, account.Address)
+
 	// make sure we remove accounts with zero balance
-	if !account.Balance.IsPositive() {
+	if balance.IsPositive() {
 		if store.Has(accountKey) {
 			store.Delete(accountKey)
 		}
@@ -119,7 +121,7 @@ func (k Keeper) SetAccount(ctx sdk.Context, account types.Account) error {
 func (k Keeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress) sdkmath.Int {
 	account := k.GetAccount(ctx, addr)
 	if account == nil {
-		return sdk.ZeroInt()
+		return sdkmath.ZeroInt()
 	}
 	return account.Balance
 }

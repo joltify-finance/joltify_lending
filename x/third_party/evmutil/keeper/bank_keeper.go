@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
@@ -37,8 +38,19 @@ type EvmBankKeeper struct {
 	ak          types.AccountKeeper
 }
 
-func (k EvmBankKeeper) IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error {
-	return k.bk.IsSendEnabledCoins(ctx, coins...)
+func (k EvmBankKeeper) IsSendEnabledCoins(ctx context.Context, coins ...sdk.Coin) error {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (k EvmBankKeeper) SendCoinsFromModuleToAccountVirtual(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (k EvmBankKeeper) SendCoinsFromAccountToModuleVirtual(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+	// TODO implement me
+	panic("implement me")
 }
 
 func (k EvmBankKeeper) BlockedAddr(addr sdk.AccAddress) bool {
