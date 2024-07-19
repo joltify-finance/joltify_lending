@@ -30,7 +30,7 @@ type Suite struct {
 	suite.Suite
 	Keeper        keeper.Keeper
 	App           app.TestApp
-	Ctx           sdk.Context
+	Ctx           context.Context
 	BankKeeper    BankKeeper.Keeper
 	AccountKeeper authkeeper.AccountKeeper
 }

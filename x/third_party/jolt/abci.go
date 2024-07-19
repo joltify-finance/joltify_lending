@@ -6,7 +6,7 @@ import (
 )
 
 // BeginBlocker updates interest rates
-func BeginBlocker(ctx sdk.Context, k keeper.Keeper) {
+func BeginBlocker(ctx context.Context, k keeper.Keeper) {
 	k.ApplyInterestRateUpdates(ctx)
 	err := k.RunSurplusAuctions(ctx)
 	if err != nil {

@@ -7,24 +7,24 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 )
 
-func (i *ICS4Wrapper) whecherOnWhiteBanList(ctx sdk.Context, data []byte) (bool, bool, error) {
+func (i *ICS4Wrapper) whecherOnWhiteBanList(ctx context.Context, data []byte) (bool, bool, error) {
 	var tdata transfertypes.FungibleTokenPacketData
 	if err := transfertypes.ModuleCdc.UnmarshalJSON(data, &tdata); err != nil {
-		return false, false, errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+		return false, false, errorsmod.Wrapf(errorsmod.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
 	}
 	ret := i.quotaKeeper.WhetherOnwhitelist(ctx, "ibc", tdata.Sender)
 	retBan := i.quotaKeeper.WhetherOnBanlist(ctx, "ibc", tdata.Sender)
 	return ret, retBan, nil
 }
 
-func (i *ICS4Wrapper) UpdateQuota(ctx sdk.Context, seq uint64, data []byte) error {
+func (i *ICS4Wrapper) UpdateQuota(ctx context.Context, seq uint64, data []byte) error {
 	var tdata transfertypes.FungibleTokenPacketData
 	if err := transfertypes.ModuleCdc.UnmarshalJSON(data, &tdata); err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+		return errorsmod.Wrapf(errorsmod.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
 	}
 
 	denom := tdata.Denom
@@ -42,6 +42,6 @@ func (i *ICS4Wrapper) UpdateQuota(ctx sdk.Context, seq uint64, data []byte) erro
 	return err
 }
 
-func (i *ICS4Wrapper) RevokeQuotaHistory(ctx sdk.Context, seq uint64) {
+func (i *ICS4Wrapper) RevokeQuotaHistory(ctx context.Context, seq uint64) {
 	i.quotaKeeper.RevokeHistory(ctx, "ibc", seq)
 }

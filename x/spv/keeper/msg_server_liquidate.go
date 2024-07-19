@@ -6,14 +6,14 @@ import (
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLiquidator, totalPoolBorrowed sdk.Coin, paidAmount sdkmath.Int) (sdkmath.Int, error) {
+func (k Keeper) doUpdateLiquidationInfo(ctx context.Context, el string, amountFromLiquidator, totalPoolBorrowed sdk.Coin, paidAmount sdkmath.Int) (sdkmath.Int, error) {
 	class, found := k.NftKeeper.GetClass(ctx, el)
 	if !found {
 		panic(found)
@@ -55,7 +55,7 @@ func (k Keeper) doUpdateLiquidationInfo(ctx sdk.Context, el string, amountFromLi
 	return paidAmount, nil
 }
 
-func (k Keeper) handleLiquidation(ctx sdk.Context, poolInfo types.PoolInfo, amount sdk.Coin) error {
+func (k Keeper) handleLiquidation(ctx context.Context, poolInfo types.PoolInfo, amount sdk.Coin) error {
 	nftClasses := poolInfo.PoolNFTIds
 	totalBorrowed := poolInfo.BorrowedAmount
 	// the first element is the pool class, we skip it
@@ -92,11 +92,11 @@ func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*t
 
 	liquidator, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	if msg.Amount.IsZero() {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the amount cannot be zero")
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the amount cannot be zero")
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)

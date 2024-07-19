@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 
 	errorsmod "cosmossdk.io/errors"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
@@ -38,17 +38,17 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if !k.sanitize(msg) {
-		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "the request ID do not match the given inbound tx and receiver")
+		return nil, errorsmod.Wrap(errorsmod.ErrInvalidRequest, "the request ID do not match the given inbound tx and receiver")
 	}
 
 	height, err := strconv.ParseInt(msg.BlockHeight, 10, 64)
 	if err != nil {
-		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("invalid block height %v", msg.BlockHeight))
+		return nil, errorsmod.Wrap(errorsmod.ErrInvalidRequest, fmt.Sprintf("invalid block height %v", msg.BlockHeight))
 	}
 
 	history, get := k.vaultStaking.GetHistoricalInfo(ctx, height)
 	if !get {
-		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintf("too early, we cannot find the block %v", msg.BlockHeight))
+		return nil, errorsmod.Wrap(errorsmod.ErrInvalidRequest, fmt.Sprintf("too early, we cannot find the block %v", msg.BlockHeight))
 	}
 
 	// now we check whether the msg is sent from the validator
@@ -62,7 +62,7 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 	}
 	if !isValidator {
 		ctx.Logger().Info("not a validator update tss message", "result", "false")
-		return &types.MsgCreateOutboundTxResponse{Successful: false}, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintln("not a validator"))
+		return &types.MsgCreateOutboundTxResponse{Successful: false}, errorsmod.Wrap(errorsmod.ErrInvalidRequest, fmt.Sprintln("not a validator"))
 	}
 	info, isFound := k.GetOutboundTx(ctx, msg.RequestID)
 	if isFound {
@@ -71,7 +71,7 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 			for _, el := range proposal.Entry {
 				if el.Address.Equals(msg.Creator) {
 					ctx.Logger().Info("the creator has already submitted the outbound tx")
-					return &types.MsgCreateOutboundTxResponse{Successful: false}, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, fmt.Sprintln("already submitted"))
+					return &types.MsgCreateOutboundTxResponse{Successful: false}, errorsmod.Wrap(errorsmod.ErrInvalidRequest, fmt.Sprintln("already submitted"))
 				}
 			}
 			thisProposal := types.Entity{Address: msg.Creator, Feecoin: msg.Feecoin}
@@ -110,7 +110,7 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 	return &types.MsgCreateOutboundTxResponse{Successful: true}, nil
 }
 
-func (k msgServer) sendFeeToStakes(ctx sdk.Context, totalValidatorNum int, info *types.OutboundTx, proposal types.Proposals) {
+func (k msgServer) sendFeeToStakes(ctx context.Context, totalValidatorNum int, info *types.OutboundTx, proposal types.Proposals) {
 	if info.Processed {
 		return
 	}

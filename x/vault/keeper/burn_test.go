@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func prepare(t *testing.T) (*joltapp.TestApp, sdk.Context, []sdk.AccAddress) {
+func prepare(t *testing.T) (*joltapp.TestApp, context.Context, []sdk.AccAddress) {
 	app, ctx := keepertest.SetupVaultApp(t)
 
 	testValidators, creators := keepertest.GenerateNValidators(t, 4)

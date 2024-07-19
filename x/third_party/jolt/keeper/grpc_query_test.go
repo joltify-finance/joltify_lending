@@ -21,7 +21,7 @@ type grpcQueryTestSuite struct {
 	suite.Suite
 
 	tApp        app.TestApp
-	ctx         sdk.Context
+	ctx         context.Context
 	keeper      keeper2.Keeper
 	queryServer types2.QueryServer
 	addrs       []sdk.AccAddress

@@ -25,7 +25,7 @@ var (
 	PreviousSavingsRewardAccrualTimeKeyPrefix     = []byte{0x17} // prefix for key that stores the previous time savings rewards accrued
 )
 
-func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+func MigrateStore(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	toBeDeleted := [][]byte{USDXMintingClaimKeyPrefix, USDXMintingRewardFactorKeyPrefix, PreviousUSDXMintingRewardAccrualTimeKeyPrefix, PreviousSavingsRewardAccrualTimeKeyPrefix, SavingsClaimKeyPrefix, SavingsRewardIndexesKeyPrefix, SwapClaimKeyPrefix, SwapRewardIndexesKeyPrefix, PreviousSwapRewardAccrualTimeKeyPrefix, DelegatorClaimKeyPrefix, DelegatorRewardIndexesKeyPrefix, PreviousDelegatorRewardAccrualTimeKeyPrefix}
 	for _, el := range toBeDeleted {
 		store := prefix.NewStore(ctx.KVStore(storeKey), el)

@@ -179,7 +179,7 @@ func (m msgServer) SwapForExactTokens(goCtx context.Context, msg *types.MsgSwapF
 }
 
 // checkDeadline returns an error if block time exceeds an included deadline
-func checkDeadline(ctx sdk.Context, msg sdk.Msg) error {
+func checkDeadline(ctx context.Context, msg sdk.Msg) error {
 	deadlineMsg, ok := msg.(types.MsgWithDeadline)
 	if !ok {
 		return nil

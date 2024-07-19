@@ -4,7 +4,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32" //nolint
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 var _ sdk.Msg = &MsgCreateCreatePool{}
@@ -37,7 +37,7 @@ func (msg *MsgCreateCreatePool) GetSignBytes() []byte {
 func (msg *MsgCreateCreatePool) ValidateBasic() error {
 	_, err := legacybech32.UnmarshalPubKey(legacybech32.AccPK, msg.PoolPubKey) //nolint
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid pubkey (%s)", err)
+		return errorsmod.Wrapf(errorsmod.ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
 	return nil
 }

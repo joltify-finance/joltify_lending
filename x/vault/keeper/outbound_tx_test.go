@@ -20,7 +20,7 @@ import (
 // Prevent strconv unused error
 var _ = strconv.IntSize
 
-func createNOutboundTx(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.OutboundTx {
+func createNOutboundTx(keeper *keeper.Keeper, ctx context.Context, n int) []types.OutboundTx {
 	items := make([]types.OutboundTx, n)
 
 	r := rand.New(rand.NewSource(time.Now().Unix())) //nolint:gosec

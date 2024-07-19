@@ -55,7 +55,7 @@ func (k *Keeper) SetHooks(hooks types2.JOLTHooks) *Keeper {
 }
 
 // GetDeposit returns a deposit from the store for a particular depositor address, deposit denom
-func (k Keeper) GetDeposit(ctx sdk.Context, depositor sdk.AccAddress) (types2.Deposit, bool) {
+func (k Keeper) GetDeposit(ctx context.Context, depositor sdk.AccAddress) (types2.Deposit, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.DepositsKeyPrefix)
 	bz := store.Get(depositor.Bytes())
 	if len(bz) == 0 {
@@ -67,20 +67,20 @@ func (k Keeper) GetDeposit(ctx sdk.Context, depositor sdk.AccAddress) (types2.De
 }
 
 // SetDeposit sets the input deposit in the store, prefixed by the deposit type, deposit denom, and depositor address, in that order
-func (k Keeper) SetDeposit(ctx sdk.Context, deposit types2.Deposit) {
+func (k Keeper) SetDeposit(ctx context.Context, deposit types2.Deposit) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.DepositsKeyPrefix)
 	bz := k.cdc.MustMarshal(&deposit)
 	store.Set(deposit.Depositor.Bytes(), bz)
 }
 
 // DeleteDeposit deletes a deposit from the store
-func (k Keeper) DeleteDeposit(ctx sdk.Context, deposit types2.Deposit) {
+func (k Keeper) DeleteDeposit(ctx context.Context, deposit types2.Deposit) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.DepositsKeyPrefix)
 	store.Delete(deposit.Depositor.Bytes())
 }
 
 // IterateDeposits iterates over all deposit objects in the store and performs a callback function
-func (k Keeper) IterateDeposits(ctx sdk.Context, cb func(deposit types2.Deposit) (stop bool)) {
+func (k Keeper) IterateDeposits(ctx context.Context, cb func(deposit types2.Deposit) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.DepositsKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -94,7 +94,7 @@ func (k Keeper) IterateDeposits(ctx sdk.Context, cb func(deposit types2.Deposit)
 }
 
 // GetDepositsByUser gets all deposits for an individual user
-func (k Keeper) GetDepositsByUser(ctx sdk.Context, user sdk.AccAddress) []types2.Deposit {
+func (k Keeper) GetDepositsByUser(ctx context.Context, user sdk.AccAddress) []types2.Deposit {
 	var deposits []types2.Deposit
 	k.IterateDeposits(ctx, func(deposit types2.Deposit) (stop bool) {
 		if deposit.Depositor.Equals(user) {
@@ -106,7 +106,7 @@ func (k Keeper) GetDepositsByUser(ctx sdk.Context, user sdk.AccAddress) []types2
 }
 
 // GetBorrow returns a Borrow from the store for a particular borrower address and borrow denom
-func (k Keeper) GetBorrow(ctx sdk.Context, borrower sdk.AccAddress) (types2.Borrow, bool) {
+func (k Keeper) GetBorrow(ctx context.Context, borrower sdk.AccAddress) (types2.Borrow, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowsKeyPrefix)
 	bz := store.Get(borrower)
 	if len(bz) == 0 {
@@ -118,20 +118,20 @@ func (k Keeper) GetBorrow(ctx sdk.Context, borrower sdk.AccAddress) (types2.Borr
 }
 
 // SetBorrow sets the input borrow in the store, prefixed by the borrower address and borrow denom
-func (k Keeper) SetBorrow(ctx sdk.Context, borrow types2.Borrow) {
+func (k Keeper) SetBorrow(ctx context.Context, borrow types2.Borrow) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowsKeyPrefix)
 	bz := k.cdc.MustMarshal(&borrow)
 	store.Set(borrow.Borrower, bz)
 }
 
 // DeleteBorrow deletes a borrow from the store
-func (k Keeper) DeleteBorrow(ctx sdk.Context, borrow types2.Borrow) {
+func (k Keeper) DeleteBorrow(ctx context.Context, borrow types2.Borrow) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowsKeyPrefix)
 	store.Delete(borrow.Borrower)
 }
 
 // IterateBorrows iterates over all borrow objects in the store and performs a callback function
-func (k Keeper) IterateBorrows(ctx sdk.Context, cb func(borrow types2.Borrow) (stop bool)) {
+func (k Keeper) IterateBorrows(ctx context.Context, cb func(borrow types2.Borrow) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowsKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -145,7 +145,7 @@ func (k Keeper) IterateBorrows(ctx sdk.Context, cb func(borrow types2.Borrow) (s
 }
 
 // SetBorrowedCoins sets the total amount of coins currently borrowed in the store
-func (k Keeper) SetBorrowedCoins(ctx sdk.Context, borrowedCoins sdk.Coins) {
+func (k Keeper) SetBorrowedCoins(ctx context.Context, borrowedCoins sdk.Coins) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowedCoinsPrefix)
 	if borrowedCoins.Empty() {
 		store.Set(types2.BorrowedCoinsPrefix, []byte{})
@@ -158,7 +158,7 @@ func (k Keeper) SetBorrowedCoins(ctx sdk.Context, borrowedCoins sdk.Coins) {
 }
 
 // GetBorrowedCoins returns an sdk.Coins object from the store representing all currently borrowed coins
-func (k Keeper) GetBorrowedCoins(ctx sdk.Context) (sdk.Coins, bool) {
+func (k Keeper) GetBorrowedCoins(ctx context.Context) (sdk.Coins, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowedCoinsPrefix)
 	bz := store.Get(types2.BorrowedCoinsPrefix)
 	if len(bz) == 0 {
@@ -170,7 +170,7 @@ func (k Keeper) GetBorrowedCoins(ctx sdk.Context) (sdk.Coins, bool) {
 }
 
 // SetSuppliedCoins sets the total amount of coins currently supplied in the store
-func (k Keeper) SetSuppliedCoins(ctx sdk.Context, suppliedCoins sdk.Coins) {
+func (k Keeper) SetSuppliedCoins(ctx context.Context, suppliedCoins sdk.Coins) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SuppliedCoinsPrefix)
 	if suppliedCoins.Empty() {
 		store.Set(types2.SuppliedCoinsPrefix, []byte{})
@@ -183,7 +183,7 @@ func (k Keeper) SetSuppliedCoins(ctx sdk.Context, suppliedCoins sdk.Coins) {
 }
 
 // GetSuppliedCoins returns an sdk.Coins object from the store representing all currently supplied coins
-func (k Keeper) GetSuppliedCoins(ctx sdk.Context) (sdk.Coins, bool) {
+func (k Keeper) GetSuppliedCoins(ctx context.Context) (sdk.Coins, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SuppliedCoinsPrefix)
 	bz := store.Get(types2.SuppliedCoinsPrefix)
 	if len(bz) == 0 {
@@ -195,7 +195,7 @@ func (k Keeper) GetSuppliedCoins(ctx sdk.Context) (sdk.Coins, bool) {
 }
 
 // GetMoneyMarket returns a money market from the store for a denom
-func (k Keeper) GetMoneyMarket(ctx sdk.Context, denom string) (types2.MoneyMarket, bool) {
+func (k Keeper) GetMoneyMarket(ctx context.Context, denom string) (types2.MoneyMarket, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.MoneyMarketsPrefix)
 	bz := store.Get([]byte(denom))
 	if len(bz) == 0 {
@@ -207,14 +207,14 @@ func (k Keeper) GetMoneyMarket(ctx sdk.Context, denom string) (types2.MoneyMarke
 }
 
 // SetMoneyMarket sets a money market in the store for a denom
-func (k Keeper) SetMoneyMarket(ctx sdk.Context, denom string, moneyMarket types2.MoneyMarket) {
+func (k Keeper) SetMoneyMarket(ctx context.Context, denom string, moneyMarket types2.MoneyMarket) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.MoneyMarketsPrefix)
 	bz := k.cdc.MustMarshal(&moneyMarket)
 	store.Set([]byte(denom), bz)
 }
 
 // DeleteMoneyMarket deletes a money market from the store
-func (k Keeper) DeleteMoneyMarket(ctx sdk.Context, denom string) {
+func (k Keeper) DeleteMoneyMarket(ctx context.Context, denom string) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.MoneyMarketsPrefix)
 	store.Delete([]byte(denom))
 }
@@ -222,7 +222,7 @@ func (k Keeper) DeleteMoneyMarket(ctx sdk.Context, denom string) {
 // IterateMoneyMarkets iterates over all money markets objects in the store and performs a callback function
 //
 //	that returns both the money market and the key (denom) it's stored under
-func (k Keeper) IterateMoneyMarkets(ctx sdk.Context, cb func(denom string, moneyMarket types2.MoneyMarket) (stop bool)) {
+func (k Keeper) IterateMoneyMarkets(ctx context.Context, cb func(denom string, moneyMarket types2.MoneyMarket) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.MoneyMarketsPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -236,7 +236,7 @@ func (k Keeper) IterateMoneyMarkets(ctx sdk.Context, cb func(denom string, money
 }
 
 // GetAllMoneyMarkets returns all money markets from the store
-func (k Keeper) GetAllMoneyMarkets(ctx sdk.Context) (moneyMarkets types2.MoneyMarkets) {
+func (k Keeper) GetAllMoneyMarkets(ctx context.Context) (moneyMarkets types2.MoneyMarkets) {
 	k.IterateMoneyMarkets(ctx, func(denom string, moneyMarket types2.MoneyMarket) bool {
 		moneyMarkets = append(moneyMarkets, moneyMarket)
 		return false
@@ -245,7 +245,7 @@ func (k Keeper) GetAllMoneyMarkets(ctx sdk.Context) (moneyMarkets types2.MoneyMa
 }
 
 // GetPreviousAccrualTime returns the last time an individual market accrued interest
-func (k Keeper) GetPreviousAccrualTime(ctx sdk.Context, denom string) (time.Time, bool) {
+func (k Keeper) GetPreviousAccrualTime(ctx context.Context, denom string) (time.Time, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.PreviousAccrualTimePrefix)
 	bz := store.Get([]byte(denom))
 	if len(bz) == 0 {
@@ -260,7 +260,7 @@ func (k Keeper) GetPreviousAccrualTime(ctx sdk.Context, denom string) (time.Time
 }
 
 // SetPreviousAccrualTime sets the most recent accrual time for a particular market
-func (k Keeper) SetPreviousAccrualTime(ctx sdk.Context, denom string, previousAccrualTime time.Time) {
+func (k Keeper) SetPreviousAccrualTime(ctx context.Context, denom string, previousAccrualTime time.Time) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.PreviousAccrualTimePrefix)
 	bz, err := previousAccrualTime.MarshalBinary()
 	if err != nil {
@@ -270,7 +270,7 @@ func (k Keeper) SetPreviousAccrualTime(ctx sdk.Context, denom string, previousAc
 }
 
 // SetTotalReserves sets the total reserves for an individual market
-func (k Keeper) SetTotalReserves(ctx sdk.Context, coins sdk.Coins) {
+func (k Keeper) SetTotalReserves(ctx context.Context, coins sdk.Coins) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.TotalReservesPrefix)
 	if coins.Empty() {
 		store.Set(types2.TotalReservesPrefix, []byte{})
@@ -284,7 +284,7 @@ func (k Keeper) SetTotalReserves(ctx sdk.Context, coins sdk.Coins) {
 }
 
 // GetTotalReserves returns the total reserves for an individual market
-func (k Keeper) GetTotalReserves(ctx sdk.Context) (sdk.Coins, bool) {
+func (k Keeper) GetTotalReserves(ctx context.Context) (sdk.Coins, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.TotalReservesPrefix)
 	bz := store.Get(types2.TotalReservesPrefix)
 	if len(bz) == 0 {
@@ -297,7 +297,7 @@ func (k Keeper) GetTotalReserves(ctx sdk.Context) (sdk.Coins, bool) {
 }
 
 // GetBorrowInterestFactor returns the current borrow interest factor for an individual market
-func (k Keeper) GetBorrowInterestFactor(ctx sdk.Context, denom string) (sdk.Dec, bool) {
+func (k Keeper) GetBorrowInterestFactor(ctx context.Context, denom string) (sdk.Dec, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowInterestFactorPrefix)
 	bz := store.Get([]byte(denom))
 	if len(bz) == 0 {
@@ -309,7 +309,7 @@ func (k Keeper) GetBorrowInterestFactor(ctx sdk.Context, denom string) (sdk.Dec,
 }
 
 // SetBorrowInterestFactor sets the current borrow interest factor for an individual market
-func (k Keeper) SetBorrowInterestFactor(ctx sdk.Context, denom string, borrowInterestFactor sdk.Dec) {
+func (k Keeper) SetBorrowInterestFactor(ctx context.Context, denom string, borrowInterestFactor sdk.Dec) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowInterestFactorPrefix)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: borrowInterestFactor})
 	store.Set([]byte(denom), bz)
@@ -317,7 +317,7 @@ func (k Keeper) SetBorrowInterestFactor(ctx sdk.Context, denom string, borrowInt
 
 // IterateBorrowInterestFactors iterates over all borrow interest factors in the store and returns
 // both the borrow interest factor and the key (denom) it's stored under
-func (k Keeper) IterateBorrowInterestFactors(ctx sdk.Context, cb func(denom string, factor sdk.Dec) (stop bool)) {
+func (k Keeper) IterateBorrowInterestFactors(ctx context.Context, cb func(denom string, factor sdk.Dec) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowInterestFactorPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -331,7 +331,7 @@ func (k Keeper) IterateBorrowInterestFactors(ctx sdk.Context, cb func(denom stri
 }
 
 // GetSupplyInterestFactor returns the current supply interest factor for an individual market
-func (k Keeper) GetSupplyInterestFactor(ctx sdk.Context, denom string) (sdk.Dec, bool) {
+func (k Keeper) GetSupplyInterestFactor(ctx context.Context, denom string) (sdk.Dec, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
 	bz := store.Get([]byte(denom))
 	if len(bz) == 0 {
@@ -343,7 +343,7 @@ func (k Keeper) GetSupplyInterestFactor(ctx sdk.Context, denom string) (sdk.Dec,
 }
 
 // SetSupplyInterestFactor sets the current supply interest factor for an individual market
-func (k Keeper) SetSupplyInterestFactor(ctx sdk.Context, denom string, supplyInterestFactor sdk.Dec) {
+func (k Keeper) SetSupplyInterestFactor(ctx context.Context, denom string, supplyInterestFactor sdk.Dec) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: supplyInterestFactor})
 	store.Set([]byte(denom), bz)
@@ -351,7 +351,7 @@ func (k Keeper) SetSupplyInterestFactor(ctx sdk.Context, denom string, supplyInt
 
 // IterateSupplyInterestFactors iterates over all supply interest factors in the store and returns
 // both the supply interest factor and the key (denom) it's stored under
-func (k Keeper) IterateSupplyInterestFactors(ctx sdk.Context, cb func(denom string, factor sdk.Dec) (stop bool)) {
+func (k Keeper) IterateSupplyInterestFactors(ctx context.Context, cb func(denom string, factor sdk.Dec) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()

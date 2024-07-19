@@ -7,7 +7,7 @@ import (
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // LiqData holds liquidation-related data
@@ -18,7 +18,7 @@ type LiqData struct {
 }
 
 // AttemptKeeperLiquidation enables a keeper to liquidate an individual borrower's position
-func (k Keeper) AttemptKeeperLiquidation(ctx sdk.Context, keeper sdk.AccAddress, borrower sdk.AccAddress) error {
+func (k Keeper) AttemptKeeperLiquidation(ctx context.Context, keeper sdk.AccAddress, borrower sdk.AccAddress) error {
 	deposit, found := k.GetDeposit(ctx, borrower)
 	if !found {
 		return types2.ErrDepositNotFound
@@ -51,7 +51,7 @@ func (k Keeper) AttemptKeeperLiquidation(ctx sdk.Context, keeper sdk.AccAddress,
 		return err
 	}
 	if isWithinRange {
-		return sdkerrors.Wrapf(types2.ErrBorrowNotLiquidatable, "position is within valid LTV range")
+		return errorsmod.Wrapf(types2.ErrBorrowNotLiquidatable, "position is within valid LTV range")
 	}
 
 	// Sending coins to auction module with keeper address getting % of the profits
@@ -73,7 +73,7 @@ func (k Keeper) AttemptKeeperLiquidation(ctx sdk.Context, keeper sdk.AccAddress,
 }
 
 // SeizeDeposits seizes a list of deposits and sends them to auction
-func (k Keeper) SeizeDeposits(ctx sdk.Context, keeper sdk.AccAddress, deposit types2.Deposit,
+func (k Keeper) SeizeDeposits(ctx context.Context, keeper sdk.AccAddress, deposit types2.Deposit,
 	borrow types2.Borrow, dDenoms, bDenoms []string,
 ) error {
 	liqMap, err := k.LoadLiquidationData(ctx, deposit, borrow)
@@ -147,7 +147,7 @@ func (k Keeper) SeizeDeposits(ctx sdk.Context, keeper sdk.AccAddress, deposit ty
 }
 
 // StartAuctions attempts to start auctions for seized assets
-func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows, deposits sdk.Coins,
+func (k Keeper) StartAuctions(ctx context.Context, borrower sdk.AccAddress, borrows, deposits sdk.Coins,
 	depositCoinValues, borrowCoinValues types2.ValuationMap, ltv sdk.Dec, liqMap map[string]LiqData,
 ) (sdk.Coins, error) {
 	// Sort keys to ensure deterministic behavior
@@ -295,7 +295,7 @@ func (k Keeper) StartAuctions(ctx sdk.Context, borrower sdk.AccAddress, borrows,
 }
 
 // IsWithinValidLtvRange compares a borrow and deposit to see if it's within a valid LTV range at current prices
-func (k Keeper) IsWithinValidLtvRange(ctx sdk.Context, deposit types2.Deposit, borrow types2.Borrow) (bool, sdk.Dec, error) {
+func (k Keeper) IsWithinValidLtvRange(ctx context.Context, deposit types2.Deposit, borrow types2.Borrow) (bool, sdk.Dec, error) {
 	liqMap, err := k.LoadLiquidationData(ctx, deposit, borrow)
 	if err != nil {
 		return false, sdk.Dec{}, err
@@ -331,7 +331,7 @@ func (k Keeper) IsWithinValidLtvRange(ctx sdk.Context, deposit types2.Deposit, b
 
 // GetStoreLTV calculates the user's current LTV based on their deposits/borrows in the store
 // and does not include any outsanding interest.
-func (k Keeper) GetStoreLTV(ctx sdk.Context, addr sdk.AccAddress) (sdk.Dec, error) {
+func (k Keeper) GetStoreLTV(ctx context.Context, addr sdk.AccAddress) (sdk.Dec, error) {
 	// Fetch deposits and parse coin denoms
 	deposit, found := k.GetDeposit(ctx, addr)
 	if !found {
@@ -349,7 +349,7 @@ func (k Keeper) GetStoreLTV(ctx sdk.Context, addr sdk.AccAddress) (sdk.Dec, erro
 
 // CalculateLtv calculates the potential LTV given a user's deposits and borrows.
 // The boolean returned indicates if the LTV should be added to the store's LTV index.
-func (k Keeper) CalculateLtv(ctx sdk.Context, deposit types2.Deposit, borrow types2.Borrow) (sdk.Dec, error) {
+func (k Keeper) CalculateLtv(ctx context.Context, deposit types2.Deposit, borrow types2.Borrow) (sdk.Dec, error) {
 	// Load required liquidation data for every deposit/borrow denom
 	liqMap, err := k.LoadLiquidationData(ctx, deposit, borrow)
 	if err != nil {
@@ -383,7 +383,7 @@ func (k Keeper) CalculateLtv(ctx sdk.Context, deposit types2.Deposit, borrow typ
 }
 
 // LoadLiquidationData returns liquidation data, deposit, borrow
-func (k Keeper) LoadLiquidationData(ctx sdk.Context, deposit types2.Deposit, borrow types2.Borrow) (map[string]LiqData, error) {
+func (k Keeper) LoadLiquidationData(ctx context.Context, deposit types2.Deposit, borrow types2.Borrow) (map[string]LiqData, error) {
 	liqMap := make(map[string]LiqData)
 
 	borrowDenoms := getDenoms(borrow.Amount)
@@ -394,7 +394,7 @@ func (k Keeper) LoadLiquidationData(ctx sdk.Context, deposit types2.Deposit, bor
 	for _, denom := range denoms {
 		mm, found := k.GetMoneyMarket(ctx, denom)
 		if !found {
-			return liqMap, sdkerrors.Wrapf(types2.ErrMarketNotFound, "no market found for denom %s", denom)
+			return liqMap, errorsmod.Wrapf(types2.ErrMarketNotFound, "no market found for denom %s", denom)
 		}
 
 		priceData, err := k.pricefeedKeeper.GetCurrentPrice(ctx, mm.SpotMarketID)

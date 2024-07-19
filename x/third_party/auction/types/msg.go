@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // ensure Msg interface compliance at compile time
@@ -32,10 +32,10 @@ func (msg MsgPlaceBid) ValidateBasic() error {
 	}
 	_, err := sdk.AccAddressFromBech32(msg.Bidder)
 	if err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "bidder address cannot be empty or invalid")
+		return errorsmod.Wrap(errorsmod.ErrInvalidAddress, "bidder address cannot be empty or invalid")
 	}
 	if !msg.Amount.IsValid() {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidCoins, "bid amount %s", msg.Amount)
+		return errorsmod.Wrapf(errorsmod.ErrInvalidCoins, "bid amount %s", msg.Amount)
 	}
 	return nil
 }

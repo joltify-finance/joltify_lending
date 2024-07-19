@@ -4,16 +4,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func (k Keeper) processEachReserve(ctx sdk.Context, c sdk.Coin, threshold sdk.Int) (bool, error) {
+func (k Keeper) processEachReserve(ctx context.Context, c sdk.Coin, threshold sdk.Int) (bool, error) {
 	liqMap := make(map[string]LiqData)
 
 	// Load required liquidation data for every deposit/borrow denom
 	mm, found := k.GetMoneyMarket(ctx, c.Denom)
 	if !found {
-		return false, sdkerrors.Wrapf(types.ErrMarketNotFound, "no market found for denom %s", c.Denom)
+		return false, errorsmod.Wrapf(types.ErrMarketNotFound, "no market found for denom %s", c.Denom)
 	}
 
 	priceData, err := k.pricefeedKeeper.GetCurrentPrice(ctx, mm.SpotMarketID)
@@ -46,7 +46,7 @@ func (k Keeper) processEachReserve(ctx sdk.Context, c sdk.Coin, threshold sdk.In
 }
 
 // RunSurplusAuctions nets the surplus and debt balances and then creates surplus or debt auctions if the remaining balance is above the auction threshold parameter
-func (k Keeper) RunSurplusAuctions(ctx sdk.Context) error {
+func (k Keeper) RunSurplusAuctions(ctx context.Context) error {
 	totalReserves, found := k.GetTotalReserves(ctx)
 	if !found {
 		return nil

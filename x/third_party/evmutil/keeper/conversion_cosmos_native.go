@@ -5,12 +5,12 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
 )
 
-func (k *Keeper) doNativeTransfer(ctx sdk.Context, sender, receiver sdk.AccAddress, amount sdk.Coin) error {
+func (k *Keeper) doNativeTransfer(ctx context.Context, sender, receiver sdk.AccAddress, amount sdk.Coin) error {
 	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, sender, types.ModuleName, sdk.NewCoins(amount))
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func (k *Keeper) doNativeTransfer(ctx sdk.Context, sender, receiver sdk.AccAddre
 // If a conversion has never been made before and no contract exists, one will be deployed.
 // Only denoms registered to the AllowedCosmosDenoms param may be converted.
 func (k *Keeper) ConvertCosmosCoinToERC20(
-	ctx sdk.Context,
+	ctx context.Context,
 	initiator sdk.AccAddress,
 	receiver types.InternalEVMAddress,
 	amount sdk.Coin,
@@ -86,7 +86,7 @@ func (k *Keeper) ConvertCosmosCoinToERC20(
 // ConvertCosmosCoinFromERC20 burns the ERC20 wrapper of the cosmos coin and
 // sends the underlying sdk coin form the module account to the receiver.
 func (k *Keeper) ConvertCosmosCoinFromERC20(
-	ctx sdk.Context,
+	ctx context.Context,
 	initiator types.InternalEVMAddress,
 	receiver sdk.AccAddress,
 	coin sdk.Coin,
@@ -122,7 +122,7 @@ func (k *Keeper) ConvertCosmosCoinFromERC20(
 		return errorsmod.Wrapf(types.ErrEVMCall, "failed to retrieve balance %s", err.Error())
 	}
 	if balance.Cmp(amount) == -1 {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, "failed to convert to cosmos coins")
+		return errorsmod.Wrapf(errorsmod.ErrInsufficientFunds, "failed to convert to cosmos coins")
 	}
 
 	// burn initiator's ERC20 tokens

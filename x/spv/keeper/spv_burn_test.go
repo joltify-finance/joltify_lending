@@ -24,7 +24,7 @@ type mockBurnSuite struct {
 	nftKeeper     types.NFTKeeper
 	auctionKeeper keeper.MockAuctionKeeper
 	app           types.MsgServer
-	ctx           sdk.Context
+	ctx           context.Context
 	investors     []string
 	investorPool  string
 	creator       string

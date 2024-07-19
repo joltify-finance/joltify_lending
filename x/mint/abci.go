@@ -5,7 +5,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/mint/keeper"
 )
 
-func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
+func BeginBlock(ctx context.Context, keeper keeper.Keeper) {
 	// we mint the tokens
 	keeper.DoDistribute(ctx)
 }

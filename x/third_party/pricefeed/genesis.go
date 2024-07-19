@@ -7,7 +7,7 @@ import (
 )
 
 // InitGenesis sets distribution information for genesis.
-func InitGenesis(ctx sdk.Context, k keeper.Keeper, gs types2.GenesisState) {
+func InitGenesis(ctx context.Context, k keeper.Keeper, gs types2.GenesisState) {
 	// Set the markets and oracles from params
 	k.SetParams(ctx, gs.Params)
 
@@ -40,7 +40,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, gs types2.GenesisState) {
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types2.GenesisState {
+func ExportGenesis(ctx context.Context, k keeper.Keeper) types2.GenesisState {
 	// Get the params for markets and oracles
 	params := k.GetParams(ctx)
 

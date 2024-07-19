@@ -7,7 +7,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	evmtypes "github.com/evmos/ethermint/x/evm/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
@@ -66,7 +66,7 @@ func NewEvmBankKeeper(uJoltKeeper Keeper, bk types.BankKeeper, ak types.AccountK
 }
 
 // GetBalance returns the total **spendable** balance of ajolt for a given account by address.
-func (k EvmBankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+func (k EvmBankKeeper) GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	if denom != EvmDenom {
 		panic(fmt.Errorf("only evm denom %s is supported by EvmBankKeeper", EvmDenom))
 	}
@@ -79,7 +79,7 @@ func (k EvmBankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom st
 }
 
 // SendCoins transfers ajolt coins from a AccAddress to an AccAddress.
-func (k EvmBankKeeper) SendCoins(ctx sdk.Context, senderAddr sdk.AccAddress, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
+func (k EvmBankKeeper) SendCoins(ctx context.Context, senderAddr sdk.AccAddress, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
 	// SendCoins method is not used by the evm module, but is required by the
 	// evmtypes.BankKeeper interface. This must be updated if the evm module
 	// is updated to use SendCoins.
@@ -89,7 +89,7 @@ func (k EvmBankKeeper) SendCoins(ctx sdk.Context, senderAddr sdk.AccAddress, rec
 // SendCoinsFromModuleToAccount transfers ajolt coins from a ModuleAccount to an AccAddress.
 // It will panic if the module account does not exist. An error is returned if the recipient
 // address is black-listed or if sending the tokens fails.
-func (k EvmBankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
+func (k EvmBankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
 	ujolt, ajolt, err := SplitAJoltCoins(amt)
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func (k EvmBankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModul
 
 // SendCoinsFromAccountToModule transfers ajolt coins from an AccAddress to a ModuleAccount.
 // It will panic if the module account does not exist.
-func (k EvmBankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+func (k EvmBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
 	ujolt, uJoltNeeded, err := SplitAJoltCoins(amt)
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (k EvmBankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr 
 
 // MintCoins mints ajolt coins by minting the equivalent ujolt coins and any remaining ajolt coins.
 // It will panic if the module account does not exist or is unauthorized.
-func (k EvmBankKeeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error {
+func (k EvmBankKeeper) MintCoins(ctx context.Context, moduleName string, amt sdk.Coins) error {
 	ujolt, ajolt, err := SplitAJoltCoins(amt)
 	if err != nil {
 		return err
@@ -163,7 +163,7 @@ func (k EvmBankKeeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coi
 
 // BurnCoins burns ajolt coins by burning the equivalent ujolt coins and any remaining ajolt coins.
 // It will panic if the module account does not exist or is unauthorized.
-func (k EvmBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error {
+func (k EvmBankKeeper) BurnCoins(ctx context.Context, moduleName string, amt sdk.Coins) error {
 	ujolt, ajolt, err := SplitAJoltCoins(amt)
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func (k EvmBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk.Coi
 
 // ConvertOneuJoltTouJoltIfNeeded converts 1 ujolt to ajolt for an address if
 // its ajolt balance is smaller than the uJoltNeeded amount.
-func (k EvmBankKeeper) ConvertOneUjoltToAjoltIfNeeded(ctx sdk.Context, addr sdk.AccAddress, uJoltNeeded sdkmath.Int) error {
+func (k EvmBankKeeper) ConvertOneUjoltToAjoltIfNeeded(ctx context.Context, addr sdk.AccAddress, uJoltNeeded sdkmath.Int) error {
 	ajoltBal := k.ajoltKeeper.GetBalance(ctx, addr)
 	if ajoltBal.GTE(uJoltNeeded) {
 		return nil
@@ -206,7 +206,7 @@ func (k EvmBankKeeper) ConvertOneUjoltToAjoltIfNeeded(ctx sdk.Context, addr sdk.
 }
 
 // ConvertAJoltToUJolt converts all available ajolt to ujolt for a given AccAddress.
-func (k EvmBankKeeper) ConvertAJoltToUJolt(ctx sdk.Context, addr sdk.AccAddress) error {
+func (k EvmBankKeeper) ConvertAJoltToUJolt(ctx context.Context, addr sdk.AccAddress) error {
 	totaluJolt := k.ajoltKeeper.GetBalance(ctx, addr)
 	ujolt, _, err := SplitAJoltCoins(sdk.NewCoins(sdk.NewCoin(EvmDenom, totaluJolt)))
 	if err != nil {
@@ -237,7 +237,7 @@ func (k EvmBankKeeper) ConvertAJoltToUJolt(ctx sdk.Context, addr sdk.AccAddress)
 func (k EvmBankKeeper) GetModuleAddress(moduleName string) sdk.AccAddress {
 	addr := k.ak.GetModuleAddress(moduleName)
 	if addr == nil {
-		panic(errorsmod.Wrapf(sdkerrors.ErrUnknownAddress, "module account %s does not exist", moduleName))
+		panic(errorsmod.Wrapf(errorsmod.ErrUnknownAddress, "module account %s does not exist", moduleName))
 	}
 	return addr
 }
@@ -278,13 +278,13 @@ func ValidateEvmCoins(coins sdk.Coins) error {
 
 	// validate that coins are non-negative, sorted, and no dup denoms
 	if err := coins.Validate(); err != nil {
-		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, coins.String())
+		return errorsmod.Wrap(errorsmod.ErrInvalidCoins, coins.String())
 	}
 
 	// validate that coin denom is ajolt
 	if len(coins) != 1 || coins[0].Denom != EvmDenom {
 		errMsg := fmt.Sprintf("invalid evm coin denom, only %s is supported", EvmDenom)
-		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, errMsg)
+		return errorsmod.Wrap(errorsmod.ErrInvalidCoins, errMsg)
 	}
 
 	return nil

@@ -11,7 +11,7 @@ import (
 	coserrors "cosmossdk.io/errors"
 	"cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
@@ -41,26 +41,26 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if msg.TargetTokenAmount.IsZero() {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidVersion, "the amount cannot be 0")
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidVersion, "the amount cannot be 0")
 	}
 
 	targetProject, ok := k.kycKeeper.GetProject(ctx, msg.ProjectIndex)
 	if !ok {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", msg.ProjectIndex)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the given project %v cannot be found", msg.ProjectIndex)
 	}
 
 	_, err := k.priceFeedKeeper.GetCurrentPrice(ctx, targetProject.MarketId)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given marketID %v cannot be found", targetProject.MarketId)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the given marketID %v cannot be found", targetProject.MarketId)
 	}
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	if !targetProject.ProjectOwner.Equals(spvAddress) {
-		return nil, coserrors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized address %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrUnauthorized, "unauthorized address %v", msg.Creator)
 	}
 
 	apys, payfreq, err := parameterSanitize(targetProject.PayFreq, msg.Apy)

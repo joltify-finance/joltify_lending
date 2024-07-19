@@ -45,7 +45,7 @@ type Suite struct {
 	suite.Suite
 
 	App            app.TestApp
-	Ctx            sdk.Context
+	Ctx            context.Context
 	Address        common.Address
 	BankKeeper     bankkeeper.Keeper
 	AccountKeeper  authkeeper.AccountKeeper

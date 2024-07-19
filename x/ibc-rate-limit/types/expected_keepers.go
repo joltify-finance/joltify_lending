@@ -6,8 +6,8 @@ import (
 
 // QuotaKeeper defines the expected bank keeper
 type QuotaKeeper interface {
-	WhetherOnwhitelist(ctx sdk.Context, moduleName, sender string) bool
-	UpdateQuota(ctx sdk.Context, coins sdk.Coins, sender string, ibcSeq uint64, moduleName string) error
-	RevokeHistory(ctx sdk.Context, moduleName string, seq uint64)
-	WhetherOnBanlist(ctx sdk.Context, moduleName, sender string) bool
+	WhetherOnwhitelist(ctx context.Context, moduleName, sender string) bool
+	UpdateQuota(ctx context.Context, coins sdk.Coins, sender string, ibcSeq uint64, moduleName string) error
+	RevokeHistory(ctx context.Context, moduleName string, seq uint64)
+	WhetherOnBanlist(ctx context.Context, moduleName, sender string) bool
 }

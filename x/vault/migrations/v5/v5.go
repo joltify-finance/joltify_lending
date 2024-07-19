@@ -14,7 +14,7 @@ import (
 
 // these codes are only for migration and may out of date
 
-func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+func MigrateStore(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	oldPrefix := "OutboundTx/value/"
 	storeHandler := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 	storeHandlerOld := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(oldPrefix))
@@ -74,7 +74,7 @@ func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.Binar
 	return nil
 }
 
-func convertOutboundTxsAndSetProposal(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec, old []types.OutboundTxV04) []types.OutboundTx {
+func convertOutboundTxsAndSetProposal(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec, old []types.OutboundTxV04) []types.OutboundTx {
 	newOutboundTxs := make([]types.OutboundTx, len(old))
 	for i, el := range old {
 		// newOutboundTx[i]
@@ -94,7 +94,7 @@ func convertOutboundTxsAndSetProposal(ctx sdk.Context, storeKey storetypes.Store
 	return newOutboundTxs
 }
 
-func setItemProposals(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec, reqIndex string, proposals map[string]types.ProposalsV04) []string {
+func setItemProposals(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec, reqIndex string, proposals map[string]types.ProposalsV04) []string {
 	items := make([]string, 0, len(proposals))
 	for txID := range proposals {
 		items = append(items, txID)

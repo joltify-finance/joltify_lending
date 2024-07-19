@@ -8,7 +8,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
@@ -51,7 +51,7 @@ func (k *Keeper) SetEvmKeeper(evmKeeper types.EvmKeeper) {
 }
 
 // GetAllAccounts returns all accounts.
-func (k Keeper) GetAllAccounts(ctx sdk.Context) (accounts []types.Account) {
+func (k Keeper) GetAllAccounts(ctx context.Context) (accounts []types.Account) {
 	k.IterateAllAccounts(ctx, func(account types.Account) bool {
 		accounts = append(accounts, account)
 		return false
@@ -61,7 +61,7 @@ func (k Keeper) GetAllAccounts(ctx sdk.Context) (accounts []types.Account) {
 
 // IterateAllAccounts iterates over all accounts. If true is returned from the
 // callback, iteration is halted.
-func (k Keeper) IterateAllAccounts(ctx sdk.Context, cb func(types.Account) bool) {
+func (k Keeper) IterateAllAccounts(ctx context.Context, cb func(types.Account) bool) {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.AccountStoreKeyPrefix)
 
@@ -78,7 +78,7 @@ func (k Keeper) IterateAllAccounts(ctx sdk.Context, cb func(types.Account) bool)
 }
 
 // GetAccount returns the account for a given address.
-func (k Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) *types.Account {
+func (k Keeper) GetAccount(ctx context.Context, addr sdk.AccAddress) *types.Account {
 	store := ctx.KVStore(k.storeKey)
 	var account types.Account
 	bz := store.Get(types.AccountStoreKey(addr))
@@ -92,7 +92,7 @@ func (k Keeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) *types.Account 
 }
 
 // SetAccount sets the account for a given address.
-func (k Keeper) SetAccount(ctx sdk.Context, account types.Account) error {
+func (k Keeper) SetAccount(ctx context.Context, account types.Account) error {
 	if err := account.Validate(); err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (k Keeper) SetAccount(ctx sdk.Context, account types.Account) error {
 }
 
 // GetBalance returns the total balance of ajolt for a given account by address.
-func (k Keeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress) sdkmath.Int {
+func (k Keeper) GetBalance(ctx context.Context, addr sdk.AccAddress) sdkmath.Int {
 	account := k.GetAccount(ctx, addr)
 	if account == nil {
 		return sdkmath.ZeroInt()
@@ -127,7 +127,7 @@ func (k Keeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress) sdkmath.Int {
 }
 
 // SetBalance sets the total balance of ajolt for a given account by address.
-func (k Keeper) SetBalance(ctx sdk.Context, addr sdk.AccAddress, bal sdkmath.Int) error {
+func (k Keeper) SetBalance(ctx context.Context, addr sdk.AccAddress, bal sdkmath.Int) error {
 	account := k.GetAccount(ctx, addr)
 	if account == nil {
 		account = types.NewAccount(addr, bal)
@@ -143,7 +143,7 @@ func (k Keeper) SetBalance(ctx sdk.Context, addr sdk.AccAddress, bal sdkmath.Int
 }
 
 // SendBalance transfers the ajolt balance from sender addr to recipient addr.
-func (k Keeper) SendBalance(ctx sdk.Context, senderAddr sdk.AccAddress, recipientAddr sdk.AccAddress, amt sdkmath.Int) error {
+func (k Keeper) SendBalance(ctx context.Context, senderAddr sdk.AccAddress, recipientAddr sdk.AccAddress, amt sdkmath.Int) error {
 	if amt.IsNegative() {
 		return fmt.Errorf("cannot send a negative amount of ajolt: %d", amt)
 	}
@@ -154,7 +154,7 @@ func (k Keeper) SendBalance(ctx sdk.Context, senderAddr sdk.AccAddress, recipien
 
 	senderBal := k.GetBalance(ctx, senderAddr)
 	if senderBal.LT(amt) {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, "insufficient funds to send %s", amt.String())
+		return errorsmod.Wrapf(errorsmod.ErrInsufficientFunds, "insufficient funds to send %s", amt.String())
 	}
 	if err := k.SetBalance(ctx, senderAddr, senderBal.Sub(amt)); err != nil {
 		return err
@@ -165,13 +165,13 @@ func (k Keeper) SendBalance(ctx sdk.Context, senderAddr sdk.AccAddress, recipien
 }
 
 // AddBalance increments the ajolt balance of an address.
-func (k Keeper) AddBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdkmath.Int) error {
+func (k Keeper) AddBalance(ctx context.Context, addr sdk.AccAddress, amt sdkmath.Int) error {
 	bal := k.GetBalance(ctx, addr)
 	return k.SetBalance(ctx, addr, amt.Add(bal))
 }
 
 // RemoveBalance decrements the ajolt balance of an address.
-func (k Keeper) RemoveBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdkmath.Int) error {
+func (k Keeper) RemoveBalance(ctx context.Context, addr sdk.AccAddress, amt sdkmath.Int) error {
 	if amt.IsNegative() {
 		return fmt.Errorf("cannot remove a negative amount from balance: %d", amt)
 	}
@@ -181,19 +181,19 @@ func (k Keeper) RemoveBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdkmath.
 	bal := k.GetBalance(ctx, addr)
 	finalBal := bal.Sub(amt)
 	if finalBal.IsNegative() {
-		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, "insufficient funds to send %s", amt.String())
+		return errorsmod.Wrapf(errorsmod.ErrInsufficientFunds, "insufficient funds to send %s", amt.String())
 	}
 	return k.SetBalance(ctx, addr, finalBal)
 }
 
 // SetDeployedCosmosCoinContract stores a single deployed ERC20JoltWrappedCosmosCoin contract address
-func (k *Keeper) SetDeployedCosmosCoinContract(ctx sdk.Context, cosmosDenom string, contractAddress types.InternalEVMAddress) error {
+func (k *Keeper) SetDeployedCosmosCoinContract(ctx context.Context, cosmosDenom string, contractAddress types.InternalEVMAddress) error {
 	if err := sdk.ValidateDenom(cosmosDenom); err != nil {
 		return errorsmod.Wrap(types.ErrInvalidCosmosDenom, cosmosDenom)
 	}
 	if contractAddress.IsNil() {
 		return errorsmod.Wrapf(
-			sdkerrors.ErrInvalidAddress,
+			errorsmod.ErrInvalidAddress,
 			"attempting to register empty contract address for denom '%s'",
 			cosmosDenom,
 		)
@@ -207,7 +207,7 @@ func (k *Keeper) SetDeployedCosmosCoinContract(ctx sdk.Context, cosmosDenom stri
 
 // SetDeployedCosmosCoinContract gets a deployed ERC20JoltWrappedCosmosCoin contract address by cosmos denom
 // Returns the stored address and a bool indicating if it was found or not
-func (k *Keeper) GetDeployedCosmosCoinContract(ctx sdk.Context, cosmosDenom string) (types.InternalEVMAddress, bool) {
+func (k *Keeper) GetDeployedCosmosCoinContract(ctx context.Context, cosmosDenom string) (types.InternalEVMAddress, bool) {
 	store := ctx.KVStore(k.storeKey)
 	storeKey := types.DeployedCosmosCoinContractKey(cosmosDenom)
 	bz := store.Get(storeKey)
@@ -217,7 +217,7 @@ func (k *Keeper) GetDeployedCosmosCoinContract(ctx sdk.Context, cosmosDenom stri
 
 // IterateAllDeployedCosmosCoinContracts iterates through all the deployed ERC20 contracts representing
 // cosmos-sdk coins. If true is returned from the callback, iteration is halted.
-func (k Keeper) IterateAllDeployedCosmosCoinContracts(ctx sdk.Context, cb func(types.DeployedCosmosCoinContract) bool) {
+func (k Keeper) IterateAllDeployedCosmosCoinContracts(ctx context.Context, cb func(types.DeployedCosmosCoinContract) bool) {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.DeployedCosmosCoinContractKeyPrefix)
 

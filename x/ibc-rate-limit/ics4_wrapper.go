@@ -31,7 +31,7 @@ type ICS4Wrapper struct {
 }
 
 func (i *ICS4Wrapper) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
-	return i.channel.GetAppVersion(ctx, portID, channelID)
+	return i.channel.GetAppVersion(sdk.UnwrapSDKContext(ctx), portID, channelID)
 }
 
 func NewICS4Middleware(
@@ -53,7 +53,8 @@ func NewICS4Middleware(
 
 // SendPacket implements the ICS4 interface and is called when sending packets.
 func (i *ICS4Wrapper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability, sourcePort, sourceChannel string, timeoutHeight clienttypes.Height, timeoutTimestamp uint64, data []byte) (uint64, error) {
-	seq, errSend := i.channel.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	seq, errSend := i.channel.SendPacket(sdkCtx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
 	if errSend != nil {
 		return seq, errSend
 	}
@@ -61,7 +62,7 @@ func (i *ICS4Wrapper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capab
 	if sourcePort == "transfer" {
 		onWhiteList, onBanList, errCheck := i.whecherOnWhiteBanList(ctx, data)
 		if errCheck != nil {
-			ctx.Logger().Error("fail to check the whitelist", "transferInfo", string(data), "reason", errCheck.Error())
+			sdkCtx.Logger().Error("fail to check the whitelist", "transferInfo", string(data), "reason", errCheck.Error())
 			return seq, nil
 		}
 		// the sender is on whitelist, so bypass
@@ -76,10 +77,10 @@ func (i *ICS4Wrapper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capab
 		errUpdate := i.UpdateQuota(ctx, seq, data)
 		if errUpdate != nil {
 			if errUpdate.Error() == quotamoduletypes.AccErrQuotaExceed.Error() || errUpdate.Error() == quotamoduletypes.ErrQuotaExceed.Error() {
-				ctx.Logger().Error("quota exceeded", "transferInfo", string(data), "reason", errUpdate.Error())
+				sdkCtx.Logger().Error("quota exceeded", "transferInfo", string(data), "reason", errUpdate.Error())
 				return 0, errorsmod.Wrapf(errUpdate, "rate limit SendPacket failed to authorize transfer")
 			}
-			ctx.Logger().Error("fail to update the quota", "transferInfo", string(data), "reason", errUpdate.Error())
+			sdkCtx.Logger().Error("fail to update the quota", "transferInfo", string(data), "reason", errUpdate.Error())
 			return seq, nil
 		}
 	}
@@ -90,12 +91,12 @@ func (i *ICS4Wrapper) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilityt
 	return i.channel.WriteAcknowledgement(ctx, chanCap, packet, ack)
 }
 
-func (i *ICS4Wrapper) GetParams(ctx sdk.Context) (params types.Params) {
+func (i *ICS4Wrapper) GetParams(ctx context.Context) (params types.Params) {
 	// This was previously done via i.paramSpace.GetParamSet(ctx, &params). That will
 	// panic if the params don't exist. This is a workaround to avoid that panic.
 	// Params should be refactored to just use a raw kvstore.
 	for _, pair := range params.ParamSetPairs() {
-		i.paramSpace.GetIfExists(ctx, pair.Key, pair.Value)
+		i.paramSpace.GetIfExists(sdk.UnwrapSDKContext(ctx), pair.Key, pair.Value)
 	}
 	if params.TokenQuota == "" {
 		return types.DefaultParams()
@@ -103,8 +104,8 @@ func (i *ICS4Wrapper) GetParams(ctx sdk.Context) (params types.Params) {
 	return params
 }
 
-func (i *ICS4Wrapper) SetParams(ctx sdk.Context, params types.Params) {
-	i.paramSpace.SetParamSet(ctx, &params)
+func (i *ICS4Wrapper) SetParams(ctx context.Context, params types.Params) {
+	i.paramSpace.SetParamSet(sdk.UnwrapSDKContext(ctx), &params)
 }
 
 func (i ICS4Wrapper) Params(goCtx context.Context,

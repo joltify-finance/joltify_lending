@@ -11,7 +11,7 @@ import (
 )
 
 // UpdateIncentive updates the incentive for the pool to the incentive module
-func (k Keeper) UpdateIncentive(ctx sdk.Context, poolInfo types.PoolInfo) {
+func (k Keeper) UpdateIncentive(ctx context.Context, poolInfo types.PoolInfo) {
 	poolIndex := poolInfo.Index
 	totalBorrowed := poolInfo.BorrowedAmount
 

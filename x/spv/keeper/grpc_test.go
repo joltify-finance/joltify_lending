@@ -22,7 +22,7 @@ type querySuite struct {
 	nftKeeper    types.NFTKeeper
 	bankKeeper   types.BankKeeper
 	app          types.MsgServer
-	ctx          sdk.Context
+	ctx          context.Context
 	investors    []string
 	investorPool string
 }

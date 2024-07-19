@@ -30,7 +30,7 @@ var testChainID = "joltifytest_888-1"
 type IntegrationTester struct {
 	suite.Suite
 	App app.TestApp
-	Ctx sdk.Context
+	Ctx context.Context
 }
 
 func (suite *IntegrationTester) SetupSuite() {

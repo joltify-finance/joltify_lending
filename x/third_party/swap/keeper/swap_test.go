@@ -8,7 +8,7 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 )
 
@@ -386,7 +386,7 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_InsufficientFunds() {
 
 			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			err := suite.Keeper.SwapExactForTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdk.MustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -429,7 +429,7 @@ func (suite *keeperTestSuite) TestSwapBatchExactForTokens_InsufficientFunds() {
 
 			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			err := suite.Keeper.SwapExactForBatchTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdk.MustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -466,7 +466,7 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_InsufficientFunds_Vesting()
 
 			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			err := suite.Keeper.SwapExactForTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdk.MustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -861,7 +861,7 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_InsufficientFunds() {
 
 			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			err := suite.Keeper.SwapForExactTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdk.MustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -898,7 +898,7 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_InsufficientFunds_Vesting()
 
 			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 			err := suite.Keeper.SwapForExactTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdk.MustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }

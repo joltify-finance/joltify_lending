@@ -38,7 +38,7 @@ import (
 //
 // These slippages can be calculated by S_B = ((A/B')/(A/B) - 1) and S_A ((B/A')/(B/A) - 1), simplifying to
 // S_B = (A/A' - 1), and S_B = (B/B' - 1).  An error is returned when max(S_A, S_B) > slippageLimit.
-func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coinA sdk.Coin, coinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coinA sdk.Coin, coinB sdk.Coin, slippageLimit sdk.Dec) error {
 	desiredAmount := sdk.NewCoins(coinA, coinB)
 
 	poolID := types.PoolIDFromCoins(desiredAmount)
@@ -104,7 +104,7 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coinA sdk.Coi
 	return nil
 }
 
-func (k Keeper) depositAllowed(ctx sdk.Context, poolID string) bool {
+func (k Keeper) depositAllowed(ctx context.Context, poolID string) bool {
 	params := k.GetParams(ctx)
 	for _, p := range params.AllowedPools {
 		if poolID == types.PoolID(p.TokenA, p.TokenB) {
@@ -114,7 +114,7 @@ func (k Keeper) depositAllowed(ctx sdk.Context, poolID string) bool {
 	return false
 }
 
-func (k Keeper) initializePool(ctx sdk.Context, poolID string, depositor sdk.AccAddress, reserves sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
+func (k Keeper) initializePool(ctx context.Context, poolID string, depositor sdk.AccAddress, reserves sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
 	if allowed := k.depositAllowed(ctx, poolID); !allowed {
 		return nil, sdk.Coins{}, sdk.ZeroInt(), errorsmod.Wrap(types.ErrNotAllowed, fmt.Sprintf("can not create pool '%s'", poolID))
 	}
@@ -127,7 +127,7 @@ func (k Keeper) initializePool(ctx sdk.Context, poolID string, depositor sdk.Acc
 	return pool, pool.Reserves(), pool.TotalShares(), nil
 }
 
-func (k Keeper) addLiquidityToPool(ctx sdk.Context, record types.PoolRecord, depositor sdk.AccAddress, desiredAmount sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
+func (k Keeper) addLiquidityToPool(ctx context.Context, record types.PoolRecord, depositor sdk.AccAddress, desiredAmount sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
 	pool, err := types.NewDenominatedPoolWithExistingShares(record.Reserves(), record.TotalShares)
 	if err != nil {
 		return nil, sdk.Coins{}, sdk.ZeroInt(), err

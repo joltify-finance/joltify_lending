@@ -5,7 +5,7 @@ import (
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
@@ -37,7 +37,7 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	pool, found := k.GetPools(ctx, msg.GetPoolIndex())
@@ -52,13 +52,13 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 	for _, el := range msg.InvestorID {
 		_, err := k.kycKeeper.GetInvestorWallets(ctx, el)
 		if err != nil {
-			return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given investor id %v cannot be found", el)
+			return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the given investor id %v cannot be found", el)
 		}
 	}
 
 	targetProject, ok := k.kycKeeper.GetProject(ctx, pool.LinkedProject)
 	if !ok {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", pool.LinkedProject)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the given project %v cannot be found", pool.LinkedProject)
 	}
 
 	poolType := types.Senior

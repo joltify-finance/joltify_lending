@@ -10,7 +10,7 @@ import (
 )
 
 // SetOutboundTx set a specific outboundTx in the store from its index
-func (k Keeper) SetOutboundTx(ctx sdk.Context, outboundTx types.OutboundTx) {
+func (k Keeper) SetOutboundTx(ctx context.Context, outboundTx types.OutboundTx) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 	b := k.cdc.MustMarshal(&outboundTx)
 	store.Set(types.OutboundTxKey(
@@ -20,7 +20,7 @@ func (k Keeper) SetOutboundTx(ctx sdk.Context, outboundTx types.OutboundTx) {
 
 // GetOutboundTx returns a outboundTx from its index
 func (k Keeper) GetOutboundTx(
-	ctx sdk.Context,
+	ctx context.Context,
 	requestID string,
 ) (val types.OutboundTx, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
@@ -37,7 +37,7 @@ func (k Keeper) GetOutboundTx(
 }
 
 // SetOutboundTxProposal set proposals based on its requestID:outboundTxID
-func (k Keeper) SetOutboundTxProposal(ctx sdk.Context, reqID, outboundTxID string, proposals types.Proposals) {
+func (k Keeper) SetOutboundTxProposal(ctx context.Context, reqID, outboundTxID string, proposals types.Proposals) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxProposalKeyPrefix))
 	b := k.cdc.MustMarshal(&proposals)
 	key := fmt.Sprintf("%v:%v", reqID, outboundTxID)
@@ -48,7 +48,7 @@ func (k Keeper) SetOutboundTxProposal(ctx sdk.Context, reqID, outboundTxID strin
 
 // GetOutboundTxProposal returns proposals from its requestID:outboundTxID
 func (k Keeper) GetOutboundTxProposal(
-	ctx sdk.Context,
+	ctx context.Context,
 	reqID, outboundTxID string,
 ) (val types.Proposals, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxProposalKeyPrefix))
@@ -65,7 +65,7 @@ func (k Keeper) GetOutboundTxProposal(
 }
 
 // GetAllOutboundTx returns all outboundTx
-func (k Keeper) GetAllOutboundTx(ctx sdk.Context) (list []types.OutboundTx) {
+func (k Keeper) GetAllOutboundTx(ctx context.Context) (list []types.OutboundTx) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 

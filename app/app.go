@@ -633,8 +633,8 @@ func NewApp(
 		app.bankKeeper,
 	)
 
-	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[kycmoduletypes.StoreKey], runtime.NewKVStoreService(keys[kycmoduletypes.MemStoreKey], kycSubspace, authtypes.NewModuleAddress(govtypes.ModuleName))
-	app.nftKeeper = nftmodulekeeper.NewKeeper(runtime.NewKVStoreService(keys[nftmoduletypes.StoreKey], appCodec, app.accountKeeper, app.bankKeeper)
+	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec,keys[kycmoduletypes.StoreKey],keys[kycmoduletypes.MemStoreKey], kycSubspace, authtypes.NewModuleAddress(govtypes.ModuleName))
+	app.nftKeeper = nftmodulekeeper.NewKeeper(runtime.NewKVStoreService(keys[nftmoduletypes.StoreKey]), appCodec, app.accountKeeper, app.bankKeeper)
 
 	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper, app.incentiveKeeper)
 

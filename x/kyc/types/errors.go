@@ -1,15 +1,15 @@
 package types
 
 import (
-	sdkerrors "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 )
 
 // DONTCOVER
 
 // x/kyc module sentinel errors
 var (
-	ErrUnauthorised        = sdkerrors.Register(ModuleName, 1, "unauthorised submitter")
-	ErrExceedMaxWalletsNum = sdkerrors.Register(ModuleName, 2, "wallets number exceed max allowed")
-	ErrInvalidWallets      = sdkerrors.Register(ModuleName, 3, "wallets address are invalid")
-	ErrInvalidProject      = sdkerrors.Register(ModuleName, 4, "project is invalid")
+	ErrUnauthorised        = errorsmod.Register(ModuleName, 1, "unauthorised submitter")
+	ErrExceedMaxWalletsNum = errorsmod.Register(ModuleName, 2, "wallets number exceed max allowed")
+	ErrInvalidWallets      = errorsmod.Register(ModuleName, 3, "wallets address are invalid")
+	ErrInvalidProject      = errorsmod.Register(ModuleName, 4, "project is invalid")
 )

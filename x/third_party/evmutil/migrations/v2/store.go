@@ -9,13 +9,13 @@ import (
 
 // MigrateStore performs in-place store migrations for consensus version 2
 // V2 adds the allowed_cosmos_denoms param to parameters.
-func MigrateStore(ctx sdk.Context, paramstore paramtypes.Subspace) error {
+func MigrateStore(ctx context.Context, paramstore paramtypes.Subspace) error {
 	migrateParamsStore(ctx, paramstore)
 	return nil
 }
 
 // migrateParamsStore ensures the param key table exists and has the allowed_cosmos_denoms property
-func migrateParamsStore(ctx sdk.Context, paramstore paramtypes.Subspace) {
+func migrateParamsStore(ctx context.Context, paramstore paramtypes.Subspace) {
 	if !paramstore.HasKeyTable() {
 		paramstore.WithKeyTable(types.ParamKeyTable())
 	}

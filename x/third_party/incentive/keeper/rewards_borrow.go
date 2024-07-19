@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
 // AccumulateJoltBorrowRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateJoltBorrowRewards(ctx sdk.Context, rewardPeriod types2.MultiRewardPeriod) {
+func (k Keeper) AccumulateJoltBorrowRewards(ctx context.Context, rewardPeriod types2.MultiRewardPeriod) {
 	previousAccrualTime, found := k.GetPreviousJoltBorrowRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
 		previousAccrualTime = ctx.BlockTime()
@@ -44,7 +44,7 @@ func (k Keeper) AccumulateJoltBorrowRewards(ctx sdk.Context, rewardPeriod types2
 // The normalized borrow is also used for each individual borrow's source shares amount. Normalized amounts do not change except through
 // user input. This is essential as claims must be synced before any change to a source shares amount. The actual borrowed amounts cannot
 // be used as they increase every block due to interest.
-func (k Keeper) getJoltBorrowTotalSourceShares(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) getJoltBorrowTotalSourceShares(ctx context.Context, denom string) sdk.Dec {
 	totalBorrowedCoins, found := k.joltKeeper.GetBorrowedCoins(ctx)
 	if !found {
 		// assume no coins have been borrowed
@@ -64,7 +64,7 @@ func (k Keeper) getJoltBorrowTotalSourceShares(ctx sdk.Context, denom string) sd
 
 // InitializeJoltBorrowReward initializes the borrow-side of a jolt liquidity provider claim
 // by creating the claim and setting the borrow reward factor index
-func (k Keeper) InitializeJoltBorrowReward(ctx sdk.Context, borrow jolttypes.Borrow) {
+func (k Keeper) InitializeJoltBorrowReward(ctx context.Context, borrow jolttypes.Borrow) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, borrow.Borrower)
 	if !found {
 		claim = types2.NewJoltLiquidityProviderClaim(borrow.Borrower, sdk.Coins{}, nil, nil)
@@ -85,7 +85,7 @@ func (k Keeper) InitializeJoltBorrowReward(ctx sdk.Context, borrow jolttypes.Bor
 
 // SynchronizeJoltBorrowReward updates the claim object by adding any accumulated rewards
 // and updating the reward index value
-func (k Keeper) SynchronizeJoltBorrowReward(ctx sdk.Context, borrow jolttypes.Borrow) {
+func (k Keeper) SynchronizeJoltBorrowReward(ctx context.Context, borrow jolttypes.Borrow) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, borrow.Borrower)
 	if !found {
 		return
@@ -106,7 +106,7 @@ func (k Keeper) SynchronizeJoltBorrowReward(ctx sdk.Context, borrow jolttypes.Bo
 // synchronizeSingleHardBorrowReward synchronizes a single rewarded borrow denom in a jolt claim.
 // It returns the claim without setting in the store.
 // The public methods for accessing and modifying claims are preferred over this one. Direct modification of claims is easy to get wrong.
-func (k Keeper) synchronizeSingleHardBorrowReward(ctx sdk.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdk.Dec) types2.JoltLiquidityProviderClaim {
+func (k Keeper) synchronizeSingleHardBorrowReward(ctx context.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdk.Dec) types2.JoltLiquidityProviderClaim {
 	globalRewardIndexes, found := k.GetJoltBorrowRewardIndexes(ctx, denom)
 	if !found {
 		// The global factor is only not found if
@@ -140,7 +140,7 @@ func (k Keeper) synchronizeSingleHardBorrowReward(ctx sdk.Context, claim types2.
 }
 
 // UpdateJoltBorrowIndexDenoms adds or removes reward indexes from a claim to match the denoms in the borrow.
-func (k Keeper) UpdateJoltBorrowIndexDenoms(ctx sdk.Context, borrow jolttypes.Borrow) {
+func (k Keeper) UpdateJoltBorrowIndexDenoms(ctx context.Context, borrow jolttypes.Borrow) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, borrow.Borrower)
 	if !found {
 		claim = types2.NewJoltLiquidityProviderClaim(borrow.Borrower, sdk.Coins{}, nil, nil)
@@ -184,7 +184,7 @@ func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, so
 	// check for missing CollateralType's
 	for _, oldIndex := range oldIndexes {
 		if newIndex, found := newIndexes.Get(oldIndex.CollateralType); !found {
-			return nil, sdkerrors.Wrapf(types2.ErrDecreasingRewardFactor, "old: %v, new: %v", oldIndex, newIndex)
+			return nil, errorsmod.Wrapf(types2.ErrDecreasingRewardFactor, "old: %v, new: %v", oldIndex, newIndex)
 		}
 	}
 	var reward sdk.Coins
@@ -218,7 +218,7 @@ func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, so
 func (k Keeper) CalculateSingleReward(oldIndex, newIndex, sourceShares sdk.Dec) (sdk.Int, error) {
 	increase := newIndex.Sub(oldIndex)
 	if increase.IsNegative() {
-		return sdk.Int{}, sdkerrors.Wrapf(types2.ErrDecreasingRewardFactor, "old: %v, new: %v", oldIndex, newIndex)
+		return sdk.Int{}, errorsmod.Wrapf(types2.ErrDecreasingRewardFactor, "old: %v, new: %v", oldIndex, newIndex)
 	}
 	reward := increase.Mul(sourceShares).RoundInt()
 	return reward, nil

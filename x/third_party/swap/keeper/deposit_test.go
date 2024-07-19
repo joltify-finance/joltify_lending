@@ -10,7 +10,7 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (suite *keeperTestSuite) TestDeposit_CreatePool_PoolNotAllowed() {
@@ -66,13 +66,13 @@ func (suite *keeperTestSuite) TestDeposit_InsufficientFunds() {
 
 			err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdk.MustNewDecFromStr("0"))
 			// TODO: wrap in module specific error?
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 			suite.SetupTest()
 			// test deposit to existing pool insuffient funds
 			err = suite.CreatePool(sdk.NewCoins(sdk.NewCoin("ukava", sdkmath.NewInt(10e6)), sdk.NewCoin("usdx", sdkmath.NewInt(50e6))))
 			suite.Require().NoError(err)
 			err = suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdk.MustNewDecFromStr("10"))
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds))
 		})
 	}
 }
@@ -131,14 +131,14 @@ func (suite *keeperTestSuite) TestDeposit_InsufficientFunds_Vesting() {
 			// test create pool insuffient funds
 			err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdk.MustNewDecFromStr("0"))
 			// TODO: wrap in module specific error?
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds))
 
 			suite.SetupTest()
 			// test deposit to existing pool insuffient funds
 			err = suite.CreatePool(sdk.NewCoins(sdk.NewCoin("ukava", sdkmath.NewInt(10e6)), sdk.NewCoin("usdx", sdkmath.NewInt(50e6))))
 			suite.Require().NoError(err)
 			err = suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdk.MustNewDecFromStr("4"))
-			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds))
+			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds))
 		})
 	}
 }

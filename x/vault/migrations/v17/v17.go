@@ -32,7 +32,7 @@ func convertOutboundTx(old types.OutboundTxV16) types.OutboundTx {
 	}
 }
 
-func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+func MigrateStore(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	storeHandler := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 
 	oldOutBoundIter := storeHandler.Iterator(nil, nil)

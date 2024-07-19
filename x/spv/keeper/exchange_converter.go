@@ -5,7 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k Keeper) inboundConvertFromUSDWithMarketID(ctx sdk.Context, marketID string, amount sdkmath.Int) (sdkmath.Int, sdk.Dec, error) {
+func (k Keeper) inboundConvertFromUSDWithMarketID(ctx context.Context, marketID string, amount sdkmath.Int) (sdkmath.Int, sdk.Dec, error) {
 	currencyPrice, err := k.priceFeedKeeper.GetCurrentPrice(ctx, marketID)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroDec(), err
@@ -14,7 +14,7 @@ func (k Keeper) inboundConvertFromUSDWithMarketID(ctx sdk.Context, marketID stri
 	return outAmount, currencyPrice.Price, nil
 }
 
-func (k Keeper) outboundConvertToUSDWithMarketID(ctx sdk.Context, marketID string, amount sdkmath.Int) (sdkmath.Int, sdk.Dec, error) {
+func (k Keeper) outboundConvertToUSDWithMarketID(ctx context.Context, marketID string, amount sdkmath.Int) (sdkmath.Int, sdk.Dec, error) {
 	currencyPrice, err := k.priceFeedKeeper.GetCurrentPrice(ctx, marketID)
 	if err != nil {
 		return sdk.ZeroInt(), sdk.ZeroDec(), err

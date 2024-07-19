@@ -27,7 +27,7 @@ const (
 type GenesisTestSuite struct {
 	suite.Suite
 
-	ctx    sdk.Context
+	ctx    context.Context
 	app    app.TestApp
 	keeper keeper.Keeper
 	addrs  []sdk.AccAddress

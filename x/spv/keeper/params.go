@@ -10,14 +10,14 @@ import (
 )
 
 // GetParams get all parameters as types.Params
-func (k Keeper) GetParams(ctx sdk.Context) types.Params {
+func (k Keeper) GetParams(ctx context.Context) types.Params {
 	var param types.Params
 	k.paramstore.GetParamSet(ctx, &param)
 	return param
 }
 
 // GetParams get all parameters as types.Params
-func (k Keeper) GetParamsV21(ctx sdk.Context) sdkmath.Int {
+func (k Keeper) GetParamsV21(ctx context.Context) sdkmath.Int {
 	ret := k.paramstore.GetRaw(ctx, types.KeyBurnThreshold)
 	out := strings.Split(string(ret), "\"")
 
@@ -29,6 +29,6 @@ func (k Keeper) GetParamsV21(ctx sdk.Context) sdkmath.Int {
 }
 
 // SetParams set the params
-func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
+func (k Keeper) SetParams(ctx context.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }

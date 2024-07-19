@@ -8,26 +8,26 @@ import (
 )
 
 // GetParams returns the params from the store
-func (k Keeper) GetParams(ctx sdk.Context) types.Params {
+func (k Keeper) GetParams(ctx context.Context) types.Params {
 	var p types.Params
 	k.paramSubspace.GetParamSet(ctx, &p)
 	return p
 }
 
 // legacy function GetParamsV19 returns the params from the store
-func (k Keeper) GetParamsV19(ctx sdk.Context) types.ParamsV19 {
+func (k Keeper) GetParamsV19(ctx context.Context) types.ParamsV19 {
 	var p types.ParamsV19
 	k.paramSubspace.GetParamSet(ctx, &p)
 	return p
 }
 
 // SetParams sets params on the store
-func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
+func (k Keeper) SetParams(ctx context.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // update spv reward tokens
-func (k Keeper) SetSPVRewardTokens(ctx sdk.Context, poolId string, rewardTokens sdk.Coins) {
+func (k Keeper) SetSPVRewardTokens(ctx context.Context, poolId string, rewardTokens sdk.Coins) {
 	params := k.GetParams(ctx)
 	for i, el := range params.SPVRewardPeriods {
 		if !el.Active {
@@ -44,7 +44,7 @@ func (k Keeper) SetSPVRewardTokens(ctx sdk.Context, poolId string, rewardTokens 
 }
 
 // GetJoltSupplyRewardPeriods returns the reward period with the specified collateral type if it's found in the params
-func (k Keeper) GetJoltSupplyRewardPeriods(ctx sdk.Context, denom string) (types.MultiRewardPeriod, bool) {
+func (k Keeper) GetJoltSupplyRewardPeriods(ctx context.Context, denom string) (types.MultiRewardPeriod, bool) {
 	params := k.GetParams(ctx)
 	for _, rp := range params.JoltSupplyRewardPeriods {
 		if rp.CollateralType == denom {
@@ -55,7 +55,7 @@ func (k Keeper) GetJoltSupplyRewardPeriods(ctx sdk.Context, denom string) (types
 }
 
 // GetJoltBorrowRewardPeriods returns the reward period with the specified collateral type if it's found in the params
-func (k Keeper) GetJoltBorrowRewardPeriods(ctx sdk.Context, denom string) (types.MultiRewardPeriod, bool) {
+func (k Keeper) GetJoltBorrowRewardPeriods(ctx context.Context, denom string) (types.MultiRewardPeriod, bool) {
 	params := k.GetParams(ctx)
 	for _, rp := range params.JoltBorrowRewardPeriods {
 		if rp.CollateralType == denom {
@@ -66,7 +66,7 @@ func (k Keeper) GetJoltBorrowRewardPeriods(ctx sdk.Context, denom string) (types
 }
 
 // GetMultiplierByDenom fetches a multiplier from the params matching the denom and name.
-func (k Keeper) GetMultiplierByDenom(ctx sdk.Context, denom string, name string) (types.Multiplier, bool) {
+func (k Keeper) GetMultiplierByDenom(ctx context.Context, denom string, name string) (types.Multiplier, bool) {
 	params := k.GetParams(ctx)
 
 	for _, dm := range params.ClaimMultipliers {
@@ -79,7 +79,7 @@ func (k Keeper) GetMultiplierByDenom(ctx sdk.Context, denom string, name string)
 }
 
 // GetClaimEnd returns the claim end time for the params
-func (k Keeper) GetClaimEnd(ctx sdk.Context) time.Time {
+func (k Keeper) GetClaimEnd(ctx context.Context) time.Time {
 	params := k.GetParams(ctx)
 	return params.ClaimEnd
 }

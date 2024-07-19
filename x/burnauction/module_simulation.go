@@ -79,7 +79,7 @@ func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.Wei
 		simulation.NewWeightedProposalMsg(
 			opWeightMsgSubmitrequest,
 			defaultWeightMsgSubmitrequest,
-			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
+			func(r *rand.Rand, ctx context.Context, accs []simtypes.Account) sdk.Msg {
 				burnauctionsimulation.SimulateMsgSubmitrequest(am.accountKeeper, am.bankKeeper, am.keeper)
 				return nil
 			},

@@ -29,7 +29,7 @@ func (k Keeper) QueryByWallet(goCtx context.Context, req *types.QueryByWalletReq
 	return &types.QueryByWalletResponse{Investor: &ret}, nil
 }
 
-func (k Keeper) GetByWallet(ctx sdk.Context, wallet string) (types.Investor, error) {
+func (k Keeper) GetByWallet(ctx context.Context, wallet string) (types.Investor, error) {
 	gasBefore := ctx.GasMeter().GasConsumed()
 	defer func() {
 		gasAfter := ctx.GasMeter().GasConsumed()

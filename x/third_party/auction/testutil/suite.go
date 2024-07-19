@@ -27,7 +27,7 @@ type Suite struct {
 	BankKeeper    bankkeeper.Keeper
 	AccountKeeper authkeeper.AccountKeeper
 	App           app.TestApp
-	Ctx           sdk.Context
+	Ctx           context.Context
 	Addrs         []sdk.AccAddress
 	ModAcc        *authtypes.ModuleAccount
 }
@@ -103,7 +103,7 @@ func (suite *Suite) AddCoinsToAccount(addr sdk.AccAddress, coins sdk.Coins) {
 	suite.Require().NoError(err)
 }
 
-func fundAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, addr sdk.AccAddress, amounts sdk.Coins) error {
+func fundAccount(bankKeeper bankkeeper.Keeper, ctx context.Context, addr sdk.AccAddress, amounts sdk.Coins) error {
 	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func fundAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, addr sdk.AccAddr
 //
 // TODO: Instead of using the mint module account, which has the
 // permission of minting, create a "faucet" account. (@fdymylja)
-func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, recipientMod string, amounts sdk.Coins) error {
+func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx context.Context, recipientMod string, amounts sdk.Coins) error {
 	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
 		return err
 	}

@@ -14,7 +14,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error {
+func (k Keeper) HandleInterest(ctx context.Context, poolInfo *types.PoolInfo) error {
 	totalAmountDue, poolLatestPaymentTime, err := k.getAllInterestToBePaid(ctx, poolInfo)
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func (k Keeper) HandleInterest(ctx sdk.Context, poolInfo *types.PoolInfo) error 
 
 // HandleTransfer if the pool have enough withdrawal amount, we can return the full amount of the investors
 // otherwise, we can only return the partial of the principal
-func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
+func (k Keeper) HandleTransfer(ctx context.Context, poolInfo *types.PoolInfo) bool {
 	var err error
 	var depositors []*types.DepositorInfo
 	totalLockedAmount := sdkmath.ZeroInt()
@@ -167,7 +167,7 @@ func (k Keeper) HandleTransfer(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
 	return true
 }
 
-func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, burnNFT bool, exchangeRatio sdk.Dec) error {
+func (k Keeper) updateClassAndBurnNFT(ctx context.Context, classID, nftID string, burnNFT bool, exchangeRatio sdk.Dec) error {
 	thisClass, found := k.NftKeeper.GetClass(ctx, classID)
 	if !found {
 		return coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
@@ -213,7 +213,7 @@ func (k Keeper) updateClassAndBurnNFT(ctx sdk.Context, classID, nftID string, bu
 	return nil
 }
 
-func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.DepositorInfo, burnNFT bool, exchangeRatio sdk.Dec) error {
+func (k Keeper) processEachWithdrawReq(ctx context.Context, depositor types.DepositorInfo, burnNFT bool, exchangeRatio sdk.Dec) error {
 	for _, el := range depositor.LinkedNFT {
 		ids := strings.Split(el, ":")
 		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], burnNFT, exchangeRatio)
@@ -224,7 +224,7 @@ func (k Keeper) processEachWithdrawReq(ctx sdk.Context, depositor types.Deposito
 	return nil
 }
 
-func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo, withdrawAccounts []sdk.AccAddress) bool {
+func (k Keeper) HandlePartialPrincipalPayment(ctx context.Context, poolInfo *types.PoolInfo, withdrawAccounts []sdk.AccAddress) bool {
 	if len(withdrawAccounts) == 0 {
 		return true
 	}
@@ -324,7 +324,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx sdk.Context, poolInfo *types.P
 	return true
 }
 
-func (k Keeper) HandlePrincipalPayment(ctx sdk.Context, poolInfo *types.PoolInfo) bool {
+func (k Keeper) HandlePrincipalPayment(ctx context.Context, poolInfo *types.PoolInfo) bool {
 	// fixme this means the pool is empty
 	// if poolInfo.BorrowedAmount.IsZero() && poolInfo.UsableAmount.IsZero() {
 	if k.isEmptyPool(ctx, *poolInfo) {

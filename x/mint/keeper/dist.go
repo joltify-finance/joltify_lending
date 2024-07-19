@@ -15,7 +15,7 @@ import (
 
 const MAXMINT = 100000000
 
-func (k Keeper) FirstDist(ctx sdk.Context) error {
+func (k Keeper) FirstDist(ctx context.Context) error {
 	if client.MAINNETFLAG == "unittest" {
 		return nil
 	}
@@ -49,14 +49,14 @@ func (k Keeper) FirstDist(ctx sdk.Context) error {
 }
 
 // SetDistInfo sets the historical distribution info
-func (k Keeper) SetDistInfo(ctx sdk.Context, h types.HistoricalDistInfo) {
+func (k Keeper) SetDistInfo(ctx context.Context, h types.HistoricalDistInfo) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FirstDistTime))
 	b := k.cdc.MustMarshal(&h)
 	store.Set(types.KeyPrefix("history"), b)
 }
 
 // GetDistInfo returns a createPool from its index
-func (k Keeper) GetDistInfo(ctx sdk.Context) (h types.HistoricalDistInfo) {
+func (k Keeper) GetDistInfo(ctx context.Context) (h types.HistoricalDistInfo) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FirstDistTime))
 
 	b := store.Get(types.KeyPrefix("history"))
@@ -68,7 +68,7 @@ func (k Keeper) GetDistInfo(ctx sdk.Context) (h types.HistoricalDistInfo) {
 	return h
 }
 
-func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params, delta time.Duration) (sdk.Coins, error) {
+func (k Keeper) mintCoinsAndDistribute(ctx context.Context, pa types.Params, delta time.Duration) (sdk.Coins, error) {
 	truncatedDelta := int64(delta.Truncate(time.Second).Seconds())
 	interestFactor := CalculateInterestFactor(pa.NodeSPY, sdkmath.NewInt(truncatedDelta))
 
@@ -98,7 +98,7 @@ func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params, delta t
 	return minttedCoins, nil
 }
 
-func (k Keeper) DoDistribute(ctx sdk.Context) {
+func (k Keeper) DoDistribute(ctx context.Context) {
 	h := k.GetDistInfo(ctx)
 	pa := k.GetParams(ctx)
 	if pa.NodeSPY.IsZero() {

@@ -23,7 +23,7 @@ type IncentiveSuite struct {
 	bankKeeper      types.BankKeeper
 	IncentiveKeeper keeper.FakeIncentiveKeeper
 	app             types.MsgServer
-	ctx             sdk.Context
+	ctx             context.Context
 }
 
 func TestIncentiveSuite(t *testing.T) {

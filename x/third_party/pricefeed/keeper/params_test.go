@@ -23,7 +23,7 @@ type KeeperTestSuite struct {
 
 	keeper keeper.Keeper
 	addrs  []sdk.AccAddress
-	ctx    sdk.Context
+	ctx    context.Context
 }
 
 func (suite *KeeperTestSuite) SetupTest() {

@@ -63,7 +63,7 @@ func TestMsgRepayInterest(t *testing.T) {
 	require.ErrorContains(t, err, "pool is not active")
 }
 
-func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.PoolInfo, borrowAmount sdk.Coin) {
+func mockBorrow(ctx context.Context, nftKeeper types.NFTKeeper, poolInfo *types.PoolInfo, borrowAmount sdk.Coin) {
 	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
 	poolClass, found := nftKeeper.GetClass(ctx, classID)
 	if !found {
@@ -111,7 +111,7 @@ func mockBorrow(ctx sdk.Context, nftKeeper types.NFTKeeper, poolInfo *types.Pool
 	poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.AddAmount(localAmount)
 }
 
-func testWithDifferentPrePayAmount(t *testing.T, ctx sdk.Context, app types.MsgServer, poolIndex string, k *spvkeeper.Keeper, expectedInterest sdkmath.Int) {
+func testWithDifferentPrePayAmount(t *testing.T, ctx context.Context, app types.MsgServer, poolIndex string, k *spvkeeper.Keeper, expectedInterest sdkmath.Int) {
 	poolnfoBeforeTest, found := k.GetPools(ctx, poolIndex)
 	require.True(t, found)
 

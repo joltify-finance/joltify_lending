@@ -89,7 +89,7 @@ package simulation
 // // SimulateMsgDeposit generates a MsgDeposit
 // func SimulateMsgDeposit(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 // 		// Get possible pools and shuffle so that deposits are evenly distributed across pools
 // 		params := k.GetParams(ctx)
@@ -189,7 +189,7 @@ package simulation
 // // SimulateMsgWithdraw generates a MsgWithdraw
 // func SimulateMsgWithdraw(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
 // 		poolRecords := k.GetAllPools(ctx)
@@ -266,7 +266,7 @@ package simulation
 // // SimulateMsgSwapExactForTokens generates a MsgSwapExactForTokens
 // func SimulateMsgSwapExactForTokens(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
 // 		poolRecords := k.GetAllPools(ctx)
@@ -365,7 +365,7 @@ package simulation
 // // SimulateMsgSwapForExactTokens generates a MsgSwapForExactTokens
 // func SimulateMsgSwapForExactTokens(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
 // 		poolRecords := k.GetAllPools(ctx)
@@ -472,7 +472,7 @@ package simulation
 // 	return sdk.NewCoin(denom, amtToken)
 // }
 
-// func validateDepositor(ctx sdk.Context, k keeper.Keeper, allowedPool types.AllowedPool,
+// func validateDepositor(ctx context.Context, k keeper.Keeper, allowedPool types.AllowedPool,
 // 	depositor authexported.Account, blockTime time.Time) error {
 // 	depositorCoins := depositor.SpendableCoins(blockTime)
 // 	tokenABalance := depositorCoins.AmountOf(allowedPool.TokenA)

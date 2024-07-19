@@ -21,7 +21,7 @@ type GenesisTestSuite struct {
 	suite.Suite
 
 	tApp   app.TestApp
-	ctx    sdk.Context
+	ctx    context.Context
 	keeper keeper.Keeper
 }
 

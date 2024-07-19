@@ -17,7 +17,7 @@ type DepositTestSuite struct {
 	suite.Suite
 	keeper *spvkeeper.Keeper
 	app    types.MsgServer
-	ctx    sdk.Context
+	ctx    context.Context
 }
 
 func TestDepositTestSuite(t *testing.T) {

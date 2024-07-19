@@ -64,7 +64,7 @@ package simulation
 // 	priceGenerator := NewPriceGenerator(startingPrices)
 
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 // 		// walk prices to current block height, noop if already called for current height
 // 		priceGenerator.Step(r, ctx.BlockHeight())
@@ -125,7 +125,7 @@ package simulation
 
 // // pickRandomAsset picks a random asset out of the assets with equal probability
 // // it returns the Market which includes the base asset as one of its fields
-// func pickRandomAsset(ctx sdk.Context, keeper keeper.Keeper, r *rand.Rand) (market types.Market) {
+// func pickRandomAsset(ctx context.Context, keeper keeper.Keeper, r *rand.Rand) (market types.Market) {
 // 	// get the params
 // 	params := keeper.GetParams(ctx)
 // 	// now pick a random asset
@@ -134,7 +134,7 @@ package simulation
 // }
 
 // // getExpiryTime gets a price expiry time by taking the current time and adding a delta to it
-// func getExpiryTime(ctx sdk.Context) (t time.Time) {
+// func getExpiryTime(ctx context.Context) (t time.Time) {
 // 	// need to use the blocktime from the context as the context generates random start time when running simulations
 // 	return ctx.BlockTime().Add(AverageBlockTime * 5000) // if blocks were 6 seconds, the expiry would be 8 hrs
 // }

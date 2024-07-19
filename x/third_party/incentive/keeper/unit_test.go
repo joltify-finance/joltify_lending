@@ -29,7 +29,7 @@ import (
 )
 
 // NewTestContext sets up a basic context with an in-memory db
-func NewTestContext(requiredStoreKeys ...storetypes.StoreKey) sdk.Context {
+func NewTestContext(requiredStoreKeys ...storetypes.StoreKey) context.Context {
 	memDB := db.NewMemDB()
 	cms := store.NewCommitMultiStore(memDB)
 
@@ -49,7 +49,7 @@ func NewTestContext(requiredStoreKeys ...storetypes.StoreKey) sdk.Context {
 type unitTester struct {
 	suite.Suite
 	keeper keeper.Keeper
-	ctx    sdk.Context
+	ctx    context.Context
 
 	cdc               codec.Codec
 	incentiveStoreKey storetypes.StoreKey
@@ -69,7 +69,7 @@ func (suite *unitTester) SetupTest() {
 
 func (suite *unitTester) TearDownTest() {
 	suite.keeper = keeper.Keeper{}
-	suite.ctx = sdk.Context{}
+	suite.ctx = context.Context{}
 }
 
 func (suite *unitTester) NewKeeper(paramSubspace types.ParamSubspace, bk types.BankKeeper, hk types.JoltKeeper, ak types.AccountKeeper, swapKeeper types.SwapKeeper, spvKeeper types.SPVKeeper, nftKeeper types.NFTKeeper) keeper.Keeper {
@@ -97,11 +97,11 @@ type fakeParamSubspace struct {
 	params types.Params
 }
 
-func (subspace *fakeParamSubspace) GetParamSet(_ sdk.Context, ps paramtypes.ParamSet) {
+func (subspace *fakeParamSubspace) GetParamSet(_ context.Context, ps paramtypes.ParamSet) {
 	*(ps.(*types.Params)) = subspace.params
 }
 
-func (subspace *fakeParamSubspace) SetParamSet(_ sdk.Context, ps paramtypes.ParamSet) {
+func (subspace *fakeParamSubspace) SetParamSet(_ context.Context, ps paramtypes.ParamSet) {
 	subspace.params = *(ps.(*types.Params))
 }
 
@@ -165,35 +165,35 @@ func (k *fakeJoltKeeper) addTotalSupply(coin sdk.Coin, factor sdk.Dec) *fakeJolt
 	return k
 }
 
-func (k *fakeJoltKeeper) GetBorrowedCoins(_ sdk.Context) (sdk.Coins, bool) {
+func (k *fakeJoltKeeper) GetBorrowedCoins(_ context.Context) (sdk.Coins, bool) {
 	if k.borrows.total == nil {
 		return nil, false
 	}
 	return k.borrows.total, true
 }
 
-func (k *fakeJoltKeeper) GetSuppliedCoins(_ sdk.Context) (sdk.Coins, bool) {
+func (k *fakeJoltKeeper) GetSuppliedCoins(_ context.Context) (sdk.Coins, bool) {
 	if k.deposits.total == nil {
 		return nil, false
 	}
 	return k.deposits.total, true
 }
 
-func (k *fakeJoltKeeper) GetBorrowInterestFactor(_ sdk.Context, denom string) (sdk.Dec, bool) {
+func (k *fakeJoltKeeper) GetBorrowInterestFactor(_ context.Context, denom string) (sdk.Dec, bool) {
 	f, ok := k.borrows.interestFactors[denom]
 	return f, ok
 }
 
-func (k *fakeJoltKeeper) GetSupplyInterestFactor(_ sdk.Context, denom string) (sdk.Dec, bool) {
+func (k *fakeJoltKeeper) GetSupplyInterestFactor(_ context.Context, denom string) (sdk.Dec, bool) {
 	f, ok := k.deposits.interestFactors[denom]
 	return f, ok
 }
 
-func (k *fakeJoltKeeper) GetBorrow(_ sdk.Context, _ sdk.AccAddress) (hardtypes.Borrow, bool) {
+func (k *fakeJoltKeeper) GetBorrow(_ context.Context, _ sdk.AccAddress) (hardtypes.Borrow, bool) {
 	panic("unimplemented")
 }
 
-func (k *fakeJoltKeeper) GetDeposit(_ sdk.Context, _ sdk.AccAddress) (hardtypes.Deposit, bool) {
+func (k *fakeJoltKeeper) GetDeposit(_ context.Context, _ sdk.AccAddress) (hardtypes.Deposit, bool) {
 	panic("unimplemented")
 }
 
@@ -370,12 +370,12 @@ func (k *fakeSwapKeeper) addDeposit(poolID string, depositor sdk.AccAddress, sha
 	return k
 }
 
-func (k *fakeSwapKeeper) GetPoolShares(_ sdk.Context, poolID string) (sdkmath.Int, bool) {
+func (k *fakeSwapKeeper) GetPoolShares(_ context.Context, poolID string) (sdkmath.Int, bool) {
 	shares, ok := k.poolShares[poolID]
 	return shares, ok
 }
 
-func (k *fakeSwapKeeper) GetDepositorSharesAmount(_ sdk.Context, depositor sdk.AccAddress, poolID string) (sdkmath.Int, bool) {
+func (k *fakeSwapKeeper) GetDepositorSharesAmount(_ context.Context, depositor sdk.AccAddress, poolID string) (sdkmath.Int, bool) {
 	shares, found := k.depositShares[poolID][depositor.String()]
 	return shares, found
 }
@@ -396,10 +396,10 @@ func newFakeSPVKeeper() *fakeSPVKeeper {
 	}
 }
 
-func (k *fakeSPVKeeper) AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int) {
+func (k *fakeSPVKeeper) AfterSPVInterestPaid(ctx context.Context, poolID string, interestPaid sdkmath.Int) {
 }
 
-func (k *fakeSPVKeeper) GetPools(ctx sdk.Context, index string) (poolInfo types2.PoolInfo, ok bool) {
+func (k *fakeSPVKeeper) GetPools(ctx context.Context, index string) (poolInfo types2.PoolInfo, ok bool) {
 	poolInfo = types2.PoolInfo{
 		Index:         "test-pool",
 		ReserveFactor: sdk.MustNewDecFromStr("0.15"),
@@ -408,7 +408,7 @@ func (k *fakeSPVKeeper) GetPools(ctx sdk.Context, index string) (poolInfo types2
 	return poolInfo, true
 }
 
-func (k *fakeSPVKeeper) GetDepositor(ctx sdk.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types2.DepositorInfo, found bool) {
+func (k *fakeSPVKeeper) GetDepositor(ctx context.Context, poolIndex string, walletAddress sdk.AccAddress) (depositor types2.DepositorInfo, found bool) {
 	return types2.DepositorInfo{}, true
 }
 
@@ -433,22 +433,22 @@ func newFakeNFTKeeper(nftsClass []*nfttypes.Class, nfts []*nfttypes.NFT) *fakeNF
 	}
 }
 
-func (fn fakeNFTKeeper) GetClass(ctx sdk.Context, classID string) (nfttypes.Class, bool) {
+func (fn fakeNFTKeeper) GetClass(ctx context.Context, classID string) (nfttypes.Class, bool) {
 	nft, ok := fn.nftClass[classID]
 	return *nft, ok
 }
 
-func (fn fakeNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nfttypes.NFT, bool) {
+func (fn fakeNFTKeeper) GetNFT(ctx context.Context, classID, nftID string) (nfttypes.NFT, bool) {
 	nft, ok := fn.nft[nftID]
 	return *nft, ok
 }
 
-func (fn fakeNFTKeeper) UpdateClass(ctx sdk.Context, class nfttypes.Class) error {
+func (fn fakeNFTKeeper) UpdateClass(ctx context.Context, class nfttypes.Class) error {
 	fn.nftClass[class.Id] = &class
 	return nil
 }
 
-func (fn fakeNFTKeeper) Update(ctx sdk.Context, token nfttypes.NFT) error {
+func (fn fakeNFTKeeper) Update(ctx context.Context, token nfttypes.NFT) error {
 	fn.nft[token.Id] = &token
 	return nil
 }

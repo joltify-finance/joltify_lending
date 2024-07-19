@@ -25,7 +25,7 @@ type GenesisTestSuite struct {
 
 	app     app.TestApp
 	genTime time.Time
-	ctx     sdk.Context
+	ctx     context.Context
 	keeper  keeper.Keeper
 	addrs   []sdk.AccAddress
 }

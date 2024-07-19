@@ -5,7 +5,7 @@ import (
 
 	cosmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
@@ -16,7 +16,7 @@ var (
 
 // ApplyInterestRateUpdates translates the current interest rate models from the params to the store,
 // with each money market accruing interest.
-func (k Keeper) ApplyInterestRateUpdates(ctx sdk.Context) {
+func (k Keeper) ApplyInterestRateUpdates(ctx context.Context) {
 	denomSet := map[string]bool{}
 
 	params := k.GetParams(ctx)
@@ -59,7 +59,7 @@ func (k Keeper) ApplyInterestRateUpdates(ctx sdk.Context) {
 
 // AccrueInterest applies accrued interest to total borrows and reserves by calculating
 // interest from the last checkpoint time and writing the updated values to the store.
-func (k Keeper) AccrueInterest(ctx sdk.Context, denom string) error {
+func (k Keeper) AccrueInterest(ctx context.Context, denom string) error {
 	previousAccrualTime, found := k.GetPreviousAccrualTime(ctx, denom)
 	if !found {
 		k.SetPreviousAccrualTime(ctx, denom, ctx.BlockTime())
@@ -111,7 +111,7 @@ func (k Keeper) AccrueInterest(ctx sdk.Context, denom string) error {
 	// Fetch money market from the store
 	mm, found := k.GetMoneyMarket(ctx, denom)
 	if !found {
-		return sdkerrors.Wrapf(types2.ErrMoneyMarketNotFound, "%s", denom)
+		return errorsmod.Wrapf(types2.ErrMoneyMarketNotFound, "%s", denom)
 	}
 
 	// GetBorrowRate calculates the current interest rate based on utilization (the fraction of supply that has been borrowed)
@@ -216,7 +216,7 @@ func CalculateSupplyInterestFactor(newInterest, cash, borrows, reserves sdk.Dec)
 }
 
 // SyncBorrowInterest updates the user's owed interest on newly borrowed coins to the latest global state
-func (k Keeper) SyncBorrowInterest(ctx sdk.Context, addr sdk.AccAddress) {
+func (k Keeper) SyncBorrowInterest(ctx context.Context, addr sdk.AccAddress) {
 	totalNewInterest := sdk.Coins{}
 
 	// Update user's borrow interest factor list for each asset in the 'coins' array.
@@ -256,7 +256,7 @@ func (k Keeper) SyncBorrowInterest(ctx sdk.Context, addr sdk.AccAddress) {
 }
 
 // SyncSupplyInterest updates the user's earned interest on supplied coins based on the latest global state
-func (k Keeper) SyncSupplyInterest(ctx sdk.Context, addr sdk.AccAddress) {
+func (k Keeper) SyncSupplyInterest(ctx context.Context, addr sdk.AccAddress) {
 	totalNewInterest := sdk.Coins{}
 
 	// Update user's supply index list for each asset in the 'coins' array.

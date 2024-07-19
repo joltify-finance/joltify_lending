@@ -8,7 +8,7 @@ import (
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -19,12 +19,12 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo, ok := k.GetPools(ctx, msg.GetPoolIndex())
 	if !ok {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
@@ -38,12 +38,12 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	if msg.Token.GetDenom() != poolInfo.TargetAmount.Denom {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidCoins, "we only accept %v", poolInfo.TargetAmount.Denom)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidCoins, "we only accept %v", poolInfo.TargetAmount.Denom)
 	}
 
 	resp, err := k.kycKeeper.GetByWallet(ctx, msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "the investor cannot be found %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "the investor cannot be found %v", msg.Creator)
 	}
 
 	investorsResp, found := k.GetInvestorToPool(ctx, msg.PoolIndex)
@@ -65,7 +65,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we transfer the token from the investor to the pool.
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, investor, types.ModuleAccount, sdk.NewCoins(msg.Token))
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "fail to transfer the token to the pool %v", err)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "fail to transfer the token to the pool %v", err)
 	}
 
 	// now we update the users deposit data

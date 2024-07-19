@@ -10,7 +10,7 @@ import (
 )
 
 // SetStoreFeeAmount set a specific outboundTx in the store from its index
-func (k Keeper) SetStoreFeeAmount(ctx sdk.Context, fees sdk.Coins) {
+func (k Keeper) SetStoreFeeAmount(ctx context.Context, fees sdk.Coins) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FeeStoreKey))
 	feeBytes, err := fees.MarshalJSON()
 	if err != nil {
@@ -21,7 +21,7 @@ func (k Keeper) SetStoreFeeAmount(ctx sdk.Context, fees sdk.Coins) {
 
 // GetFeeAmount returns a outboundTx from its index
 func (k Keeper) GetFeeAmount(
-	ctx sdk.Context,
+	ctx context.Context,
 	denom string,
 ) (fee sdk.Coin, found bool) {
 	fees := k.GetAllFeeAmount(ctx)
@@ -29,7 +29,7 @@ func (k Keeper) GetFeeAmount(
 	return sdk.NewCoin(denom, amount), true
 }
 
-func (k Keeper) LegacyGetAllFeeAMountAndDelete(ctx sdk.Context) sdk.Coins {
+func (k Keeper) LegacyGetAllFeeAMountAndDelete(ctx context.Context) sdk.Coins {
 	var fees sdk.Coins
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FeeStoreKey))
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
@@ -52,7 +52,7 @@ func (k Keeper) LegacyGetAllFeeAMountAndDelete(ctx sdk.Context) sdk.Coins {
 }
 
 // GetAllFeeAmount returns all outboundTx
-func (k Keeper) GetAllFeeAmount(ctx sdk.Context) sdk.Coins {
+func (k Keeper) GetAllFeeAmount(ctx context.Context) sdk.Coins {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FeeStoreKey))
 	result := store.Get(types.OutboundTxKey("-fee"))
 	var fees sdk.Coins

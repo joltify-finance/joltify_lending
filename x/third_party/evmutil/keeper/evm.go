@@ -33,7 +33,7 @@ import (
 
 // CallEVM performs a smart contract method call using given args
 func (k Keeper) CallEVM(
-	ctx sdk.Context,
+	ctx context.Context,
 	abi abi.ABI,
 	from common.Address,
 	contract types.InternalEVMAddress,
@@ -59,7 +59,7 @@ func (k Keeper) CallEVM(
 // Derived from tharsis/evmos
 // https://github.com/tharsis/evmos/blob/ee54f496551df937915ff6f74a94732a35abc505/x/erc20/keeper/evm.go
 func (k Keeper) CallEVMWithData(
-	ctx sdk.Context,
+	ctx context.Context,
 	from common.Address,
 	contract *types.InternalEVMAddress,
 	data []byte,

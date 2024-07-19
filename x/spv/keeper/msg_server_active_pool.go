@@ -4,7 +4,7 @@ import (
 	"context"
 
 	coserrors "cosmossdk.io/errors"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,12 +18,12 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo1, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
 	if poolInfo1.PoolStatus != types.PoolInfo_PREPARE {
@@ -40,7 +40,7 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 
 	targetProject, ok := k.kycKeeper.GetProject(ctx, poolInfo1.LinkedProject)
 	if !ok {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", poolInfo1.LinkedProject)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the given project %v cannot be found", poolInfo1.LinkedProject)
 	}
 
 	if poolInfo1.SeparatePool || poolInfo1.PoolType == types.PoolInfo_JUNIOR {
@@ -52,7 +52,7 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 
 	juniorPoolInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
 	if juniorPoolInfo.PoolStatus != types.PoolInfo_ACTIVE {

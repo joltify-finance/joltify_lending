@@ -16,7 +16,7 @@ type addInvestorSuite struct {
 	suite.Suite
 	keeper     *spvkeeper.Keeper
 	app        types.MsgServer
-	ctx        sdk.Context
+	ctx        context.Context
 	poolIndexs []string
 }
 

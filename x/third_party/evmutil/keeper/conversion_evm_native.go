@@ -13,7 +13,7 @@ import (
 // MintConversionPairCoin mints the given amount of a ConversionPair denom and
 // sends it to the provided address.
 func (k Keeper) MintConversionPairCoin(
-	ctx sdk.Context,
+	ctx context.Context,
 	pair types.ConversionPair,
 	amount *big.Int,
 	recipient sdk.AccAddress,
@@ -35,7 +35,7 @@ func (k Keeper) MintConversionPairCoin(
 // BurnConversionPairCoin transfers the provided amount to the module account
 // then burns it.
 func (k Keeper) BurnConversionPairCoin(
-	ctx sdk.Context,
+	ctx context.Context,
 	pair types.ConversionPair,
 	coin sdk.Coin,
 	account sdk.AccAddress,
@@ -56,7 +56,7 @@ func (k Keeper) BurnConversionPairCoin(
 // ConvertCoinToERC20 converts an sdk.Coin from the originating account to an
 // ERC20 to the receiver account.
 func (k Keeper) ConvertCoinToERC20(
-	ctx sdk.Context,
+	ctx context.Context,
 	initiatorAccount sdk.AccAddress,
 	receiverAccount types.InternalEVMAddress,
 	coin sdk.Coin,
@@ -89,7 +89,7 @@ func (k Keeper) ConvertCoinToERC20(
 // ConvertERC20ToCoin converts an ERC20 coin from the originating account to an
 // sdk.Coin to the receiver account.
 func (k Keeper) ConvertERC20ToCoin(
-	ctx sdk.Context,
+	ctx context.Context,
 	initiator types.InternalEVMAddress,
 	receiver sdk.AccAddress,
 	contractAddr types.InternalEVMAddress,
@@ -127,7 +127,7 @@ func (k Keeper) ConvertERC20ToCoin(
 // UnlockERC20Tokens transfers the given amount of a conversion pair ERC20 token
 // to the provided account.
 func (k Keeper) UnlockERC20Tokens(
-	ctx sdk.Context,
+	ctx context.Context,
 	pair types.ConversionPair,
 	amount *big.Int,
 	receiver types.InternalEVMAddress,
@@ -176,7 +176,7 @@ func (k Keeper) UnlockERC20Tokens(
 // LockERC20Tokens transfers the given amount of a conversion pair ERC20 token
 // from the initiator account to the module account.
 func (k Keeper) LockERC20Tokens(
-	ctx sdk.Context,
+	ctx context.Context,
 	pair types.ConversionPair,
 	amount *big.Int,
 	initiator types.InternalEVMAddress,

@@ -8,7 +8,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
-func (k Keeper) BurnTokens(ctx sdk.Context, addr sdk.AccAddress) error {
+func (k Keeper) BurnTokens(ctx context.Context, addr sdk.AccAddress) error {
 	coinsBalance := k.bankKeeper.GetAllBalances(ctx, addr)
 	var coins sdk.Coins
 	for _, el := range coinsBalance {
@@ -33,7 +33,7 @@ func (k Keeper) BurnTokens(ctx sdk.Context, addr sdk.AccAddress) error {
 	return k.bankKeeper.BurnCoins(ctx, types.ModuleName, coins)
 }
 
-func (k Keeper) sendFeesToValidators(ctx sdk.Context, pool *types.PoolInfo) bool {
+func (k Keeper) sendFeesToValidators(ctx context.Context, pool *types.PoolInfo) bool {
 	addr := pool.CreatePool.PoolAddr
 	if addr == nil {
 		return true
@@ -83,7 +83,7 @@ func ProcessHistory(historyLength int32, newItem *types.HistoricalAmount, coinsQ
 	return coinsQuota
 }
 
-func (k Keeper) ProcessQuota(ctx sdk.Context, totalCoins sdk.Coins) {
+func (k Keeper) ProcessQuota(ctx context.Context, totalCoins sdk.Coins) {
 	quotaData, found := k.GetQuotaData(ctx)
 	if !found {
 		panic("this item should be always be available")
@@ -96,7 +96,7 @@ func (k Keeper) ProcessQuota(ctx sdk.Context, totalCoins sdk.Coins) {
 	k.SetQuotaData(ctx, *newQuotaData)
 }
 
-func (k Keeper) ProcessAccountLeft(ctx sdk.Context) {
+func (k Keeper) ProcessAccountLeft(ctx context.Context) {
 	req := types.QueryLatestPoolRequest{}
 	wctx := sdk.WrapSDKContext(ctx)
 	ret, err := k.GetLastPool(wctx, &req)

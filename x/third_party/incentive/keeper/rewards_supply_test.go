@@ -115,7 +115,7 @@ type SupplyRewardsTestSuite struct {
 	joltKeeper joltkeeper.Keeper
 
 	app app.TestApp
-	ctx sdk.Context
+	ctx context.Context
 
 	genesisTime time.Time
 	addrs       []sdk.AccAddress

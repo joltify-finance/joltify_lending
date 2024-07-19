@@ -5,6 +5,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/burnauction/keeper"
 )
 
-func EndBlock(ctx sdk.Context, k keeper.Keeper) {
+func EndBlock(ctx context.Context, k keeper.Keeper) {
 	k.RunSurplusAuctions(ctx)
 }

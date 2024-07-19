@@ -10,13 +10,13 @@ import (
 var _ types.SPVHooks = Keeper{}
 
 // AfterSPVInterestPaid - call hook if registered to update the pool's incentives
-func (k Keeper) AfterSPVInterestPaid(ctx sdk.Context, poolID string, amt sdkmath.Int) {
+func (k Keeper) AfterSPVInterestPaid(ctx context.Context, poolID string, amt sdkmath.Int) {
 	if k.hooks != nil {
 		k.hooks.AfterSPVInterestPaid(ctx, poolID, amt)
 	}
 }
 
-func (k Keeper) BeforeNFTBurned(ctx sdk.Context, poolIndex string, walletAddress string, linkednfts []string) error {
+func (k Keeper) BeforeNFTBurned(ctx context.Context, poolIndex string, walletAddress string, linkednfts []string) error {
 	if k.hooks != nil {
 		return k.hooks.BeforeNFTBurned(ctx, poolIndex, walletAddress, linkednfts)
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createNIssueToken(keeper *keeper.Keeper, ctx sdk.Context, n int) ([]types.IssueToken, error) {
+func createNIssueToken(keeper *keeper.Keeper, ctx context.Context, n int) ([]types.IssueToken, error) {
 	items := make([]types.IssueToken, n)
 	creator, err := sdk.AccAddressFromBech32("jolt1rfmwldwrm3652shx3a7say0v4vvtglast0l05d")
 	if err != nil {

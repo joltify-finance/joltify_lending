@@ -18,7 +18,7 @@ type withdrawProposalSuite struct {
 	keeper       *spvkeeper.Keeper
 	nftKeeper    types.NFTKeeper
 	app          types.MsgServer
-	ctx          sdk.Context
+	ctx          context.Context
 	investorPool string
 	investors    []string
 }

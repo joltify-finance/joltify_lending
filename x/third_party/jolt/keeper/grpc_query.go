@@ -6,7 +6,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
@@ -79,7 +79,7 @@ func (s queryServer) Deposits(ctx context.Context, req *types2.QueryDepositsRequ
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -168,7 +168,7 @@ func (s queryServer) UnsyncedDeposits(ctx context.Context, req *types2.QueryUnsy
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -239,7 +239,7 @@ func (s queryServer) Borrows(ctx context.Context, req *types2.QueryBorrowsReques
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -325,7 +325,7 @@ func (s queryServer) UnsyncedBorrows(ctx context.Context, req *types2.QueryUnsyn
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -584,7 +584,7 @@ func (s queryServer) Liquidate(ctx context.Context, req *types2.QueryLiquidateRe
 	}
 	ret, err = doQueryAllLiquidate(sdkCtx, s.keeper, v)
 	if err != nil {
-		return nil, sdkerrors.Wrap(errors.New("err in query the liquidate users"), err.Error())
+		return nil, errorsmod.Wrap(errors.New("err in query the liquidate users"), err.Error())
 	}
 
 	start, end := client.Paginate(len(ret), page, limit, 100)

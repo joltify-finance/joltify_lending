@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	sdkerrors "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 
 	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,7 +25,7 @@ func updateList(in []string, added []string) []string {
 	return walletsNew
 }
 
-func (k Keeper) GetInvestor(ctx sdk.Context, investorID string) types.Investor {
+func (k Keeper) GetInvestor(ctx context.Context, investorID string) types.Investor {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.InvestorToWalletsPrefix))
 	var storedInvestor types.Investor
 	b := store.Get(types.KeyPrefix(investorID))
@@ -37,7 +37,7 @@ func (k Keeper) GetInvestor(ctx sdk.Context, investorID string) types.Investor {
 }
 
 // SetInvestor set a specific issueToken in the store from its index
-func (k Keeper) SetInvestor(ctx sdk.Context, investor types.Investor) *types.Investor {
+func (k Keeper) SetInvestor(ctx context.Context, investor types.Investor) *types.Investor {
 	gasBefore := ctx.GasMeter().GasConsumed()
 	defer func() {
 		gasAfter := ctx.GasMeter().GasConsumed()
@@ -82,7 +82,7 @@ func (k msgServer) UploadInvestor(goCtx context.Context, msg *types.MsgUploadInv
 		}
 	}
 	if !found {
-		return nil, sdkerrors.Wrapf(types.ErrUnauthorised, "unauthorised submitter: %v", submitter.String())
+		return nil, errorsmod.Wrapf(types.ErrUnauthorised, "unauthorised submitter: %v", submitter.String())
 	}
 
 	if len(msg.WalletAddress) == 0 {
@@ -94,19 +94,19 @@ func (k msgServer) UploadInvestor(goCtx context.Context, msg *types.MsgUploadInv
 	for _, el := range msg.GetWalletAddress() {
 		_, err := sdk.AccAddressFromBech32(el)
 		if err != nil {
-			return nil, sdkerrors.Wrapf(types.ErrInvalidWallets, "invalid wallets: %v", el)
+			return nil, errorsmod.Wrapf(types.ErrInvalidWallets, "invalid wallets: %v", el)
 		}
 
 		// the wallet has been already registered
 		_, err = k.GetByWallet(ctx, el)
 		if err == nil {
-			return nil, sdkerrors.Wrapf(types.ErrInvalidWallets, "fail to check the wallets against existing data: %v", msg.WalletAddress)
+			return nil, errorsmod.Wrapf(types.ErrInvalidWallets, "fail to check the wallets against existing data: %v", msg.WalletAddress)
 		}
 	}
 
 	// we check whether we exceed the max wallet number
 	if len(msg.GetWalletAddress()) > types.MaxWalletNum {
-		return nil, sdkerrors.Wrapf(types.ErrExceedMaxWalletsNum, "wallets submitted %v", len(msg.GetWalletAddress()))
+		return nil, errorsmod.Wrapf(types.ErrExceedMaxWalletsNum, "wallets submitted %v", len(msg.GetWalletAddress()))
 	}
 
 	investor := types.Investor{InvestorId: msg.InvestorId, WalletAddress: msg.GetWalletAddress()}

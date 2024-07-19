@@ -10,7 +10,7 @@ import (
 )
 
 // InitGenesis initializes the store state from a genesis state.
-func InitGenesis(ctx sdk.Context, k keeper.Keeper, accountKeeper types2.AccountKeeper, gs types2.GenesisState) {
+func InitGenesis(ctx context.Context, k keeper.Keeper, accountKeeper types2.AccountKeeper, gs types2.GenesisState) {
 	if err := gs.Validate(); err != nil {
 		panic(fmt.Sprintf("failed to validate %s genesis state: %s", types2.ModuleName, err))
 	}
@@ -47,7 +47,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, accountKeeper types2.AccountK
 }
 
 // ExportGenesis export genesis state for jolt module
-func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types2.GenesisState {
+func ExportGenesis(ctx context.Context, k keeper.Keeper) types2.GenesisState {
 	params := k.GetParams(ctx)
 
 	gats := types2.GenesisAccumulationTimes{}

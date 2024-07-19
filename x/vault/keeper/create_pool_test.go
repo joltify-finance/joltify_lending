@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createNCreatePool(keeper *keeper.Keeper, ctx sdk.Context, n int, addresses []sdk.AccAddress) []types.CreatePool {
+func createNCreatePool(keeper *keeper.Keeper, ctx context.Context, n int, addresses []sdk.AccAddress) []types.CreatePool {
 	items := make([]types.CreatePool, n)
 	for i := range items {
 		poolProposal := types.PoolProposal{

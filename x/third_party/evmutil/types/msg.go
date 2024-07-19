@@ -4,7 +4,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -61,18 +61,18 @@ func (msg MsgConvertCoinToERC20) GetSigners() []sdk.AccAddress {
 func (msg MsgConvertCoinToERC20) ValidateBasic() error {
 	_, err := PubKeyToJoltAddr(msg.Initiator)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
+		return errorsmod.Wrapf(errorsmod.ErrInvalidAddress, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
 	}
 
 	if !common.IsHexAddress(msg.Receiver) {
 		return errorsmod.Wrap(
-			sdkerrors.ErrInvalidAddress,
+			errorsmod.ErrInvalidAddress,
 			"Receiver is not a valid hex address",
 		)
 	}
 
 	if msg.Amount.IsZero() {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidRequest, "amount cannot be zero")
+		return errorsmod.Wrapf(errorsmod.ErrInvalidRequest, "amount cannot be zero")
 	}
 
 	// Checks for negative
@@ -122,23 +122,23 @@ func (msg MsgConvertERC20ToCoin) GetSigners() []sdk.AccAddress {
 func (msg MsgConvertERC20ToCoin) ValidateBasic() error {
 	_, err := PubKeyToJoltAddr(msg.Initiator)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
+		return errorsmod.Wrapf(errorsmod.ErrInvalidPubKey, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
 	}
 
 	if !common.IsHexAddress(msg.JoltERC20Address) {
 		return errorsmod.Wrap(
-			sdkerrors.ErrInvalidAddress,
+			errorsmod.ErrInvalidAddress,
 			"erc20 contract address is not a valid hex address",
 		)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.Receiver)
 	if err != nil {
-		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "receiver is not a valid bech32 address")
+		return errorsmod.Wrap(errorsmod.ErrInvalidAddress, "receiver is not a valid bech32 address")
 	}
 
 	if msg.Amount.IsNil() || msg.Amount.LTE(sdk.ZeroInt()) {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidRequest, "amount cannot be zero or less")
+		return errorsmod.Wrapf(errorsmod.ErrInvalidRequest, "amount cannot be zero or less")
 	}
 
 	return nil
@@ -189,15 +189,15 @@ func (msg MsgConvertCosmosCoinToERC20) GetSigners() []sdk.AccAddress {
 func (msg MsgConvertCosmosCoinToERC20) ValidateBasic() error {
 	_, err := PubKeyToJoltAddr(msg.Initiator)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
+		return errorsmod.Wrapf(errorsmod.ErrInvalidPubKey, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
 	}
 
 	if !common.IsHexAddress(msg.Receiver) {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "receiver is not a valid hex address (%s)", msg.Receiver)
+		return errorsmod.Wrapf(errorsmod.ErrInvalidAddress, "receiver is not a valid hex address (%s)", msg.Receiver)
 	}
 
 	if msg.Amount.IsNil() || !msg.Amount.IsValid() || msg.Amount.IsZero() {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidCoins, "'%s'", msg.Amount)
+		return errorsmod.Wrapf(errorsmod.ErrInvalidCoins, "'%s'", msg.Amount)
 	}
 
 	return nil
@@ -240,16 +240,16 @@ func (msg MsgConvertCosmosCoinFromERC20) GetSigners() []sdk.AccAddress {
 func (msg MsgConvertCosmosCoinFromERC20) ValidateBasic() error {
 	_, err := PubKeyToJoltAddr(msg.Initiator)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
+		return errorsmod.Wrapf(errorsmod.ErrInvalidPubKey, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.Receiver)
 	if err != nil {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid receiver address (%s): %s", msg.Receiver, err.Error())
+		return errorsmod.Wrapf(errorsmod.ErrInvalidAddress, "invalid receiver address (%s): %s", msg.Receiver, err.Error())
 	}
 
 	if msg.Amount.IsNil() || !msg.Amount.IsValid() || msg.Amount.IsZero() {
-		return errorsmod.Wrapf(sdkerrors.ErrInvalidCoins, "'%s'", msg.Amount)
+		return errorsmod.Wrapf(errorsmod.ErrInvalidCoins, "'%s'", msg.Amount)
 	}
 
 	return nil

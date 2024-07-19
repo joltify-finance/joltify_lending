@@ -29,7 +29,7 @@ const (
 // Derived from tharsis/evmos
 // https://github.com/tharsis/evmos/blob/ee54f496551df937915ff6f74a94732a35abc505/x/erc20/keeper/evm.go
 func (k Keeper) DeployTestMintableERC20Contract(
-	ctx sdk.Context,
+	ctx context.Context,
 	name string,
 	symbol string,
 	decimals uint8,
@@ -72,7 +72,7 @@ func (k Keeper) DeployTestMintableERC20Contract(
 // contract with the token metadata.
 // This method does NOT check if a token for the provided SdkDenom has already been deployed.
 func (k Keeper) DeployJoltWrappedCosmosCoinERC20Contract(
-	ctx sdk.Context,
+	ctx context.Context,
 	token types.AllowedCosmosCoinERC20Token,
 ) (types.InternalEVMAddress, error) {
 	if err := token.Validate(); err != nil {
@@ -116,7 +116,7 @@ func (k Keeper) DeployJoltWrappedCosmosCoinERC20Contract(
 // GetOrDeployCosmosCoinERC20Contract checks the module store for a deployed contract for the given
 // token info and returns it if preset. Otherwise, it deploys and registers the contract.
 func (k *Keeper) GetOrDeployCosmosCoinERC20Contract(
-	ctx sdk.Context,
+	ctx context.Context,
 	tokenInfo types.AllowedCosmosCoinERC20Token,
 ) (types.InternalEVMAddress, error) {
 	contractAddress, found := k.GetDeployedCosmosCoinContract(ctx, tokenInfo.CosmosDenom)
@@ -142,7 +142,7 @@ func (k *Keeper) GetOrDeployCosmosCoinERC20Contract(
 // MintERC20 mints the given amount of an ERC20 token to an address. This is
 // unchecked and should only be called after permission and enabled ERC20 checks.
 func (k Keeper) MintERC20(
-	ctx sdk.Context,
+	ctx context.Context,
 	contractAddr types.InternalEVMAddress,
 	receiver types.InternalEVMAddress,
 	amount *big.Int,
@@ -163,7 +163,7 @@ func (k Keeper) MintERC20(
 
 // BurnERC20 burns the token amount from the initiator's balance.
 func (k Keeper) BurnERC20(
-	ctx sdk.Context,
+	ctx context.Context,
 	contractAddr types.InternalEVMAddress,
 	initiator types.InternalEVMAddress,
 	amount *big.Int,
@@ -185,7 +185,7 @@ func (k Keeper) BurnERC20(
 // QueryERC20BalanceOf makes a contract call to the balanceOf method of the ERC20 contract to get
 // the ERC20 balance of the given account.
 func (k Keeper) QueryERC20BalanceOf(
-	ctx sdk.Context,
+	ctx context.Context,
 	contractAddr types.InternalEVMAddress,
 	account types.InternalEVMAddress,
 ) (*big.Int, error) {
@@ -208,7 +208,7 @@ func (k Keeper) QueryERC20BalanceOf(
 // QueryERC20TotalSupply makes a contract call to the totalSupply method of the ERC20 contract to
 // get the total supply of the token.
 func (k Keeper) QueryERC20TotalSupply(
-	ctx sdk.Context,
+	ctx context.Context,
 	contractAddr types.InternalEVMAddress,
 ) (*big.Int, error) {
 	res, err := k.CallEVM(

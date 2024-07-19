@@ -24,7 +24,7 @@ type grpcQueryTestSuite struct {
 
 	App         app.TestApp
 	Keeper      keeper.Keeper
-	Ctx         sdk.Context
+	Ctx         context.Context
 	QueryClient types.QueryClient
 }
 

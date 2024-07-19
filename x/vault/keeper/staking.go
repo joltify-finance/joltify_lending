@@ -14,7 +14,7 @@ import (
 	vaulttypes "github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
-func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
+func (k Keeper) UpdateStakingInfo(ctx context.Context) {
 	stakingKeeper := k.vaultStaking
 	params := k.GetParams(ctx)
 
@@ -58,7 +58,7 @@ func (k Keeper) UpdateStakingInfo(ctx sdk.Context) {
 	}
 }
 
-func (k Keeper) getEligibleValidators(ctx sdk.Context) ([]vaulttypes.ValidatorPowerInfo, error) {
+func (k Keeper) getEligibleValidators(ctx context.Context) ([]vaulttypes.ValidatorPowerInfo, error) {
 	params := k.GetParams(ctx)
 
 	boundedValidators := k.vaultStaking.GetBondedValidatorsByPower(ctx)
@@ -101,7 +101,7 @@ func (k Keeper) getEligibleValidators(ctx sdk.Context) ([]vaulttypes.ValidatorPo
 	return candidates[:candidateNum], nil
 }
 
-func (k Keeper) updateValidators(ctx sdk.Context) error {
+func (k Keeper) updateValidators(ctx context.Context) error {
 	vs, err := k.getEligibleValidators(ctx)
 	if err != nil {
 		return errorsmod.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
@@ -129,7 +129,7 @@ func (k Keeper) updateValidators(ctx sdk.Context) error {
 	return nil
 }
 
-func (k Keeper) NewUpdate(ctx sdk.Context) []abci.ValidatorUpdate {
+func (k Keeper) NewUpdate(ctx context.Context) []abci.ValidatorUpdate {
 	defer telemetry.ModuleMeasureSince(vaulttypes.ModuleName, ctx.BlockTime(), telemetry.MetricKeyEndBlocker)
 
 	blockHeight := k.GetParams(ctx).BlockChurnInterval

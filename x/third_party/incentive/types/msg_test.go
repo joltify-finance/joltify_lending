@@ -9,7 +9,7 @@ import (
 
 	"github.com/cometbft/cometbft/crypto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -91,7 +91,7 @@ func TestMsgClaim_Validate(t *testing.T) {
 				},
 			},
 			expect: expectedErr{
-				wraps: sdkerrors.ErrInvalidAddress,
+				wraps: errorsmod.ErrInvalidAddress,
 			},
 		},
 		{

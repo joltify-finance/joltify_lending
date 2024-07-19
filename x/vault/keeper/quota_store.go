@@ -7,7 +7,7 @@ import (
 )
 
 // SetQuotaData set a specific createPool in the store from its index
-func (k Keeper) SetQuotaData(ctx sdk.Context, coinsQuota types.CoinsQuota) {
+func (k Keeper) SetQuotaData(ctx context.Context, coinsQuota types.CoinsQuota) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.QuotaStoreKey))
 	b := k.cdc.MustMarshal(&coinsQuota)
 
@@ -15,7 +15,7 @@ func (k Keeper) SetQuotaData(ctx sdk.Context, coinsQuota types.CoinsQuota) {
 }
 
 // GetQuotaData returns a createPool from its index
-func (k Keeper) GetQuotaData(ctx sdk.Context) (val types.CoinsQuota, found bool) {
+func (k Keeper) GetQuotaData(ctx context.Context) (val types.CoinsQuota, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.QuotaStoreKey))
 
 	b := store.Get(types.KeyPrefix("info"))

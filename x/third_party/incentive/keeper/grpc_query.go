@@ -122,7 +122,7 @@ func (s queryServer) RewardFactors(
 // queryRewards queries the rewards for a given owner and reward type, updating
 // the response with the results in place.
 func (s queryServer) queryRewards(
-	ctx sdk.Context,
+	ctx context.Context,
 	res *types.QueryRewardsResponse,
 	owner sdk.AccAddress,
 	hasOwner bool,
@@ -163,7 +163,7 @@ func (s queryServer) queryRewards(
 
 // synchronizeRewards synchronizes all non-empty rewards in place.
 func (s queryServer) synchronizeRewards(
-	ctx sdk.Context,
+	ctx context.Context,
 	res *types.QueryRewardsResponse,
 ) error {
 	// Synchronize all non-empty rewards

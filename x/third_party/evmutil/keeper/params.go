@@ -10,19 +10,19 @@ import (
 )
 
 // GetParams returns the total set of evm parameters.
-func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
+func (k Keeper) GetParams(ctx context.Context) (params types.Params) {
 	k.paramSubspace.GetParamSetIfExists(ctx, &params)
 	return params
 }
 
 // SetParams sets the evm parameters to the param space.
-func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
+func (k Keeper) SetParams(ctx context.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // GetAllowedTokenMetadata gets the token metadata for the given cosmosDenom if it is allowed.
 // Returns the metadata if allowed, and a bool indicating if the denom was in the allow list or not.
-func (k Keeper) GetAllowedTokenMetadata(ctx sdk.Context, cosmosDenom string) (types.AllowedCosmosCoinERC20Token, bool) {
+func (k Keeper) GetAllowedTokenMetadata(ctx context.Context, cosmosDenom string) (types.AllowedCosmosCoinERC20Token, bool) {
 	params := k.GetParams(ctx)
 	for _, token := range params.AllowedCosmosDenoms {
 		if token.CosmosDenom == cosmosDenom {
@@ -34,7 +34,7 @@ func (k Keeper) GetAllowedTokenMetadata(ctx sdk.Context, cosmosDenom string) (ty
 
 // GetEnabledConversionPairFromERC20Address returns an ConversionPair from the internal contract address.
 func (k Keeper) GetEnabledConversionPairFromERC20Address(
-	ctx sdk.Context,
+	ctx context.Context,
 	address types.InternalEVMAddress,
 ) (types.ConversionPair, error) {
 	params := k.GetParams(ctx)
@@ -49,7 +49,7 @@ func (k Keeper) GetEnabledConversionPairFromERC20Address(
 
 // GetEnabledConversionPairFromDenom returns an ConversionPair from the sdk.Coin denom.
 func (k Keeper) GetEnabledConversionPairFromDenom(
-	ctx sdk.Context,
+	ctx context.Context,
 	denom string,
 ) (types.ConversionPair, error) {
 	params := k.GetParams(ctx)

@@ -59,7 +59,7 @@ func (s queryServer) DeployedCosmosCoinContracts(
 
 // getAllDeployedCosmosCoinContractsPage gets a page of deployed contracts (no filtering)
 func getAllDeployedCosmosCoinContractsPage(
-	k *Keeper, ctx sdk.Context, pagination *query.PageRequest,
+	k *Keeper, ctx context.Context, pagination *query.PageRequest,
 ) (*types.QueryDeployedCosmosCoinContractsResponse, error) {
 	contracts := make([]types.DeployedCosmosCoinContract, 0)
 	contractStore := prefix.NewStore(
@@ -91,7 +91,7 @@ func getAllDeployedCosmosCoinContractsPage(
 }
 
 func getDeployedCosmosCoinContractsByDenoms(
-	k *Keeper, ctx sdk.Context, denoms []string,
+	k *Keeper, ctx context.Context, denoms []string,
 ) (*types.QueryDeployedCosmosCoinContractsResponse, error) {
 	if len(denoms) > query.DefaultLimit {
 		// forego dealing with pagination by rejecting reqs for >100 denoms

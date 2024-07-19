@@ -28,7 +28,7 @@ type addBorrowSuite struct {
 	nftKeeper  types.NFTKeeper
 	bankKeeper types.BankKeeper
 	app        types.MsgServer
-	ctx        sdk.Context
+	ctx        context.Context
 }
 
 func TestBorrowTestSuite(t *testing.T) {

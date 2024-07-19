@@ -17,7 +17,7 @@ type payPrincipalSuite struct {
 	keeper       *spvkeeper.Keeper
 	nftKeeper    types.NFTKeeper
 	app          types.MsgServer
-	ctx          sdk.Context
+	ctx          context.Context
 	investors    []string
 	investorPool string
 }

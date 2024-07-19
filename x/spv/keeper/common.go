@@ -15,7 +15,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
+func calculateTotalInterest(ctx context.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
 	totalInterestUsd := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -92,7 +92,7 @@ func calculateTotalInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.
 	return totalInterestUsd, nil
 }
 
-func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdk.Dec) (sdkmath.Int, error) {
+func calculateTotalOutstandingInterest(ctx context.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdk.Dec) (sdkmath.Int, error) {
 	totalInterestUsd := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -131,7 +131,7 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 	return totalInterestUsd, nil
 }
 
-// func (k Keeper) QueryModuleBalance(ctx sdk.Context) {
+// func (k Keeper) QueryModuleBalance(ctx context.Context) {
 //	acc := k.accKeeper.GetModuleAddress(types.ModuleAccount)
 //
 //	coins := k.bankKeeper.GetAllBalances(ctx, acc)
@@ -140,7 +140,7 @@ func calculateTotalOutstandingInterest(ctx sdk.Context, lendNFTs []string, nftKe
 
 // tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
 // rather then all the usable money
-func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int, userPoolLastPaymentTime bool) error {
+func (k Keeper) doBorrow(ctx context.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int, userPoolLastPaymentTime bool) error {
 	if usdTokenAmount.IsZero() {
 		return nil
 	}
@@ -236,7 +236,7 @@ func (k Keeper) doBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, usdTokenAmou
 	return nil
 }
 
-func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, usdAmount, localToken sdk.Coin, ratio sdk.Dec, depositors []*types.DepositorInfo, borrowableFix sdkmath.Int) error {
+func (k Keeper) processBorrow(ctx context.Context, poolInfo *types.PoolInfo, nftClass nfttypes.Class, usdAmount, localToken sdk.Coin, ratio sdk.Dec, depositors []*types.DepositorInfo, borrowableFix sdkmath.Int) error {
 	if poolInfo.UsableAmount.IsLT(usdAmount) {
 		return types.ErrInsufficientFund
 	}
@@ -260,7 +260,7 @@ func (k Keeper) processBorrow(ctx sdk.Context, poolInfo *types.PoolInfo, nftClas
 	return k.processInvestors(ctx, poolInfo, utilization, usdAmount.Amount, localToken.Amount, ratio, nftClass, depositors)
 }
 
-func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, useLastPaymentTime bool) error {
+func (k Keeper) doProcessInvestor(ctx context.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, useLastPaymentTime bool) error {
 	depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(poolInfo.BorrowedAmount.Denom, lockedLocal))
 
 	if depositor.WithdrawalAmount.Amount.LT(lockedUsd) {
@@ -301,7 +301,7 @@ func (k Keeper) doProcessInvestor(ctx sdk.Context, depositor *types.DepositorInf
 	return nil
 }
 
-func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, usdBorrowed, localAmount sdkmath.Int, ratio sdk.Dec, nftClass nfttypes.Class, depositors []*types.DepositorInfo) error {
+func (k Keeper) processInvestors(ctx context.Context, poolInfo *types.PoolInfo, utilization sdk.Dec, usdBorrowed, localAmount sdkmath.Int, ratio sdk.Dec, nftClass nfttypes.Class, depositors []*types.DepositorInfo) error {
 	nftTemplate := nfttypes.NFT{
 		ClassId: nftClass.Id,
 		Uri:     nftClass.Uri,
@@ -383,7 +383,7 @@ func (k Keeper) processInvestors(ctx sdk.Context, poolInfo *types.PoolInfo, util
 	return err
 }
 
-func (k Keeper) handleClassLeftover(ctx sdk.Context, poolinfo types.PoolInfo) sdk.Coin {
+func (k Keeper) handleClassLeftover(ctx context.Context, poolinfo types.PoolInfo) sdk.Coin {
 	nfts := poolinfo.PoolNFTIds
 	var err error
 	leftover := sdk.NewCoin(poolinfo.TargetAmount.Denom, sdk.ZeroInt())
@@ -405,7 +405,7 @@ func (k Keeper) handleClassLeftover(ctx sdk.Context, poolinfo types.PoolInfo) sd
 	return leftover
 }
 
-func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
+func (k Keeper) cleanupDepositor(ctx context.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		panic(err)
@@ -472,7 +472,7 @@ func (k Keeper) cleanupDepositor(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	return totalPaidAmount, nil
 }
 
-func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []string) (sdkmath.Int, error) {
+func (k Keeper) doProcessLiquidationForInvestor(ctx context.Context, lendNFTs []string) (sdkmath.Int, error) {
 	totalRedeem := sdk.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -546,7 +546,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx sdk.Context, lendNFTs []stri
 	return totalRedeem, nil
 }
 
-func (k Keeper) updateDepositorStatus(ctx sdk.Context, poolInfo *types.PoolInfo) {
+func (k Keeper) updateDepositorStatus(ctx context.Context, poolInfo *types.PoolInfo) {
 	totalAdjust := sdk.NewInt(0)
 
 	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {

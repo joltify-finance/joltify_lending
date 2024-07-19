@@ -10,7 +10,7 @@ import (
 )
 
 // SwapExactForTokens swaps an exact coin a input for a coin b output
-func (k *Keeper) SwapExactForTokens(ctx sdk.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k *Keeper) SwapExactForTokens(ctx context.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdk.Dec) error {
 	poolID, pool, err := k.loadPool(ctx, exactCoinA.Denom, coinB.Denom)
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (k *Keeper) SwapExactForTokens(ctx sdk.Context, requester sdk.AccAddress, e
 }
 
 // SwapExactForBatchTokens swaps an exact coin a input for a coin b output
-func (k *Keeper) SwapExactForBatchTokens(ctx sdk.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k *Keeper) SwapExactForBatchTokens(ctx context.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdk.Dec) error {
 	poolID, pool, err := k.loadPool(ctx, exactCoinA.Denom, "uoppy")
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (k *Keeper) SwapExactForBatchTokens(ctx sdk.Context, requester sdk.AccAddre
 }
 
 // SwapForExactTokens swaps a coin a input for an exact coin b output
-func (k *Keeper) SwapForExactTokens(ctx sdk.Context, requester sdk.AccAddress, coinA, exactCoinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k *Keeper) SwapForExactTokens(ctx context.Context, requester sdk.AccAddress, coinA, exactCoinB sdk.Coin, slippageLimit sdk.Dec) error {
 	poolID, pool, err := k.loadPool(ctx, coinA.Denom, exactCoinB.Denom)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (k *Keeper) SwapForExactTokens(ctx sdk.Context, requester sdk.AccAddress, c
 	return nil
 }
 
-func (k Keeper) loadPool(ctx sdk.Context, denomA string, denomB string) (string, *types.DenominatedPool, error) {
+func (k Keeper) loadPool(ctx context.Context, denomA string, denomB string) (string, *types.DenominatedPool, error) {
 	poolID := types.PoolID(denomA, denomB)
 
 	poolRecord, found := k.GetPool(ctx, poolID)
@@ -125,7 +125,7 @@ func (k Keeper) assertSlippageWithinLimit(priceChange sdk.Dec, slippageLimit sdk
 }
 
 func (k Keeper) commitSwap(
-	ctx sdk.Context,
+	ctx context.Context,
 	poolID string,
 	pool *types.DenominatedPool,
 	requester sdk.AccAddress,

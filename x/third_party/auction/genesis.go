@@ -10,7 +10,7 @@ import (
 )
 
 // InitGenesis initializes the store state from a genesis state.
-func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, bankKeeper types2.BankKeeper, accountKeeper types2.AccountKeeper, gs *types2.GenesisState) {
+func InitGenesis(ctx context.Context, keeper keeper.Keeper, bankKeeper types2.BankKeeper, accountKeeper types2.AccountKeeper, gs *types2.GenesisState) {
 	if err := gs.Validate(); err != nil {
 		panic(fmt.Sprintf("failed to validate %s genesis state: %s", types2.ModuleName, err))
 	}
@@ -47,7 +47,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, bankKeeper types2.BankKe
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types2.GenesisState {
+func ExportGenesis(ctx context.Context, keeper keeper.Keeper) *types2.GenesisState {
 	nextAuctionID, err := keeper.GetNextAuctionID(ctx)
 	if err != nil {
 		panic(err)

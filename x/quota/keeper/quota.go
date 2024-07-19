@@ -9,14 +9,14 @@ import (
 )
 
 // SetQuotaData set a specific quota for the module
-func (k Keeper) SetQuotaData(ctx sdk.Context, coinsQuota types.CoinsQuota) {
+func (k Keeper) SetQuotaData(ctx context.Context, coinsQuota types.CoinsQuota) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.QuotaKey))
 	b := k.cdc.MustMarshal(&coinsQuota)
 	store.Set(types.KeyPrefix(coinsQuota.ModuleName), b)
 }
 
 // GetQuotaData returns the quota for a module
-func (k Keeper) GetQuotaData(ctx sdk.Context, moduleName string) (val types.CoinsQuota, found bool) {
+func (k Keeper) GetQuotaData(ctx context.Context, moduleName string) (val types.CoinsQuota, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.QuotaKey))
 	b := store.Get(types.KeyPrefix(moduleName))
 	if b == nil {
@@ -26,7 +26,7 @@ func (k Keeper) GetQuotaData(ctx sdk.Context, moduleName string) (val types.Coin
 	return val, true
 }
 
-func (k Keeper) WhetherOnwhitelist(ctx sdk.Context, moduleName, sender string) bool {
+func (k Keeper) WhetherOnwhitelist(ctx context.Context, moduleName, sender string) bool {
 	params := k.GetParams(ctx)
 	for _, el := range params.Whitelist {
 		if el.ModuleName == moduleName {
@@ -40,7 +40,7 @@ func (k Keeper) WhetherOnwhitelist(ctx sdk.Context, moduleName, sender string) b
 	return false
 }
 
-func (k Keeper) WhetherOnBanlist(ctx sdk.Context, moduleName, sender string) bool {
+func (k Keeper) WhetherOnBanlist(ctx context.Context, moduleName, sender string) bool {
 	params := k.GetParams(ctx)
 	for _, el := range params.Banlist {
 		if el.ModuleName == moduleName {
@@ -55,7 +55,7 @@ func (k Keeper) WhetherOnBanlist(ctx sdk.Context, moduleName, sender string) boo
 }
 
 // GetAllQuota returns all quota
-func (k Keeper) GetAllQuota(ctx sdk.Context) (list []types.CoinsQuota) {
+func (k Keeper) GetAllQuota(ctx context.Context) (list []types.CoinsQuota) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.QuotaKey))
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 
@@ -70,7 +70,7 @@ func (k Keeper) GetAllQuota(ctx sdk.Context) (list []types.CoinsQuota) {
 }
 
 // GetPreAccountQuotaData returns the quota for a given account
-func (k Keeper) getAccountQuotaData(ctx sdk.Context, moduleName, accAddr string) (val types.AccQuota, found bool) {
+func (k Keeper) getAccountQuotaData(ctx context.Context, moduleName, accAddr string) (val types.AccQuota, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.QuotaAccKey))
 	key := types.KeyPrefix(moduleName + accAddr)
 	b := store.Get(key)
@@ -82,7 +82,7 @@ func (k Keeper) getAccountQuotaData(ctx sdk.Context, moduleName, accAddr string)
 }
 
 // setAccQuotaData set coin quota for a specific account
-func (k Keeper) setAccQuotaData(ctx sdk.Context, moduleName, accAddress string, accQuota types.AccQuota) {
+func (k Keeper) setAccQuotaData(ctx context.Context, moduleName, accAddress string, accQuota types.AccQuota) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.QuotaAccKey))
 	b := k.cdc.MustMarshal(&accQuota)
 	store.Set(types.KeyPrefix(moduleName+accAddress), b)
@@ -97,7 +97,7 @@ func ProcessHistory(newItem *types.HistoricalAmount, coinsQuota *types.CoinsQuot
 	return coinsQuota
 }
 
-func (k Keeper) updatePerAccountQuota(ctx sdk.Context, accTargets []*types.Target, coins sdk.Coins, sender string, moduleName string) error {
+func (k Keeper) updatePerAccountQuota(ctx context.Context, accTargets []*types.Target, coins sdk.Coins, sender string, moduleName string) error {
 	var targetQuota sdk.Coins
 	var targetHistoryLength int64
 
@@ -141,7 +141,7 @@ func (k Keeper) updatePerAccountQuota(ctx sdk.Context, accTargets []*types.Targe
 	return nil
 }
 
-func (k Keeper) UpdateQuota(ctx sdk.Context, coins sdk.Coins, sender string, ibcSeq uint64, moduleName string) error {
+func (k Keeper) UpdateQuota(ctx context.Context, coins sdk.Coins, sender string, ibcSeq uint64, moduleName string) error {
 	var targetQuota sdk.Coins
 
 	params := k.GetParams(ctx)
@@ -194,7 +194,7 @@ func (k Keeper) UpdateQuota(ctx sdk.Context, coins sdk.Coins, sender string, ibc
 	return nil
 }
 
-func (k Keeper) RevokeHistory(ctx sdk.Context, moduleName string, seq uint64) {
+func (k Keeper) RevokeHistory(ctx context.Context, moduleName string, seq uint64) {
 	currentQuota, found := k.GetQuotaData(ctx, moduleName)
 	if !found {
 		return
@@ -211,7 +211,7 @@ func (k Keeper) RevokeHistory(ctx sdk.Context, moduleName string, seq uint64) {
 	ctx.Logger().Error("cannot find the seq in history", "seq", seq)
 }
 
-func (k Keeper) BlockUpdateQuota(ctx sdk.Context) {
+func (k Keeper) BlockUpdateQuota(ctx context.Context) {
 	lengthMap := make(map[string]int64)
 	params := k.GetParams(ctx)
 	for _, el := range params.Targets {

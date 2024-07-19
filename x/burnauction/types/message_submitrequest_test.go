@@ -5,7 +5,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/testutil/sample"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +20,7 @@ func TestMsgSubmitrequest_ValidateBasic(t *testing.T) {
 			msg: MsgSubmitrequest{
 				Creator: "invalid_address",
 			},
-			err: sdkerrors.ErrInvalidAddress,
+			err: errorsmod.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgSubmitrequest{

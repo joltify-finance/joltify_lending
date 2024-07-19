@@ -17,7 +17,7 @@ import (
 
 var KeyProjects = []byte("projectInfo")
 
-func setProject(ctx sdk.Context, storeKey storetypes.StoreKey, p *types.ProjectInfo, cdc codec.BinaryCodec) (int32, error) {
+func setProject(ctx context.Context, storeKey storetypes.StoreKey, p *types.ProjectInfo, cdc codec.BinaryCodec) (int32, error) {
 	var currentNum uint32
 	projectStore := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	projectNum := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.ProjectInfoNum))
@@ -41,7 +41,7 @@ func setProject(ctx sdk.Context, storeKey storetypes.StoreKey, p *types.ProjectI
 	return int32(currentNum), nil
 }
 
-func MigrateStore(ctx sdk.Context, paramstore paramtypes.Subspace, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+func MigrateStore(ctx context.Context, paramstore paramtypes.Subspace, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	var projectsEncoded string
 	paramstore.Get(ctx, KeyProjects, &projectsEncoded)
 

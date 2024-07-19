@@ -19,7 +19,7 @@ type ArchiveTestSuite struct {
 	suite.Suite
 	keeper *spvkeeper.Keeper
 	app    types.MsgServer
-	ctx    sdk.Context
+	ctx    context.Context
 }
 
 func TestArchiveTestSuite(t *testing.T) {

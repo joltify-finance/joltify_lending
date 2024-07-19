@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -49,7 +50,7 @@ func NewKeeper(
 }
 
 // GetJoltLiquidityProviderClaim returns the claim in the store corresponding the the input address collateral type and id and a boolean for if the claim was found
-func (k Keeper) GetJoltLiquidityProviderClaim(ctx sdk.Context, addr sdk.AccAddress) (types.JoltLiquidityProviderClaim, bool) {
+func (k Keeper) GetJoltLiquidityProviderClaim(ctx context.Context, addr sdk.AccAddress) (types.JoltLiquidityProviderClaim, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
 	bz := store.Get(addr)
 	if bz == nil {
@@ -61,20 +62,20 @@ func (k Keeper) GetJoltLiquidityProviderClaim(ctx sdk.Context, addr sdk.AccAddre
 }
 
 // SetJoltLiquidityProviderClaim sets the claim in the store corresponding to the input address, collateral type, and id
-func (k Keeper) SetJoltLiquidityProviderClaim(ctx sdk.Context, c types.JoltLiquidityProviderClaim) {
+func (k Keeper) SetJoltLiquidityProviderClaim(ctx context.Context, c types.JoltLiquidityProviderClaim) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
 	bz := k.cdc.MustMarshal(&c)
 	store.Set(c.Owner, bz)
 }
 
 // DeleteJoltLiquidityProviderClaim deletes the claim in the store corresponding to the input address, collateral type, and id
-func (k Keeper) DeleteJoltLiquidityProviderClaim(ctx sdk.Context, owner sdk.AccAddress) {
+func (k Keeper) DeleteJoltLiquidityProviderClaim(ctx context.Context, owner sdk.AccAddress) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
 	store.Delete(owner)
 }
 
 // IterateJoltLiquidityProviderClaims iterates over all claim  objects in the store and preforms a callback function
-func (k Keeper) IterateJoltLiquidityProviderClaims(ctx sdk.Context, cb func(c types.JoltLiquidityProviderClaim) (stop bool)) {
+func (k Keeper) IterateJoltLiquidityProviderClaims(ctx context.Context, cb func(c types.JoltLiquidityProviderClaim) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -88,7 +89,7 @@ func (k Keeper) IterateJoltLiquidityProviderClaims(ctx sdk.Context, cb func(c ty
 }
 
 // GetAllJoltLiquidityProviderClaims returns all Claim objects in the store
-func (k Keeper) GetAllJoltLiquidityProviderClaims(ctx sdk.Context) types.JoltLiquidityProviderClaims {
+func (k Keeper) GetAllJoltLiquidityProviderClaims(ctx context.Context) types.JoltLiquidityProviderClaims {
 	cs := types.JoltLiquidityProviderClaims{}
 	k.IterateJoltLiquidityProviderClaims(ctx, func(c types.JoltLiquidityProviderClaim) (stop bool) {
 		cs = append(cs, c)
@@ -98,7 +99,7 @@ func (k Keeper) GetAllJoltLiquidityProviderClaims(ctx sdk.Context) types.JoltLiq
 }
 
 // SetJoltSupplyRewardIndexes sets the current reward indexes for an individual denom
-func (k Keeper) SetJoltSupplyRewardIndexes(ctx sdk.Context, denom string, indexes types.RewardIndexes) {
+func (k Keeper) SetJoltSupplyRewardIndexes(ctx context.Context, denom string, indexes types.RewardIndexes) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltSupplyRewardIndexesKeyPrefix)
 	bz := k.cdc.MustMarshal(&types.RewardIndexesProto{
 		RewardIndexes: indexes,
@@ -107,7 +108,7 @@ func (k Keeper) SetJoltSupplyRewardIndexes(ctx sdk.Context, denom string, indexe
 }
 
 // GetJoltSupplyRewardIndexes gets the current reward indexes for an individual denom
-func (k Keeper) GetJoltSupplyRewardIndexes(ctx sdk.Context, denom string) (types.RewardIndexes, bool) {
+func (k Keeper) GetJoltSupplyRewardIndexes(ctx context.Context, denom string) (types.RewardIndexes, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltSupplyRewardIndexesKeyPrefix)
 	bz := store.Get([]byte(denom))
 	if bz == nil {
@@ -120,7 +121,7 @@ func (k Keeper) GetJoltSupplyRewardIndexes(ctx sdk.Context, denom string) (types
 }
 
 // IterateJoltSupplyRewardIndexes iterates over all Hard supply reward index objects in the store and preforms a callback function
-func (k Keeper) IterateJoltSupplyRewardIndexes(ctx sdk.Context, cb func(denom string, indexes types.RewardIndexes) (stop bool)) {
+func (k Keeper) IterateJoltSupplyRewardIndexes(ctx context.Context, cb func(denom string, indexes types.RewardIndexes) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltSupplyRewardIndexesKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -133,7 +134,7 @@ func (k Keeper) IterateJoltSupplyRewardIndexes(ctx sdk.Context, cb func(denom st
 	}
 }
 
-func (k Keeper) IterateJoltSupplyRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
+func (k Keeper) IterateJoltSupplyRewardAccrualTimes(ctx context.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltSupplyRewardAccrualTimeKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -150,7 +151,7 @@ func (k Keeper) IterateJoltSupplyRewardAccrualTimes(ctx sdk.Context, cb func(str
 }
 
 // SetJoltBorrowRewardIndexes sets the current reward indexes for an individual denom
-func (k Keeper) SetJoltBorrowRewardIndexes(ctx sdk.Context, denom string, indexes types.RewardIndexes) {
+func (k Keeper) SetJoltBorrowRewardIndexes(ctx context.Context, denom string, indexes types.RewardIndexes) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltBorrowRewardIndexesKeyPrefix)
 	bz := k.cdc.MustMarshal(&types.RewardIndexesProto{
 		RewardIndexes: indexes,
@@ -159,7 +160,7 @@ func (k Keeper) SetJoltBorrowRewardIndexes(ctx sdk.Context, denom string, indexe
 }
 
 // GetJoltBorrowRewardIndexes gets the current reward indexes for an individual denom
-func (k Keeper) GetJoltBorrowRewardIndexes(ctx sdk.Context, denom string) (types.RewardIndexes, bool) {
+func (k Keeper) GetJoltBorrowRewardIndexes(ctx context.Context, denom string) (types.RewardIndexes, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltBorrowRewardIndexesKeyPrefix)
 	bz := store.Get([]byte(denom))
 	if bz == nil {
@@ -172,7 +173,7 @@ func (k Keeper) GetJoltBorrowRewardIndexes(ctx sdk.Context, denom string) (types
 }
 
 // IterateJoltBorrowRewardIndexes iterates over all Hard borrow reward index objects in the store and preforms a callback function
-func (k Keeper) IterateJoltBorrowRewardIndexes(ctx sdk.Context, cb func(denom string, indexes types.RewardIndexes) (stop bool)) {
+func (k Keeper) IterateJoltBorrowRewardIndexes(ctx context.Context, cb func(denom string, indexes types.RewardIndexes) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltBorrowRewardIndexesKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -185,7 +186,7 @@ func (k Keeper) IterateJoltBorrowRewardIndexes(ctx sdk.Context, cb func(denom st
 	}
 }
 
-func (k Keeper) IterateJoltBorrowRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
+func (k Keeper) IterateJoltBorrowRewardAccrualTimes(ctx context.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltBorrowRewardAccrualTimeKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -202,7 +203,7 @@ func (k Keeper) IterateJoltBorrowRewardAccrualTimes(ctx sdk.Context, cb func(str
 }
 
 // GetPreviousJoltSupplyRewardAccrualTime returns the last time a denom accrued Hard protocol supply-side rewards
-func (k Keeper) GetPreviousJoltSupplyRewardAccrualTime(ctx sdk.Context, denom string) (blockTime time.Time, found bool) {
+func (k Keeper) GetPreviousJoltSupplyRewardAccrualTime(ctx context.Context, denom string) (blockTime time.Time, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltSupplyRewardAccrualTimeKeyPrefix)
 	bz := store.Get([]byte(denom))
 	if bz == nil {
@@ -215,7 +216,7 @@ func (k Keeper) GetPreviousJoltSupplyRewardAccrualTime(ctx sdk.Context, denom st
 }
 
 // SetPreviousJoltSupplyRewardAccrualTime sets the last time a denom accrued Hard protocol supply-side rewards
-func (k Keeper) SetPreviousJoltSupplyRewardAccrualTime(ctx sdk.Context, denom string, blockTime time.Time) {
+func (k Keeper) SetPreviousJoltSupplyRewardAccrualTime(ctx context.Context, denom string, blockTime time.Time) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltSupplyRewardAccrualTimeKeyPrefix)
 	bz, err := blockTime.MarshalBinary()
 	if err != nil {
@@ -225,7 +226,7 @@ func (k Keeper) SetPreviousJoltSupplyRewardAccrualTime(ctx sdk.Context, denom st
 }
 
 // GetPreviousJoltBorrowRewardAccrualTime returns the last time a denom accrued Hard protocol borrow-side rewards
-func (k Keeper) GetPreviousJoltBorrowRewardAccrualTime(ctx sdk.Context, denom string) (blockTime time.Time, found bool) {
+func (k Keeper) GetPreviousJoltBorrowRewardAccrualTime(ctx context.Context, denom string) (blockTime time.Time, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltBorrowRewardAccrualTimeKeyPrefix)
 	b := store.Get([]byte(denom))
 	if b == nil {
@@ -238,7 +239,7 @@ func (k Keeper) GetPreviousJoltBorrowRewardAccrualTime(ctx sdk.Context, denom st
 }
 
 // SetPreviousJoltBorrowRewardAccrualTime sets the last time a denom accrued Hard protocol borrow-side rewards
-func (k Keeper) SetPreviousJoltBorrowRewardAccrualTime(ctx sdk.Context, denom string, blockTime time.Time) {
+func (k Keeper) SetPreviousJoltBorrowRewardAccrualTime(ctx context.Context, denom string, blockTime time.Time) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltBorrowRewardAccrualTimeKeyPrefix)
 	bz, err := blockTime.MarshalBinary()
 	if err != nil {
@@ -248,7 +249,7 @@ func (k Keeper) SetPreviousJoltBorrowRewardAccrualTime(ctx sdk.Context, denom st
 }
 
 // GetPreviousDelegatorRewardAccrualTime returns the last time a denom accrued protocol delegator rewards
-func (k Keeper) GetPreviousDelegatorRewardAccrualTime(ctx sdk.Context, denom string) (blockTime time.Time, found bool) {
+func (k Keeper) GetPreviousDelegatorRewardAccrualTime(ctx context.Context, denom string) (blockTime time.Time, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousDelegatorRewardAccrualTimeKeyPrefix)
 	bz := store.Get([]byte(denom))
 	if bz == nil {
@@ -261,7 +262,7 @@ func (k Keeper) GetPreviousDelegatorRewardAccrualTime(ctx sdk.Context, denom str
 }
 
 // SetPreviousDelegatorRewardAccrualTime sets the last time a denom accrued protocol delegator rewards
-func (k Keeper) SetPreviousDelegatorRewardAccrualTime(ctx sdk.Context, denom string, blockTime time.Time) {
+func (k Keeper) SetPreviousDelegatorRewardAccrualTime(ctx context.Context, denom string, blockTime time.Time) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousDelegatorRewardAccrualTimeKeyPrefix)
 	bz, err := blockTime.MarshalBinary()
 	if err != nil {
@@ -271,7 +272,7 @@ func (k Keeper) SetPreviousDelegatorRewardAccrualTime(ctx sdk.Context, denom str
 }
 
 // GetSwapClaim returns the claim in the store corresponding the the input address.
-func (k Keeper) GetSwapClaim(ctx sdk.Context, addr sdk.AccAddress) (types.SwapClaim, bool) {
+func (k Keeper) GetSwapClaim(ctx context.Context, addr sdk.AccAddress) (types.SwapClaim, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapClaimKeyPrefix)
 	bz := store.Get(addr)
 	if bz == nil {
@@ -283,20 +284,20 @@ func (k Keeper) GetSwapClaim(ctx sdk.Context, addr sdk.AccAddress) (types.SwapCl
 }
 
 // SetSwapClaim sets the claim in the store corresponding to the input address.
-func (k Keeper) SetSwapClaim(ctx sdk.Context, c types.SwapClaim) {
+func (k Keeper) SetSwapClaim(ctx context.Context, c types.SwapClaim) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapClaimKeyPrefix)
 	bz := k.cdc.MustMarshal(&c)
 	store.Set(c.Owner, bz)
 }
 
 // DeleteSwapClaim deletes the claim in the store corresponding to the input address.
-func (k Keeper) DeleteSwapClaim(ctx sdk.Context, owner sdk.AccAddress) {
+func (k Keeper) DeleteSwapClaim(ctx context.Context, owner sdk.AccAddress) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapClaimKeyPrefix)
 	store.Delete(owner)
 }
 
 // IterateSwapClaims iterates over all claim  objects in the store and preforms a callback function
-func (k Keeper) IterateSwapClaims(ctx sdk.Context, cb func(c types.SwapClaim) (stop bool)) {
+func (k Keeper) IterateSwapClaims(ctx context.Context, cb func(c types.SwapClaim) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapClaimKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -310,7 +311,7 @@ func (k Keeper) IterateSwapClaims(ctx sdk.Context, cb func(c types.SwapClaim) (s
 }
 
 // GetAllSwapClaims returns all Claim objects in the store
-func (k Keeper) GetAllSwapClaims(ctx sdk.Context) types.SwapClaims {
+func (k Keeper) GetAllSwapClaims(ctx context.Context) types.SwapClaims {
 	cs := types.SwapClaims{}
 	k.IterateSwapClaims(ctx, func(c types.SwapClaim) (stop bool) {
 		cs = append(cs, c)
@@ -320,7 +321,7 @@ func (k Keeper) GetAllSwapClaims(ctx sdk.Context) types.SwapClaims {
 }
 
 // SetSwapRewardIndexes stores the global reward indexes that track total rewards to a swap pool.
-func (k Keeper) SetSwapRewardIndexes(ctx sdk.Context, poolID string, indexes types.RewardIndexes) {
+func (k Keeper) SetSwapRewardIndexes(ctx context.Context, poolID string, indexes types.RewardIndexes) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapRewardIndexesKeyPrefix)
 	bz := k.cdc.MustMarshal(&types.RewardIndexesProto{
 		RewardIndexes: indexes,
@@ -329,7 +330,7 @@ func (k Keeper) SetSwapRewardIndexes(ctx sdk.Context, poolID string, indexes typ
 }
 
 // GetSwapRewardIndexes fetches the global reward indexes that track total rewards to a swap pool.
-func (k Keeper) GetSwapRewardIndexes(ctx sdk.Context, poolID string) (types.RewardIndexes, bool) {
+func (k Keeper) GetSwapRewardIndexes(ctx context.Context, poolID string) (types.RewardIndexes, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapRewardIndexesKeyPrefix)
 	bz := store.Get([]byte(poolID))
 	if bz == nil {
@@ -341,7 +342,7 @@ func (k Keeper) GetSwapRewardIndexes(ctx sdk.Context, poolID string) (types.Rewa
 }
 
 // IterateSwapRewardIndexes iterates over all swap reward index objects in the store and preforms a callback function
-func (k Keeper) IterateSwapRewardIndexes(ctx sdk.Context, cb func(poolID string, indexes types.RewardIndexes) (stop bool)) {
+func (k Keeper) IterateSwapRewardIndexes(ctx context.Context, cb func(poolID string, indexes types.RewardIndexes) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapRewardIndexesKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -355,7 +356,7 @@ func (k Keeper) IterateSwapRewardIndexes(ctx sdk.Context, cb func(poolID string,
 }
 
 // GetSwapRewardAccrualTime fetches the last time rewards were accrued for a swap pool.
-func (k Keeper) GetSwapRewardAccrualTime(ctx sdk.Context, poolID string) (blockTime time.Time, found bool) {
+func (k Keeper) GetSwapRewardAccrualTime(ctx context.Context, poolID string) (blockTime time.Time, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSwapRewardAccrualTimeKeyPrefix)
 	b := store.Get([]byte(poolID))
 	if b == nil {
@@ -368,7 +369,7 @@ func (k Keeper) GetSwapRewardAccrualTime(ctx sdk.Context, poolID string) (blockT
 }
 
 // SetSwapRewardAccrualTime stores the last time rewards were accrued for a swap pool.
-func (k Keeper) SetSwapRewardAccrualTime(ctx sdk.Context, poolID string, blockTime time.Time) {
+func (k Keeper) SetSwapRewardAccrualTime(ctx context.Context, poolID string, blockTime time.Time) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSwapRewardAccrualTimeKeyPrefix)
 	bz, err := blockTime.MarshalBinary()
 	if err != nil {
@@ -377,7 +378,7 @@ func (k Keeper) SetSwapRewardAccrualTime(ctx sdk.Context, poolID string, blockTi
 	store.Set([]byte(poolID), bz)
 }
 
-func (k Keeper) IterateSwapRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
+func (k Keeper) IterateSwapRewardAccrualTimes(ctx context.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSwapRewardAccrualTimeKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -394,7 +395,7 @@ func (k Keeper) IterateSwapRewardAccrualTimes(ctx sdk.Context, cb func(string, t
 }
 
 // SetSPVReward stores the global reward indexes that track total rewards to a SPV pool.
-func (k Keeper) SetSPVReward(ctx sdk.Context, poolID string, accRewardTokens types.SPVRewardAccTokens) {
+func (k Keeper) SetSPVReward(ctx context.Context, poolID string, accRewardTokens types.SPVRewardAccTokens) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
 	bz := k.cdc.MustMarshal(&types.SPVRewardAccTokens{
 		PaymentAmount: accRewardTokens.PaymentAmount,
@@ -404,7 +405,7 @@ func (k Keeper) SetSPVReward(ctx sdk.Context, poolID string, accRewardTokens typ
 }
 
 // GetSPVReward fetches the global reward indexes that track total rewards to a SPV pool.
-func (k Keeper) GetSPVReward(ctx sdk.Context, poolID string) (types.SPVRewardAccTokens, bool) {
+func (k Keeper) GetSPVReward(ctx context.Context, poolID string) (types.SPVRewardAccTokens, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
 	incentivePool := types.Incentiveprefix + poolID
 	bz := store.Get([]byte(incentivePool))
@@ -417,7 +418,7 @@ func (k Keeper) GetSPVReward(ctx sdk.Context, poolID string) (types.SPVRewardAcc
 }
 
 // SetSPVInvestorReward stores the investor reward indexes that track total rewards to a SPV pool.
-func (k Keeper) SetSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string, incentiveTokens sdk.Coins) {
+func (k Keeper) SetSPVInvestorReward(ctx context.Context, poolID, walletAddr string, incentiveTokens sdk.Coins) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardInvestorKeyPrefix)
 	bz := k.cdc.MustMarshal(&types.SPVRewardAccTokens{
 		PaymentAmount: incentiveTokens,
@@ -427,7 +428,7 @@ func (k Keeper) SetSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string,
 }
 
 // GetSPVInvestorReward fetches the investor reward indexes that track total rewards to a SPV pool.
-func (k Keeper) GetSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string) (sdk.Coins, bool) {
+func (k Keeper) GetSPVInvestorReward(ctx context.Context, poolID, walletAddr string) (sdk.Coins, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardInvestorKeyPrefix)
 	incentivePool := types.Incentiveclassprefix + fmt.Sprintf("%s-%s", poolID, walletAddr)
 	bz := store.Get([]byte(incentivePool))
@@ -440,7 +441,7 @@ func (k Keeper) GetSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string)
 }
 
 // IterateSPVInvestorRewards iterates over all SPV reward index objects in the store and preforms a callback function
-func (k Keeper) IterateSPVInvestorReward(ctx sdk.Context, cb func(key string, accTokens types.SPVRewardAccTokens) (stop bool)) {
+func (k Keeper) IterateSPVInvestorReward(ctx context.Context, cb func(key string, accTokens types.SPVRewardAccTokens) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardInvestorKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -454,7 +455,7 @@ func (k Keeper) IterateSPVInvestorReward(ctx sdk.Context, cb func(key string, ac
 }
 
 // IterateSPVInvestorRewards iterates over all SPV reward index objects in the store and preforms a callback function
-func (k Keeper) LegacyIterateSPVInvestorReward(ctx sdk.Context, cb func(key string, accTokens types.SPVRewardAccTokens) (stop bool)) {
+func (k Keeper) LegacyIterateSPVInvestorReward(ctx context.Context, cb func(key string, accTokens types.SPVRewardAccTokens) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -470,14 +471,14 @@ func (k Keeper) LegacyIterateSPVInvestorReward(ctx sdk.Context, cb func(key stri
 	}
 }
 
-func (k Keeper) DeleteSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string) {
+func (k Keeper) DeleteSPVInvestorReward(ctx context.Context, poolID, walletAddr string) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardInvestorKeyPrefix)
 	incentivePool := types.Incentiveclassprefix + fmt.Sprintf("%s-%s", poolID, walletAddr)
 	store.Delete([]byte(incentivePool))
 }
 
 // IterateSPVRewardIndexes iterates over all SPV global reward index objects in the store and preforms a callback function
-func (k Keeper) IterateSPVRewardIndexes(ctx sdk.Context, cb func(poolID string, accTokens types.SPVRewardAccTokens) (stop bool)) {
+func (k Keeper) IterateSPVRewardIndexes(ctx context.Context, cb func(poolID string, accTokens types.SPVRewardAccTokens) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
@@ -491,7 +492,7 @@ func (k Keeper) IterateSPVRewardIndexes(ctx sdk.Context, cb func(poolID string, 
 }
 
 // GetSPVRewardAccrualTime fetches the last time rewards were accrued for a SPV pool.
-func (k Keeper) GetSPVRewardAccrualTime(ctx sdk.Context, poolID string) (blockTime time.Time, found bool) {
+func (k Keeper) GetSPVRewardAccrualTime(ctx context.Context, poolID string) (blockTime time.Time, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSPVRewardAccrualTimeKeyPrefix)
 	incentivePool := types.Incentiveprefix + poolID
 	b := store.Get([]byte(incentivePool))
@@ -505,7 +506,7 @@ func (k Keeper) GetSPVRewardAccrualTime(ctx sdk.Context, poolID string) (blockTi
 }
 
 // SetSPVRewardAccrualTime stores the last time rewards were accrued for a SPV pool.
-func (k Keeper) SetSPVRewardAccrualTime(ctx sdk.Context, poolID string, blockTime time.Time) {
+func (k Keeper) SetSPVRewardAccrualTime(ctx context.Context, poolID string, blockTime time.Time) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSPVRewardAccrualTimeKeyPrefix)
 	bz, err := blockTime.MarshalBinary()
 	if err != nil {
@@ -515,7 +516,7 @@ func (k Keeper) SetSPVRewardAccrualTime(ctx sdk.Context, poolID string, blockTim
 	store.Set([]byte(incentivePool), bz)
 }
 
-func (k Keeper) IterateSPVRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
+func (k Keeper) IterateSPVRewardAccrualTimes(ctx context.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSPVRewardAccrualTimeKeyPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()

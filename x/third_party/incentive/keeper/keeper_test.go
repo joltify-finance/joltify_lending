@@ -22,7 +22,7 @@ type KeeperTestSuite struct {
 	keeper keeper.Keeper
 
 	app app.TestApp
-	ctx sdk.Context
+	ctx context.Context
 
 	genesisTime time.Time
 	addrs       []sdk.AccAddress

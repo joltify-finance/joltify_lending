@@ -6,13 +6,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 )
 
-func doQueryAllLiquidate(ctx sdk.Context, k Keeper, reqBorrowers sdk.AccAddress) ([]types2.LiquidateItem, error) {
+func doQueryAllLiquidate(ctx context.Context, k Keeper, reqBorrowers sdk.AccAddress) ([]types2.LiquidateItem, error) {
 	var liquidateUsers []types2.LiquidateItem
 	var borrows types2.Borrows
 
@@ -61,11 +61,11 @@ func doQueryAllLiquidate(ctx sdk.Context, k Keeper, reqBorrowers sdk.AccAddress)
 	return liquidateUsers, nil
 }
 
-func queryGetLiquidate(ctx sdk.Context, req abci.RequestQuery, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
+func queryGetLiquidate(ctx context.Context, req abci.RequestQuery, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
 	var liquidateReq types2.QueryLiquidate
 	err := legacyQuerierCdc.UnmarshalJSON(req.Data, &liquidateReq)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+		return nil, errorsmod.Wrap(errorsmod.ErrJSONUnmarshal, err.Error())
 	}
 
 	// we query all the borrows
@@ -74,21 +74,21 @@ func queryGetLiquidate(ctx sdk.Context, req abci.RequestQuery, k Keeper, legacyQ
 	if liquidateReq.Borrow == "" {
 		ret, err := doQueryAllLiquidate(ctx, k, sdk.AccAddress{})
 		if err != nil {
-			return nil, sdkerrors.Wrap(errors.New("err in query the liquidate users"), err.Error())
+			return nil, errorsmod.Wrap(errors.New("err in query the liquidate users"), err.Error())
 		}
 
 		start, end := client.Paginate(len(ret), liquidateReq.Page, liquidateReq.Limit, 100)
 		if start < 0 || end < 0 {
 			bz, err = codec.MarshalJSONIndent(legacyQuerierCdc, retLiquidateResp)
 			if err != nil {
-				return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+				return nil, errorsmod.Wrap(errorsmod.ErrJSONMarshal, err.Error())
 			}
 			return bz, nil
 		}
 		retLiquidateResp = ret[start:end]
 		bz, err := codec.MarshalJSONIndent(legacyQuerierCdc, retLiquidateResp)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+			return nil, errorsmod.Wrap(errorsmod.ErrJSONMarshal, err.Error())
 		}
 		return bz, nil
 	}
@@ -100,21 +100,21 @@ func queryGetLiquidate(ctx sdk.Context, req abci.RequestQuery, k Keeper, legacyQ
 
 	ret, err := doQueryAllLiquidate(ctx, k, v)
 	if err != nil {
-		return nil, sdkerrors.Wrap(errors.New("err in query the liquidate users"), err.Error())
+		return nil, errorsmod.Wrap(errors.New("err in query the liquidate users"), err.Error())
 	}
 
 	start, end := client.Paginate(len(ret), liquidateReq.Page, liquidateReq.Limit, 100)
 	if start < 0 || end < 0 {
 		bz, err = codec.MarshalJSONIndent(legacyQuerierCdc, retLiquidateResp)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+			return nil, errorsmod.Wrap(errorsmod.ErrJSONMarshal, err.Error())
 		}
 		return bz, nil
 	}
 	retLiquidateResp = ret[start:end]
 	bz, err = codec.MarshalJSONIndent(legacyQuerierCdc, retLiquidateResp)
 	if err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+		return nil, errorsmod.Wrap(errorsmod.ErrJSONMarshal, err.Error())
 	}
 	return bz, nil
 }

@@ -8,11 +8,11 @@ import (
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdk.Coin, error) {
+func (k Keeper) handlerPoolClose(ctx context.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdk.Coin, error) {
 	amount, err := k.cleanupDepositor(ctx, poolInfo, depositor)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -30,7 +30,7 @@ func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	return tokenSend, err
 }
 
-func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
+func (k Keeper) handlerPoolLiquidation(ctx context.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -57,7 +57,7 @@ func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.Deposito
 	return totalWithdraw, err
 }
 
-func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
+func (k Keeper) isEmptyPool(ctx context.Context, poolInfo types.PoolInfo) bool {
 	if !poolInfo.BorrowedAmount.IsZero() || !poolInfo.UsableAmount.IsZero() {
 		return false
 	}
@@ -74,7 +74,7 @@ func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
 	return true
 }
 
-func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
+func (k msgServer) handleDepositClose(ctx context.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
 	depositor.DepositType = types.DepositorInfo_deactive
 	amountToSend := depositor.WithdrawalAmount
 	interest, err := k.claimInterest(ctx, &depositor)
@@ -83,7 +83,7 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 	}
 
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", depositor.DepositorAddress.String())
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", depositor.DepositorAddress.String())
 	}
 
 	amountToSend = amountToSend.Add(interest)
@@ -155,7 +155,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	depositor, found := k.GetDepositor(ctx, msg.PoolIndex, investor)

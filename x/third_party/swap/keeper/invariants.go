@@ -17,7 +17,7 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 
 // AllInvariants runs all invariants of the swap module
 func AllInvariants(k Keeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx context.Context) (string, bool) {
 		if res, stop := PoolRecordsInvariant(k)(ctx); stop {
 			return res, stop
 		}
@@ -40,7 +40,7 @@ func PoolRecordsInvariant(k Keeper) sdk.Invariant {
 	broken := false
 	message := sdk.FormatInvariant(types.ModuleName, "validate pool records broken", "pool record invalid")
 
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx context.Context) (string, bool) {
 		k.IteratePools(ctx, func(record types.PoolRecord) bool {
 			if err := record.Validate(); err != nil {
 				broken = true
@@ -58,7 +58,7 @@ func ShareRecordsInvariant(k Keeper) sdk.Invariant {
 	broken := false
 	message := sdk.FormatInvariant(types.ModuleName, "validate share records broken", "share record invalid")
 
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx context.Context) (string, bool) {
 		k.IterateDepositorShares(ctx, func(record types.ShareRecord) bool {
 			if err := record.Validate(); err != nil {
 				broken = true
@@ -75,7 +75,7 @@ func ShareRecordsInvariant(k Keeper) sdk.Invariant {
 func PoolReservesInvariant(k Keeper) sdk.Invariant {
 	message := sdk.FormatInvariant(types.ModuleName, "pool reserves broken", "pool reserves do not match module account")
 
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx context.Context) (string, bool) {
 		balance := k.bankKeeper.GetAllBalances(ctx, k.GetSwapModuleAccount(ctx).GetAddress())
 
 		reserves := sdk.Coins{}
@@ -101,7 +101,7 @@ func PoolSharesInvariant(k Keeper) sdk.Invariant {
 	broken := false
 	message := sdk.FormatInvariant(types.ModuleName, "pool shares broken", "pool shares do not match depositor shares")
 
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx context.Context) (string, bool) {
 		totalShares := make(map[string]poolShares)
 
 		k.IteratePools(ctx, func(pr types.PoolRecord) bool {

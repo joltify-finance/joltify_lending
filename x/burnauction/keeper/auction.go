@@ -6,7 +6,7 @@ import (
 )
 
 // RunSurplusAuctions nets the surplus and debt balances and then creates surplus or debt auctions if the remaining balance is above the auction threshold parameter
-func (k Keeper) RunSurplusAuctions(ctx sdk.Context) {
+func (k Keeper) RunSurplusAuctions(ctx context.Context) {
 	acc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
 	currentBalances := k.bankKeeper.GetAllBalances(ctx, acc.GetAddress())
 
