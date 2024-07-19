@@ -3,6 +3,7 @@ package keeper
 import (
 	"errors"
 
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,7 +18,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrower sdk.AccAddress, coins sdk.Coins
 		if !foundInterestFactor {
 			_, foundMm := k.GetMoneyMarket(ctx, coin.Denom)
 			if foundMm {
-				k.SetBorrowInterestFactor(ctx, coin.Denom, sdk.OneDec())
+				k.SetBorrowInterestFactor(ctx, coin.Denom, sdkmath.LegacyOneDec())
 			}
 		}
 	}
