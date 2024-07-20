@@ -13,8 +13,8 @@ import (
 
 // ParamSubspace defines the expected Subspace interfacace
 type ParamSubspace interface {
-	GetParamSet(context.Context, paramtypes.ParamSet)
-	SetParamSet(context.Context, paramtypes.ParamSet)
+	GetParamSet(sdk.Context, paramtypes.ParamSet)
+	SetParamSet(sdk.Context, paramtypes.ParamSet)
 	WithKeyTable(paramtypes.KeyTable) paramtypes.Subspace
 	HasKeyTable() bool
 }

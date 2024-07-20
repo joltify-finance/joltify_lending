@@ -191,7 +191,7 @@ func (k EvmBankKeeper) ConvertOneUjoltToAjoltIfNeeded(ctx context.Context, addr 
 		return nil
 	}
 
-	uJoltToStore := sdk.NewCoins(sdk.NewCoin(CosmosDenom, sdk.OneInt()))
+	uJoltToStore := sdk.NewCoins(sdk.NewCoin(CosmosDenom, sdkmath.OneInt()))
 	if err := k.bk.SendCoinsFromAccountToModule(ctx, addr, types.ModuleName, uJoltToStore); err != nil {
 		return err
 	}

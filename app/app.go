@@ -58,7 +58,6 @@ import (
 	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/rakyll/statik/fs"
 
-	vaultmodule "github.com/joltify-finance/joltify_lending/x/vault"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/server/config"
@@ -90,8 +89,6 @@ import (
 	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	swaptypes "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
-	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
-	vaultmoduletypes "github.com/joltify-finance/joltify_lending/x/vault/types"
 
 	"github.com/joltify-finance/joltify_lending/x/mint"
 	mintkeeper "github.com/joltify-finance/joltify_lending/x/mint/keeper"
@@ -215,7 +212,6 @@ var (
 		pricefeed.AppModuleBasic{},
 		jolt.AppModuleBasic{},
 		incentive.AppModuleBasic{},
-		vaultmodule.AppModuleBasic{},
 		kycmodule.AppModuleBasic{},
 		ibcratelimit.AppModule{},
 		quotamodule.AppModuleBasic{},
@@ -242,7 +238,6 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		auctiontypes.ModuleName:        nil,
-		vaultmoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		// issuancetypes.ModuleAccountName: {authtypes.Minter, authtypes.Burner},
 		// cdptypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
 		// cdptypes.LiquidatorMacc:      {authtypes.Minter, authtypes.Burner},
@@ -319,7 +314,6 @@ type App struct {
 	joltKeeper              joltkeeper.Keeper
 	incentiveKeeper         incentivekeeper.Keeper
 	feeGrantKeeper          feegrantkeeper.Keeper
-	VaultKeeper             vaultmodulekeeper.Keeper
 	kycKeeper               kycmodulekeeper.Keeper
 	spvKeeper               spvmodulekeeper.Keeper
 	burnauctionKeeper       burnauctionmodulekeeper.Keeper
@@ -390,7 +384,6 @@ func NewApp(
 		// cdptypes.StoreKey,
 		jolttypes.StoreKey,
 		incentivetypes.StoreKey,
-		vaultmoduletypes.StoreKey,
 		kycmoduletypes.StoreKey,
 		spvmoduletypes.StoreKey,
 		burnauctionmoduletypes.StoreKey,
@@ -435,7 +428,6 @@ func NewApp(
 	incentiveSubspace := app.ParamsKeeper.Subspace(incentivetypes.ModuleName)
 	ibcSubspace := app.ParamsKeeper.Subspace(ibcexported.ModuleName)
 	ibctransferSubspace := app.ParamsKeeper.Subspace(ibctransfertypes.ModuleName)
-	vaultSubspace := app.ParamsKeeper.Subspace(vaultmoduletypes.ModuleName)
 	kycSubspace := app.ParamsKeeper.Subspace(kycmoduletypes.ModuleName)
 	spvSubspace := app.ParamsKeeper.Subspace(spvmoduletypes.ModuleName)
 	ibcQuotaSubspace := app.ParamsKeeper.Subspace(ibcratelimittypes.ModuleName)
@@ -655,15 +647,7 @@ func NewApp(
 	app.spvKeeper = *mSpvKeeper.SetHooks(app.incentiveKeeper.Hooks())
 	app.spvKeeper = *mSpvKeeper.SetIncentiveKeeper(app.incentiveKeeper)
 
-	app.VaultKeeper = *vaultmodulekeeper.NewKeeper(
-		appCodec,
-		keys[vaultmoduletypes.StoreKey],
-		keys[vaultmoduletypes.MemStoreKey],
-		app.stakingKeeper,
-		app.bankKeeper,
-		vaultSubspace,
-		app.accountKeeper,
-	)
+
 
 	app.burnauctionKeeper = *burnauctionmodulekeeper.NewKeeper(
 		appCodec,
@@ -676,8 +660,7 @@ func NewApp(
 		appCodec,
 		// Authority
 		authtypes.NewModuleAddress(govtypes.ModuleName),
-		runtime.NewKVStoreService(keys[feemarkettypes.StoreKey],
-		tkeys[feemarkettypes.TransientKey],
+		keys[feemarkettypes.StoreKey],
 		feemarketSubspace,
 	)
 
@@ -779,7 +762,6 @@ func NewApp(
 		// cdp.NewAppModule(app.cdpKeeper, app.accountKeeper, app.pricefeedKeeper, app.bankKeeper),
 		jolt.NewAppModule(app.joltKeeper, app.accountKeeper, app.bankKeeper, app.pricefeedKeeper),
 		incentive.NewAppModule(app.incentiveKeeper, app.accountKeeper, app.bankKeeper),
-		vaultmodule.NewAppModule(appCodec, app.VaultKeeper, app.accountKeeper, app.bankKeeper),
 		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.accountKeeper, app.bankKeeper),
 
 		spvmodule.NewAppModule(appCodec, app.spvKeeper, app.accountKeeper, app.bankKeeper),
@@ -820,7 +802,6 @@ func NewApp(
 		swaptypes.ModuleName,
 		// issuancetypes.ModuleName,
 		incentivetypes.ModuleName,
-		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
 		ibcratelimittypes.ModuleName,
@@ -860,7 +841,6 @@ func NewApp(
 		// cdptypes.ModuleName,
 		jolttypes.ModuleName,
 		swaptypes.ModuleName,
-		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
@@ -905,7 +885,6 @@ func NewApp(
 		// cdptypes.ModuleName, // reads market prices, so must run after pricefeed genesis
 		jolttypes.ModuleName,
 		swaptypes.ModuleName,
-		vaultmoduletypes.ModuleName,
 		kycmoduletypes.ModuleName,
 		nftmoduletypes.ModuleName,
 		spvmoduletypes.ModuleName,
