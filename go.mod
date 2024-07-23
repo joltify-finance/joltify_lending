@@ -13,7 +13,7 @@ require (
 	github.com/cometbft/cometbft v0.38.9
 	github.com/cometbft/cometbft-db v0.9.1
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
-	github.com/cosmos/cosmos-sdk v0.50.8
+	github.com/cosmos/cosmos-sdk v0.50.6
 	github.com/cosmos/gogoproto v1.5.0
 	github.com/cosmos/ibc-go/v8 v8.3.1
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc

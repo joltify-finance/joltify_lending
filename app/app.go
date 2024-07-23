@@ -473,6 +473,7 @@ func NewApp(
 		logger,
 	)
 
+
 	app.stakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[stakingtypes.StoreKey]),
