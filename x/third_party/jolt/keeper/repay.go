@@ -82,7 +82,7 @@ func (k Keeper) Repay(ctx context.Context, sender, owner sdk.AccAddress, coins s
 
 // ValidateRepay validates a requested loan repay
 func (k Keeper) ValidateRepay(ctx context.Context, sender, owner sdk.AccAddress, coins sdk.Coins) error {
-	assetPriceCache := map[string]sdk.Dec{}
+	assetPriceCache := map[string]sdkmath.LegacyDec{}
 
 	// Get the total USD value of user's existing borrows
 	existingBorrowUSDValue := sdk.ZeroDec()

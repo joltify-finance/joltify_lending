@@ -54,7 +54,7 @@ package simulation
 // // SimulateMsgUpdatePrices updates the prices of various assets by randomly varying them based on current price
 // func SimulateMsgUpdatePrices(ak auth.AccountKeeper, keeper keeper.Keeper, blocks int) simulation.Operation {
 // 	// runs one at the start of each simulation
-// 	startingPrices := map[string]sdk.Dec{
+// 	startingPrices := map[string]sdkmath.LegacyDec{
 // 		"btc:usd": sdk.MustNewDecFromStr("7000"),
 // 		"bnb:usd": sdk.MustNewDecFromStr("15"),
 // 		"xrp:usd": sdk.MustNewDecFromStr("0.25"),

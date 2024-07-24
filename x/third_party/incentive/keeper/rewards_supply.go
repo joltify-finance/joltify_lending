@@ -37,7 +37,7 @@ func (k Keeper) AccumulateJoltSupplyRewards(ctx context.Context, rewardPeriod ty
 // getJoltSupplyTotalSourceShares fetches the sum of all source shares for a supply reward.
 // In the case of jolt supply, this is the total supplied divided by the supply interest factor.
 // This gives the "pre interest" value of the total supplied.
-func (k Keeper) getJoltSupplyTotalSourceShares(ctx context.Context, denom string) sdk.Dec {
+func (k Keeper) getJoltSupplyTotalSourceShares(ctx context.Context, denom string) sdkmath.LegacyDec {
 	totalSuppliedCoins, found := k.joltKeeper.GetSuppliedCoins(ctx)
 	if !found {
 		// assume no coins have been supplied
@@ -99,7 +99,7 @@ func (k Keeper) SynchronizeJoltSupplyReward(ctx context.Context, deposit hardtyp
 // synchronizeSingleJoltSupplyReward synchronizes a single rewarded supply denom in a jolt claim.
 // It returns the claim without setting in the store.
 // The public methods for accessing and modifying claims are preferred over this one. Direct modification of claims is easy to get wrong.
-func (k Keeper) synchronizeSingleJoltSupplyReward(ctx context.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdk.Dec) types2.JoltLiquidityProviderClaim {
+func (k Keeper) synchronizeSingleJoltSupplyReward(ctx context.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdkmath.LegacyDec) types2.JoltLiquidityProviderClaim {
 	globalRewardIndexes, found := k.GetJoltSupplyRewardIndexes(ctx, denom)
 	if !found {
 		// The global factor is only not found if

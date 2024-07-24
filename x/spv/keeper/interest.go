@@ -16,7 +16,7 @@ const (
 	scalingFactor = 1e18
 )
 
-func apyTospy(r sdk.Dec, seconds uint64) (sdk.Dec, error) {
+func apyTospy(r sdkmath.LegacyDec, seconds uint64) (sdkmath.LegacyDec, error) {
 	// Note: any APY 179 or greater will cause an out-of-bounds error
 	root, err := r.ApproxRoot(seconds)
 	if err != nil {
@@ -25,7 +25,7 @@ func apyTospy(r sdk.Dec, seconds uint64) (sdk.Dec, error) {
 	return root, nil
 }
 
-func CalculateInterestRate(apy sdk.Dec, payFreq int) sdk.Dec {
+func CalculateInterestRate(apy sdkmath.LegacyDec, payFreq int) sdkmath.LegacyDec {
 	// by default, we set the interest as the payment for the whole year which is 3600*24*365=31536000 seconds
 	// the minimal pay frequency is one week
 
@@ -37,15 +37,15 @@ func CalculateInterestRate(apy sdk.Dec, payFreq int) sdk.Dec {
 	adjMonthAPY := sdk.OneDec().Add(splitAPY)
 	i, err := apyTospy(adjMonthAPY, uint64(seconds))
 	if err != nil {
-		return sdk.Dec{}
+		return sdkmath.LegacyDec{}
 	}
 
 	return i
 }
 
-func CalculateInterestAmount(apy sdk.Dec, payFreq int) (sdk.Dec, error) {
+func CalculateInterestAmount(apy sdkmath.LegacyDec, payFreq int) (sdkmath.LegacyDec, error) {
 	if payFreq == 0 {
-		return sdk.Dec{}, errors.New("payFreq cannot be zero")
+		return sdkmath.LegacyDec{}, errors.New("payFreq cannot be zero")
 	}
 	seconds := BASE * payFreq
 	eachPayFreqAPY := apy.QuoTruncate(sdk.NewDec(OneYear / int64(seconds)))
@@ -56,7 +56,7 @@ func CalculateInterestAmount(apy sdk.Dec, payFreq int) (sdk.Dec, error) {
 // CalculateInterestFactor calculates the simple interest scaling factor,
 // which is equal to: (per-second interest rate * number of seconds elapsed)
 // Will return 1.000x, multiply by principal to get new principal with added interest
-func CalculateInterestFactor(perSecondInterestRate sdk.Dec, secondsElapsed sdkmath.Int) sdk.Dec {
+func CalculateInterestFactor(perSecondInterestRate sdkmath.LegacyDec, secondsElapsed sdkmath.Int) sdkmath.LegacyDec {
 	scalingFactorUint := sdk.NewUint(uint64(scalingFactor))
 	scalingFactorInt := sdk.NewInt(int64(scalingFactor))
 
@@ -67,6 +67,6 @@ func CalculateInterestFactor(perSecondInterestRate sdk.Dec, secondsElapsed sdkma
 	// Calculate the interest factor as a uint scaled by 1e18
 	interestFactorMantissa := sdkmath.RelativePow(interestMantissa, secondsElapsedUint, scalingFactorUint)
 
-	// Convert interest factor to an unscaled sdk.Dec
+	// Convert interest factor to an unscaled sdkmath.LegacyDec
 	return sdk.NewDecFromBigInt(interestFactorMantissa.BigInt()).QuoInt(scalingFactorInt)
 }

@@ -10,7 +10,7 @@ import (
 )
 
 // SwapExactForTokens swaps an exact coin a input for a coin b output
-func (k *Keeper) SwapExactForTokens(ctx context.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k *Keeper) SwapExactForTokens(ctx context.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdkmath.LegacyDec) error {
 	poolID, pool, err := k.loadPool(ctx, exactCoinA.Denom, coinB.Denom)
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (k *Keeper) SwapExactForTokens(ctx context.Context, requester sdk.AccAddres
 }
 
 // SwapExactForBatchTokens swaps an exact coin a input for a coin b output
-func (k *Keeper) SwapExactForBatchTokens(ctx context.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k *Keeper) SwapExactForBatchTokens(ctx context.Context, requester sdk.AccAddress, exactCoinA, coinB sdk.Coin, slippageLimit sdkmath.LegacyDec) error {
 	poolID, pool, err := k.loadPool(ctx, exactCoinA.Denom, "uoppy")
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (k *Keeper) SwapExactForBatchTokens(ctx context.Context, requester sdk.AccA
 }
 
 // SwapForExactTokens swaps a coin a input for an exact coin b output
-func (k *Keeper) SwapForExactTokens(ctx context.Context, requester sdk.AccAddress, coinA, exactCoinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k *Keeper) SwapForExactTokens(ctx context.Context, requester sdk.AccAddress, coinA, exactCoinB sdk.Coin, slippageLimit sdkmath.LegacyDec) error {
 	poolID, pool, err := k.loadPool(ctx, coinA.Denom, exactCoinB.Denom)
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func (k Keeper) loadPool(ctx context.Context, denomA string, denomB string) (str
 	return poolID, pool, nil
 }
 
-func (k Keeper) assertSlippageWithinLimit(priceChange sdk.Dec, slippageLimit sdk.Dec) error {
+func (k Keeper) assertSlippageWithinLimit(priceChange sdkmath.LegacyDec, slippageLimit sdkmath.LegacyDec) error {
 	slippage := sdk.OneDec().Sub(priceChange)
 	if slippage.GT(slippageLimit) {
 		return errorsmod.Wrapf(types.ErrSlippageExceeded, "slippage %s > limit %s", slippage, slippageLimit)

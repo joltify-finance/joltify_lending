@@ -128,7 +128,7 @@ func (suite *IntegrationTester) DeliverMsgDelegate(delegator sdk.AccAddress, val
 }
 
 //
-//func (suite *IntegrationTester) DeliverSwapMsgDeposit(depositor sdk.AccAddress, tokenA, tokenB sdk.Coin, slippage sdk.Dec) error {
+//func (suite *IntegrationTester) DeliverSwapMsgDeposit(depositor sdk.AccAddress, tokenA, tokenB sdk.Coin, slippage sdkmath.LegacyDec) error {
 //	msg := swaptypes.NewMsgDeposit(
 //		depositor.String(),
 //		tokenA,

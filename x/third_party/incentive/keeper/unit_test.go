@@ -134,13 +134,13 @@ type fakeJoltKeeper struct {
 
 type fakeHardState struct {
 	total           sdk.Coins
-	interestFactors map[string]sdk.Dec
+	interestFactors map[string]sdkmath.LegacyDec
 }
 
 func newFakeHardState() fakeHardState {
 	return fakeHardState{
 		total:           nil,
-		interestFactors: map[string]sdk.Dec{}, // initialize map to avoid panics on read
+		interestFactors: map[string]sdkmath.LegacyDec{}, // initialize map to avoid panics on read
 	}
 }
 
@@ -153,13 +153,13 @@ func newFakeHardKeeper() *fakeJoltKeeper {
 	}
 }
 
-func (k *fakeJoltKeeper) addTotalBorrow(coin sdk.Coin, factor sdk.Dec) *fakeJoltKeeper {
+func (k *fakeJoltKeeper) addTotalBorrow(coin sdk.Coin, factor sdkmath.LegacyDec) *fakeJoltKeeper {
 	k.borrows.total = k.borrows.total.Add(coin)
 	k.borrows.interestFactors[coin.Denom] = factor
 	return k
 }
 
-func (k *fakeJoltKeeper) addTotalSupply(coin sdk.Coin, factor sdk.Dec) *fakeJoltKeeper {
+func (k *fakeJoltKeeper) addTotalSupply(coin sdk.Coin, factor sdkmath.LegacyDec) *fakeJoltKeeper {
 	k.deposits.total = k.deposits.total.Add(coin)
 	k.deposits.interestFactors[coin.Denom] = factor
 	return k
@@ -179,12 +179,12 @@ func (k *fakeJoltKeeper) GetSuppliedCoins(_ context.Context) (sdk.Coins, bool) {
 	return k.deposits.total, true
 }
 
-func (k *fakeJoltKeeper) GetBorrowInterestFactor(_ context.Context, denom string) (sdk.Dec, bool) {
+func (k *fakeJoltKeeper) GetBorrowInterestFactor(_ context.Context, denom string) (sdkmath.LegacyDec, bool) {
 	f, ok := k.borrows.interestFactors[denom]
 	return f, ok
 }
 
-func (k *fakeJoltKeeper) GetSupplyInterestFactor(_ context.Context, denom string) (sdk.Dec, bool) {
+func (k *fakeJoltKeeper) GetSupplyInterestFactor(_ context.Context, denom string) (sdkmath.LegacyDec, bool) {
 	f, ok := k.deposits.interestFactors[denom]
 	return f, ok
 }

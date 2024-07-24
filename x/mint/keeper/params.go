@@ -19,13 +19,13 @@ func (k Keeper) SetParams(ctx context.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
-func (k Keeper) GetNodeAPY(ctx context.Context) (res sdk.Dec) {
+func (k Keeper) GetNodeAPY(ctx context.Context) (res sdkmath.LegacyDec) {
 	k.paramstore.Get(ctx, types.NodeSPY, &res)
 	return
 }
 
 // FirstProvision returns the CurrentProvision param
-func (k Keeper) FirstProvision(ctx context.Context) (res sdk.Dec) {
+func (k Keeper) FirstProvision(ctx context.Context) (res sdkmath.LegacyDec) {
 	k.paramstore.Get(ctx, types.KeyFirstProvision, &res)
 	return
 }

@@ -103,9 +103,9 @@ func TestMockWholeProcess(t *testing.T) {
 }
 
 // generateRandomIntegersWithSum generates n random integers with a given sum
-func generateRandomIntegersWithSum(n int, targetSum int) ([]int, []sdk.Dec) {
+func generateRandomIntegersWithSum(n int, targetSum int) ([]int, []sdkmath.LegacyDec) {
 	result := make([]int, n)
-	ratio := make([]sdk.Dec, n)
+	ratio := make([]sdkmath.LegacyDec, n)
 	remainingSum := targetSum
 
 	rand.Seed(100)
@@ -1159,8 +1159,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 
 	suite.Require().True(checkValueWithRangeTwo(totalLockedSeniorUsd.Add(totalWithdrawalbleSenior).Amount.Add(dbeforeTransferU1.WithdrawalAmount.Amount), sdk.NewIntFromUint64(uint64(1003000)).Mul(sdk.NewIntFromBigInt(base))))
 
-	seniorRatios := make([]sdk.Dec, len(suite.investors))
-	juniorRatios := make([]sdk.Dec, len(suite.investors))
+	seniorRatios := make([]sdkmath.LegacyDec, len(suite.investors))
+	juniorRatios := make([]sdkmath.LegacyDec, len(suite.investors))
 
 	for i, el := range suite.investors {
 		addr, err := sdk.AccAddressFromBech32(el)

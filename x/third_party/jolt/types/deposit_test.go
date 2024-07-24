@@ -13,7 +13,7 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 	testCases := []struct {
 		name      string
 		deposit   types2.Deposit
-		expect    sdk.DecCoins
+		expect    sdkmath.LegacyDecCoins
 		expectErr string
 	}{
 		{
@@ -45,7 +45,7 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 				Amount: sdk.Coins{},
 				Index:  types2.SupplyInterestFactors{},
 			},
-			expect: sdk.DecCoins{},
+			expect: sdkmath.LegacyDecCoins{},
 		},
 		{
 			name: "nil deposit amount returns empty dec coins",
@@ -53,7 +53,7 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 				Amount: nil,
 				Index:  types2.SupplyInterestFactors{},
 			},
-			expect: sdk.DecCoins{},
+			expect: sdkmath.LegacyDecCoins{},
 		},
 		{
 			name: "missing indexes return error",

@@ -78,5 +78,6 @@ message WeightedAddresses {
   ];
 
   repeated bytes weights = 2
+
       [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }

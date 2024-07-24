@@ -16,7 +16,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func parameterSanitize(payFreqStr string, apyStr []string) ([]sdk.Dec, int32, error) {
+func parameterSanitize(payFreqStr string, apyStr []string) ([]sdkmath.LegacyDec, int32, error) {
 	apyJunior, err := sdk.NewDecFromStr(apyStr[0])
 	if err != nil {
 		return nil, 0, err
@@ -34,7 +34,7 @@ func parameterSanitize(payFreqStr string, apyStr []string) ([]sdk.Dec, int32, er
 	if payFreq > types.Maxfreq || payFreq < types.Minfreq {
 		return nil, 0, errors.New("pay frequency is invalid")
 	}
-	return []sdk.Dec{apyJunior, apySenior}, int32(payFreq), nil
+	return []sdkmath.LegacyDec{apyJunior, apySenior}, int32(payFreq), nil
 }
 
 func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (*types.MsgCreatePoolResponse, error) {

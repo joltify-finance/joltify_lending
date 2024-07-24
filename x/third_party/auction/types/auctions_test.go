@@ -29,7 +29,7 @@ func init() {
 	sdk.GetConfig().SetBech32PrefixForAccount("joltify", "joltify"+sdk.PrefixPublic)
 }
 
-func d(amount string) sdk.Dec               { return sdk.MustNewDecFromStr(amount) }
+func d(amount string) sdkmath.LegacyDec     { return sdk.MustNewDecFromStr(amount) }
 func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
 func i(n int64) sdk.Int                     { return sdk.NewInt(n) }
 func is(ns ...int64) (is []sdk.Int) {

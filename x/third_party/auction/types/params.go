@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
 	"time"
@@ -9,7 +10,7 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
-var emptyDec = sdk.Dec{}
+var emptyDec = sdkmath.LegacyDec{}
 
 // Defaults for auction params
 const (
@@ -46,7 +47,7 @@ func NewParams(
 	maxAuctionDuration, forwardBidDuration, reverseBidDuration time.Duration,
 	incrementSurplus,
 	incrementDebt,
-	incrementCollateral sdk.Dec,
+	incrementCollateral sdkmath.LegacyDec,
 ) Params {
 	return Params{
 		MaxAuctionDuration:  maxAuctionDuration,
@@ -147,7 +148,7 @@ func validateMaxAuctionDurationParam(i interface{}) error {
 }
 
 func validateIncrementSurplusParam(i interface{}) error {
-	incrementSurplus, ok := i.(sdk.Dec)
+	incrementSurplus, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -164,7 +165,7 @@ func validateIncrementSurplusParam(i interface{}) error {
 }
 
 func validateIncrementDebtParam(i interface{}) error {
-	incrementDebt, ok := i.(sdk.Dec)
+	incrementDebt, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -181,7 +182,7 @@ func validateIncrementDebtParam(i interface{}) error {
 }
 
 func validateIncrementCollateralParam(i interface{}) error {
-	incrementCollateral, ok := i.(sdk.Dec)
+	incrementCollateral, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}

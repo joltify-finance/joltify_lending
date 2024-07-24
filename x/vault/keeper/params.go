@@ -20,7 +20,7 @@ func (k Keeper) Step(ctx context.Context) (res int64) {
 	return
 }
 
-func (k Keeper) CandidateRatio(ctx context.Context) (res sdk.Dec) {
+func (k Keeper) CandidateRatio(ctx context.Context) (res sdkmath.LegacyDec) {
 	k.paramstore.Get(ctx, vaultmoduletypes.KeyRatio, &res)
 	return
 }

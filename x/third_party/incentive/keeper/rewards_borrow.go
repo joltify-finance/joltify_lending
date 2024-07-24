@@ -44,7 +44,7 @@ func (k Keeper) AccumulateJoltBorrowRewards(ctx context.Context, rewardPeriod ty
 // The normalized borrow is also used for each individual borrow's source shares amount. Normalized amounts do not change except through
 // user input. This is essential as claims must be synced before any change to a source shares amount. The actual borrowed amounts cannot
 // be used as they increase every block due to interest.
-func (k Keeper) getJoltBorrowTotalSourceShares(ctx context.Context, denom string) sdk.Dec {
+func (k Keeper) getJoltBorrowTotalSourceShares(ctx context.Context, denom string) sdkmath.LegacyDec {
 	totalBorrowedCoins, found := k.joltKeeper.GetBorrowedCoins(ctx)
 	if !found {
 		// assume no coins have been borrowed
@@ -106,7 +106,7 @@ func (k Keeper) SynchronizeJoltBorrowReward(ctx context.Context, borrow jolttype
 // synchronizeSingleHardBorrowReward synchronizes a single rewarded borrow denom in a jolt claim.
 // It returns the claim without setting in the store.
 // The public methods for accessing and modifying claims are preferred over this one. Direct modification of claims is easy to get wrong.
-func (k Keeper) synchronizeSingleHardBorrowReward(ctx context.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdk.Dec) types2.JoltLiquidityProviderClaim {
+func (k Keeper) synchronizeSingleHardBorrowReward(ctx context.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdkmath.LegacyDec) types2.JoltLiquidityProviderClaim {
 	globalRewardIndexes, found := k.GetJoltBorrowRewardIndexes(ctx, denom)
 	if !found {
 		// The global factor is only not found if
@@ -180,7 +180,7 @@ func (k Keeper) UpdateJoltBorrowIndexDenoms(ctx context.Context, borrow jolttype
 //
 // It returns an error if newIndexes does not contain all CollateralTypes from oldIndexes, or if any value of oldIndex.RewardFactor > newIndex.RewardFactor.
 // This should never happen, as it would mean that a global reward index has decreased in value, or that a global reward index has been deleted from state.
-func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, sourceShares sdk.Dec) (sdk.Coins, error) {
+func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, sourceShares sdkmath.LegacyDec) (sdk.Coins, error) {
 	// check for missing CollateralType's
 	for _, oldIndex := range oldIndexes {
 		if newIndex, found := newIndexes.Get(oldIndex.CollateralType); !found {
@@ -215,7 +215,7 @@ func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, so
 //
 // Returns an error if oldIndex > newIndex. This should never happen, as it would mean that a global reward index has decreased in value,
 // or that a global reward index has been deleted from state.
-func (k Keeper) CalculateSingleReward(oldIndex, newIndex, sourceShares sdk.Dec) (sdk.Int, error) {
+func (k Keeper) CalculateSingleReward(oldIndex, newIndex, sourceShares sdkmath.LegacyDec) (sdk.Int, error) {
 	increase := newIndex.Sub(oldIndex)
 	if increase.IsNegative() {
 		return sdk.Int{}, errorsmod.Wrapf(types2.ErrDecreasingRewardFactor, "old: %v, new: %v", oldIndex, newIndex)

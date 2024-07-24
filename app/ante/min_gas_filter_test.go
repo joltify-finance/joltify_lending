@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func mustParseDecCoins(value string) sdk.DecCoins {
+func mustParseDecCoins(value string) sdkmath.LegacyDecCoins {
 	coins, err := sdk.ParseDecCoins(strings.ReplaceAll(value, ";", ","))
 	if err != nil {
 		panic(err)
@@ -40,8 +40,8 @@ func TestEvmMinGasFilter(t *testing.T) {
 
 	testCases := []struct {
 		name                 string
-		minGasPrices         sdk.DecCoins
-		expectedMinGasPrices sdk.DecCoins
+		minGasPrices         sdkmath.LegacyDecCoins
+		expectedMinGasPrices sdkmath.LegacyDecCoins
 	}{
 		{
 			"no min gas prices",

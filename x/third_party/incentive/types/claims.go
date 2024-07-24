@@ -221,7 +221,7 @@ type SPVClaims []SPVClaim
 // ---------------------- Reward indexes are used internally in the store ----------------------
 
 // NewRewardIndex returns a new RewardIndex
-func NewRewardIndex(collateralType string, factor sdk.Dec) RewardIndex {
+func NewRewardIndex(collateralType string, factor sdkmath.LegacyDec) RewardIndex {
 	return RewardIndex{
 		CollateralType: collateralType,
 		RewardFactor:   factor,
@@ -253,17 +253,17 @@ func (ris RewardIndexes) GetRewardIndex(denom string) (RewardIndex, bool) {
 }
 
 // Get fetches a RewardFactor by it's denom
-func (ris RewardIndexes) Get(denom string) (sdk.Dec, bool) {
+func (ris RewardIndexes) Get(denom string) (sdkmath.LegacyDec, bool) {
 	for _, ri := range ris {
 		if ri.CollateralType == denom {
 			return ri.RewardFactor, true
 		}
 	}
-	return sdk.Dec{}, false
+	return sdkmath.LegacyDec{}, false
 }
 
 // With returns a copy of the indexes with a new reward factor added
-func (ris RewardIndexes) With(denom string, factor sdk.Dec) RewardIndexes {
+func (ris RewardIndexes) With(denom string, factor sdkmath.LegacyDec) RewardIndexes {
 	newIndexes := ris.copy()
 
 	for i, ri := range newIndexes {
@@ -296,7 +296,7 @@ func (ris RewardIndexes) Validate() error {
 }
 
 // Mul returns a copy of RewardIndexes with all factors multiplied by a single value.
-func (ris RewardIndexes) Mul(multiplier sdk.Dec) RewardIndexes {
+func (ris RewardIndexes) Mul(multiplier sdkmath.LegacyDec) RewardIndexes {
 	newIndexes := ris.copy()
 
 	for i := range newIndexes {
@@ -306,8 +306,8 @@ func (ris RewardIndexes) Mul(multiplier sdk.Dec) RewardIndexes {
 }
 
 // Quo returns a copy of RewardIndexes with all factors divided by a single value.
-// It uses sdk.Dec.Quo for the division.
-func (ris RewardIndexes) Quo(divisor sdk.Dec) RewardIndexes {
+// It uses sdkmath.LegacyDec.Quo for the division.
+func (ris RewardIndexes) Quo(divisor sdkmath.LegacyDec) RewardIndexes {
 	newIndexes := ris.copy()
 
 	for i := range newIndexes {

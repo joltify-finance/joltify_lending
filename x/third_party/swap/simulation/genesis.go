@@ -21,7 +21,7 @@ package simulation
 // )
 
 // // GenSwapFee generates a random SwapFee in range [0.01, 1.00]
-// func GenSwapFee(r *rand.Rand) sdk.Dec {
+// func GenSwapFee(r *rand.Rand) sdkmath.LegacyDec {
 // 	min := int(1)
 // 	max := int(100)
 // 	percentage := int64(r.Intn(int(max)-min) + min)

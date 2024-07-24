@@ -29,10 +29,10 @@ type InterestTestSuite struct {
 
 func (suite *InterestTestSuite) TestCalculateUtilizationRatio() {
 	type args struct {
-		cash          sdk.Dec
-		borrows       sdk.Dec
-		reserves      sdk.Dec
-		expectedValue sdk.Dec
+		cash          sdkmath.LegacyDec
+		borrows       sdkmath.LegacyDec
+		reserves      sdkmath.LegacyDec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -98,11 +98,11 @@ func (suite *InterestTestSuite) TestCalculateUtilizationRatio() {
 
 func (suite *InterestTestSuite) TestCalculateBorrowRate() {
 	type args struct {
-		cash          sdk.Dec
-		borrows       sdk.Dec
-		reserves      sdk.Dec
+		cash          sdkmath.LegacyDec
+		borrows       sdkmath.LegacyDec
+		reserves      sdkmath.LegacyDec
 		model         types3.InterestRateModel
-		expectedValue sdk.Dec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -226,9 +226,9 @@ func (suite *InterestTestSuite) TestCalculateBorrowRate() {
 
 func (suite *InterestTestSuite) TestCalculateBorrowInterestFactor() {
 	type args struct {
-		perSecondInterestRate sdk.Dec
+		perSecondInterestRate sdkmath.LegacyDec
 		timeElapsed           sdkmath.Int
-		expectedValue         sdk.Dec
+		expectedValue         sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -355,12 +355,12 @@ func (suite *InterestTestSuite) TestCalculateBorrowInterestFactor() {
 
 func (suite *InterestTestSuite) TestCalculateSupplyInterestFactor() {
 	type args struct {
-		newInterest   sdk.Dec
-		cash          sdk.Dec
-		borrows       sdk.Dec
-		reserves      sdk.Dec
-		reserveFactor sdk.Dec
-		expectedValue sdk.Dec
+		newInterest   sdkmath.LegacyDec
+		cash          sdkmath.LegacyDec
+		borrows       sdkmath.LegacyDec
+		reserves      sdkmath.LegacyDec
+		reserveFactor sdkmath.LegacyDec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -415,8 +415,8 @@ func (suite *InterestTestSuite) TestCalculateSupplyInterestFactor() {
 
 func (suite *InterestTestSuite) TestAPYToSPY() {
 	type args struct {
-		apy           sdk.Dec
-		expectedValue sdk.Dec
+		apy           sdkmath.LegacyDec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -499,7 +499,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 
 func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 	type args struct {
-		spy             sdk.Dec
+		spy             sdkmath.LegacyDec
 		expectedAPY     float64
 		acceptableRange float64
 	}
@@ -561,7 +561,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 	}
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// From SPY calculate APY and parse result from sdk.Dec to float64
+			// From SPY calculate APY and parse result from sdkmath.LegacyDec to float64
 			calculatedAPY := keeper.SPYToEstimatedAPY(tc.args.spy)
 			calculatedAPYFloat, err := strconv.ParseFloat(calculatedAPY.String(), 32)
 			suite.Require().NoError(err)
@@ -586,7 +586,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 		borrowCoinDenom          string
 		borrowCoins              sdk.Coins
 		interestRateModel        types3.InterestRateModel
-		reserveFactor            sdk.Dec
+		reserveFactor            sdkmath.LegacyDec
 		expectedInterestSnaphots []ExpectedBorrowInterest
 	}
 
@@ -983,7 +983,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 		coinDenoms               []string
 		borrowCoins              sdk.Coins
 		interestRateModel        types3.InterestRateModel
-		reserveFactor            sdk.Dec
+		reserveFactor            sdkmath.LegacyDec
 		expectedInterestSnaphots []ExpectedSupplyInterest
 	}
 
@@ -1412,7 +1412,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 						userSupplyAfter, _ := suite.keeper.GetDeposit(snapshotCtx, tc.args.user)
 
 						// Confirm that user's supply index for the denom has increased as expected
-						var userSupplyAfterIndexFactor sdk.Dec
+						var userSupplyAfterIndexFactor sdkmath.LegacyDec
 						for _, indexFactor := range userSupplyAfter.Index {
 							if indexFactor.Denom == coinDenom {
 								userSupplyAfterIndexFactor = indexFactor.Value

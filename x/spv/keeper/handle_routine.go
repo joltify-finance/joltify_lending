@@ -167,7 +167,7 @@ func (k Keeper) HandleTransfer(ctx context.Context, poolInfo *types.PoolInfo) bo
 	return true
 }
 
-func (k Keeper) updateClassAndBurnNFT(ctx context.Context, classID, nftID string, burnNFT bool, exchangeRatio sdk.Dec) error {
+func (k Keeper) updateClassAndBurnNFT(ctx context.Context, classID, nftID string, burnNFT bool, exchangeRatio sdkmath.LegacyDec) error {
 	thisClass, found := k.NftKeeper.GetClass(ctx, classID)
 	if !found {
 		return coserrors.Wrapf(types.ErrClassNotFound, "the class cannot be found")
@@ -213,7 +213,7 @@ func (k Keeper) updateClassAndBurnNFT(ctx context.Context, classID, nftID string
 	return nil
 }
 
-func (k Keeper) processEachWithdrawReq(ctx context.Context, depositor types.DepositorInfo, burnNFT bool, exchangeRatio sdk.Dec) error {
+func (k Keeper) processEachWithdrawReq(ctx context.Context, depositor types.DepositorInfo, burnNFT bool, exchangeRatio sdkmath.LegacyDec) error {
 	for _, el := range depositor.LinkedNFT {
 		ids := strings.Split(el, ":")
 		err := k.updateClassAndBurnNFT(ctx, ids[0], ids[1], burnNFT, exchangeRatio)

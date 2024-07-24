@@ -59,7 +59,7 @@ package simulation
 // }
 
 // // getInitialPrice gets the starting price for each of the base assets
-// func getInitialPrice(marketID string) (price sdk.Dec) {
+// func getInitialPrice(marketID string) (price sdkmath.LegacyDec) {
 // 	switch marketID {
 // 	case "btc:usd":
 // 		return sdk.MustNewDecFromStr("7000")

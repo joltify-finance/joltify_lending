@@ -72,7 +72,7 @@ func (k Keeper) SetParams(ctx context.Context, params types.Params) {
 }
 
 // GetSwapFee returns the swap fee set in the module parameters
-func (k Keeper) GetSwapFee(ctx context.Context) sdk.Dec {
+func (k Keeper) GetSwapFee(ctx context.Context) sdkmath.LegacyDec {
 	return k.GetParams(ctx).SwapFee
 }
 

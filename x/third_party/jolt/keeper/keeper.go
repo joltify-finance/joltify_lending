@@ -297,32 +297,32 @@ func (k Keeper) GetTotalReserves(ctx context.Context) (sdk.Coins, bool) {
 }
 
 // GetBorrowInterestFactor returns the current borrow interest factor for an individual market
-func (k Keeper) GetBorrowInterestFactor(ctx context.Context, denom string) (sdk.Dec, bool) {
+func (k Keeper) GetBorrowInterestFactor(ctx context.Context, denom string) (sdkmath.LegacyDec, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowInterestFactorPrefix)
 	bz := store.Get([]byte(denom))
 	if len(bz) == 0 {
 		return sdk.ZeroDec(), false
 	}
-	var borrowInterestFactor sdk.DecProto
+	var borrowInterestFactor sdkmath.LegacyDecProto
 	k.cdc.MustUnmarshal(bz, &borrowInterestFactor)
 	return borrowInterestFactor.Dec, true
 }
 
 // SetBorrowInterestFactor sets the current borrow interest factor for an individual market
-func (k Keeper) SetBorrowInterestFactor(ctx context.Context, denom string, borrowInterestFactor sdk.Dec) {
+func (k Keeper) SetBorrowInterestFactor(ctx context.Context, denom string, borrowInterestFactor sdkmath.LegacyDec) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowInterestFactorPrefix)
-	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: borrowInterestFactor})
+	bz := k.cdc.MustMarshal(&sdkmath.LegacyDecProto{Dec: borrowInterestFactor})
 	store.Set([]byte(denom), bz)
 }
 
 // IterateBorrowInterestFactors iterates over all borrow interest factors in the store and returns
 // both the borrow interest factor and the key (denom) it's stored under
-func (k Keeper) IterateBorrowInterestFactors(ctx context.Context, cb func(denom string, factor sdk.Dec) (stop bool)) {
+func (k Keeper) IterateBorrowInterestFactors(ctx context.Context, cb func(denom string, factor sdkmath.LegacyDec) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowInterestFactorPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var factor sdk.DecProto
+		var factor sdkmath.LegacyDecProto
 		k.cdc.MustUnmarshal(iterator.Value(), &factor)
 		if cb(string(iterator.Key()), factor.Dec) {
 			break
@@ -331,32 +331,32 @@ func (k Keeper) IterateBorrowInterestFactors(ctx context.Context, cb func(denom 
 }
 
 // GetSupplyInterestFactor returns the current supply interest factor for an individual market
-func (k Keeper) GetSupplyInterestFactor(ctx context.Context, denom string) (sdk.Dec, bool) {
+func (k Keeper) GetSupplyInterestFactor(ctx context.Context, denom string) (sdkmath.LegacyDec, bool) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
 	bz := store.Get([]byte(denom))
 	if len(bz) == 0 {
 		return sdk.ZeroDec(), false
 	}
-	var supplyInterestFactor sdk.DecProto
+	var supplyInterestFactor sdkmath.LegacyDecProto
 	k.cdc.MustUnmarshal(bz, &supplyInterestFactor)
 	return supplyInterestFactor.Dec, true
 }
 
 // SetSupplyInterestFactor sets the current supply interest factor for an individual market
-func (k Keeper) SetSupplyInterestFactor(ctx context.Context, denom string, supplyInterestFactor sdk.Dec) {
+func (k Keeper) SetSupplyInterestFactor(ctx context.Context, denom string, supplyInterestFactor sdkmath.LegacyDec) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
-	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: supplyInterestFactor})
+	bz := k.cdc.MustMarshal(&sdkmath.LegacyDecProto{Dec: supplyInterestFactor})
 	store.Set([]byte(denom), bz)
 }
 
 // IterateSupplyInterestFactors iterates over all supply interest factors in the store and returns
 // both the supply interest factor and the key (denom) it's stored under
-func (k Keeper) IterateSupplyInterestFactors(ctx context.Context, cb func(denom string, factor sdk.Dec) (stop bool)) {
+func (k Keeper) IterateSupplyInterestFactors(ctx context.Context, cb func(denom string, factor sdkmath.LegacyDec) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
 	iterator := sdk.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var factor sdk.DecProto
+		var factor sdkmath.LegacyDecProto
 
 		k.cdc.MustUnmarshal(iterator.Value(), &factor)
 		if cb(string(iterator.Key()), factor.Dec) {

@@ -163,7 +163,7 @@ func (builder JoltGenesisBuilder) WithInitializedMoneyMarket(market types2.Money
 	return builder
 }
 
-func (builder JoltGenesisBuilder) WithMinBorrow(minUSDValue sdk.Dec) JoltGenesisBuilder {
+func (builder JoltGenesisBuilder) WithMinBorrow(minUSDValue sdkmath.LegacyDec) JoltGenesisBuilder {
 	builder.Params.MinimumBorrowUSDValue = minUSDValue
 	return builder
 }

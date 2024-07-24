@@ -10,9 +10,9 @@ import (
 
 func (suite *InterestTestSuite) TestAPYToSPY() {
 	type args struct {
-		apy           sdk.Dec
+		apy           sdkmath.LegacyDec
 		payfrq        int
-		expectedValue sdk.Dec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -103,7 +103,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 	}
 }
 
-func checkPayFreqApy(oneYearApy sdk.Dec, freqApy sdk.Dec, circle uint64) bool {
+func checkPayFreqApy(oneYearApy sdkmath.LegacyDec, freqApy sdkmath.LegacyDec, circle uint64) bool {
 	return oneYearApy.Sub(freqApy.MulInt(sdk.NewIntFromUint64(circle))).Abs().LTE(sdk.NewDecWithPrec(1, 8))
 }
 

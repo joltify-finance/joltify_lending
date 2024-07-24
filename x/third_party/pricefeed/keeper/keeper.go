@@ -62,7 +62,7 @@ func (k Keeper) SetPrice(
 	ctx context.Context,
 	oracle sdk.AccAddress,
 	marketID string,
-	price sdk.Dec,
+	price sdkmath.LegacyDec,
 	expiry time.Time,
 ) (types2.PostedPrice, error) {
 	// If the expiry is less than or equal to the current blockheight, we consider the price valid
@@ -148,7 +148,7 @@ func (k Keeper) setCurrentPrice(ctx context.Context, marketID string, currentPri
 }
 
 // CalculateMedianPrice calculates the median prices for the input prices.
-func (k Keeper) CalculateMedianPrice(prices []types2.CurrentPrice) sdk.Dec {
+func (k Keeper) CalculateMedianPrice(prices []types2.CurrentPrice) sdkmath.LegacyDec {
 	l := len(prices)
 
 	if l == 1 {
@@ -168,7 +168,7 @@ func (k Keeper) CalculateMedianPrice(prices []types2.CurrentPrice) sdk.Dec {
 	return prices[l/2].Price
 }
 
-func (k Keeper) calculateMeanPrice(priceA, priceB types2.CurrentPrice) sdk.Dec {
+func (k Keeper) calculateMeanPrice(priceA, priceB types2.CurrentPrice) sdkmath.LegacyDec {
 	sum := priceA.Price.Add(priceB.Price)
 	mean := sum.Quo(sdk.NewDec(2))
 	return mean

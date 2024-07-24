@@ -83,7 +83,7 @@ func (h Hooks) BeforeDelegationSharesModified(ctx context.Context, delAddr sdk.A
 // NOTE: following hooks are just implemented to ensure StakingHooks interface compliance
 
 // BeforeValidatorSlashed is called before a validator is slashed
-func (h Hooks) BeforeValidatorSlashed(ctx context.Context, valAddr sdk.ValAddress, fraction sdk.Dec) {}
+func (h Hooks) BeforeValidatorSlashed(ctx context.Context, valAddr sdk.ValAddress, fraction sdkmath.LegacyDec) {}
 
 // AfterValidatorBeginUnbonding is called after a validator begins unbonding
 func (h Hooks) AfterValidatorBeginUnbonding(ctx context.Context, consAddr sdk.ConsAddress, valAddr sdk.ValAddress) {

@@ -1,6 +1,6 @@
 package types
 
-import errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+import errorsmod "cosmossdk.io/errors"
 
 // DONTCOVER
 

@@ -199,8 +199,8 @@ func (suite *keeperTestSuite) TestSwapExactBatchForTokens_Slippage() {
 	testCases := []struct {
 		coinA      sdk.Coin
 		coinB      sdk.Coin
-		slippage   sdk.Dec
-		fee        sdk.Dec
+		slippage   sdkmath.LegacyDec
+		fee        sdkmath.LegacyDec
 		shouldFail bool
 	}{
 		// negtive slippage OK
@@ -281,8 +281,8 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_Slippage() {
 	testCases := []struct {
 		coinA      sdk.Coin
 		coinB      sdk.Coin
-		slippage   sdk.Dec
-		fee        sdk.Dec
+		slippage   sdkmath.LegacyDec
+		fee        sdkmath.LegacyDec
 		shouldFail bool
 	}{
 		// positive slippage OK
@@ -755,8 +755,8 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_Slippage() {
 	testCases := []struct {
 		coinA      sdk.Coin
 		coinB      sdk.Coin
-		slippage   sdk.Dec
-		fee        sdk.Dec
+		slippage   sdkmath.LegacyDec
+		fee        sdkmath.LegacyDec
 		shouldFail bool
 	}{
 		// positive slippage OK

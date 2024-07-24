@@ -15,7 +15,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) updateInterestData(ctx context.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, time.Time, error) {
+func (k Keeper) updateInterestData(ctx context.Context, interestData *types.BorrowInterest, reserve sdkmath.LegacyDec, firstBorrow bool, exchangeRatio sdkmath.LegacyDec) (sdk.Coin, time.Time, error) {
 	var payment, paymentToInvestor sdk.Coin
 	var thisPaymentTime time.Time
 	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
@@ -106,7 +106,7 @@ func (k Keeper) getAllInterestToBePaid(ctx context.Context, poolInfo *types.Pool
 	// the first element is the pool class, we skip it
 	totalPayment := sdkmath.NewInt(0)
 	firstBorrow := true
-	var exchangeRatio sdk.Dec
+	var exchangeRatio sdkmath.LegacyDec
 
 	if poolInfo.PoolStatus == types.PoolInfo_INACTIVE {
 		return sdk.ZeroInt(), time.Time{}, errors.New("no interest to be paid")
@@ -162,7 +162,7 @@ func (k Keeper) getAllInterestToBePaid(ctx context.Context, poolInfo *types.Pool
 	return totalPayment, poolLatestPaymentTime, nil
 }
 
-func (k msgServer) calculatePaymentMonth(ctx context.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdk.Dec, error) {
+func (k msgServer) calculatePaymentMonth(ctx context.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdkmath.LegacyDec, error) {
 	paymentAmount, err := k.calculateTotalDueInterest(ctx, poolInfo)
 	if err != nil {
 		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err

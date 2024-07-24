@@ -13,7 +13,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 	testCases := []struct {
 		name      string
 		borrow    types2.Borrow
-		expect    sdk.DecCoins
+		expect    sdkmath.LegacyDecCoins
 		expectErr string
 	}{
 		{
@@ -45,7 +45,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Amount: sdk.Coins{},
 				Index:  types2.BorrowInterestFactors{},
 			},
-			expect: sdk.DecCoins{},
+			expect: sdkmath.LegacyDecCoins{},
 		},
 		{
 			name: "nil borrow amount returns empty dec coins",
@@ -53,7 +53,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Amount: nil,
 				Index:  types2.BorrowInterestFactors{},
 			},
-			expect: sdk.DecCoins{},
+			expect: sdkmath.LegacyDecCoins{},
 		},
 		{
 			name: "missing indexes return error",
