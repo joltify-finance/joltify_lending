@@ -1,13 +1,13 @@
 package ante
 
 import (
+	"cosmossdk.io/log"
 	"fmt"
 	"runtime/debug"
 
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 
 	errorsmod "cosmossdk.io/errors"
-	tmlog "github.com/cometbft/cometbft/libs/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
@@ -82,7 +82,6 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 	return func(
 		ctx sdk.Context, tx sdk.Tx, sim bool,
 	) (newCtx sdk.Context, err error) {
-		var anteHandler sdk.AnteHandler
 
 		defer Recover(ctx.Logger(), &err)
 
@@ -105,15 +104,7 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 			if len(opts) == 1 {
 				typeURL := opts[0].GetTypeUrl()
 				switch typeURL {
-				case "/ethermint.evm.v1.ExtensionOptionsEthereumTx":
-					// handle as *evmtypes.MsgEthereumTx
-					anteHandler = newEthAnteHandler(ctx, options)
-				case "/ethermint.types.v1.ExtensionOptionsWeb3Tx":
-					// handle as normal Cosmos SDK tx, except signature is checked for EIP712 representation
-					anteHandler = newCosmosAnteHandler(cosmosHandlerOptions{
-						HandlerOptions: options,
-						isEIP712:       true,
-					})
+
 				case "/cosmos.authz.v1beta1.MsgRevoke", "/cosmos.authz.v1beta1.MsgExec", "/cosmos.authz.v1beta1.MsgGrant":
 					return normalCosmosTxAnte(ctx, tx, sim, options)
 				default:
@@ -123,7 +114,6 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 					)
 				}
 
-				return anteHandler(ctx, tx, sim)
 			}
 		}
 
@@ -154,7 +144,6 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 	}
 
 	decorators = append(decorators,
-		NewEvmMinGasFilter(options.EvmKeeper), // filter out evm denom from min-gas-prices
 		NewAuthzLimiterDecorator(
 			sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{}),
 			// sdk.MsgTypeURL(&vesting.MsgCreateVestingAccount{}),
@@ -180,31 +169,7 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 	return sdk.ChainAnteDecorators(decorators...)
 }
 
-func newEthAnteHandler(ctx sdk.Context, options HandlerOptions) sdk.AnteHandler {
-	evmParams := options.EvmKeeper.GetParams(ctx)
-	evmDenom := evmParams.EvmDenom
-	chainID := options.EvmKeeper.ChainID()
-	chainCfg := evmParams.GetChainConfig()
-	ethCfg := chainCfg.EthereumConfig(chainID)
-	baseFee := options.EvmKeeper.GetBaseFee(ctx, ethCfg)
-
-	decorators := []sdk.AnteDecorator{
-		evmante.NewEthSetUpContextDecorator(options.EvmKeeper),               // outermost AnteDecorator. SetUpContext must be called first
-		evmante.NewEthMempoolFeeDecorator(evmDenom, baseFee),                 // Check eth effective gas price against minimal-gas-prices
-		evmante.NewEthMinGasPriceDecorator(options.FeeMarketKeeper, baseFee), // Check eth effective gas price against the global MinGasPrice
-		evmante.NewEthValidateBasicDecorator(&evmParams, baseFee),
-		evmante.NewEthSigVerificationDecorator(chainID),
-		evmante.NewEthAccountVerificationDecorator(options.AccountKeeper, options.EvmKeeper, evmDenom),
-		evmante.NewCanTransferDecorator(options.EvmKeeper, baseFee, &evmParams, ethCfg),
-		evmante.NewEthGasConsumeDecorator(options.EvmKeeper, options.MaxTxGasWanted, ethCfg, evmDenom, baseFee),
-		evmante.NewEthIncrementSenderSequenceDecorator(options.AccountKeeper), // innermost AnteDecorator.
-		evmante.NewGasWantedDecorator(options.FeeMarketKeeper, ethCfg),
-		evmante.NewEthEmitEventDecorator(options.EvmKeeper), // emit eth tx hash and index at the very last ante handler.
-	}
-	return sdk.ChainAnteDecorators(decorators...)
-}
-
-func Recover(logger tmlog.Logger, err *error) {
+func Recover(logger log.Logger, err *error) {
 	if r := recover(); r != nil {
 		*err = errorsmod.Wrapf(sdkerrors.ErrPanic, "%v", r)
 
