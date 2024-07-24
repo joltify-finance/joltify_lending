@@ -674,7 +674,6 @@ func NewApp(
 	govRouter.
 		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
-		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.upgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.ibcKeeper.ClientKeeper))
 
 	govKeeper.SetLegacyRouter(govRouter)
@@ -699,7 +698,7 @@ func NewApp(
 	// must be passed by reference here.)
 	authModule := auth.NewAppModule(appCodec, app.accountKeeper, authsims.RandomGenesisAccounts, app.ParamsKeeper.Subspace(authtypes.ModuleName))
 	app.mm = module.NewManager(
-		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app.BaseApp.DeliverTx, encodingConfig.TxConfig),
+		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app, encodingConfig.TxConfig),
 		authModule,
 		bank.NewAppModule(appCodec, app.bankKeeper, app.accountKeeper, app.ParamsKeeper.Subspace(banktypes.ModuleName)),
 		capability.NewAppModule(appCodec, *app.capabilityKeeper, false),
@@ -709,7 +708,7 @@ func NewApp(
 		distr.NewAppModule(appCodec, app.distrKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
 		gov.NewAppModule(appCodec, &app.govKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(govtypes.ModuleName)),
 		params.NewAppModule(app.ParamsKeeper),
-		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName)),
+		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName), app.interfaceRegistry),
 		ibc.NewAppModule(app.ibcKeeper),
 		upgrade.NewAppModule(app.upgradeKeeper, addresscodec.NewBech32Codec(sdk.Bech32PrefixAccAddr)),
 		evidence.NewAppModule(*app.evidenceKeeper),
@@ -948,17 +947,17 @@ func NewApp(
 func (app *App) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker contains app specific logic for the BeginBlock abci call.
-func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	return app.mm.BeginBlock(ctx, req)
+func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
+	return app.mm.BeginBlock(ctx)
 }
 
 // EndBlocker contains app specific logic for the EndBlock abci call.
-func (app *App) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.mm.EndBlock(ctx, req)
+func (app *App) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
+	return app.mm.EndBlock(ctx)
 }
 
 // InitChainer contains app specific logic for the InitChain abci call.
-func (app *App) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+func (app *App) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
 	var genesisState GenesisState
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
@@ -969,6 +968,7 @@ func (app *App) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.Res
 	app.upgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
 
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
+
 }
 
 // LoadHeight loads the app state for a particular height.

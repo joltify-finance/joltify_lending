@@ -148,6 +148,7 @@ func (am AppModule) EndBlock(_ context.Context, _ abci.RequestEndBlock) []abci.V
 	return []abci.ValidatorUpdate{}
 }
 
+// IsOnePerModuleType implements the depinject.OnePerModuleType interface.
 //____________________________________________________________________________
 
 // // RegisterStoreDecoder registers a decoder for incentive module's types
@@ -174,3 +175,8 @@ func (am AppModule) EndBlock(_ context.Context, _ abci.RequestEndBlock) []abci.V
 // func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
 // return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.supplyKeeper, am.keeper)
 // }
+
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the appmodule.AppModule interface.
+func (am AppModule) IsAppModule() {}

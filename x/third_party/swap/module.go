@@ -167,3 +167,9 @@ func (am AppModule) EndBlock(_ context.Context, _ abci.RequestEndBlock) []abci.V
 // func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
 // 	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.keeper)
 // }
+
+// IsOnePerModuleType implements the depinject.OnePerModuleType interface.
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the appmodule.AppModule interface.
+func (am AppModule) IsAppModule() {}

@@ -118,13 +118,19 @@ func (am AppModule) ExportGenesis(ctx context.Context, cdc codec.JSONCodec) json
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the txfees module.
-func (am AppModule) BeginBlock(_ context.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ context.Context) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the txfees module. It
 // returns no validator updates.
-func (am AppModule) EndBlock(_ context.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(_ context.Context) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 
 // ConsensusVersion implements AppModule/ConsensusVersion.
 func (AppModule) ConsensusVersion() uint64 { return 1 }
+
+// IsOnePerModuleType implements the depinject.OnePerModuleType interface.
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the appmodule.AppModule interface.
+func (am AppModule) IsAppModule() {}
