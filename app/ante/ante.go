@@ -3,6 +3,9 @@ package ante
 import (
 	"cosmossdk.io/log"
 	"fmt"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+
+	txsigning "cosmossdk.io/x/tx/signing"
 	"runtime/debug"
 
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
@@ -11,7 +14,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
-	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	ibcante "github.com/cosmos/ibc-go/v8/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	evmante "github.com/evmos/ethermint/app/ante"
@@ -31,13 +33,13 @@ type cosmosHandlerOptions struct {
 // channel keeper, EVM Keeper and Fee Market Keeper.
 type HandlerOptions struct {
 	AccountKeeper          evmtypes.AccountKeeper
-	BankKeeper             evmtypes.BankKeeper
+	BankKeeper             bankkeeper.Keeper
 	IBCKeeper              *ibckeeper.Keeper
 	VaultKeeper            vaultmodulekeeper.Keeper
 	SpvKeeper              spvkeeper.Keeper
 	EvmKeeper              evmante.EVMKeeper
 	FeegrantKeeper         authante.FeegrantKeeper
-	SignModeHandler        authsigning.SignModeHandler
+	SignModeHandler        *txsigning.HandlerMap
 	SigGasConsumer         authante.SignatureVerificationGasConsumer
 	FeeMarketKeeper        feeMarketKeeper.Keeper
 	MaxTxGasWanted         uint64
@@ -85,11 +87,12 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 
 		defer Recover(ctx.Logger(), &err)
 
-		c, err := consensusKeeper.Get(ctx)
+		ctxR := sdk.UnwrapSDKContext(ctx)
+		p, err := consensusKeeper.Params(ctxR, nil)
 		if err != nil {
 			panic("fail to load the consensus")
 		}
-		ctx = ctx.WithConsensusParams(c)
+		ctx = ctx.WithConsensusParams(*p.GetParams())
 
 		txWithExtensions, ok := tx.(authante.HasExtensionOptionsTx)
 		if ok {

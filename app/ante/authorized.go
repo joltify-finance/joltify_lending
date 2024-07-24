@@ -1,6 +1,7 @@
 package ante
 
 import (
+	"bytes"
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -31,7 +32,13 @@ func (amd AuthenticatedMempoolDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, 
 		if !ok {
 			return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "tx must be sig verifiable tx")
 		}
-		if !commonAddressesExist(sigTx.GetSigners(), amd.fetchAuthorizedAddresses(ctx)) {
+
+		signer, err := sigTx.GetSigners()
+		if err != nil {
+			return ctx, errorsmod.Wrap(sdkerrors.ErrTxDecode, "tx must has a signer")
+		}
+
+		if !commonAddressesExist(signer, amd.fetchAuthorizedAddresses(ctx)) {
 			return ctx, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "tx contains no signers authorized for this mempool")
 		}
 	}
@@ -47,10 +54,10 @@ func (amd AuthenticatedMempoolDecorator) fetchAuthorizedAddresses(ctx sdk.Contex
 }
 
 // commonAddressesExist checks if there is any intersection between two lists of addresses
-func commonAddressesExist(addresses1, addresses2 []sdk.AccAddress) bool {
+func commonAddressesExist(addresses1 [][]byte, addresses2 []sdk.AccAddress) bool {
 	for _, a1 := range addresses1 {
 		for _, a2 := range addresses2 {
-			if a1.Equals(a2) {
+			if bytes.Equal(a1, a2) {
 				return true
 			}
 		}

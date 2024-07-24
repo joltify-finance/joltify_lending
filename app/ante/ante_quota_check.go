@@ -11,9 +11,8 @@ import (
 
 func getPools(ctx sdk.Context, keeper vaultkeeper.Keeper) []sdk.AccAddress {
 	req := types.QueryLatestPoolRequest{}
-	wctx := sdk.WrapSDKContext(ctx)
 
-	resp, err := keeper.GetLastPool(wctx, &req)
+	resp, err := keeper.GetLastPool(ctx, &req)
 	if err != nil || resp == nil || len(resp.Pools) != 2 {
 		return nil
 	}

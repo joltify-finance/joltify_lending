@@ -3,6 +3,7 @@ package app
 import (
 	"cosmossdk.io/log"
 	"fmt"
+	evmante "github.com/evmos/ethermint/app/ante"
 	"io"
 	"net/http"
 	"os"
@@ -44,7 +45,6 @@ import (
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
-	evmante "github.com/evmos/ethermint/app/ante"
 	"github.com/evmos/ethermint/x/evm"
 	"github.com/gorilla/mux"
 	_ "github.com/joltify-finance/joltify_lending/client/docs/statik"
