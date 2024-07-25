@@ -49,7 +49,7 @@ func (k Keeper) doUpdateLiquidationInfo(ctx context.Context, el string, amountFr
 	}
 	err = k.NftKeeper.UpdateClass(ctx, class)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	return paidAmount, nil
@@ -59,13 +59,13 @@ func (k Keeper) handleLiquidation(ctx context.Context, poolInfo types.PoolInfo, 
 	nftClasses := poolInfo.PoolNFTIds
 	totalBorrowed := poolInfo.BorrowedAmount
 	// the first element is the pool class, we skip it
-	totalPaid := sdk.ZeroInt()
+	totalPaid := sdkmath.ZeroInt()
 	for i, el := range nftClasses {
 		if i == 0 {
 			// we will handle the fist element later
 			continue
 		}
-		amountPaid, err := k.doUpdateLiquidationInfo(ctx, el, amount, totalBorrowed, sdk.ZeroInt())
+		amountPaid, err := k.doUpdateLiquidationInfo(ctx, el, amount, totalBorrowed, sdkmath.ZeroInt())
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*t
 
 	liquidator, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	if msg.Amount.IsZero() {

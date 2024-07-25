@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
 	"strings"
@@ -250,7 +251,7 @@ func (a CollateralAuction) Validate() error {
 }
 
 // NewWeightedAddresses returns a new list addresses with weights.
-func NewWeightedAddresses(addrs []sdk.AccAddress, weights []sdk.Int) (WeightedAddresses, error) {
+func NewWeightedAddresses(addrs []sdk.AccAddress, weights []sdkmath.Int) (WeightedAddresses, error) {
 	wa := WeightedAddresses{
 		Addresses: addrs,
 		Weights:   weights,
@@ -271,7 +272,7 @@ func (wa WeightedAddresses) Validate() error {
 		return fmt.Errorf("number of addresses doesn't match number of weights, %d ≠ %d", len(wa.Addresses), len(wa.Weights))
 	}
 
-	totalWeight := sdk.ZeroInt()
+	totalWeight := sdkmath.ZeroInt()
 	for i := range wa.Addresses {
 		if wa.Addresses[i].Empty() {
 			return fmt.Errorf("address %d cannot be empty", i)

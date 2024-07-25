@@ -30,7 +30,7 @@ func (k Keeper) UpdateIncentive(ctx context.Context, poolInfo types.PoolInfo) {
 	for _, el := range pa.Incentives {
 		if el.Poolid == poolIndex {
 			// as the spy is 1.XXXX, so we need to minus 1
-			spy := sdk.MustNewDecFromStr(el.Spy).Sub(sdk.OneDec())
+			spy := sdk.MustNewDecFromStr(el.Spy).Sub(sdkmath.LegacyOneDec())
 			joltM, err := k.priceFeedKeeper.GetCurrentPrice(ctx, "jolt:usd")
 			if err != nil {
 				ctx.Logger().Error("cannot get jolt price", "error", err)

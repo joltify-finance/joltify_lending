@@ -192,7 +192,7 @@ func (k *Keeper) SetDeployedCosmosCoinContract(ctx context.Context, cosmosDenom 
 	}
 	if contractAddress.IsNil() {
 		return errorsmod.Wrapf(
-			errorsmod.ErrInvalidAddress,
+			sdkerrors.ErrInvalidAddress,
 			"attempting to register empty contract address for denom '%s'",
 			cosmosDenom,
 		)

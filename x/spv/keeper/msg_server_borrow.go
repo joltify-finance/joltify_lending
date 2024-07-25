@@ -16,7 +16,7 @@ import (
 
 func (k msgServer) getAllBorrowed(ctx context.Context, poolInfo types.PoolInfo) sdkmath.Int {
 	var err error
-	sum := sdk.ZeroInt()
+	sum := sdkmath.ZeroInt()
 	for _, el := range poolInfo.PoolNFTIds {
 
 		class, found := k.NftKeeper.GetClass(ctx, el)
@@ -67,7 +67,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
@@ -112,7 +112,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	k.updateDepositorStatus(ctx, &poolInfo)
 
-	err = k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
+	err = k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdkmath.ZeroInt(), false)
 	if err != nil {
 		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "borrow failed %v", err)
 	}
@@ -133,7 +133,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 			if err != nil {
 				return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
 			}
-			poolInfo.EscrowInterestAmount = sdk.ZeroInt()
+			poolInfo.EscrowInterestAmount = sdkmath.ZeroInt()
 			poolInfo.InterestPrepayment = nil
 			k.SetPool(ctx, poolInfo)
 		} else {

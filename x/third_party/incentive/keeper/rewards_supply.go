@@ -48,7 +48,7 @@ func (k Keeper) getJoltSupplyTotalSourceShares(ctx context.Context, denom string
 	interestFactor, found := k.joltKeeper.GetSupplyInterestFactor(ctx, denom)
 	if !found {
 		// assume nothing has been borrowed so the factor starts at it's default value
-		interestFactor = sdk.OneDec()
+		interestFactor = sdkmath.LegacyOneDec()
 	}
 
 	// return supplied/factor to get the "pre interest" value of the current total supplied

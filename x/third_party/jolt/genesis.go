@@ -5,8 +5,6 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // InitGenesis initializes the store state from a genesis state.
@@ -90,11 +88,11 @@ func ExportGenesis(ctx context.Context, k keeper.Keeper) types2.GenesisState {
 	for _, mm := range params.MoneyMarkets {
 		supplyFactor, f := k.GetSupplyInterestFactor(ctx, mm.Denom)
 		if !f {
-			supplyFactor = sdk.OneDec()
+			supplyFactor = sdkmath.LegacyOneDec()
 		}
 		borrowFactor, f := k.GetBorrowInterestFactor(ctx, mm.Denom)
 		if !f {
-			borrowFactor = sdk.OneDec()
+			borrowFactor = sdkmath.LegacyOneDec()
 		}
 		previousAccrualTime, f := k.GetPreviousAccrualTime(ctx, mm.Denom)
 		if !f {

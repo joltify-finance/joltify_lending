@@ -115,7 +115,7 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 
 	spvDev := sdk.MustNewDecFromStr(spy)
 	jotlM := sdk.MustNewDecFromStr("0.7")
-	incentives := sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdk.OneDec())).Quo(jotlM).TruncateInt()
+	incentives := sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdkmath.LegacyOneDec())).Quo(jotlM).TruncateInt()
 
 	aa, ok := ret[poolInfo.Index]
 
@@ -136,7 +136,7 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 	spvDev = sdk.MustNewDecFromStr(spy)
 	jotlM = sdk.MustNewDecFromStr("0.7")
 	fmt.Printf(">>>borrowed new %v\n", poolInfo.BorrowedAmount.Amount)
-	incentives = sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdk.OneDec())).Quo(jotlM).TruncateInt()
+	incentives = sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdkmath.LegacyOneDec())).Quo(jotlM).TruncateInt()
 
 	aa, ok = ret[poolInfo.Index]
 

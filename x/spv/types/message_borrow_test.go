@@ -19,7 +19,7 @@ func TestMsgBorrow_ValidateBasic(t *testing.T) {
 			msg: MsgBorrow{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgBorrow{

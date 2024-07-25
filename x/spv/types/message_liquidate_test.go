@@ -19,7 +19,7 @@ func TestMsgLiquidate_ValidateBasic(t *testing.T) {
 			msg: MsgLiquidate{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgLiquidate{

@@ -283,13 +283,13 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 		}
 	}
 
-	sumJuniorF := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	sumSeniorF := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	sumJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	sumSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	sumJuniorF := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
+	sumSeniorF := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
+	sumJunior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
+	sumSenior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 
-	sumJuniorAllYear := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	sumSeniorAllYear := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	sumJuniorAllYear := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
+	sumSeniorAllYear := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 
 	// we check the first month
 	// total junior is interest is
@@ -573,8 +573,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	coins := suite.getAllInvestorInterest(seniorPool, suite.investors[:6], -1)
 	allCoinsSenior[checkPointCounter] = coins
 
-	sumSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	sumJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	sumSenior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
+	sumJunior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 	allMonthSeniorCoins := allCoinsSenior[1]
 	for _, el := range allMonthSeniorCoins {
 		sumSenior = sumSenior.Add(el)
@@ -640,7 +640,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 
 	// now we withdraw
 	// ####################withdraw principal for investor who submit the withdrawal proposal##################################
-	totalWithdrawal := sdk.ZeroInt()
+	totalWithdrawal := sdkmath.ZeroInt()
 	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: seniorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1000e10))})
 	suite.Require().NoError(err)
 	token, _ := sdk.ParseCoinNormalized(resp.Amount)
@@ -717,8 +717,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 
 	currentTime := suite.ctx.BlockTime()
 
-	totalSeniorInterest := sdk.ZeroInt()
-	totalJuniorInterest := sdk.ZeroInt()
+	totalSeniorInterest := sdkmath.ZeroInt()
+	totalJuniorInterest := sdkmath.ZeroInt()
 	eightWeeks := oneWeek * 8
 	for {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
@@ -987,8 +987,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 		}
 	}
 
-	seniorTotalInterest := sdk.ZeroInt()
-	juniorTotalInterest := sdk.ZeroInt()
+	seniorTotalInterest := sdkmath.ZeroInt()
+	juniorTotalInterest := sdkmath.ZeroInt()
 
 	amount := new(big.Int).Mul(big.NewInt(20000), base)
 	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
@@ -1100,8 +1100,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	allSeniorsInterest := suite.getAllInvestorInterest(seniorPool, suite.investors[:8], -1)
 	allJuniorInterest := suite.getAllInvestorInterest(juniorPool, suite.investors[:8], -1)
 
-	sumSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	sumJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	sumSenior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
+	sumJunior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 	for _, el := range allSeniorsInterest {
 		sumSenior = sumSenior.Add(el)
 	}
@@ -1134,10 +1134,10 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	suite.Require().True(checkValueWithRangeTwo(expected, tokens[0].Amount))
 
 	// we check whether the total borrow is equal to the estimated
-	totalLockedSenior := sdk.NewCoin("aud-ausdc", sdk.ZeroInt())
-	totalWithdrawalbleSenior := sdk.NewCoin("ausdc", sdk.ZeroInt())
-	totalLockedJunior := sdk.NewCoin("aud-ausdc", sdk.ZeroInt())
-	totalWithdrawalbleJunior := sdk.NewCoin("ausdc", sdk.ZeroInt())
+	totalLockedSenior := sdk.NewCoin("aud-ausdc", sdkmath.ZeroInt())
+	totalWithdrawalbleSenior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
+	totalLockedJunior := sdk.NewCoin("aud-ausdc", sdkmath.ZeroInt())
+	totalWithdrawalbleJunior := sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 	for i, el := range suite.investors {
 		addr, err := sdk.AccAddressFromBech32(el)
 		suite.Require().NoError(err)
@@ -1218,12 +1218,12 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	allSeniorsInterest = suite.getAllInvestorInterest(seniorPool, suite.investors, -1)
 	allJuniorInterest = suite.getAllInvestorInterest(juniorPool, suite.investors, 1)
 
-	sumSenior = sdk.NewCoin("ausdc", sdk.ZeroInt())
+	sumSenior = sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 	for _, el := range allSeniorsInterest {
 		sumSenior = sumSenior.Add(el)
 	}
 
-	sumJunior = sdk.NewCoin("ausdc", sdk.ZeroInt())
+	sumJunior = sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 	for _, el := range allJuniorInterest {
 		sumJunior = sumJunior.Add(el)
 	}
@@ -1251,7 +1251,7 @@ func (suite *mockWholeProcessSuite) getAllInvestorInterest(poolType string, inve
 			suite.Require().NoError(err)
 			interests[i] = resp.ClaimableInterestAmount
 		} else {
-			interests[i] = sdk.NewCoin("ausdc", sdk.ZeroInt())
+			interests[i] = sdk.NewCoin("ausdc", sdkmath.ZeroInt())
 		}
 	}
 	return interests

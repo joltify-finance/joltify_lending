@@ -91,7 +91,7 @@ func (suite *evmBankKeeperTestSuite) TestGetBalance() {
 		{
 			"no ujolt or ajolt",
 			sdk.NewCoins(),
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"with avaka that is more than 1 ujolt",
@@ -415,9 +415,9 @@ func (suite *evmBankKeeperTestSuite) TestBurnCoins() {
 			"burn no ajolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 0)),
 			startingUjolt,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 			false,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"errors if burning other coins",
@@ -434,9 +434,9 @@ func (suite *evmBankKeeperTestSuite) TestBurnCoins() {
 				sdk.NewInt64Coin("ajolt", 2_000_000_000_000),
 			},
 			startingUjolt,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 			true,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"errors if burn amount is negative",
@@ -458,9 +458,9 @@ func (suite *evmBankKeeperTestSuite) TestBurnCoins() {
 			"errors if not enough ujolt to cover burn",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 200_000_000_000_000)),
 			sdkmath.NewInt(100),
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 			true,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"converts 1 ujolt to ajolt if not enough ajolt to cover",
@@ -515,36 +515,36 @@ func (suite *evmBankKeeperTestSuite) TestMintCoins() {
 			sdkmath.NewInt(12),
 			sdkmath.NewInt(21_000_000_002),
 			false,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"mint less than 1 ujolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 901_000_000_001)),
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 			sdkmath.NewInt(901_000_000_001),
 			false,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"mint an exact amount of ujolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 123_000_000_000_000_000)),
 			sdkmath.NewInt(123_000),
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 			false,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"mint no ajolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 0)),
-			sdk.ZeroInt(),
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
+			sdkmath.ZeroInt(),
 			false,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"errors if minting other coins",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdk.NewInt64Coin("busd", 1000)),
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 			sdkmath.NewInt(100),
 			true,
 			sdkmath.NewInt(100),
@@ -555,15 +555,15 @@ func (suite *evmBankKeeperTestSuite) TestMintCoins() {
 				sdk.NewInt64Coin("ajolt", 12_000_000_000_000),
 				sdk.NewInt64Coin("ajolt", 2_000_000_000_000),
 			},
-			sdk.ZeroInt(),
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
+			sdkmath.ZeroInt(),
 			true,
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 		},
 		{
 			"errors if mint amount is negative",
 			sdk.Coins{sdk.Coin{Denom: "ajolt", Amount: sdkmath.NewInt(-100)}},
-			sdk.ZeroInt(),
+			sdkmath.ZeroInt(),
 			sdkmath.NewInt(50),
 			true,
 			sdkmath.NewInt(50),
@@ -691,7 +691,7 @@ func (suite *evmBankKeeperTestSuite) TestConvertOneUjoltToAjoltIfNeeded() {
 				}
 			} else {
 				suite.Require().Error(err)
-				suite.Require().Equal(sdk.ZeroInt(), moduleJolt.Amount)
+				suite.Require().Equal(sdkmath.ZeroInt(), moduleJolt.Amount)
 			}
 
 			ajolt := suite.Keeper.GetBalance(suite.Ctx, suite.Addrs[0])

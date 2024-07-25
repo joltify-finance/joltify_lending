@@ -77,7 +77,7 @@ func (k Keeper) AccrueInterest(ctx context.Context, denom string) error {
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleName)
 	cashPrior := k.bankKeeper.GetBalance(ctx, macc.GetAddress(), denom).Amount
 
-	borrowedPrior := sdk.NewCoin(denom, sdk.ZeroInt())
+	borrowedPrior := sdk.NewCoin(denom, sdkmath.ZeroInt())
 	borrowedCoinsPrior, foundBorrowedCoinsPrior := k.GetBorrowedCoins(ctx)
 	if foundBorrowedCoinsPrior {
 		borrowedPrior = sdk.NewCoin(denom, borrowedCoinsPrior.AmountOf(denom))
@@ -121,7 +121,7 @@ func (k Keeper) AccrueInterest(ctx context.Context, denom string) error {
 	}
 
 	// Convert from APY to SPY, expressed as (1 + borrow rate)
-	borrowRateSpy, err := APYToSPY(sdk.OneDec().Add(borrowRateApy))
+	borrowRateSpy, err := APYToSPY(sdkmath.LegacyOneDec().Add(borrowRateApy))
 	if err != nil {
 		return err
 	}
@@ -180,16 +180,16 @@ func CalculateUtilizationRatio(cash, borrows, reserves sdkmath.LegacyDec) sdkmat
 
 	totalSupply := cash.Add(borrows).Sub(reserves)
 	if totalSupply.IsNegative() {
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
 
-	return sdk.MinDec(sdk.OneDec(), borrows.Quo(totalSupply))
+	return sdk.MinDec(sdkmath.LegacyOneDec(), borrows.Quo(totalSupply))
 }
 
 // CalculateBorrowInterestFactor calculates the simple interest scaling factor,
 // which is equal to: (per-second interest rate * number of seconds elapsed)
 // Will return 1.000x, multiply by principal to get new principal with added interest
-func CalculateBorrowInterestFactor(perSecondInterestRate sdkmath.LegacyDec, secondsElapsed sdk.Int) sdkmath.LegacyDec {
+func CalculateBorrowInterestFactor(perSecondInterestRate sdkmath.LegacyDec, secondsElapsed sdkmath.Int) sdkmath.LegacyDec {
 	scalingFactorUint := sdk.NewUint(uint64(scalingFactor))
 	scalingFactorInt := sdk.NewInt(int64(scalingFactor))
 
@@ -210,9 +210,9 @@ func CalculateBorrowInterestFactor(perSecondInterestRate sdkmath.LegacyDec, seco
 func CalculateSupplyInterestFactor(newInterest, cash, borrows, reserves sdkmath.LegacyDec) sdkmath.LegacyDec {
 	totalSupply := cash.Add(borrows).Sub(reserves)
 	if totalSupply.IsZero() {
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
-	return (newInterest.Quo(totalSupply)).Add(sdk.OneDec())
+	return (newInterest.Quo(totalSupply)).Add(sdkmath.LegacyOneDec())
 }
 
 // SyncBorrowInterest updates the user's owed interest on newly borrowed coins to the latest global state
@@ -284,7 +284,7 @@ func (k Keeper) SyncSupplyInterest(ctx context.Context, addr sdk.AccAddress) {
 			storedAmount := sdk.NewDecFromInt(deposit.Amount.AmountOf(coin.Denom))
 			userLastInterestFactor := deposit.Index[foundAtIndex].Value
 			interest := (storedAmount.Mul(interestFactorValue).Quo(userLastInterestFactor)).Sub(storedAmount)
-			if interest.TruncateInt().GT(sdk.ZeroInt()) {
+			if interest.TruncateInt().GT(sdkmath.ZeroInt()) {
 				totalNewInterest = totalNewInterest.Add(sdk.NewCoin(coin.Denom, interest.TruncateInt()))
 			}
 			// We're synced up, so update user's deposit index value to match the current global deposit index value

@@ -40,7 +40,7 @@ func (k Keeper) AccumulateSwapRewards(ctx context.Context, rewardPeriod types.Mu
 func (k Keeper) getSwapTotalSourceShares(ctx context.Context, poolID string) sdkmath.LegacyDec {
 	totalShares, found := k.swapKeeper.GetPoolShares(ctx, poolID)
 	if !found {
-		totalShares = sdk.ZeroInt()
+		totalShares = sdkmath.ZeroInt()
 	}
 	return sdk.NewDecFromInt(totalShares)
 }
@@ -118,7 +118,7 @@ func (k Keeper) GetSynchronizedSwapClaim(ctx context.Context, owner sdk.AccAddre
 	k.IterateSwapRewardIndexes(ctx, func(poolID string, _ types.RewardIndexes) bool {
 		shares, found := k.swapKeeper.GetDepositorSharesAmount(ctx, owner, poolID)
 		if !found {
-			shares = sdk.ZeroInt()
+			shares = sdkmath.ZeroInt()
 		}
 
 		claim = k.synchronizeSwapReward(ctx, claim, poolID, owner, shares)

@@ -13,8 +13,6 @@ type VaultStaking interface {
 
 	GetParams(ctx context.Context) stakingtypes.Params
 
-	LastValidatorsIterator(ctx context.Context) (iterator sdk.Iterator)
-
 	GetValidator(ctx context.Context, addr sdk.ValAddress) (validator stakingtypes.Validator, found bool)
 
 	GetHistoricalInfo(ctx context.Context, height int64) (stakingtypes.HistoricalInfo, bool)

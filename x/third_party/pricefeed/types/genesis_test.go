@@ -38,7 +38,7 @@ func TestGenesisStateValidate(t *testing.T) {
 				NewParams([]Market{
 					{"market", "xrp", "bnb", []sdk.AccAddress{addr}, true},
 				}),
-				[]PostedPrice{NewPostedPrice("xrp", addr, sdk.OneDec(), now)},
+				[]PostedPrice{NewPostedPrice("xrp", addr, sdkmath.LegacyOneDec(), now)},
 			),
 			expPass: true,
 		},
@@ -48,7 +48,7 @@ func TestGenesisStateValidate(t *testing.T) {
 				NewParams([]Market{
 					{"", "xrp", "bnb", []sdk.AccAddress{addr}, true},
 				}),
-				[]PostedPrice{NewPostedPrice("xrp", addr, sdk.OneDec(), now)},
+				[]PostedPrice{NewPostedPrice("xrp", addr, sdkmath.LegacyOneDec(), now)},
 			),
 			expPass: false,
 		},
@@ -59,7 +59,7 @@ func TestGenesisStateValidate(t *testing.T) {
 					{"market", "xrp", "bnb", []sdk.AccAddress{addr}, true},
 					{"market", "xrp", "bnb", []sdk.AccAddress{addr}, true},
 				}),
-				[]PostedPrice{NewPostedPrice("xrp", addr, sdk.OneDec(), now)},
+				[]PostedPrice{NewPostedPrice("xrp", addr, sdkmath.LegacyOneDec(), now)},
 			),
 			expPass: false,
 		},
@@ -67,7 +67,7 @@ func TestGenesisStateValidate(t *testing.T) {
 			msg: "invalid posted price",
 			genesisState: NewGenesisState(
 				NewParams([]Market{}),
-				[]PostedPrice{NewPostedPrice("xrp", nil, sdk.OneDec(), now)},
+				[]PostedPrice{NewPostedPrice("xrp", nil, sdkmath.LegacyOneDec(), now)},
 			),
 			expPass: false,
 		},
@@ -76,8 +76,8 @@ func TestGenesisStateValidate(t *testing.T) {
 			genesisState: NewGenesisState(
 				NewParams([]Market{}),
 				[]PostedPrice{
-					NewPostedPrice("xrp", addr, sdk.OneDec(), now),
-					NewPostedPrice("xrp", addr, sdk.OneDec(), now),
+					NewPostedPrice("xrp", addr, sdkmath.LegacyOneDec(), now),
+					NewPostedPrice("xrp", addr, sdkmath.LegacyOneDec(), now),
 				},
 			),
 			expPass: false,

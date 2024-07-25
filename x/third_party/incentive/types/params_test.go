@@ -23,7 +23,7 @@ var rewardPeriodWithInvalidRewardsPerSecond = types2.NewRewardPeriod(
 	"bnb",
 	time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 	time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-	sdk.Coin{Denom: "INVALID!@#😫", Amount: sdk.ZeroInt()},
+	sdk.Coin{Denom: "INVALID!@#😫", Amount: sdkmath.ZeroInt()},
 )
 
 var rewardMultiPeriodWithInvalidRewardsPerSecond = types2.NewMultiRewardPeriod(
@@ -31,7 +31,7 @@ var rewardMultiPeriodWithInvalidRewardsPerSecond = types2.NewMultiRewardPeriod(
 	"bnb",
 	time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 	time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-	sdk.Coins{sdk.Coin{Denom: "INVALID!@#😫", Amount: sdk.ZeroInt()}},
+	sdk.Coins{sdk.Coin{Denom: "INVALID!@#😫", Amount: sdkmath.ZeroInt()}},
 )
 
 var validMultiRewardPeriod = types2.NewMultiRewardPeriod(

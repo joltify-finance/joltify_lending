@@ -95,7 +95,7 @@ func mockBorrow(ctx context.Context, nftKeeper types.NFTKeeper, poolInfo *types.
 		MonthlyRatio:  i,
 		InterestSPY:   rate,
 		Payments:      []*types.PaymentItem{&firstPayment},
-		AccInterest:   sdk.NewCoin("ausdc", sdk.ZeroInt()),
+		AccInterest:   sdk.NewCoin("ausdc", sdkmath.ZeroInt()),
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)
@@ -239,7 +239,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	delta := firstBorrowTime.Add(time.Second * spvkeeper.OneMonth * 2).Sub(secondBorrowTime)
 
 	r := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
-	interest := r.Power(uint64(delta.Seconds())).Sub(sdk.OneDec())
+	interest := r.Power(uint64(delta.Seconds())).Sub(sdkmath.LegacyOneDec())
 
 	paymentAmount := interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
 	reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
@@ -284,7 +284,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 
 	delta = firstBorrowTime.Add(time.Second * spvkeeper.OneMonth * 4).Sub(thirdBorrowTime)
 
-	interest = r.Power(uint64(delta.Seconds())).Sub(sdk.OneDec())
+	interest = r.Power(uint64(delta.Seconds())).Sub(sdkmath.LegacyOneDec())
 	paymentAmount = interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
 	reservedAmount = sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
 	toInvestors = paymentAmount.Sub(reservedAmount)

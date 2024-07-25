@@ -79,7 +79,7 @@ func (s queryServer) Deposits(ctx context.Context, req *types2.QueryDepositsRequ
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -168,7 +168,7 @@ func (s queryServer) UnsyncedDeposits(ctx context.Context, req *types2.QueryUnsy
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -239,7 +239,7 @@ func (s queryServer) Borrows(ctx context.Context, req *types2.QueryBorrowsReques
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -325,7 +325,7 @@ func (s queryServer) UnsyncedBorrows(ctx context.Context, req *types2.QueryUnsyn
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, errorsmod.Wrap(errorsmod.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -450,7 +450,7 @@ func (s queryServer) InterestRate(ctx context.Context, req *types2.QueryInterest
 		macc := s.accountKeeper.GetModuleAccount(sdkCtx, types2.ModuleName)
 		cash := s.bankKeeper.GetBalance(sdkCtx, macc.GetAddress(), denom).Amount
 
-		borrowed := sdk.NewCoin(denom, sdk.ZeroInt())
+		borrowed := sdk.NewCoin(denom, sdkmath.ZeroInt())
 		borrowedCoins, foundBorrowedCoins := s.keeper.GetBorrowedCoins(sdkCtx)
 		if foundBorrowedCoins {
 			borrowed = sdk.NewCoin(denom, borrowedCoins.AmountOf(denom))
@@ -469,7 +469,7 @@ func (s queryServer) InterestRate(ctx context.Context, req *types2.QueryInterest
 
 		utilRatio := CalculateUtilizationRatio(sdk.NewDecFromInt(cash), sdk.NewDecFromInt(borrowed.Amount), sdk.NewDecFromInt(reserves.AmountOf(denom)))
 		fullSupplyAPY := borrowAPY.Mul(utilRatio)
-		realSupplyAPY := fullSupplyAPY.Mul(sdk.OneDec().Sub(moneyMarket.ReserveFactor))
+		realSupplyAPY := fullSupplyAPY.Mul(sdkmath.LegacyOneDec().Sub(moneyMarket.ReserveFactor))
 
 		moneyMarketInterestRate := types2.MoneyMarketInterestRate{
 			Denom:              denom,

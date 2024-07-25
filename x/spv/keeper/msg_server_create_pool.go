@@ -56,7 +56,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	if !targetProject.ProjectOwner.Equals(spvAddress) {
@@ -160,7 +160,7 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
 			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track transferred accounts when we close the pool
 			ProcessedWithdrawAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track the withdrawal accounts when we close the pool
-			TotalTransferOwnershipAmount:  sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.ZeroInt()),
+			TotalTransferOwnershipAmount:  sdk.NewCoin(denomPrefix+targetAmount.Denom, sdkmath.ZeroInt()),
 			MinBorrowAmount:               sdk.NewCoin(targetAmount.Denom, minBorrowAmount),
 			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
 			PoolLockedSeconds:             targetProject.PoolLockedSeconds,

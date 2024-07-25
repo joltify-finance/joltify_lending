@@ -45,7 +45,7 @@ func (k Keeper) RunSurplusAuctions(ctx context.Context) {
 			return false
 		}
 		if processed {
-			k.SetReserve(ctx, sdk.NewCoin(totalReserve.Denom, sdk.ZeroInt()))
+			k.SetReserve(ctx, sdk.NewCoin(totalReserve.Denom, sdkmath.ZeroInt()))
 		}
 		return false
 	})

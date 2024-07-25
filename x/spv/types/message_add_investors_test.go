@@ -19,7 +19,7 @@ func TestMsgAddInvestors_ValidateBasic(t *testing.T) {
 			msg: MsgAddInvestors{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgAddInvestors{

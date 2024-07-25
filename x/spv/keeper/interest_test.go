@@ -96,7 +96,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 			accTime := tc.args.payfrq
 			accumulate := i.Power(uint64(accTime))
 
-			total := (accumulate.Sub(sdk.OneDec())).Mul(sdk.NewDec(OneYear / int64(accTime)))
+			total := (accumulate.Sub(sdkmath.LegacyOneDec())).Mul(sdk.NewDec(OneYear / int64(accTime)))
 			gap := total.Sub(tc.args.apy)
 			suite.Require().True(gap.LT(sdk.NewDecFromIntWithPrec(sdk.NewInt(1), 8)))
 		})
@@ -136,13 +136,13 @@ func (suite *InterestTestSuite) TestCalculateInterestFactor() {
 func (suite *InterestTestSuite) TestCalculateInterestPerSecond() {
 	testapy := sdk.MustNewDecFromStr("0.18")
 
-	adjMonthAPY := sdk.OneDec().Add(testapy)
+	adjMonthAPY := sdkmath.LegacyOneDec().Add(testapy)
 
 	val, err := apyTospy(adjMonthAPY, uint64(OneYear))
 
 	fmt.Printf(">>>>val is %v\n", val.String())
 
-	result := (val.Sub(sdk.OneDec())).Mul(sdk.NewDec(OneYear))
+	result := (val.Sub(sdkmath.LegacyOneDec())).Mul(sdk.NewDec(OneYear))
 
 	gap := testapy.Sub(result)
 

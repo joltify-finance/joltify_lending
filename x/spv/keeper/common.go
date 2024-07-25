@@ -46,7 +46,7 @@ func calculateTotalInterest(ctx context.Context, lendNFTs []string, nftKeeper ty
 
 		// no new interest payment
 		if len(allPayments) <= int(investorInterestData.PaymentOffset) {
-			return sdk.ZeroInt(), nil
+			return sdkmath.ZeroInt(), nil
 		}
 		counter := 0
 		allNewPayments := allPayments[investorInterestData.PaymentOffset:]
@@ -123,8 +123,8 @@ func calculateTotalOutstandingInterest(ctx context.Context, lendNFTs []string, n
 		factor := CalculateInterestFactor(borrowClassInfo.InterestSPY, sdk.NewIntFromUint64(delta))
 
 		ratio := sdk.NewDecFromInt(interestData.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.BorrowedAmount.Amount))
-		paymentAmountToInvestor := sdk.NewDecFromInt(lastBorrow.BorrowedAmount.Amount).Mul(sdk.OneDec().Sub(reserve))
-		interestLocal := paymentAmountToInvestor.Mul(ratio).Mul(factor.Sub(sdk.OneDec())).TruncateInt()
+		paymentAmountToInvestor := sdk.NewDecFromInt(lastBorrow.BorrowedAmount.Amount).Mul(sdkmath.LegacyOneDec().Sub(reserve))
+		interestLocal := paymentAmountToInvestor.Mul(ratio).Mul(factor.Sub(sdkmath.LegacyOneDec())).TruncateInt()
 		interest := outboundConvertToUSD(interestLocal, lastBorrow.ExchangeRatio)
 		totalInterestUsd = totalInterestUsd.Add(interest)
 	}
@@ -190,8 +190,8 @@ func (k Keeper) doBorrow(ctx context.Context, poolInfo *types.PoolInfo, usdToken
 		MonthlyRatio:  i,
 		InterestSPY:   rate,
 		Payments:      []*types.PaymentItem{&firstPayment},
-		InterestPaid:  sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.ZeroInt()), // using the usd
-		AccInterest:   sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.ZeroInt()), // using the usd
+		InterestPaid:  sdk.NewCoin(poolInfo.TargetAmount.Denom, sdkmath.ZeroInt()), // using the usd
+		AccInterest:   sdk.NewCoin(poolInfo.TargetAmount.Denom, sdkmath.ZeroInt()), // using the usd
 	}
 
 	data, err := types2.NewAnyWithValue(&bi)
@@ -310,8 +310,8 @@ func (k Keeper) processInvestors(ctx context.Context, poolInfo *types.PoolInfo, 
 
 	// now we update the depositor's withdrawal amount and locked amount
 	var firstDepositor *types.DepositorInfo
-	totalLocked := sdk.ZeroInt()
-	totalLockedLocal := sdk.ZeroInt()
+	totalLocked := sdkmath.ZeroInt()
+	totalLockedLocal := sdkmath.ZeroInt()
 	if depositors != nil {
 		for _, depositor := range depositors {
 
@@ -386,7 +386,7 @@ func (k Keeper) processInvestors(ctx context.Context, poolInfo *types.PoolInfo, 
 func (k Keeper) handleClassLeftover(ctx context.Context, poolinfo types.PoolInfo) sdk.Coin {
 	nfts := poolinfo.PoolNFTIds
 	var err error
-	leftover := sdk.NewCoin(poolinfo.TargetAmount.Denom, sdk.ZeroInt())
+	leftover := sdk.NewCoin(poolinfo.TargetAmount.Denom, sdkmath.ZeroInt())
 	for _, el := range nfts {
 		class, found := k.NftKeeper.GetClass(ctx, el)
 		if !found {
@@ -419,7 +419,7 @@ func (k Keeper) cleanupDepositor(ctx context.Context, poolInfo types.PoolInfo, d
 	err = k.processEachWithdrawReq(ctx, depositor, true, poolInfo.PrincipalPaymentExchangeRatio)
 	if err != nil {
 		ctx.Logger().Error("fail to process partial principal", err.Error())
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	exchange := poolInfo.PrincipalPaymentExchangeRatio
@@ -430,14 +430,14 @@ func (k Keeper) cleanupDepositor(ctx context.Context, poolInfo types.PoolInfo, d
 
 	poolInfo.BorrowedAmount, err = poolInfo.BorrowedAmount.SafeSub(depositor.LockedAmount)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	// fix the issue 10. since we have not to add the transfer owner withdrawal amount to the pool, we do not need to deducted it here.
 	if depositor.DepositType != types.DepositorInfo_processed {
 		poolInfo.UsableAmount, err = poolInfo.UsableAmount.SafeSub(depositor.WithdrawalAmount)
 		if err != nil {
-			return sdk.ZeroInt(), err
+			return sdkmath.ZeroInt(), err
 		}
 
 	}
@@ -466,8 +466,8 @@ func (k Keeper) cleanupDepositor(ctx context.Context, poolInfo types.PoolInfo, d
 	}
 	depositor.DepositType = types.DepositorInfo_deactive
 	depositor.LinkedNFT = []string{}
-	depositor.WithdrawalAmount = sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.ZeroInt())
-	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	depositor.WithdrawalAmount = sdk.NewCoin(poolInfo.TargetAmount.Denom, sdkmath.ZeroInt())
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdkmath.ZeroInt())
 	k.ArchieveDepositor(ctx, depositor)
 	return totalPaidAmount, nil
 }
@@ -501,7 +501,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx context.Context, lendNFTs []
 		latestTimeStamp := time.Time{}
 
 		if len(allLiquidationPayments) <= int(investorInterestData.LiquidationPaymentOffset) {
-			return sdk.ZeroInt(), nil
+			return sdkmath.ZeroInt(), nil
 		}
 		counter := 0
 		allNewLiquidationPayments := allLiquidationPayments[investorInterestData.LiquidationPaymentOffset:]

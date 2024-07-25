@@ -316,7 +316,7 @@ func (builder BorrowBuilder) Build() jolttypes.Borrow { return builder.Borrow }
 // WithSourceShares adds a borrow amount and factor such that the source shares for this borrow is equal to specified.
 // With a factor of 1, the borrow amount is the source shares. This picks an arbitrary factor to ensure factors are accounted for in production code.
 func (builder BorrowBuilder) WithSourceShares(denom string, shares int64) BorrowBuilder {
-	if !builder.Amount.AmountOf(denom).Equal(sdk.ZeroInt()) {
+	if !builder.Amount.AmountOf(denom).Equal(sdkmath.ZeroInt()) {
 		panic("adding to amount with existing denom not implemented")
 	}
 	if _, f := builder.Index.GetInterestFactor(denom); f {
@@ -509,7 +509,7 @@ func TestCalculateRewards(t *testing.T) {
 func TestCalculateSingleReward(t *testing.T) {
 	type expected struct {
 		err    error
-		reward sdk.Int
+		reward sdkmath.Int
 	}
 	type args struct {
 		oldIndex, newIndex sdkmath.LegacyDec
@@ -551,7 +551,7 @@ func TestCalculateSingleReward(t *testing.T) {
 				sourceAmount: d("1000000000"),
 			},
 			expected: expected{
-				reward: sdk.ZeroInt(),
+				reward: sdkmath.ZeroInt(),
 			},
 		},
 	}

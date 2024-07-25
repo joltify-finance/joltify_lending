@@ -15,7 +15,7 @@ message Params{
 
   string candidate_ratio= 4 [
     (gogoproto.moretags)   = "yaml:\"candidate_ratio\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 

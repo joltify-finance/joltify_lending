@@ -47,7 +47,7 @@ func (msg MsgClaimJoltReward) Type() string {
 func (msg MsgClaimJoltReward) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
-		return errorsmod.Wrap(errorsmod.ErrInvalidAddress, "sender address cannot be empty or invalid")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty or invalid")
 	}
 	if err := msg.DenomsToClaim.Validate(); err != nil {
 		return err
@@ -90,7 +90,7 @@ func (msg MsgClaimSwapReward) Type() string {
 func (msg MsgClaimSwapReward) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
-		return errorsmod.Wrap(errorsmod.ErrInvalidAddress, "sender address cannot be empty or invalid")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty or invalid")
 	}
 	if err := msg.DenomsToClaim.Validate(); err != nil {
 		return err
@@ -133,7 +133,7 @@ func (msg MsgClaimSPVReward) Type() string {
 func (msg MsgClaimSPVReward) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
-		return errorsmod.Wrap(errorsmod.ErrInvalidAddress, "sender address cannot be empty or invalid")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty or invalid")
 	}
 	if msg.PoolIndex == "" {
 		return errorsmod.Wrap(errorsmod.ErrInvalidRequest, "pool index cannot be empty")

@@ -1,6 +1,6 @@
 package types
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import "context"
 
 // MultiHARDHooks combine multiple HARD hooks, all hook functions are run in array sequence
 type MultiHARDHooks []JOLTHooks

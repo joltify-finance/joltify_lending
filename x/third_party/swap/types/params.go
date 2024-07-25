@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"fmt"
 	"strings"
 
@@ -24,8 +25,8 @@ var (
 		AllowedPool{"aswap", "uosmo"},
 		AllowedPool{"aswap", "ujuno"},
 	}
-	DefaultSwapFee = sdk.MustNewDecFromStr("0.02")
-	MaxSwapFee     = sdk.OneDec()
+	DefaultSwapFee = sdkmath.LegacyMustNewDecFromStr("0.02")
+	MaxSwapFee     = sdkmath.LegacyOneDec()
 )
 
 // NewParams returns a new params object

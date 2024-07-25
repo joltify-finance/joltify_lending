@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +13,7 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 
 var (
 	KeyBurnThreshold     = []byte("auctionBurnThreshold")
-	DefaultBurnThreshold = sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdk.NewInt(15e6)), sdk.NewCoin("ujolt", sdk.NewInt(20e6)))
+	DefaultBurnThreshold = sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdkmath.NewInt(15e6)), sdk.NewCoin("ujolt", sdkmath.NewInt(20e6)))
 )
 
 // ParamKeyTable the param key table for launch module

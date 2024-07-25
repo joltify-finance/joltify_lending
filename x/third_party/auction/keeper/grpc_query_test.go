@@ -45,7 +45,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 			c("usdx", 12345678),
 			types2.WeightedAddresses{
 				Addresses: addrs,
-				Weights:   []sdk.Int{sdk.NewInt(100)},
+				Weights:   []sdkmath.Int{sdk.NewInt(100)},
 			},
 			c("debt", 12345678),
 		).WithID(2),
@@ -56,7 +56,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 			c("usdx", 12345678),
 			types2.WeightedAddresses{
 				Addresses: addrs,
-				Weights:   []sdk.Int{sdk.NewInt(100)},
+				Weights:   []sdkmath.Int{sdk.NewInt(100)},
 			},
 			c("debt", 12345678),
 		).WithID(3),

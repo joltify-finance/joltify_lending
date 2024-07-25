@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"github.com/joltify-finance/joltify_lending/x/burnauction/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,11 +16,11 @@ func (k Keeper) GetParams(ctx context.Context) types.Params {
 
 // SetParams set the params
 func (k Keeper) SetParams(ctx context.Context, params types.Params) {
-	k.paramstore.SetParamSet(ctx, &params)
+	k.paramstore.SetParamSet(sdk.UnwrapSDKContext(ctx), &params)
 }
 
 // Burnthreshold returns the Burnthreshold param
 func (k Keeper) Burnthreshold(ctx context.Context) (res sdk.Coins) {
-	k.paramstore.Get(ctx, types.KeyBurnThreshold, &res)
+	k.paramstore.Get(sdk.UnwrapSDKContext(ctx), types.KeyBurnThreshold, &res)
 	return
 }

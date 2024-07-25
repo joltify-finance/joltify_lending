@@ -37,7 +37,7 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	pool, found := k.GetPools(ctx, msg.GetPoolIndex())

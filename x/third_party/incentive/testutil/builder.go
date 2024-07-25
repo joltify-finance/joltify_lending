@@ -158,7 +158,7 @@ func (builder JoltGenesisBuilder) WithInitializedMoneyMarket(market types2.Money
 
 	builder.PreviousAccumulationTimes = append(
 		builder.PreviousAccumulationTimes,
-		types2.NewGenesisAccumulationTime(market.Denom, builder.genesisTime, sdk.OneDec(), sdk.OneDec()),
+		types2.NewGenesisAccumulationTime(market.Denom, builder.genesisTime, sdkmath.LegacyOneDec(), sdkmath.LegacyOneDec()),
 	)
 	return builder
 }

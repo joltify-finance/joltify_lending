@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,7 +15,7 @@ var (
 	KeyMinimumBorrowUSDValue     = []byte("MinimumBorrowUSDValue")
 	KeySurplusAuctionThreshold   = []byte("SurplusAuctionThreshold")
 	DefaultMoneyMarkets          = MoneyMarkets{}
-	DefaultMinimumBorrowUSDValue = sdk.NewDec(10) // $10 USD minimum borrow value
+	DefaultMinimumBorrowUSDValue = sdkmath.LegacyNewDec(10) // $10 USD minimum borrow value
 	DefaultAccumulationTimes     = GenesisAccumulationTimes{}
 	DefaultTotalSupplied         = sdk.Coins{}
 	DefaultTotalBorrowed         = sdk.Coins{}
@@ -40,7 +41,7 @@ func (bl BorrowLimit) Validate() error {
 	if bl.LoanToValue.IsNegative() {
 		return fmt.Errorf("loan-to-value must be a non-negative decimal: %s", bl.LoanToValue)
 	}
-	if bl.LoanToValue.GT(sdk.OneDec()) {
+	if bl.LoanToValue.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("loan-to-value cannot be greater than 1.0: %s", bl.LoanToValue)
 	}
 	return nil
@@ -61,7 +62,7 @@ func (bl BorrowLimit) Equal(blCompareTo BorrowLimit) bool {
 }
 
 // NewMoneyMarket returns a new MoneyMarket
-func NewMoneyMarket(denom string, borrowLimit BorrowLimit, spotMarketID string, conversionFactor sdk.Int,
+func NewMoneyMarket(denom string, borrowLimit BorrowLimit, spotMarketID string, conversionFactor sdkmath.Int,
 	interestRateModel InterestRateModel, reserveFactor, keeperRewardPercentage sdkmath.LegacyDec,
 ) MoneyMarket {
 	return MoneyMarket{
@@ -93,11 +94,11 @@ func (mm MoneyMarket) Validate() error {
 		return err
 	}
 
-	if mm.ReserveFactor.IsNegative() || mm.ReserveFactor.GT(sdk.OneDec()) {
+	if mm.ReserveFactor.IsNegative() || mm.ReserveFactor.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("reserve factor must be between 0.0-1.0")
 	}
 
-	if mm.KeeperRewardPercentage.IsNegative() || mm.KeeperRewardPercentage.GT(sdk.OneDec()) {
+	if mm.KeeperRewardPercentage.IsNegative() || mm.KeeperRewardPercentage.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("keeper reward percentage must be between 0.0-1.0")
 	}
 
@@ -155,7 +156,7 @@ func NewInterestRateModel(baseRateAPY, baseMultiplier, kink, jumpMultiplier sdkm
 
 // Validate InterestRateModel param
 func (irm InterestRateModel) Validate() error {
-	if irm.BaseRateAPY.IsNegative() || irm.BaseRateAPY.GT(sdk.OneDec()) {
+	if irm.BaseRateAPY.IsNegative() || irm.BaseRateAPY.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("base rate APY must be in the inclusive range 0.0-1.0")
 	}
 
@@ -163,7 +164,7 @@ func (irm InterestRateModel) Validate() error {
 		return fmt.Errorf("base multiplier must not be negative")
 	}
 
-	if irm.Kink.IsNegative() || irm.Kink.GT(sdk.OneDec()) {
+	if irm.Kink.IsNegative() || irm.Kink.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("kink must be in the inclusive range 0.0-1.0")
 	}
 
@@ -199,7 +200,7 @@ func NewParams(moneyMarkets MoneyMarkets, minimumBorrowUSDValue sdkmath.LegacyDe
 	return Params{
 		MoneyMarkets:            moneyMarkets,
 		MinimumBorrowUSDValue:   minimumBorrowUSDValue,
-		SurplusAuctionThreshold: sdk.NewInt(50),
+		SurplusAuctionThreshold: sdkmath.NewInt(50),
 	}
 }
 
@@ -422,7 +423,7 @@ func validateMoneyMarketParams(i interface{}) error {
 }
 
 func validateSurplusAuctionThreshold(i interface{}) error {
-	a, ok := i.(sdk.Int)
+	a, ok := i.(sdkmath.Int)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}

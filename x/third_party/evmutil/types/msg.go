@@ -61,12 +61,12 @@ func (msg MsgConvertCoinToERC20) GetSigners() []sdk.AccAddress {
 func (msg MsgConvertCoinToERC20) ValidateBasic() error {
 	_, err := PubKeyToJoltAddr(msg.Initiator)
 	if err != nil {
-		return errorsmod.Wrapf(errorsmod.ErrInvalidAddress, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid initiator pubkey (%s): %s", msg.Initiator, err.Error())
 	}
 
 	if !common.IsHexAddress(msg.Receiver) {
 		return errorsmod.Wrap(
-			errorsmod.ErrInvalidAddress,
+			sdkerrors.ErrInvalidAddress,
 			"Receiver is not a valid hex address",
 		)
 	}
@@ -127,17 +127,17 @@ func (msg MsgConvertERC20ToCoin) ValidateBasic() error {
 
 	if !common.IsHexAddress(msg.JoltERC20Address) {
 		return errorsmod.Wrap(
-			errorsmod.ErrInvalidAddress,
+			sdkerrors.ErrInvalidAddress,
 			"erc20 contract address is not a valid hex address",
 		)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.Receiver)
 	if err != nil {
-		return errorsmod.Wrap(errorsmod.ErrInvalidAddress, "receiver is not a valid bech32 address")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "receiver is not a valid bech32 address")
 	}
 
-	if msg.Amount.IsNil() || msg.Amount.LTE(sdk.ZeroInt()) {
+	if msg.Amount.IsNil() || msg.Amount.LTE(sdkmath.ZeroInt()) {
 		return errorsmod.Wrapf(errorsmod.ErrInvalidRequest, "amount cannot be zero or less")
 	}
 
@@ -193,11 +193,11 @@ func (msg MsgConvertCosmosCoinToERC20) ValidateBasic() error {
 	}
 
 	if !common.IsHexAddress(msg.Receiver) {
-		return errorsmod.Wrapf(errorsmod.ErrInvalidAddress, "receiver is not a valid hex address (%s)", msg.Receiver)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "receiver is not a valid hex address (%s)", msg.Receiver)
 	}
 
 	if msg.Amount.IsNil() || !msg.Amount.IsValid() || msg.Amount.IsZero() {
-		return errorsmod.Wrapf(errorsmod.ErrInvalidCoins, "'%s'", msg.Amount)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidCoins, "'%s'", msg.Amount)
 	}
 
 	return nil
@@ -245,11 +245,11 @@ func (msg MsgConvertCosmosCoinFromERC20) ValidateBasic() error {
 
 	_, err = sdk.AccAddressFromBech32(msg.Receiver)
 	if err != nil {
-		return errorsmod.Wrapf(errorsmod.ErrInvalidAddress, "invalid receiver address (%s): %s", msg.Receiver, err.Error())
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid receiver address (%s): %s", msg.Receiver, err.Error())
 	}
 
 	if msg.Amount.IsNil() || !msg.Amount.IsValid() || msg.Amount.IsZero() {
-		return errorsmod.Wrapf(errorsmod.ErrInvalidCoins, "'%s'", msg.Amount)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidCoins, "'%s'", msg.Amount)
 	}
 
 	return nil

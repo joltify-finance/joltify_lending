@@ -317,7 +317,7 @@ package simulation
 
 // 		// Calculate expected output coin
 // 		globalSwapFee := k.GetSwapFee(ctx)
-// 		tradeAmountAfterFee := exactInputToken.Amount.ToDec().Mul(sdk.OneDec().Sub(globalSwapFee)).TruncateInt()
+// 		tradeAmountAfterFee := exactInputToken.Amount.ToDec().Mul(sdkmath.LegacyOneDec().Sub(globalSwapFee)).TruncateInt()
 
 // 		var outputAmt big.Int
 // 		outputAmt.Mul(outputToken.Amount.BigInt(), tradeAmountAfterFee.BigInt())
@@ -416,7 +416,7 @@ package simulation
 
 // 		// Calculate exact output coin
 // 		globalSwapFee := k.GetSwapFee(ctx)
-// 		tradeAmountAfterFee := expectedInputToken.Amount.ToDec().Mul(sdk.OneDec().Sub(globalSwapFee)).TruncateInt()
+// 		tradeAmountAfterFee := expectedInputToken.Amount.ToDec().Mul(sdkmath.LegacyOneDec().Sub(globalSwapFee)).TruncateInt()
 
 // 		var outputAmt big.Int
 // 		outputAmt.Mul(outputToken.Amount.BigInt(), tradeAmountAfterFee.BigInt())

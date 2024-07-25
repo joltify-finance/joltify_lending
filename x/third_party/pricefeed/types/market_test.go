@@ -109,7 +109,7 @@ func TestPostedPriceValidate(t *testing.T) {
 			PostedPrice{
 				MarketID:      "market",
 				OracleAddress: addr,
-				Price:         sdk.OneDec(),
+				Price:         sdkmath.LegacyOneDec(),
 				Expiry:        now,
 			},
 			true,
@@ -143,7 +143,7 @@ func TestPostedPriceValidate(t *testing.T) {
 			PostedPrice{
 				MarketID:      "market",
 				OracleAddress: addr,
-				Price:         sdk.OneDec(),
+				Price:         sdkmath.LegacyOneDec(),
 				Expiry:        time.Time{},
 			},
 			false,

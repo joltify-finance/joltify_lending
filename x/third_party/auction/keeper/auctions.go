@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
 	"time"
@@ -86,7 +88,7 @@ func (k Keeper) StartDebtAuction(ctx context.Context, buyer string, bid sdk.Coin
 // StartCollateralAuction starts a new collateral (2-phase) auction.
 func (k Keeper) StartCollateralAuction(
 	ctx context.Context, seller string, lot, maxBid sdk.Coin,
-	lotReturnAddrs []sdk.AccAddress, lotReturnWeights []sdk.Int, debt sdk.Coin,
+	lotReturnAddrs []sdk.AccAddress, lotReturnWeights []sdkmath.Int, debt sdk.Coin,
 ) (uint64, error) {
 	weightedAddresses, err := types2.NewWeightedAddresses(lotReturnAddrs, lotReturnWeights)
 	if err != nil {
@@ -404,7 +406,7 @@ func (k Keeper) PlaceBidDebt(ctx context.Context, auction *types2.DebtAuction, b
 		return auction, errorsmod.Wrapf(types2.ErrLotTooLarge, "%s > %s%s", lot, maxNewLotAmt, auction.Lot.Denom)
 	}
 	if lot.IsNegative() {
-		return auction, errorsmod.Wrapf(types2.ErrLotTooSmall, "%s ≤ %s%s", lot, sdk.ZeroInt(), auction.Lot.Denom)
+		return auction, errorsmod.Wrapf(types2.ErrLotTooSmall, "%s ≤ %s%s", lot, sdkmath.ZeroInt(), auction.Lot.Denom)
 	}
 
 	// New bidder pays back old bidder
@@ -572,7 +574,7 @@ func earliestTime(t1, t2 time.Time) time.Time {
 }
 
 // splitCoinIntoWeightedBuckets divides up some amount of coins according to some weights.
-func splitCoinIntoWeightedBuckets(coin sdk.Coin, buckets []sdk.Int) ([]sdk.Coin, error) {
+func splitCoinIntoWeightedBuckets(coin sdk.Coin, buckets []sdkmath.Int) ([]sdk.Coin, error) {
 	amounts := splitIntIntoWeightedBuckets(coin.Amount, buckets)
 	result := make([]sdk.Coin, len(amounts))
 	for i, a := range amounts {

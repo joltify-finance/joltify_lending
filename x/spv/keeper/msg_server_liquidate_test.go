@@ -120,7 +120,7 @@ func (suite *liquidateTestSuite) TestLiquidate() {
 
 		{
 			name: "amount cannot be zero",
-			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[0], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("abc", sdk.ZeroInt())}, expectedErr: "the amount cannot be zero"},
+			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[0], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("abc", sdkmath.ZeroInt())}, expectedErr: "the amount cannot be zero"},
 		},
 		{
 			name: "pool cannot be found",

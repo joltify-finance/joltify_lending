@@ -19,7 +19,7 @@ func TestMsgRepayInterest_ValidateBasic(t *testing.T) {
 			msg: MsgRepayInterest{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgRepayInterest{

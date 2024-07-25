@@ -233,7 +233,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 		InvestorId:       "2",
 		DepositorAddress: creatorAddr1,
 		PoolIndex:        depositorPool,
-		LockedAmount:     sdk.NewCoin("aud-ausdc", sdk.ZeroInt()),
+		LockedAmount:     sdk.NewCoin("aud-ausdc", sdkmath.ZeroInt()),
 		WithdrawalAmount: depositAmount,
 		LinkedNFT:        []string{},
 	}

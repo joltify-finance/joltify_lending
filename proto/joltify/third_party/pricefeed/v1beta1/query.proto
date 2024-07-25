@@ -126,7 +126,7 @@ message QueryMarketsResponse {
 message PostedPriceResponse {
   string market_id      = 1 [(gogoproto.customname) = "MarketID"];
   string oracle_address = 2;
-  string price = 3 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string price = 3 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
   google.protobuf.Timestamp expiry = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
 }
 
@@ -134,7 +134,7 @@ message PostedPriceResponse {
 // module.
 message CurrentPriceResponse {
   string market_id = 1 [(gogoproto.customname) = "MarketID"];
-  string price = 2 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  string price = 2 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
 }
 
 // MarketResponse defines an asset in the pricefeed.

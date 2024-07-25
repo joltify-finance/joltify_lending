@@ -11,7 +11,6 @@ import (
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -29,7 +28,7 @@ func (k Keeper) updateInterestData(ctx context.Context, interestData *types.Borr
 	}
 	delta := latestPaymentDueTime.Sub(latestPaymentTime)
 	denom := interestData.Payments[0].PaymentAmount.Denom
-	payment = sdk.NewCoin(denom, sdk.ZeroInt())
+	payment = sdk.NewCoin(denom, sdkmath.ZeroInt())
 	lastBorrow := interestData.BorrowDetails[len(interestData.BorrowDetails)-1].BorrowedAmount
 	if delta >= time.Second*time.Duration(interestData.PayFreq) {
 		for delta > 0 {
@@ -38,7 +37,7 @@ func (k Keeper) updateInterestData(ctx context.Context, interestData *types.Borr
 			freqRatio := interestData.MonthlyRatio
 			paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
 			if paymentAmount.IsZero() {
-				return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
+				return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdkmath.ZeroInt()}, time.Time{}, nil
 			}
 
 			paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
@@ -68,11 +67,11 @@ func (k Keeper) updateInterestData(ctx context.Context, interestData *types.Borr
 		latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 		if currentTimeTruncated.Before(latestPaymentTime) {
-			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdkmath.ZeroInt()}, time.Time{}, nil
 		}
 		deltaTruncated := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
-		interest := r.Power(uint64(deltaTruncated)).Sub(sdk.OneDec())
+		interest := r.Power(uint64(deltaTruncated)).Sub(sdkmath.LegacyOneDec())
 
 		usdInterest := interest.Mul(exchangeRatio)
 		paymentAmountUsd := usdInterest.MulInt(lastBorrow.Amount).TruncateInt()
@@ -109,7 +108,7 @@ func (k Keeper) getAllInterestToBePaid(ctx context.Context, poolInfo *types.Pool
 	var exchangeRatio sdkmath.LegacyDec
 
 	if poolInfo.PoolStatus == types.PoolInfo_INACTIVE {
-		return sdk.ZeroInt(), time.Time{}, errors.New("no interest to be paid")
+		return sdkmath.ZeroInt(), time.Time{}, errors.New("no interest to be paid")
 	}
 
 	if poolInfo.InterestPrepayment == nil || poolInfo.InterestPrepayment.Counter == 0 {
@@ -172,7 +171,7 @@ func (k msgServer) calculatePaymentMonth(ctx context.Context, poolInfo types.Poo
 	}
 	usdEachMonth, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, marketId, paymentAmount)
 	if err != nil {
-		return 0, sdkmath.ZeroInt(), sdk.ZeroInt(), sdk.ZeroDec(), err
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err
 	}
 	counter := totalPaid.Quo(usdEachMonth)
 	return int32(counter.Int64()), usdEachMonth.Mul(counter), usdEachMonth, ratio, nil
@@ -184,7 +183,7 @@ func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInter
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())

@@ -20,7 +20,7 @@ func TestMsgSubmitrequest_ValidateBasic(t *testing.T) {
 			msg: MsgSubmitrequest{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgSubmitrequest{

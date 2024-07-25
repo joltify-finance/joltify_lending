@@ -45,7 +45,7 @@ func init() {
 }
 
 func RegisterDenoms() {
-	err := sdk.RegisterDenom(HumanCoinUnit, sdk.OneDec())
+	err := sdk.RegisterDenom(HumanCoinUnit, sdkmath.LegacyOneDec())
 	if err != nil {
 		panic(err)
 	}

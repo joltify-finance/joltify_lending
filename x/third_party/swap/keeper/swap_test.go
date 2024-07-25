@@ -364,7 +364,7 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_InsufficientFunds() {
 		coinA    sdk.Coin
 		coinB    sdk.Coin
 	}{
-		{"no uoppy balance", sdk.NewCoin("uoppy", sdk.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
+		{"no uoppy balance", sdk.NewCoin("uoppy", sdkmath.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
 		{"low uoppy balance", sdk.NewCoin("uoppy", sdkmath.NewInt(1000000)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000001)), sdk.NewCoin("usdc", sdkmath.NewInt(5000000))},
 		{"low uoppy balance", sdk.NewCoin("usdc", sdkmath.NewInt(5000000)), sdk.NewCoin("usdc", sdkmath.NewInt(5000001)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000000))},
 		{"large uoppy balance difference", sdk.NewCoin("uoppy", sdkmath.NewInt(100e6)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000e6)), sdk.NewCoin("usdc", sdkmath.NewInt(5000e6))},
@@ -398,7 +398,7 @@ func (suite *keeperTestSuite) TestSwapBatchExactForTokens_InsufficientFunds() {
 		coinA    sdk.Coin
 		coinB    sdk.Coin
 	}{
-		{"no usdt balance", sdk.NewCoin("usdt", sdk.ZeroInt()), sdk.NewCoin("usdt", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(90))},
+		{"no usdt balance", sdk.NewCoin("usdt", sdkmath.ZeroInt()), sdk.NewCoin("usdt", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(90))},
 		{"low usdt balance", sdk.NewCoin("usdt", sdkmath.NewInt(1000000)), sdk.NewCoin("usdt", sdkmath.NewInt(1000001)), sdk.NewCoin("usdc", sdkmath.NewInt(1000000))},
 		{"low usdc balance", sdk.NewCoin("usdc", sdkmath.NewInt(5000000)), sdk.NewCoin("usdc", sdkmath.NewInt(5000001)), sdk.NewCoin("usdt", sdkmath.NewInt(1000000))},
 		{"large usdt balance difference", sdk.NewCoin("usdt", sdkmath.NewInt(100e6)), sdk.NewCoin("usdt", sdkmath.NewInt(1000e6)), sdk.NewCoin("usdc", sdkmath.NewInt(100e6))},
@@ -442,8 +442,8 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_InsufficientFunds_Vesting()
 		coinA    sdk.Coin
 		coinB    sdk.Coin
 	}{
-		{"no uoppy balance, vesting only", sdk.NewCoin("uoppy", sdk.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
-		{"no usdc balance, vesting only", sdk.NewCoin("usdc", sdk.ZeroInt()), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("uoppy", sdkmath.NewInt(100))},
+		{"no uoppy balance, vesting only", sdk.NewCoin("uoppy", sdkmath.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
+		{"no usdc balance, vesting only", sdk.NewCoin("usdc", sdkmath.ZeroInt()), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("uoppy", sdkmath.NewInt(100))},
 		{"low uoppy balance, vesting matches exact", sdk.NewCoin("uoppy", sdkmath.NewInt(1000000)), sdk.NewCoin("uoppy", sdkmath.NewInt(1)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000001)), sdk.NewCoin("usdc", sdkmath.NewInt(5000000))},
 		{"low uoppy balance, vesting matches exact", sdk.NewCoin("usdc", sdkmath.NewInt(5000000)), sdk.NewCoin("usdc", sdkmath.NewInt(1)), sdk.NewCoin("usdc", sdkmath.NewInt(5000001)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000000))},
 		{"large uoppy balance difference, vesting covers difference", sdk.NewCoin("uoppy", sdkmath.NewInt(100e6)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000e6)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000e6)), sdk.NewCoin("usdc", sdkmath.NewInt(5000e6))},
@@ -537,7 +537,7 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_PanicOnInvalidPool() {
 	poolRecord, found := suite.Keeper.GetPool(suite.Ctx, poolID)
 	suite.Require().True(found, "expected pool record to exist")
 
-	poolRecord.TotalShares = sdk.ZeroInt()
+	poolRecord.TotalShares = sdkmath.ZeroInt()
 	suite.Keeper.SetPool_Raw(suite.Ctx, poolRecord)
 
 	balance := sdk.NewCoins(
@@ -580,10 +580,10 @@ func (suite *keeperTestSuite) TestSwapBatchExactForTokens_PanicOnInvalidPool() {
 	poolRecord2, found := suite.Keeper.GetPool(suite.Ctx, poolID2)
 	suite.Require().True(found, "expected pool record to exist")
 
-	poolRecord.TotalShares = sdk.ZeroInt()
+	poolRecord.TotalShares = sdkmath.ZeroInt()
 	suite.Keeper.SetPool_Raw(suite.Ctx, poolRecord)
 
-	poolRecord.TotalShares = sdk.ZeroInt()
+	poolRecord.TotalShares = sdkmath.ZeroInt()
 	suite.Keeper.SetPool_Raw(suite.Ctx, poolRecord2)
 
 	balance := sdk.NewCoins(
@@ -838,8 +838,8 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_InsufficientFunds() {
 		coinA    sdk.Coin
 		coinB    sdk.Coin
 	}{
-		{"no uoppy balance", sdk.NewCoin("uoppy", sdk.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
-		{"no usdc balance", sdk.NewCoin("usdc", sdk.ZeroInt()), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("uoppy", sdkmath.NewInt(100))},
+		{"no uoppy balance", sdk.NewCoin("uoppy", sdkmath.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
+		{"no usdc balance", sdk.NewCoin("usdc", sdkmath.ZeroInt()), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("uoppy", sdkmath.NewInt(100))},
 		{"low uoppy balance", sdk.NewCoin("uoppy", sdkmath.NewInt(1000000)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000000)), sdk.NewCoin("usdc", sdkmath.NewInt(5000000))},
 		{"low uoppy balance", sdk.NewCoin("usdc", sdkmath.NewInt(5000000)), sdk.NewCoin("usdc", sdkmath.NewInt(5000000)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000000))},
 		{"large uoppy balance difference", sdk.NewCoin("uoppy", sdkmath.NewInt(100e6)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000e6)), sdk.NewCoin("usdc", sdkmath.NewInt(5000e6))},
@@ -874,8 +874,8 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_InsufficientFunds_Vesting()
 		coinA    sdk.Coin
 		coinB    sdk.Coin
 	}{
-		{"no uoppy balance, vesting only", sdk.NewCoin("uoppy", sdk.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
-		{"no usdc balance, vesting only", sdk.NewCoin("usdc", sdk.ZeroInt()), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("usdc", sdkmath.NewInt(5000)), sdk.NewCoin("uoppy", sdkmath.NewInt(100))},
+		{"no uoppy balance, vesting only", sdk.NewCoin("uoppy", sdkmath.ZeroInt()), sdk.NewCoin("uoppy", sdkmath.NewInt(100)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000)), sdk.NewCoin("usdc", sdkmath.NewInt(500))},
+		{"no usdc balance, vesting only", sdk.NewCoin("usdc", sdkmath.ZeroInt()), sdk.NewCoin("usdc", sdkmath.NewInt(500)), sdk.NewCoin("usdc", sdkmath.NewInt(5000)), sdk.NewCoin("uoppy", sdkmath.NewInt(100))},
 		{"low uoppy balance, vesting matches exact", sdk.NewCoin("uoppy", sdkmath.NewInt(1000000)), sdk.NewCoin("uoppy", sdkmath.NewInt(100000)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000000)), sdk.NewCoin("usdc", sdkmath.NewInt(5000000))},
 		{"low uoppy balance, vesting matches exact", sdk.NewCoin("usdc", sdkmath.NewInt(5000000)), sdk.NewCoin("usdc", sdkmath.NewInt(500000)), sdk.NewCoin("usdc", sdkmath.NewInt(5000000)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000000))},
 		{"large uoppy balance difference, vesting covers difference", sdk.NewCoin("uoppy", sdkmath.NewInt(100e6)), sdk.NewCoin("uoppy", sdkmath.NewInt(10000e6)), sdk.NewCoin("uoppy", sdkmath.NewInt(1000e6)), sdk.NewCoin("usdc", sdkmath.NewInt(5000e6))},
@@ -940,7 +940,7 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_PanicOnInvalidPool() {
 	poolRecord, found := suite.Keeper.GetPool(suite.Ctx, poolID)
 	suite.Require().True(found, "expected pool record to exist")
 
-	poolRecord.TotalShares = sdk.ZeroInt()
+	poolRecord.TotalShares = sdkmath.ZeroInt()
 	suite.Keeper.SetPool_Raw(suite.Ctx, poolRecord)
 
 	balance := sdk.NewCoins(

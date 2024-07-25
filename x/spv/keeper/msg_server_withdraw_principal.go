@@ -43,7 +43,7 @@ func (k Keeper) handlerPoolLiquidation(ctx context.Context, depositor types.Depo
 
 	depositor.TotalPaidLiquidationAmount = depositor.TotalPaidLiquidationAmount.Add(totalRedeem)
 	totalWithdraw := depositor.WithdrawalAmount.AddAmount(interest).AddAmount(totalRedeem)
-	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdkmath.ZeroInt())
 	k.SetDepositor(ctx, depositor)
 
 	ctx.EventManager().EmitEvent(
@@ -83,7 +83,7 @@ func (k msgServer) handleDepositClose(ctx context.Context, depositor types.Depos
 	}
 
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", depositor.DepositorAddress.String())
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", depositor.DepositorAddress.String())
 	}
 
 	amountToSend = amountToSend.Add(interest)
@@ -98,8 +98,8 @@ func (k msgServer) handleDepositClose(ctx context.Context, depositor types.Depos
 			sdk.NewAttribute(types.AttributeAmount, amountToSend.String()),
 		),
 	)
-	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
-	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdkmath.ZeroInt())
+	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdkmath.ZeroInt())
 
 	// burn the nft if it is existed
 	for _, el := range depositor.LinkedNFT {
@@ -155,7 +155,7 @@ func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdr
 
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	depositor, found := k.GetDepositor(ctx, msg.PoolIndex, investor)

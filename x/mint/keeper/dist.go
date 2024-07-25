@@ -74,7 +74,7 @@ func (k Keeper) mintCoinsAndDistribute(ctx context.Context, pa types.Params, del
 
 	totalBoned := k.stakingKeeper.TotalBondedTokens(ctx)
 
-	minttedAmt := interestFactor.Sub(sdk.OneDec()).MulInt(totalBoned)
+	minttedAmt := interestFactor.Sub(sdkmath.LegacyOneDec()).MulInt(totalBoned)
 	minttedCoins := sdk.NewCoins(sdk.NewCoin("ujolt", minttedAmt.TruncateInt()))
 
 	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, minttedCoins)

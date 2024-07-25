@@ -245,8 +245,8 @@ func (k EvmBankKeeper) GetModuleAddress(moduleName string) sdk.AccAddress {
 // SplitAJoltCoins splits ajolt coins to the equivalent ujolt coins and any remaining ajolt balance.
 // An error will be returned if the coins are not valid or if the coins are not the ajolt denom.
 func SplitAJoltCoins(coins sdk.Coins) (sdk.Coin, sdkmath.Int, error) {
-	ajolt := sdk.ZeroInt()
-	ujolt := sdk.NewCoin(CosmosDenom, sdk.ZeroInt())
+	ajolt := sdkmath.ZeroInt()
+	ujolt := sdk.NewCoin(CosmosDenom, sdkmath.ZeroInt())
 
 	if len(coins) == 0 {
 		return ujolt, ajolt, nil
@@ -278,13 +278,13 @@ func ValidateEvmCoins(coins sdk.Coins) error {
 
 	// validate that coins are non-negative, sorted, and no dup denoms
 	if err := coins.Validate(); err != nil {
-		return errorsmod.Wrap(errorsmod.ErrInvalidCoins, coins.String())
+		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, coins.String())
 	}
 
 	// validate that coin denom is ajolt
 	if len(coins) != 1 || coins[0].Denom != EvmDenom {
 		errMsg := fmt.Sprintf("invalid evm coin denom, only %s is supported", EvmDenom)
-		return errorsmod.Wrap(errorsmod.ErrInvalidCoins, errMsg)
+		return errorsmod.Wrap(sdkerrors.ErrInvalidCoins, errMsg)
 	}
 
 	return nil

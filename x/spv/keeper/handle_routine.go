@@ -75,7 +75,7 @@ func (k Keeper) HandleTransfer(ctx context.Context, poolInfo *types.PoolInfo) bo
 
 	poolInfo.ProcessedTransferAccounts = append(poolInfo.ProcessedTransferAccounts, poolInfo.TransferAccounts...)
 	poolInfo.TransferAccounts = make([]sdk.AccAddress, 0, 200)
-	poolInfo.TotalTransferOwnershipAmount = sdk.NewCoin(poolInfo.TotalTransferOwnershipAmount.Denom, sdk.ZeroInt())
+	poolInfo.TotalTransferOwnershipAmount = sdk.NewCoin(poolInfo.TotalTransferOwnershipAmount.Denom, sdkmath.ZeroInt())
 
 	a, _ := denomConvertToLocalAndUsd(poolInfo.BorrowedAmount.Denom)
 	usdTotalLocked, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, denomConvertToMarketID(a), totalLockedAmount)
@@ -107,13 +107,13 @@ func (k Keeper) HandleTransfer(ctx context.Context, poolInfo *types.PoolInfo) bo
 
 			usdLocked := outboundConvertToUSD(el.LockedAmount.Amount, ratio)
 			el.WithdrawalAmount = el.WithdrawalAmount.AddAmount(usdLocked)
-			el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdk.ZeroInt())
+			el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdkmath.ZeroInt())
 			el.DepositType = types.DepositorInfo_deposit_close
 			k.SetDepositor(ctx, *el)
 		}
 
 		poolInfo.BorrowedAmount = poolInfo.BorrowedAmount.SubAmount(totalLockedAmount)
-		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, usdTotalLocked), false, nil, sdk.ZeroInt(), true)
+		err := k.doBorrow(ctx, poolInfo, sdk.NewCoin(poolInfo.UsableAmount.Denom, usdTotalLocked), false, nil, sdkmath.ZeroInt(), true)
 		if err != nil {
 			panic(err)
 		}
@@ -142,7 +142,7 @@ func (k Keeper) HandleTransfer(ctx context.Context, poolInfo *types.PoolInfo) bo
 
 		usdLocked := outboundConvertToUSD(el.LockedAmount.Amount, ratio)
 		el.WithdrawalAmount = el.WithdrawalAmount.AddAmount(usdLocked)
-		el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdk.ZeroInt())
+		el.LockedAmount = sdk.NewCoin(el.LockedAmount.Denom, sdkmath.ZeroInt())
 		totalBorrowableFromPrevious = totalBorrowableFromPrevious.Add(el.WithdrawalAmount.Amount)
 	}
 
@@ -160,7 +160,7 @@ func (k Keeper) HandleTransfer(ctx context.Context, poolInfo *types.PoolInfo) bo
 		depositors[i].DepositType = types.DepositorInfo_processed
 		k.SetDepositor(ctx, *depositors[i])
 	}
-	err = k.doBorrow(ctx, poolInfo, poolInfo.UsableAmount, false, nil, sdk.ZeroInt(), true)
+	err = k.doBorrow(ctx, poolInfo, poolInfo.UsableAmount, false, nil, sdkmath.ZeroInt(), true)
 	if err != nil {
 		panic(err)
 	}
@@ -244,7 +244,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx context.Context, poolInfo *typ
 		return false
 	}
 
-	total := sdk.ZeroInt()
+	total := sdkmath.ZeroInt()
 	for _, el := range withdrawAccounts[1:] {
 		depositor, found := k.GetDepositor(ctx, poolInfo.Index, el)
 		if !found {
@@ -271,7 +271,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx context.Context, poolInfo *typ
 		usdWithdrawal := sdk.NewDecFromInt(depositor.LockedAmount.Amount).Mul(exchangeRatio).TruncateInt()
 		total = total.Add(usdWithdrawal)
 		depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(usdWithdrawal)
-		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdkmath.ZeroInt())
 		depositor.DepositType = types.DepositorInfo_deposit_close
 		k.SetDepositor(ctx, depositor)
 	}
@@ -301,7 +301,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx context.Context, poolInfo *typ
 	depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
 	usdAmount := usdWithdrawalTotal.SubAmount(total)
 	depositor.WithdrawalAmount = depositor.WithdrawalAmount.Add(usdAmount)
-	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdkmath.ZeroInt())
 	depositor.DepositType = types.DepositorInfo_deposit_close
 	k.SetDepositor(ctx, depositor)
 
@@ -313,8 +313,8 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx context.Context, poolInfo *typ
 		panic(err)
 	}
 
-	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.EscrowPrincipalAmount.Denom, sdk.ZeroInt())
-	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdk.ZeroInt())
+	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.EscrowPrincipalAmount.Denom, sdkmath.ZeroInt())
+	poolInfo.WithdrawProposalAmount = sdk.NewCoin(poolInfo.WithdrawProposalAmount.Denom, sdkmath.ZeroInt())
 
 	poolInfo.ProcessedWithdrawAccounts = append(poolInfo.ProcessedWithdrawAccounts, poolInfo.WithdrawAccounts...)
 	poolInfo.WithdrawAccounts = make([]sdk.AccAddress, 0, 200)
@@ -346,8 +346,8 @@ func (k Keeper) HandlePrincipalPayment(ctx context.Context, poolInfo *types.Pool
 	}
 
 	poolInfo.PoolStatus = types.PoolInfo_FROZEN
-	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdk.ZeroInt())
-	poolInfo.EscrowInterestAmount = sdk.ZeroInt()
+	poolInfo.EscrowPrincipalAmount = sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdkmath.ZeroInt())
+	poolInfo.EscrowInterestAmount = sdkmath.ZeroInt()
 	poolInfo.PrincipalPaid = false
 	k.SetPool(ctx, *poolInfo)
 	return true

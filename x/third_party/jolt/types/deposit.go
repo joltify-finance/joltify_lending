@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -22,7 +24,7 @@ func NewDeposit(depositor sdk.AccAddress, amount sdk.Coins, indexes SupplyIntere
 // The normalized deposit is effectively how big the deposit would have been if it had been supplied at time 0 and not touched since.
 //
 // An error is returned if the deposit is in an invalid state.
-func (d Deposit) NormalizedDeposit() (sdkmath.LegacyDecCoins, error) {
+func (d Deposit) NormalizedDeposit() (sdk.DecCoins, error) {
 	normalized := sdk.NewDecCoins()
 
 	for _, coin := range d.Amount {
@@ -31,11 +33,11 @@ func (d Deposit) NormalizedDeposit() (sdkmath.LegacyDecCoins, error) {
 		if !found {
 			return nil, fmt.Errorf("deposited amount '%s' missing interest factor", coin.Denom)
 		}
-		if factor.LT(sdk.OneDec()) {
+		if factor.LT(sdkmath.LegacyOneDec()) {
 			return nil, fmt.Errorf("interest factor '%s' < 1", coin.Denom)
 		}
 
-		value := sdk.NewDecFromInt(coin.Amount).Quo(factor)
+		value := sdkmath.LegacyNewDecFromInt(coin.Amount).Quo(factor)
 		normalized = normalized.Add(
 			sdk.NewDecCoinFromDec(
 				coin.Denom,
@@ -150,7 +152,7 @@ func (sifs SupplyInterestFactors) GetInterestFactor(denom string) (sdkmath.Legac
 			return sif.Value, true
 		}
 	}
-	return sdk.ZeroDec(), false
+	return sdkmath.LegacyZeroDec(), false
 }
 
 // SetInterestFactor sets a denom's interest factor value

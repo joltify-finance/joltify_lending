@@ -46,7 +46,7 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 	apy, err := sdk.NewDecFromStr("0.08")
 	assert.NoError(t, err)
 
-	adjAPY := sdk.OneDec().Add(apy)
+	adjAPY := sdkmath.LegacyOneDec().Add(apy)
 
 	spy, err := keeper.APYToSPY(adjAPY)
 	assert.NoError(t, err)

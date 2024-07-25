@@ -313,7 +313,7 @@ func (builder JoltDepositBuilder) Build() hardtypes.Deposit { return builder.Dep
 // WithSourceShares adds a deposit amount and factor such that the source shares for this deposit is equal to specified.
 // With a factor of 1, the deposit amount is the source shares. This picks an arbitrary factor to ensure factors are accounted for in production code.
 func (builder JoltDepositBuilder) WithSourceShares(denom string, shares int64) JoltDepositBuilder {
-	if !builder.Amount.AmountOf(denom).Equal(sdk.ZeroInt()) {
+	if !builder.Amount.AmountOf(denom).Equal(sdkmath.ZeroInt()) {
 		panic("adding to amount with existing denom not implemented")
 	}
 	if _, f := builder.Index.GetInterestFactor(denom); f {

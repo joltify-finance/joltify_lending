@@ -72,7 +72,7 @@ func (suite *ConversionTestSuite) TestBurn() {
 	suite.Require().NoError(err)
 
 	bal = suite.App.GetBankKeeper().GetBalance(suite.Ctx, recipient, pair.Denom)
-	suite.Require().Equal(sdk.ZeroInt(), bal.Amount, "balance should be zero after burn")
+	suite.Require().Equal(sdkmath.ZeroInt(), bal.Amount, "balance should be zero after burn")
 }
 
 func (suite *ConversionTestSuite) TestUnlockERC20Tokens() {
@@ -191,7 +191,7 @@ func (suite *ConversionTestSuite) TestConvertCoinToERC20() {
 
 	// Source should decrease
 	bal := suite.App.GetBankKeeper().GetBalance(suite.Ctx, originAcc, pair.Denom)
-	suite.Require().Equal(sdk.ZeroInt(), bal.Amount, "conversion should decrease source balance")
+	suite.Require().Equal(sdkmath.ZeroInt(), bal.Amount, "conversion should decrease source balance")
 
 	// Module bal should also decrease
 	moduleBal := suite.GetERC20BalanceOf(
@@ -353,5 +353,5 @@ func (suite *ConversionTestSuite) TestConvertERC20ToCoin_EmptyContract() {
 
 	// bank balance should not change
 	bal := suite.App.GetBankKeeper().GetBalance(suite.Ctx, userAddr, pair.Denom)
-	suite.Require().Equal(sdk.ZeroInt(), bal.Amount)
+	suite.Require().Equal(sdkmath.ZeroInt(), bal.Amount)
 }

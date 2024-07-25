@@ -34,7 +34,7 @@ func CalculateInterestRate(apy sdkmath.LegacyDec, payFreq int) sdkmath.LegacyDec
 	if err != nil {
 		panic(err)
 	}
-	adjMonthAPY := sdk.OneDec().Add(splitAPY)
+	adjMonthAPY := sdkmath.LegacyOneDec().Add(splitAPY)
 	i, err := apyTospy(adjMonthAPY, uint64(seconds))
 	if err != nil {
 		return sdkmath.LegacyDec{}

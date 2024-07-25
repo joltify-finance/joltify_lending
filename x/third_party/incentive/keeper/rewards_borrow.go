@@ -55,7 +55,7 @@ func (k Keeper) getJoltBorrowTotalSourceShares(ctx context.Context, denom string
 	interestFactor, found := k.joltKeeper.GetBorrowInterestFactor(ctx, denom)
 	if !found {
 		// assume nothing has been borrowed so the factor starts at it's default value
-		interestFactor = sdk.OneDec()
+		interestFactor = sdkmath.LegacyOneDec()
 	}
 
 	// return borrowed/factor to get the "pre interest" value of the current total borrowed
@@ -215,10 +215,10 @@ func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, so
 //
 // Returns an error if oldIndex > newIndex. This should never happen, as it would mean that a global reward index has decreased in value,
 // or that a global reward index has been deleted from state.
-func (k Keeper) CalculateSingleReward(oldIndex, newIndex, sourceShares sdkmath.LegacyDec) (sdk.Int, error) {
+func (k Keeper) CalculateSingleReward(oldIndex, newIndex, sourceShares sdkmath.LegacyDec) (sdkmath.Int, error) {
 	increase := newIndex.Sub(oldIndex)
 	if increase.IsNegative() {
-		return sdk.Int{}, errorsmod.Wrapf(types2.ErrDecreasingRewardFactor, "old: %v, new: %v", oldIndex, newIndex)
+		return sdkmath.Int{}, errorsmod.Wrapf(types2.ErrDecreasingRewardFactor, "old: %v, new: %v", oldIndex, newIndex)
 	}
 	reward := increase.Mul(sourceShares).RoundInt()
 	return reward, nil

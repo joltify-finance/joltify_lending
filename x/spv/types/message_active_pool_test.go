@@ -19,7 +19,7 @@ func TestMsgActivePool_ValidateBasic(t *testing.T) {
 			msg: MsgActivePool{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgActivePool{

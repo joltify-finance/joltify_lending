@@ -301,7 +301,7 @@ func TestMsgWithdraw_Validation(t *testing.T) {
 		{
 			name:        "zero shares",
 			from:        validMsg.From,
-			shares:      sdk.ZeroInt(),
+			shares:      sdkmath.ZeroInt(),
 			minTokenA:   validMsg.MinTokenA,
 			minTokenB:   validMsg.MinTokenB,
 			deadline:    validMsg.Deadline,

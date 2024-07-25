@@ -246,7 +246,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipTwoInvestor() {
 	suite.Require().True(found)
 
 	suite.Require().Len(depositor2Before.LinkedNFT, 0)
-	suite.Require().True(depositor2Before.LockedAmount.Amount.Equal(sdk.ZeroInt()))
+	suite.Require().True(depositor2Before.LockedAmount.Amount.Equal(sdkmath.ZeroInt()))
 	suite.Require().True(depositor2Before.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(2e5)))
 
 	d, ok = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
@@ -417,7 +417,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipTwoInvestorBoth() {
 	suite.Require().True(found)
 
 	suite.Require().Len(depositor2Before.LinkedNFT, 0)
-	suite.Require().True(depositor2Before.LockedAmount.Amount.Equal(sdk.ZeroInt()))
+	suite.Require().True(depositor2Before.LockedAmount.Amount.Equal(sdkmath.ZeroInt()))
 	suite.Require().True(depositor2Before.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(1e5)))
 
 	suite.keeper.HandleTransfer(suite.ctx, &poolInfo)
@@ -603,7 +603,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByTwoInvestors()
 	suite.Require().True(found)
 
 	suite.Require().Len(depositor2Before.LinkedNFT, 0)
-	suite.Require().True(depositor2Before.LockedAmount.Amount.Equal(sdk.ZeroInt()))
+	suite.Require().True(depositor2Before.LockedAmount.Amount.Equal(sdkmath.ZeroInt()))
 	suite.Require().True(depositor2Before.WithdrawalAmount.Amount.Equal(sdk.NewIntFromUint64(1e5)))
 
 	suite.keeper.HandleTransfer(suite.ctx, &poolInfo)
@@ -713,7 +713,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByMultipleEnough
 	suite.Require().True(poolInfoBefore.UsableAmount.Amount.IsZero())
 	// err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
-	totalBorrowed := sdk.ZeroInt()
+	totalBorrowed := sdkmath.ZeroInt()
 	for i := 0; i < 3; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
@@ -735,7 +735,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByMultipleEnough
 
 	suite.keeper.HandleTransfer(suite.ctx, &poolInfo)
 
-	totalBorrowed2 := sdk.ZeroInt()
+	totalBorrowed2 := sdkmath.ZeroInt()
 
 	for i := 0; i < 8; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
@@ -825,7 +825,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByMultipleNotEno
 	suite.Require().True(poolInfoBefore.UsableAmount.Amount.IsZero())
 	// err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
-	totalBorrowed := sdk.ZeroInt()
+	totalBorrowed := sdkmath.ZeroInt()
 	for i := 0; i < 3; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
@@ -836,7 +836,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByMultipleNotEno
 
 	suite.Require().True(totalBorrowed.Equal(poolInfoBefore.BorrowedAmount.Amount))
 
-	totalDeposit := sdk.ZeroInt()
+	totalDeposit := sdkmath.ZeroInt()
 	for i := 3; i < 8; i++ {
 		msgDeposit := &types.MsgDeposit{Creator: suite.investors[i], PoolIndex: suite.investorPool, Token: depositorAmounts[i]}
 		_, err := suite.app.Deposit(suite.ctx, msgDeposit)
@@ -851,8 +851,8 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByMultipleNotEno
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	totalBorrowed2 := sdk.ZeroInt()
-	totalBorrowable := sdk.ZeroInt()
+	totalBorrowed2 := sdkmath.ZeroInt()
+	totalBorrowable := sdkmath.ZeroInt()
 	for i := 0; i < 8; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
@@ -958,7 +958,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	suite.Require().True(poolInfoBefore.UsableAmount.Amount.IsZero())
 	// err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
-	totalBorrowed := sdk.ZeroInt()
+	totalBorrowed := sdkmath.ZeroInt()
 	for i := 0; i < 3; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
@@ -969,7 +969,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 
 	suite.Require().True(totalBorrowed.Equal(poolInfoBefore.BorrowedAmount.Amount))
 
-	totalDeposit := sdk.ZeroInt()
+	totalDeposit := sdkmath.ZeroInt()
 	for i := 3; i < 8; i++ {
 		msgDeposit := &types.MsgDeposit{Creator: suite.investors[i], PoolIndex: suite.investorPool, Token: depositorAmounts[i]}
 		_, err := suite.app.Deposit(suite.ctx, msgDeposit)
@@ -988,8 +988,8 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	totalBorrowed2 := sdk.ZeroInt()
-	totalBorrowable := sdk.ZeroInt()
+	totalBorrowed2 := sdkmath.ZeroInt()
+	totalBorrowable := sdkmath.ZeroInt()
 	for i := 0; i < 8; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
@@ -1162,7 +1162,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	suite.Require().True(poolInfoBefore.UsableAmount.Amount.IsZero())
 	// err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 
-	totalBorrowed := sdk.ZeroInt()
+	totalBorrowed := sdkmath.ZeroInt()
 	for i := 0; i < 3; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)
@@ -1173,7 +1173,7 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 
 	suite.Require().True(totalBorrowed.Equal(poolInfoBefore.BorrowedAmount.Amount))
 
-	totalDeposit := sdk.ZeroInt()
+	totalDeposit := sdkmath.ZeroInt()
 	for i := 3; i < 8; i++ {
 		msgDeposit := &types.MsgDeposit{Creator: suite.investors[i], PoolIndex: suite.investorPool, Token: depositorAmounts[i]}
 		_, err := suite.app.Deposit(suite.ctx, msgDeposit)
@@ -1192,8 +1192,8 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedMultipleBorrowBy
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	totalBorrowed2 := sdk.ZeroInt()
-	totalBorrowable := sdk.ZeroInt()
+	totalBorrowed2 := sdkmath.ZeroInt()
+	totalBorrowable := sdkmath.ZeroInt()
 	for i := 0; i < 8; i++ {
 		creatorAddr, err := sdk.AccAddressFromBech32(suite.investors[i])
 		suite.Require().NoError(err)

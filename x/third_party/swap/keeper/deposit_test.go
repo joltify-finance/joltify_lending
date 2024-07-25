@@ -32,8 +32,8 @@ func (suite *keeperTestSuite) TestDeposit_InsufficientFunds() {
 	}{
 		{
 			name:     "no balance",
-			balanceA: sdk.NewCoin("unuseddenom", sdk.ZeroInt()),
-			balanceB: sdk.NewCoin("unuseddenom", sdk.ZeroInt()),
+			balanceA: sdk.NewCoin("unuseddenom", sdkmath.ZeroInt()),
+			balanceB: sdk.NewCoin("unuseddenom", sdkmath.ZeroInt()),
 			depositA: sdk.NewCoin("ukava", sdkmath.NewInt(100)),
 			depositB: sdk.NewCoin("usdx", sdkmath.NewInt(100)),
 		},
@@ -89,8 +89,8 @@ func (suite *keeperTestSuite) TestDeposit_InsufficientFunds_Vesting() {
 	}{
 		{
 			name:     "no balance, vesting only",
-			balanceA: sdk.NewCoin("ukava", sdk.ZeroInt()),
-			balanceB: sdk.NewCoin("usdx", sdk.ZeroInt()),
+			balanceA: sdk.NewCoin("ukava", sdkmath.ZeroInt()),
+			balanceB: sdk.NewCoin("usdx", sdkmath.ZeroInt()),
 			vestingA: sdk.NewCoin("ukava", sdkmath.NewInt(100)),
 			vestingB: sdk.NewCoin("usdx", sdkmath.NewInt(100)),
 			depositA: sdk.NewCoin("ukava", sdkmath.NewInt(100)),

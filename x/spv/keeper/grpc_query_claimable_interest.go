@@ -20,7 +20,7 @@ func (k Keeper) ClaimableInterest(goCtx context.Context, req *types.QueryClaimab
 
 	investor, err := sdk.AccAddressFromBech32(req.Wallet)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", req.Wallet)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", req.Wallet)
 	}
 
 	depositor, found := k.GetDepositor(ctx, req.PoolIndex, investor)

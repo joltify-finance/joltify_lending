@@ -19,7 +19,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo, ok := k.GetPools(ctx, msg.GetPoolIndex())
@@ -38,7 +38,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	}
 
 	if msg.Token.GetDenom() != poolInfo.TargetAmount.Denom {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidCoins, "we only accept %v", poolInfo.TargetAmount.Denom)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidCoins, "we only accept %v", poolInfo.TargetAmount.Denom)
 	}
 
 	resp, err := k.kycKeeper.GetByWallet(ctx, msg.Creator)
@@ -74,7 +74,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		if msg.Token.Amount.Sub(poolInfo.MinDepositAmount).IsNegative() {
 			return nil, coserrors.Wrapf(types.ErrDeposit, "the deposit amount %v is less than the minimum deposit amount %v", msg.Token.Amount.String(), poolInfo.MinDepositAmount.String())
 		}
-		depositor := types.DepositorInfo{InvestorId: resp.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdkmath.ZeroInt()), WithdrawalAmount: msg.Token, LinkedNFT: []string{}, DepositType: types.DepositorInfo_unset, PendingInterest: sdk.NewCoin(msg.Token.Denom, sdk.ZeroInt())}
+		depositor := types.DepositorInfo{InvestorId: resp.InvestorId, DepositorAddress: investor, PoolIndex: msg.PoolIndex, LockedAmount: sdk.NewCoin(poolInfo.BorrowedAmount.Denom, sdkmath.ZeroInt()), WithdrawalAmount: msg.Token, LinkedNFT: []string{}, DepositType: types.DepositorInfo_unset, PendingInterest: sdk.NewCoin(msg.Token.Denom, sdkmath.ZeroInt())}
 		k.SetDepositor(ctx, depositor)
 	} else {
 		switch previousDepositor.DepositType {

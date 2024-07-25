@@ -144,7 +144,7 @@ func (p *DenominatedPool) SwapWithExactOutput(swapOutput sdk.Coin, fee sdkmath.L
 	}
 }
 
-// coins returns a new coins slice with correct reserve denoms from ordered sdk.Ints
+// coins returns a new coins slice with correct reserve denoms from ordered sdkmath.Ints
 func (p *DenominatedPool) coins(amountA, amountB sdkmath.Int) sdk.Coins {
 	return sdk.NewCoins(p.coinA(amountA), p.coinB(amountB))
 }

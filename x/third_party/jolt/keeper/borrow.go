@@ -149,10 +149,10 @@ func (k Keeper) ValidateBorrow(ctx context.Context, borrower sdk.AccAddress, amo
 
 		// Validate the requested borrow value for the asset against the money market's global borrow limit
 		if moneyMarket.BorrowLimit.HasMaxLimit {
-			var assetTotalBorrowedAmount sdk.Int
+			var assetTotalBorrowedAmount sdkmath.Int
 			totalBorrowedCoins, found := k.GetBorrowedCoins(ctx)
 			if !found {
-				assetTotalBorrowedAmount = sdk.ZeroInt()
+				assetTotalBorrowedAmount = sdkmath.ZeroInt()
 			} else {
 				assetTotalBorrowedAmount = totalBorrowedCoins.AmountOf(coin.Denom)
 			}
@@ -246,7 +246,7 @@ func (k Keeper) DecrementBorrowedCoins(ctx context.Context, coins sdk.Coins) err
 		coinsToSubtract := sdk.NewCoins()
 		for _, coin := range coins {
 			if borrowedCoins.AmountOf(coin.Denom).LT(coin.Amount) {
-				if borrowedCoins.AmountOf(coin.Denom).GT(sdk.ZeroInt()) {
+				if borrowedCoins.AmountOf(coin.Denom).GT(sdkmath.ZeroInt()) {
 					coinsToSubtract = coinsToSubtract.Add(sdk.NewCoin(coin.Denom, borrowedCoins.AmountOf(coin.Denom)))
 				}
 			} else {

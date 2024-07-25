@@ -135,7 +135,7 @@ func checkInterestCorrectness(suite *claimInterestSuite, creatorAddr1, creatorAd
 	c2, err := sdk.ParseCoinsNormalized(expectedAmount2 + "ausdc")
 	suite.Require().NoError(err)
 
-	totalPaid := sdk.ZeroInt()
+	totalPaid := sdkmath.ZeroInt()
 	for _, el := range borrowClassInfo.Payments {
 		totalPaid = totalPaid.Add(el.PaymentAmount.Amount)
 	}
@@ -492,7 +492,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	expectedUser1TotalfromTheFirstBorrow := amount1.MulRaw(int64(totalCounter))
 	expectedUser2TotalfromTheFirstBorrow := amount2.MulRaw(int64(totalCounter))
 
-	totalPayment := sdk.ZeroInt()
+	totalPayment := sdkmath.ZeroInt()
 
 	Borrowclasss, _ := suite.nftKeeper.GetClass(suite.ctx, "class-e0d49c3eed41e408b493a14042a8aa31375d64e3e357f911afbb085e02bde083-1")
 	err = proto.Unmarshal(Borrowclasss.Data.Value, &borrowClassInfo)

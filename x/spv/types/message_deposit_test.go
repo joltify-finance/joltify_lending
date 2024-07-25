@@ -19,7 +19,7 @@ func TestMsgDeposit_ValidateBasic(t *testing.T) {
 			msg: MsgDeposit{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgDeposit{

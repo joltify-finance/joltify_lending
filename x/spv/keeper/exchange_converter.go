@@ -8,7 +8,7 @@ import (
 func (k Keeper) inboundConvertFromUSDWithMarketID(ctx context.Context, marketID string, amount sdkmath.Int) (sdkmath.Int, sdkmath.LegacyDec, error) {
 	currencyPrice, err := k.priceFeedKeeper.GetCurrentPrice(ctx, marketID)
 	if err != nil {
-		return sdk.ZeroInt(), sdk.ZeroDec(), err
+		return sdkmath.ZeroInt(), sdk.ZeroDec(), err
 	}
 	outAmount := sdk.NewDecFromInt(amount).Quo(currencyPrice.Price).TruncateInt()
 	return outAmount, currencyPrice.Price, nil
@@ -17,7 +17,7 @@ func (k Keeper) inboundConvertFromUSDWithMarketID(ctx context.Context, marketID 
 func (k Keeper) outboundConvertToUSDWithMarketID(ctx context.Context, marketID string, amount sdkmath.Int) (sdkmath.Int, sdkmath.LegacyDec, error) {
 	currencyPrice, err := k.priceFeedKeeper.GetCurrentPrice(ctx, marketID)
 	if err != nil {
-		return sdk.ZeroInt(), sdk.ZeroDec(), err
+		return sdkmath.ZeroInt(), sdk.ZeroDec(), err
 	}
 	outAmount := currencyPrice.Price.Mul(sdk.NewDecFromInt(amount)).TruncateInt()
 	return outAmount, currencyPrice.Price, nil

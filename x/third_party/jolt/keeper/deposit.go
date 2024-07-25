@@ -17,7 +17,7 @@ func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coins sdk
 		if !foundInterestFactor {
 			_, foundMm := k.GetMoneyMarket(ctx, coin.Denom)
 			if foundMm {
-				k.SetSupplyInterestFactor(ctx, coin.Denom, sdk.OneDec())
+				k.SetSupplyInterestFactor(ctx, coin.Denom, sdkmath.LegacyOneDec())
 			}
 		}
 	}
@@ -115,7 +115,7 @@ func (k Keeper) ValidateDeposit(ctx context.Context, coins sdk.Coins) error {
 }
 
 // GetTotalDeposited returns the total amount deposited for the input deposit type and deposit denom
-func (k Keeper) GetTotalDeposited(ctx context.Context, depositDenom string) (total sdk.Int) {
+func (k Keeper) GetTotalDeposited(ctx context.Context, depositDenom string) (total sdkmath.Int) {
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleAccountName)
 	return k.bankKeeper.GetBalance(ctx, macc.GetAddress(), depositDenom).Amount
 }
@@ -143,7 +143,7 @@ func (k Keeper) DecrementSuppliedCoins(ctx context.Context, coins sdk.Coins) err
 		coinsToSubtract := sdk.NewCoins()
 		for _, coin := range coins {
 			if suppliedCoins.AmountOf(coin.Denom).LT(coin.Amount) {
-				if suppliedCoins.AmountOf(coin.Denom).GT(sdk.ZeroInt()) {
+				if suppliedCoins.AmountOf(coin.Denom).GT(sdkmath.ZeroInt()) {
 					coinsToSubtract = coinsToSubtract.Add(sdk.NewCoin(coin.Denom, suppliedCoins.AmountOf(coin.Denom)))
 				}
 			} else {

@@ -18,7 +18,7 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo1, found := k.GetPools(ctx, msg.GetPoolIndex())

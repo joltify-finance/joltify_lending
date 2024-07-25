@@ -911,7 +911,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 
 				reservesPrior, foundReservesPrior := suite.keeper.GetTotalReserves(prevCtx)
 				if !foundReservesPrior {
-					reservesPrior = sdk.NewCoins(sdk.NewCoin(tc.args.borrowCoinDenom, sdk.ZeroInt()))
+					reservesPrior = sdk.NewCoins(sdk.NewCoin(tc.args.borrowCoinDenom, sdkmath.ZeroInt()))
 				}
 
 				interestFactorPrior, foundInterestFactorPrior := suite.keeper.GetBorrowInterestFactor(prevCtx, tc.args.borrowCoinDenom)
@@ -922,7 +922,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 				suite.Require().NoError(err)
 
 				// Convert from APY to SPY, expressed as (1 + borrow rate)
-				borrowRateSpy, err := keeper.APYToSPY(sdk.OneDec().Add(borrowRateApy))
+				borrowRateSpy, err := keeper.APYToSPY(sdkmath.LegacyOneDec().Add(borrowRateApy))
 				suite.Require().NoError(err)
 
 				interestFactor := keeper.CalculateBorrowInterestFactor(borrowRateSpy, sdk.NewInt(snapshot.elapsedTime))
@@ -1333,7 +1333,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 
 					reservesPrior, foundReservesPrior := suite.keeper.GetTotalReserves(prevCtx)
 					if !foundReservesPrior {
-						reservesPrior = sdk.NewCoins(sdk.NewCoin(coinDenom, sdk.ZeroInt()))
+						reservesPrior = sdk.NewCoins(sdk.NewCoin(coinDenom, sdkmath.ZeroInt()))
 					}
 
 					borrowInterestFactorPrior, foundBorrowInterestFactorPrior := suite.keeper.GetBorrowInterestFactor(prevCtx, coinDenom)
@@ -1347,7 +1347,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 					suite.Require().NoError(err)
 
 					// Convert from APY to SPY, expressed as (1 + borrow rate)
-					borrowRateSpy, err := keeper.APYToSPY(sdk.OneDec().Add(borrowRateApy))
+					borrowRateSpy, err := keeper.APYToSPY(sdkmath.LegacyOneDec().Add(borrowRateApy))
 					suite.Require().NoError(err)
 
 					newBorrowInterestFactor := keeper.CalculateBorrowInterestFactor(borrowRateSpy, sdk.NewInt(snapshot.elapsedTime))

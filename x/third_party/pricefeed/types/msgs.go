@@ -1,13 +1,16 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"strings"
 	"time"
 
+	errorsmod "cosmossdk.io/errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const (
@@ -55,7 +58,7 @@ func (msg MsgPostPrice) GetSigners() []sdk.AccAddress {
 // ValidateBasic does a simple validation check that doesn't require access to any other information.
 func (msg MsgPostPrice) ValidateBasic() error {
 	if len(msg.From) == 0 {
-		return errorsmod.Wrap(errorsmod.ErrInvalidAddress, "sender address cannot be empty")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty")
 	}
 	if strings.TrimSpace(msg.MarketID) == "" {
 		return errors.New("market id cannot be blank")

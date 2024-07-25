@@ -116,7 +116,7 @@ func (k Keeper) loadPool(ctx context.Context, denomA string, denomB string) (str
 }
 
 func (k Keeper) assertSlippageWithinLimit(priceChange sdkmath.LegacyDec, slippageLimit sdkmath.LegacyDec) error {
-	slippage := sdk.OneDec().Sub(priceChange)
+	slippage := sdkmath.LegacyOneDec().Sub(priceChange)
 	if slippage.GT(slippageLimit) {
 		return errorsmod.Wrapf(types.ErrSlippageExceeded, "slippage %s > limit %s", slippage, slippageLimit)
 	}

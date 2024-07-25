@@ -43,7 +43,7 @@ func FullyBackedInvariant(bankK types.BankKeeper, k Keeper) sdk.Invariant {
 	message := sdk.FormatInvariant(types.ModuleName, "fully backed broken", "sum of minor balances greater than module account")
 
 	return func(ctx context.Context) (string, bool) {
-		totalMinorBalances := sdk.ZeroInt()
+		totalMinorBalances := sdkmath.ZeroInt()
 		k.IterateAllAccounts(ctx, func(acc types.Account) bool {
 			totalMinorBalances = totalMinorBalances.Add(acc.Balance)
 			return false

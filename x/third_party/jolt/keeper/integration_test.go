@@ -77,8 +77,8 @@ func NewJoltGenState(cdc codec.JSONCodec) app.GenesisState {
 			types3.NewGenesisAccumulationTime(
 				"usdx",
 				time.Date(2020, 12, 15, 14, 0, 0, 0, time.UTC),
-				sdk.OneDec(),
-				sdk.OneDec(),
+				sdkmath.LegacyOneDec(),
+				sdkmath.LegacyOneDec(),
 			),
 		},
 		Deposits:      types3.DefaultDeposits,
@@ -104,7 +104,7 @@ func NewPricefeedGenStateMulti(cdc codec.JSONCodec) app.GenesisState {
 			{
 				MarketID:      "usdx:usd",
 				OracleAddress: sdk.AccAddress{},
-				Price:         sdk.OneDec(),
+				Price:         sdkmath.LegacyOneDec(),
 				Expiry:        time.Now().Add(1 * time.Hour),
 			},
 			{
@@ -116,7 +116,7 @@ func NewPricefeedGenStateMulti(cdc codec.JSONCodec) app.GenesisState {
 			{
 				MarketID:      "busd:usd",
 				OracleAddress: sdk.AccAddress{},
-				Price:         sdk.OneDec(),
+				Price:         sdkmath.LegacyOneDec(),
 				Expiry:        time.Now().Add(1 * time.Hour),
 			},
 		},

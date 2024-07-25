@@ -26,7 +26,7 @@ var (
 		c("lotdenom", 10),
 		testTime,
 		c("biddenom", 1000),
-		types2.WeightedAddresses{Addresses: testAddrs, Weights: []sdk.Int{sdk.OneInt(), sdk.OneInt()}},
+		types2.WeightedAddresses{Addresses: testAddrs, Weights: []sdkmath.Int{sdk.OneInt(), sdk.OneInt()}},
 		c("debt", 1000),
 	).WithID(3).(types2.GenesisAuction)
 )

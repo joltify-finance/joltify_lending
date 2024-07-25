@@ -91,7 +91,7 @@ func TestMsgClaim_Validate(t *testing.T) {
 				},
 			},
 			expect: expectedErr{
-				wraps: errorsmod.ErrInvalidAddress,
+				wraps: sdkerrors.ErrInvalidAddress,
 			},
 		},
 		{

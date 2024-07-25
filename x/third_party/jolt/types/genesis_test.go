@@ -60,7 +60,7 @@ func (suite *GenesisTestSuite) TestGenesisValidation() {
 					sdk.MustNewDecFromStr("10"),
 				),
 				gats: types2.GenesisAccumulationTimes{
-					types2.NewGenesisAccumulationTime("usdx", time.Date(2020, 12, 15, 14, 0, 0, 0, time.UTC), sdk.OneDec(), sdk.OneDec()),
+					types2.NewGenesisAccumulationTime("usdx", time.Date(2020, 12, 15, 14, 0, 0, 0, time.UTC), sdkmath.LegacyOneDec(), sdkmath.LegacyOneDec()),
 				},
 				deps: types2.DefaultDeposits,
 				brws: types2.DefaultBorrows,

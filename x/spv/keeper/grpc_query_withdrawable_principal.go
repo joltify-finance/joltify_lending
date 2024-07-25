@@ -21,7 +21,7 @@ func (k Keeper) WithdrawalPrincipal(goCtx context.Context, req *types.Querywithd
 
 	investor, err := sdk.AccAddressFromBech32(req.WalletAddress)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", req.WalletAddress)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", req.WalletAddress)
 	}
 
 	depositor, found := k.GetDepositor(ctx, req.PoolIndex, investor)

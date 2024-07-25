@@ -19,7 +19,7 @@ func TestMsgWithdrawPrincipal_ValidateBasic(t *testing.T) {
 			msg: MsgWithdrawPrincipal{
 				Creator: "invalid_address",
 			},
-			err: errorsmod.ErrInvalidAddress,
+			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgWithdrawPrincipal{

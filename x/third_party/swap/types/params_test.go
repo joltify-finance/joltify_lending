@@ -174,7 +174,7 @@ func TestParams_Validation(t *testing.T) {
 			name: "1 swap fee",
 			key:  types.KeySwapFee,
 			testFn: func(params *types.Params) {
-				params.SwapFee = sdk.OneDec()
+				params.SwapFee = sdkmath.LegacyOneDec()
 			},
 			expectedErr: "invalid swap fee: 1.000000000000000000",
 		},

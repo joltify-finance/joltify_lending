@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
@@ -33,7 +32,7 @@ const (
 
 var (
 	// DefaultIncrement is the smallest percent change a new bid must have from the old one
-	DefaultIncrement       = sdk.MustNewDecFromStr("0.05")
+	DefaultIncrement       = sdkmath.LegacyMustNewDecFromStr("0.05")
 	KeyForwardBidDuration  = []byte("ForwardBidDuration")
 	KeyReverseBidDuration  = []byte("ReverseBidDuration")
 	KeyMaxAuctionDuration  = []byte("MaxAuctionDuration")

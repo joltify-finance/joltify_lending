@@ -14,7 +14,7 @@ import (
 type LiqData struct {
 	price            sdkmath.LegacyDec
 	ltv              sdkmath.LegacyDec
-	conversionFactor sdk.Int
+	conversionFactor sdkmath.Int
 }
 
 // AttemptKeeperLiquidation enables a keeper to liquidate an individual borrower's position
@@ -86,7 +86,7 @@ func (k Keeper) SeizeDeposits(ctx context.Context, keeper sdk.AccAddress, deposi
 	for _, depCoin := range deposit.Amount {
 		mm, _ := k.GetMoneyMarket(ctx, depCoin.Denom)
 		keeperReward := mm.KeeperRewardPercentage.MulInt(depCoin.Amount).TruncateInt()
-		if keeperReward.GT(sdk.ZeroInt()) {
+		if keeperReward.GT(sdkmath.ZeroInt()) {
 			// Send keeper their reward
 			keeperCoin := sdk.NewCoin(depCoin.Denom, keeperReward)
 			keeperRewardCoins = append(keeperRewardCoins, keeperCoin)
@@ -157,7 +157,7 @@ func (k Keeper) StartAuctions(ctx context.Context, borrower sdk.AccAddress, borr
 	// Set up auction constants
 	returnAddrs := []sdk.AccAddress{borrower}
 	weights := []sdkmath.Int{sdk.NewInt(100)}
-	debt := sdk.NewCoin("debt", sdk.ZeroInt())
+	debt := sdk.NewCoin("debt", sdkmath.ZeroInt())
 
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleAccountName)
 	maccCoins := k.bankKeeper.SpendableCoins(ctx, macc.GetAddress())
@@ -177,7 +177,7 @@ func (k Keeper) StartAuctions(ctx context.Context, borrower sdk.AccAddress, borr
 				bid := sdk.NewCoin(bKey, borrows.AmountOf(bKey))
 
 				lotSize := maxLotSize.MulInt(liqMap[dKey].conversionFactor).Quo(liqMap[dKey].price)
-				if lotSize.TruncateInt().Equal(sdk.ZeroInt()) {
+				if lotSize.TruncateInt().Equal(sdkmath.ZeroInt()) {
 					continue
 				}
 				lot := sdk.NewCoin(dKey, lotSize.TruncateInt())
@@ -229,7 +229,7 @@ func (k Keeper) StartAuctions(ctx context.Context, borrower sdk.AccAddress, borr
 				bid := sdk.NewCoin(bKey, bidSize.TruncateInt())
 				lot := sdk.NewCoin(dKey, deposits.AmountOf(dKey))
 
-				if bid.Amount.Equal(sdk.ZeroInt()) || lot.Amount.Equal(sdk.ZeroInt()) {
+				if bid.Amount.Equal(sdkmath.ZeroInt()) || lot.Amount.Equal(sdkmath.ZeroInt()) {
 					continue
 				}
 
@@ -282,7 +282,7 @@ func (k Keeper) StartAuctions(ctx context.Context, borrower sdk.AccAddress, borr
 	// Send any remaining deposit back to the original borrower
 	for _, dKey := range dKeys {
 		remaining := deposits.AmountOf(dKey)
-		if remaining.GT(sdk.ZeroInt()) {
+		if remaining.GT(sdkmath.ZeroInt()) {
 			returnCoin := sdk.NewCoins(sdk.NewCoin(dKey, remaining))
 			err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types2.ModuleAccountName, borrower, returnCoin)
 			if err != nil {

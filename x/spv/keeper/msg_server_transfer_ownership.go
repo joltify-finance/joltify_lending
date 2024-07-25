@@ -19,7 +19,7 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	d, found := k.GetDepositor(ctx, msg.PoolIndex, caller)

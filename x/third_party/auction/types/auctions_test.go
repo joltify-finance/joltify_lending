@@ -31,8 +31,8 @@ func init() {
 
 func d(amount string) sdkmath.LegacyDec     { return sdk.MustNewDecFromStr(amount) }
 func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
-func i(n int64) sdk.Int                     { return sdk.NewInt(n) }
-func is(ns ...int64) (is []sdk.Int) {
+func i(n int64) sdkmath.Int                 { return sdk.NewInt(n) }
+func is(ns ...int64) (is []sdkmath.Int) {
 	for _, n := range ns {
 		is = append(is, sdk.NewInt(n))
 	}
@@ -52,25 +52,25 @@ func TestNewWeightedAddresses(t *testing.T) {
 	tests := []struct {
 		name      string
 		addresses []sdk.AccAddress
-		weights   []sdk.Int
+		weights   []sdkmath.Int
 		expPass   bool
 	}{
 		{
 			"normal",
 			[]sdk.AccAddress{addr1, addr2},
-			[]sdk.Int{sdk.NewInt(6), sdk.NewInt(8)},
+			[]sdkmath.Int{sdk.NewInt(6), sdk.NewInt(8)},
 			true,
 		},
 		{
 			"empty address",
 			[]sdk.AccAddress{nil, nil},
-			[]sdk.Int{sdk.NewInt(6), sdk.NewInt(8)},
+			[]sdkmath.Int{sdk.NewInt(6), sdk.NewInt(8)},
 			false,
 		},
 		{
 			"mismatched",
 			[]sdk.AccAddress{addr1, addr2},
-			[]sdk.Int{sdk.NewInt(6)},
+			[]sdkmath.Int{sdk.NewInt(6)},
 			false,
 		},
 		{
@@ -189,7 +189,7 @@ func TestCollateralAuctionValidate(t *testing.T) {
 				MaxBid:            c("joltify", 1),
 				LotReturns: WeightedAddresses{
 					Addresses: []sdk.AccAddress{addr1},
-					Weights:   []sdk.Int{sdk.NewInt(1)},
+					Weights:   []sdkmath.Int{sdk.NewInt(1)},
 				},
 			},
 			true,
@@ -246,7 +246,7 @@ func TestCollateralAuctionValidate(t *testing.T) {
 				MaxBid:            c("joltify", 1),
 				LotReturns: WeightedAddresses{
 					Addresses: []sdk.AccAddress{nil},
-					Weights:   []sdk.Int{sdk.NewInt(1)},
+					Weights:   []sdkmath.Int{sdk.NewInt(1)},
 				},
 			},
 			false,
@@ -330,7 +330,7 @@ func TestNewCollateralAuction(t *testing.T) {
 		sdk.AccAddress(testAccAddress2),
 	}
 
-	weights := []sdk.Int{
+	weights := []sdkmath.Int{
 		sdk.NewInt(6),
 		sdk.NewInt(8),
 	}

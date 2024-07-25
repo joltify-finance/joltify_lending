@@ -13,7 +13,7 @@ import (
 )
 
 func (k msgServer) calculateTotalDueInterest(ctx context.Context, poolInfo types.PoolInfo) (sdkmath.Int, error) {
-	totalAmount := sdk.ZeroInt()
+	totalAmount := sdkmath.ZeroInt()
 	for _, el := range poolInfo.PoolNFTIds {
 		class, found := k.NftKeeper.GetClass(ctx, el)
 		if !found {
@@ -38,7 +38,7 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 
 	spv, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
@@ -117,7 +117,7 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 
 	spv, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
