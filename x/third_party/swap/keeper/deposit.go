@@ -92,7 +92,7 @@ func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coinA sdk
 		return err
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdk.UnwrapSDKContext(ctx).EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeSwapDeposit,
 			sdk.NewAttribute(types.AttributeKeyPoolID, poolID),

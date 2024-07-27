@@ -56,7 +56,7 @@ func (k msgServer) CreateOutboundTx(goCtx context.Context, msg *types.MsgCreateO
 	validators := history.GetValset()
 	isValidator := false
 	for _, el := range validators {
-		if el.GetOperator().Equals(msg.Creator) {
+		if el.GetOperator() == msg.Creator.String() {
 			isValidator = true
 			break
 		}

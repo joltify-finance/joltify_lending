@@ -23,9 +23,10 @@ func (k Keeper) SetOutboundTx(rctx context.Context, outboundTx types.OutboundTx)
 
 // GetOutboundTx returns a outboundTx from its index
 func (k Keeper) GetOutboundTx(
-	ctx context.Context,
+	rctx context.Context,
 	requestID string,
 ) (val types.OutboundTx, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 
 	b := store.Get(types.OutboundTxKey(
@@ -40,7 +41,8 @@ func (k Keeper) GetOutboundTx(
 }
 
 // SetOutboundTxProposal set proposals based on its requestID:outboundTxID
-func (k Keeper) SetOutboundTxProposal(ctx context.Context, reqID, outboundTxID string, proposals types.Proposals) {
+func (k Keeper) SetOutboundTxProposal(rctx context.Context, reqID, outboundTxID string, proposals types.Proposals) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxProposalKeyPrefix))
 	b := k.cdc.MustMarshal(&proposals)
 	key := fmt.Sprintf("%v:%v", reqID, outboundTxID)

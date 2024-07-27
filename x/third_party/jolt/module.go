@@ -139,12 +139,12 @@ func (am AppModule) ExportGenesis(ctx context.Context, cdc codec.JSONCodec) json
 }
 
 // BeginBlock module begin-block
-func (am AppModule) BeginBlock(ctx context.Context, _ abci.RequestBeginBlock) {
+func (am AppModule) BeginBlock(ctx context.Context) {
 	BeginBlocker(ctx, am.keeper)
 }
 
 // EndBlock module end-block
-func (am AppModule) EndBlock(_ context.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(_ context.Context) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 

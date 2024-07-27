@@ -1,7 +1,8 @@
 package burnauction
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"context"
+
 	"github.com/joltify-finance/joltify_lending/x/burnauction/keeper"
 )
 

@@ -1,15 +1,18 @@
 package pricefeed
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 )
 
 // InitGenesis sets distribution information for genesis.
-func InitGenesis(ctx context.Context, k keeper.Keeper, gs types2.GenesisState) {
+func InitGenesis(rctx context.Context, k keeper.Keeper, gs types2.GenesisState) {
 	// Set the markets and oracles from params
-	k.SetParams(ctx, gs.Params)
+	ctx := sdk.UnwrapSDKContext(rctx)
+	k.SetParams(rctx, gs.Params)
 
 	// Iterate through the posted prices and set them in the store if they are not expired
 	for _, pp := range gs.PostedPrices {

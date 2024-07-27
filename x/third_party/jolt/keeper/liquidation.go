@@ -7,8 +7,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // LiqData holds liquidation-related data
@@ -74,9 +74,10 @@ func (k Keeper) AttemptKeeperLiquidation(ctx context.Context, keeper sdk.AccAddr
 }
 
 // SeizeDeposits seizes a list of deposits and sends them to auction
-func (k Keeper) SeizeDeposits(ctx context.Context, keeper sdk.AccAddress, deposit types2.Deposit,
+func (k Keeper) SeizeDeposits(rctx context.Context, keeper sdk.AccAddress, deposit types2.Deposit,
 	borrow types2.Borrow, dDenoms, bDenoms []string,
 ) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	liqMap, err := k.LoadLiquidationData(ctx, deposit, borrow)
 	if err != nil {
 		return err
@@ -157,7 +158,7 @@ func (k Keeper) StartAuctions(ctx context.Context, borrower sdk.AccAddress, borr
 
 	// Set up auction constants
 	returnAddrs := []sdk.AccAddress{borrower}
-	weights := []sdkmath.Int{sdk.NewInt(100)}
+	weights := []sdkmath.Int{sdkmath.NewInt(100)}
 	debt := sdk.NewCoin("debt", sdkmath.ZeroInt())
 
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleAccountName)

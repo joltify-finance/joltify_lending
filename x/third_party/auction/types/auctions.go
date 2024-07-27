@@ -193,7 +193,7 @@ func NewCollateralAuction(seller string, lot sdk.Coin, endTime time.Time, maxBid
 			Initiator:       seller,
 			Lot:             lot,
 			Bidder:          nil,
-			Bid:             sdkmath.NewInt64Coin(maxBid.Denom, 0),
+			Bid:             sdk.NewInt64Coin(maxBid.Denom, 0),
 			HasReceivedBids: false, // new auctions don't have any bids
 			EndTime:         endTime,
 			MaxEndTime:      endTime,

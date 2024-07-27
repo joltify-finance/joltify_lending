@@ -46,7 +46,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 }
 
 // RegisterStoreDecoder registers a decoder.
-func (am AppModule) RegisterStoreDecoder(_ sdk.StoreDecoderRegistry) {}
+func (am AppModule) RegisterStoreDecoder(_ simtypes.StoreDecoderRegistry) {}
 
 // ProposalContents doesn't return any content functions for governance proposals.
 func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalMsg {
@@ -58,7 +58,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations := make([]simtypes.WeightedOperation, 0)
 
 	var weightMsgSubmitrequest int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgSubmitrequest, &weightMsgSubmitrequest, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgSubmitrequest, &weightMsgSubmitrequest, nil,
 		func(_ *rand.Rand) {
 			weightMsgSubmitrequest = defaultWeightMsgSubmitrequest
 		},
@@ -79,7 +79,7 @@ func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.Wei
 		simulation.NewWeightedProposalMsg(
 			opWeightMsgSubmitrequest,
 			defaultWeightMsgSubmitrequest,
-			func(r *rand.Rand, ctx context.Context, accs []simtypes.Account) sdk.Msg {
+			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
 				burnauctionsimulation.SimulateMsgSubmitrequest(am.accountKeeper, am.bankKeeper, am.keeper)
 				return nil
 			},

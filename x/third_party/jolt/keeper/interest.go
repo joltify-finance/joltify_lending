@@ -185,7 +185,7 @@ func CalculateUtilizationRatio(cash, borrows, reserves sdkmath.LegacyDec) sdkmat
 		return sdkmath.LegacyOneDec()
 	}
 
-	return sdk.MinDec(sdkmath.LegacyOneDec(), borrows.Quo(totalSupply))
+	return sdkmath.LegacyMinDec(sdkmath.LegacyOneDec(), borrows.Quo(totalSupply))
 }
 
 // CalculateBorrowInterestFactor calculates the simple interest scaling factor,

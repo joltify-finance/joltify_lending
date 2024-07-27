@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
@@ -28,7 +29,8 @@ func (k Keeper) UpdateStakingInfo(ctx context.Context) {
 	}
 
 	stakingKeeper.IterateLastValidators(ctx, func(index int64, validator stakingtypes.ValidatorI) (stop bool) {
-		consAddr, err := validator.GetConsAddr()
+		consAddrB, err := validator.GetConsAddr()
+		consAddr := sdk.AccAddress(consAddrB)
 		if err != nil {
 			panic("get cons should never fail")
 		}
@@ -79,7 +81,8 @@ func (k Keeper) getEligibleValidators(ctx context.Context) ([]vaulttypes.Validat
 	}
 	// we get rotate the nodes
 	for i := 0; i < len(candidates); i++ {
-		consAddr, err := candidates[i].Validator.GetConsAddr()
+		consAddrB, err := candidates[i].Validator.GetConsAddr()
+		consAddr := sdk.AccAddress(consAddrB)
 		if err != nil {
 			panic("it should never fail to get the cons addr")
 		}
@@ -102,7 +105,8 @@ func (k Keeper) getEligibleValidators(ctx context.Context) ([]vaulttypes.Validat
 	return candidates[:candidateNum], nil
 }
 
-func (k Keeper) updateValidators(ctx context.Context) error {
+func (k Keeper) updateValidators(rctx context.Context) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	vs, err := k.getEligibleValidators(ctx)
 	if err != nil {
 		return errorsmod.Wrap(vaulttypes.ErrFormat, "fail to convert the format")
@@ -130,7 +134,8 @@ func (k Keeper) updateValidators(ctx context.Context) error {
 	return nil
 }
 
-func (k Keeper) NewUpdate(ctx context.Context) []abci.ValidatorUpdate {
+func (k Keeper) NewUpdate(rctx context.Context) []abci.ValidatorUpdate {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	defer telemetry.ModuleMeasureSince(vaulttypes.ModuleName, ctx.BlockTime(), telemetry.MetricKeyEndBlocker)
 
 	blockHeight := k.GetParams(ctx).BlockChurnInterval

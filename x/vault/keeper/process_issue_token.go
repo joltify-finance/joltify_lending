@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 
 	errorsmod "cosmossdk.io/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32" //nolint
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
@@ -27,7 +27,7 @@ func (k msgServer) getLastTwoPools(goCtx context.Context) ([]cryptotypes.Address
 
 	lastPoolsInfo, err := k.GetLastPool(goCtx, &req)
 	if err != nil {
-		return nil, errorsmod.Wrap(errorsmod.ErrInvalidRequest, "fail to get the last pool address")
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "fail to get the last pool address")
 	}
 
 	pk, err := legacybech32.UnmarshalPubKey(legacybech32.AccPK, lastPoolsInfo.GetPools()[0].GetCreatePool().PoolPubKey) //nolint

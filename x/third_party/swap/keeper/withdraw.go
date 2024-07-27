@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
@@ -61,7 +62,7 @@ func (k Keeper) Withdraw(ctx context.Context, owner sdk.AccAddress, shares sdkma
 		panic(err)
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdk.UnwrapSDKContext(ctx).EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeSwapWithdraw,
 			sdk.NewAttribute(types.AttributeKeyPoolID, poolID),

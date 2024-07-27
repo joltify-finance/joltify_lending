@@ -1,12 +1,11 @@
 package pricefeed
 
 import (
+	"context"
 	"errors"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // EndBlocker updates the current pricefeed

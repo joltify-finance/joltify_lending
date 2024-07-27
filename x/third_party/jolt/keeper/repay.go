@@ -146,7 +146,7 @@ func (k Keeper) ValidateRepay(ctx context.Context, sender, owner sdk.AccAddress,
 	// invalid range is not allowed
 	// Unless the user is fully repaying their loan
 	proposedBorrowNewUSDValue := existingBorrowUSDValue.Sub(repayTotalUSDValue)
-	isFullRepayment := coins.IsEqual(existingBorrow.Amount)
+	isFullRepayment := coins.Equal(existingBorrow.Amount)
 	if proposedBorrowNewUSDValue.LT(k.GetMinimumBorrowUSDValue(ctx)) && !isFullRepayment {
 		return errorsmod.Wrapf(types2.ErrBelowMinimumBorrowValue, "the proposed borrow's USD value $%s is below the minimum borrow limit $%s", proposedBorrowNewUSDValue, k.GetMinimumBorrowUSDValue(ctx))
 	}

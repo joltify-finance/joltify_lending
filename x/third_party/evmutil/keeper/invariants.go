@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -20,7 +21,7 @@ func RegisterInvariants(ir sdk.InvariantRegistry, bankK types.BankKeeper, k Keep
 
 // AllInvariants runs all invariants of the swap module
 func AllInvariants(bankK types.BankKeeper, k Keeper) sdk.Invariant {
-	return func(ctx context.Context) (string, bool) {
+	return func(ctx sdk.Context) (string, bool) {
 		if res, stop := FullyBackedInvariant(bankK, k)(ctx); stop {
 			return res, stop
 		}
@@ -42,7 +43,7 @@ func FullyBackedInvariant(bankK types.BankKeeper, k Keeper) sdk.Invariant {
 	broken := false
 	message := sdk.FormatInvariant(types.ModuleName, "fully backed broken", "sum of minor balances greater than module account")
 
-	return func(ctx context.Context) (string, bool) {
+	return func(ctx sdk.Context) (string, bool) {
 		totalMinorBalances := sdkmath.ZeroInt()
 		k.IterateAllAccounts(ctx, func(acc types.Account) bool {
 			totalMinorBalances = totalMinorBalances.Add(acc.Balance)
@@ -63,7 +64,7 @@ func SmallBalancesInvariant(_ types.BankKeeper, k Keeper) sdk.Invariant {
 	broken := false
 	message := sdk.FormatInvariant(types.ModuleName, "small balances broken", "minor balances not all less than overflow")
 
-	return func(ctx context.Context) (string, bool) {
+	return func(ctx sdk.Context) (string, bool) {
 		k.IterateAllAccounts(ctx, func(account types.Account) bool {
 			if account.Balance.GTE(ConversionMultiplier) {
 				broken = true
@@ -87,7 +88,7 @@ func BackedCoinsInvariant(_ types.BankKeeper, k Keeper) sdk.Invariant {
 		"coin supply is greater than module account ERC20 tokens",
 	)
 
-	return func(ctx context.Context) (string, bool) {
+	return func(ctx sdk.Context) (string, bool) {
 		params := k.GetParams(ctx)
 		for _, pair := range params.EnabledConversionPairs {
 			erc20Balance, err := k.QueryERC20BalanceOf(
@@ -130,7 +131,7 @@ func CosmosCoinsFullyBackedInvariant(bankK types.BankKeeper, k Keeper) sdk.Invar
 	)
 	maccAddress := authtypes.NewModuleAddress(types.ModuleName)
 
-	return func(ctx context.Context) (string, bool) {
+	return func(ctx sdk.Context) (string, bool) {
 		k.IterateAllDeployedCosmosCoinContracts(ctx, func(c types.DeployedCosmosCoinContract) bool {
 			moduleBalance := bankK.GetBalance(ctx, maccAddress, c.CosmosDenom).Amount
 			totalSupply, err := k.QueryERC20TotalSupply(ctx, *c.Address)

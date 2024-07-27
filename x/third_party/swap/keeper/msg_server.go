@@ -4,6 +4,7 @@ import (
 	"context"
 
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
@@ -179,7 +180,8 @@ func (m msgServer) SwapForExactTokens(goCtx context.Context, msg *types.MsgSwapF
 }
 
 // checkDeadline returns an error if block time exceeds an included deadline
-func checkDeadline(ctx context.Context, msg sdk.Msg) error {
+func checkDeadline(rctx context.Context, msg sdk.Msg) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	deadlineMsg, ok := msg.(types.MsgWithDeadline)
 	if !ok {
 		return nil

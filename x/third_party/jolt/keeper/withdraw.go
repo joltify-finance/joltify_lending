@@ -1,13 +1,16 @@
 package keeper
 
 import (
+	"context"
+
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
 // Withdraw returns some or all of a deposit back to original depositor
-func (k Keeper) Withdraw(ctx context.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+func (k Keeper) Withdraw(rctx context.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// Call incentive hooks
 	existingDeposit, found := k.GetDeposit(ctx, depositor)
 	if !found {

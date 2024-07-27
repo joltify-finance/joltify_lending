@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/burnauction/types"
 )
@@ -31,12 +33,12 @@ func (k Keeper) RunSurplusAuctions(ctx context.Context) {
 	for _, el := range burnTokens {
 		_, err := k.auctionKeeper.StartSurplusAuction(ctx, types.ModuleAccount, el, "ujolt")
 		if err != nil {
-			ctx.Logger().Error("failed to start surplus auction in auction module", "error", err)
+			sdk.UnwrapSDKContext(ctx).Logger().Error("failed to start surplus auction in auction module", "error", err)
 			return
 		}
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdk.UnwrapSDKContext(ctx).EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(types.EventModuleName, types.ModuleName),

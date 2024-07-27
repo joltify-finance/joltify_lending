@@ -57,7 +57,8 @@ func (k *Keeper) SetHooks(hooks types2.JOLTHooks) *Keeper {
 }
 
 // GetDeposit returns a deposit from the store for a particular depositor address, deposit denom
-func (k Keeper) GetDeposit(ctx context.Context, depositor sdk.AccAddress) (types2.Deposit, bool) {
+func (k Keeper) GetDeposit(rctx context.Context, depositor sdk.AccAddress) (types2.Deposit, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.DepositsKeyPrefix)
 	bz := store.Get(depositor.Bytes())
 	if len(bz) == 0 {
@@ -325,7 +326,7 @@ func (k Keeper) GetBorrowInterestFactor(rctx context.Context, denom string) (sdk
 	if len(bz) == 0 {
 		return sdkmath.LegacyZeroDec(), false
 	}
-	var borrowInterestFactor sdkmath.LegacyDec
+	var borrowInterestFactor sdk.DecProto
 	k.cdc.MustUnmarshal(bz, &borrowInterestFactor)
 	return borrowInterestFactor.Dec, true
 }
@@ -334,7 +335,7 @@ func (k Keeper) GetBorrowInterestFactor(rctx context.Context, denom string) (sdk
 func (k Keeper) SetBorrowInterestFactor(rctx context.Context, denom string, borrowInterestFactor sdkmath.LegacyDec) {
 	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.BorrowInterestFactorPrefix)
-	bz := k.cdc.MustMarshal(&sdkmath.LegacyDecProto{Dec: borrowInterestFactor})
+	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: borrowInterestFactor})
 	store.Set([]byte(denom), bz)
 }
 
@@ -346,7 +347,7 @@ func (k Keeper) IterateBorrowInterestFactors(rctx context.Context, cb func(denom
 	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var factor sdkmath.LegacyDecProto
+		var factor sdk.DecProto
 		k.cdc.MustUnmarshal(iterator.Value(), &factor)
 		if cb(string(iterator.Key()), factor.Dec) {
 			break
@@ -355,21 +356,23 @@ func (k Keeper) IterateBorrowInterestFactors(rctx context.Context, cb func(denom
 }
 
 // GetSupplyInterestFactor returns the current supply interest factor for an individual market
-func (k Keeper) GetSupplyInterestFactor(ctx context.Context, denom string) (sdkmath.LegacyDec, bool) {
+func (k Keeper) GetSupplyInterestFactor(rctx context.Context, denom string) (sdkmath.LegacyDec, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
 	bz := store.Get([]byte(denom))
 	if len(bz) == 0 {
 		return sdkmath.LegacyZeroDec(), false
 	}
-	var supplyInterestFactor sdkmath.LegacyDecProto
+	var supplyInterestFactor sdk.DecProto
 	k.cdc.MustUnmarshal(bz, &supplyInterestFactor)
 	return supplyInterestFactor.Dec, true
 }
 
 // SetSupplyInterestFactor sets the current supply interest factor for an individual market
-func (k Keeper) SetSupplyInterestFactor(ctx context.Context, denom string, supplyInterestFactor sdkmath.LegacyDec) {
+func (k Keeper) SetSupplyInterestFactor(rctx context.Context, denom string, supplyInterestFactor sdkmath.LegacyDec) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types2.SupplyInterestFactorPrefix)
-	bz := k.cdc.MustMarshal(&sdkmath.LegacyDecProto{Dec: supplyInterestFactor})
+	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: supplyInterestFactor})
 	store.Set([]byte(denom), bz)
 }
 
@@ -381,7 +384,7 @@ func (k Keeper) IterateSupplyInterestFactors(rctx context.Context, cb func(denom
 	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var factor sdkmath.LegacyDecProto
+		var factor sdk.DecProto
 
 		k.cdc.MustUnmarshal(iterator.Value(), &factor)
 		if cb(string(iterator.Key()), factor.Dec) {
