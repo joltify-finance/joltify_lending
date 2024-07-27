@@ -1,6 +1,8 @@
 package types
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
@@ -11,8 +13,6 @@ type VaultStaking interface {
 	GetBondedValidatorsByPower(ctx context.Context) []stakingtypes.Validator
 
 	GetParams(ctx context.Context) stakingtypes.Params
-
-	LastValidatorsIterator(ctx context.Context) (iterator sdk.Iterator)
 
 	GetValidator(ctx context.Context, addr sdk.ValAddress) (validator stakingtypes.Validator, found bool)
 

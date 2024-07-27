@@ -4,6 +4,7 @@ import (
 	stderr "errors"
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -65,7 +66,7 @@ func DefaultParams() Params {
 		DefaultBlockChurnInterval,
 		DEFAULTPOWER,
 		DEFAULTSTEP,
-		sdk.NewDecWithPrec(DEFAULTRATIO, 2),
+		sdkmath.LegacyNewDecWithPrec(DEFAULTRATIO, 2),
 		tokensQuota,
 		14400,
 	)
@@ -132,7 +133,7 @@ func validateInteger32(i interface{}) error {
 }
 
 func validateFloat(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -140,7 +141,7 @@ func validateFloat(i interface{}) error {
 	if v.IsNegative() {
 		return fmt.Errorf("goal bonded cannot be negative: %s", v)
 	}
-	if v.GT(sdk.OneDec()) {
+	if v.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("goal bonded too large: %s", v)
 	}
 
