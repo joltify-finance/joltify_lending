@@ -23,7 +23,7 @@ func NewBorrow(borrower sdk.AccAddress, amount sdk.Coins, index BorrowInterestFa
 // The normalized borrow is effectively how big the borrow would have been if it had been borrowed at time 0 and not touched since.
 //
 // An error is returned if the borrow is in an invalid state.
-func (b Borrow) NormalizedBorrow() (sdkmath.LegacyDecCoins, error) {
+func (b Borrow) NormalizedBorrow() (sdk.DecCoins, error) {
 	normalized := sdk.NewDecCoins()
 
 	for _, coin := range b.Amount {
@@ -36,7 +36,7 @@ func (b Borrow) NormalizedBorrow() (sdkmath.LegacyDecCoins, error) {
 			return nil, fmt.Errorf("interest factor '%s' < 1", coin.Denom)
 		}
 
-		value := sdk.NewDecFromInt(coin.Amount).Quo(factor)
+		value := sdkmath.LegacyNewDecFromInt(coin.Amount).Quo(factor)
 		normalized = normalized.Add(
 			sdk.NewDecCoinFromDec(
 				coin.Denom,

@@ -1,11 +1,12 @@
 package keeper
 
 import (
+	"context"
 	"math"
 
-	cosmath "cosmossdk.io/math"
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
@@ -59,7 +60,8 @@ func (k Keeper) ApplyInterestRateUpdates(ctx context.Context) {
 
 // AccrueInterest applies accrued interest to total borrows and reserves by calculating
 // interest from the last checkpoint time and writing the updated values to the store.
-func (k Keeper) AccrueInterest(ctx context.Context, denom string) error {
+func (k Keeper) AccrueInterest(rctx context.Context, denom string) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	previousAccrualTime, found := k.GetPreviousAccrualTime(ctx, denom)
 	if !found {
 		k.SetPreviousAccrualTime(ctx, denom, ctx.BlockTime())
@@ -96,14 +98,14 @@ func (k Keeper) AccrueInterest(ctx context.Context, denom string) error {
 
 	borrowInterestFactorPrior, foundBorrowInterestFactorPrior := k.GetBorrowInterestFactor(ctx, denom)
 	if !foundBorrowInterestFactorPrior {
-		newBorrowInterestFactorPrior := sdk.MustNewDecFromStr("1.0")
+		newBorrowInterestFactorPrior := sdkmath.LegacyMustNewDecFromStr("1.0")
 		k.SetBorrowInterestFactor(ctx, denom, newBorrowInterestFactorPrior)
 		borrowInterestFactorPrior = newBorrowInterestFactorPrior
 	}
 
 	supplyInterestFactorPrior, foundSupplyInterestFactorPrior := k.GetSupplyInterestFactor(ctx, denom)
 	if !foundSupplyInterestFactorPrior {
-		newSupplyInterestFactorPrior := sdk.MustNewDecFromStr("1.0")
+		newSupplyInterestFactorPrior := sdkmath.LegacyMustNewDecFromStr("1.0")
 		k.SetSupplyInterestFactor(ctx, denom, newSupplyInterestFactorPrior)
 		supplyInterestFactorPrior = newSupplyInterestFactorPrior
 	}
@@ -115,7 +117,7 @@ func (k Keeper) AccrueInterest(ctx context.Context, denom string) error {
 	}
 
 	// GetBorrowRate calculates the current interest rate based on utilization (the fraction of supply that has been borrowed)
-	borrowRateApy, err := CalculateBorrowRate(mm.InterestRateModel, sdk.NewDecFromInt(cashPrior), sdk.NewDecFromInt(borrowedPrior.Amount), sdk.NewDecFromInt(reservesPrior.AmountOf(denom)))
+	borrowRateApy, err := CalculateBorrowRate(mm.InterestRateModel, sdkmath.LegacyNewDecFromInt(cashPrior), sdkmath.LegacyNewDecFromInt(borrowedPrior.Amount), sdkmath.LegacyNewDecFromInt(reservesPrior.AmountOf(denom)))
 	if err != nil {
 		return err
 	}
@@ -127,22 +129,22 @@ func (k Keeper) AccrueInterest(ctx context.Context, denom string) error {
 	}
 
 	// Calculate borrow interest factor and update
-	borrowInterestFactor := CalculateBorrowInterestFactor(borrowRateSpy, sdk.NewInt(timeElapsed))
-	interestBorrowAccumulated := (borrowInterestFactor.Mul(sdk.NewDecFromInt(borrowedPrior.Amount)).TruncateInt()).Sub(borrowedPrior.Amount)
+	borrowInterestFactor := CalculateBorrowInterestFactor(borrowRateSpy, sdkmath.NewInt(timeElapsed))
+	interestBorrowAccumulated := (borrowInterestFactor.Mul(sdkmath.LegacyNewDecFromInt(borrowedPrior.Amount)).TruncateInt()).Sub(borrowedPrior.Amount)
 	if interestBorrowAccumulated.IsZero() && borrowRateApy.IsPositive() {
 		// don't accumulate if borrow interest is rounding to zero
 		return nil
 	}
 
 	totalBorrowInterestAccumulated := sdk.NewCoins(sdk.NewCoin(denom, interestBorrowAccumulated))
-	reservesNew := sdk.NewDecFromInt(interestBorrowAccumulated).Mul(mm.ReserveFactor).TruncateInt()
+	reservesNew := sdkmath.LegacyNewDecFromInt(interestBorrowAccumulated).Mul(mm.ReserveFactor).TruncateInt()
 	borrowInterestFactorNew := borrowInterestFactorPrior.Mul(borrowInterestFactor)
 	k.SetBorrowInterestFactor(ctx, denom, borrowInterestFactorNew)
 
 	// Calculate supply interest factor and update
 	supplyInterestNew := interestBorrowAccumulated.Sub(reservesNew)
-	supplyInterestNewDec := sdk.NewDecFromInt(supplyInterestNew)
-	supplyInterestFactor := CalculateSupplyInterestFactor(supplyInterestNewDec, sdk.NewDecFromInt(cashPrior), sdk.NewDecFromInt(borrowedPrior.Amount), sdk.NewDecFromInt(reservesPrior.AmountOf(denom)))
+	supplyInterestNewDec := sdkmath.LegacyNewDecFromInt(supplyInterestNew)
+	supplyInterestFactor := CalculateSupplyInterestFactor(supplyInterestNewDec, sdkmath.LegacyNewDecFromInt(cashPrior), sdkmath.LegacyNewDecFromInt(borrowedPrior.Amount), sdkmath.LegacyNewDecFromInt(reservesPrior.AmountOf(denom)))
 	supplyInterestFactorNew := supplyInterestFactorPrior.Mul(supplyInterestFactor)
 	k.SetSupplyInterestFactor(ctx, denom, supplyInterestFactorNew)
 
@@ -174,8 +176,8 @@ func CalculateBorrowRate(model types2.InterestRateModel, cash, borrows, reserves
 // CalculateUtilizationRatio calculates an asset's current utilization rate
 func CalculateUtilizationRatio(cash, borrows, reserves sdkmath.LegacyDec) sdkmath.LegacyDec {
 	// Utilization rate is 0 when there are no borrows
-	if borrows.Equal(sdk.ZeroDec()) {
-		return sdk.ZeroDec()
+	if borrows.Equal(sdkmath.LegacyZeroDec()) {
+		return sdkmath.LegacyZeroDec()
 	}
 
 	totalSupply := cash.Add(borrows).Sub(reserves)
@@ -190,18 +192,18 @@ func CalculateUtilizationRatio(cash, borrows, reserves sdkmath.LegacyDec) sdkmat
 // which is equal to: (per-second interest rate * number of seconds elapsed)
 // Will return 1.000x, multiply by principal to get new principal with added interest
 func CalculateBorrowInterestFactor(perSecondInterestRate sdkmath.LegacyDec, secondsElapsed sdkmath.Int) sdkmath.LegacyDec {
-	scalingFactorUint := sdk.NewUint(uint64(scalingFactor))
-	scalingFactorInt := sdk.NewInt(int64(scalingFactor))
+	scalingFactorUint := sdkmath.NewUint(uint64(scalingFactor))
+	scalingFactorInt := sdkmath.NewInt(int64(scalingFactor))
 
 	// Convert per-second interest rate to a uint scaled by 1e18
-	interestMantissa := cosmath.NewUintFromBigInt(perSecondInterestRate.MulInt(scalingFactorInt).RoundInt().BigInt())
+	interestMantissa := sdkmath.NewUintFromBigInt(perSecondInterestRate.MulInt(scalingFactorInt).RoundInt().BigInt())
 	// Convert seconds elapsed to uint (*not scaled*)
-	secondsElapsedUint := cosmath.NewUintFromBigInt(secondsElapsed.BigInt())
+	secondsElapsedUint := sdkmath.NewUintFromBigInt(secondsElapsed.BigInt())
 	// Calculate the interest factor as a uint scaled by 1e18
-	interestFactorMantissa := cosmath.RelativePow(interestMantissa, secondsElapsedUint, scalingFactorUint)
+	interestFactorMantissa := sdkmath.RelativePow(interestMantissa, secondsElapsedUint, scalingFactorUint)
 
 	// Convert interest factor to an unscaled sdkmath.LegacyDec
-	return sdk.NewDecFromBigInt(interestFactorMantissa.BigInt()).QuoInt(scalingFactorInt)
+	return sdkmath.LegacyNewDecFromBigInt(interestFactorMantissa.BigInt()).QuoInt(scalingFactorInt)
 }
 
 // CalculateSupplyInterestFactor calculates the supply interest factor, which is the percentage of borrow interest
@@ -240,7 +242,7 @@ func (k Keeper) SyncBorrowInterest(ctx context.Context, addr sdk.AccAddress) {
 			borrow.Index = append(borrow.Index, types2.NewBorrowInterestFactor(coin.Denom, interestFactorValue))
 		} else { // User has an existing borrow index for this denom
 			// Calculate interest owed by user since asset's last borrow index update
-			storedAmount := sdk.NewDecFromInt(borrow.Amount.AmountOf(coin.Denom))
+			storedAmount := sdkmath.LegacyNewDecFromInt(borrow.Amount.AmountOf(coin.Denom))
 			userLastInterestFactor := borrow.Index[foundAtIndex].Value
 			interest := (storedAmount.Quo(userLastInterestFactor).Mul(interestFactorValue)).Sub(storedAmount)
 			totalNewInterest = totalNewInterest.Add(sdk.NewCoin(coin.Denom, interest.TruncateInt()))
@@ -281,7 +283,7 @@ func (k Keeper) SyncSupplyInterest(ctx context.Context, addr sdk.AccAddress) {
 			deposit.Index = append(deposit.Index, types2.NewSupplyInterestFactor(coin.Denom, interestFactorValue))
 		} else { // User has an existing supply index for this denom
 			// Calculate interest earned by user since asset's last deposit index update
-			storedAmount := sdk.NewDecFromInt(deposit.Amount.AmountOf(coin.Denom))
+			storedAmount := sdkmath.LegacyNewDecFromInt(deposit.Amount.AmountOf(coin.Denom))
 			userLastInterestFactor := deposit.Index[foundAtIndex].Value
 			interest := (storedAmount.Mul(interestFactorValue).Quo(userLastInterestFactor)).Sub(storedAmount)
 			if interest.TruncateInt().GT(sdkmath.ZeroInt()) {
@@ -304,7 +306,7 @@ func APYToSPY(apy sdkmath.LegacyDec) (sdkmath.LegacyDec, error) {
 	// Note: any APY 179 or greater will cause an out-of-bounds error
 	root, err := apy.ApproxRoot(uint64(secondsPerYear))
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 	return root, nil
 }

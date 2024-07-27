@@ -28,8 +28,8 @@ import (
 func networkWithCreatePoolObjects(t *testing.T, n int, maxValidator uint32) (*network.Network, []*types.CreatePool) {
 	t.Helper()
 	cfg := network.DefaultConfig()
-	cfg.BondedTokens = sdk.NewInt(10000000000000000)
-	cfg.StakingTokens = sdk.NewInt(100000000000000000)
+	cfg.BondedTokens = sdkmath.NewInt(10000000000000000)
+	cfg.StakingTokens = sdkmath.NewInt(100000000000000000)
 	state := types.GenesisState{}
 	stateStaking := stakingtypes.GenesisState{}
 

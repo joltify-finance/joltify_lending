@@ -118,7 +118,7 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 }
 
 // InitGenesis module init-genesis
-func (am AppModule) InitGenesis(ctx context.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types2.GenesisState
 	cdc.MustUnmarshalJSON(gs, &genState)
 	InitGenesis(ctx, am.keeper, am.bankKeeper, am.accountKeeper, &genState)
@@ -127,18 +127,18 @@ func (am AppModule) InitGenesis(ctx context.Context, cdc codec.JSONCodec, gs jso
 }
 
 // ExportGenesis module export genesis
-func (am AppModule) ExportGenesis(ctx context.Context, cdc codec.JSONCodec) json.RawMessage {
+func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
 	return cdc.MustMarshalJSON(gs)
 }
 
 // BeginBlock module begin-block
-func (am AppModule) BeginBlock(ctx context.Context, _ abci.RequestBeginBlock) {
+func (am AppModule) BeginBlock(ctx context.Context) {
 	BeginBlocker(ctx, am.keeper)
 }
 
 // EndBlock module end-block
-func (am AppModule) EndBlock(_ context.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(_ context.Context) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 

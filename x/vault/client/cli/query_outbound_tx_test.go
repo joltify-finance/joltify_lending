@@ -34,8 +34,8 @@ func networkWithOutboundTxObjects(t *testing.T, n int) (*network.Network, []type
 	SetupBech32Prefix()
 
 	cfg := network.DefaultConfig()
-	cfg.BondedTokens = sdk.NewInt(10000000000000000)
-	cfg.StakingTokens = sdk.NewInt(100000000000000000)
+	cfg.BondedTokens = sdkmath.NewInt(10000000000000000)
+	cfg.StakingTokens = sdkmath.NewInt(100000000000000000)
 	state := types.GenesisState{}
 	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[types.ModuleName], &state))
 

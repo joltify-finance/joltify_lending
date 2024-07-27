@@ -25,7 +25,7 @@ func TestParams_UnmarshalJSON(t *testing.T) {
 	poolData, err := json.Marshal(pools)
 	require.NoError(t, err)
 
-	fee, err := sdk.NewDecFromStr("0.5")
+	fee, err := sdkmath.LegacyNewDecFromStr("0.5")
 	require.NoError(t, err)
 	feeData, err := json.Marshal(fee)
 	require.NoError(t, err)
@@ -48,7 +48,7 @@ func TestParams_MarshalYAML(t *testing.T) {
 		types.NewAllowedPool("hard", "ukava"),
 		types.NewAllowedPool("hard", "usdx"),
 	)
-	fee, err := sdk.NewDecFromStr("0.5")
+	fee, err := sdkmath.LegacyNewDecFromStr("0.5")
 	require.NoError(t, err)
 
 	p := types.Params{
@@ -78,7 +78,7 @@ func TestParams_Default(t *testing.T) {
 	assert.Equal(t, types.DefaultSwapFee, defaultParams.SwapFee)
 
 	assert.Equal(t, 10, len(defaultParams.AllowedPools))
-	assert.Equal(t, sdk.MustNewDecFromStr("0.02"), defaultParams.SwapFee)
+	assert.Equal(t, sdkmath.LegacyMustNewDecFromStr("0.02"), defaultParams.SwapFee)
 }
 
 func TestParams_ParamSetPairs_AllowedPools(t *testing.T) {
@@ -158,7 +158,7 @@ func TestParams_Validation(t *testing.T) {
 			name: "swap fee greater than 1",
 			key:  types.KeySwapFee,
 			testFn: func(params *types.Params) {
-				params.SwapFee = sdk.MustNewDecFromStr("1.000000000000000001")
+				params.SwapFee = sdkmath.LegacyMustNewDecFromStr("1.000000000000000001")
 			},
 			expectedErr: "invalid swap fee: 1.000000000000000001",
 		},
@@ -166,7 +166,7 @@ func TestParams_Validation(t *testing.T) {
 			name: "0 swap fee",
 			key:  types.KeySwapFee,
 			testFn: func(params *types.Params) {
-				params.SwapFee = sdk.ZeroDec()
+				params.SwapFee = sdkmath.LegacyZeroDec()
 			},
 			expectedErr: "",
 		},
@@ -215,7 +215,7 @@ func TestParams_String(t *testing.T) {
 			types.NewAllowedPool("hard", "ukava"),
 			types.NewAllowedPool("ukava", "usdx"),
 		),
-		sdk.MustNewDecFromStr("0.5"),
+		sdkmath.LegacyMustNewDecFromStr("0.5"),
 	)
 
 	require.NoError(t, params.Validate())

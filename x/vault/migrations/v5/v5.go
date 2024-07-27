@@ -1,6 +1,7 @@
 package v5
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -14,8 +15,9 @@ import (
 
 // these codes are only for migration and may out of date
 
-func MigrateStore(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+func MigrateStore(rctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
 	oldPrefix := "OutboundTx/value/"
+	ctx := sdk.UnwrapSDKContext(rctx)
 	storeHandler := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 	storeHandlerOld := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(oldPrefix))
 
@@ -94,7 +96,8 @@ func convertOutboundTxsAndSetProposal(ctx context.Context, storeKey storetypes.S
 	return newOutboundTxs
 }
 
-func setItemProposals(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec, reqIndex string, proposals map[string]types.ProposalsV04) []string {
+func setItemProposals(rctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec, reqIndex string, proposals map[string]types.ProposalsV04) []string {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	items := make([]string, 0, len(proposals))
 	for txID := range proposals {
 		items = append(items, txID)

@@ -23,7 +23,7 @@ func TestGenesisState_Validate(t *testing.T) {
 			desc: "valid genesis state",
 			genState: &types.GenesisState{
 				Params: types.Params{
-					BurnThreshold: sdk.NewCoins(sdk.NewCoin("ausdc", sdk.NewInt(100))),
+					BurnThreshold: sdk.NewCoins(sdk.NewCoin("ausdc", sdkmath.NewInt(100))),
 				},
 				// this line is used by starport scaffolding # types/genesis/validField
 			},

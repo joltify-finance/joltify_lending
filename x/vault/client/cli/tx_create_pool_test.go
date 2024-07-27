@@ -25,8 +25,8 @@ import (
 func TestCreateCreatePool(t *testing.T) {
 	app2.SetSDKConfig()
 	cfg := network.DefaultConfig()
-	cfg.BondedTokens = sdk.NewInt(10000000000000000)
-	cfg.StakingTokens = sdk.NewInt(100000000000000000)
+	cfg.BondedTokens = sdkmath.NewInt(10000000000000000)
+	cfg.StakingTokens = sdkmath.NewInt(100000000000000000)
 	cfg.MinGasPrices = "0jolt"
 	// modification to pay fee with test bond denom "stake"
 	net := network.New(t, cfg)
@@ -55,7 +55,7 @@ func TestCreateCreatePool(t *testing.T) {
 				fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
-				// fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdk.NewInt(10))).String()),
+				// fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdkmath.NewInt(10))).String()),
 			},
 		},
 
@@ -67,7 +67,7 @@ func TestCreateCreatePool(t *testing.T) {
 				fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
-				// fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdk.NewInt(10))).String()),
+				// fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdkmath.NewInt(10))).String()),
 			},
 		},
 	} {

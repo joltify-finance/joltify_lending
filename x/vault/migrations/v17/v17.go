@@ -3,6 +3,8 @@
 package keeper
 
 import (
+	"context"
+
 	"cosmossdk.io/store/prefix"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -32,7 +34,8 @@ func convertOutboundTx(old types.OutboundTxV16) types.OutboundTx {
 	}
 }
 
-func MigrateStore(ctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+func MigrateStore(rctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	storeHandler := prefix.NewStore(ctx.KVStore(storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 
 	oldOutBoundIter := storeHandler.Iterator(nil, nil)

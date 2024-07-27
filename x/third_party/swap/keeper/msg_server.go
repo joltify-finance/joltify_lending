@@ -34,7 +34,7 @@ func (m msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (m msgServer) SwapExactForTokens(goCtx context.Context, msg *types.MsgSwapE
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (m msgServer) SwapExactForBatchTokens(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (m msgServer) SwapForExactTokens(goCtx context.Context, msg *types.MsgSwapF
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}

@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
@@ -462,12 +464,12 @@ func (s queryServer) InterestRate(ctx context.Context, req *types2.QueryInterest
 		}
 
 		// CalculateBorrowRate calculates the current interest rate based on utilization (the fraction of supply that has ien borrowed)
-		borrowAPY, err := CalculateBorrowRate(moneyMarket.InterestRateModel, sdk.NewDecFromInt(cash), sdk.NewDecFromInt(borrowed.Amount), sdk.NewDecFromInt(reserves.AmountOf(denom)))
+		borrowAPY, err := CalculateBorrowRate(moneyMarket.InterestRateModel, sdkmath.LegacyNewDecFromInt(cash), sdkmath.LegacyNewDecFromInt(borrowed.Amount), sdkmath.LegacyNewDecFromInt(reserves.AmountOf(denom)))
 		if err != nil {
 			return nil, err
 		}
 
-		utilRatio := CalculateUtilizationRatio(sdk.NewDecFromInt(cash), sdk.NewDecFromInt(borrowed.Amount), sdk.NewDecFromInt(reserves.AmountOf(denom)))
+		utilRatio := CalculateUtilizationRatio(sdkmath.LegacyNewDecFromInt(cash), sdkmath.LegacyNewDecFromInt(borrowed.Amount), sdkmath.LegacyNewDecFromInt(reserves.AmountOf(denom)))
 		fullSupplyAPY := borrowAPY.Mul(utilRatio)
 		realSupplyAPY := fullSupplyAPY.Mul(sdkmath.LegacyOneDec().Sub(moneyMarket.ReserveFactor))
 

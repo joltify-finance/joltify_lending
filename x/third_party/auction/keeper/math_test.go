@@ -106,10 +106,10 @@ func TestSplitIntIntoWeightedBuckets(t *testing.T) {
 	}
 }
 
-func i(n int64) sdkmath.Int { return sdk.NewInt(n) }
+func i(n int64) sdkmath.Int { return sdkmath.NewInt(n) }
 func is(ns ...int64) (is []sdkmath.Int) {
 	for _, n := range ns {
-		is = append(is, sdk.NewInt(n))
+		is = append(is, sdkmath.NewInt(n))
 	}
 	return
 }

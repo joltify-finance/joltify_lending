@@ -208,7 +208,7 @@ func (suite *msgServerTestSuite) TestWithdraw_AllShares() {
 	suite.Require().NoError(pool.Validate())
 	suite.Keeper.SetParams(suite.Ctx, types.NewParams(types.AllowedPools{pool}, types.DefaultSwapFee))
 
-	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdk.MustNewDecFromStr("1"))
+	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdkmath.LegacyMustNewDecFromStr("1"))
 	suite.Require().NoError(err)
 
 	withdraw := types.NewMsgWithdraw(
@@ -261,7 +261,7 @@ func (suite *msgServerTestSuite) TestWithdraw_PartialShares() {
 	suite.Require().NoError(pool.Validate())
 	suite.Keeper.SetParams(suite.Ctx, types.NewParams(types.AllowedPools{pool}, types.DefaultSwapFee))
 
-	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdk.MustNewDecFromStr("1"))
+	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdkmath.LegacyMustNewDecFromStr("1"))
 	suite.Require().NoError(err)
 
 	minTokenA := sdk.NewCoin("ukava", sdkmath.NewInt(4999999))
@@ -319,7 +319,7 @@ func (suite *msgServerTestSuite) TestWithdraw_SlippageFailure() {
 	suite.Require().NoError(pool.Validate())
 	suite.Keeper.SetParams(suite.Ctx, types.NewParams(types.AllowedPools{pool}, types.DefaultSwapFee))
 
-	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdk.MustNewDecFromStr("1"))
+	err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdkmath.LegacyMustNewDecFromStr("1"))
 	suite.Require().NoError(err)
 
 	minTokenA := sdk.NewCoin("ukava", sdkmath.NewInt(5e6))

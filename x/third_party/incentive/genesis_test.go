@@ -47,13 +47,13 @@ func (suite *GenesisTestSuite) SetupTest() {
 		WithSimpleAccount(addrs[0], cs(c("bnb", 1e10), c("ujolt", 1e10))).
 		WithSimpleModuleAccount(types.IncentiveMacc, cs(c("hard", 1e15), c("ujolt", 1e15)))
 
-	loanToValue, _ := sdk.NewDecFromStr("0.6")
+	loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
 	borrowLimit := sdk.NewDec(1000000000000000)
 	joltGS := types2.NewGenesisState(
 		types2.NewParams(
 			types2.MoneyMarkets{
-				types2.NewMoneyMarket("ujolt", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "jolt:usd", sdk.NewInt(1000000), types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
-				types2.NewMoneyMarket("bnb", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "bnb:usd", sdk.NewInt(1000000), types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
+				types2.NewMoneyMarket("ujolt", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "jolt:usd", sdkmath.NewInt(1000000), types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+				types2.NewMoneyMarket("bnb", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "bnb:usd", sdkmath.NewInt(1000000), types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 			},
 			sdk.NewDec(10),
 		),
@@ -192,7 +192,7 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 			[]*types.SPVGenRewardInvestorState{{
 				Pool:   "spv:1",
 				Wallet: suite.addrs[0].String(),
-				Reward: sdk.NewCoins(sdk.NewCoin("jolt", sdk.NewInt(1e9))),
+				Reward: sdk.NewCoins(sdk.NewCoin("jolt", sdkmath.NewInt(1e9))),
 			}},
 		),
 

@@ -1,8 +1,9 @@
 package types
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"fmt"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -86,7 +87,7 @@ func (mm MoneyMarket) Validate() error {
 		return err
 	}
 
-	if mm.ConversionFactor.IsNil() || mm.ConversionFactor.LT(sdk.OneInt()) {
+	if mm.ConversionFactor.IsNil() || mm.ConversionFactor.LT(sdkmath.OneInt()) {
 		return fmt.Errorf("conversion '%s' factor must be ≥ one", mm.ConversionFactor)
 	}
 
@@ -206,165 +207,165 @@ func NewParams(moneyMarkets MoneyMarkets, minimumBorrowUSDValue sdkmath.LegacyDe
 
 // DefaultParams returns default params for jolt module
 func DefaultParams() Params {
-	loanToValue, _ := sdk.NewDecFromStr("0.8")
-	loanToValueStable, _ := sdk.NewDecFromStr("0.95")
-	loanToValueJolt, _ := sdk.NewDecFromStr("0.2")
+	loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.8")
+	loanToValueStable, _ := sdkmath.LegacyNewDecFromStr("0.95")
+	loanToValueJolt, _ := sdkmath.LegacyNewDecFromStr("0.2")
 
 	m1 := NewMoneyMarket(
 		"ujolt",
 		NewBorrowLimit(
 			true,
-			sdk.NewDec(1.2e14),
+			sdkmath.LegacyNewDec(1.2e14),
 			loanToValueJolt,
 		),
 		"jolt:usd",
-		sdk.NewInt(1e6),
+		sdkmath.NewInt(1e6),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m2 := NewMoneyMarket(
 		"abnb",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"bnb:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m3 := NewMoneyMarket(
 		"ausdt",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValueStable,
 		),
 		"usdt:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.08"),
-			sdk.MustNewDecFromStr("1"),
-			sdk.MustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("1"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
 		),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m4 := NewMoneyMarket(
 		"ausdc",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValueStable,
 		),
 		"usdc:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.08"),
-			sdk.MustNewDecFromStr("1"),
-			sdk.MustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
+			sdkmath.LegacyMustNewDecFromStr("1"),
+			sdkmath.LegacyMustNewDecFromStr("0.08"),
 		),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m5 := NewMoneyMarket(
 		"aeth",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"eth:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m6 := NewMoneyMarket(
 		"uatom",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"atom:usd",
-		sdk.NewInt(1e6),
+		sdkmath.NewInt(1e6),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m7 := NewMoneyMarket(
 		"aeth",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"bnb:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	m8 := NewMoneyMarket(
 		"abtc",
 		NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			loanToValue,
 		),
 		"bnb:usd",
-		sdk.NewInt(1e18),
+		sdkmath.NewInt(1e18),
 		NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.0"),
-			sdk.MustNewDecFromStr("0.02"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("5"),
+			sdkmath.LegacyMustNewDecFromStr("0.0"),
+			sdkmath.LegacyMustNewDecFromStr("0.02"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("5"),
 		),
-		sdk.MustNewDecFromStr("0.02"),
-		sdk.MustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
+		sdkmath.LegacyMustNewDecFromStr("0.02"),
 	)
 
 	params := NewParams(
 		MoneyMarkets{m1, m2, m3, m4, m5, m6, m7, m8},
-		sdk.NewDec(10),
+		sdkmath.LegacyNewDec(10),
 	)
 
 	return params

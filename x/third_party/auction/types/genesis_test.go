@@ -11,7 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var testCoin = sdk.NewInt64Coin("test", 20)
+var testCoin = sdkmath.NewInt64Coin("test", 20)
 
 func newTestModuleCodec() codec.Codec {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
@@ -25,15 +25,15 @@ func TestGenesisState_Validate(t *testing.T) {
 		BaseAuction: BaseAuction{
 			ID:              10,
 			Initiator:       "seller mod account",
-			Lot:             sdk.NewInt64Coin("btc", 1e8),
+			Lot:             sdkmath.NewInt64Coin("btc", 1e8),
 			Bidder:          sdk.AccAddress("test bidder"),
-			Bid:             sdk.NewInt64Coin("usdx", 5),
+			Bid:             sdkmath.NewInt64Coin("usdx", 5),
 			HasReceivedBids: true,
 			EndTime:         arbitraryTime,
 			MaxEndTime:      arbitraryTime.Add(time.Hour),
 		},
-		CorrespondingDebt: sdk.NewInt64Coin("debt", 1e9),
-		MaxBid:            sdk.NewInt64Coin("usdx", 5e4),
+		CorrespondingDebt: sdkmath.NewInt64Coin("debt", 1e9),
+		MaxBid:            sdkmath.NewInt64Coin("usdx", 5e4),
 		LotReturns: WeightedAddresses{
 			Addresses: []sdk.AccAddress{sdk.AccAddress("test return address")},
 			Weights:   []sdkmath.Int{sdk.OneInt()},
@@ -101,24 +101,24 @@ func TestGenesisState_UnmarshalAnys(t *testing.T) {
 			BaseAuction: BaseAuction{
 				ID:              1,
 				Initiator:       "seller mod account",
-				Lot:             sdk.NewInt64Coin("btc", 1e8),
+				Lot:             sdkmath.NewInt64Coin("btc", 1e8),
 				Bidder:          sdk.AccAddress("test bidder"),
-				Bid:             sdk.NewInt64Coin("usdx", 5),
+				Bid:             sdkmath.NewInt64Coin("usdx", 5),
 				HasReceivedBids: true,
 				EndTime:         arbitraryTime,
 				MaxEndTime:      arbitraryTime.Add(time.Hour),
 			},
-			CorrespondingDebt: sdk.NewInt64Coin("debt", 1e9),
-			MaxBid:            sdk.NewInt64Coin("usdx", 5e4),
+			CorrespondingDebt: sdkmath.NewInt64Coin("debt", 1e9),
+			MaxBid:            sdkmath.NewInt64Coin("usdx", 5e4),
 			LotReturns:        WeightedAddresses{},
 		},
 		&DebtAuction{
 			BaseAuction: BaseAuction{
 				ID:              2,
 				Initiator:       "mod account",
-				Lot:             sdk.NewInt64Coin("ujolt", 1e9),
+				Lot:             sdkmath.NewInt64Coin("ujolt", 1e9),
 				Bidder:          sdk.AccAddress("test bidder"),
-				Bid:             sdk.NewInt64Coin("usdx", 5),
+				Bid:             sdkmath.NewInt64Coin("usdx", 5),
 				HasReceivedBids: true,
 				EndTime:         arbitraryTime,
 				MaxEndTime:      arbitraryTime.Add(time.Hour),
@@ -129,9 +129,9 @@ func TestGenesisState_UnmarshalAnys(t *testing.T) {
 			BaseAuction: BaseAuction{
 				ID:              3,
 				Initiator:       "seller mod account",
-				Lot:             sdk.NewInt64Coin("usdx", 1e9),
+				Lot:             sdkmath.NewInt64Coin("usdx", 1e9),
 				Bidder:          sdk.AccAddress("test bidder"),
-				Bid:             sdk.NewInt64Coin("ujolt", 5),
+				Bid:             sdkmath.NewInt64Coin("ujolt", 5),
 				HasReceivedBids: true,
 				EndTime:         arbitraryTime,
 				MaxEndTime:      arbitraryTime.Add(time.Hour),

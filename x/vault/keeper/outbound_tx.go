@@ -1,16 +1,19 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
 // SetOutboundTx set a specific outboundTx in the store from its index
-func (k Keeper) SetOutboundTx(ctx context.Context, outboundTx types.OutboundTx) {
+func (k Keeper) SetOutboundTx(rctx context.Context, outboundTx types.OutboundTx) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
 	b := k.cdc.MustMarshal(&outboundTx)
 	store.Set(types.OutboundTxKey(
@@ -48,9 +51,10 @@ func (k Keeper) SetOutboundTxProposal(ctx context.Context, reqID, outboundTxID s
 
 // GetOutboundTxProposal returns proposals from its requestID:outboundTxID
 func (k Keeper) GetOutboundTxProposal(
-	ctx context.Context,
+	rctx context.Context,
 	reqID, outboundTxID string,
 ) (val types.Proposals, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxProposalKeyPrefix))
 
 	key := fmt.Sprintf("%v:%v", reqID, outboundTxID)
@@ -65,9 +69,10 @@ func (k Keeper) GetOutboundTxProposal(
 }
 
 // GetAllOutboundTx returns all outboundTx
-func (k Keeper) GetAllOutboundTx(ctx context.Context) (list []types.OutboundTx) {
+func (k Keeper) GetAllOutboundTx(rctx context.Context) (list []types.OutboundTx) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OutboundTxKeyPrefix))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 
 	defer iterator.Close()
 

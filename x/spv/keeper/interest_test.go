@@ -25,7 +25,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"lowest apy",
 			args{
-				apy:    sdk.MustNewDecFromStr("0.005"),
+				apy:    sdkmath.LegacyMustNewDecFromStr("0.005"),
 				payfrq: 3600 * 24 * 7,
 			},
 			false,
@@ -34,7 +34,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"lowest apy",
 			args{
-				apy:    sdk.MustNewDecFromStr("0.051271109622422061"),
+				apy:    sdkmath.LegacyMustNewDecFromStr("0.051271109622422061"),
 				payfrq: 4,
 			},
 			false,
@@ -42,7 +42,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"lower apy",
 			args{
-				apy:    sdk.MustNewDecFromStr("0.05"),
+				apy:    sdkmath.LegacyMustNewDecFromStr("0.05"),
 				payfrq: 4,
 			},
 			false,
@@ -50,7 +50,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"medium-low apy",
 			args{
-				apy:    sdk.MustNewDecFromStr("0.5"),
+				apy:    sdkmath.LegacyMustNewDecFromStr("0.5"),
 				payfrq: 4,
 			},
 			false,
@@ -58,7 +58,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"medium-high apy",
 			args{
-				apy:    sdk.MustNewDecFromStr("5"),
+				apy:    sdkmath.LegacyMustNewDecFromStr("5"),
 				payfrq: 4,
 			},
 			false,
@@ -66,7 +66,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"high apy",
 			args{
-				apy:    sdk.MustNewDecFromStr("50"),
+				apy:    sdkmath.LegacyMustNewDecFromStr("50"),
 				payfrq: 4,
 			},
 			false,
@@ -74,7 +74,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"highest apy",
 			args{
-				apy:    sdk.MustNewDecFromStr("177"),
+				apy:    sdkmath.LegacyMustNewDecFromStr("177"),
 				payfrq: 4,
 			},
 			false,
@@ -82,9 +82,9 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"out of bounds error after 178",
 			args{
-				apy:           sdk.MustNewDecFromStr("179"),
+				apy:           sdkmath.LegacyMustNewDecFromStr("179"),
 				payfrq:        4,
-				expectedValue: sdk.ZeroDec(),
+				expectedValue: sdkmath.LegacyZeroDec(),
 			},
 			true,
 		},
@@ -98,7 +98,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 
 			total := (accumulate.Sub(sdkmath.LegacyOneDec())).Mul(sdk.NewDec(OneYear / int64(accTime)))
 			gap := total.Sub(tc.args.apy)
-			suite.Require().True(gap.LT(sdk.NewDecFromIntWithPrec(sdk.NewInt(1), 8)))
+			suite.Require().True(gap.LT(sdkmath.LegacyNewDecFromIntWithPrec(sdk.NewInt(1), 8)))
 		})
 	}
 }
@@ -108,7 +108,7 @@ func checkPayFreqApy(oneYearApy sdkmath.LegacyDec, freqApy sdkmath.LegacyDec, ci
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestAmount() {
-	testapy := sdk.MustNewDecFromStr("0.15")
+	testapy := sdkmath.LegacyMustNewDecFromStr("0.15")
 	_, err := CalculateInterestAmount(testapy, 0)
 	suite.Require().ErrorContains(err, "payFreq cannot be zero")
 	for i := 1; i < 52; i++ {
@@ -121,7 +121,7 @@ func (suite *InterestTestSuite) TestCalculateInterestAmount() {
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestFactor() {
-	testapy := sdk.MustNewDecFromStr("0.25")
+	testapy := sdkmath.LegacyMustNewDecFromStr("0.25")
 	payfreq := OneWeek * 8
 
 	apyEachPayment, err := CalculateInterestAmount(testapy, payfreq)
@@ -129,12 +129,12 @@ func (suite *InterestTestSuite) TestCalculateInterestFactor() {
 	spy, err := apyTospy(apyEachPayment, uint64(payfreq))
 	suite.Require().NoError(err)
 
-	result := CalculateInterestFactor(spy, sdk.NewIntFromUint64(uint64(payfreq)))
+	result := CalculateInterestFactor(spy, sdkmath.NewIntFromUint64(uint64(payfreq)))
 	suite.Require().True(apyEachPayment.Sub(result).Abs().LTE(sdk.NewDecWithPrec(1, 8)))
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestPerSecond() {
-	testapy := sdk.MustNewDecFromStr("0.18")
+	testapy := sdkmath.LegacyMustNewDecFromStr("0.18")
 
 	adjMonthAPY := sdkmath.LegacyOneDec().Add(testapy)
 

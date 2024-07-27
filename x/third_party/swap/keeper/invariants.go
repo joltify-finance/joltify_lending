@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 
 	sdkmath "cosmossdk.io/math"
@@ -17,7 +19,8 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 
 // AllInvariants runs all invariants of the swap module
 func AllInvariants(k Keeper) sdk.Invariant {
-	return func(ctx context.Context) (string, bool) {
+	return func(rctx context.Context) (string, bool) {
+		ctx := sdk.UnwrapSDKContext(rctx)
 		if res, stop := PoolRecordsInvariant(k)(ctx); stop {
 			return res, stop
 		}

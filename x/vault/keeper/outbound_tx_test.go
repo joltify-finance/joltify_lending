@@ -27,7 +27,7 @@ func createNOutboundTx(keeper *keeper.Keeper, ctx context.Context, n int) []type
 	accs := simulation.RandomAccounts(r, n)
 	for i := range items {
 		items[i].Index = strconv.Itoa(i)
-		items[i].Feecoin = []sdk.Coin{{Denom: "mock", Amount: sdk.NewInt(1)}}
+		items[i].Feecoin = []sdk.Coin{{Denom: "mock", Amount: sdkmath.NewInt(1)}}
 		items[i].ReceiverAddress = accs[i].Address
 		keeper.SetOutboundTx(ctx, items[i])
 	}

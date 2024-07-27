@@ -22,7 +22,7 @@ func (k Keeper) UpdateIncentive(ctx context.Context, poolInfo types.PoolInfo) {
 	for _, market := range pa.Markets {
 		if market.GetDenom() == pooldemos[1] {
 			c := market.GetConversionFactor()
-			conversion = sdk.NewIntFromBigInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(c)), nil))
+			conversion = sdkmath.NewIntFromBigInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(c)), nil))
 			break
 		}
 	}
@@ -30,15 +30,15 @@ func (k Keeper) UpdateIncentive(ctx context.Context, poolInfo types.PoolInfo) {
 	for _, el := range pa.Incentives {
 		if el.Poolid == poolIndex {
 			// as the spy is 1.XXXX, so we need to minus 1
-			spy := sdk.MustNewDecFromStr(el.Spy).Sub(sdkmath.LegacyOneDec())
+			spy := sdkmath.LegacyMustNewDecFromStr(el.Spy).Sub(sdkmath.LegacyOneDec())
 			joltM, err := k.priceFeedKeeper.GetCurrentPrice(ctx, "jolt:usd")
 			if err != nil {
 				ctx.Logger().Error("cannot get jolt price", "error", err)
 				return
 			}
 
-			borrowedDec := sdk.NewDecFromInt(totalBorrowed.Amount)
-			incentiveJolt := borrowedDec.Mul(spy).Mul(sdk.NewDecFromInt(sdk.NewIntFromUint64(types.JOLTPRECISION))).Quo(sdk.NewDecFromInt(conversion)).Quo(joltM.Price)
+			borrowedDec := sdkmath.LegacyNewDecFromInt(totalBorrowed.Amount)
+			incentiveJolt := borrowedDec.Mul(spy).Mul(sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(types.JOLTPRECISION))).Quo(sdkmath.LegacyNewDecFromInt(conversion)).Quo(joltM.Price)
 
 			incentiveCoin := sdk.NewCoins(sdk.NewCoin("ujolt", incentiveJolt.TruncateInt()))
 

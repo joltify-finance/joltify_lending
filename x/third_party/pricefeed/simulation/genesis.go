@@ -62,12 +62,12 @@ package simulation
 // func getInitialPrice(marketID string) (price sdkmath.LegacyDec) {
 // 	switch marketID {
 // 	case "btc:usd":
-// 		return sdk.MustNewDecFromStr("7000")
+// 		return sdkmath.LegacyMustNewDecFromStr("7000")
 // 	case "bnb:usd":
-// 		return sdk.MustNewDecFromStr("14")
+// 		return sdkmath.LegacyMustNewDecFromStr("14")
 // 	case "xrp:usd":
-// 		return sdk.MustNewDecFromStr("0.2")
+// 		return sdkmath.LegacyMustNewDecFromStr("0.2")
 // 	default:
-// 		return sdk.MustNewDecFromStr("20") // Catch future additional assets
+// 		return sdkmath.LegacyMustNewDecFromStr("20") // Catch future additional assets
 // 	}
 // }

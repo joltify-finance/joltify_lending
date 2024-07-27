@@ -35,7 +35,7 @@ func TestMsgPlaceBid_ValidateBasic(t *testing.T) {
 		},
 		{
 			"negative amount",
-			NewMsgPlaceBid(1, testAccAddress1, sdk.Coin{Denom: "token", Amount: sdk.NewInt(-10)}),
+			NewMsgPlaceBid(1, testAccAddress1, sdk.Coin{Denom: "token", Amount: sdkmath.NewInt(-10)}),
 			false,
 		},
 		{

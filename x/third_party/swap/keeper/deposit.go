@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
@@ -67,9 +68,9 @@ func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coinA sdk
 		return errorsmod.Wrap(types.ErrInsufficientLiquidity, "deposit must be increased")
 	}
 
-	maxPercentPriceChange := sdk.MaxDec(
-		sdk.NewDecFromInt(desiredAmount.AmountOf(coinA.Denom)).Quo(sdk.NewDecFromInt(depositAmount.AmountOf(coinA.Denom))),
-		sdk.NewDecFromInt(desiredAmount.AmountOf(coinB.Denom)).Quo(sdk.NewDecFromInt(depositAmount.AmountOf(coinB.Denom))),
+	maxPercentPriceChange := sdkmath.LegacyMaxDec(
+		sdkmath.LegacyNewDecFromInt(desiredAmount.AmountOf(coinA.Denom)).Quo(sdkmath.LegacyNewDecFromInt(depositAmount.AmountOf(coinA.Denom))),
+		sdkmath.LegacyNewDecFromInt(desiredAmount.AmountOf(coinB.Denom)).Quo(sdkmath.LegacyNewDecFromInt(depositAmount.AmountOf(coinB.Denom))),
 	)
 	slippage := maxPercentPriceChange.Sub(sdkmath.LegacyOneDec())
 

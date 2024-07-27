@@ -25,7 +25,7 @@ func (k msgServer) calculateTotalDueInterest(ctx context.Context, poolInfo types
 			return sdkmath.ZeroInt(), coserrors.Wrapf(err, "invalid unmarshal of the borrow interest")
 		}
 		borrow := borrowInterest.BorrowDetails[len(borrowInterest.BorrowDetails)-1].BorrowedAmount
-		paymentAmount := borrowInterest.MonthlyRatio.Mul(sdk.NewDecFromInt(borrow.Amount)).TruncateInt()
+		paymentAmount := borrowInterest.MonthlyRatio.Mul(sdkmath.LegacyNewDecFromInt(borrow.Amount)).TruncateInt()
 		totalAmount = totalAmount.Add(paymentAmount)
 	}
 	return totalAmount, nil

@@ -83,7 +83,7 @@ func (k Keeper) ClaimSwapReward(ctx context.Context, owner, receiver sdk.AccAddr
 	amt := syncedClaim.Reward.AmountOf(denom)
 
 	claimingCoins := sdk.NewCoins(sdk.NewCoin(denom, amt))
-	rewardCoins := sdk.NewCoins(sdk.NewCoin(denom, sdk.NewDecFromInt(amt).Mul(multiplier.Factor).RoundInt()))
+	rewardCoins := sdk.NewCoins(sdk.NewCoin(denom, sdkmath.LegacyNewDecFromInt(amt).Mul(multiplier.Factor).RoundInt()))
 	if rewardCoins.IsZero() {
 		return types.ErrZeroClaim
 	}

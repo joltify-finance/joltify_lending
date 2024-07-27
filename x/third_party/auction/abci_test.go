@@ -55,5 +55,5 @@ func (suite *abciTestSuite) TestKeeper_BeginBlocker() {
 	suite.False(found)
 }
 
-func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
 func cs(coins ...sdk.Coin) sdk.Coins        { return sdk.NewCoins(coins...) }

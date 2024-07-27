@@ -45,7 +45,7 @@ func TestSubmitRequest(t *testing.T) {
 	})
 	require.True(t, strings.Contains(err.Error(), "invalid address"))
 
-	testCoin := sdk.NewCoins(sdk.NewCoin("uatom", sdk.NewInt(100)), sdk.NewCoin("ustake", sdk.NewInt(120)))
+	testCoin := sdk.NewCoins(sdk.NewCoin("uatom", sdkmath.NewInt(100)), sdk.NewCoin("ustake", sdkmath.NewInt(120)))
 
 	_, err = ms.Submitrequest(ctx, &types.MsgSubmitrequest{
 		Creator: sender.String(),

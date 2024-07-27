@@ -16,7 +16,7 @@ import (
 )
 
 func calculateTotalInterest(ctx context.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdkmath.Int, error) {
-	totalInterestUsd := sdk.NewInt(0)
+	totalInterestUsd := sdkmath.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
 		thisNFT, found := nftKeeper.GetNFT(ctx, ids[0], ids[1])
@@ -59,7 +59,7 @@ func calculateTotalInterest(ctx context.Context, lendNFTs []string, nftKeeper ty
 			paymentAmount := eachPayment.PaymentAmount
 			// todo there may be the case that because of the truncate, the total payment is larger than the interest paid to investors
 			// fixme we should NEVER calculate the interest after the pool status is in luquidation as the user ratio is not correct any more
-			interestUsd := sdk.NewDecFromInt(paymentAmount.Amount).Mul(sdk.NewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
+			interestUsd := sdkmath.LegacyNewDecFromInt(paymentAmount.Amount).Mul(sdkmath.LegacyNewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdkmath.LegacyNewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
 			totalInterestUsd = totalInterestUsd.Add(interestUsd)
 			latestTimeStamp = eachPayment.PaymentTime
 			lastPaymentSet = true
@@ -93,7 +93,7 @@ func calculateTotalInterest(ctx context.Context, lendNFTs []string, nftKeeper ty
 }
 
 func calculateTotalOutstandingInterest(ctx context.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdkmath.LegacyDec) (sdkmath.Int, error) {
-	totalInterestUsd := sdk.NewInt(0)
+	totalInterestUsd := sdkmath.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
 		thisNFT, found := nftKeeper.GetNFT(ctx, ids[0], ids[1])
@@ -120,10 +120,10 @@ func calculateTotalOutstandingInterest(ctx context.Context, lendNFTs []string, n
 		lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1]
 		lastPayment := borrowClassInfo.Payments[len(borrowClassInfo.Payments)-1]
 		delta := uint64(ctx.BlockTime().Sub(lastPayment.PaymentTime).Seconds())
-		factor := CalculateInterestFactor(borrowClassInfo.InterestSPY, sdk.NewIntFromUint64(delta))
+		factor := CalculateInterestFactor(borrowClassInfo.InterestSPY, sdkmath.NewIntFromUint64(delta))
 
-		ratio := sdk.NewDecFromInt(interestData.Borrowed.Amount).Quo(sdk.NewDecFromInt(lastBorrow.BorrowedAmount.Amount))
-		paymentAmountToInvestor := sdk.NewDecFromInt(lastBorrow.BorrowedAmount.Amount).Mul(sdkmath.LegacyOneDec().Sub(reserve))
+		ratio := sdkmath.LegacyNewDecFromInt(interestData.Borrowed.Amount).Quo(sdkmath.LegacyNewDecFromInt(lastBorrow.BorrowedAmount.Amount))
+		paymentAmountToInvestor := sdkmath.LegacyNewDecFromInt(lastBorrow.BorrowedAmount.Amount).Mul(sdkmath.LegacyOneDec().Sub(reserve))
 		interestLocal := paymentAmountToInvestor.Mul(ratio).Mul(factor.Sub(sdkmath.LegacyOneDec())).TruncateInt()
 		interest := outboundConvertToUSD(interestLocal, lastBorrow.ExchangeRatio)
 		totalInterestUsd = totalInterestUsd.Add(interest)
@@ -180,7 +180,7 @@ func (k Keeper) doBorrow(ctx context.Context, poolInfo *types.PoolInfo, usdToken
 
 	borrowDetails := make([]types.BorrowDetail, 1, 10)
 	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: localToken, TimeStamp: paymentTime, ExchangeRatio: ratio}
-	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(poolInfo.TargetAmount.Denom, sdk.NewInt(0))}
+	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(poolInfo.TargetAmount.Denom, sdkmath.NewInt(0))}
 	bi := types.BorrowInterest{
 		PoolIndex:     poolInfo.Index,
 		Apy:           poolInfo.Apy,
@@ -246,7 +246,7 @@ func (k Keeper) processBorrow(ctx context.Context, poolInfo *types.PoolInfo, nft
 	} else {
 		borrowable = poolInfo.UsableAmount.Amount
 	}
-	utilization := sdk.NewDecFromInt(usdAmount.Amount).Quo(sdk.NewDecFromInt(borrowable))
+	utilization := sdkmath.LegacyNewDecFromInt(usdAmount.Amount).Quo(sdkmath.LegacyNewDecFromInt(borrowable))
 
 	var err error
 	// we add the amount of the tokens that borrowed in the pool and decreases the borrowable
@@ -327,7 +327,7 @@ func (k Keeper) processInvestors(ctx context.Context, poolInfo *types.PoolInfo, 
 				firstDepositor = depositor
 				continue
 			}
-			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
+			lockedUsd := sdkmath.LegacyNewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
 			if !lockedLocal.IsPositive() {
 				continue
@@ -354,7 +354,7 @@ func (k Keeper) processInvestors(ctx context.Context, poolInfo *types.PoolInfo, 
 				firstDepositor = &depositor
 				return false
 			}
-			lockedUsd := sdk.NewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
+			lockedUsd := sdkmath.LegacyNewDecFromInt(depositor.WithdrawalAmount.Amount).Mul(utilization).TruncateInt()
 			lockedLocal := inboundConvertFromUSD(lockedUsd, ratio)
 			if !lockedLocal.IsPositive() {
 				return false
@@ -473,7 +473,7 @@ func (k Keeper) cleanupDepositor(ctx context.Context, poolInfo types.PoolInfo, d
 }
 
 func (k Keeper) doProcessLiquidationForInvestor(ctx context.Context, lendNFTs []string) (sdkmath.Int, error) {
-	totalRedeem := sdk.NewInt(0)
+	totalRedeem := sdkmath.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
 		thisNFT, found := k.NftKeeper.GetNFT(ctx, ids[0], ids[1])
@@ -515,7 +515,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx context.Context, lendNFTs []
 			liquidationPaymentAmount := eachLiquidationPayment.Amount
 			// todo there may be the case that because of the tucate, the total payment is larger than the interest paid to investors
 			// fixme we should NEVER calculate the interest after the pool status is in luquidation as the user ratio is not correct any more
-			investorRedeemAmount := sdk.NewDecFromInt(liquidationPaymentAmount.Amount).Mul(sdk.NewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classLastBorrow.Amount)).TruncateInt()
+			investorRedeemAmount := sdkmath.LegacyNewDecFromInt(liquidationPaymentAmount.Amount).Mul(sdkmath.LegacyNewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdkmath.LegacyNewDecFromInt(classLastBorrow.Amount)).TruncateInt()
 			totalRedeem = totalRedeem.Add(investorRedeemAmount)
 			latestTimeStamp = eachLiquidationPayment.LiquidationPaymentTime
 			borrowClassInfo.TotalPaidLiquidationAmount = borrowClassInfo.TotalPaidLiquidationAmount.Add(investorRedeemAmount)
@@ -547,7 +547,7 @@ func (k Keeper) doProcessLiquidationForInvestor(ctx context.Context, lendNFTs []
 }
 
 func (k Keeper) updateDepositorStatus(ctx context.Context, poolInfo *types.PoolInfo) {
-	totalAdjust := sdk.NewInt(0)
+	totalAdjust := sdkmath.NewInt(0)
 
 	k.IterateDepositors(ctx, poolInfo.Index, func(depositor types.DepositorInfo) (stop bool) {
 		if depositor.DepositType == types.DepositorInfo_unset {

@@ -109,7 +109,7 @@ func (k Keeper) AfterSPVInterestPaid(ctx context.Context, poolID string, interes
 	totalRewards := rewards.PaymentAmount.Sort()
 
 	reserve := poolInfo.ReserveFactor
-	reserveAmt := sdk.NewDecFromInt(interestPaid).Mul(reserve).TruncateInt()
+	reserveAmt := sdkmath.LegacyNewDecFromInt(interestPaid).Mul(reserve).TruncateInt()
 	paymentToInvestor := interestPaid.Sub(reserveAmt)
 	allNFTs := poolInfo.PoolNFTIds
 
@@ -138,11 +138,11 @@ func (k Keeper) AfterSPVInterestPaid(ctx context.Context, poolID string, interes
 
 		lastBorrow := borrowInterest.BorrowDetails[len(borrowInterest.BorrowDetails)-1].BorrowedAmount
 		lastpayment := borrowInterest.Payments[len(borrowInterest.Payments)-1]
-		ratio := sdk.NewDecFromInt(lastpayment.PaymentAmount.Amount).Quo(sdk.NewDecFromInt(paymentToInvestor))
+		ratio := sdkmath.LegacyNewDecFromInt(lastpayment.PaymentAmount.Amount).Quo(sdkmath.LegacyNewDecFromInt(paymentToInvestor))
 
 		var incentiveCoins sdk.Coins
 		for _, eachCoin := range totalRewards {
-			amt := sdk.NewDecFromInt(eachCoin.Amount).Mul(ratio).TruncateInt()
+			amt := sdkmath.LegacyNewDecFromInt(eachCoin.Amount).Mul(ratio).TruncateInt()
 			incentiveCoins = incentiveCoins.Add(sdk.NewCoin(eachCoin.Denom, amt))
 		}
 
@@ -284,7 +284,7 @@ func CalculateTotalIncentives(ctx context.Context, lendNFTs []string, nftKeeper 
 
 			var incentiveCoins sdk.Coins
 			for _, eachCoin := range incentivePaymentAmount {
-				incentiveAmt := sdk.NewDecFromInt(eachCoin.Amount).Mul(sdk.NewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
+				incentiveAmt := sdkmath.LegacyNewDecFromInt(eachCoin.Amount).Mul(sdkmath.LegacyNewDecFromInt(investorInterestData.Borrowed.Amount)).Quo(sdkmath.LegacyNewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
 				incentive := sdk.NewCoin(eachCoin.Denom, incentiveAmt)
 				incentiveCoins = incentiveCoins.Add(incentive)
 			}

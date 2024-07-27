@@ -3,6 +3,7 @@ package keeper
 import (
 	rawcontext "context"
 
+	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -16,10 +17,10 @@ func (k Keeper) calMinSupportNodes(c rawcontext.Context) int32 {
 
 	boundedValidators := k.vaultStaking.GetBondedValidatorsByPower(ctx)
 
-	candidateDec := sdk.NewDecWithPrec(int64(len(boundedValidators)), 0)
+	candidateDec := sdkmath.LegacyNewDecWithPrec(int64(len(boundedValidators)), 0)
 
 	params := k.GetParams(ctx)
-	candidateNumDec := candidateDec.Mul(params.CandidateRatio).MulTruncate(sdk.MustNewDecFromStr("0.6667"))
+	candidateNumDec := candidateDec.Mul(params.CandidateRatio).MulTruncate(sdkmath.LegacyMustNewDecFromStr("0.6667"))
 	candidateNum := int32(candidateNumDec.TruncateInt64())
 	return candidateNum
 }

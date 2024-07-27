@@ -85,7 +85,7 @@ func (suite *grpcQueryTestSuite) TestGrpcPrice() {
 	suite.setTestParams()
 	suite.setTstPrice()
 
-	expectedPrice := types2.NewCurrentPriceResponse("tstusd", sdk.MustNewDecFromStr("0.34"))
+	expectedPrice := types2.NewCurrentPriceResponse("tstusd", sdkmath.LegacyMustNewDecFromStr("0.34"))
 
 	res, err := suite.queryServer.Price(sdk.WrapSDKContext(suite.ctx), &types2.QueryPriceRequest{MarketId: "tstusd"})
 	suite.NoError(err)
@@ -112,7 +112,7 @@ func (suite *grpcQueryTestSuite) TestGrpcPrices() {
 	suite.setTestParams()
 	suite.setTstPrice()
 
-	expectedPrice := types2.NewCurrentPriceResponse("tstusd", sdk.MustNewDecFromStr("0.34"))
+	expectedPrice := types2.NewCurrentPriceResponse("tstusd", sdkmath.LegacyMustNewDecFromStr("0.34"))
 
 	prices, err := suite.queryServer.Prices(sdk.WrapSDKContext(suite.ctx), &types2.QueryPricesRequest{})
 	suite.NoError(err)
@@ -129,7 +129,7 @@ func (suite *grpcQueryTestSuite) TestGrpcPrices_NoPriceSet() {
 
 	_, err := suite.keeper.SetPrice(
 		suite.ctx, suite.addrs[2], "tst:usd",
-		sdk.MustNewDecFromStr("0.34"),
+		sdkmath.LegacyMustNewDecFromStr("0.34"),
 		suite.now.Add(time.Hour*1))
 	suite.NoError(err)
 
@@ -139,7 +139,7 @@ func (suite *grpcQueryTestSuite) TestGrpcPrices_NoPriceSet() {
 	// Set current price of "other:usd" with no individual prices in store
 	_ = suite.keeper.SetCurrentPrices(suite.ctx, "other:usd")
 
-	expectedPrice := types2.NewCurrentPriceResponse("tst:usd", sdk.MustNewDecFromStr("0.34"))
+	expectedPrice := types2.NewCurrentPriceResponse("tst:usd", sdkmath.LegacyMustNewDecFromStr("0.34"))
 	prices, err := suite.queryServer.Prices(sdk.WrapSDKContext(suite.ctx), &types2.QueryPricesRequest{})
 	suite.NoError(err)
 
@@ -162,19 +162,19 @@ func (suite *grpcQueryTestSuite) TestGrpcRawPrices() {
 			types2.NewPostedPriceResponse(
 				"tstusd",
 				suite.addrs[0],
-				sdk.MustNewDecFromStr("0.33"),
+				sdkmath.LegacyMustNewDecFromStr("0.33"),
 				suite.now.Add(time.Hour*1),
 			),
 			types2.NewPostedPriceResponse(
 				"tstusd",
 				suite.addrs[1],
-				sdk.MustNewDecFromStr("0.35"),
+				sdkmath.LegacyMustNewDecFromStr("0.35"),
 				suite.now.Add(time.Hour*1),
 			),
 			types2.NewPostedPriceResponse(
 				"tstusd",
 				suite.addrs[2],
-				sdk.MustNewDecFromStr("0.34"),
+				sdkmath.LegacyMustNewDecFromStr("0.34"),
 				suite.now.Add(time.Hour*1),
 			),
 		},
@@ -248,19 +248,19 @@ func (suite *grpcQueryTestSuite) TestGrpcMarkets() {
 func (suite *grpcQueryTestSuite) setTstPrice() {
 	_, err := suite.keeper.SetPrice(
 		suite.ctx, suite.addrs[0], "tstusd",
-		sdk.MustNewDecFromStr("0.33"),
+		sdkmath.LegacyMustNewDecFromStr("0.33"),
 		suite.now.Add(time.Hour*1))
 	suite.NoError(err)
 
 	_, err = suite.keeper.SetPrice(
 		suite.ctx, suite.addrs[1], "tstusd",
-		sdk.MustNewDecFromStr("0.35"),
+		sdkmath.LegacyMustNewDecFromStr("0.35"),
 		suite.now.Add(time.Hour*1))
 	suite.NoError(err)
 
 	_, err = suite.keeper.SetPrice(
 		suite.ctx, suite.addrs[2], "tstusd",
-		sdk.MustNewDecFromStr("0.34"),
+		sdkmath.LegacyMustNewDecFromStr("0.34"),
 		suite.now.Add(time.Hour*1))
 	suite.NoError(err)
 

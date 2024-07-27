@@ -31,14 +31,14 @@ type withDrawPrincipalSuite struct {
 
 func setupPool(suite *withDrawPrincipalSuite) {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, resp.PoolIndex[0])
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(3*1e5))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e5))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	suite.keeper.SetReserve(suite.ctx, sdk.NewCoin("ausdc", sdkmath.ZeroInt()))
@@ -86,13 +86,13 @@ func (suite *withDrawPrincipalSuite) SetupTest() {
 }
 
 func convertBorrowToUsd(in sdkmath.Int) sdkmath.Int {
-	ratio := sdk.MustNewDecFromStr("0.7")
+	ratio := sdkmath.LegacyMustNewDecFromStr("0.7")
 	return ratio.MulInt(in).TruncateInt()
 }
 
 func convertBorrowToLocal(in sdkmath.Int) sdkmath.Int {
-	ratio := sdk.MustNewDecFromStr("0.7")
-	return (sdk.NewDecFromInt(in)).Quo(ratio).TruncateInt()
+	ratio := sdkmath.LegacyMustNewDecFromStr("0.7")
+	return (sdkmath.LegacyNewDecFromInt(in)).Quo(ratio).TruncateInt()
 }
 
 func TestWithdrawPrincipalInterest(t *testing.T) {
@@ -108,7 +108,7 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().NoError(err)
 	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
 	suite.Require().NoError(err)
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -129,7 +129,7 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	// now we borrow 1.34e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)
@@ -141,7 +141,7 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 
 	suite.Require().True(borrow.BorrowAmount.Amount.Sub(convertBorrowToUsd(poolInfo.BorrowedAmount.Amount)).Abs().LT(sdk.NewInt(2)))
 
-	borrowable := sdk.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
+	borrowable := sdkmath.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
 	suite.Require().EqualValues(borrowable, poolInfo.UsableAmount.Amount)
 	suite.Require().True(convertBorrowToUsd(poolInfo.BorrowedAmount.Amount).Sub(sdk.NewIntFromUint64(1.34e5)).Abs().LT(sdk.NewIntFromUint64(2)))
 
@@ -157,12 +157,12 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().EqualValues(sdk.NewInt(4e5), depositor1.WithdrawalAmount.AddAmount(convertBorrowToUsd(depositor1.LockedAmount.Amount)).Amount)
 	suite.Require().EqualValues(sdk.NewInt(1.99999e5), depositor2.WithdrawalAmount.AddAmount(convertBorrowToUsd(depositor2.LockedAmount.Amount)).Amount)
 
-	getRatio := sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
+	getRatio := sdkmath.LegacyNewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdkmath.LegacyNewDecFromInt(depositor2.LockedAmount.Amount))
 	// the ratio should close to 2
-	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
+	suite.Require().True(getRatio.Sub(sdkmath.LegacyMustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
 
 	// now we borrow more money
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.1e5))
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.1e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 	totalBorrowed = totalBorrowed.Add(borrow.BorrowAmount)
@@ -184,9 +184,9 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().True(sdk.NewInt(4e5).Sub(depositor1.WithdrawalAmount.AddAmount(convertBorrowToUsd(depositor1.LockedAmount.Amount)).Amount).Abs().LTE(sdk.NewIntFromUint64(1)))
 	suite.Require().True(sdk.NewInt(2e5).Sub(depositor2.WithdrawalAmount.AddAmount(convertBorrowToUsd(depositor2.LockedAmount.Amount)).Amount).Abs().LTE(sdk.NewIntFromUint64(1)))
 
-	getRatio = sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
+	getRatio = sdkmath.LegacyNewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdkmath.LegacyNewDecFromInt(depositor2.LockedAmount.Amount))
 	// the ratio should close to 2
-	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
+	suite.Require().True(getRatio.Sub(sdkmath.LegacyMustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
 
 	// now we run the withdrawal
 	withdrawReq := types.MsgWithdrawPrincipal{Creator: "invalid"}
@@ -198,11 +198,11 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	suite.Require().ErrorContains(err, "depositor not found for pool")
 
 	withdrawReq.PoolIndex = suite.investorPool
-	withdrawReq.Token = sdk.NewCoin("invalid", sdk.NewIntFromUint64(22))
+	withdrawReq.Token = sdk.NewCoin("invalid", sdkmath.NewIntFromUint64(22))
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
 	suite.Require().ErrorContains(err, "you can only withdraw ausdc")
 
-	getRatio = sdk.NewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdk.NewDecFromInt(depositor2.LockedAmount.Amount))
+	getRatio = sdkmath.LegacyNewDecFromInt(depositor1.LockedAmount.Amount).Quo(sdkmath.LegacyNewDecFromInt(depositor2.LockedAmount.Amount))
 	// the ratio should close to 2
 
 	depositor1, found = suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
@@ -213,9 +213,9 @@ func (suite *withDrawPrincipalSuite) TestMsgWithdrawPrincipalTest() {
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
 	suite.Require().ErrorContains(err, "deposit amount 3 is less than the minimum deposit amount 5")
 
-	suite.Require().True(getRatio.Sub(sdk.MustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
+	suite.Require().True(getRatio.Sub(sdkmath.LegacyMustNewDecFromStr("2")).LTE(sdk.NewDecWithPrec(1, 4)))
 
-	withdrawReq.Token = sdk.NewCoin(depositor1.WithdrawalAmount.Denom, sdk.NewIntFromUint64(100))
+	withdrawReq.Token = sdk.NewCoin(depositor1.WithdrawalAmount.Denom, sdkmath.NewIntFromUint64(100))
 	_, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawReq)
 	suite.Require().NoError(err)
 	before := depositor1.WithdrawalAmount.Amount
@@ -236,7 +236,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 	suite.Require().NoError(err)
 	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
 	suite.Require().NoError(err)
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -257,14 +257,14 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	// now we borrow 1.34e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
 	// we borrow again
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e5))
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
@@ -284,7 +284,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 		samples[i] = randomInt
 	}
 
-	amount := sdk.NewIntFromUint64(uint64(samples[0])).Mul(sdk.NewIntFromUint64(1e2))
+	amount := sdkmath.NewIntFromUint64(uint64(samples[0])).Mul(sdk.NewIntFromUint64(1e2))
 	_, err = suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 	suite.Require().NoError(err)
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
@@ -295,16 +295,16 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 	depositorInfo2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
 	suite.Require().True(found)
 
-	expectedLiquidationToUser1 := sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
-	expectedLiquidationToUser2 := sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+	expectedLiquidationToUser1 := sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+	expectedLiquidationToUser2 := sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
 
 	totalExpected1 := depositorInfo1.WithdrawalAmount.AddAmount(expectedLiquidationToUser1)
 	totalExpected2 := depositorInfo2.WithdrawalAmount.AddAmount(expectedLiquidationToUser2)
 
-	resp1, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	resp1, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 
-	resp2, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	resp2, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	// start from 1
@@ -319,18 +319,18 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 	expectedLiquidationToUser1 = sdkmath.ZeroInt()
 	expectedLiquidationToUser2 = sdkmath.ZeroInt()
 	for i := 1; i < 5; i++ {
-		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
-		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
-		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
 	}
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
-	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 
-	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	// start from 1
@@ -345,18 +345,18 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidationMultipl
 	expectedLiquidationToUser1 = sdkmath.ZeroInt()
 	expectedLiquidationToUser2 = sdkmath.ZeroInt()
 	for i := 5; i < 20; i++ {
-		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
-		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
-		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
 	}
 
-	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 
-	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	// start from 1
@@ -377,7 +377,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
 	suite.Require().NoError(err)
 	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
 	suite.Require().NoError(err)
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -398,7 +398,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	// now we borrow 1.34e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)
@@ -424,7 +424,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
 		a += randomInt
 	}
 
-	amount := sdk.NewIntFromUint64(uint64(samples[0])).Mul(sdk.NewIntFromUint64(1e2))
+	amount := sdkmath.NewIntFromUint64(uint64(samples[0])).Mul(sdk.NewIntFromUint64(1e2))
 	_, err = suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 	suite.Require().NoError(err)
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
@@ -435,16 +435,16 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
 	depositorInfo2, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
 	suite.Require().True(found)
 
-	expectedLiquidationToUser1 := sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
-	expectedLiquidationToUser2 := sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+	expectedLiquidationToUser1 := sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
+	expectedLiquidationToUser2 := sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt()
 
 	totalExpected1 := depositorInfo1.WithdrawalAmount.AddAmount(expectedLiquidationToUser1)
 	totalExpected2 := depositorInfo2.WithdrawalAmount.AddAmount(expectedLiquidationToUser2)
 
-	resp1, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	resp1, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 
-	resp2, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	resp2, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	// start from 1
@@ -462,18 +462,18 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
 	expectedLiquidationToUser1 = sdkmath.ZeroInt()
 	expectedLiquidationToUser2 = sdkmath.ZeroInt()
 	for i := 1; i < 5; i++ {
-		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
-		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
-		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
 	}
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
-	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 
-	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	// start from 1
@@ -490,18 +490,18 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithLiquidation() {
 	expectedLiquidationToUser1 = sdkmath.ZeroInt()
 	expectedLiquidationToUser2 = sdkmath.ZeroInt()
 	for i := 5; i < 20; i++ {
-		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
-		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
-		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdk.NewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser1 = expectedLiquidationToUser1.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo1.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
+		expectedLiquidationToUser2 = expectedLiquidationToUser2.Add(sdkmath.LegacyNewDecFromInt(amount.Mul(depositorInfo2.LockedAmount.Amount)).Quo(sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount)).TruncateInt())
 	}
 
-	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))})
+	resp1, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1))})
 	suite.Require().NoError(err)
 
-	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e9))})
+	resp2, err = suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e9))})
 	suite.Require().NoError(err)
 
 	// start from 1
@@ -539,7 +539,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 	suite.Require().NoError(err)
 	// creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
 	// suite.Require().NoError(err)
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -560,7 +560,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	// now we borrow 1.34e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)
@@ -571,11 +571,11 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 20))
 
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))})
 	suite.Require().NoError(err)
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneYear * time.Second))
-	req := types.MsgPayPrincipal{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(5e6))}
+	req := types.MsgPayPrincipal{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(5e6))}
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -587,7 +587,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 200))
 
-	withdrawreq1 := types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}
+	withdrawreq1 := types.MsgWithdrawPrincipal{Creator: suite.investors[0], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(100))}
 	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &withdrawreq1)
 	suite.Require().NoError(err)
 
@@ -596,13 +596,13 @@ func (suite *withDrawPrincipalSuite) TestWithdrawPrincipalWithClosePool() {
 	suite.Require().False(found)
 	suite.Require().EqualValues(resp.Amount, "400000ausdc")
 
-	withdrawreq1 = types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100))}
+	withdrawreq1 = types.MsgWithdrawPrincipal{Creator: suite.investors[1], PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(100))}
 	resp, err = suite.app.WithdrawPrincipal(suite.ctx, &withdrawreq1)
 	suite.Require().NoError(err)
 	respAmount, err := sdk.ParseCoinNormalized(resp.Amount)
 	suite.Require().NoError(err)
 
-	suite.Require().True(checkValueWithRangeTwo(respAmount.Amount, sdk.NewIntFromUint64(2e5)))
+	suite.Require().True(checkValueWithRangeTwo(respAmount.Amount, sdkmath.NewIntFromUint64(2e5)))
 
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().False(found)
@@ -619,7 +619,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	suite.Require().NoError(err)
 	creatorAddr2, err := sdk.AccAddressFromBech32(creator2)
 	suite.Require().NoError(err)
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -640,7 +640,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	// now we borrow 1.34e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)
@@ -651,9 +651,9 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 
 	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, borrow.BorrowAmount.Amount))
 
-	borrowable := sdk.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
+	borrowable := sdkmath.NewIntFromUint64(6e5).Sub(sdk.NewIntFromUint64(1.34e5))
 	suite.Require().EqualValues(borrowable, poolInfo.UsableAmount.Amount)
-	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromUint64(1.34e5)))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdkmath.NewIntFromUint64(1.34e5)))
 
 	depositor1, found := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
 	suite.Require().True(found)
@@ -703,7 +703,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(4e3))
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(4e3))
 	// now we borrow 4e3
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
@@ -711,7 +711,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e3))
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e3))
 	// now we borrow 2e3
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
@@ -764,13 +764,13 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	//
 	//
 	//
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e5))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e5))})
 	suite.Require().NoError(err)
 	// now we pay all the money
 	req := types.MsgPayPrincipal{
 		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		PoolIndex: suite.investorPool,
-		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1e10)),
+		Token:     sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1e10)),
 	}
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().NoError(err)
@@ -806,7 +806,7 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	coin, err := sdk.ParseCoinNormalized(resp.Amount)
 	suite.Require().NoError(err)
 
-	suite.Require().True(checkValueWithRangeTwo(coin.Amount, sdk.NewIntFromUint64(2e5)))
+	suite.Require().True(checkValueWithRangeTwo(coin.Amount, sdkmath.NewIntFromUint64(2e5)))
 
 	withdraw.Creator = suite.investors[0]
 	resp, err = suite.app.WithdrawPrincipal(suite.ctx, &withdraw)
@@ -820,5 +820,5 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 
 	coin, err = sdk.ParseCoinNormalized(resp.Amount)
 	suite.Require().NoError(err)
-	suite.Require().True(checkValueWithRangeTwo(coin.Amount, sdk.NewIntFromUint64(4e5)))
+	suite.Require().True(checkValueWithRangeTwo(coin.Amount, sdkmath.NewIntFromUint64(4e5)))
 }

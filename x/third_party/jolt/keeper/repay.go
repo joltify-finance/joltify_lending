@@ -1,13 +1,17 @@
 package keeper
 
 import (
+	"context"
+
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
 // Repay borrowed funds
-func (k Keeper) Repay(ctx context.Context, sender, owner sdk.AccAddress, coins sdk.Coins) error {
+func (k Keeper) Repay(rctx context.Context, sender, owner sdk.AccAddress, coins sdk.Coins) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// Check borrow exists here to avoid duplicating store read in ValidateRepay
 	borrow, found := k.GetBorrow(ctx, owner)
 	if !found {
@@ -85,7 +89,7 @@ func (k Keeper) ValidateRepay(ctx context.Context, sender, owner sdk.AccAddress,
 	assetPriceCache := map[string]sdkmath.LegacyDec{}
 
 	// Get the total USD value of user's existing borrows
-	existingBorrowUSDValue := sdk.ZeroDec()
+	existingBorrowUSDValue := sdkmath.LegacyZeroDec()
 	existingBorrow, found := k.GetBorrow(ctx, owner)
 	if found {
 		for _, coin := range existingBorrow.Amount {
@@ -105,13 +109,13 @@ func (k Keeper) ValidateRepay(ctx context.Context, sender, owner sdk.AccAddress,
 			}
 
 			// Calculate this borrow coin's USD value and add it to the total previous borrowed USD value
-			coinUSDValue := sdk.NewDecFromInt(coin.Amount).Quo(sdk.NewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
+			coinUSDValue := sdkmath.LegacyNewDecFromInt(coin.Amount).Quo(sdkmath.LegacyNewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
 			existingBorrowUSDValue = existingBorrowUSDValue.Add(coinUSDValue)
 		}
 	}
 
 	senderCoins := k.bankKeeper.SpendableCoins(ctx, sender)
-	repayTotalUSDValue := sdk.ZeroDec()
+	repayTotalUSDValue := sdkmath.LegacyZeroDec()
 	for _, repayCoin := range coins {
 		// Check that sender holds enough tokens to make the proposed payment
 		if senderCoins.AmountOf(repayCoin.Denom).LT(repayCoin.Amount) {
@@ -133,7 +137,7 @@ func (k Keeper) ValidateRepay(ctx context.Context, sender, owner sdk.AccAddress,
 			assetPriceCache[repayCoin.Denom] = assetPriceInfo.Price
 			assetPrice = assetPriceInfo.Price
 		}
-		coinUSDValue := sdk.NewDecFromInt(repayCoin.Amount).Quo(sdk.NewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
+		coinUSDValue := sdkmath.LegacyNewDecFromInt(repayCoin.Amount).Quo(sdkmath.LegacyNewDecFromInt(moneyMarket.ConversionFactor)).Mul(assetPrice)
 		repayTotalUSDValue = repayTotalUSDValue.Add(coinUSDValue)
 	}
 

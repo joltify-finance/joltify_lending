@@ -46,12 +46,12 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			args{
 				depositor:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
 				initialModAccountBalance:  sdk.Coins(nil),
-				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(200))),
-				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(100))),
+				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(200))),
+				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(100))),
 				createDeposit:             true,
-				expectedAccountBalance:    sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(900)), sdk.NewCoin("btcb", sdk.NewInt(1000))),
-				expectedModAccountBalance: sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(100))),
-				finalDepositAmount:        sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(100))),
+				expectedAccountBalance:    sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(900)), sdk.NewCoin("btcb", sdkmath.NewInt(1000))),
+				expectedModAccountBalance: sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(100))),
+				finalDepositAmount:        sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(100))),
 			},
 			errArgs{
 				expectPass:   true,
@@ -64,10 +64,10 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			args{
 				depositor:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
 				initialModAccountBalance:  sdk.Coins(nil),
-				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(200))),
-				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(200))),
+				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(200))),
+				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(200))),
 				createDeposit:             true,
-				expectedAccountBalance:    sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(1000)), sdk.NewCoin("btcb", sdk.NewInt(1000))),
+				expectedAccountBalance:    sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(1000)), sdk.NewCoin("btcb", sdkmath.NewInt(1000))),
 				expectedModAccountBalance: sdk.Coins(nil),
 				finalDepositAmount:        sdk.Coins{},
 			},
@@ -81,12 +81,12 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			"valid: withdraw exceeds deposit but is adjusted to match max deposit",
 			args{
 				depositor:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialModAccountBalance:  sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(1000))),
-				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(200))),
-				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(300))),
+				initialModAccountBalance:  sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(1000))),
+				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(200))),
+				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(300))),
 				createDeposit:             true,
-				expectedAccountBalance:    sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(1000)), sdk.NewCoin("btcb", sdk.NewInt(1000))),
-				expectedModAccountBalance: sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(1000))),
+				expectedAccountBalance:    sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(1000)), sdk.NewCoin("btcb", sdkmath.NewInt(1000))),
+				expectedModAccountBalance: sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(1000))),
 				finalDepositAmount:        sdk.Coins{},
 			},
 			errArgs{
@@ -100,8 +100,8 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			args{
 				depositor:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
 				initialModAccountBalance:  sdk.Coins(nil),
-				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(200))),
-				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("btcb", sdk.NewInt(200))),
+				depositAmount:             sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(200))),
+				withdrawAmount:            sdk.NewCoins(sdk.NewCoin("btcb", sdkmath.NewInt(200))),
 				createDeposit:             true,
 				expectedAccountBalance:    sdk.Coins{},
 				expectedModAccountBalance: sdk.Coins{},
@@ -124,18 +124,18 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
 				[]sdk.Coins{sdk.NewCoins(
-					sdk.NewCoin("bnb", sdk.NewInt(1000)),
-					sdk.NewCoin("btcb", sdk.NewInt(1000)),
+					sdk.NewCoin("bnb", sdkmath.NewInt(1000)),
+					sdk.NewCoin("btcb", sdkmath.NewInt(1000)),
 				)},
 				[]sdk.AccAddress{tc.args.depositor},
 			)
 
-			loanToValue := sdk.MustNewDecFromStr("0.6")
+			loanToValue := sdkmath.LegacyMustNewDecFromStr("0.6")
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
-					types3.NewMoneyMarket("usdx", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "usdx:usd", sdk.NewInt(1000000), types3.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
-					types3.NewMoneyMarket("ujolt", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "joltify:usd", sdk.NewInt(1000000), types3.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
-					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "bnb:usd", sdk.NewInt(100000000), types3.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
+					types3.NewMoneyMarket("usdx", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "usdx:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("ujolt", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "joltify:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "bnb:usd", sdkmath.NewInt(100000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 				},
 				sdk.NewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
@@ -155,19 +155,19 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 					{
 						MarketID:      "usdx:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "joltify:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("2.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "bnb:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("10.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("10.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 				},
@@ -181,7 +181,7 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			suite.ctx = ctx
 			suite.keeper = keeper
 
-			err := testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.depositor, []sdk.Coin{sdk.NewCoin("bnb", sdk.NewInt(1000)), sdk.NewCoin("btcb", sdk.NewInt(1000))})
+			err := testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.depositor, []sdk.Coin{sdk.NewCoin("bnb", sdkmath.NewInt(1000)), sdk.NewCoin("btcb", sdkmath.NewInt(1000))})
 			suite.Require().NoError(err)
 
 			// Mint coins to Hard module account
@@ -240,8 +240,8 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 	}
 
 	// Set up test constants
-	model := types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("0.5"))
-	reserveFactor := sdk.MustNewDecFromStr("0.05")
+	model := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("0.5"))
+	reserveFactor := sdkmath.LegacyMustNewDecFromStr("0.05")
 	oneMonthInSeconds := int64(2592000)
 	borrower := sdk.AccAddress(crypto.AddressHash([]byte("testborrower")))
 
@@ -250,11 +250,11 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			"invalid: withdraw is outside loan-to-value range",
 			args{
 				borrower:             borrower,
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(100*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))), // 100 * 2 = $200
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(80*JoltCf))),  // 80 * 2 = $160
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(60*JoltCf))),  // 60 * 2 = $120
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))), // 100 * 2 = $200
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(80*JoltCf))),  // 80 * 2 = $160
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(60*JoltCf))),  // 60 * 2 = $120
 				futureTime:           oneMonthInSeconds,
 			},
 			errArgs{
@@ -281,19 +281,19 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			harvestGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
-						"joltify:usd",                  // Market ID
-						sdk.NewInt(JoltCf),             // Conversion Factor
-						model,                          // Interest Rate Model
-						reserveFactor,                  // Reserve Factor
-						sdk.MustNewDecFromStr("0.05")), // Keeper Reward Percent
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+						"joltify:usd",                            // Market ID
+						sdk.NewInt(JoltCf),                       // Conversion Factor
+						model,                                    // Interest Rate Model
+						reserveFactor,                            // Reserve Factor
+						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 					types3.NewMoneyMarket("usdx",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
-						"usdx:usd",                     // Market ID
-						sdk.NewInt(JoltCf),             // Conversion Factor
-						model,                          // Interest Rate Model
-						reserveFactor,                  // Reserve Factor
-						sdk.MustNewDecFromStr("0.05")), // Keeper Reward Percent
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+						"usdx:usd",                               // Market ID
+						sdk.NewInt(JoltCf),                       // Conversion Factor
+						model,                                    // Interest Rate Model
+						reserveFactor,                            // Reserve Factor
+						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 				},
 				sdk.NewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
@@ -312,13 +312,13 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 					{
 						MarketID:      "usdx:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "joltify:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("2.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 				},

@@ -1,20 +1,25 @@
 package keeper
 
 import (
+	"context"
+
 	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
 // SetValidators set a specific validator in the store from its index
-func (k Keeper) SetValidators(ctx context.Context, index string, validators types.Validators) {
+func (k Keeper) SetValidators(rctx context.Context, index string, validators types.Validators) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ValidatorsStoreKey))
 	b := k.cdc.MustMarshal(&validators)
 	store.Set(types.KeyPrefix(index), b)
 }
 
 // GetValidatorsByHeight returns a validators group from its index
-func (k Keeper) GetValidatorsByHeight(ctx context.Context, index string) (val types.Validators, found bool) {
+func (k Keeper) GetValidatorsByHeight(rctx context.Context, index string) (val types.Validators, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ValidatorsStoreKey))
 
 	b := store.Get(types.KeyPrefix(index))
@@ -27,9 +32,10 @@ func (k Keeper) GetValidatorsByHeight(ctx context.Context, index string) (val ty
 }
 
 // DoGetAllValidators returns all issueToken
-func (k Keeper) DoGetAllValidators(ctx context.Context) (list []types.Validators) {
+func (k Keeper) DoGetAllValidators(rctx context.Context) (list []types.Validators) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ValidatorsStoreKey))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 
 	defer iterator.Close()
 
@@ -43,20 +49,23 @@ func (k Keeper) DoGetAllValidators(ctx context.Context) (list []types.Validators
 }
 
 // SetStandbyPower set a specific validator in the store from its index
-func (k Keeper) SetStandbyPower(ctx context.Context, addr string, powerItem types.StandbyPower) {
+func (k Keeper) SetStandbyPower(rctx context.Context, addr string, powerItem types.StandbyPower) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.StandbyPwoerStoreKey))
 	b := k.cdc.MustMarshal(&powerItem)
 	store.Set(types.KeyPrefix(addr), b)
 }
 
 // DelStandbyPower set a specific validator in the store from its index
-func (k Keeper) DelStandbyPower(ctx context.Context, addr string) {
+func (k Keeper) DelStandbyPower(rctx context.Context, addr string) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.StandbyPwoerStoreKey))
 	store.Delete(types.KeyPrefix(addr))
 }
 
 // GetStandbyPower returns a validators group from its index
-func (k Keeper) GetStandbyPower(ctx context.Context, addr string) (val types.StandbyPower, found bool) {
+func (k Keeper) GetStandbyPower(rctx context.Context, addr string) (val types.StandbyPower, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.StandbyPwoerStoreKey))
 
 	b := store.Get(types.KeyPrefix(addr))
@@ -69,9 +78,10 @@ func (k Keeper) GetStandbyPower(ctx context.Context, addr string) (val types.Sta
 }
 
 // DoGetAllStandbyPower returns all issueToken
-func (k Keeper) DoGetAllStandbyPower(ctx context.Context) (list []types.StandbyPower) {
+func (k Keeper) DoGetAllStandbyPower(rctx context.Context) (list []types.StandbyPower) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.StandbyPwoerStoreKey))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 
 	defer iterator.Close()
 

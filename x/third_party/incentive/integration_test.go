@@ -11,10 +11,10 @@ import (
 )
 
 // Avoid cluttering test cases with long function names
-func i(in int64) sdkmath.Int                { return sdk.NewInt(in) }
-func d(str string) sdkmath.LegacyDec        { return sdk.MustNewDecFromStr(str) }
+func i(in int64) sdkmath.Int                { return sdkmath.NewInt(in) }
+func d(str string) sdkmath.LegacyDec        { return sdkmath.LegacyMustNewDecFromStr(str) }
 func cs(coins ...sdk.Coin) sdk.Coins        { return sdk.NewCoins(coins...) }
-func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
 
 func NewPricefeedGenStateMultiFromTime(cdc codec.JSONCodec, t time.Time) app.GenesisState {
 	pfGenesis := types.GenesisState{
@@ -32,25 +32,25 @@ func NewPricefeedGenStateMultiFromTime(cdc codec.JSONCodec, t time.Time) app.Gen
 			{
 				MarketID:      "jolt:usd",
 				OracleAddress: sdk.AccAddress{},
-				Price:         sdk.MustNewDecFromStr("2.00"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 				Expiry:        t.Add(1 * time.Hour),
 			},
 			{
 				MarketID:      "btc:usd",
 				OracleAddress: sdk.AccAddress{},
-				Price:         sdk.MustNewDecFromStr("8000.00"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("8000.00"),
 				Expiry:        t.Add(1 * time.Hour),
 			},
 			{
 				MarketID:      "xrp:usd",
 				OracleAddress: sdk.AccAddress{},
-				Price:         sdk.MustNewDecFromStr("0.25"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("0.25"),
 				Expiry:        t.Add(1 * time.Hour),
 			},
 			{
 				MarketID:      "bnb:usd",
 				OracleAddress: sdk.AccAddress{},
-				Price:         sdk.MustNewDecFromStr("17.25"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("17.25"),
 				Expiry:        t.Add(1 * time.Hour),
 			},
 			{
@@ -62,7 +62,7 @@ func NewPricefeedGenStateMultiFromTime(cdc codec.JSONCodec, t time.Time) app.Gen
 			{
 				MarketID:      "zzz:usd",
 				OracleAddress: sdk.AccAddress{},
-				Price:         sdk.MustNewDecFromStr("2.00"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 				Expiry:        t.Add(1 * time.Hour),
 			},
 		},

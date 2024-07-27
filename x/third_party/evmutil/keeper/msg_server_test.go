@@ -544,7 +544,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinToERC20_AlreadyDeployedContrac
 func (suite *MsgServerSuite) TestConvertCosmosCoinFromERC20() {
 	denom := "magic"
 	tokenInfo := types.NewAllowedCosmosCoinERC20Token(denom, "Cosmos Coin", "MAGIC", 6)
-	initialPosition := sdk.NewInt64Coin(denom, 1e10)
+	initialPosition := sdkmath.NewInt64Coin(denom, 1e10)
 	initiator := "02ab5a9421b7032d3d5c6c8ef2fd3e5940ec67b96e60b9fc281c297dab062fd5c7"
 	evmAddr, err := types.PubKeyToEthAddr(initiator)
 	suite.NoError(err)
@@ -704,7 +704,7 @@ func (suite *MsgServerSuite) TestConvertCosmosCoinForRemovedDenom() {
 	evmAddress, err := types.PubKeyToEthAddr(pk)
 	suite.NoError(err)
 	evmAddr := types.BytesToInternalEVMAddress(evmAddress.Bytes())
-	coin := func(amt int64) sdk.Coin { return sdk.NewInt64Coin(denom, amt) }
+	coin := func(amt int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amt) }
 
 	// fund account
 	suite.NoError(suite.App.FundAccount(suite.Ctx, account, sdk.NewCoins(coin(1e10))))

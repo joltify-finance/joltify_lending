@@ -42,7 +42,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 }
 
 func (suite *GenesisTestSuite) Test_InitExportGenesis() {
-	loanToValue, _ := sdk.NewDecFromStr("0.6")
+	loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
 	params := types2.NewParams(
 		types2.MoneyMarkets{
 			types2.NewMoneyMarket(
@@ -55,13 +55,13 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 				"joltify:usd",
 				sdk.NewInt(1e6),
 				types2.NewInterestRateModel(
-					sdk.MustNewDecFromStr("0.05"),
-					sdk.MustNewDecFromStr("2"),
-					sdk.MustNewDecFromStr("0.8"),
-					sdk.MustNewDecFromStr("10"),
+					sdkmath.LegacyMustNewDecFromStr("0.05"),
+					sdkmath.LegacyMustNewDecFromStr("2"),
+					sdkmath.LegacyMustNewDecFromStr("0.8"),
+					sdkmath.LegacyMustNewDecFromStr("10"),
 				),
-				sdk.MustNewDecFromStr("0.05"),
-				sdk.ZeroDec(),
+				sdkmath.LegacyMustNewDecFromStr("0.05"),
+				sdkmath.LegacyZeroDec(),
 			),
 		},
 		sdk.NewDec(10),
@@ -70,7 +70,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 	deposits := types2.Deposits{
 		types2.NewDeposit(
 			suite.addrs[0],
-			sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1e8))), // 100 ujolt
+			sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1e8))), // 100 ujolt
 			types2.SupplyInterestFactors{
 				{
 					Denom: "ujolt",
@@ -88,7 +88,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 	borrows := types2.Borrows{
 		types2.NewBorrow(
 			suite.addrs[1],
-			sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1e7))), // 10 ujolt
+			sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1e7))), // 10 ujolt
 			types2.BorrowInterestFactors{
 				{
 					Denom: "ujolt",
@@ -103,8 +103,8 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 		totalBorrowed = totalBorrowed.Add(borrow.Amount...)
 	}
 
-	supplyInterestFactor := sdk.MustNewDecFromStr("1.0001")
-	borrowInterestFactor := sdk.MustNewDecFromStr("1.1234")
+	supplyInterestFactor := sdkmath.LegacyMustNewDecFromStr("1.0001")
+	borrowInterestFactor := sdkmath.LegacyMustNewDecFromStr("1.1234")
 	accuralTimes := types2.GenesisAccumulationTimes{
 		types2.NewGenesisAccumulationTime("ujolt", suite.genTime, supplyInterestFactor, borrowInterestFactor),
 	}

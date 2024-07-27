@@ -20,13 +20,13 @@ func (k Keeper) FirstDist(ctx context.Context) error {
 		return nil
 	}
 
-	base := sdk.NewInt(1000000)
-	firstDropIncentive := sdk.NewInt(100000)
+	base := sdkmath.NewInt(1000000)
+	firstDropIncentive := sdkmath.NewInt(100000)
 
 	c1 := sdk.NewCoin("ujolt", firstDropIncentive.Mul(base))
 	incentiveReceived := sdk.NewCoins(c1)
 
-	firstDropCommunity := sdk.NewInt(20000000)
+	firstDropCommunity := sdkmath.NewInt(20000000)
 	c2 := sdk.NewCoin("ujolt", firstDropCommunity.Mul(base))
 
 	minttedCoin := incentiveReceived.Add(c2)
@@ -105,7 +105,7 @@ func (k Keeper) DoDistribute(ctx context.Context) {
 		return
 	}
 
-	base := sdk.NewInt(1000000)
+	base := sdkmath.NewInt(1000000)
 	maxMint := base.Mul(sdk.NewInt(MAXMINT))
 	if h.TotalMintCoins.AmountOf("ujolt").GTE(maxMint) {
 		return

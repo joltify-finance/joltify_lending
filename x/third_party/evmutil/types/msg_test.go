@@ -204,7 +204,7 @@ func TestConvertCosmosCoinToERC20_ValidateBasic(t *testing.T) {
 	_, pk := app.RandomAddress()
 	validHexAddr, _ := testutil.RandomEvmAccount()
 	invalidAddr := "not-an-address"
-	validAmount := sdk.NewInt64Coin("hard", 5e3)
+	validAmount := sdkmath.NewInt64Coin("hard", 5e3)
 
 	rAddr1, _ := app.RandomAddress()
 	rAddr2, _ := app.RandomAddress()
@@ -255,7 +255,7 @@ func TestConvertCosmosCoinToERC20_ValidateBasic(t *testing.T) {
 			name:        "invalid - invalid amount - zero",
 			initiator:   pk,
 			receiver:    validHexAddr.String(),
-			amount:      sdk.NewInt64Coin("magic", 0),
+			amount:      sdkmath.NewInt64Coin("magic", 0),
 			expectedErr: "invalid coins",
 		},
 		{
@@ -323,7 +323,7 @@ func TestConvertCosmosCoinFromERC20_ValidateBasic(t *testing.T) {
 
 	rAddr1, _ := app.RandomAddress()
 	invalidAddr := "not-an-address"
-	validAmount := sdk.NewInt64Coin("hard", 5e3)
+	validAmount := sdkmath.NewInt64Coin("hard", 5e3)
 
 	testCases := []struct {
 		name        string
@@ -371,7 +371,7 @@ func TestConvertCosmosCoinFromERC20_ValidateBasic(t *testing.T) {
 			name:        "invalid - invalid amount - zero",
 			initiator:   pk,
 			receiver:    validJoltAddr.String(),
-			amount:      sdk.NewInt64Coin("magic", 0),
+			amount:      sdkmath.NewInt64Coin("magic", 0),
 			expectedErr: "invalid coins",
 		},
 		{

@@ -60,7 +60,7 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 	}
 
 	totalTarget := poolInfo1.TargetAmount.Add(juniorPoolInfo.TargetAmount)
-	poolAmount := sdk.NewDecFromInt(juniorPoolInfo.TargetAmount.Amount)
+	poolAmount := sdkmath.LegacyNewDecFromInt(juniorPoolInfo.TargetAmount.Amount)
 
 	ratio := poolAmount.QuoInt(totalTarget.Amount)
 

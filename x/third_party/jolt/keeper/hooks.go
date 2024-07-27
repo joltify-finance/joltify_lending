@@ -1,7 +1,8 @@
 package keeper
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"context"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 

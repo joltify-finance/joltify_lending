@@ -9,17 +9,17 @@ import (
 )
 
 // d is a helper function for creating sdkmath.LegacyDec values in tests
-func d(str string) sdkmath.LegacyDec { return sdk.MustNewDecFromStr(str) }
+func d(str string) sdkmath.LegacyDec { return sdkmath.LegacyMustNewDecFromStr(str) }
 
 // c is a helper function for created sdk.Coin types in tests
-func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
 
 // c is a helper function for created sdk.Coins types in tests
 func cs(coins ...sdk.Coin) sdk.Coins { return sdk.NewCoins(coins...) }
 
 func TestRewardIndexes(t *testing.T) {
 	t.Run("With", func(t *testing.T) {
-		arbitraryDec := sdk.MustNewDecFromStr("0.1")
+		arbitraryDec := sdkmath.LegacyMustNewDecFromStr("0.1")
 
 		type args struct {
 			denom  string
@@ -70,7 +70,7 @@ func TestRewardIndexes(t *testing.T) {
 		}
 	})
 	t.Run("Get", func(t *testing.T) {
-		arbitraryDec := sdk.MustNewDecFromStr("0.1")
+		arbitraryDec := sdkmath.LegacyMustNewDecFromStr("0.1")
 
 		type expected struct {
 			factor sdkmath.LegacyDec
@@ -365,7 +365,7 @@ func TestMultiRewardIndexes(t *testing.T) {
 	arbitraryRewardIndexes := RewardIndexes{
 		{
 			CollateralType: "reward",
-			RewardFactor:   sdk.MustNewDecFromStr("0.1"),
+			RewardFactor:   sdkmath.LegacyMustNewDecFromStr("0.1"),
 		},
 	}
 
@@ -585,12 +585,12 @@ func TestMultiRewardIndexes(t *testing.T) {
 }
 
 var normalRewardIndexes = RewardIndexes{
-	NewRewardIndex("jolt", sdk.MustNewDecFromStr("0.000001")),
-	NewRewardIndex("ujolt", sdk.MustNewDecFromStr("0.1")),
+	NewRewardIndex("jolt", sdkmath.LegacyMustNewDecFromStr("0.000001")),
+	NewRewardIndex("ujolt", sdkmath.LegacyMustNewDecFromStr("0.1")),
 }
 
 var invalidRewardIndexes = RewardIndexes{
-	RewardIndex{"jolt", sdk.MustNewDecFromStr("-0.01")},
+	RewardIndex{"jolt", sdkmath.LegacyMustNewDecFromStr("-0.01")},
 }
 
 func appendUniqueRewardIndex(indexes RewardIndexes) RewardIndexes {
@@ -604,6 +604,6 @@ func appendUniqueRewardIndex(indexes RewardIndexes) RewardIndexes {
 
 	return append(
 		indexes,
-		NewRewardIndex(uniqueDenom, sdk.MustNewDecFromStr("0.02")),
+		NewRewardIndex(uniqueDenom, sdkmath.LegacyMustNewDecFromStr("0.02")),
 	)
 }

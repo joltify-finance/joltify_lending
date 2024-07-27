@@ -18,13 +18,13 @@ func TestProcessHistory(t *testing.T) {
 		CoinsSum: sdk.NewCoins(),
 	}
 
-	bnb := sdk.NewCoin("bnb", sdk.NewInt(10))
-	busd := sdk.NewCoin("busd", sdk.NewInt(2))
-	eth := sdk.NewCoin("eth", sdk.NewInt(4))
+	bnb := sdk.NewCoin("bnb", sdkmath.NewInt(10))
+	busd := sdk.NewCoin("busd", sdkmath.NewInt(2))
+	eth := sdk.NewCoin("eth", sdkmath.NewInt(4))
 
-	bnb2 := sdk.NewCoin("bnb", sdk.NewInt(1))
-	busd2 := sdk.NewCoin("busd", sdk.NewInt(2))
-	eth2 := sdk.NewCoin("eth", sdk.NewInt(3))
+	bnb2 := sdk.NewCoin("bnb", sdkmath.NewInt(1))
+	busd2 := sdk.NewCoin("busd", sdkmath.NewInt(2))
+	eth2 := sdk.NewCoin("eth", sdkmath.NewInt(3))
 
 	f1 := keeper.NewHistory(1, sdk.Coins{})
 
@@ -44,7 +44,7 @@ func TestProcessHistory(t *testing.T) {
 	keeper.ProcessHistory(5, f3, &q)
 	keeper.ProcessHistory(5, f4, &q)
 	keeper.ProcessHistory(5, f5, &q)
-	expected := sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(30)), sdk.NewCoin("busd", sdk.NewInt(4)), sdk.NewCoin("eth", sdk.NewInt(4)))
+	expected := sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(30)), sdk.NewCoin("busd", sdkmath.NewInt(4)), sdk.NewCoin("eth", sdkmath.NewInt(4)))
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 	assert.True(t, q.History[0].Amount.Empty())
 	assert.True(t, q.History[1].Amount.IsEqual(f2.Amount))
@@ -118,13 +118,13 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 		CoinsSum: sdk.NewCoins(),
 	}
 
-	bnb := sdk.NewCoin("bnb", sdk.NewInt(10))
-	busd := sdk.NewCoin("busd", sdk.NewInt(2))
-	eth := sdk.NewCoin("eth", sdk.NewInt(4))
+	bnb := sdk.NewCoin("bnb", sdkmath.NewInt(10))
+	busd := sdk.NewCoin("busd", sdkmath.NewInt(2))
+	eth := sdk.NewCoin("eth", sdkmath.NewInt(4))
 
-	bnb2 := sdk.NewCoin("bnb", sdk.NewInt(1))
-	busd2 := sdk.NewCoin("busd", sdk.NewInt(2))
-	eth2 := sdk.NewCoin("eth", sdk.NewInt(3))
+	bnb2 := sdk.NewCoin("bnb", sdkmath.NewInt(1))
+	busd2 := sdk.NewCoin("busd", sdkmath.NewInt(2))
+	eth2 := sdk.NewCoin("eth", sdkmath.NewInt(3))
 
 	f1 := keeper.NewHistory(1, sdk.Coins{})
 
@@ -144,7 +144,7 @@ func TestProcessHistoryWithManyEmpty(t *testing.T) {
 	keeper.ProcessHistory(5, f3, &q)
 	keeper.ProcessHistory(5, f4, &q)
 	keeper.ProcessHistory(5, f5, &q)
-	expected := sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(20)), sdk.NewCoin("busd", sdk.NewInt(2)), sdk.NewCoin("eth", sdk.NewInt(4)))
+	expected := sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(20)), sdk.NewCoin("busd", sdkmath.NewInt(2)), sdk.NewCoin("eth", sdkmath.NewInt(4)))
 	assert.True(t, q.CoinsSum.IsEqual(expected))
 	assert.True(t, q.History[0].Amount.Empty())
 	assert.True(t, q.History[1].Amount.IsEqual(f2.Amount))
@@ -269,7 +269,7 @@ func TestProcessEvent(t *testing.T) {
 	}
 	app.VaultKeeper.SetCreatePool(ctx, createPool)
 
-	sendToken := sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(100)), sdk.NewCoin("aeth", sdk.NewInt(222)))
+	sendToken := sdk.NewCoins(sdk.NewCoin("abnb", sdkmath.NewInt(100)), sdk.NewCoin("aeth", sdkmath.NewInt(222)))
 
 	app.VaultKeeper.ProcessQuota(ctx, sendToken)
 	quota, found := app.VaultKeeper.GetQuotaData(ctx)

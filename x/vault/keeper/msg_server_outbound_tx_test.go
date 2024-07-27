@@ -60,7 +60,7 @@ func TestOutboundTxMsgServerCreate(t *testing.T) {
 	testValidators, creators := generateNValidators(t, 4)
 
 	for _, el := range creators {
-		err := simapp.FundAccount(app.GetBankKeeper(), ctx, el, sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}})
+		err := simapp.FundAccount(app.GetBankKeeper(), ctx, el, sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(1000)}})
 		assert.NoError(t, err)
 	}
 
@@ -118,7 +118,7 @@ func TestOutboundTxMsgServerCreate(t *testing.T) {
 		RequestID:       strconv.Itoa(1),
 		BlockHeight:     "100",
 		OutboundTx:      "123",
-		Feecoin:         sdk.NewCoins(sdk.Coin{Denom: "mock", Amount: sdk.NewInt(12)}),
+		Feecoin:         sdk.NewCoins(sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(12)}),
 		ChainType:       "OPPY",
 		ReceiverAddress: sdk.AccAddress("mockAddr"),
 		NeedMint:        true,
@@ -145,7 +145,7 @@ func TestOutboundTxMsgServerCreate(t *testing.T) {
 		RequestID:       strconv.Itoa(1),
 		BlockHeight:     "100",
 		OutboundTx:      "123",
-		Feecoin:         sdk.NewCoins(sdk.Coin{Denom: "mock", Amount: sdk.NewInt(12)}),
+		Feecoin:         sdk.NewCoins(sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(12)}),
 		ChainType:       "OPPY",
 		ReceiverAddress: sdk.AccAddress("mockAddr"),
 		NeedMint:        true,
@@ -169,6 +169,6 @@ func TestOutboundTxMsgServerCreate(t *testing.T) {
 	// require.Equal(t, 2, len(rst.Items["123"].Entry))
 
 	fee := k.GetAllFeeAmount(ctx)
-	expectedFee := sdk.Coin{Denom: "mock", Amount: sdk.NewInt(12)}
+	expectedFee := sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(12)}
 	require.Equal(t, expectedFee.IsEqual(fee[0]), true)
 }

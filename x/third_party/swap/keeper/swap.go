@@ -1,8 +1,10 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 
 	errorsmod "cosmossdk.io/errors"
@@ -21,7 +23,7 @@ func (k *Keeper) SwapExactForTokens(ctx context.Context, requester sdk.AccAddres
 		return errorsmod.Wrapf(types.ErrInsufficientLiquidity, "swap output rounds to zero, increase input amount")
 	}
 
-	priceChange := sdk.NewDecFromInt(swapOutput.Amount).Quo(sdk.NewDecFromInt(coinB.Amount))
+	priceChange := sdkmath.LegacyNewDecFromInt(swapOutput.Amount).Quo(sdkmath.LegacyNewDecFromInt(coinB.Amount))
 	if err := k.assertSlippageWithinLimit(priceChange, slippageLimit); err != nil {
 		return err
 	}
@@ -55,7 +57,7 @@ func (k *Keeper) SwapExactForBatchTokens(ctx context.Context, requester sdk.AccA
 		return errorsmod.Wrapf(types.ErrInsufficientLiquidity, "swap2 output rounds to zero, increase input amount")
 	}
 
-	priceChange := sdk.NewDecFromInt(swapOutput.Amount).Quo(sdk.NewDecFromInt(coinB.Amount))
+	priceChange := sdkmath.LegacyNewDecFromInt(swapOutput.Amount).Quo(sdkmath.LegacyNewDecFromInt(coinB.Amount))
 	if err := k.assertSlippageWithinLimit(priceChange, slippageLimit); err != nil {
 		return err
 	}
@@ -87,7 +89,7 @@ func (k *Keeper) SwapForExactTokens(ctx context.Context, requester sdk.AccAddres
 
 	swapInput, feePaid := pool.SwapWithExactOutput(exactCoinB, k.GetSwapFee(ctx))
 
-	priceChange := sdk.NewDecFromInt(coinA.Amount).Quo(sdk.NewDecFromInt(swapInput.Sub(feePaid).Amount))
+	priceChange := sdkmath.LegacyNewDecFromInt(coinA.Amount).Quo(sdkmath.LegacyNewDecFromInt(swapInput.Sub(feePaid).Amount))
 	if err := k.assertSlippageWithinLimit(priceChange, slippageLimit); err != nil {
 		return err
 	}
@@ -125,7 +127,7 @@ func (k Keeper) assertSlippageWithinLimit(priceChange sdkmath.LegacyDec, slippag
 }
 
 func (k Keeper) commitSwap(
-	ctx context.Context,
+	rctx context.Context,
 	poolID string,
 	pool *types.DenominatedPool,
 	requester sdk.AccAddress,
@@ -134,6 +136,7 @@ func (k Keeper) commitSwap(
 	feePaid sdk.Coin,
 	exactDirection string,
 ) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	k.SetPool(ctx, types.NewPoolRecordFromPool(pool))
 
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, requester, types.ModuleAccountName, sdk.NewCoins(swapInput)); err != nil {

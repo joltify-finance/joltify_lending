@@ -37,8 +37,8 @@ func preparePool(t *testing.T) (*network.Network, []*types.CreatePool) {
 	height := []int{7, 10}
 	cfg := network.DefaultConfig()
 	cfg.MinGasPrices = "0poppy"
-	cfg.BondedTokens = sdk.NewInt(10000000000000000)
-	cfg.StakingTokens = sdk.NewInt(100000000000000000)
+	cfg.BondedTokens = sdkmath.NewInt(10000000000000000)
+	cfg.StakingTokens = sdkmath.NewInt(100000000000000000)
 	state := types.GenesisState{}
 	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[types.ModuleName], &state))
 	sk := ed25519.GenPrivKey()
@@ -107,7 +107,7 @@ func TestCreateIssueTokenFail(t *testing.T) {
 				fmt.Sprintf("--%s=%s", flags.FlagFrom, val.Address.String()),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
-				// fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdk.NewInt(10))).String()),
+				// fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdkmath.NewInt(10))).String()),
 			},
 		},
 	} {
@@ -136,8 +136,8 @@ func networkPrepare(t *testing.T, maxValidator uint32, addr sdk.AccAddress, pk c
 	t.Helper()
 	cfg := network.DefaultConfig()
 	cfg.MinGasPrices = "0stake"
-	cfg.BondedTokens = sdk.NewInt(10000000000000000)
-	cfg.StakingTokens = sdk.NewInt(100000000000000000)
+	cfg.BondedTokens = sdkmath.NewInt(10000000000000000)
+	cfg.StakingTokens = sdkmath.NewInt(100000000000000000)
 	state := types.GenesisState{}
 	stateStaking := stakingtypes.GenesisState{}
 	stateBank := banktypes.GenesisState{}
@@ -149,7 +149,7 @@ func networkPrepare(t *testing.T, maxValidator uint32, addr sdk.AccAddress, pk c
 	state.Params.BlockChurnInterval = 3
 	buf, err := cfg.Codec.MarshalJSON(&state)
 	require.NoError(t, err)
-	stateBank.Balances = []banktypes.Balance{{Address: addr.String(), Coins: sdk.Coins{sdk.NewCoin("stake", sdk.NewInt(100000))}}}
+	stateBank.Balances = []banktypes.Balance{{Address: addr.String(), Coins: sdk.Coins{sdk.NewCoin("stake", sdkmath.NewInt(100000))}}}
 	bankBuf, err := cfg.Codec.MarshalJSON(&stateBank)
 	require.NoError(t, err)
 	cfg.GenesisState[banktypes.ModuleName] = bankBuf
@@ -226,7 +226,7 @@ func TestCreateIssue(t *testing.T) {
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, infoAddr),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
 		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
-		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdk.NewInt(10))).String()),
+		fmt.Sprintf("--%s=%s", flags.FlagFees, sdk.NewCoins(sdk.NewCoin(net.Config.BondDenom, sdkmath.NewInt(10))).String()),
 	}
 
 	commonArgs2 := []string{

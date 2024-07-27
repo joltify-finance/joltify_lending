@@ -17,12 +17,12 @@ import (
 )
 
 func parameterSanitize(payFreqStr string, apyStr []string) ([]sdkmath.LegacyDec, int32, error) {
-	apyJunior, err := sdk.NewDecFromStr(apyStr[0])
+	apyJunior, err := sdkmath.LegacyNewDecFromStr(apyStr[0])
 	if err != nil {
 		return nil, 0, err
 	}
 
-	apySenior, err := sdk.NewDecFromStr(apyStr[1])
+	apySenior, err := sdkmath.LegacyNewDecFromStr(apyStr[1])
 	if err != nil {
 		return nil, 0, err
 	}
@@ -151,11 +151,11 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			PoolType:                      ePoolType,
 			ProjectLength:                 targetProject.ProjectLength,
 			LastPaymentTime:               ctx.BlockTime(),
-			BorrowedAmount:                sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.NewInt(0)),
-			UsableAmount:                  sdk.NewCoin(targetAmount.Denom, sdk.NewInt(0)),
-			EscrowInterestAmount:          sdk.NewInt(0),
-			EscrowPrincipalAmount:         sdk.NewCoin(targetAmount.Denom, sdk.NewInt(0)),
-			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.NewInt(0)),
+			BorrowedAmount:                sdk.NewCoin(denomPrefix+targetAmount.Denom, sdkmath.NewInt(0)),
+			UsableAmount:                  sdk.NewCoin(targetAmount.Denom, sdkmath.NewInt(0)),
+			EscrowInterestAmount:          sdkmath.NewInt(0),
+			EscrowPrincipalAmount:         sdk.NewCoin(targetAmount.Denom, sdkmath.NewInt(0)),
+			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+targetAmount.Denom, sdkmath.NewInt(0)),
 			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
 			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track transferred accounts when we close the pool

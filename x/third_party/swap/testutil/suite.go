@@ -23,7 +23,7 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-var defaultSwapFee = sdk.MustNewDecFromStr("0.003")
+var defaultSwapFee = sdkmath.LegacyMustNewDecFromStr("0.003")
 
 // Suite implements a test suite for the swap module integration tests
 type Suite struct {
@@ -120,7 +120,7 @@ func (suite *Suite) CreatePool(reserves sdk.Coins) error {
 	suite.Require().NoError(pool.Validate())
 	suite.Keeper.SetParams(suite.Ctx, types.NewParams(types.AllowedPools{pool}, defaultSwapFee))
 
-	return suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdk.MustNewDecFromStr("1"))
+	return suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), reserves[0], reserves[1], sdkmath.LegacyMustNewDecFromStr("1"))
 }
 
 // AccountBalanceEqual asserts that the coins match the account balance

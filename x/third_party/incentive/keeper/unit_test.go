@@ -402,7 +402,7 @@ func (k *fakeSPVKeeper) AfterSPVInterestPaid(ctx context.Context, poolID string,
 func (k *fakeSPVKeeper) GetPools(ctx context.Context, index string) (poolInfo types2.PoolInfo, ok bool) {
 	poolInfo = types2.PoolInfo{
 		Index:         "test-pool",
-		ReserveFactor: sdk.MustNewDecFromStr("0.15"),
+		ReserveFactor: sdkmath.LegacyMustNewDecFromStr("0.15"),
 		PoolNFTIds:    []string{"c1", "c2", "c3", "c4", "c5", "c6"},
 	}
 	return poolInfo, true

@@ -39,10 +39,10 @@ func (suite *convertCosmosCoinToERC20Suite) denomContractNotRegistered(denom str
 // more tests of tests of this method are made to the msg handler, see ./msg_server_test.go
 func (suite *convertCosmosCoinToERC20Suite) TestConvertCosmosCoinToERC20() {
 	allowedDenom := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
-	initialFunding := sdk.NewInt64Coin(allowedDenom, int64(1e10))
+	initialFunding := sdkmath.NewInt64Coin(allowedDenom, int64(1e10))
 	initiator, _ := app.RandomAddress()
 
-	amount := sdk.NewInt64Coin(allowedDenom, 6e8)
+	amount := sdkmath.NewInt64Coin(allowedDenom, 6e8)
 
 	addr1, _ := app.RandomAddress()
 	addr2, _ := app.RandomAddress()
@@ -199,7 +199,7 @@ func (suite *convertCosmosCoinFromERC20Suite) SetupTest() {
 	suite.receiver, _ = app.RandomAddress()
 
 	// manually create an initial position - sdk coin locked in module
-	suite.initialPosition = sdk.NewInt64Coin(suite.denom, 1e12)
+	suite.initialPosition = sdkmath.NewInt64Coin(suite.denom, 1e12)
 	err = suite.App.FundModuleAccount(suite.Ctx, types.ModuleName, sdk.NewCoins(suite.initialPosition))
 	suite.NoError(err)
 

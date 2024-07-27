@@ -1,10 +1,9 @@
 package keeper
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"sort"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // splitIntIntoWeightedBuckets divides an initial +ve integer among several buckets in proportion to the buckets' weights
@@ -58,8 +57,8 @@ func splitIntIntoWeightedBuckets(amount sdkmath.Int, buckets []sdkmath.Int) []sd
 	for _, qr := range quotients {
 		results[qr.index] = qr.quo
 		if !leftToAllocate.IsZero() {
-			results[qr.index] = results[qr.index].Add(sdk.OneInt())
-			leftToAllocate = leftToAllocate.Sub(sdk.OneInt())
+			results[qr.index] = results[qr.index].Add(sdkmath.OneInt())
+			leftToAllocate = leftToAllocate.Sub(sdkmath.OneInt())
 		}
 	}
 	return results

@@ -23,7 +23,7 @@ func TestMsgRepayInterest(t *testing.T) {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(322)), sdk.NewCoin("ausdc", sdkmath.NewInt(322))}}
 	resp, err := lapp.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
@@ -31,7 +31,7 @@ func TestMsgRepayInterest(t *testing.T) {
 	reqRePayInterest := types.MsgRepayInterest{
 		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		PoolIndex: poolIndex[0],
-		Token:     sdk.NewCoin("invalid", sdk.NewInt(100)),
+		Token:     sdk.NewCoin("invalid", sdkmath.NewInt(100)),
 	}
 	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "pool denom ausdc and repay is invalid: inconsistency tokens")
@@ -43,7 +43,7 @@ func TestMsgRepayInterest(t *testing.T) {
 	reqRePayInterest = types.MsgRepayInterest{
 		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		PoolIndex: poolIndex[0],
-		Token:     sdk.NewCoin("ausdc", sdk.NewInt(100)),
+		Token:     sdk.NewCoin("ausdc", sdkmath.NewInt(100)),
 	}
 	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "borrow amount is zero, no interest to be paid or interest paid is zero")
@@ -51,13 +51,13 @@ func TestMsgRepayInterest(t *testing.T) {
 	poolInfo, found := k.GetPools(ctx, poolIndex[0])
 	require.True(t, found)
 	poolInfo.PoolStatus = types.PoolInfo_FROZEN
-	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdk.NewInt(100))
+	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(100))
 	k.SetPool(ctx, poolInfo)
 	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "pool is not active")
 
 	poolInfo.PoolStatus = types.PoolInfo_INACTIVE
-	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdk.NewInt(100))
+	poolInfo.BorrowedAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(100))
 	k.SetPool(ctx, poolInfo)
 	_, err = lapp.RepayInterest(ctx, &reqRePayInterest)
 	require.ErrorContains(t, err, "pool is not active")
@@ -83,7 +83,7 @@ func mockBorrow(ctx context.Context, nftKeeper types.NFTKeeper, poolInfo *types.
 
 	rate := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	paymentTime := ctx.BlockTime()
-	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(borrowAmount.Denom, sdk.NewInt(0))}
+	firstPayment := types.PaymentItem{PaymentTime: paymentTime, PaymentAmount: sdk.NewCoin(borrowAmount.Denom, sdkmath.NewInt(0))}
 	borrowDetails := make([]types.BorrowDetail, 1, 10)
 	borrowDetails[0] = types.BorrowDetail{BorrowedAmount: sdk.NewCoin("aud-ausdc", localAmount), TimeStamp: ctx.BlockTime()}
 	bi := types.BorrowInterest{
@@ -118,19 +118,19 @@ func testWithDifferentPrePayAmount(t *testing.T, ctx context.Context, app types.
 	repayMsg := types.MsgRepayInterest{
 		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		PoolIndex: poolIndex,
-		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)),
+		Token:     sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e8)),
 	}
 	_, err := app.RepayInterest(ctx, &repayMsg)
 	require.NoError(t, err)
 	poolnfo, found := k.GetPools(ctx, poolIndex)
 	require.True(t, found)
 
-	counter := sdk.NewIntFromUint64(2e8).Quo(expectedInterest)
+	counter := sdkmath.NewIntFromUint64(2e8).Quo(expectedInterest)
 	require.EqualValues(t, counter.Int64(), int64(poolnfo.InterestPrepayment.Counter))
 
 	k.SetPool(ctx, poolnfoBeforeTest)
 	// now we pay very small amount
-	repayMsg.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1))
+	repayMsg.Token = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1))
 
 	_, err = app.RepayInterest(ctx, &repayMsg)
 	require.ErrorContains(t, err, "you must pay at least one interest cycle")
@@ -148,7 +148,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.078", "0.072"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.078", "0.072"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(322)), sdk.NewCoin("ausdc", sdkmath.NewInt(322))}}
 	resp, err := lapp.CreatePool(ctx, &req)
 	require.NoError(t, err)
 
@@ -156,16 +156,16 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	samplePool, found := k.GetPools(ctx, poolIndex)
 	require.True(t, found)
 
-	samplePool.EscrowInterestAmount = sdk.NewIntFromUint64(10e12)
+	samplePool.EscrowInterestAmount = sdkmath.NewIntFromUint64(10e12)
 	k.SetPool(ctx, samplePool)
 
-	samplePool.UsableAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(8e12))
+	samplePool.UsableAmount = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(8e12))
 	samplePool.PoolStatus = types.PoolInfo_ACTIVE
 	samplePool.PoolTotalBorrowLimit = 100
 	samplePool.GraceTime = time.Hour * 1000
-	samplePool.TargetAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(100e12))
+	samplePool.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(100e12))
 	firstBorrowTime := ctx.BlockTime()
-	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)))
+	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e8)))
 	samplePool.CurrentPoolTotalBorrowCounter = 1
 	k.SetPool(ctx, samplePool)
 	err = k.HandleInterest(ctx, &samplePool)
@@ -189,16 +189,16 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	}
 
 	period := spvkeeper.OneYear / spvkeeper.OneMonth
-	interestOneMonthWithReserve := sdk.NewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(samplePool.Apy).QuoInt64(int64(period)).TruncateInt()
+	interestOneMonthWithReserve := sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(samplePool.Apy).QuoInt64(int64(period)).TruncateInt()
 
-	interestOneMonth := interestOneMonthWithReserve.Sub(sdk.NewDecFromInt(interestOneMonthWithReserve).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt())
+	interestOneMonth := interestOneMonthWithReserve.Sub(sdkmath.LegacyNewDecFromInt(interestOneMonthWithReserve).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt())
 
 	testWithDifferentPrePayAmount(t, ctx, lapp, poolIndex, k, interestOneMonthWithReserve)
 
 	repayMsg := types.MsgRepayInterest{
 		Creator:   "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		PoolIndex: poolIndex,
-		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)),
+		Token:     sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e8)),
 	}
 	_, err = lapp.RepayInterest(ctx, &repayMsg)
 
@@ -210,7 +210,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 15 * 24 * 3600))
 	secondBorrowTime := ctx.BlockTime()
 
-	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)))
+	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e8)))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 15 * 24 * 3600))
 	err = k.HandleInterest(ctx, &samplePool)
@@ -242,7 +242,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	interest := r.Power(uint64(delta.Seconds())).Sub(sdkmath.LegacyOneDec())
 
 	paymentAmount := interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
-	reservedAmount := sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	reservedAmount := sdkmath.LegacyNewDecFromInt(paymentAmount).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	toInvestors := paymentAmount.Sub(reservedAmount)
 
 	err = proto.Unmarshal(nclass.Data.Value, &borrowInterest)
@@ -276,7 +276,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(24*3600*13)))
 	thirdBorrowTime := ctx.BlockTime()
-	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e8)))
+	mockBorrow(ctx, nftKeeper, &samplePool, sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e8)))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * time.Duration(24*3600*19)))
 	err = k.HandleInterest(ctx, &samplePool)
@@ -286,7 +286,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 
 	interest = r.Power(uint64(delta.Seconds())).Sub(sdkmath.LegacyOneDec())
 	paymentAmount = interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
-	reservedAmount = sdk.NewDecFromInt(paymentAmount).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	reservedAmount = sdkmath.LegacyNewDecFromInt(paymentAmount).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	toInvestors = paymentAmount.Sub(reservedAmount)
 
 	poolInfo, _ = k.GetPools(ctx, poolIndex)

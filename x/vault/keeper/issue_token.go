@@ -1,20 +1,25 @@
 package keeper
 
 import (
+	"context"
+
 	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
 // SetIssueToken set a specific issueToken in the store from its index
-func (k Keeper) SetIssueToken(ctx context.Context, issueToken types.IssueToken) {
+func (k Keeper) SetIssueToken(rctx context.Context, issueToken types.IssueToken) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.IssueTokenKey))
 	b := k.cdc.MustMarshal(&issueToken)
 	store.Set(types.KeyPrefix(issueToken.Index), b)
 }
 
 // GetIssueToken returns a issueToken from its index
-func (k Keeper) GetIssueToken(ctx context.Context, index string) (val types.IssueToken, found bool) {
+func (k Keeper) GetIssueToken(rctx context.Context, index string) (val types.IssueToken, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.IssueTokenKey))
 
 	b := store.Get(types.KeyPrefix(index))
@@ -27,9 +32,10 @@ func (k Keeper) GetIssueToken(ctx context.Context, index string) (val types.Issu
 }
 
 // GetAllIssueToken returns all issueToken
-func (k Keeper) GetAllIssueToken(ctx context.Context) (list []types.IssueToken) {
+func (k Keeper) GetAllIssueToken(rctx context.Context) (list []types.IssueToken) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.IssueTokenKey))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 
 	defer iterator.Close()
 

@@ -1,16 +1,21 @@
 package keeper
 
 import (
+	"context"
 	"errors"
 
+	errorsmod "cosmossdk.io/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // Deposit deposit
-func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+func (k Keeper) Deposit(rctx context.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// Set any new denoms' global supply index to 1.0
 	for _, coin := range coins {
 		_, foundInterestFactor := k.GetSupplyInterestFactor(ctx, coin.Denom)
@@ -38,7 +43,7 @@ func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coins sdk
 
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, depositor, types2.ModuleAccountName, coins)
 	if err != nil {
-		if errors.Is(err, errorsmod.ErrInsufficientFunds) {
+		if errors.Is(err, sdkerrors.ErrInsufficientFunds) {
 			acc := k.accountKeeper.GetAccount(ctx, depositor)
 			accCoins := k.bankKeeper.SpendableCoins(ctx, acc.GetAddress())
 			for _, coin := range coins {
@@ -90,7 +95,6 @@ func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coins sdk
 	} else {
 		k.AfterDepositModified(ctx, deposit)
 	}
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types2.EventTypeHardDeposit,
@@ -185,7 +189,7 @@ func (k Keeper) loadSyncedDeposit(ctx context.Context, deposit types2.Deposit) t
 
 			// Calculate interest that will be paid to user for this asset
 			if foundAtIndex != -1 {
-				storedAmount := sdk.NewDecFromInt(deposit.Amount.AmountOf(coin.Denom))
+				storedAmount := sdkmath.LegacyNewDecFromInt(deposit.Amount.AmountOf(coin.Denom))
 				userLastInterestFactor := deposit.Index[foundAtIndex].Value
 				coinInterest := (storedAmount.Quo(userLastInterestFactor).Mul(interestFactorValue)).Sub(storedAmount)
 				totalNewInterest = totalNewInterest.Add(sdk.NewCoin(coin.Denom, coinInterest.TruncateInt()))

@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"sort"
 	"strconv"
 
@@ -64,7 +65,7 @@ func (k Keeper) getEligibleValidators(ctx context.Context) ([]vaulttypes.Validat
 	boundedValidators := k.vaultStaking.GetBondedValidatorsByPower(ctx)
 	var candidates []vaulttypes.ValidatorPowerInfo
 
-	candidateDec := sdk.NewDecWithPrec(int64(len(boundedValidators)), 0)
+	candidateDec := sdkmath.LegacyNewDecWithPrec(int64(len(boundedValidators)), 0)
 	candidateNumDec := candidateDec.MulTruncate(params.CandidateRatio)
 
 	candidateNum := uint32(candidateNumDec.TruncateInt64())

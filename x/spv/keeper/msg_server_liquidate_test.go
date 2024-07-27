@@ -45,7 +45,7 @@ func (suite *liquidateTestSuite) SetupTest() {
 
 func setupLiquidateEnv(suite *liquidateTestSuite) {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(4*1e5)), sdk.NewCoin("ausdc", sdk.NewInt(4*1e5))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(4*1e5)), sdk.NewCoin("ausdc", sdkmath.NewInt(4*1e5))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -69,7 +69,7 @@ func setupLiquidateEnv(suite *liquidateTestSuite) {
 	creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
 	creator2 := "jolt1kkujrm0lqeu0e5va5f6mmwk87wva0k8cmam8jq"
 
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -83,10 +83,10 @@ func setupLiquidateEnv(suite *liquidateTestSuite) {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
@@ -174,7 +174,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(600000))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	samples := make([]int, 20)
@@ -186,7 +186,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
@@ -209,7 +209,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		total := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		total := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		suite.Require().True(total.Equal(histories[0][i].Amount.Amount))
 	}
 }
@@ -220,12 +220,12 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	depositorPool := suite.investorPool
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	_, err := suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().ErrorContains(err, "pool is not in active status")
@@ -236,13 +236,13 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	poolInfo.PoolTotalBorrowLimit = 100
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
-	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5))
+	borrow.BorrowAmount = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
-	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdk.NewIntFromUint64(3.34e5)))
+	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdkmath.NewIntFromUint64(3.34e5)))
 	poolInfo.PoolStatus = types.PoolInfo_Liquidation
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
@@ -257,7 +257,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		amount := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
@@ -280,8 +280,8 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		total := sdk.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
-		v2 := sdk.NewDecFromInt(total.Mul(sdk.NewIntFromUint64(2e5))).Quo(sdk.NewDecFromInt(sdk.NewIntFromUint64(3.34e5))).TruncateInt()
+		total := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		v2 := sdkmath.LegacyNewDecFromInt(total.Mul(sdk.NewIntFromUint64(2e5))).Quo(sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(3.34e5))).TruncateInt()
 		suite.Require().True(v2.Equal(histories[1][i].Amount.Amount))
 		v1 := total.Sub(v2)
 		suite.Require().True(v1.Equal(histories[0][i].Amount.Amount))

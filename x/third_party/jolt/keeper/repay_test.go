@@ -42,7 +42,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 		errArgs errArgs
 	}
 
-	model := types3.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10"))
+	model := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
 
 	testCases := []borrowTest{
 		{
@@ -50,12 +50,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
 			},
 			errArgs{
 				expectPass:   true,
@@ -68,12 +68,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("repayer"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
 			},
 			errArgs{
 				expectPass:   true,
@@ -86,12 +86,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
 			},
 			errArgs{
 				expectPass:   true,
@@ -104,12 +104,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(80*JoltCf))), // Deposit less so user still has some KAVA
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(60*JoltCf))), // Exceeds borrowed coins but not user's balance
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(80*JoltCf))), // Deposit less so user still has some KAVA
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(60*JoltCf))), // Exceeds borrowed coins but not user's balance
 			},
 			errArgs{
 				expectPass:   true,
@@ -122,12 +122,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(10*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*JoltCf))),
 			},
 			errArgs{
 				expectPass:   false,
@@ -140,12 +140,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("repayer"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(49*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))), // Exceeds repayer's balance, but not borrow amount
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(49*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))), // Exceeds repayer's balance, but not borrow amount
 			},
 			errArgs{
 				expectPass:   false,
@@ -158,12 +158,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(50*UsdxCf))),
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(45*UsdxCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(50*UsdxCf))),
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(45*UsdxCf))),
 			},
 			errArgs{
 				expectPass:   false,
@@ -176,12 +176,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf)), sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(50*UsdxCf)), sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))), // (50*$1)+(10*$2) = $70
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(45*UsdxCf)), sdk.NewCoin("ujolt", sdk.NewInt(8*JoltCf))),  // (45*$1)+(8*$2) = $61
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(50*UsdxCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))), // (50*$1)+(10*$2) = $70
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(45*UsdxCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),  // (45*$1)+(8*$2) = $61
 			},
 			errArgs{
 				expectPass:   false,
@@ -194,12 +194,12 @@ func (suite *KeeperTestSuite) TestRepay() {
 			args{
 				borrower:             sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
 				repayer:              sdk.AccAddress(crypto.AddressHash([]byte("borrower"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf))),
-				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf)), sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*UsdxCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(100*UsdxCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(50*UsdxCf)), sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))), // (50*$1)+(10*$2) = $70
-				repayCoins:           sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(500*UsdxCf)), sdk.NewCoin("ujolt", sdk.NewInt(8*JoltCf))), // (500*$1)+(8*$2) = $516, or capping to borrowed amount, (50*$1)+(8*$2) = $66
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf))),
+				initialRepayerCoins:  sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*UsdxCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(50*UsdxCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))), // (50*$1)+(10*$2) = $70
+				repayCoins:           sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(500*UsdxCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))), // (500*$1)+(8*$2) = $516, or capping to borrowed amount, (50*$1)+(8*$2) = $66
 			},
 			errArgs{
 				expectPass:   false,
@@ -230,19 +230,19 @@ func (suite *KeeperTestSuite) TestRepay() {
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("usdx",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*UsdxCf), sdk.MustNewDecFromStr("1")), // Borrow Limit
-						"usdx:usd",                     // Market ID
-						sdk.NewInt(UsdxCf),             // Conversion Factor
-						model,                          // Interest Rate Model
-						sdk.MustNewDecFromStr("0.05"),  // Reserve Factor
-						sdk.MustNewDecFromStr("0.05")), // Keeper Reward Percent
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*UsdxCf), sdkmath.LegacyMustNewDecFromStr("1")), // Borrow Limit
+						"usdx:usd",                               // Market ID
+						sdk.NewInt(UsdxCf),                       // Conversion Factor
+						model,                                    // Interest Rate Model
+						sdkmath.LegacyMustNewDecFromStr("0.05"),  // Reserve Factor
+						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
-						"joltify:usd",                  // Market ID
-						sdk.NewInt(JoltCf),             // Conversion Factor
-						model,                          // Interest Rate Model
-						sdk.MustNewDecFromStr("0.05"),  // Reserve Factor
-						sdk.MustNewDecFromStr("0.05")), // Keeper Reward Percent
+						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+						"joltify:usd",                            // Market ID
+						sdk.NewInt(JoltCf),                       // Conversion Factor
+						model,                                    // Interest Rate Model
+						sdkmath.LegacyMustNewDecFromStr("0.05"),  // Reserve Factor
+						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 				},
 				sdk.NewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
@@ -261,13 +261,13 @@ func (suite *KeeperTestSuite) TestRepay() {
 					{
 						MarketID:      "usdx:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(1 * time.Hour),
 					},
 					{
 						MarketID:      "joltify:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("2.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 						Expiry:        time.Now().Add(1 * time.Hour),
 					},
 				},

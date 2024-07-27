@@ -28,14 +28,14 @@ func NewPriceGenerator(startingPrice map[string]sdkmath.LegacyDec) *PriceGenerat
 		currentBlockHeight: 0,
 	}
 
-	divisor := sdk.MustNewDecFromStr("20")
+	divisor := sdkmath.LegacyMustNewDecFromStr("20")
 
 	for marketID, startPrice := range startingPrice {
 		p.markets = append(p.markets, marketID)
 		// allow 10x price increase
-		p.maxPrice[marketID] = sdk.MustNewDecFromStr("10.0").Mul(startPrice)
+		p.maxPrice[marketID] = sdkmath.LegacyMustNewDecFromStr("10.0").Mul(startPrice)
 		// allow 100x price decrease
-		p.minPrice[marketID] = sdk.MustNewDecFromStr("0.01").Mul(startPrice)
+		p.minPrice[marketID] = sdkmath.LegacyMustNewDecFromStr("0.01").Mul(startPrice)
 		// set increment - should we use a random increment?
 		p.increment[marketID] = startPrice.Quo(divisor)
 	}
@@ -74,7 +74,7 @@ func (p *PriceGenerator) Step(r *rand.Rand, blockHeight int64) {
 			if upDown == 0 {
 				lastPrice = sdk.MinDec(lastPrice.Add(increment), maxPrice)
 			} else {
-				lastPrice = sdk.MaxDec(lastPrice.Sub(increment), minPrice)
+				lastPrice = sdkmath.LegacyMaxDec(lastPrice.Sub(increment), minPrice)
 			}
 
 			lastHeight++

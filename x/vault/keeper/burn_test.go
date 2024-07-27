@@ -21,14 +21,14 @@ func prepare(t *testing.T) (*joltapp.TestApp, context.Context, []sdk.AccAddress)
 	testValidators, creators := keepertest.GenerateNValidators(t, 4)
 
 	for _, el := range creators {
-		err := simapp.FundAccount(app.GetBankKeeper(), ctx, el, sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}})
+		err := simapp.FundAccount(app.GetBankKeeper(), ctx, el, sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(1000)}})
 		assert.NoError(t, err)
 	}
 
 	f1Before := app.GetBankKeeper().GetAllBalances(ctx, creators[0])
-	assert.Equal(t, f1Before.IsEqual(sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}}), true)
+	assert.Equal(t, f1Before.IsEqual(sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(1000)}}), true)
 	f2Before := app.GetBankKeeper().GetAllBalances(ctx, creators[1])
-	assert.Equal(t, f2Before.IsEqual(sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}}), true)
+	assert.Equal(t, f2Before.IsEqual(sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(1000)}}), true)
 
 	p1 := types.PoolProposal{PoolAddr: creators[0], Nodes: []sdk.AccAddress{creators[0], creators[1], creators[2]}}
 	p2 := types.PoolProposal{PoolAddr: creators[1], Nodes: []sdk.AccAddress{creators[0], creators[1], creators[2]}}
@@ -61,7 +61,7 @@ func prepare(t *testing.T) (*joltapp.TestApp, context.Context, []sdk.AccAddress)
 		poolProposal := types.PoolProposal{
 			PoolAddr: creators[i].Bytes(),
 		}
-		err := simapp.FundAccount(app.GetBankKeeper(), ctx, sk.PubKey().Address().Bytes(), sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdk.NewInt(1000)}})
+		err := simapp.FundAccount(app.GetBankKeeper(), ctx, sk.PubKey().Address().Bytes(), sdk.Coins{sdk.Coin{Denom: "mock", Amount: sdkmath.NewInt(1000)}})
 		assert.NoError(t, err)
 		items[i].Proposal = []*types.PoolProposal{&poolProposal}
 		items[i].BlockHeight = fmt.Sprintf("%d", i)
@@ -73,11 +73,11 @@ func prepare(t *testing.T) (*joltapp.TestApp, context.Context, []sdk.AccAddress)
 
 func TestProcessAccountLeft(t *testing.T) {
 	app, ctx, creators := prepare(t)
-	app.VaultKeeper.SetStoreFeeAmount(ctx, sdk.NewCoins(sdk.NewCoin("mock", sdk.NewInt(12))))
+	app.VaultKeeper.SetStoreFeeAmount(ctx, sdk.NewCoins(sdk.NewCoin("mock", sdkmath.NewInt(12))))
 	app.VaultKeeper.ProcessAccountLeft(ctx)
 	fee, ok := app.VaultKeeper.GetFeeAmount(ctx, "mock")
 	assert.True(t, ok)
-	assert.Equal(t, fee.Amount, sdk.NewInt(0))
+	assert.Equal(t, fee.Amount, sdkmath.NewInt(0))
 	f1 := app.GetBankKeeper().GetAllBalances(ctx, creators[0])
 	assert.Equal(t, len(f1), 0)
 	f2 := app.GetBankKeeper().GetAllBalances(ctx, creators[1])
@@ -86,11 +86,11 @@ func TestProcessAccountLeft(t *testing.T) {
 
 func TestProcessAccountLeftWithAccountLessThanFee(t *testing.T) {
 	app, ctx, creators := prepare(t)
-	app.VaultKeeper.SetStoreFeeAmount(ctx, sdk.NewCoins(sdk.NewCoin("mock", sdk.NewInt(120000))))
+	app.VaultKeeper.SetStoreFeeAmount(ctx, sdk.NewCoins(sdk.NewCoin("mock", sdkmath.NewInt(120000))))
 	app.VaultKeeper.ProcessAccountLeft(ctx)
 	fee, ok := app.VaultKeeper.GetFeeAmount(ctx, "mock")
 	assert.True(t, ok)
-	assert.Equal(t, fee.Amount, sdk.NewInt(120000))
+	assert.Equal(t, fee.Amount, sdkmath.NewInt(120000))
 	f1 := app.GetBankKeeper().GetAllBalances(ctx, creators[0])
 	assert.Equal(t, len(f1), 0)
 	f2 := app.GetBankKeeper().GetAllBalances(ctx, creators[1])

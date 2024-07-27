@@ -168,7 +168,7 @@ func (suite *evmBankKeeperTestSuite) TestSendCoinsFromModuleToAccount() {
 		},
 		{
 			"errors if sending other coins",
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdk.NewInt64Coin("busd", 1000)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdkmath.NewInt64Coin("busd", 1000)),
 			sdk.Coins{},
 			sdk.Coins{},
 			true,
@@ -275,34 +275,34 @@ func (suite *evmBankKeeperTestSuite) TestSendCoinsFromAccountToModule() {
 		{
 			"send more than 1 ujolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 12_000_000_000_010)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 190), sdk.NewInt64Coin("ujolt", 88)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_010), sdk.NewInt64Coin("ujolt", 12)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 190), sdkmath.NewInt64Coin("ujolt", 88)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_010), sdkmath.NewInt64Coin("ujolt", 12)),
 			false,
 		},
 		{
 			"send less than 1 ujolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 122)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 78), sdk.NewInt64Coin("ujolt", 100)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_122), sdk.NewInt64Coin("ujolt", 0)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 78), sdkmath.NewInt64Coin("ujolt", 100)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_122), sdkmath.NewInt64Coin("ujolt", 0)),
 			false,
 		},
 		{
 			"send an exact amount of ujolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 98_000_000_000_000)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 200), sdk.NewInt64Coin("ujolt", 2)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_000), sdk.NewInt64Coin("ujolt", 98)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 200), sdkmath.NewInt64Coin("ujolt", 2)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_000), sdkmath.NewInt64Coin("ujolt", 98)),
 			false,
 		},
 		{
 			"send no ajolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 0)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 200), sdk.NewInt64Coin("ujolt", 100)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_000), sdk.NewInt64Coin("ujolt", 0)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 200), sdkmath.NewInt64Coin("ujolt", 100)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_000), sdkmath.NewInt64Coin("ujolt", 0)),
 			false,
 		},
 		{
 			"errors if sending other coins",
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdk.NewInt64Coin("busd", 1000)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdkmath.NewInt64Coin("busd", 1000)),
 			sdk.Coins{},
 			sdk.Coins{},
 			true,
@@ -334,15 +334,15 @@ func (suite *evmBankKeeperTestSuite) TestSendCoinsFromAccountToModule() {
 		{
 			"converts 1 ujolt to ajolt if not enough ajolt to cover",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 99_001_000_000_000)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 999_000_000_200), sdk.NewInt64Coin("ujolt", 0)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 101_000_000_000), sdk.NewInt64Coin("ujolt", 99)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 999_000_000_200), sdkmath.NewInt64Coin("ujolt", 0)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 101_000_000_000), sdkmath.NewInt64Coin("ujolt", 99)),
 			false,
 		},
 		{
 			"converts receiver's ajolt to ujolt if there's enough ajolt after the transfer",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 5_900_000_000_200)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_000), sdk.NewInt64Coin("ujolt", 94)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 200), sdk.NewInt64Coin("ujolt", 6)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100_000_000_000), sdkmath.NewInt64Coin("ujolt", 94)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 200), sdkmath.NewInt64Coin("ujolt", 6)),
 			false,
 		},
 	}
@@ -421,7 +421,7 @@ func (suite *evmBankKeeperTestSuite) TestBurnCoins() {
 		},
 		{
 			"errors if burning other coins",
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdk.NewInt64Coin("busd", 1000)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdkmath.NewInt64Coin("busd", 1000)),
 			startingUjolt,
 			sdkmath.NewInt(100),
 			true,
@@ -543,7 +543,7 @@ func (suite *evmBankKeeperTestSuite) TestMintCoins() {
 		},
 		{
 			"errors if minting other coins",
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdk.NewInt64Coin("busd", 1000)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 500), sdkmath.NewInt64Coin("busd", 1000)),
 			sdkmath.ZeroInt(),
 			sdkmath.NewInt(100),
 			true,
@@ -624,7 +624,7 @@ func (suite *evmBankKeeperTestSuite) TestValidateEvmCoins() {
 		},
 		{
 			"dup coins",
-			sdk.Coins{sdk.NewInt64Coin("ajolt", 500), sdk.NewInt64Coin("ajolt", 500)},
+			sdk.Coins{sdk.NewInt64Coin("ajolt", 500), sdkmath.NewInt64Coin("ajolt", 500)},
 			true,
 		},
 		{
@@ -666,14 +666,14 @@ func (suite *evmBankKeeperTestSuite) TestConvertOneUjoltToAjoltIfNeeded() {
 		},
 		{
 			"converts 1 ujolt to ajolt",
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdk.NewInt64Coin("ajolt", 100)),
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 9), sdk.NewInt64Coin("ajolt", 1_000_000_000_100)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdkmath.NewInt64Coin("ajolt", 100)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 9), sdkmath.NewInt64Coin("ajolt", 1_000_000_000_100)),
 			true,
 		},
 		{
 			"conversion not needed",
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdk.NewInt64Coin("ajolt", 200)),
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdk.NewInt64Coin("ajolt", 200)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdkmath.NewInt64Coin("ajolt", 200)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdkmath.NewInt64Coin("ajolt", 200)),
 			true,
 		},
 	}
@@ -711,17 +711,17 @@ func (suite *evmBankKeeperTestSuite) TestConvertAjoltToUjolt() {
 		{
 			"not enough ujolt",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100)),
-			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100), sdk.NewInt64Coin("ujolt", 0)),
+			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 100), sdkmath.NewInt64Coin("ujolt", 0)),
 		},
 		{
 			"converts ajolt for 1 ujolt",
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdk.NewInt64Coin("ajolt", 1_000_000_000_003)),
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 11), sdk.NewInt64Coin("ajolt", 3)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdkmath.NewInt64Coin("ajolt", 1_000_000_000_003)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 11), sdkmath.NewInt64Coin("ajolt", 3)),
 		},
 		{
 			"converts more than 1 ujolt of ajolt",
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdk.NewInt64Coin("ajolt", 8_000_000_000_123)),
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 18), sdk.NewInt64Coin("ajolt", 123)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 10), sdkmath.NewInt64Coin("ajolt", 8_000_000_000_123)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 18), sdkmath.NewInt64Coin("ajolt", 123)),
 		},
 	}
 	for _, tt := range tests {
@@ -763,7 +763,7 @@ func (suite *evmBankKeeperTestSuite) TestSplitAjoltCoins() {
 		{
 			"ujolt & ajolt coins",
 			sdk.NewCoins(sdk.NewInt64Coin("ajolt", 8_000_000_000_123)),
-			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 8), sdk.NewInt64Coin("ajolt", 123)),
+			sdk.NewCoins(sdk.NewInt64Coin("ujolt", 8), sdkmath.NewInt64Coin("ajolt", 123)),
 			false,
 		},
 		{

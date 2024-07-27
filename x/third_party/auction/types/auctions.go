@@ -1,11 +1,12 @@
 package types
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -192,7 +193,7 @@ func NewCollateralAuction(seller string, lot sdk.Coin, endTime time.Time, maxBid
 			Initiator:       seller,
 			Lot:             lot,
 			Bidder:          nil,
-			Bid:             sdk.NewInt64Coin(maxBid.Denom, 0),
+			Bid:             sdkmath.NewInt64Coin(maxBid.Denom, 0),
 			HasReceivedBids: false, // new auctions don't have any bids
 			EndTime:         endTime,
 			MaxEndTime:      endTime,

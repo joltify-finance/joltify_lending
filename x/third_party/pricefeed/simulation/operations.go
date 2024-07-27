@@ -55,9 +55,9 @@ package simulation
 // func SimulateMsgUpdatePrices(ak auth.AccountKeeper, keeper keeper.Keeper, blocks int) simulation.Operation {
 // 	// runs one at the start of each simulation
 // 	startingPrices := map[string]sdkmath.LegacyDec{
-// 		"btc:usd": sdk.MustNewDecFromStr("7000"),
-// 		"bnb:usd": sdk.MustNewDecFromStr("15"),
-// 		"xrp:usd": sdk.MustNewDecFromStr("0.25"),
+// 		"btc:usd": sdkmath.LegacyMustNewDecFromStr("7000"),
+// 		"bnb:usd": sdkmath.LegacyMustNewDecFromStr("15"),
+// 		"xrp:usd": sdkmath.LegacyMustNewDecFromStr("0.25"),
 // 	}
 
 // 	// creates the new price generator from starting prices - resets for each sim

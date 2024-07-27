@@ -49,8 +49,8 @@ func (suite *KeeperTestSuite) SetupTest() {
 }
 
 func (suite *KeeperTestSuite) TestGetSetDeleteDeposit() {
-	dep := types2.NewDeposit(sdk.AccAddress("test"), sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(100))),
-		types2.SupplyInterestFactors{types2.NewSupplyInterestFactor("", sdk.MustNewDecFromStr("0"))})
+	dep := types2.NewDeposit(sdk.AccAddress("test"), sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(100))),
+		types2.SupplyInterestFactors{types2.NewSupplyInterestFactor("", sdkmath.LegacyMustNewDecFromStr("0"))})
 
 	_, f := suite.keeper.GetDeposit(suite.ctx, sdk.AccAddress("test"))
 	suite.Require().False(f)
@@ -69,7 +69,7 @@ func (suite *KeeperTestSuite) TestGetSetDeleteDeposit() {
 
 func (suite *KeeperTestSuite) TestIterateDeposits() {
 	for i := 0; i < 5; i++ {
-		dep := types2.NewDeposit(sdk.AccAddress("test"+fmt.Sprint(i)), sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(100))), types2.SupplyInterestFactors{})
+		dep := types2.NewDeposit(sdk.AccAddress("test"+fmt.Sprint(i)), sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(100))), types2.SupplyInterestFactors{})
 		suite.Require().NotPanics(func() { suite.keeper.SetDeposit(suite.ctx, dep) })
 	}
 	var deposits []types2.Deposit
@@ -82,9 +82,9 @@ func (suite *KeeperTestSuite) TestIterateDeposits() {
 
 func (suite *KeeperTestSuite) TestGetSetDeleteInterestRateModel() {
 	denom := "test"
-	model := types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10"))
-	borrowLimit := types2.NewBorrowLimit(false, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5"))
-	moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdk.NewInt(1000000), model, sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec())
+	model := types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
+	borrowLimit := types2.NewBorrowLimit(false, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.5"))
+	moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdkmath.NewInt(1000000), model, sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec())
 
 	_, f := suite.keeper.GetMoneyMarket(suite.ctx, denom)
 	suite.Require().False(f)
@@ -119,9 +119,9 @@ func (suite *KeeperTestSuite) TestIterateInterestRateModels() {
 	for i := 0; i < 5; i++ {
 		// Initialize a new money market
 		denom := testDenom + strconv.Itoa(i)
-		model := types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10"))
-		borrowLimit := types2.NewBorrowLimit(false, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5"))
-		moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdk.NewInt(1000000), model, sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec())
+		model := types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
+		borrowLimit := types2.NewBorrowLimit(false, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.5"))
+		moneyMarket := types2.NewMoneyMarket(denom, borrowLimit, denom+":usd", sdkmath.NewInt(1000000), model, sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec())
 
 		// Store money market in the module's store
 		suite.Require().NotPanics(func() { suite.keeper.SetMoneyMarket(suite.ctx, denom, moneyMarket) })

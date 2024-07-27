@@ -117,7 +117,7 @@ func (builder IncentiveGenesisBuilder) simpleRewardPeriod(ctype string, rewardsP
 func newZeroRewardIndexesFromCoins(coins ...sdk.Coin) types3.RewardIndexes {
 	var ri types3.RewardIndexes
 	for _, coin := range coins {
-		ri = ri.With(coin.Denom, sdk.ZeroDec())
+		ri = ri.With(coin.Denom, sdkmath.LegacyZeroDec())
 	}
 	return ri
 }
@@ -174,17 +174,17 @@ func NewStandardMoneyMarket(denom string) types2.MoneyMarket {
 		types2.NewBorrowLimit(
 			false,
 			sdk.NewDec(1e15),
-			sdk.MustNewDecFromStr("0.6"),
+			sdkmath.LegacyMustNewDecFromStr("0.6"),
 		),
 		denom+":usd",
 		sdk.NewInt(1e6),
 		types2.NewInterestRateModel(
-			sdk.MustNewDecFromStr("0.05"),
-			sdk.MustNewDecFromStr("2"),
-			sdk.MustNewDecFromStr("0.8"),
-			sdk.MustNewDecFromStr("10"),
+			sdkmath.LegacyMustNewDecFromStr("0.05"),
+			sdkmath.LegacyMustNewDecFromStr("2"),
+			sdkmath.LegacyMustNewDecFromStr("0.8"),
+			sdkmath.LegacyMustNewDecFromStr("10"),
 		),
-		sdk.MustNewDecFromStr("0.05"),
-		sdk.ZeroDec(),
+		sdkmath.LegacyMustNewDecFromStr("0.05"),
+		sdkmath.LegacyZeroDec(),
 	)
 }

@@ -31,7 +31,7 @@ func TestFirstDist(t *testing.T) {
 	acc := tApp.GetAccountKeeper().GetModuleAddress(incentivetypes.ModuleName)
 	balances := tApp.GetBankKeeper().GetBalance(ctx, acc, "ujolt")
 
-	firstDrop, ok := sdk.NewIntFromString("100000000000")
+	firstDrop, ok := sdkmath.NewIntFromString("100000000000")
 	assert.True(t, ok)
 	assert.True(t, balances.Amount.Equal(firstDrop))
 }
@@ -43,7 +43,7 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 
 	ctx := tApp.Ctx
 
-	apy, err := sdk.NewDecFromStr("0.08")
+	apy, err := sdkmath.LegacyNewDecFromStr("0.08")
 	assert.NoError(t, err)
 
 	adjAPY := sdkmath.LegacyOneDec().Add(apy)

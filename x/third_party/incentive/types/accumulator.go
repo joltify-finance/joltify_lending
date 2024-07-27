@@ -60,7 +60,7 @@ func (*Accumulator) getTimeElapsedWithinLimits(start, end, limitMin, limitMax ti
 // total rewards per source share, which is what the indexes store.
 // Note, duration is rounded to the nearest second to keep rewards calculation consistent with joltify.
 func (*Accumulator) calculateNewRewards(rewardsPerSecond sdk.Coins, totalSourceShares sdkmath.LegacyDec, duration time.Duration) RewardIndexes {
-	if totalSourceShares.LTE(sdk.ZeroDec()) {
+	if totalSourceShares.LTE(sdkmath.LegacyZeroDec()) {
 		// When there is zero source shares, there is no users with deposits/borrows/delegations to pay out the current block's rewards to.
 		// So drop the rewards and pay out nothing.
 		return nil
@@ -72,7 +72,7 @@ func (*Accumulator) calculateNewRewards(rewardsPerSecond sdk.Coins, totalSourceS
 		return nil
 	}
 	increment := newRewardIndexesFromCoins(rewardsPerSecond)
-	increment = increment.Mul(sdk.NewDec(durationSeconds)).Mul(sdk.NewDecFromInt(sdk.NewInt(1e12))).Quo(totalSourceShares)
+	increment = increment.Mul(sdk.NewDec(durationSeconds)).Mul(sdkmath.LegacyNewDecFromInt(sdk.NewInt(1e12))).Quo(totalSourceShares)
 	return increment
 }
 
@@ -96,7 +96,7 @@ func maxTime(t1, t2 time.Time) time.Time {
 func newRewardIndexesFromCoins(coins sdk.Coins) RewardIndexes {
 	var indexes RewardIndexes
 	for _, coin := range coins {
-		value := sdk.NewDecFromInt(coin.Amount)
+		value := sdkmath.LegacyNewDecFromInt(coin.Amount)
 		indexes = append(indexes, NewRewardIndex(coin.Denom, value))
 	}
 	return indexes

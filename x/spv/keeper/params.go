@@ -21,7 +21,7 @@ func (k Keeper) GetParamsV21(ctx context.Context) sdkmath.Int {
 	ret := k.paramstore.GetRaw(ctx, types.KeyBurnThreshold)
 	out := strings.Split(string(ret), "\"")
 
-	amt, ok := sdk.NewIntFromString(out[len(out)-2])
+	amt, ok := sdkmath.NewIntFromString(out[len(out)-2])
 	if !ok {
 		panic("fail to convert")
 	}

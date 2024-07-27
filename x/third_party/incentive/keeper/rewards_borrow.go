@@ -59,7 +59,7 @@ func (k Keeper) getJoltBorrowTotalSourceShares(ctx context.Context, denom string
 	}
 
 	// return borrowed/factor to get the "pre interest" value of the current total borrowed
-	return sdk.NewDecFromInt(totalBorrowed).Quo(interestFactor)
+	return sdkmath.LegacyNewDecFromInt(totalBorrowed).Quo(interestFactor)
 }
 
 // InitializeJoltBorrowReward initializes the borrow-side of a jolt liquidity provider claim
@@ -191,7 +191,7 @@ func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, so
 	for _, newIndex := range newIndexes {
 		oldFactor, found := oldIndexes.Get(newIndex.CollateralType)
 		if !found {
-			oldFactor = sdk.ZeroDec()
+			oldFactor = sdkmath.LegacyZeroDec()
 		}
 
 		rewardAmount, err := k.CalculateSingleReward(oldFactor, newIndex.RewardFactor, sourceShares)

@@ -634,7 +634,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 				expectedRewardIndex.RewardFactor = expectedRewardIndex.RewardFactor.MulInt64(1000000000000)
 				currRewardIndex, found := multiRewardIndex.RewardIndexes.GetRewardIndex(expectedRewardIndex.CollateralType)
 				suite.Require().True(found)
-				suite.Require().Equal(sdk.ZeroDec(), currRewardIndex.RewardFactor)
+				suite.Require().Equal(sdkmath.LegacyZeroDec(), currRewardIndex.RewardFactor)
 			}
 
 			// Run accumulator at several intervals
@@ -1025,7 +1025,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 			for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
 				currRewardIndex, found := multiRewardIndexPre.RewardIndexes.GetRewardIndex(expectedRewardIndex.CollateralType)
 				suite.Require().True(found)
-				suite.Require().Equal(sdk.ZeroDec(), currRewardIndex.RewardFactor)
+				suite.Require().Equal(sdkmath.LegacyZeroDec(), currRewardIndex.RewardFactor)
 			}
 
 			// Check that the synced claim held in memory has properly simulated syncing

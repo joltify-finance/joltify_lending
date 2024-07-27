@@ -321,10 +321,10 @@ func (builder JoltDepositBuilder) WithSourceShares(denom string, shares int64) J
 	}
 
 	// pick arbitrary factor
-	factor := sdk.MustNewDecFromStr("2")
+	factor := sdkmath.LegacyMustNewDecFromStr("2")
 
 	// Calculate deposit amount that would equal the requested source shares given the above factor.
-	amt := sdk.NewInt(shares).Mul(factor.RoundInt())
+	amt := sdkmath.NewInt(shares).Mul(factor.RoundInt())
 
 	builder.Amount = builder.Amount.Add(sdk.NewCoin(denom, amt))
 	builder.Index = builder.Index.SetInterestFactor(denom, factor)

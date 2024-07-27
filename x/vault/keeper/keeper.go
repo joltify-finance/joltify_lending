@@ -1,18 +1,18 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
-	"github.com/cometbft/cometbft/libs/log"
-
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 	// this line is used by starport scaffolding # ibc/keeper/import
 )
@@ -58,6 +58,7 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) Logger(ctx context.Context) log.Logger {
+func (k Keeper) Logger(rctx context.Context) log.Logger {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }

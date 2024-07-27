@@ -1,8 +1,9 @@
 package types
 
 import (
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"time"
+
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
@@ -389,7 +390,7 @@ func (msg MsgSwapForExactTokens) ValidateBasic() error {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil || slippage.IsNegative() {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}

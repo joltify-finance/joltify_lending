@@ -27,7 +27,7 @@ func (k Keeper) doUpdateLiquidationInfo(ctx context.Context, el string, amountFr
 
 	lastBorrow := borrowInterest.BorrowDetails[len(borrowInterest.BorrowDetails)-1].BorrowedAmount
 	if paidAmount.IsZero() {
-		paidAmount = sdk.NewDecFromInt(amountFromLiquidator.Amount).Mul(sdk.NewDecFromInt(lastBorrow.Amount)).Quo(sdk.NewDecFromInt(totalPoolBorrowed.Amount)).TruncateInt()
+		paidAmount = sdkmath.LegacyNewDecFromInt(amountFromLiquidator.Amount).Mul(sdkmath.LegacyNewDecFromInt(lastBorrow.Amount)).Quo(sdkmath.LegacyNewDecFromInt(totalPoolBorrowed.Amount)).TruncateInt()
 	}
 
 	if borrowInterest.LiquidationItems == nil {

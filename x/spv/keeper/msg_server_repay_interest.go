@@ -35,13 +35,13 @@ func (k Keeper) updateInterestData(ctx context.Context, interestData *types.Borr
 			latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 			// we need to pay the whole month
 			freqRatio := interestData.MonthlyRatio
-			paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
+			paymentAmount := freqRatio.Mul(sdkmath.LegacyNewDecFromInt(lastBorrow.Amount)).TruncateInt()
 			if paymentAmount.IsZero() {
 				return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdkmath.ZeroInt()}, time.Time{}, nil
 			}
 
 			paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
-			reservedAmount := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+			reservedAmount := sdkmath.LegacyNewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
 			toInvestors := paymentAmountUsd.Sub(reservedAmount)
 			pReserve, found := k.GetReserve(ctx, denom)
 			if !found {
@@ -75,7 +75,7 @@ func (k Keeper) updateInterestData(ctx context.Context, interestData *types.Borr
 
 		usdInterest := interest.Mul(exchangeRatio)
 		paymentAmountUsd := usdInterest.MulInt(lastBorrow.Amount).TruncateInt()
-		reservedAmountUsd := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+		reservedAmountUsd := sdkmath.LegacyNewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
 		toInvestors := paymentAmountUsd.Sub(reservedAmountUsd)
 
 		pReserve, found := k.GetReserve(ctx, denom)
@@ -164,14 +164,14 @@ func (k Keeper) getAllInterestToBePaid(ctx context.Context, poolInfo *types.Pool
 func (k msgServer) calculatePaymentMonth(ctx context.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdkmath.LegacyDec, error) {
 	paymentAmount, err := k.calculateTotalDueInterest(ctx, poolInfo)
 	if err != nil {
-		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.LegacyZeroDec(), err
 	}
 	if paymentAmount.IsZero() {
-		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), errors.New("no interest to be paid")
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.LegacyZeroDec(), errors.New("no interest to be paid")
 	}
 	usdEachMonth, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, marketId, paymentAmount)
 	if err != nil {
-		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.LegacyZeroDec(), err
 	}
 	counter := totalPaid.Quo(usdEachMonth)
 	return int32(counter.Int64()), usdEachMonth.Mul(counter), usdEachMonth, ratio, nil

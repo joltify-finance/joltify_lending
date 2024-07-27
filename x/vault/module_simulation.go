@@ -55,12 +55,12 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 	}
 
 	ss1 := make(map[string]types.Proposals)
-	mockCoin := sdk.Coin{Denom: "aaa", Amount: sdk.NewIntFromUint64(3)}
+	mockCoin := sdk.Coin{Denom: "aaa", Amount: sdkmath.NewIntFromUint64(3)}
 	a1 := types.Entity{Address: s1, Feecoin: []sdk.Coin{mockCoin}}
 	ss1["00"] = types.Proposals{Entry: []*types.Entity{&a1}}
 
 	ss2 := make(map[string]types.Proposals)
-	mockCoin2 := sdk.Coin{Denom: "aaa", Amount: sdk.NewIntFromUint64(4)}
+	mockCoin2 := sdk.Coin{Denom: "aaa", Amount: sdkmath.NewIntFromUint64(4)}
 	a2 := types.Entity{Address: s2, Feecoin: []sdk.Coin{mockCoin2}}
 	ss2["11"] = types.Proposals{Entry: []*types.Entity{&a2}}
 

@@ -33,8 +33,8 @@ import (
 func networkPrepare(t *testing.T, maxValidator uint32, v *keyring.Record) *network.Network {
 	cfg := localnetwork.DefaultConfig()
 	cfg.MinGasPrices = "0stake"
-	cfg.BondedTokens = sdk.NewInt(10000000000000000)
-	cfg.StakingTokens = sdk.NewInt(100000000000000000)
+	cfg.BondedTokens = sdkmath.NewInt(10000000000000000)
+	cfg.StakingTokens = sdkmath.NewInt(100000000000000000)
 	state := types.GenesisState{}
 	stateStaking := stakingtypes.GenesisState{}
 	stateBank := banktypes.GenesisState{}
@@ -74,7 +74,7 @@ func networkPrepare(t *testing.T, maxValidator uint32, v *keyring.Record) *netwo
 
 	authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
 
-	stateBank.Balances = []banktypes.Balance{{Address: addr.String(), Coins: sdk.Coins{sdk.NewCoin("stake", sdk.NewInt(100000))}}}
+	stateBank.Balances = []banktypes.Balance{{Address: addr.String(), Coins: sdk.Coins{sdk.NewCoin("stake", sdkmath.NewInt(100000))}}}
 	bankBuf, err := cfg.Codec.MarshalJSON(&stateBank)
 	require.NoError(t, err)
 

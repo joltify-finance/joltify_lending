@@ -1,16 +1,19 @@
 package keeper
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
 // SetStoreFeeAmount set a specific outboundTx in the store from its index
-func (k Keeper) SetStoreFeeAmount(ctx context.Context, fees sdk.Coins) {
+func (k Keeper) SetStoreFeeAmount(rctx context.Context, fees sdk.Coins) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FeeStoreKey))
 	feeBytes, err := fees.MarshalJSON()
 	if err != nil {
@@ -29,10 +32,11 @@ func (k Keeper) GetFeeAmount(
 	return sdk.NewCoin(denom, amount), true
 }
 
-func (k Keeper) LegacyGetAllFeeAMountAndDelete(ctx context.Context) sdk.Coins {
+func (k Keeper) LegacyGetAllFeeAMountAndDelete(rctx context.Context) sdk.Coins {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	var fees sdk.Coins
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FeeStoreKey))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	var deleteDenom []string
 	for ; iterator.Valid(); iterator.Next() {
@@ -52,7 +56,8 @@ func (k Keeper) LegacyGetAllFeeAMountAndDelete(ctx context.Context) sdk.Coins {
 }
 
 // GetAllFeeAmount returns all outboundTx
-func (k Keeper) GetAllFeeAmount(ctx context.Context) sdk.Coins {
+func (k Keeper) GetAllFeeAmount(rctx context.Context) sdk.Coins {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FeeStoreKey))
 	result := store.Get(types.OutboundTxKey("-fee"))
 	var fees sdk.Coins

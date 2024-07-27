@@ -78,15 +78,15 @@ func (suite *ParamTestSuite) TestParamValidation() {
 					{
 						Denom: "jolt",
 						Multipliers: types2.Multipliers{
-							types2.NewMultiplier("small", 1, sdk.MustNewDecFromStr("0.25")),
-							types2.NewMultiplier("large", 12, sdk.MustNewDecFromStr("1.0")),
+							types2.NewMultiplier("small", 1, sdkmath.LegacyMustNewDecFromStr("0.25")),
+							types2.NewMultiplier("large", 12, sdkmath.LegacyMustNewDecFromStr("1.0")),
 						},
 					},
 					{
 						Denom: "ujolt",
 						Multipliers: types2.Multipliers{
-							types2.NewMultiplier("small", 1, sdk.MustNewDecFromStr("0.2")),
-							types2.NewMultiplier("large", 12, sdk.MustNewDecFromStr("1.0")),
+							types2.NewMultiplier("small", 1, sdkmath.LegacyMustNewDecFromStr("0.2")),
+							types2.NewMultiplier("large", 12, sdkmath.LegacyMustNewDecFromStr("1.0")),
 						},
 					},
 				},
@@ -133,7 +133,7 @@ func (suite *ParamTestSuite) TestParamValidation() {
 					{
 						Denom: "jolt",
 						Multipliers: types2.Multipliers{
-							types2.NewMultiplier("small", -9999, sdk.MustNewDecFromStr("0.25")),
+							types2.NewMultiplier("small", -9999, sdkmath.LegacyMustNewDecFromStr("0.25")),
 						},
 					},
 				},

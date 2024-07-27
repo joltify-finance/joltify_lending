@@ -100,7 +100,7 @@ func (suite *IntegrationTester) DeliverMsgCreateValidator(address sdk.ValAddress
 		ed25519.GenPrivKey().PubKey(),
 		selfDelegation,
 		stakingtypes.Description{},
-		stakingtypes.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+		stakingtypes.NewCommissionRates(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
 		sdk.NewInt(1_000_000),
 	)
 	if err != nil {

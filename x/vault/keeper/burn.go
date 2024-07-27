@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"html"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -83,7 +84,8 @@ func ProcessHistory(historyLength int32, newItem *types.HistoricalAmount, coinsQ
 	return coinsQuota
 }
 
-func (k Keeper) ProcessQuota(ctx context.Context, totalCoins sdk.Coins) {
+func (k Keeper) ProcessQuota(rctx context.Context, totalCoins sdk.Coins) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	quotaData, found := k.GetQuotaData(ctx)
 	if !found {
 		panic("this item should be always be available")
@@ -98,8 +100,7 @@ func (k Keeper) ProcessQuota(ctx context.Context, totalCoins sdk.Coins) {
 
 func (k Keeper) ProcessAccountLeft(ctx context.Context) {
 	req := types.QueryLatestPoolRequest{}
-	wctx := sdk.WrapSDKContext(ctx)
-	ret, err := k.GetLastPool(wctx, &req)
+	ret, err := k.GetLastPool(ctx, &req)
 	if err != nil {
 		k.Logger(ctx).Error("fail to get the last pool, skip", "err=", err)
 		return
@@ -123,7 +124,7 @@ func (k Keeper) ProcessAccountLeft(ctx context.Context) {
 	if len(ret.Pools) != 0 {
 		transferred := k.sendFeesToValidators(ctx, ret.Pools[0])
 		if !transferred {
-			ctx.Logger().Info("vault", "send Fee to validator", "not enough token to be paid as fee")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("vault", "send Fee to validator", "not enough token to be paid as fee")
 		}
 	}
 

@@ -55,14 +55,14 @@ func testParams() types.Params {
 func TestGenesis(t *testing.T) {
 	ht := types.HistoricalAmount{
 		100,
-		sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(100))),
+		sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(100))),
 		1,
 	}
 
 	cq := types.CoinsQuota{
 		ModuleName: "testmodule",
 		History:    []*types.HistoricalAmount{&ht},
-		CoinsSum:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(100))),
+		CoinsSum:   sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(100))),
 	}
 
 	genesisState := types.GenesisState{

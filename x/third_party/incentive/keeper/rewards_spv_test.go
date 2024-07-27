@@ -313,7 +313,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 
 	suite.keeper.AfterSPVInterestPaid(suite.ctx, rewardIndex, interestPaid)
 
-	reserveAmt := sdk.NewDecFromInt(interestPaid).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	reserveAmt := sdkmath.LegacyNewDecFromInt(interestPaid).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	paymentToInvestor := interestPaid.Sub(reserveAmt)
 
 	var allincentives []sdk.Coins
@@ -321,10 +321,10 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 
 	allps := []types.PaymentItem{p1, p2, p3, p4, p5}
 	for _, el := range allps {
-		ratio := sdk.NewDecFromInt(el.PaymentAmount.Amount).Quo(sdk.NewDecFromInt(paymentToInvestor))
+		ratio := sdkmath.LegacyNewDecFromInt(el.PaymentAmount.Amount).Quo(sdkmath.LegacyNewDecFromInt(paymentToInvestor))
 		var incentiveCoins sdk.Coins
 		for _, eachCoin := range reward.PaymentAmount {
-			amt := sdk.NewDecFromInt(eachCoin.Amount).Mul(ratio).TruncateInt()
+			amt := sdkmath.LegacyNewDecFromInt(eachCoin.Amount).Mul(ratio).TruncateInt()
 			incentiveCoins = incentiveCoins.Add(sdk.NewCoin(eachCoin.Denom, amt))
 		}
 		allincentives = append(allincentives, incentiveCoins)
@@ -361,7 +361,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 
 	suite.keeper.AfterSPVInterestPaid(suite.ctx, rewardIndex, interestPaid)
 
-	reserveAmt = sdk.NewDecFromInt(interestPaid).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+	reserveAmt = sdkmath.LegacyNewDecFromInt(interestPaid).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	paymentToInvestor = interestPaid.Sub(reserveAmt)
 
 	for index, el := range ids {
@@ -448,7 +448,7 @@ func (suite *SPVRewardsTests) TestClaimIncentives() {
 	suite.Require().NoError(err)
 
 	circleNum := 0
-	rewards := calcualteInterest([]sdkmath.Int{sdk.NewInt(2e17), sdk.NewInt(3e17)}, allIncentivepayments, circleNum)
+	rewards := calcualteInterest([]sdkmath.Int{sdk.NewInt(2e17), sdkmath.NewInt(3e17)}, allIncentivepayments, circleNum)
 	suite.Require().True(c.IsEqual(rewards))
 
 	c2, err := keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
@@ -484,7 +484,7 @@ func (suite *SPVRewardsTests) TestClaimIncentives() {
 	c, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
 	suite.Require().NoError(err)
 
-	rewards = calcualteInterest([]sdkmath.Int{sdk.NewInt(2e17), sdk.NewInt(3e17)}, new2payments, circleNum)
+	rewards = calcualteInterest([]sdkmath.Int{sdk.NewInt(2e17), sdkmath.NewInt(3e17)}, new2payments, circleNum)
 	suite.Require().True(c.IsEqual(rewards))
 
 	c, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)
@@ -514,7 +514,7 @@ func calcualteInterest(nftBorrow []sdkmath.Int, incentivePayments []*types.Incen
 
 			var incentiveCoins sdk.Coins
 			for _, eachCoin := range incentivePaymentAmount {
-				incentiveAmt := sdk.NewDecFromInt(eachCoin.Amount).Mul(sdk.NewDecFromInt(eachNFTBorrow)).Quo(sdk.NewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
+				incentiveAmt := sdkmath.LegacyNewDecFromInt(eachCoin.Amount).Mul(sdkmath.LegacyNewDecFromInt(eachNFTBorrow)).Quo(sdkmath.LegacyNewDecFromInt(classBorrowedAmount.Amount)).TruncateInt()
 				incentive := sdk.NewCoin(eachCoin.Denom, incentiveAmt)
 				incentiveCoins = incentiveCoins.Add(incentive)
 			}

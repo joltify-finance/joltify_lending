@@ -1,20 +1,25 @@
 package keeper
 
 import (
+	"context"
+
 	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/vault/types"
 )
 
 // SetCreatePool set a specific createPool in the store from its index
-func (k Keeper) SetCreatePool(ctx context.Context, createPool types.CreatePool) {
+func (k Keeper) SetCreatePool(rctx context.Context, createPool types.CreatePool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.CreatePoolKey))
 	b := k.cdc.MustMarshal(&createPool)
 	store.Set(types.KeyPrefix(createPool.BlockHeight), b)
 }
 
 // GenSetLastTwoPool the first is the newest
-func (k Keeper) GenSetLastTwoPool(ctx context.Context, lastPool []*types.CreatePool) {
+func (k Keeper) GenSetLastTwoPool(rctx context.Context, lastPool []*types.CreatePool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.LastTwoPoolKey))
 	b0 := k.cdc.MustMarshal(lastPool[0])
 	b1 := k.cdc.MustMarshal(lastPool[1])
@@ -23,7 +28,8 @@ func (k Keeper) GenSetLastTwoPool(ctx context.Context, lastPool []*types.CreateP
 }
 
 // UpdateLastTwoPool updates the last two pool
-func (k Keeper) UpdateLastTwoPool(ctx context.Context, latestPool types.CreatePool) {
+func (k Keeper) UpdateLastTwoPool(rctx context.Context, latestPool types.CreatePool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.LastTwoPoolKey))
 
 	c := sdk.WrapSDKContext(ctx)
@@ -59,7 +65,8 @@ func (k Keeper) UpdateLastTwoPool(ctx context.Context, latestPool types.CreatePo
 	store.Set(types.KeyPrefix("new"), b)
 }
 
-func (k Keeper) GetLatestTwoPool(ctx context.Context) ([]*types.CreatePool, bool) {
+func (k Keeper) GetLatestTwoPool(rctx context.Context) ([]*types.CreatePool, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.LastTwoPoolKey))
 	previous := store.Get(types.KeyPrefix("old"))
 	latest := store.Get(types.KeyPrefix("new"))
@@ -79,7 +86,8 @@ func (k Keeper) GetLatestTwoPool(ctx context.Context) ([]*types.CreatePool, bool
 }
 
 // GetCreatePool returns a createPool from its index
-func (k Keeper) GetCreatePool(ctx context.Context, index string) (val types.CreatePool, found bool) {
+func (k Keeper) GetCreatePool(rctx context.Context, index string) (val types.CreatePool, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.CreatePoolKey))
 
 	b := store.Get(types.KeyPrefix(index))
@@ -92,15 +100,17 @@ func (k Keeper) GetCreatePool(ctx context.Context, index string) (val types.Crea
 }
 
 // RemoveCreatePool removes a createPool from the store
-func (k Keeper) RemoveCreatePool(ctx context.Context, index string) {
+func (k Keeper) RemoveCreatePool(rctx context.Context, index string) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.CreatePoolKey))
 	store.Delete(types.KeyPrefix(index))
 }
 
 // GetAllCreatePool returns all createPool
-func (k Keeper) GetAllCreatePool(ctx context.Context) (list []types.CreatePool) {
+func (k Keeper) GetAllCreatePool(rctx context.Context) (list []types.CreatePool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.CreatePoolKey))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 
 	for ; iterator.Valid(); iterator.Next() {
 		var val types.CreatePool

@@ -268,7 +268,7 @@ func (k Keeper) HandlePartialPrincipalPayment(ctx context.Context, poolInfo *typ
 		}
 		depositor.LinkedNFT = []string{}
 		depositor.PendingInterest = depositor.PendingInterest.AddAmount(interest)
-		usdWithdrawal := sdk.NewDecFromInt(depositor.LockedAmount.Amount).Mul(exchangeRatio).TruncateInt()
+		usdWithdrawal := sdkmath.LegacyNewDecFromInt(depositor.LockedAmount.Amount).Mul(exchangeRatio).TruncateInt()
 		total = total.Add(usdWithdrawal)
 		depositor.WithdrawalAmount = depositor.WithdrawalAmount.AddAmount(usdWithdrawal)
 		depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdkmath.ZeroInt())

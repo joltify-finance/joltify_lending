@@ -29,12 +29,12 @@ func init() {
 	sdk.GetConfig().SetBech32PrefixForAccount("joltify", "joltify"+sdk.PrefixPublic)
 }
 
-func d(amount string) sdkmath.LegacyDec     { return sdk.MustNewDecFromStr(amount) }
-func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
-func i(n int64) sdkmath.Int                 { return sdk.NewInt(n) }
+func d(amount string) sdkmath.LegacyDec     { return sdkmath.LegacyMustNewDecFromStr(amount) }
+func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
+func i(n int64) sdkmath.Int                 { return sdkmath.NewInt(n) }
 func is(ns ...int64) (is []sdkmath.Int) {
 	for _, n := range ns {
-		is = append(is, sdk.NewInt(n))
+		is = append(is, sdkmath.NewInt(n))
 	}
 	return
 }
@@ -58,13 +58,13 @@ func TestNewWeightedAddresses(t *testing.T) {
 		{
 			"normal",
 			[]sdk.AccAddress{addr1, addr2},
-			[]sdkmath.Int{sdk.NewInt(6), sdk.NewInt(8)},
+			[]sdkmath.Int{sdk.NewInt(6), sdkmath.NewInt(8)},
 			true,
 		},
 		{
 			"empty address",
 			[]sdk.AccAddress{nil, nil},
-			[]sdkmath.Int{sdk.NewInt(6), sdk.NewInt(8)},
+			[]sdkmath.Int{sdk.NewInt(6), sdkmath.NewInt(8)},
 			false,
 		},
 		{
@@ -143,7 +143,7 @@ func TestDebtAuctionValidate(t *testing.T) {
 					MaxEndTime:      now,
 					HasReceivedBids: true,
 				},
-				CorrespondingDebt: sdk.Coin{Denom: "", Amount: sdk.NewInt(1)},
+				CorrespondingDebt: sdk.Coin{Denom: "", Amount: sdkmath.NewInt(1)},
 			},
 			false,
 		},
@@ -207,7 +207,7 @@ func TestCollateralAuctionValidate(t *testing.T) {
 					MaxEndTime:      now,
 					HasReceivedBids: true,
 				},
-				CorrespondingDebt: sdk.Coin{Denom: "DENOM", Amount: sdk.NewInt(1)},
+				CorrespondingDebt: sdk.Coin{Denom: "DENOM", Amount: sdkmath.NewInt(1)},
 			},
 			false,
 		},
@@ -225,7 +225,7 @@ func TestCollateralAuctionValidate(t *testing.T) {
 					HasReceivedBids: true,
 				},
 				CorrespondingDebt: c("joltify", 1),
-				MaxBid:            sdk.Coin{Denom: "DENOM", Amount: sdk.NewInt(1)},
+				MaxBid:            sdk.Coin{Denom: "DENOM", Amount: sdkmath.NewInt(1)},
 			},
 			false,
 		},
