@@ -164,7 +164,7 @@ func (am AppModule) EndBlock(ctx context.Context) []abci.ValidatorUpdate {
 // }
 
 // // RegisterStoreDecoder registers a decoder for price feed module's types
-// func (AppModuleBasic) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+// func (AppModuleBasic) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 // 	sdr[StoreKey] = simulation.DecodeStore
 // }
 

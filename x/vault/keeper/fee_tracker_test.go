@@ -26,5 +26,5 @@ func TestSetStoreFeeAmount(t *testing.T) {
 	feesGet[0].Amount = sdkmath.NewInt(2222)
 	app.VaultKeeper.SetStoreFeeAmount(ctx, feesGet)
 	feesGet = app.VaultKeeper.GetAllFeeAmount(ctx)
-	assert.Equal(t, true, feesGet[0].Amount.Equal(sdk.NewInt(2222)))
+	assert.Equal(t, true, feesGet[0].Amount.Equal(sdkmath.NewInt(2222)))
 }

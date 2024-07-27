@@ -448,7 +448,7 @@ func (suite *SPVRewardsTests) TestClaimIncentives() {
 	suite.Require().NoError(err)
 
 	circleNum := 0
-	rewards := calcualteInterest([]sdkmath.Int{sdk.NewInt(2e17), sdkmath.NewInt(3e17)}, allIncentivepayments, circleNum)
+	rewards := calcualteInterest([]sdkmath.Int{sdkmath.NewInt(2e17), sdkmath.NewInt(3e17)}, allIncentivepayments, circleNum)
 	suite.Require().True(c.IsEqual(rewards))
 
 	c2, err := keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
@@ -484,7 +484,7 @@ func (suite *SPVRewardsTests) TestClaimIncentives() {
 	c, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
 	suite.Require().NoError(err)
 
-	rewards = calcualteInterest([]sdkmath.Int{sdk.NewInt(2e17), sdkmath.NewInt(3e17)}, new2payments, circleNum)
+	rewards = calcualteInterest([]sdkmath.Int{sdkmath.NewInt(2e17), sdkmath.NewInt(3e17)}, new2payments, circleNum)
 	suite.Require().True(c.IsEqual(rewards))
 
 	c, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)

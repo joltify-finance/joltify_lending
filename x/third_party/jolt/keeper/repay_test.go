@@ -232,14 +232,14 @@ func (suite *KeeperTestSuite) TestRepay() {
 					types3.NewMoneyMarket("usdx",
 						types3.NewBorrowLimit(false, sdk.NewDec(100000000*UsdxCf), sdkmath.LegacyMustNewDecFromStr("1")), // Borrow Limit
 						"usdx:usd",                               // Market ID
-						sdk.NewInt(UsdxCf),                       // Conversion Factor
+						sdkmath.NewInt(UsdxCf),                   // Conversion Factor
 						model,                                    // Interest Rate Model
 						sdkmath.LegacyMustNewDecFromStr("0.05"),  // Reserve Factor
 						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 					types3.NewMoneyMarket("ujolt",
 						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",                            // Market ID
-						sdk.NewInt(JoltCf),                       // Conversion Factor
+						sdkmath.NewInt(JoltCf),                   // Conversion Factor
 						model,                                    // Interest Rate Model
 						sdkmath.LegacyMustNewDecFromStr("0.05"),  // Reserve Factor
 						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent

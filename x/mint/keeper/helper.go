@@ -2,7 +2,6 @@ package keeper
 
 import (
 	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const scalingFactor = 1e18
@@ -11,7 +10,7 @@ const scalingFactor = 1e18
 // which is equal to: (per-second interest rate * number of seconds elapsed)
 // Will return 1.000x, multiply by principal to get new principal with added interest
 func CalculateInterestFactor(perSecondInterestRate sdkmath.LegacyDec, secondsElapsed sdkmath.Int) sdkmath.LegacyDec {
-	scalingFactorUint := sdk.NewUint(uint64(scalingFactor))
+	scalingFactorUint := sdkmath.NewUint(uint64(scalingFactor))
 	scalingFactorInt := sdkmath.NewInt(int64(scalingFactor))
 
 	// Convert per-second interest rate to a uint scaled by 1e18
@@ -22,5 +21,5 @@ func CalculateInterestFactor(perSecondInterestRate sdkmath.LegacyDec, secondsEla
 	interestFactorMantissa := sdkmath.RelativePow(interestMantissa, secondsElapsedUint, scalingFactorUint)
 
 	// Convert interest factor to an unscaled sdkmath.LegacyDec
-	return sdk.NewDecFromBigInt(interestFactorMantissa.BigInt()).QuoInt(scalingFactorInt)
+	return sdkmath.LegacyNewDecFromBigInt(interestFactorMantissa.BigInt()).QuoInt(scalingFactorInt)
 }

@@ -1,14 +1,15 @@
 package ibc_rate_limit
 
 import (
+	"context"
 	"encoding/json"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/ibc-rate-limit/types"
 
 	errorsmod "cosmossdk.io/errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 
 	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
@@ -32,7 +33,7 @@ func NewIBCMiddleware(app porttypes.IBCModule, ics4 *ICS4Wrapper) IBCMiddleware 
 }
 
 // OnChanOpenInit implements the IBCMiddleware interface
-func (im *IBCMiddleware) OnChanOpenInit(ctx context.Context,
+func (im *IBCMiddleware) OnChanOpenInit(ctx sdk.Context,
 	order channeltypes.Order,
 	connectionHops []string,
 	portID string,
@@ -55,7 +56,7 @@ func (im *IBCMiddleware) OnChanOpenInit(ctx context.Context,
 
 // OnChanOpenTry implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnChanOpenTry(
-	ctx context.Context,
+	ctx sdk.Context,
 	order channeltypes.Order,
 	connectionHops []string,
 	portID,
@@ -69,7 +70,7 @@ func (im *IBCMiddleware) OnChanOpenTry(
 
 // OnChanOpenAck implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnChanOpenAck(
-	ctx context.Context,
+	ctx sdk.Context,
 	portID,
 	channelID string,
 	counterpartyChannelID string,
@@ -81,7 +82,7 @@ func (im *IBCMiddleware) OnChanOpenAck(
 
 // OnChanOpenConfirm implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnChanOpenConfirm(
-	ctx context.Context,
+	ctx sdk.Context,
 	portID,
 	channelID string,
 ) error {
@@ -91,7 +92,7 @@ func (im *IBCMiddleware) OnChanOpenConfirm(
 
 // OnChanCloseInit implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnChanCloseInit(
-	ctx context.Context,
+	ctx sdk.Context,
 	portID,
 	channelID string,
 ) error {
@@ -101,7 +102,7 @@ func (im *IBCMiddleware) OnChanCloseInit(
 
 // OnChanCloseConfirm implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnChanCloseConfirm(
-	ctx context.Context,
+	ctx sdk.Context,
 	portID,
 	channelID string,
 ) error {
@@ -111,7 +112,7 @@ func (im *IBCMiddleware) OnChanCloseConfirm(
 
 // OnRecvPacket implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnRecvPacket(
-	ctx context.Context,
+	ctx sdk.Context,
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) exported.Acknowledgement {
@@ -121,7 +122,7 @@ func (im *IBCMiddleware) OnRecvPacket(
 
 // OnAcknowledgementPacket implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnAcknowledgementPacket(
-	ctx context.Context,
+	ctx sdk.Context,
 	packet channeltypes.Packet,
 	acknowledgement []byte,
 	relayer sdk.AccAddress,
@@ -131,7 +132,7 @@ func (im *IBCMiddleware) OnAcknowledgementPacket(
 		if packet.SourcePort == types.PORTTYPE {
 			im.ics4Middleware.RevokeQuotaHistory(ctx, packet.GetSequence())
 		}
-		return errorsmod.Wrapf(errorsmod.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet acknowledgement: %v", err)
+		return errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet acknowledgement: %v", err)
 	}
 
 	_, ok := ack.Response.(*channeltypes.Acknowledgement_Error)
@@ -146,7 +147,7 @@ func (im *IBCMiddleware) OnAcknowledgementPacket(
 
 // OnTimeoutPacket implements the IBCMiddleware interface
 func (im *IBCMiddleware) OnTimeoutPacket(
-	ctx context.Context,
+	ctx sdk.Context,
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) error {
@@ -170,7 +171,7 @@ func (im *IBCMiddleware) RevertSentPacket(
 
 // SendPacket implements the ICS4 Wrapper interface
 func (im *IBCMiddleware) SendPacket(
-	ctx context.Context,
+	ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	sourcePort, sourceChannel string,
 	timeoutHeight clienttypes.Height,
@@ -182,7 +183,7 @@ func (im *IBCMiddleware) SendPacket(
 
 // WriteAcknowledgement implements the ICS4 Wrapper interface
 func (im *IBCMiddleware) WriteAcknowledgement(
-	ctx context.Context,
+	ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	packet exported.PacketI,
 	ack exported.Acknowledgement,
@@ -190,6 +191,6 @@ func (im *IBCMiddleware) WriteAcknowledgement(
 	return im.ics4Middleware.WriteAcknowledgement(ctx, chanCap, packet, ack)
 }
 
-func (im *IBCMiddleware) GetAppVersion(ctx context.Context, portID, channelID string) (string, bool) {
+func (im *IBCMiddleware) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
 	return im.ics4Middleware.GetAppVersion(ctx, portID, channelID)
 }

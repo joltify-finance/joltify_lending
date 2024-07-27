@@ -53,7 +53,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 					loanToValue,
 				),
 				"joltify:usd",
-				sdk.NewInt(1e6),
+				sdkmath.NewInt(1e6),
 				types2.NewInterestRateModel(
 					sdkmath.LegacyMustNewDecFromStr("0.05"),
 					sdkmath.LegacyMustNewDecFromStr("2"),

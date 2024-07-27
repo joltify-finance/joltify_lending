@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 
+	"cosmossdk.io/log"
 	"cosmossdk.io/store/prefix"
 	storetypes "cosmossdk.io/store/types"
-	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -46,13 +46,14 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) Logger(ctx context.Context) log.Logger {
+func (k Keeper) Logger(rctx context.Context) log.Logger {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k Keeper) SetProject(ctx context.Context, p *types.ProjectInfo) (int32, error) {
+func (k Keeper) SetProject(rctx context.Context, p *types.ProjectInfo) (int32, error) {
 	var currentNum uint32
-	cltx := sdk.UnwrapSDKContext(ctx)
+	ctx := sdk.UnwrapSDKContext(rctx)
 
 	projectStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	projectNum := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoNum))
@@ -75,12 +76,14 @@ func (k Keeper) SetProject(ctx context.Context, p *types.ProjectInfo) (int32, er
 	return int32(currentNum), nil
 }
 
-func (k Keeper) UpdateProject(ctx context.Context, p *types.ProjectInfo) {
+func (k Keeper) UpdateProject(rctx context.Context, p *types.ProjectInfo) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	projectStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	projectStore.Set(types.KeyPrefix(string(p.Index)), k.cdc.MustMarshal(p))
 }
 
-func (k Keeper) GetProject(ctx context.Context, index int32) (val types.ProjectInfo, found bool) {
+func (k Keeper) GetProject(rctx context.Context, index int32) (val types.ProjectInfo, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	bz := store.Get(types.KeyPrefix(string(index)))
 	if bz == nil {
@@ -91,9 +94,10 @@ func (k Keeper) GetProject(ctx context.Context, index int32) (val types.ProjectI
 }
 
 // IteratePool iterates over all deposit objects in the store and performs a callback function
-func (k Keeper) IterateProject(ctx context.Context, cb func(poolInfo types.ProjectInfo) (stop bool)) {
+func (k Keeper) IterateProject(rctx context.Context, cb func(poolInfo types.ProjectInfo) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var projects types.ProjectInfo
@@ -104,7 +108,8 @@ func (k Keeper) IterateProject(ctx context.Context, cb func(poolInfo types.Proje
 	}
 }
 
-func (k Keeper) DeleteProject(ctx context.Context, index int32) {
+func (k Keeper) DeleteProject(rctx context.Context, index int32) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	store.Delete(types.KeyPrefix(string(index)))
 }

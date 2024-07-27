@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -92,7 +93,8 @@ func calculateTotalInterest(ctx context.Context, lendNFTs []string, nftKeeper ty
 	return totalInterestUsd, nil
 }
 
-func calculateTotalOutstandingInterest(ctx context.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdkmath.LegacyDec) (sdkmath.Int, error) {
+func calculateTotalOutstandingInterest(rctx context.Context, lendNFTs []string, nftKeeper types.NFTKeeper, reserve sdkmath.LegacyDec) (sdkmath.Int, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	totalInterestUsd := sdkmath.NewInt(0)
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -140,7 +142,8 @@ func calculateTotalOutstandingInterest(ctx context.Context, lendNFTs []string, n
 
 // tokenamount is the amount of token that to borrow and borrowedfix is the partial of the money we need to borrow
 // rather then all the usable money
-func (k Keeper) doBorrow(ctx context.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int, userPoolLastPaymentTime bool) error {
+func (k Keeper) doBorrow(rctx context.Context, poolInfo *types.PoolInfo, usdTokenAmount sdk.Coin, needBankTransfer bool, depositors []*types.DepositorInfo, borrowedFix sdkmath.Int, userPoolLastPaymentTime bool) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	if usdTokenAmount.IsZero() {
 		return nil
 	}
@@ -260,11 +263,12 @@ func (k Keeper) processBorrow(ctx context.Context, poolInfo *types.PoolInfo, nft
 	return k.processInvestors(ctx, poolInfo, utilization, usdAmount.Amount, localToken.Amount, ratio, nftClass, depositors)
 }
 
-func (k Keeper) doProcessInvestor(ctx context.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, useLastPaymentTime bool) error {
+func (k Keeper) doProcessInvestor(rctx context.Context, depositor *types.DepositorInfo, lockedUsd, lockedLocal sdkmath.Int, nftTemplate nfttypes.NFT, nftClassId string, poolInfo *types.PoolInfo, useLastPaymentTime bool) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	depositor.LockedAmount = depositor.LockedAmount.Add(sdk.NewCoin(poolInfo.BorrowedAmount.Denom, lockedLocal))
 
 	if depositor.WithdrawalAmount.Amount.LT(lockedUsd) {
-		if lockedUsd.Sub(depositor.WithdrawalAmount.Amount).GT(sdk.NewIntFromUint64(5)) {
+		if lockedUsd.Sub(depositor.WithdrawalAmount.Amount).GT(sdkmath.NewIntFromUint64(5)) {
 			panic("withdraw amount is small than the locked amount")
 		}
 		lockedUsd = depositor.WithdrawalAmount.Amount
@@ -301,7 +305,8 @@ func (k Keeper) doProcessInvestor(ctx context.Context, depositor *types.Deposito
 	return nil
 }
 
-func (k Keeper) processInvestors(ctx context.Context, poolInfo *types.PoolInfo, utilization sdkmath.LegacyDec, usdBorrowed, localAmount sdkmath.Int, ratio sdkmath.LegacyDec, nftClass nfttypes.Class, depositors []*types.DepositorInfo) error {
+func (k Keeper) processInvestors(rctx context.Context, poolInfo *types.PoolInfo, utilization sdkmath.LegacyDec, usdBorrowed, localAmount sdkmath.Int, ratio sdkmath.LegacyDec, nftClass nfttypes.Class, depositors []*types.DepositorInfo) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	nftTemplate := nfttypes.NFT{
 		ClassId: nftClass.Id,
 		Uri:     nftClass.Uri,
@@ -405,7 +410,8 @@ func (k Keeper) handleClassLeftover(ctx context.Context, poolinfo types.PoolInfo
 	return leftover
 }
 
-func (k Keeper) cleanupDepositor(ctx context.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
+func (k Keeper) cleanupDepositor(rctx context.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdkmath.Int, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		panic(err)

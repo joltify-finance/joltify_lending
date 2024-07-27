@@ -69,15 +69,17 @@ func (k Keeper) SetJoltLiquidityProviderClaim(ctx context.Context, c types.JoltL
 }
 
 // DeleteJoltLiquidityProviderClaim deletes the claim in the store corresponding to the input address, collateral type, and id
-func (k Keeper) DeleteJoltLiquidityProviderClaim(ctx context.Context, owner sdk.AccAddress) {
+func (k Keeper) DeleteJoltLiquidityProviderClaim(rctx context.Context, owner sdk.AccAddress) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
 	store.Delete(owner)
 }
 
 // IterateJoltLiquidityProviderClaims iterates over all claim  objects in the store and preforms a callback function
-func (k Keeper) IterateJoltLiquidityProviderClaims(ctx context.Context, cb func(c types.JoltLiquidityProviderClaim) (stop bool)) {
+func (k Keeper) IterateJoltLiquidityProviderClaims(rctx context.Context, cb func(c types.JoltLiquidityProviderClaim) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var c types.JoltLiquidityProviderClaim

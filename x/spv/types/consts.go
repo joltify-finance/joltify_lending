@@ -1,5 +1,7 @@
 package types
 
+import sdkmath "cosmossdk.io/math"
+
 const (
 	Maxfreq         = 31536000
 	Minfreq         = 60

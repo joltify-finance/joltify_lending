@@ -19,7 +19,7 @@ func initCometBFTConfig() *cmtcfg.Config {
 
 // initAppConfig helps to override default appConfig template and configs.
 // return "", nil if no custom configuration is required for the application.
-func initAppConfig() (string, interface{}) {
+func initAppConfig(denom string) (string, interface{}) {
 	// The following code snippet is just for reference.
 	type CustomAppConfig struct {
 		serverconfig.Config `mapstructure:",squash"`
@@ -46,6 +46,7 @@ func initAppConfig() (string, interface{}) {
 	customAppConfig := CustomAppConfig{
 		Config: *srvCfg,
 	}
+	srvCfg.MinGasPrices = "0" + denom
 
 	customAppTemplate := serverconfig.DefaultConfigTemplate
 	// Edit the default template file

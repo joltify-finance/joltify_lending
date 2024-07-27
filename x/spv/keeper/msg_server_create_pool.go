@@ -94,8 +94,8 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	}
 
 	adj := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(gap)), nil)
-	minBorrowAmount := targetProject.MinBorrowAmount.Quo(sdk.NewIntFromBigInt(adj))
-	minDeposit := targetProject.MinDepositAmount.Quo(sdk.NewIntFromBigInt(adj))
+	minBorrowAmount := targetProject.MinBorrowAmount.Quo(sdkmath.NewIntFromBigInt(adj))
+	minDeposit := targetProject.MinDepositAmount.Quo(sdkmath.NewIntFromBigInt(adj))
 
 	supportedTokens := pa.BurnThreshold
 

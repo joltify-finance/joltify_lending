@@ -98,13 +98,13 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 
 			total := (accumulate.Sub(sdkmath.LegacyOneDec())).Mul(sdk.NewDec(OneYear / int64(accTime)))
 			gap := total.Sub(tc.args.apy)
-			suite.Require().True(gap.LT(sdkmath.LegacyNewDecFromIntWithPrec(sdk.NewInt(1), 8)))
+			suite.Require().True(gap.LT(sdkmath.LegacyNewDecFromIntWithPrec(sdkmath.NewInt(1), 8)))
 		})
 	}
 }
 
 func checkPayFreqApy(oneYearApy sdkmath.LegacyDec, freqApy sdkmath.LegacyDec, circle uint64) bool {
-	return oneYearApy.Sub(freqApy.MulInt(sdk.NewIntFromUint64(circle))).Abs().LTE(sdk.NewDecWithPrec(1, 8))
+	return oneYearApy.Sub(freqApy.MulInt(sdkmath.NewIntFromUint64(circle))).Abs().LTE(sdk.NewDecWithPrec(1, 8))
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestAmount() {

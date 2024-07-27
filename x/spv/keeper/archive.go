@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	coserrors "cosmossdk.io/errors"
@@ -16,7 +17,8 @@ func (k Keeper) ArchieveDepositor(ctx context.Context, depositor types.Depositor
 }
 
 // ArchiveNFT archives the NFT
-func (k Keeper) ArchiveNFT(ctx context.Context, classID, nftID string) error {
+func (k Keeper) ArchiveNFT(rctx context.Context, classID, nftID string) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	thisNFT, ok := k.NftKeeper.GetNFT(ctx, classID, nftID)
 	if !ok {
 		return coserrors.Wrap(types.ErrNFTNotFound, fmt.Sprintf("classID: %v, nftID: %v", classID, nftID))

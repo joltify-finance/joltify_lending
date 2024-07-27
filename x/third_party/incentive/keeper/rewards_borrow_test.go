@@ -253,7 +253,7 @@ func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
 			suite.Require().NoError(err)
 
 			// User deposits and borrows to increase total borrowed amount
-			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdkmath.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)
@@ -617,7 +617,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 			)
 
 			// User deposits and borrows to increase total borrowed amount
-			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdkmath.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)
@@ -1005,7 +1005,7 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 			suite.Require().NoError(err)
 
 			// User deposits and borrows to increase total borrowed amount
-			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdkmath.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)

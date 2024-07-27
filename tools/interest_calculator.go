@@ -41,7 +41,7 @@ func main() {
 	var a, interestToUser, interestToReserve sdkmath.Int
 	if len(os.Args) == 4 {
 		userAmount := os.Args[3]
-		amount, ok := sdk.NewIntFromString(userAmount)
+		amount, ok := sdkmath.NewIntFromString(userAmount)
 		if !ok {
 			// print the log of the err
 			fmt.Printf("use : cmd apy payfreq(seconds) userAmount(optional)")

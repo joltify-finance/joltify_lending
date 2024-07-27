@@ -64,7 +64,7 @@ func CreateUpgradeHandlerForV020Upgrade(
 		for i := 0; i < 5; i++ {
 			ctx.Logger().Info("we upgrade to v020")
 		}
-		defaultAmount, _ := sdk.NewIntFromString("200000000000000000000")
+		defaultAmount, _ := sdkmath.NewIntFromString("200000000000000000000")
 		spvKeeper.IteratePool(ctx, func(poolInfo spvmoduletypes.PoolInfo) bool {
 			poolInfo.MinDepositAmount = defaultAmount
 			spvKeeper.SetPool(ctx, poolInfo)
@@ -76,7 +76,7 @@ func CreateUpgradeHandlerForV020Upgrade(
 
 		// we give 3000 jolt per day to the pool with 3466b9
 		rewards := incentivetypes.MultiRewardPeriods{
-			incentivetypes.NewMultiRewardPeriod(true, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", ctx.BlockTime().Add(-time.Hour), ctx.BlockTime().Add(time.Hour*24*365), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(34722222222222222)))),
+			incentivetypes.NewMultiRewardPeriod(true, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", ctx.BlockTime().Add(-time.Hour), ctx.BlockTime().Add(time.Hour*24*365), sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(34722222222222222)))),
 		}
 
 		newParamns := incentivetypes.Params{

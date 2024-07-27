@@ -1,13 +1,9 @@
 package client
 
 import (
-	"bufio"
-
 	"github.com/cometbft/cometbft/libs/cli"
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -49,7 +45,8 @@ The pass backend requires GnuPG: https://gnupg.org/
 	addCmd := keys.AddKeyCommand()
 	addCmd.Flags().Bool(ethFlag, false, "use default evm coin-type (60) and key signing algorithm (\"eth_secp256k1\")")
 
-	addCmd.RunE = runAddCmd
+	// todo enable it if you need ethermint key
+	//addCmd.RunE = runAddCmd
 
 	cmd.AddCommand(
 		keys.MnemonicKeyCommand(),
@@ -71,37 +68,37 @@ The pass backend requires GnuPG: https://gnupg.org/
 	return cmd
 }
 
-func runAddCmd(cmd *cobra.Command, args []string) error {
-	buf := bufio.NewReader(cmd.InOrStdin())
-	clientCtx := client.GetClientContextFromCmd(cmd)
-
-	var (
-		kr  keyring.Keyring
-		err error
-	)
-
-	dryRun, _ := cmd.Flags().GetBool(flags.FlagDryRun)
-	if dryRun {
-		kr, err = keyring.New(
-			sdk.KeyringServiceName(),
-			keyring.BackendMemory,
-			clientCtx.KeyringDir,
-			buf,
-			clientCtx.Codec,
-		)
-		clientCtx = clientCtx.WithKeyring(kr)
-	}
-	eth, _ := cmd.Flags().GetBool(ethFlag)
-	if eth {
-		// cmd.Print("eth flag specified: using coin-type 60 and signing algorithm eth_secp256k1\n")
-		// cmd.Flags().Set(flags.FlagKeyAlgorithm, string(hd.EthSecp256k1Type))
-		// cmd.Flags().Set("coin-type", "60")
-		panic("not supported command")
-	}
-
-	if err != nil {
-		return err
-	}
-
-	return clientkeys.RunAddCmd(clientCtx, cmd, args, buf)
-}
+//func runAddCmd(cmd *cobra.Command, args []string) error {
+//	buf := bufio.NewReader(cmd.InOrStdin())
+//	clientCtx := client.GetClientContextFromCmd(cmd)
+//
+//	var (
+//		kr  keyring.Keyring
+//		err error
+//	)
+//
+//	dryRun, _ := cmd.Flags().GetBool(flags.FlagDryRun)
+//	if dryRun {
+//		kr, err = keyring.New(
+//			sdk.KeyringServiceName(),
+//			keyring.BackendMemory,
+//			clientCtx.KeyringDir,
+//			buf,
+//			clientCtx.Codec,
+//		)
+//		clientCtx = clientCtx.WithKeyring(kr)
+//	}
+//	eth, _ := cmd.Flags().GetBool(ethFlag)
+//	if eth {
+//		// cmd.Print("eth flag specified: using coin-type 60 and signing algorithm eth_secp256k1\n")
+//		// cmd.Flags().Set(flags.FlagKeyAlgorithm, string(hd.EthSecp256k1Type))
+//		// cmd.Flags().Set("coin-type", "60")
+//		panic("not supported command")
+//	}
+//
+//	if err != nil {
+//		return err
+//	}
+//
+//	return clientkeys.RunAddCmd(clientCtx, cmd, args, buf)
+//}

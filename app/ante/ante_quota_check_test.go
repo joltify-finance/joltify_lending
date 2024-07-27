@@ -173,7 +173,7 @@ func TestQuotaCheck(t *testing.T) {
 	ret = vd.QuotaCheck(ctx, coins)
 	assert.False(t, ret)
 
-	// tEth := sdk.NewCoins(sdk.NewCoin("aeth", sdk.NewInt(1)))
+	// tEth := sdk.NewCoins(sdk.NewCoin("aeth", sdkmath.NewInt(1)))
 	tx, err := simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,
@@ -196,7 +196,7 @@ func TestQuotaCheck(t *testing.T) {
 	_, err = decorator.AnteHandle(ctx, tx, false, mockAnteHandler)
 	require.Error(t, err)
 
-	t1 := sdk.NewCoins(sdk.NewCoin("abnb", sdk.NewInt(100)))
+	t1 := sdk.NewCoins(sdk.NewCoin("abnb", sdkmath.NewInt(100)))
 	q.CoinsSum = q.CoinsSum.Sub(t1...)
 	vaultKeeper.SetQuotaData(ctx, q)
 	ret = vd.QuotaCheck(ctx, t1)
@@ -224,7 +224,7 @@ func TestQuotaCheck(t *testing.T) {
 	_, err = decorator.AnteHandle(ctx, tx, false, mockAnteHandler)
 	require.NoError(t, err)
 
-	tEth := sdk.NewCoins(sdk.NewCoin("aeth", sdk.NewInt(1)))
+	tEth := sdk.NewCoins(sdk.NewCoin("aeth", sdkmath.NewInt(1)))
 
 	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
@@ -249,7 +249,7 @@ func TestQuotaCheck(t *testing.T) {
 	require.ErrorContainsf(t, err, "has reached the quota target", "quota check")
 
 	//
-	tEthandBnb := sdk.NewCoins(sdk.NewCoin("aeth", sdk.NewInt(1)), t1[0])
+	tEthandBnb := sdk.NewCoins(sdk.NewCoin("aeth", sdkmath.NewInt(1)), t1[0])
 	ret = vd.QuotaCheck(ctx, tEthandBnb)
 	assert.False(t, ret)
 
@@ -275,7 +275,7 @@ func TestQuotaCheck(t *testing.T) {
 	_, err = decorator.AnteHandle(ctx, tx, false, mockAnteHandler)
 	require.ErrorContainsf(t, err, "has reached the quota target", "quota check")
 
-	t2 := t1.Add(sdk.NewCoin("abnb", sdk.NewInt(1)))
+	t2 := t1.Add(sdk.NewCoin("abnb", sdkmath.NewInt(1)))
 	tx, err = simtestutil.GenSignedMockTx(
 		rand.New(rand.NewSource(time.Now().UnixNano())),
 		txConfig,

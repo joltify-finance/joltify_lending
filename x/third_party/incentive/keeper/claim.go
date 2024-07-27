@@ -11,7 +11,8 @@ import (
 
 // ClaimJoltReward pays out funds from a claim to a receiver account.
 // Rewards are removed from a claim and paid out according to the multiplier, which reduces the reward amount in exchange for shorter vesting times.
-func (k Keeper) ClaimJoltReward(ctx context.Context, owner, receiver sdk.AccAddress, denom string, multiplierName string) error {
+func (k Keeper) ClaimJoltReward(rctx context.Context, owner, receiver sdk.AccAddress, denom string, multiplierName string) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	multiplier, found := k.GetMultiplierByDenom(ctx, denom, multiplierName)
 	if !found {
 		return errorsmod.Wrapf(types.ErrInvalidMultiplier, "denom '%s' has no multiplier '%s'", denom, multiplierName)
@@ -62,7 +63,8 @@ func (k Keeper) ClaimJoltReward(ctx context.Context, owner, receiver sdk.AccAddr
 
 // ClaimSwapReward pays out funds from a claim to a receiver account.
 // Rewards are removed from a claim and paid out according to the multiplier, which reduces the reward amount in exchange for shorter vesting times.
-func (k Keeper) ClaimSwapReward(ctx context.Context, owner, receiver sdk.AccAddress, denom string, multiplierName string) error {
+func (k Keeper) ClaimSwapReward(rctx context.Context, owner, receiver sdk.AccAddress, denom string, multiplierName string) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	multiplier, found := k.GetMultiplierByDenom(ctx, denom, multiplierName)
 	if !found {
 		return errorsmod.Wrapf(types.ErrInvalidMultiplier, "denom '%s' has no multiplier '%s'", denom, multiplierName)

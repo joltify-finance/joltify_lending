@@ -7,10 +7,10 @@ import (
 )
 
 // InitGenesis initializes the x/ibc-rate-limit module's state from a provided genesis
-func (i *ICS4Wrapper) InitGenesis(ctx context.Context, genState types.GenesisState) {
+func (i *ICS4Wrapper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 }
 
 // ExportGenesis returns the x/ibc-rate-limit module's exported genesis.
-func (i *ICS4Wrapper) ExportGenesis(ctx context.Context) *types.GenesisState {
+func (i *ICS4Wrapper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 	return &types.GenesisState{}
 }

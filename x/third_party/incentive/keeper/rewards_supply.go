@@ -1,7 +1,10 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -10,7 +13,8 @@ import (
 
 // AccumulateJoltSupplyRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateJoltSupplyRewards(ctx context.Context, rewardPeriod types2.MultiRewardPeriod) {
+func (k Keeper) AccumulateJoltSupplyRewards(rctx context.Context, rewardPeriod types2.MultiRewardPeriod) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	previousAccrualTime, found := k.GetPreviousJoltSupplyRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
 		previousAccrualTime = ctx.BlockTime()
@@ -218,7 +222,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx context.Context, claim types2.Jo
 			if !found {
 				continue
 			}
-			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdkmath.LegacyNewDecFromInt(deposit.Amount.AmountOf(ri.CollateralType))).QuoInt(sdk.NewInt(1e12)).RoundInt()
+			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdkmath.LegacyNewDecFromInt(deposit.Amount.AmountOf(ri.CollateralType))).QuoInt(sdkmath.NewInt(1e12)).RoundInt()
 			if newRewardsAmount.IsZero() || newRewardsAmount.IsNegative() {
 				continue
 			}
@@ -268,7 +272,7 @@ func (k Keeper) SimulateJoltSynchronization(ctx context.Context, claim types2.Jo
 			if !found {
 				continue
 			}
-			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdkmath.LegacyNewDecFromInt(borrow.Amount.AmountOf(ri.CollateralType))).QuoInt(sdk.NewInt(1e12)).TruncateInt()
+			newRewardsAmount := rewardsAccumulatedFactor.Mul(sdkmath.LegacyNewDecFromInt(borrow.Amount.AmountOf(ri.CollateralType))).QuoInt(sdkmath.NewInt(1e12)).TruncateInt()
 			if newRewardsAmount.IsZero() || newRewardsAmount.IsNegative() {
 				continue
 			}

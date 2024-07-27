@@ -85,10 +85,10 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 
 	t.Logf("we have received for one minute %v", received.Amount.String())
 	yearlyMinutes := int64(365 * 24 * 60)
-	actualReceived := received.Amount.Mul(sdk.NewInt(yearlyMinutes))
-	fmt.Printf("gap is %v\n", yearlyWeGet.Sub(actualReceived).Quo(sdk.NewInt(1000000)))
-	gap := yearlyWeGet.Sub(actualReceived).Quo(sdk.NewInt(1000000))
-	assert.True(t, gap.LT(sdk.NewInt(40000)))
+	actualReceived := received.Amount.Mul(sdkmath.NewInt(yearlyMinutes))
+	fmt.Printf("gap is %v\n", yearlyWeGet.Sub(actualReceived).Quo(sdkmath.NewInt(1000000)))
+	gap := yearlyWeGet.Sub(actualReceived).Quo(sdkmath.NewInt(1000000))
+	assert.True(t, gap.LT(sdkmath.NewInt(40000)))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second))
 	k.DoDistribute(ctx)

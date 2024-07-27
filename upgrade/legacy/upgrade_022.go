@@ -63,7 +63,7 @@ func CreateUpgradeHandlerForV022Upgrade(
 			}
 
 			myreward := reward.PaymentAmount[0]
-			amtAdj := myreward.Amount.Quo(sdk.NewInt(1e12))
+			amtAdj := myreward.Amount.Quo(sdkmath.NewInt(1e12))
 
 			if amtAdj.IsZero() {
 				incentiveKeeper.SetSPVInvestorReward(ctx, poolID, data[1], reward.PaymentAmount)

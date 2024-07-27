@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
@@ -11,7 +12,8 @@ import (
 
 // AccumulateSwapRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateSwapRewards(ctx context.Context, rewardPeriod types.MultiRewardPeriod) {
+func (k Keeper) AccumulateSwapRewards(rctx context.Context, rewardPeriod types.MultiRewardPeriod) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	previousAccrualTime, found := k.GetSwapRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
 		previousAccrualTime = ctx.BlockTime()

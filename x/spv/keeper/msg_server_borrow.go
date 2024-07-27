@@ -90,7 +90,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 	allBorrowed = k.getAllBorrowed(ctx, juniorInfo)
 
 	if poolInfo.PoolType == types.PoolInfo_SENIOR && !poolInfo.SeparatePool {
-		if juniorInfo.TargetAmount.Amount.Sub(allBorrowed).GT(sdk.NewIntFromUint64(10)) {
+		if juniorInfo.TargetAmount.Amount.Sub(allBorrowed).GT(sdkmath.NewIntFromUint64(10)) {
 			return nil, coserrors.Wrapf(types.ErrPoolNotActive, "junior pool has not met its target amount, cannot borrow from senior pool current Borrowed Junior %v and target is %v", allBorrowed, juniorInfo.TargetAmount.Amount)
 		}
 	}

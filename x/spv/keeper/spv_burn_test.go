@@ -161,11 +161,11 @@ func (suite *mockBurnSuite) TestBurn() {
 	// now we check the total amount of the pool is 300,000 and 1000,0000, and the borrowed is 0
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(1000000), base))))
+	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(1000000), base))))
 	suite.Require().True(poolInfo.BorrowedAmount.IsZero())
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(300000), base))))
+	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(300000), base))))
 	suite.Require().True(poolInfo.BorrowedAmount.IsZero())
 
 	// now we borrow 200,000 and 800,000
@@ -186,7 +186,7 @@ func (suite *mockBurnSuite) TestBurn() {
 	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
 		PoolIndex: juniorPool,
-		Token:     sdk.Coin{Denom: "ausdc", Amount: sdkmath.NewInt(50000).Mul(sdk.NewIntFromBigInt(base))},
+		Token:     sdk.Coin{Denom: "ausdc", Amount: sdkmath.NewInt(50000).Mul(sdkmath.NewIntFromBigInt(base))},
 	})
 	suite.Require().NoError(err)
 
@@ -195,7 +195,7 @@ func (suite *mockBurnSuite) TestBurn() {
 		PoolIndex: juniorPool,
 		Token: sdk.Coin{
 			Denom:  "ausdc",
-			Amount: sdkmath.NewInt(200000).Mul(sdk.NewIntFromBigInt(base)),
+			Amount: sdkmath.NewInt(200000).Mul(sdkmath.NewIntFromBigInt(base)),
 		},
 	})
 	suite.Require().ErrorContains(err, "no withdraw proposal to be paid: invalid request")
@@ -206,7 +206,7 @@ func (suite *mockBurnSuite) TestBurn() {
 	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
 		Creator:   suite.creator,
 		PoolIndex: seniorPool,
-		Token:     sdk.Coin{Denom: "ausdc", Amount: sdkmath.NewInt(80000).Mul(sdk.NewIntFromBigInt(base))},
+		Token:     sdk.Coin{Denom: "ausdc", Amount: sdkmath.NewInt(80000).Mul(sdkmath.NewIntFromBigInt(base))},
 	})
 	suite.Require().NoError(err)
 
@@ -215,7 +215,7 @@ func (suite *mockBurnSuite) TestBurn() {
 		PoolIndex: seniorPool,
 		Token: sdk.Coin{
 			Denom:  "ausdc",
-			Amount: sdkmath.NewInt(800000).Mul(sdk.NewIntFromBigInt(base)),
+			Amount: sdkmath.NewInt(800000).Mul(sdkmath.NewIntFromBigInt(base)),
 		},
 	})
 	suite.Require().ErrorContains(err, "no withdraw proposal to be paid: invalid request")
@@ -223,10 +223,10 @@ func (suite *mockBurnSuite) TestBurn() {
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(ok)
 	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))))
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
+	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 	poolInfo, ok = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().True(ok)
-	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdk.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(100000), base))))
+	suite.Require().True(poolInfo.UsableAmount.Amount.Equal(sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(100000), base))))
 	suite.Require().True(checkValueEqualWithExchange(poolInfo.BorrowedAmount.Amount, sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))))
 
 	// we simulate 6 seconds for each block

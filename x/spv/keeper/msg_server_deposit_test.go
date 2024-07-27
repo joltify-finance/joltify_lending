@@ -281,7 +281,7 @@ func (suite *DepositTestSuite) TestDepositWithAmountIncorrect() {
 	_, err = suite.app.Deposit(suite.ctx, &msgDepositor)
 	suite.Require().ErrorContains(err, "the deposit amount 149 is less than the minimum deposit amount 150")
 
-	depositAmount = depositAmount.AddAmount(sdk.NewInt(1))
+	depositAmount = depositAmount.AddAmount(sdkmath.NewInt(1))
 	msgDepositor.Token = depositAmount
 
 	_, err = suite.app.Deposit(suite.ctx, &msgDepositor)

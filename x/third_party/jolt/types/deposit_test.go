@@ -20,8 +20,8 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 			name: "multiple denoms are calculated correctly",
 			deposit: types2.Deposit{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
-					sdk.NewInt64Coin("xrpb", 1e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("xrpb", 1e8),
 				),
 				Index: types2.SupplyInterestFactors{
 					{
@@ -35,8 +35,8 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 				},
 			},
 			expect: sdk.NewDecCoins(
-				sdk.NewInt64DecCoin("bnb", 50e8),
-				sdk.NewInt64DecCoin("xrpb", 8e7),
+				sdkmath.NewInt64DecCoin("bnb", 50e8),
+				sdkmath.NewInt64DecCoin("xrpb", 8e7),
 			),
 		},
 		{
@@ -59,7 +59,7 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 			name: "missing indexes return error",
 			deposit: types2.Deposit{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.SupplyInterestFactors{
 					{
@@ -74,7 +74,7 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 			name: "invalid indexes return error",
 			deposit: types2.Deposit{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.SupplyInterestFactors{
 					{
@@ -89,7 +89,7 @@ func TestDeposit_NormalizedDeposit(t *testing.T) {
 			name: "zero indexes return error rather than panicking",
 			deposit: types2.Deposit{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.SupplyInterestFactors{
 					{

@@ -38,7 +38,7 @@ func (k Keeper) UpdateIncentive(ctx context.Context, poolInfo types.PoolInfo) {
 			}
 
 			borrowedDec := sdkmath.LegacyNewDecFromInt(totalBorrowed.Amount)
-			incentiveJolt := borrowedDec.Mul(spy).Mul(sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(types.JOLTPRECISION))).Quo(sdkmath.LegacyNewDecFromInt(conversion)).Quo(joltM.Price)
+			incentiveJolt := borrowedDec.Mul(spy).Mul(sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(types.JOLTPRECISION))).Quo(sdkmath.LegacyNewDecFromInt(conversion)).Quo(joltM.Price)
 
 			incentiveCoin := sdk.NewCoins(sdk.NewCoin("ujolt", incentiveJolt.TruncateInt()))
 

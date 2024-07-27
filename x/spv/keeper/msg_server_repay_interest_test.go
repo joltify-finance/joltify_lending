@@ -189,7 +189,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	}
 
 	period := spvkeeper.OneYear / spvkeeper.OneMonth
-	interestOneMonthWithReserve := sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(2e8)).Mul(samplePool.Apy).QuoInt64(int64(period)).TruncateInt()
+	interestOneMonthWithReserve := sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(2e8)).Mul(samplePool.Apy).QuoInt64(int64(period)).TruncateInt()
 
 	interestOneMonth := interestOneMonthWithReserve.Sub(sdkmath.LegacyNewDecFromInt(interestOneMonthWithReserve).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt())
 
@@ -241,7 +241,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	r := spvkeeper.CalculateInterestRate(poolInfo.Apy, int(poolInfo.PayFreq))
 	interest := r.Power(uint64(delta.Seconds())).Sub(sdkmath.LegacyOneDec())
 
-	paymentAmount := interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
+	paymentAmount := interest.MulInt(sdkmath.NewIntFromUint64(2e8)).TruncateInt()
 	reservedAmount := sdkmath.LegacyNewDecFromInt(paymentAmount).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	toInvestors := paymentAmount.Sub(reservedAmount)
 
@@ -285,7 +285,7 @@ func TestGetAllInterestWithInterestPaid(t *testing.T) {
 	delta = firstBorrowTime.Add(time.Second * spvkeeper.OneMonth * 4).Sub(thirdBorrowTime)
 
 	interest = r.Power(uint64(delta.Seconds())).Sub(sdkmath.LegacyOneDec())
-	paymentAmount = interest.MulInt(sdk.NewIntFromUint64(2e8)).TruncateInt()
+	paymentAmount = interest.MulInt(sdkmath.NewIntFromUint64(2e8)).TruncateInt()
 	reservedAmount = sdkmath.LegacyNewDecFromInt(paymentAmount).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	toInvestors = paymentAmount.Sub(reservedAmount)
 

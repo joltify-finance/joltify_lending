@@ -3,7 +3,7 @@ package types
 import (
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgAddInvestors = "add_investors"
@@ -45,7 +45,7 @@ func (msg *MsgAddInvestors) ValidateBasic() error {
 		return coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 	if len(msg.InvestorID) == 0 {
-		return coserrors.Wrapf(errorsmod.ErrInvalidRequest, "empty investors")
+		return coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "empty investors")
 	}
 	return nil
 }

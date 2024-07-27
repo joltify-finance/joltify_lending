@@ -75,8 +75,8 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
 		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(2000000),
-		MinDepositAmount: sdk.NewInt(1000000),
+		MinBorrowAmount:  sdkmath.NewInt(2000000),
+		MinDepositAmount: sdkmath.NewInt(1000000),
 	}
 
 	b2 := kycmoduletypes.BasicInfo{
@@ -101,8 +101,8 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
 		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(10000000000000),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(10000000000000),
 	}
 
 	pi3 := kycmoduletypes.ProjectInfo{
@@ -116,8 +116,8 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
 		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(5000000000000),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(5000000000000),
 	}
 
 	pi4 := kycmoduletypes.ProjectInfo{
@@ -131,8 +131,8 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
 		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(100000000000000),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(100000000000000),
 	}
 
 	pi5 := kycmoduletypes.ProjectInfo{
@@ -146,8 +146,8 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
 		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(150000000000000),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(150000000000000),
 	}
 
 	a := []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4, &pi5}

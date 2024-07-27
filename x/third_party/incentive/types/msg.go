@@ -3,7 +3,8 @@ package types
 import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 )
 
@@ -136,7 +137,7 @@ func (msg MsgClaimSPVReward) ValidateBasic() error {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty or invalid")
 	}
 	if msg.PoolIndex == "" {
-		return errorsmod.Wrap(errorsmod.ErrInvalidRequest, "pool index cannot be empty")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "pool index cannot be empty")
 	}
 	return nil
 }

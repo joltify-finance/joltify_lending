@@ -25,7 +25,8 @@ func (k Keeper) QueryInvestorWallets(goCtx context.Context, req *types.QueryInve
 	return &types.QueryInvestorWalletsResponse{Wallets: ret.WalletAddress}, nil
 }
 
-func (k Keeper) GetInvestorWallets(ctx context.Context, investorID string) (types.Investor, error) {
+func (k Keeper) GetInvestorWallets(rctx context.Context, investorID string) (types.Investor, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := ctx.KVStore(k.storeKey)
 	investorStores := prefix.NewStore(store, types.KeyPrefix(types.InvestorToWalletsPrefix))
 	b := investorStores.Get(types.KeyPrefix(investorID))

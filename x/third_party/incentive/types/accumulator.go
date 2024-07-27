@@ -5,6 +5,8 @@ import (
 	"math"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -72,7 +74,7 @@ func (*Accumulator) calculateNewRewards(rewardsPerSecond sdk.Coins, totalSourceS
 		return nil
 	}
 	increment := newRewardIndexesFromCoins(rewardsPerSecond)
-	increment = increment.Mul(sdk.NewDec(durationSeconds)).Mul(sdkmath.LegacyNewDecFromInt(sdk.NewInt(1e12))).Quo(totalSourceShares)
+	increment = increment.Mul(sdkmath.LegacyNewDec(durationSeconds)).Mul(sdkmath.LegacyNewDecFromInt(sdkmath.NewInt(1e12))).Quo(totalSourceShares)
 	return increment
 }
 

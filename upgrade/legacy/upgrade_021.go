@@ -34,7 +34,7 @@ func CreateUpgradeHandlerForV021Upgrade(
 
 		for i, el := range incentiveParams.SPVRewardPeriods {
 			if el.CollateralType == "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9" {
-				el.RewardsPerSecond = sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(34722)))
+				el.RewardsPerSecond = sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(34722)))
 				incentiveParams.SPVRewardPeriods[i] = el
 			}
 		}
@@ -79,7 +79,7 @@ func CreateUpgradeHandlerForV021Upgrade(
 
 				onlyIncentiveCoin := eachincentive.PaymentAmount[0]
 
-				amt := onlyIncentiveCoin.Amount.Quo(sdk.NewInt(1e12))
+				amt := onlyIncentiveCoin.Amount.Quo(sdkmath.NewInt(1e12))
 				incentivepaments[index].PaymentAmount = sdk.NewCoins(sdk.NewCoin("ujolt", amt))
 			}
 
@@ -102,7 +102,7 @@ func CreateUpgradeHandlerForV021Upgrade(
 
 		var newrewards sdk.Coins
 		for _, el := range rewards.PaymentAmount {
-			amt := el.Amount.Quo(sdk.NewInt(1e12))
+			amt := el.Amount.Quo(sdkmath.NewInt(1e12))
 			c := sdk.NewCoin("ujolt", amt)
 			newrewards.Add(c)
 		}

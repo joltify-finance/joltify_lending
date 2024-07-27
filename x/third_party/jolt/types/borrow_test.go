@@ -20,8 +20,8 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 			name: "multiple denoms are calculated correctly",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
-					sdk.NewInt64Coin("xrpb", 1e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("xrpb", 1e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{
@@ -35,8 +35,8 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				},
 			},
 			expect: sdk.NewDecCoins(
-				sdk.NewInt64DecCoin("bnb", 50e8),
-				sdk.NewInt64DecCoin("xrpb", 8e7),
+				sdkmath.NewInt64DecCoin("bnb", 50e8),
+				sdkmath.NewInt64DecCoin("xrpb", 8e7),
 			),
 		},
 		{
@@ -59,7 +59,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 			name: "missing indexes return error",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{
@@ -74,7 +74,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 			name: "invalid indexes return error",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{
@@ -89,7 +89,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 			name: "zero indexes return error rather than panicking",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdk.NewInt64Coin("bnb", 100e8),
+					sdkmath.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{

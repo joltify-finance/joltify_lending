@@ -834,7 +834,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 					types3.NewMoneyMarket("ujolt",
 						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",             // Market ID
-						sdk.NewInt(JoltCf),        // Conversion Factor
+						sdkmath.NewInt(JoltCf),    // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
 						sdkmath.LegacyZeroDec()),  // Keeper Reward Percentage
@@ -881,7 +881,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			// Deposit 2x as many coins for each coin we intend to borrow
 			depositCoins := sdk.NewCoins()
 			for _, borrowCoin := range tc.args.borrowCoins {
-				depositCoins = depositCoins.Add(sdk.NewCoin(borrowCoin.Denom, borrowCoin.Amount.Mul(sdk.NewInt(2))))
+				depositCoins = depositCoins.Add(sdk.NewCoin(borrowCoin.Denom, borrowCoin.Amount.Mul(sdkmath.NewInt(2))))
 			}
 
 			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.user, tc.args.initialBorrowerCoins)
@@ -1243,14 +1243,14 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 					types3.NewMoneyMarket("ujolt",
 						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",             // Market ID
-						sdk.NewInt(JoltCf),        // Conversion Factor
+						sdkmath.NewInt(JoltCf),    // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
 						sdkmath.LegacyZeroDec()),  // Keeper Reward Percentage
 					types3.NewMoneyMarket("bnb",
 						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BnbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"bnb:usd",                 // Market ID
-						sdk.NewInt(BnbCf),         // Conversion Factor
+						sdkmath.NewInt(BnbCf),     // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
 						sdkmath.LegacyZeroDec()),  // Keeper Reward Percentage

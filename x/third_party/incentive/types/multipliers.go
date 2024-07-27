@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"sort"
 
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // NewMultiplier returns a new Multiplier

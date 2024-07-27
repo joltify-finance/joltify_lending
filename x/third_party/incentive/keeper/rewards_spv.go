@@ -85,7 +85,7 @@ func calculateTokenIncrease(timeDelta time.Duration, rewardPerSecond sdk.Coins) 
 	rewardPerSecond.Sort()
 	for _, el := range rewardPerSecond {
 		amt := el.Amount
-		amt = amt.Mul(sdk.NewInt(durationSeconds))
+		amt = amt.Mul(sdkmath.NewInt(durationSeconds))
 		c := sdk.NewCoin(el.Denom, amt)
 		increasement = increasement.Add(c)
 	}

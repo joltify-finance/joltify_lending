@@ -217,7 +217,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: depositorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -260,7 +260,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 	totalBorrowable := msgDepositUser1.Token.Add(msgDepositUser1.Token).Add(msgDepositUser2.Token)
 	suite.Require().True(totalBorrowable.IsEqual(pool.UsableAmount))
 
-	user1Ratio := sdkmath.LegacyNewDecFromInt(msgDepositUser1.Token.Amount.Mul(sdk.NewInt(2))).Quo(sdkmath.LegacyNewDecFromInt(totalBorrowable.Amount))
+	user1Ratio := sdkmath.LegacyNewDecFromInt(msgDepositUser1.Token.Amount.Mul(sdkmath.NewInt(2))).Quo(sdkmath.LegacyNewDecFromInt(totalBorrowable.Amount))
 
 	user2Ratio := sdkmath.LegacyNewDecFromInt(msgDepositUser2.Token.Amount).Quo(sdkmath.LegacyNewDecFromInt(totalBorrowable.Amount))
 
@@ -467,7 +467,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: depositorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -483,14 +483,14 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 	suite.Require().True(found)
 
 	period := spvkeeper.OneYear / poolInfo.PayFreq
-	interestWithReserve := sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
+	interestWithReserve := sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
 
 	for i := 0; i < 10; i++ {
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
 		err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 		suite.Require().NoError(err)
 		if i == 0 {
-			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdk.NewIntFromBigInt(big.NewInt(-1)))))
+			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdkmath.NewIntFromBigInt(big.NewInt(-1)))))
 		}
 	}
 
@@ -531,7 +531,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 	suite.Require().True(p.EscrowInterestAmount.IsZero())
 	suite.Require().Nil(p.InterestPrepayment)
 
-	deltaUser := userCoinAfter.Sub(userCoinBefore).Amount.Sub(sdk.NewIntFromUint64(1.34e5))
+	deltaUser := userCoinAfter.Sub(userCoinBefore).Amount.Sub(sdkmath.NewIntFromUint64(1.34e5))
 	suite.Require().True(checkValueWithRangeTwo(deltaUser, oneInterest))
 	fmt.Printf(">>1111>>>%v\n", deltaUser)
 }
@@ -579,7 +579,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: depositorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -595,7 +595,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 	suite.Require().True(found)
 
 	period := spvkeeper.OneYear / poolInfo.PayFreq
-	interestWithReserve := sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
+	interestWithReserve := sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
 
 	var oneInterest sdkmath.Int
 	for i := 0; i < 10; i++ {
@@ -603,7 +603,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 		err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 		suite.Require().NoError(err)
 		if i == 0 {
-			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdk.NewIntFromBigInt(big.NewInt(-1)))))
+			suite.Require().True(checkValueWithRangeTwo(interestWithReserve, poolInfo.EscrowInterestAmount.Mul(sdkmath.NewIntFromBigInt(big.NewInt(-1)))))
 			oneInterest = poolInfo.EscrowInterestAmount.MulRaw(-1)
 		}
 	}
@@ -652,7 +652,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 
 	returned := escrowInterestBefore.Sub(currentInterest.Mul(counter))
 
-	spvReturned := userCoinAfter.Sub(userCoinBefore).Amount.Sub(sdk.NewIntFromUint64(1.34e5))
+	spvReturned := userCoinAfter.Sub(userCoinBefore).Amount.Sub(sdkmath.NewIntFromUint64(1.34e5))
 
 	suite.Require().True(checkValueWithRangeTwo(returned, spvReturned))
 }

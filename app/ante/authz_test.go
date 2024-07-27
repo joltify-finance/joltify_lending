@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,7 +41,6 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 	require.NoError(t, err)
 
 	decorator := ante.NewAuthzLimiterDecorator(
-		sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{}),
 		sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{}),
 	)
 
@@ -58,16 +56,14 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 				banktypes.NewMsgSend(
 					testAddresses[0],
 					testAddresses[1],
-					sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
+					sdk.NewCoins(sdkmath.NewInt64Coin("ukava", 100e6)),
 				),
 			},
 			checkTx: false,
 		},
 		{
-			name: "a blocked msg is not blocked when not wrapped in MsgExec",
-			msgs: []sdk.Msg{
-				&evmtypes.MsgEthereumTx{},
-			},
+			name:    "a blocked msg is not blocked when not wrapped in MsgExec",
+			msgs:    []sdk.Msg{},
 			checkTx: false,
 		},
 		{
@@ -94,19 +90,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 			},
 			checkTx: false,
 		},
-		{
-			name: "when a MsgGrant contains a blocked msg, it is blocked",
-			msgs: []sdk.Msg{
-				newMsgGrant(
-					testAddresses[0],
-					testAddresses[1],
-					authz.NewGenericAuthorization(sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{})),
-					distantFuture,
-				),
-			},
-			checkTx:     false,
-			expectedErr: sdkerrors.ErrUnauthorized,
-		},
+
 		{
 			name: "when a MsgGrant contains a blocked msg, it is blocked",
 			msgs: []sdk.Msg{
@@ -128,7 +112,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 					[]sdk.Msg{banktypes.NewMsgSend(
 						testAddresses[0],
 						testAddresses[3],
-						sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
+						sdk.NewCoins(sdkmath.NewInt64Coin("ukava", 100e6)),
 					)}),
 			},
 			checkTx: false,
@@ -138,9 +122,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 			msgs: []sdk.Msg{
 				newMsgExec(
 					testAddresses[1],
-					[]sdk.Msg{
-						&evmtypes.MsgEthereumTx{},
-					},
+					[]sdk.Msg{},
 				),
 			},
 			checkTx:     false,
@@ -161,9 +143,8 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 						banktypes.NewMsgSend(
 							testAddresses[0],
 							testAddresses[3],
-							sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
+							sdk.NewCoins(sdkmath.NewInt64Coin("ukava", 100e6)),
 						),
-						&evmtypes.MsgEthereumTx{},
 					},
 				),
 			},
@@ -178,27 +159,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 					[]sdk.Msg{
 						newMsgExec(
 							testAddresses[2],
-							[]sdk.Msg{
-								&evmtypes.MsgEthereumTx{},
-							},
-						),
-					},
-				),
-			},
-			checkTx:     false,
-			expectedErr: sdkerrors.ErrUnauthorized,
-		},
-		{
-			name: "a nested MsgGrant containing a blocked msg is still blocked",
-			msgs: []sdk.Msg{
-				newMsgExec(
-					testAddresses[1],
-					[]sdk.Msg{
-						newMsgGrant(
-							testAddresses[0],
-							testAddresses[1],
-							authz.NewGenericAuthorization(sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{})),
-							distantFuture,
+							[]sdk.Msg{},
 						),
 					},
 				),

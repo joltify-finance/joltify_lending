@@ -151,7 +151,7 @@ func (suite *querySuite) TestAllQuery() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)

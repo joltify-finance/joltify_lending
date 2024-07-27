@@ -166,7 +166,7 @@ func (am AppModule) EndBlock(_ context.Context) []abci.ValidatorUpdate {
 // }
 
 // // RegisterStoreDecoder registers a decoder for jolt module's types
-// func (AppModuleBasic) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+// func (AppModuleBasic) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 // 	sdr[types.StoreKey] = simulation.DecodeStore
 // }
 

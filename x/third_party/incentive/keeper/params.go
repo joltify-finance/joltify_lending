@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,7 +28,8 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 }
 
 // update spv reward tokens
-func (k Keeper) SetSPVRewardTokens(ctx context.Context, poolId string, rewardTokens sdk.Coins) {
+func (k Keeper) SetSPVRewardTokens(rctx context.Context, poolId string, rewardTokens sdk.Coins) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	params := k.GetParams(ctx)
 	for i, el := range params.SPVRewardPeriods {
 		if !el.Active {
@@ -44,7 +46,8 @@ func (k Keeper) SetSPVRewardTokens(ctx context.Context, poolId string, rewardTok
 }
 
 // GetJoltSupplyRewardPeriods returns the reward period with the specified collateral type if it's found in the params
-func (k Keeper) GetJoltSupplyRewardPeriods(ctx context.Context, denom string) (types.MultiRewardPeriod, bool) {
+func (k Keeper) GetJoltSupplyRewardPeriods(rctx context.Context, denom string) (types.MultiRewardPeriod, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	params := k.GetParams(ctx)
 	for _, rp := range params.JoltSupplyRewardPeriods {
 		if rp.CollateralType == denom {
@@ -55,7 +58,8 @@ func (k Keeper) GetJoltSupplyRewardPeriods(ctx context.Context, denom string) (t
 }
 
 // GetJoltBorrowRewardPeriods returns the reward period with the specified collateral type if it's found in the params
-func (k Keeper) GetJoltBorrowRewardPeriods(ctx context.Context, denom string) (types.MultiRewardPeriod, bool) {
+func (k Keeper) GetJoltBorrowRewardPeriods(rctx context.Context, denom string) (types.MultiRewardPeriod, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	params := k.GetParams(ctx)
 	for _, rp := range params.JoltBorrowRewardPeriods {
 		if rp.CollateralType == denom {
@@ -66,7 +70,8 @@ func (k Keeper) GetJoltBorrowRewardPeriods(ctx context.Context, denom string) (t
 }
 
 // GetMultiplierByDenom fetches a multiplier from the params matching the denom and name.
-func (k Keeper) GetMultiplierByDenom(ctx context.Context, denom string, name string) (types.Multiplier, bool) {
+func (k Keeper) GetMultiplierByDenom(rctx context.Context, denom string, name string) (types.Multiplier, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	params := k.GetParams(ctx)
 
 	for _, dm := range params.ClaimMultipliers {

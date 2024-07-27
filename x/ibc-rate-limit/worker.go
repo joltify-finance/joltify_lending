@@ -1,20 +1,21 @@
 package ibc_rate_limit
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"strings"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 )
 
 func (i *ICS4Wrapper) whecherOnWhiteBanList(ctx context.Context, data []byte) (bool, bool, error) {
 	var tdata transfertypes.FungibleTokenPacketData
 	if err := transfertypes.ModuleCdc.UnmarshalJSON(data, &tdata); err != nil {
-		return false, false, errorsmod.Wrapf(errorsmod.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+		return false, false, errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
 	}
 	ret := i.quotaKeeper.WhetherOnwhitelist(ctx, "ibc", tdata.Sender)
 	retBan := i.quotaKeeper.WhetherOnBanlist(ctx, "ibc", tdata.Sender)
@@ -24,7 +25,7 @@ func (i *ICS4Wrapper) whecherOnWhiteBanList(ctx context.Context, data []byte) (b
 func (i *ICS4Wrapper) UpdateQuota(ctx context.Context, seq uint64, data []byte) error {
 	var tdata transfertypes.FungibleTokenPacketData
 	if err := transfertypes.ModuleCdc.UnmarshalJSON(data, &tdata); err != nil {
-		return errorsmod.Wrapf(errorsmod.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+		return errorsmod.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
 	}
 
 	denom := tdata.Denom

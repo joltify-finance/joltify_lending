@@ -40,7 +40,7 @@ func CreateUpgradeHandlerForV011Upgrade(
 			ctx.Logger().Info("we upgrade to v011")
 		}
 
-		burncoin := sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdk.NewInt(10000000)))
+		burncoin := sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdkmath.NewInt(10000000)))
 
 		m := spvmoduletypes.Moneymarket{Denom: "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", ConversionFactor: 6}
 
@@ -109,7 +109,7 @@ func CreateUpgradeHandlerForV011Upgrade(
 		// update the incentive module parameter
 		currentTime := ctx.BlockTime()
 		incentiveParams := incentiveKeeper.GetParams(ctx)
-		addedIncentive := incentivetypes.NewMultiRewardPeriod(true, "0x3a0e72aefc820a7ec5a04cd3b987df8794d5adc48df082a5f8c2aba80a5f6e20", currentTime.Add(-1*24*time.Hour), currentTime.Add(oneyear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(0))))
+		addedIncentive := incentivetypes.NewMultiRewardPeriod(true, "0x3a0e72aefc820a7ec5a04cd3b987df8794d5adc48df082a5f8c2aba80a5f6e20", currentTime.Add(-1*24*time.Hour), currentTime.Add(oneyear), sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(0))))
 
 		incentiveParams.SPVRewardPeriods = append(incentiveParams.SPVRewardPeriods, addedIncentive)
 		incentiveKeeper.SetParams(ctx, incentiveParams)

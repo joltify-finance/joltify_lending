@@ -283,14 +283,14 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 					types3.NewMoneyMarket("ujolt",
 						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",                            // Market ID
-						sdk.NewInt(JoltCf),                       // Conversion Factor
+						sdkmath.NewInt(JoltCf),                   // Conversion Factor
 						model,                                    // Interest Rate Model
 						reserveFactor,                            // Reserve Factor
 						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 					types3.NewMoneyMarket("usdx",
 						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"usdx:usd",                               // Market ID
-						sdk.NewInt(JoltCf),                       // Conversion Factor
+						sdkmath.NewInt(JoltCf),                   // Conversion Factor
 						model,                                    // Interest Rate Model
 						reserveFactor,                            // Reserve Factor
 						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
@@ -381,7 +381,7 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			suite.Require().True(strings.Contains(err.Error(), tc.errArgs.contains))
 
 			// Withdrawing 10% of the coins should succeed
-			withdrawCoins := sdk.NewCoins(sdk.NewCoin("ujolt", tc.args.depositCoins[0].Amount.Quo(sdk.NewInt(10))))
+			withdrawCoins := sdk.NewCoins(sdk.NewCoin("ujolt", tc.args.depositCoins[0].Amount.Quo(sdkmath.NewInt(10))))
 			err = suite.keeper.Withdraw(suite.ctx, tc.args.borrower, withdrawCoins)
 			suite.Require().NoError(err)
 		})

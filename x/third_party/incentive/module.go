@@ -152,7 +152,7 @@ func (am AppModule) EndBlock(_ context.Context, _ abci.RequestEndBlock) []abci.V
 //____________________________________________________________________________
 
 // // RegisterStoreDecoder registers a decoder for incentive module's types
-// func (AppModuleBasic) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+// func (AppModuleBasic) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 // sdr[types.StoreKey] = simulation.DecodeStore
 // }
 

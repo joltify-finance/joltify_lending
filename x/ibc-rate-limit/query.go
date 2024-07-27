@@ -9,7 +9,7 @@ type Querier struct {
 	K ICS4Wrapper
 }
 
-func (q Querier) Params(ctx context.Context,
+func (q Querier) Params(ctx sdk.Context,
 	req *types.QueryParamsRequest,
 ) (*types.QueryParamsResponse, error) {
 	params := q.K.GetParams(ctx)

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	errorsmod "cosmossdk.io/errors"
+	types2 "cosmossdk.io/store/types"
 
 	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,7 +26,8 @@ func updateList(in []string, added []string) []string {
 	return walletsNew
 }
 
-func (k Keeper) GetInvestor(ctx context.Context, investorID string) types.Investor {
+func (k Keeper) GetInvestor(rctx context.Context, investorID string) types.Investor {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.InvestorToWalletsPrefix))
 	var storedInvestor types.Investor
 	b := store.Get(types.KeyPrefix(investorID))
@@ -37,7 +39,8 @@ func (k Keeper) GetInvestor(ctx context.Context, investorID string) types.Invest
 }
 
 // SetInvestor set a specific issueToken in the store from its index
-func (k Keeper) SetInvestor(ctx context.Context, investor types.Investor) *types.Investor {
+func (k Keeper) SetInvestor(rctx context.Context, investor types.Investor) *types.Investor {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	gasBefore := ctx.GasMeter().GasConsumed()
 	defer func() {
 		gasAfter := ctx.GasMeter().GasConsumed()
@@ -62,9 +65,10 @@ func (k Keeper) SetInvestor(ctx context.Context, investor types.Investor) *types
 	return &storedInvestor
 }
 
-func (k msgServer) UploadInvestor(goCtx context.Context, msg *types.MsgUploadInvestor) (*types.MsgUploadInvestorResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+func (k msgServer) UploadInvestor(rctx context.Context, msg *types.MsgUploadInvestor) (*types.MsgUploadInvestorResponse, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
+
+	ctx = ctx.WithGasMeter(types2.NewInfiniteGasMeter())
 	if len(msg.InvestorId) == 0 {
 		return nil, errors.New("invalid investor ID")
 	}

@@ -9,8 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32" //nolint
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/evmos/ethermint/crypto/ethsecp256k1"
-	"github.com/joltify-finance/joltify_lending/x/third_party/evmutil/types"
 )
 
 // PoolPubKeyToJoltAddress return the jolt encoded pubkey
@@ -45,13 +43,13 @@ func keyConvert() { //nolint
 	fmt.Printf(">>>Jolt address %v\n", accAddr.String())
 
 	// eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-	pkEth := ethsecp256k1.PrivKey{
+	pkEth := secp256k1.PrivKey{
 		Key: data,
 	}
 
 	pk1 := pkEth.PubKey()
 
-	pk2 := ethsecp256k1.PubKey{
+	pk2 := secp256k1.PubKey{
 		Key: pk1.Bytes(),
 	}
 
@@ -79,9 +77,9 @@ func keyConvert() { //nolint
 	fmt.Printf(">>%v\n", bb)
 	fmt.Printf(">>equal??>>%v\n", bytes.Equal(bb, sk.PubKey().Bytes()))
 	fmt.Printf(">IIIIIIII>%v\n", in)
-	eAddr, _ := types.PubKeyToEthAddr(in)
-
-	coAddr, _ := types.PubKeyToJoltAddr(in)
-	fmt.Printf(">>>%v\n", eAddr.String())
-	fmt.Printf(">>>%v\n", coAddr.String())
+	//eAddr, _ := types.PubKeyToEthAddr(in)
+	//
+	//coAddr, _ := types.PubKeyToJoltAddr(in)
+	//fmt.Printf(">>>%v\n", eAddr.String())
+	//fmt.Printf(">>>%v\n", coAddr.String())
 }

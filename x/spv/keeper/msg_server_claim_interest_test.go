@@ -179,7 +179,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -231,8 +231,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	investor1TotalClaimed = investor1TotalClaimed.Add(a1.AmountOf("ausdc"))
 	a2, _ := sdk.ParseCoinsNormalized(result2.Amount)
 
-	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(2))
-	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(2))
+	amount1 := a1.AmountOf("ausdc").Quo(sdkmath.NewInt(2))
+	amount2 := a2.AmountOf("ausdc").Quo(sdkmath.NewInt(2))
 
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, convertBorrowToLocal(amount1).String(), convertBorrowToLocal(amount2).String())
 
@@ -258,8 +258,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	investor1TotalClaimed = investor1TotalClaimed.Add(a1.AmountOf("ausdc"))
 	a2, _ = sdk.ParseCoinsNormalized(result2.Amount)
 
-	amount1 = a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
-	amount2 = a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
+	amount1 = a1.AmountOf("ausdc").Quo(sdkmath.NewInt(1))
+	amount2 = a2.AmountOf("ausdc").Quo(sdkmath.NewInt(1))
 
 	fmt.Printf("amoutn 1 %v amount 2 %v\n", amount1, amount2)
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, convertBorrowToLocal(amount1).String(), convertBorrowToLocal(amount2).String())
@@ -283,8 +283,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	investor1TotalClaimed = investor1TotalClaimed.Add(a1.AmountOf("ausdc"))
 	a2, _ = sdk.ParseCoinsNormalized(result2.Amount)
 
-	amount1 = a1.AmountOf("ausdc").Quo(sdk.NewInt(10))
-	amount2 = a2.AmountOf("ausdc").Quo(sdk.NewInt(10))
+	amount1 = a1.AmountOf("ausdc").Quo(sdkmath.NewInt(10))
+	amount2 = a2.AmountOf("ausdc").Quo(sdkmath.NewInt(10))
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, convertBorrowToLocal(amount1).String(), convertBorrowToLocal(amount2).String())
 
 	expectedInterest := sdkmath.LegacyNewDecFromInt(convertBorrowToUsd(investor1Borrowed)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).Mul(sdk.NewDecWithPrec(85, 2)).TruncateInt()
@@ -331,7 +331,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -377,8 +377,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	investor1TotalClaimed = investor1TotalClaimed.Add(a1.AmountOf("ausdc"))
 	a2, _ := sdk.ParseCoinsNormalized(result2.Amount)
 
-	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
-	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
+	amount1 := a1.AmountOf("ausdc").Quo(sdkmath.NewInt(1))
+	amount2 := a2.AmountOf("ausdc").Quo(sdkmath.NewInt(1))
 
 	dat := strings.Split(depositor1.LinkedNFT[0], ":")
 	nftUser1, found := suite.nftKeeper.GetNFT(suite.ctx, dat[0], dat[1])
@@ -530,8 +530,8 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	}
 	// as we have the division, so the max error is totalCounter *1 (1: the max error of the division for each payment)
 
-	suite.Require().True(expectedToUser1.Sub(resultCoinUser1.Amount).LT(sdk.NewInt(int64(totalCounter))))
-	suite.Require().True(expectedToUser2.Sub(resultCoinUser2.Amount).LT(sdk.NewInt(int64(totalCounter))))
+	suite.Require().True(expectedToUser1.Sub(resultCoinUser1.Amount).LT(sdkmath.NewInt(int64(totalCounter))))
+	suite.Require().True(expectedToUser2.Sub(resultCoinUser2.Amount).LT(sdkmath.NewInt(int64(totalCounter))))
 
 	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	req.Creator = suite.investors[0]
@@ -570,7 +570,7 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -610,14 +610,14 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	suite.Require().NoError(err)
 	// total borrow is 1.34e5 and the user1 offer 4e5 while the second user offer 2e5, reserve is 0.15, the apy is 0.15
 	// after the first month, user 1 get 1.34e5*0.85*0.15/12*4/6
-	// interestOneYearWithReserve := sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	// interestOneYearWithReserve := sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
 	// interestOneYear := interestOneYearWithReserve.Sub(sdkmath.LegacyNewDecFromInt(interestOneYearWithReserve).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt())
 
 	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
 	a2, _ := sdk.ParseCoinsNormalized(result2.Amount)
 
-	amount1 := a1.AmountOf("ausdc").Quo(sdk.NewInt(1))
-	amount2 := a2.AmountOf("ausdc").Quo(sdk.NewInt(1))
+	amount1 := a1.AmountOf("ausdc").Quo(sdkmath.NewInt(1))
+	amount2 := a2.AmountOf("ausdc").Quo(sdkmath.NewInt(1))
 
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, convertBorrowToLocal(amount1).String(), convertBorrowToLocal(amount2).String())
 
@@ -672,7 +672,7 @@ func (suite *claimInterestSuite) TestClaimInterestNoAuthorized() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err := suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -748,7 +748,7 @@ func (suite *claimInterestSuite) TestQueryOutStandingInterest() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err := suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -798,7 +798,7 @@ func (suite *claimInterestSuite) TestQueryOutStandingInterest() {
 	suite.Require().NoError(err)
 	// total borrow is 1.34e5 and the user1 offer 4e5 while the second user offer 2e5, reserve is 0.15, the apy is 0.15
 	// after the first month, user 1 get 1.34e5*0.85*0.15/12*4/6
-	// interestOneYearWithReserve := sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
+	// interestOneYearWithReserve := sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(12).TruncateInt()
 	// interestOneYear := interestOneYearWithReserve.Sub(sdkmath.LegacyNewDecFromInt(interestOneYearWithReserve).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt())
 
 	a1, _ := sdk.ParseCoinsNormalized(result1.Amount)
@@ -874,7 +874,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonthWithSomePaymentMi
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err := suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -991,5 +991,5 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonthWithSomePaymentMi
 	}
 
 	// as each payment is 1545, and we have 3 missing payment and 2 normal payment, so the escrow should be 1545*5
-	suite.Require().True((escrowInterestAmount1.Sub(poolInfo.EscrowInterestAmount)).Equal(sdk.NewInt(1545 * 5)))
+	suite.Require().True((escrowInterestAmount1.Sub(poolInfo.EscrowInterestAmount)).Equal(sdkmath.NewInt(1545 * 5)))
 }

@@ -1,9 +1,12 @@
 package keeper
 
 import (
+	"context"
+
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -25,7 +28,8 @@ func (k Keeper) processEachReserve(ctx context.Context, c sdk.Coin) (bool, error
 }
 
 // RunSurplusAuctions nets the surplus and debt balances and then creates surplus or debt auctions if the remaining balance is above the auction threshold parameter
-func (k Keeper) RunSurplusAuctions(ctx context.Context) {
+func (k Keeper) RunSurplusAuctions(rctx context.Context) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	k.IterSPVReserve(ctx, func(totalReserve sdk.Coin) (stop bool) {
 		if totalReserve.IsZero() {
 			return false
@@ -34,7 +38,7 @@ func (k Keeper) RunSurplusAuctions(ctx context.Context) {
 		acc := k.accKeeper.GetModuleAccount(ctx, types.ModuleAccount)
 		currentBalance := k.bankKeeper.GetBalance(ctx, acc.GetAddress(), totalReserve.Denom)
 		if currentBalance.IsLT(totalReserve) {
-			err := errorsmod.Wrapf(errorsmod.ErrInsufficientFunds, "we need to burn %v and we only have %v in account", totalReserve.String(), currentBalance.String())
+			err := errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, "we need to burn %v and we only have %v in account", totalReserve.String(), currentBalance.String())
 			ctx.Logger().Error("run surplus auction error", "error msg", err.Error())
 			return false
 		}

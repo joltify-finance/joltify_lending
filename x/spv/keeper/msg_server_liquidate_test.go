@@ -186,7 +186,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdkmath.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
@@ -209,7 +209,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		total := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		total := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdkmath.NewIntFromUint64(1e2))
 		suite.Require().True(total.Equal(histories[0][i].Amount.Amount))
 	}
 }
@@ -257,7 +257,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
+		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdkmath.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
 		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
@@ -280,8 +280,8 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 	}
 
 	for i := 0; i < 20; i++ {
-		total := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdk.NewIntFromUint64(1e2))
-		v2 := sdkmath.LegacyNewDecFromInt(total.Mul(sdk.NewIntFromUint64(2e5))).Quo(sdkmath.LegacyNewDecFromInt(sdk.NewIntFromUint64(3.34e5))).TruncateInt()
+		total := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdkmath.NewIntFromUint64(1e2))
+		v2 := sdkmath.LegacyNewDecFromInt(total.Mul(sdkmath.NewIntFromUint64(2e5))).Quo(sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(3.34e5))).TruncateInt()
 		suite.Require().True(v2.Equal(histories[1][i].Amount.Amount))
 		v1 := total.Sub(v2)
 		suite.Require().True(v1.Equal(histories[0][i].Amount.Amount))

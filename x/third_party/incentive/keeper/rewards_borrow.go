@@ -1,17 +1,20 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 )
 
 // AccumulateJoltBorrowRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateJoltBorrowRewards(ctx context.Context, rewardPeriod types2.MultiRewardPeriod) {
+func (k Keeper) AccumulateJoltBorrowRewards(rctx context.Context, rewardPeriod types2.MultiRewardPeriod) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	previousAccrualTime, found := k.GetPreviousJoltBorrowRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
 		previousAccrualTime = ctx.BlockTime()
@@ -199,7 +202,7 @@ func (k Keeper) CalculateRewards(oldIndexes, newIndexes types2.RewardIndexes, so
 			return nil, err
 		}
 
-		rewardAmount = rewardAmount.Quo(sdk.NewInt(1e12))
+		rewardAmount = rewardAmount.Quo(sdkmath.NewInt(1e12))
 
 		reward = reward.Add(
 			sdk.NewCoin(newIndex.CollateralType, rewardAmount),

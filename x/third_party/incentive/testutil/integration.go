@@ -101,7 +101,7 @@ func (suite *IntegrationTester) DeliverMsgCreateValidator(address sdk.ValAddress
 		selfDelegation,
 		stakingtypes.Description{},
 		stakingtypes.NewCommissionRates(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
-		sdk.NewInt(1_000_000),
+		sdkmath.NewInt(1_000_000),
 	)
 	if err != nil {
 		return err
