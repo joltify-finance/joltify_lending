@@ -18,7 +18,6 @@ require (
 	github.com/cosmos/ibc-go/v8 v8.3.1
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/ethereum/go-ethereum v1.13.15
-	github.com/evmos/ethermint v0.0.0-00010101000000-000000000000
 	github.com/fatih/color v1.16.0
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/gogo/protobuf v1.3.3
@@ -267,7 +266,6 @@ replace (
 	github.com/ethereum/go-ethereum => github.com/evmos/go-ethereum v1.10.26-evmos-rc1
 	//github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 
-	github.com/evmos/ethermint => github.com/joltify-finance/ethermint v0.1.3-joltify
 
 	//cosmossdk.io/client/v2 => github.com/crypto-org-chain/cosmos-sdk/client/v2 v2.0.0-20240626040048-36295f051595
 	//cosmossdk.io/store => github.com/crypto-org-chain/cosmos-sdk/store v0.0.0-20240626040048-36295f051595

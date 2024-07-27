@@ -4,23 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"path/filepath"
 	"strings"
 
-	types "cosmossdk.io/store/snapshots/types"
-
-	"cosmossdk.io/store/snapshots"
-
-	"cosmossdk.io/store"
-	dbm "github.com/cometbft/cometbft-db"
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
-	ethermintflags "github.com/evmos/ethermint/server/flags"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/params"
 	"github.com/spf13/cast"
@@ -46,10 +39,10 @@ func (ac appCreator) newApp(
 	traceStore io.Writer,
 	appOpts servertypes.AppOptions,
 ) servertypes.Application {
-	var cache sdk.MultiStorePersistentCache
-	if cast.ToBool(appOpts.Get(server.FlagInterBlockCache)) {
-		cache = store.NewCommitKVStoreCacheManager()
-	}
+	//var cache sdk.MultiStorePersistentCache
+	//if cast.ToBool(appOpts.Get(server.FlagInterBlockCache)) {
+	//	cache = store.NewCommitKVStoreCacheManager()
+	//}
 
 	skipUpgradeHeights := make(map[int64]bool)
 	for _, h := range cast.ToIntSlice(appOpts.Get(server.FlagUnsafeSkipUpgrades)) {
@@ -62,22 +55,22 @@ func (ac appCreator) newApp(
 	}
 
 	homeDir := cast.ToString(appOpts.Get(flags.FlagHome))
-	snapshotDir := filepath.Join(homeDir, "data", "snapshots") // TODO can these directory names be imported from somewhere?
-	snapshotDB, err := dbm.NewDB("metadata", dbm.GoLevelDBBackend, snapshotDir)
+	//snapshotDir := filepath.Join(homeDir, "data", "snapshots") // TODO can these directory names be imported from somewhere?
+	//snapshotDB, err := dbm.NewDB("metadata", dbm.GoLevelDBBackend, snapshotDir)
 	if err != nil {
 		panic(err)
 	}
-	snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
-	if err != nil {
-		panic(err)
-	}
+	//snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	mempoolEnableAuth := cast.ToBool(appOpts.Get(flagMempoolEnableAuth))
 	mempoolAuthAddresses, err := accAddressesFromBech32(
 		cast.ToStringSlice(appOpts.Get(flagMempoolAuthAddresses))...,
 	)
 
-	snapOpts := types.NewSnapshotOptions(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)), cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)))
+	//snapOpts := types.NewSnapshotOptions(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)), cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)))
 	if err != nil {
 		panic(fmt.Sprintf("could not get authorized address from config: %v", err))
 	}
@@ -91,8 +84,6 @@ func (ac appCreator) newApp(
 			InvariantCheckPeriod:  cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
 			MempoolEnableAuth:     mempoolEnableAuth,
 			MempoolAuthAddresses:  mempoolAuthAddresses,
-			EVMTrace:              cast.ToString(appOpts.Get(ethermintflags.EVMTracer)),
-			EVMMaxGasWanted:       cast.ToUint64(appOpts.Get(ethermintflags.EVMMaxTxGasWanted)),
 		},
 		0,
 		appOpts,
@@ -101,10 +92,8 @@ func (ac appCreator) newApp(
 		baseapp.SetHaltHeight(cast.ToUint64(appOpts.Get(server.FlagHaltHeight))),
 		baseapp.SetHaltTime(cast.ToUint64(appOpts.Get(server.FlagHaltTime))),
 		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))), // TODO what is this?
-		baseapp.SetInterBlockCache(cache),
 		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
-		baseapp.SetSnapshot(snapshotStore, snapOpts),
 		baseapp.SetChainID(ChainID),
 	)
 }

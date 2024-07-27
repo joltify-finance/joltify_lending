@@ -1,13 +1,13 @@
 package app
 
 import (
-	"cosmossdk.io/log"
 	"fmt"
-	evmante "github.com/evmos/ethermint/app/ante"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"cosmossdk.io/log"
 
 	"github.com/cosmos/cosmos-sdk/runtime"
 
@@ -45,7 +45,6 @@ import (
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
-	"github.com/evmos/ethermint/x/evm"
 	"github.com/gorilla/mux"
 	_ "github.com/joltify-finance/joltify_lending/client/docs/statik"
 
@@ -55,7 +54,6 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	ibcporttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
-	"github.com/evmos/ethermint/x/feemarket"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	auctiontypes "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -141,9 +139,6 @@ import (
 	"github.com/cosmos/ibc-go/modules/capability"
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
 	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
-	ethermintconfig "github.com/evmos/ethermint/server/config"
-	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
-	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 
 	"github.com/cosmos/ibc-go/v8/modules/apps/transfer"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
@@ -209,8 +204,6 @@ var (
 		spvmodule.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
-		evm.AppModuleBasic{},
-		feemarket.AppModuleBasic{},
 		swap.AppModuleBasic{},
 		capability.AppModuleBasic{},
 		burnauctionmodule.AppModuleBasic{},
@@ -245,10 +238,7 @@ var (
 var _ servertypes.Application = (*App)(nil)
 
 // DefaultOptions is a sensible default Options value.
-var DefaultOptions = Options{
-	EVMTrace:        ethermintconfig.DefaultEVMTracer,
-	EVMMaxGasWanted: ethermintconfig.DefaultMaxTxGasWanted,
-}
+var DefaultOptions = Options{}
 
 // Options bundles several configuration params for an App.
 type Options struct {
@@ -283,7 +273,6 @@ type App struct {
 	stakingKeeper    *stakingkeeper.Keeper
 	mintKeeper       mintkeeper.Keeper
 	distrKeeper      distrkeeper.Keeper
-	feeMarketKeeper  feemarketkeeper.Keeper
 	govKeeper        govkeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	authzKeeper      authzkeeper.Keeper
@@ -375,7 +364,6 @@ func NewApp(
 		burnauctionmoduletypes.StoreKey,
 		nftmoduletypes.StoreKey,
 		quotamoduletypes.StoreKey,
-		feemarkettypes.StoreKey,
 		swaptypes.StoreKey,
 		consensusparamtypes.StoreKey,
 	)
@@ -415,7 +403,6 @@ func NewApp(
 	kycSubspace := app.ParamsKeeper.Subspace(kycmoduletypes.ModuleName)
 	spvSubspace := app.ParamsKeeper.Subspace(spvmoduletypes.ModuleName)
 	ibcQuotaSubspace := app.ParamsKeeper.Subspace(ibcratelimittypes.ModuleName)
-	feemarketSubspace := app.ParamsKeeper.Subspace(feemarkettypes.ModuleName)
 	swapSubspace := app.ParamsKeeper.Subspace(swaptypes.ModuleName)
 	quotaSubspace := app.ParamsKeeper.Subspace(quotamoduletypes.ModuleName)
 	burnAuctionSubspace := app.ParamsKeeper.Subspace(burnauctionmoduletypes.ModuleName)
@@ -635,15 +622,6 @@ func NewApp(
 		keys[burnauctionmoduletypes.MemStoreKey],
 		burnAuctionSubspace, app.accountKeeper, app.bankKeeper, app.auctionKeeper)
 
-	// Create Ethermint keepers
-	app.feeMarketKeeper = feemarketkeeper.NewKeeper(
-		appCodec,
-		// Authority
-		authtypes.NewModuleAddress(govtypes.ModuleName),
-		keys[feemarkettypes.StoreKey],
-		feemarketSubspace,
-	)
-
 	allKeys := make(map[string]storetypes.StoreKey, len(keys)+len(tkeys)+len(memKeys))
 	for k, v := range keys {
 		allKeys[k] = v
@@ -727,7 +705,6 @@ func NewApp(
 		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
 		ibcratelimit.NewAppModule(*app.RateLimitingICS4Wrapper),
 		quotamodule.NewAppModule(appCodec, app.QuotaKeeper),
-		feemarket.NewAppModule(app.feeMarketKeeper, feemarketSubspace),
 		swap.NewAppModule(app.swapKeeper, app.accountKeeper),
 		crisis.NewAppModule(app.crisisKeeper, skipGenesisInvariants, app.ParamsKeeper.Subspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 		burnauctionmodule.NewAppModule(appCodec, app.burnauctionKeeper, app.accountKeeper, app.bankKeeper),
@@ -748,7 +725,6 @@ func NewApp(
 		slashingtypes.ModuleName,
 		evidencetypes.ModuleName,
 		stakingtypes.ModuleName,
-		feemarkettypes.ModuleName,
 		feegrant.ModuleName,
 		// Auction begin blocker will close out expired auctions and pay debt back to cdp.
 		// It should be run before cdp begin blocker which cancels out debt with stable and starts more auctions.
@@ -783,7 +759,6 @@ func NewApp(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
-		feemarkettypes.ModuleName,
 		pricefeedtypes.ModuleName,
 		// Add all remaining modules with an empty end blocker below since cosmos 0.45.0 requires it
 		capabilitytypes.ModuleName,
@@ -829,7 +804,6 @@ func NewApp(
 		evidencetypes.ModuleName,
 		authz.ModuleName,
 		ibctransfertypes.ModuleName,
-		feemarkettypes.ModuleName,
 		feegrant.ModuleName,
 		auctiontypes.ModuleName,
 		// issuancetypes.ModuleName,
@@ -905,14 +879,12 @@ func NewApp(
 	}
 
 	anteOptions := ante.HandlerOptions{
-		AccountKeeper:          app.accountKeeper,
+		AccountKeeper:          &app.accountKeeper,
 		BankKeeper:             app.bankKeeper,
 		SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
 		FeegrantKeeper:         app.feeGrantKeeper,
-		SigGasConsumer:         evmante.DefaultSigVerificationGasConsumer,
 		SpvKeeper:              app.spvKeeper,
 		IBCKeeper:              app.ibcKeeper,
-		FeeMarketKeeper:        app.feeMarketKeeper,
 		MaxTxGasWanted:         options.EVMMaxGasWanted,
 		AddressFetchers:        []ante.AddressFetcher{},
 		ExtensionOptionChecker: extensionCheck,
@@ -1087,8 +1059,6 @@ func (app *App) setupUpgradeHandlers() {
 		case crisistypes.ModuleName:
 			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
 
-		case feemarkettypes.ModuleName:
-			keyTable = feemarkettypes.ParamKeyTable()
 		}
 		if !subspace.HasKeyTable() {
 			subspace.WithKeyTable(keyTable)

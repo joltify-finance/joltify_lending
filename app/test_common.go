@@ -8,17 +8,11 @@ import (
 	"time"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
-	"github.com/evmos/ethermint/app"
 
 	"github.com/ethereum/go-ethereum/common"
 	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 
 	sdkmath "cosmossdk.io/math"
-
-	feemarketkeeper "github.com/evmos/ethermint/x/feemarket/keeper"
-	evmutilkeeper "github.com/joltify-finance/joltify_lending/x/third_party/evmutil/keeper"
-
-	evmkeeper "github.com/evmos/ethermint/x/evm/keeper"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 

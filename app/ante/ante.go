@@ -1,12 +1,14 @@
 package ante
 
 import (
-	"cosmossdk.io/log"
 	"fmt"
+	"runtime/debug"
+
+	"cosmossdk.io/log"
+	accountkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
 	txsigning "cosmossdk.io/x/tx/signing"
-	"runtime/debug"
 
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 
@@ -16,9 +18,6 @@ import (
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	ibcante "github.com/cosmos/ibc-go/v8/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
-	evmante "github.com/evmos/ethermint/app/ante"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
-	feeMarketKeeper "github.com/evmos/ethermint/x/feemarket/keeper"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
 )
@@ -32,16 +31,14 @@ type cosmosHandlerOptions struct {
 // HandlerOptions extend the SDK's AnteHandler options by requiring the IBC
 // channel keeper, EVM Keeper and Fee Market Keeper.
 type HandlerOptions struct {
-	AccountKeeper          evmtypes.AccountKeeper
+	AccountKeeper          *accountkeeper.AccountKeeper
 	BankKeeper             bankkeeper.Keeper
 	IBCKeeper              *ibckeeper.Keeper
 	VaultKeeper            vaultmodulekeeper.Keeper
 	SpvKeeper              spvkeeper.Keeper
-	EvmKeeper              evmante.EVMKeeper
 	FeegrantKeeper         authante.FeegrantKeeper
 	SignModeHandler        *txsigning.HandlerMap
 	SigGasConsumer         authante.SignatureVerificationGasConsumer
-	FeeMarketKeeper        feeMarketKeeper.Keeper
 	MaxTxGasWanted         uint64
 	AddressFetchers        []AddressFetcher
 	ExtensionOptionChecker authante.ExtensionOptionChecker
@@ -128,7 +125,6 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 	var decorators []sdk.AnteDecorator
 
 	decorators = append(decorators,
-		evmante.RejectMessagesDecorator{},   // reject MsgEthereumTxs
 		authante.NewSetUpContextDecorator(), // second decorator. SetUpContext must be called before other decorators
 	)
 
@@ -141,17 +137,17 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 	}
 
 	var sigVerification sdk.AnteDecorator = authante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler)
-	if options.isEIP712 {
-		// fixme ignore the deprecated warning
-		sigVerification = evmante.NewLegacyEip712SigVerificationDecorator(options.AccountKeeper, options.SignModeHandler) //nolint
-	}
+	//if options.isEIP712 {
+	// fixme ignore the deprecated warning
+	//	sigVerification = evmante.NewLegacyEip712SigVerificationDecorator(options.AccountKeeper, options.SignModeHandler) //nolint
+	//}
 
 	decorators = append(decorators,
 		NewAuthzLimiterDecorator(
-			sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{}),
-			// sdk.MsgTypeURL(&vesting.MsgCreateVestingAccount{}),
-			// sdk.MsgTypeURL(&vesting.MsgCreatePermanentLockedAccount{}),
-			// sdk.MsgTypeURL(&vesting.MsgCreatePeriodicVestingAccount{}),
+		//sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{}),
+		// sdk.MsgTypeURL(&vesting.MsgCreateVestingAccount{}),
+		// sdk.MsgTypeURL(&vesting.MsgCreatePermanentLockedAccount{}),
+		// sdk.MsgTypeURL(&vesting.MsgCreatePeriodicVestingAccount{}),
 		),
 		authante.NewValidateBasicDecorator(),
 		authante.NewTxTimeoutHeightDecorator(),

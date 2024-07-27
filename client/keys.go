@@ -11,9 +11,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	ethclient "github.com/evmos/ethermint/client"
-	clientkeys "github.com/evmos/ethermint/client/keys"
-	"github.com/evmos/ethermint/crypto/hd"
 )
 
 var ethFlag = "eth"
@@ -65,8 +62,6 @@ The pass backend requires GnuPG: https://gnupg.org/
 		keys.RenameKeyCommand(),
 		keys.ParseKeyStringCommand(),
 		keys.MigrateCommand(),
-		ethclient.UnsafeExportEthKeyCommand(),
-		ethclient.UnsafeImportKeyCommand(),
 	)
 
 	cmd.PersistentFlags().String(flags.FlagHome, defaultNodeHome, "The application home directory")
@@ -93,7 +88,6 @@ func runAddCmd(cmd *cobra.Command, args []string) error {
 			clientCtx.KeyringDir,
 			buf,
 			clientCtx.Codec,
-			hd.EthSecp256k1Option(),
 		)
 		clientCtx = clientCtx.WithKeyring(kr)
 	}
