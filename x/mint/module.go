@@ -134,18 +134,19 @@ func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // InitGenesis performs the capability module's genesis initialization It returns
 // no validator updates.
-func (am AppModule) InitGenesis(ctx context.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(rctx context.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types.GenesisState
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
-
+	ctx := sdk.UnwrapSDKContext(rctx)
 	InitGenesis(ctx, am.keeper, genState)
 
 	return []abci.ValidatorUpdate{}
 }
 
 // ExportGenesis returns the capability module's exported genesis state as raw JSON bytes.
-func (am AppModule) ExportGenesis(ctx context.Context, cdc codec.JSONCodec) json.RawMessage {
+func (am AppModule) ExportGenesis(rctx context.Context, cdc codec.JSONCodec) json.RawMessage {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	genState := ExportGenesis(ctx, am.keeper)
 	return cdc.MustMarshalJSON(genState)
 }
@@ -154,7 +155,8 @@ func (am AppModule) ExportGenesis(ctx context.Context, cdc codec.JSONCodec) json
 func (AppModule) ConsensusVersion() uint64 { return 2 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the capability module.
-func (am AppModule) BeginBlock(ctx context.Context) {
+func (am AppModule) BeginBlock(rctx context.Context) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	BeginBlock(ctx, am.keeper)
 }
 

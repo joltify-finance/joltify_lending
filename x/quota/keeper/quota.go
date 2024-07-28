@@ -30,7 +30,8 @@ func (k Keeper) GetQuotaData(rctx context.Context, moduleName string) (val types
 	return val, true
 }
 
-func (k Keeper) WhetherOnwhitelist(ctx sdk.Context, moduleName, sender string) bool {
+func (k Keeper) WhetherOnwhitelist(rctx context.Context, moduleName, sender string) bool {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	params := k.GetParams(ctx)
 	for _, el := range params.Whitelist {
 		if el.ModuleName == moduleName {

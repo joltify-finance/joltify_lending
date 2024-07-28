@@ -128,14 +128,14 @@ func (am AppModule) InitGenesis(ctx context.Context, cdc codec.JSONCodec, gs jso
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
 
-	InitGenesis(ctx, am.keeper, genState)
+	InitGenesis(sdk.UnwrapSDKContext(ctx), am.keeper, genState)
 
 	return []abci.ValidatorUpdate{}
 }
 
 // ExportGenesis returns the module's exported genesis state as raw JSON bytes.
 func (am AppModule) ExportGenesis(ctx context.Context, cdc codec.JSONCodec) json.RawMessage {
-	genState := ExportGenesis(ctx, am.keeper)
+	genState := ExportGenesis(sdk.UnwrapSDKContext(ctx), am.keeper)
 	return cdc.MustMarshalJSON(genState)
 }
 
@@ -147,7 +147,7 @@ func (am AppModule) BeginBlock(_ context.Context) {}
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
 func (am AppModule) EndBlock(ctx context.Context) []abci.ValidatorUpdate {
-	EndBlock(ctx, am.keeper)
+	EndBlock(sdk.UnwrapSDKContext(ctx), am.keeper)
 	return []abci.ValidatorUpdate{}
 }
 

@@ -1,10 +1,11 @@
 package keeper
 
 import (
+	"context"
 	"math/big"
 	"strings"
 
-	"cosmossdk.io/math"
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -17,7 +18,7 @@ func (k Keeper) UpdateIncentive(ctx context.Context, poolInfo types.PoolInfo) {
 
 	pa := k.GetParams(ctx)
 
-	var conversion math.Int
+	var conversion sdkmath.Int
 	pooldemos := strings.Split(poolInfo.BorrowedAmount.Denom, "-")
 	for _, market := range pa.Markets {
 		if market.GetDenom() == pooldemos[1] {
@@ -33,7 +34,7 @@ func (k Keeper) UpdateIncentive(ctx context.Context, poolInfo types.PoolInfo) {
 			spy := sdkmath.LegacyMustNewDecFromStr(el.Spy).Sub(sdkmath.LegacyOneDec())
 			joltM, err := k.priceFeedKeeper.GetCurrentPrice(ctx, "jolt:usd")
 			if err != nil {
-				ctx.Logger().Error("cannot get jolt price", "error", err)
+				sdk.UnwrapSDKContext(ctx).Logger().Error("cannot get jolt price", "error", err)
 				return
 			}
 

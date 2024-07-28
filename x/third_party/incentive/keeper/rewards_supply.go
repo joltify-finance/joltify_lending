@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"context"
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
@@ -13,7 +12,7 @@ import (
 
 // AccumulateJoltSupplyRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateJoltSupplyRewards(rctx context.Context, rewardPeriod types2.MultiRewardPeriod) {
+func (k Keeper) AccumulateJoltSupplyRewards(rctx sdk.Context, rewardPeriod types2.MultiRewardPeriod) {
 	ctx := sdk.UnwrapSDKContext(rctx)
 	previousAccrualTime, found := k.GetPreviousJoltSupplyRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
@@ -41,7 +40,7 @@ func (k Keeper) AccumulateJoltSupplyRewards(rctx context.Context, rewardPeriod t
 // getJoltSupplyTotalSourceShares fetches the sum of all source shares for a supply reward.
 // In the case of jolt supply, this is the total supplied divided by the supply interest factor.
 // This gives the "pre interest" value of the total supplied.
-func (k Keeper) getJoltSupplyTotalSourceShares(ctx context.Context, denom string) sdkmath.LegacyDec {
+func (k Keeper) getJoltSupplyTotalSourceShares(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	totalSuppliedCoins, found := k.joltKeeper.GetSuppliedCoins(ctx)
 	if !found {
 		// assume no coins have been supplied
@@ -61,7 +60,7 @@ func (k Keeper) getJoltSupplyTotalSourceShares(ctx context.Context, denom string
 
 // InitializeJoltSupplyReward initializes the supply-side of a jolt liquidity provider claim
 // by creating the claim and setting the supply reward factor index
-func (k Keeper) InitializeJoltSupplyReward(ctx context.Context, deposit hardtypes.Deposit) {
+func (k Keeper) InitializeJoltSupplyReward(ctx sdk.Context, deposit hardtypes.Deposit) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, deposit.Depositor)
 	if !found {
 		claim = types2.NewJoltLiquidityProviderClaim(deposit.Depositor, sdk.Coins{}, nil, nil)
@@ -82,7 +81,7 @@ func (k Keeper) InitializeJoltSupplyReward(ctx context.Context, deposit hardtype
 
 // SynchronizeJoltSupplyReward updates the claim object by adding any accumulated rewards
 // and updating the reward index value
-func (k Keeper) SynchronizeJoltSupplyReward(ctx context.Context, deposit hardtypes.Deposit) {
+func (k Keeper) SynchronizeJoltSupplyReward(ctx sdk.Context, deposit hardtypes.Deposit) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, deposit.Depositor)
 	if !found {
 		return
@@ -103,7 +102,7 @@ func (k Keeper) SynchronizeJoltSupplyReward(ctx context.Context, deposit hardtyp
 // synchronizeSingleJoltSupplyReward synchronizes a single rewarded supply denom in a jolt claim.
 // It returns the claim without setting in the store.
 // The public methods for accessing and modifying claims are preferred over this one. Direct modification of claims is easy to get wrong.
-func (k Keeper) synchronizeSingleJoltSupplyReward(ctx context.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdkmath.LegacyDec) types2.JoltLiquidityProviderClaim {
+func (k Keeper) synchronizeSingleJoltSupplyReward(ctx sdk.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdkmath.LegacyDec) types2.JoltLiquidityProviderClaim {
 	globalRewardIndexes, found := k.GetJoltSupplyRewardIndexes(ctx, denom)
 	if !found {
 		// The global factor is only not found if
@@ -137,7 +136,7 @@ func (k Keeper) synchronizeSingleJoltSupplyReward(ctx context.Context, claim typ
 }
 
 // UpdateJoltSupplyIndexDenoms adds any new deposit denoms to the claim's supply reward index
-func (k Keeper) UpdateJoltSupplyIndexDenoms(ctx context.Context, deposit hardtypes.Deposit) {
+func (k Keeper) UpdateJoltSupplyIndexDenoms(ctx sdk.Context, deposit hardtypes.Deposit) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, deposit.Depositor)
 	if !found {
 		claim = types2.NewJoltLiquidityProviderClaim(deposit.Depositor, sdk.Coins{}, nil, nil)
@@ -171,7 +170,7 @@ func (k Keeper) UpdateJoltSupplyIndexDenoms(ctx context.Context, deposit hardtyp
 }
 
 // SynchronizeJoltLiquidityProviderClaim adds any accumulated rewards
-func (k Keeper) SynchronizeJoltLiquidityProviderClaim(ctx context.Context, owner sdk.AccAddress) {
+func (k Keeper) SynchronizeJoltLiquidityProviderClaim(ctx sdk.Context, owner sdk.AccAddress) {
 	// Synchronize any jolt liquidity supply-side rewards
 	deposit, foundDeposit := k.joltKeeper.GetDeposit(ctx, owner)
 	if foundDeposit {
@@ -186,7 +185,7 @@ func (k Keeper) SynchronizeJoltLiquidityProviderClaim(ctx context.Context, owner
 }
 
 // SimulateJoltSynchronization calculates a user's outstanding jolt rewards by simulating reward synchronization
-func (k Keeper) SimulateJoltSynchronization(ctx context.Context, claim types2.JoltLiquidityProviderClaim) types2.JoltLiquidityProviderClaim {
+func (k Keeper) SimulateJoltSynchronization(ctx sdk.Context, claim types2.JoltLiquidityProviderClaim) types2.JoltLiquidityProviderClaim {
 	// 1. Simulate Hard supply-side rewards
 	for _, ri := range claim.SupplyRewardIndexes {
 		globalRewardIndexes, foundGlobalRewardIndexes := k.GetJoltSupplyRewardIndexes(ctx, ri.CollateralType)

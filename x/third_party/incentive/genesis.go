@@ -19,7 +19,7 @@ var EarliestValidAccumulationTime = year
 
 // InitGenesis initializes the store state from a genesis state.
 func InitGenesis(
-	ctx context.Context,
+	ctx sdk.Context,
 	k keeper.Keeper,
 	accountKeeper types.AccountKeeper,
 	gs types.GenesisState,
@@ -91,7 +91,7 @@ func InitGenesis(
 	}
 }
 
-func getSPVGenesisRewardState(ctx context.Context, keeper keeper.Keeper) types.SPVGenesisRewardState {
+func getSPVGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.SPVGenesisRewardState {
 	var ats types.AccumulationTimes
 	keeper.IterateSPVRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
 		ctype = strings.TrimPrefix(ctype, types.Incentiveprefix)
@@ -121,7 +121,7 @@ func getSPVGenesisRewardState(ctx context.Context, keeper keeper.Keeper) types.S
 	return types.NewSPVGenesisRewardState(ats, mris, spvInvestors)
 }
 
-func getSwapGenesisRewardState(ctx context.Context, keeper keeper.Keeper) types.GenesisRewardState {
+func getSwapGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {
 	var ats types.AccumulationTimes
 	keeper.IterateSwapRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
 		ats = append(ats, types.NewAccumulationTime(ctype, accTime))
@@ -138,7 +138,7 @@ func getSwapGenesisRewardState(ctx context.Context, keeper keeper.Keeper) types.
 }
 
 // ExportGenesis export genesis state for incentive module
-func ExportGenesis(ctx context.Context, k keeper.Keeper) types.GenesisState {
+func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types.GenesisState {
 	params := k.GetParams(ctx)
 
 	joltClaims := k.GetAllJoltLiquidityProviderClaims(ctx)
@@ -157,7 +157,7 @@ func ExportGenesis(ctx context.Context, k keeper.Keeper) types.GenesisState {
 	)
 }
 
-func getJoltSupplyGenesisRewardState(ctx context.Context, keeper keeper.Keeper) types.GenesisRewardState {
+func getJoltSupplyGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {
 	var ats types.AccumulationTimes
 	keeper.IterateJoltSupplyRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
 		ats = append(ats, types.NewAccumulationTime(ctype, accTime))
@@ -173,7 +173,7 @@ func getJoltSupplyGenesisRewardState(ctx context.Context, keeper keeper.Keeper) 
 	return types.NewGenesisRewardState(ats, mris)
 }
 
-func getJoltBorrowGenesisRewardState(ctx context.Context, keeper keeper.Keeper) types.GenesisRewardState {
+func getJoltBorrowGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.GenesisRewardState {
 	var ats types.AccumulationTimes
 	keeper.IterateJoltBorrowRewardAccrualTimes(ctx, func(ctype string, accTime time.Time) bool {
 		ats = append(ats, types.NewAccumulationTime(ctype, accTime))

@@ -67,7 +67,7 @@ func (k Keeper) getJoltBorrowTotalSourceShares(ctx context.Context, denom string
 
 // InitializeJoltBorrowReward initializes the borrow-side of a jolt liquidity provider claim
 // by creating the claim and setting the borrow reward factor index
-func (k Keeper) InitializeJoltBorrowReward(ctx context.Context, borrow jolttypes.Borrow) {
+func (k Keeper) InitializeJoltBorrowReward(ctx sdk.Context, borrow jolttypes.Borrow) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, borrow.Borrower)
 	if !found {
 		claim = types2.NewJoltLiquidityProviderClaim(borrow.Borrower, sdk.Coins{}, nil, nil)
@@ -88,7 +88,7 @@ func (k Keeper) InitializeJoltBorrowReward(ctx context.Context, borrow jolttypes
 
 // SynchronizeJoltBorrowReward updates the claim object by adding any accumulated rewards
 // and updating the reward index value
-func (k Keeper) SynchronizeJoltBorrowReward(ctx context.Context, borrow jolttypes.Borrow) {
+func (k Keeper) SynchronizeJoltBorrowReward(ctx sdk.Context, borrow jolttypes.Borrow) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, borrow.Borrower)
 	if !found {
 		return
@@ -109,7 +109,7 @@ func (k Keeper) SynchronizeJoltBorrowReward(ctx context.Context, borrow jolttype
 // synchronizeSingleHardBorrowReward synchronizes a single rewarded borrow denom in a jolt claim.
 // It returns the claim without setting in the store.
 // The public methods for accessing and modifying claims are preferred over this one. Direct modification of claims is easy to get wrong.
-func (k Keeper) synchronizeSingleHardBorrowReward(ctx context.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdkmath.LegacyDec) types2.JoltLiquidityProviderClaim {
+func (k Keeper) synchronizeSingleHardBorrowReward(ctx sdk.Context, claim types2.JoltLiquidityProviderClaim, denom string, sourceShares sdkmath.LegacyDec) types2.JoltLiquidityProviderClaim {
 	globalRewardIndexes, found := k.GetJoltBorrowRewardIndexes(ctx, denom)
 	if !found {
 		// The global factor is only not found if
@@ -143,7 +143,7 @@ func (k Keeper) synchronizeSingleHardBorrowReward(ctx context.Context, claim typ
 }
 
 // UpdateJoltBorrowIndexDenoms adds or removes reward indexes from a claim to match the denoms in the borrow.
-func (k Keeper) UpdateJoltBorrowIndexDenoms(ctx context.Context, borrow jolttypes.Borrow) {
+func (k Keeper) UpdateJoltBorrowIndexDenoms(ctx sdk.Context, borrow jolttypes.Borrow) {
 	claim, found := k.GetJoltLiquidityProviderClaim(ctx, borrow.Borrower)
 	if !found {
 		claim = types2.NewJoltLiquidityProviderClaim(borrow.Borrower, sdk.Coins{}, nil, nil)

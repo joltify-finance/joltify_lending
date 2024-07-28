@@ -7,12 +7,15 @@ import (
 	"time"
 
 	coserrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) handlerPoolClose(ctx context.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdk.Coin, error) {
+func (k Keeper) handlerPoolClose(rctx context.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdk.Coin, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	amount, err := k.cleanupDepositor(ctx, poolInfo, depositor)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -30,7 +33,8 @@ func (k Keeper) handlerPoolClose(ctx context.Context, poolInfo types.PoolInfo, d
 	return tokenSend, err
 }
 
-func (k Keeper) handlerPoolLiquidation(ctx context.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
+func (k Keeper) handlerPoolLiquidation(rctx context.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -74,7 +78,8 @@ func (k Keeper) isEmptyPool(ctx context.Context, poolInfo types.PoolInfo) bool {
 	return true
 }
 
-func (k msgServer) handleDepositClose(ctx context.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
+func (k msgServer) handleDepositClose(rctx context.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	depositor.DepositType = types.DepositorInfo_deactive
 	amountToSend := depositor.WithdrawalAmount
 	interest, err := k.claimInterest(ctx, &depositor)
@@ -151,7 +156,7 @@ func (k msgServer) handleDepositClose(ctx context.Context, depositor types.Depos
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {

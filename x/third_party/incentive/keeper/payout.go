@@ -1,12 +1,13 @@
 package keeper
 
 import (
+	"context"
 	"time"
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	// validatorvesting "github.com/joltify-finance/joltify_lending/x/validator-vesting"
@@ -61,7 +62,8 @@ func (k Keeper) SendTimeLockedCoinsToPeriodicVestingAccount(ctx context.Context,
 }
 
 // SendTimeLockedCoinsToBaseAccount sends time-locked coins from the input module account to the recipient, converting the recipient account to a vesting account
-func (k Keeper) SendTimeLockedCoinsToBaseAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
+func (k Keeper) SendTimeLockedCoinsToBaseAccount(rctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, senderModule, recipientAddr, amt)
 	if err != nil {
 		return err
@@ -71,7 +73,10 @@ func (k Keeper) SendTimeLockedCoinsToBaseAccount(ctx context.Context, senderModu
 	bacc := authtypes.NewBaseAccount(acc.GetAddress(), acc.GetPubKey(), acc.GetAccountNumber(), acc.GetSequence())
 
 	newPeriods := vestingtypes.Periods{types2.NewPeriod(amt, length)}
-	bva := vestingtypes.NewBaseVestingAccount(bacc, amt, ctx.BlockTime().Unix()+length)
+	bva, err := vestingtypes.NewBaseVestingAccount(bacc, amt, ctx.BlockTime().Unix()+length)
+	if err != nil {
+		return err
+	}
 	pva := vestingtypes.NewPeriodicVestingAccountRaw(bva, ctx.BlockTime().Unix(), newPeriods)
 	k.accountKeeper.SetAccount(ctx, pva)
 
@@ -101,7 +106,8 @@ func (k Keeper) GetPeriodLength(blockTime time.Time, monthsLockup int64) int64 {
 
 // addCoinsToVestingSchedule adds coins to the input account's vesting schedule where length is the amount of time (from the current block time), in seconds, that the coins will be vesting for
 // the input address must be a periodic vesting account
-func (k Keeper) addCoinsToVestingSchedule(ctx context.Context, addr sdk.AccAddress, amt sdk.Coins, length int64) {
+func (k Keeper) addCoinsToVestingSchedule(rctx context.Context, addr sdk.AccAddress, amt sdk.Coins, length int64) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	acc := k.accountKeeper.GetAccount(ctx, addr)
 	vacc := acc.(*vestingtypes.PeriodicVestingAccount)
 	// Add the new vesting coins to OriginalVesting

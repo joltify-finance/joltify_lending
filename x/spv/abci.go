@@ -8,7 +8,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func EndBlock(ctx context.Context, k keeper.Keeper) {
+func EndBlock(ctx sdk.Context, k keeper.Keeper) {
 	currentTime := ctx.BlockTime()
 	// we firstly handle the interest
 	k.RunSurplusAuctions(ctx)

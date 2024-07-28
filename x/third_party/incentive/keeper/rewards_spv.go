@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"context"
 	"fmt"
 	"math"
 	"strings"
@@ -21,7 +20,7 @@ import (
 
 // AccumulateSPVRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateSPVRewards(ctx context.Context, rewardPeriod types.MultiRewardPeriod) {
+func (k Keeper) AccumulateSPVRewards(ctx sdk.Context, rewardPeriod types.MultiRewardPeriod) {
 	previousAccrualTime, found := k.GetSPVRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
 		previousAccrualTime = ctx.BlockTime()
@@ -93,7 +92,7 @@ func calculateTokenIncrease(timeDelta time.Duration, rewardPerSecond sdk.Coins) 
 }
 
 // AfterSPVInterestPaid is called after the interest is paid to the pool
-func (k Keeper) AfterSPVInterestPaid(ctx context.Context, poolID string, interestPaid sdkmath.Int) {
+func (k Keeper) AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int) {
 	poolInfo, ok := k.spvKeeper.GetPools(ctx, poolID)
 	if !ok {
 		ctx.Logger().Error("pool not found", "poolID", poolID)
@@ -226,7 +225,7 @@ func (k Keeper) AfterSPVInterestPaid(ctx context.Context, poolID string, interes
 	return
 }
 
-func (k Keeper) BeforeNFTBurn(ctx context.Context, poolIndex, incestorAddr string, nfts []string) error {
+func (k Keeper) BeforeNFTBurn(ctx sdk.Context, poolIndex, incestorAddr string, nfts []string) error {
 	amt, err := CalculateTotalIncentives(ctx, nfts, k.NftKeeper, true)
 	if err != nil {
 		ctx.Logger().Error("fail to calculate the total incentives", "error", err)
@@ -238,7 +237,7 @@ func (k Keeper) BeforeNFTBurn(ctx context.Context, poolIndex, incestorAddr strin
 	return nil
 }
 
-func CalculateTotalIncentives(ctx context.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdk.Coins, error) {
+func CalculateTotalIncentives(ctx sdk.Context, lendNFTs []string, nftKeeper types.NFTKeeper, updateNFT bool) (sdk.Coins, error) {
 	allTotalIncentives := sdk.NewCoins()
 	for _, el := range lendNFTs {
 		ids := strings.Split(el, ":")
@@ -310,7 +309,7 @@ func CalculateTotalIncentives(ctx context.Context, lendNFTs []string, nftKeeper 
 }
 
 // ClaimSPVReward pays out rewards from a claim to a receiver account for RWA incentives.
-func (k Keeper) ClaimSPVReward(ctx context.Context, poolIndex string, investorID sdk.AccAddress) (sdk.Coins, error) {
+func (k Keeper) ClaimSPVReward(ctx sdk.Context, poolIndex string, investorID sdk.AccAddress) (sdk.Coins, error) {
 	amt, found := k.GetSPVInvestorReward(ctx, poolIndex, investorID.String())
 	if !found {
 		ctx.Logger().Debug("No rewards to claim", "poolIndex", poolIndex, "investorID", investorID)
@@ -335,7 +334,7 @@ func (k Keeper) ClaimSPVReward(ctx context.Context, poolIndex string, investorID
 	return total, nil
 }
 
-func (k Keeper) GetSPVRewards(ctx context.Context, poolIndex string, investorID sdk.AccAddress) (sdk.Coins, error) {
+func (k Keeper) GetSPVRewards(ctx sdk.Context, poolIndex string, investorID sdk.AccAddress) (sdk.Coins, error) {
 	amt, found := k.GetSPVInvestorReward(ctx, poolIndex, investorID.String())
 	if !found {
 		ctx.Logger().Debug("No rewards to claim", "poolIndex", poolIndex, "investorID", investorID)

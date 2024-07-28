@@ -3,8 +3,8 @@ package keeper
 import (
 	"context"
 
-	coserrors "cosmossdk.io/errors"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "cosmossdk.io/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -15,27 +15,27 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
+		return nil, errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
-		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, errorsmod.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
 	targetProject, ok := k.kycKeeper.GetProject(ctx, poolInfo.LinkedProject)
 	if !ok {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the given project %v cannot be found", poolInfo.LinkedProject)
+		return nil, errorsmod.Wrapf(sdkerrors.ErrInvalidRequest, "the given project %v cannot be found", poolInfo.LinkedProject)
 	}
 
 	// we use the second one as the mock apy
 	apy, _, err := parameterSanitize(targetProject.PayFreq, []string{msg.PoolApy, "0"})
 	if err != nil {
-		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
+		return nil, errorsmod.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", err.Error())
 	}
 
 	if msg.TargetTokenAmount.Denom != poolInfo.TargetAmount.Denom {
-		return nil, coserrors.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", "target amount denom is not matched")
+		return nil, errorsmod.Wrapf(types.ErrInvalidParameter, "invalid parameter: %v", "target amount denom is not matched")
 	}
 
 	if poolInfo.PoolStatus != types.PoolInfo_PREPARE {
@@ -43,7 +43,7 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 	}
 
 	if !poolInfo.OwnerAddress.Equals(caller) {
-		return nil, coserrors.Wrapf(types.ErrUnauthorized, "%v is not authorized to update the pool", msg.Creator)
+		return nil, errorsmod.Wrapf(types.ErrUnauthorized, "%v is not authorized to update the pool", msg.Creator)
 	}
 
 	pType := "-senior"

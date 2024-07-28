@@ -6,14 +6,17 @@ import (
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+
+	storetypes "cosmossdk.io/store/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) doUpdateLiquidationInfo(ctx context.Context, el string, amountFromLiquidator, totalPoolBorrowed sdk.Coin, paidAmount sdkmath.Int) (sdkmath.Int, error) {
+func (k Keeper) doUpdateLiquidationInfo(rctx context.Context, el string, amountFromLiquidator, totalPoolBorrowed sdk.Coin, paidAmount sdkmath.Int) (sdkmath.Int, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	class, found := k.NftKeeper.GetClass(ctx, el)
 	if !found {
 		panic(found)
@@ -85,10 +88,10 @@ func (k Keeper) handleLiquidation(ctx context.Context, poolInfo types.PoolInfo, 
 	return nil
 }
 
-func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*types.MsgLiquidateResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
+func (k msgServer) Liquidate(rctx context.Context, msg *types.MsgLiquidate) (*types.MsgLiquidateResponse, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 
 	liquidator, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -96,7 +99,7 @@ func (k msgServer) Liquidate(goCtx context.Context, msg *types.MsgLiquidate) (*t
 	}
 
 	if msg.Amount.IsZero() {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "the amount cannot be zero")
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "the amount cannot be zero")
 	}
 
 	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)

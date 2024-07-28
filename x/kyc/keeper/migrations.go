@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"context"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	v16 "github.com/joltify-finance/joltify_lending/x/kyc/migrate"
 )
@@ -18,6 +16,6 @@ func NewMigrator(keeper Keeper) Migrator {
 }
 
 // Migrate1to2 from version 1 to 2.
-func (m Migrator) Migrate1to2(ctx context.Context) error {
+func (m Migrator) Migrate1to2(ctx sdk.Context) error {
 	return v16.MigrateStore(sdk.UnwrapSDKContext(ctx), m.keeper.paramstore, m.keeper.storeKey, m.keeper.cdc)
 }

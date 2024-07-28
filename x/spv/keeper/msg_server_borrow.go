@@ -5,12 +5,13 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	types2 "cosmossdk.io/store/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gogo/protobuf/proto"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
@@ -63,7 +64,7 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo, borrowAmount
 
 func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.MsgBorrowResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(types2.NewInfiniteGasMeter())
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -72,7 +73,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
 	if !found {
-		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
 	if msg.BorrowAmount.Denom != poolInfo.TargetAmount.Denom {
@@ -85,7 +86,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	juniorInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
 	if !found {
-		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 	allBorrowed = k.getAllBorrowed(ctx, juniorInfo)
 
@@ -114,7 +115,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	err = k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdkmath.ZeroInt(), false)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "borrow failed %v", err)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "borrow failed %v", err)
 	}
 
 	// now we need to update the interest prepaid

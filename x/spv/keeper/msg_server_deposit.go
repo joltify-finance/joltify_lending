@@ -5,17 +5,18 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	types2 "cosmossdk.io/store/types"
 
 	coserrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
 func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types.MsgDepositResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(types2.NewInfiniteGasMeter())
 
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -24,7 +25,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	poolInfo, ok := k.GetPools(ctx, msg.GetPoolIndex())
 	if !ok {
-		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
 	}
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
@@ -43,7 +44,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 
 	resp, err := k.kycKeeper.GetByWallet(ctx, msg.Creator)
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrNotFound, "the investor cannot be found %v", msg.Creator)
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "the investor cannot be found %v", msg.Creator)
 	}
 
 	investorsResp, found := k.GetInvestorToPool(ctx, msg.PoolIndex)
@@ -65,7 +66,7 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 	// now we transfer the token from the investor to the pool.
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, investor, types.ModuleAccount, sdk.NewCoins(msg.Token))
 	if err != nil {
-		return nil, coserrors.Wrapf(errorsmod.ErrInvalidRequest, "fail to transfer the token to the pool %v", err)
+		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "fail to transfer the token to the pool %v", err)
 	}
 
 	// now we update the users deposit data

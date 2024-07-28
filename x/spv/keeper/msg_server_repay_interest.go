@@ -5,7 +5,9 @@ import (
 	"errors"
 	"time"
 
+	storetypes "cosmossdk.io/store/types"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 
 	coserrors "cosmossdk.io/errors"
@@ -14,9 +16,10 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) updateInterestData(ctx context.Context, interestData *types.BorrowInterest, reserve sdkmath.LegacyDec, firstBorrow bool, exchangeRatio sdkmath.LegacyDec) (sdk.Coin, time.Time, error) {
+func (k Keeper) updateInterestData(rctx context.Context, interestData *types.BorrowInterest, reserve sdkmath.LegacyDec, firstBorrow bool, exchangeRatio sdkmath.LegacyDec) (sdk.Coin, time.Time, error) {
 	var payment, paymentToInvestor sdk.Coin
 	var thisPaymentTime time.Time
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
 	latestPaymentDueTime := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 
@@ -161,7 +164,8 @@ func (k Keeper) getAllInterestToBePaid(ctx context.Context, poolInfo *types.Pool
 	return totalPayment, poolLatestPaymentTime, nil
 }
 
-func (k msgServer) calculatePaymentMonth(ctx context.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdkmath.LegacyDec, error) {
+func (k msgServer) calculatePaymentMonth(rctx context.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdkmath.LegacyDec, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	paymentAmount, err := k.calculateTotalDueInterest(ctx, poolInfo)
 	if err != nil {
 		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.LegacyZeroDec(), err
@@ -177,9 +181,9 @@ func (k msgServer) calculatePaymentMonth(ctx context.Context, poolInfo types.Poo
 	return int32(counter.Int64()), usdEachMonth.Mul(counter), usdEachMonth, ratio, nil
 }
 
-func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+func (k msgServer) RepayInterest(rctx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
+	ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {

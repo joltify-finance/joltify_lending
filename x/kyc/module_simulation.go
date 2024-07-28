@@ -55,7 +55,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations := make([]simtypes.WeightedOperation, 0)
 
 	var weightMsgUploadInvestor int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgUploadInvestor, &weightMsgUploadInvestor, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgUploadInvestor, &weightMsgUploadInvestor, nil,
 		func(_ *rand.Rand) {
 			weightMsgUploadInvestor = defaultWeightMsgUploadInvestor
 		},
