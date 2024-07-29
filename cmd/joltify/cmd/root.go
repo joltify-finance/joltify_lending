@@ -4,15 +4,16 @@ import (
 	"os"
 	"strings"
 
+	confixcmd "cosmossdk.io/tools/confix/cmd"
+	"github.com/cosmos/cosmos-sdk/client/pruning"
+
 	"cosmossdk.io/simapp"
 
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
 
 	"github.com/cosmos/cosmos-sdk/client/keys"
 
-	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/debug"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
@@ -79,7 +80,8 @@ func NewRootCmd() *cobra.Command {
 		},
 	}
 
-	initRootCmd(rootCmd, clientCtx.TxConfig, moduleBasicManager)
+	initRootCmd(rootCmd, encodingConfig.TxConfig, moduleBasicManager)
+	addSubCmds(rootCmd, clientCtx.TxConfig, moduleBasicManager)
 
 	overwriteFlagDefaults(rootCmd, map[string]string{
 		flags.FlagChainID:        strings.ReplaceAll(app.Name, "-", ""),
@@ -90,25 +92,32 @@ func NewRootCmd() *cobra.Command {
 }
 
 // addSubCmds registers all the sub commands used by joltify.
-func addSubCmds(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, defaultNodeHome string) {
+func addSubCmds(rootCmd *cobra.Command,
+	txConfig client.TxConfig,
+	basicManager module.BasicManager,
+) {
 	gentxModule := simapp.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
 	rootCmd.AddCommand(
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, defaultNodeHome, gentxModule.GenTxValidator),
-		genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, defaultNodeHome),
-		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
-		AddGenesisAccountCmd(defaultNodeHome),
-		tmcli.NewCompletionCmd(rootCmd, true), // TODO add other shells, drop tmcli dependency, unhide?
-		// testnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}), // TODO add
+
+		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
 		debug.Cmd(),
-		config.Cmd(),
+		confixcmd.ConfigCommand(),
+		pruning.Cmd(newApp, app.DefaultNodeHome),
 		snapshot.Cmd(newApp),
+
+		// genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, defaultNodeHome, gentxModule.GenTxValidator),
+		// genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, defaultNodeHome),
+		// genutilcli.ValidateGenesisCmd(app.ModuleBasics),
+		// AddGenesisAccountCmd(defaultNodeHome),
+		// tmcli.NewCompletionCmd(rootCmd, true), // TODO add other shells, drop tmcli dependency, unhide?
+		// testnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}), // TODO add
+		// config.Cmd(),
+		// snapshot.Cmd(newApp),
 	)
 
 	ac := appCreator{
 		encodingConfig: encodingConfig,
 	}
-
-	addSubCmds(rootCmd, encodingConfig, app.DefaultNodeHome)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
