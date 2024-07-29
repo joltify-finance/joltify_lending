@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cosmos/cosmos-sdk/server"
+
 	"cosmossdk.io/log"
 
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -39,7 +41,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/consensus"
 
-	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap"
 
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
@@ -154,7 +155,6 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/joltify-finance/joltify_lending/app/ante"
-	joltparams "github.com/joltify-finance/joltify_lending/app/params"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
 	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
 
@@ -328,16 +328,23 @@ func NewApp(
 	db dbm.DB,
 	homePath string,
 	traceStore io.Writer,
-	encodingConfig joltparams.EncodingConfig,
-	options Options,
-	invCheckPeriod uint,
+	loadLatest bool,
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
+	encodingConfig := MakeEncodingConfig()
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 	txConfig := encodingConfig.TxConfig
+
+	invCheckPeriod := cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod))
+
+	// get skipUpgradeHeights from the app options
+	skipUpgradeHeights := map[int64]bool{}
+	for _, h := range cast.ToIntSlice(appOpts.Get(server.FlagUnsafeSkipUpgrades)) {
+		skipUpgradeHeights[int64(h)] = true
+	}
 
 	bApp := baseapp.NewBaseApp(Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
@@ -485,7 +492,7 @@ func NewApp(
 		app.accountKeeper.AddressCodec(),
 	)
 	app.upgradeKeeper = upgradekeeper.NewKeeper(
-		options.SkipUpgradeHeights,
+		skipUpgradeHeights,
 		runtime.NewKVStoreService(keys[upgradetypes.StoreKey]),
 		appCodec,
 		homePath,
@@ -885,7 +892,6 @@ func NewApp(
 		FeegrantKeeper:         app.feeGrantKeeper,
 		SpvKeeper:              app.spvKeeper,
 		IBCKeeper:              app.ibcKeeper,
-		MaxTxGasWanted:         options.EVMMaxGasWanted,
 		AddressFetchers:        []ante.AddressFetcher{},
 		ExtensionOptionChecker: extensionCheck,
 		TxFeeChecker:           nil,
@@ -906,11 +912,11 @@ func NewApp(
 	app.setupUpgradeHandlers()
 
 	// load store
-	if !options.SkipLoadLatest {
-		if err := app.LoadLatestVersion(); err != nil {
-			tmos.Exit(err.Error())
-		}
-	}
+	//if !options.SkipLoadLatest {
+	//	if err := app.LoadLatestVersion(); err != nil {
+	//		tmos.Exit(err.Error())
+	//	}
+	//}
 
 	return app
 }
@@ -940,7 +946,6 @@ func (app *App) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.
 	app.upgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
 
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
-
 }
 
 // LoadHeight loads the app state for a particular height.
