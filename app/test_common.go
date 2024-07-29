@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/client"
+
 	dbm "github.com/cosmos/cosmos-db"
 
 	pruningtypes "cosmossdk.io/store/pruning/types"
@@ -232,6 +234,10 @@ func (app *App) LegacyAmino() *codec.LegacyAmino {
 // AppCodec returns the app's app codec.
 func (app *App) AppCodec() codec.Codec {
 	return app.appCodec
+}
+
+func (app *App) TxConfig() client.TxConfig {
+	return app.txConfig
 }
 
 // InitializeFromGenesisStates calls InitChain on the app using the provided genesis states.

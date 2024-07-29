@@ -7,6 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
+	tmos "github.com/cometbft/cometbft/libs/os"
+
+	params2 "github.com/joltify-finance/joltify_lending/app/params"
+
+	"github.com/cosmos/cosmos-sdk/client/flags"
+
 	"github.com/cosmos/cosmos-sdk/server"
 
 	"cosmossdk.io/log"
@@ -260,6 +266,7 @@ type App struct {
 	legacyAmino       *codec.LegacyAmino
 	appCodec          codec.Codec
 	interfaceRegistry types.InterfaceRegistry
+	txConfig          client.TxConfig
 
 	// keys to access the substores
 	keys    map[string]*storetypes.KVStoreKey
@@ -326,7 +333,6 @@ func init() {
 func NewApp(
 	logger log.Logger,
 	db dbm.DB,
-	homePath string,
 	traceStore io.Writer,
 	loadLatest bool,
 	appOpts servertypes.AppOptions,
@@ -344,6 +350,11 @@ func NewApp(
 	skipUpgradeHeights := map[int64]bool{}
 	for _, h := range cast.ToIntSlice(appOpts.Get(server.FlagUnsafeSkipUpgrades)) {
 		skipUpgradeHeights[int64(h)] = true
+	}
+
+	homePath := cast.ToString(appOpts.Get(flags.FlagHome))
+	if homePath == "" {
+		homePath = DefaultNodeHome
 	}
 
 	bApp := baseapp.NewBaseApp(Name, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
@@ -912,11 +923,11 @@ func NewApp(
 	app.setupUpgradeHandlers()
 
 	// load store
-	//if !options.SkipLoadLatest {
-	//	if err := app.LoadLatestVersion(); err != nil {
-	//		tmos.Exit(err.Error())
-	//	}
-	//}
+	if loadLatest {
+		if err := app.LoadLatestVersion(); err != nil {
+			tmos.Exit(err.Error())
+		}
+	}
 
 	return app
 }
@@ -1088,4 +1099,13 @@ func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 	delete(modAccAddrs, authtypes.NewModuleAddress(incentivetypes.IncentiveMacc).String())
 
 	return modAccAddrs
+}
+
+func (app *App) EncodingConfig() params2.EncodingConfig {
+	return params2.EncodingConfig{
+		InterfaceRegistry: app.InterfaceRegistry(),
+		Marshaler:         app.AppCodec(),
+		TxConfig:          app.TxConfig(),
+		Amino:             app.LegacyAmino(),
+	}
 }

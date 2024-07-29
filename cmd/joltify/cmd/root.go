@@ -20,13 +20,14 @@ import (
 	"io"
 	"os"
 
+	params2 "github.com/joltify-finance/joltify_lending/app/params"
+
 	"github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/spf13/cobra"
 
 	cmtlog "cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
-	cmtcfg "github.com/cometbft/cometbft/config"
 	cmtcli "github.com/cometbft/cometbft/libs/cli"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -49,14 +50,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 )
 
 const (
 	EnvPrefix = "ETHERMINT"
-	ChainID   = "ethermint_9000-1"
+	ChainID   = "joltify_1729-1"
 )
 
 type emptyAppOptions struct{}
@@ -69,46 +69,9 @@ func NewRootCmd() (*cobra.Command, EncodingConfig) {
 	tempApp := app.NewApp(cmtlog.NewNopLogger(), dbm.NewMemDB(), nil, true, emptyAppOptions{})
 	// MakeConfig creates an EncodingConfig
 
-
-	encoding:= app.MakeEncodingConfig()
-
-	func MakeConfig() ethermint.EncodingConfig {
-		cdc := amino.NewLegacyAmino()
-		signingOptions := signing.Options{
-		AddressCodec: address.Bech32Codec{
-		Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
-	},
-		ValidatorAddressCodec: address.Bech32Codec{
-		Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
-	},
-	}
-		interfaceRegistry, err := types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
-		ProtoFiles:     gogoproto.HybridResolver,
-		SigningOptions: signingOptions,
-	})
-		if err != nil {
-		panic(err)
-	}
-		if err := interfaceRegistry.SigningContext().Validate(); err != nil {
-		panic(err)
-	}
-		codec := amino.NewProtoCodec(interfaceRegistry)
-		encodingConfig := ethermint.EncodingConfig{
-		InterfaceRegistry: interfaceRegistry,
-		Codec:             codec,
-		TxConfig:          tx.NewTxConfig(codec, tx.DefaultSignModes),
-		Amino:             cdc,
-	}
-		enccodec.RegisterLegacyAminoCodec(cdc)
-		enccodec.RegisterInterfaces(encodingConfig.InterfaceRegistry)
-		// This is needed for the EIP712 txs because currently is using
-		// the deprecated method legacytx.StdSignBytes
-		legacytx.RegressionTestingAminoCodec = cdc
-		return encodingConfig
-	}
 	encodingConfig := tempApp.EncodingConfig()
 	initClientCtx := client.Context{}.
-		WithCodec(encodingConfig.Codec).
+		WithCodec(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
 		WithTxConfig(encodingConfig.TxConfig).
 		WithLegacyAmino(encodingConfig.Amino).
@@ -116,12 +79,11 @@ func NewRootCmd() (*cobra.Command, EncodingConfig) {
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastSync).
 		WithHomeDir(app.DefaultNodeHome).
-		WithKeyringOptions(hd.EthSecp256k1Option()).
 		WithViper(EnvPrefix)
 
 	rootCmd := &cobra.Command{
-		Use:   "ethermintd",
-		Short: "Ethermint Daemon",
+		Use:   "joltify",
+		Short: "joltify Daemon",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
@@ -160,9 +122,10 @@ func NewRootCmd() (*cobra.Command, EncodingConfig) {
 			}
 
 			// FIXME: replace AttoPhoton with bond denom
-			customAppTemplate, customAppConfig := servercfg.AppConfig(ethermint.AttoPhoton)
+			customAppTemplate, customAppConfig := app.InitAppConfig()
+			customCMTConfig := app.InitCometBFTConfig()
 
-			return sdkserver.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, cmtcfg.DefaultConfig())
+			return sdkserver.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customCMTConfig)
 		},
 	}
 
@@ -182,18 +145,15 @@ func NewRootCmd() (*cobra.Command, EncodingConfig) {
 
 func initRootCmd(
 	rootCmd *cobra.Command,
-	encodingConfig ethermint.EncodingConfig,
+	encodingConfig params2.EncodingConfig,
 	basicManager module.BasicManager,
 ) {
 	cfg := sdk.GetConfig()
 	cfg.Seal()
 
 	rootCmd.AddCommand(
-		ethermintclient.ValidateChainID(
-			genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
-		),
+
 		cmtcli.NewCompletionCmd(rootCmd, true),
-		ethermintclient.NewTestnetCmd(basicManager, banktypes.GenesisBalancesIterator{}),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
 		pruning.Cmd(newApp, app.DefaultNodeHome),
@@ -209,7 +169,6 @@ func initRootCmd(
 		genesisCommand(encodingConfig.TxConfig, basicManager),
 		queryCommand(),
 		txCommand(),
-		ethermintclient.KeyCommands(app.DefaultNodeHome),
 	)
 
 	rootCmd, err := srvflags.AddGlobalFlags(rootCmd)
@@ -285,12 +244,12 @@ func txCommand() *cobra.Command {
 // newApp creates the application
 func newApp(logger cmtlog.Logger, db dbm.DB, traceStore io.Writer, appOpts servertypes.AppOptions) servertypes.Application {
 	baseappOptions := sdkserver.DefaultBaseappOptions(appOpts)
-	ethermintApp := app.NewEthermintApp(
+	napp := app.NewApp(
 		logger, db, traceStore, true,
 		appOpts,
 		baseappOptions...,
 	)
-	return ethermintApp
+	return napp
 }
 
 // appExport creates a new app (optionally at a given height)
@@ -305,20 +264,20 @@ func appExport(
 	appOpts servertypes.AppOptions,
 	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
-	var ethermintApp *app.EthermintApp
+	var ethermintApp *app.App
 	homePath, ok := appOpts.Get(flags.FlagHome).(string)
 	if !ok || homePath == "" {
 		return servertypes.ExportedApp{}, errors.New("application home not set")
 	}
 
 	if height != -1 {
-		ethermintApp = app.NewEthermintApp(logger, db, traceStore, false, appOpts, baseapp.SetChainID(ChainID))
+		ethermintApp = app.NewApp(logger, db, traceStore, false, appOpts, baseapp.SetChainID(ChainID))
 
 		if err := ethermintApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		ethermintApp = app.NewEthermintApp(logger, db, traceStore, true, appOpts, baseapp.SetChainID(ChainID))
+		ethermintApp = app.NewApp(logger, db, traceStore, true, appOpts, baseapp.SetChainID(ChainID))
 	}
 
 	return ethermintApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
