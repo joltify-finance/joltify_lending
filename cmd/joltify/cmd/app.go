@@ -134,7 +134,7 @@ func txCommand() *cobra.Command {
 }
 
 // newApp loads config from AppOptions and returns a new app.
-func newApp(
+func (ac appCreator) newApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
@@ -199,7 +199,7 @@ func newApp(
 }
 
 // appExport writes out an app's state to json.
-func appExport(
+func (ac appCreator) appExport(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
