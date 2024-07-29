@@ -1,140 +1,325 @@
+// Copyright 2021 Evmos Foundation
+// This file is part of Evmos' Ethermint library.
+//
+// The Ethermint library is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// The Ethermint library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
 package cmd
 
 import (
+	"errors"
+	"io"
 	"os"
-	"strings"
 
-	confixcmd "cosmossdk.io/tools/confix/cmd"
-	"github.com/cosmos/cosmos-sdk/client/pruning"
-
-	"github.com/cosmos/cosmos-sdk/client/snapshot"
-
-	"github.com/cosmos/cosmos-sdk/client/keys"
-
-	tmcfg "github.com/cometbft/cometbft/config"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/config"
-	"github.com/cosmos/cosmos-sdk/client/debug"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/joltify-finance/joltify_lending/app"
+
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
+
+	cmtlog "cosmossdk.io/log"
+	confixcmd "cosmossdk.io/tools/confix/cmd"
+	cmtcfg "github.com/cometbft/cometbft/config"
+	cmtcli "github.com/cometbft/cometbft/libs/cli"
+	dbm "github.com/cosmos/cosmos-db"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	txmodule "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
+
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client"
+	clientcfg "github.com/cosmos/cosmos-sdk/client/config"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/pruning"
+	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/client/snapshot"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdkserver "github.com/cosmos/cosmos-sdk/server"
+	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/cosmos/cosmos-sdk/client/debug"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/cosmos/cosmos-sdk/x/crisis"
+	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 )
 
-// EnvPrefix is the prefix environment variables must have to configure the app.
-const EnvPrefix = "JOLT"
+const (
+	EnvPrefix = "ETHERMINT"
+	ChainID   = "ethermint_9000-1"
+)
 
-// NewRootCmd creates a new root command for the joltify blockchain.
-func NewRootCmd() *cobra.Command {
-	var (
-		moduleBasicManager module.BasicManager
-		clientCtx          client.Context
-		err                error
-	)
-	app.SetSDKConfig().Seal()
+type emptyAppOptions struct{}
 
-	encodingConfig := app.MakeEncodingConfig()
+func (ao emptyAppOptions) Get(_ string) interface{} { return nil }
 
+// NewRootCmd creates a new root command for simd. It is called once in the
+// main function.
+func NewRootCmd() (*cobra.Command, EncodingConfig) {
+	tempApp := app.NewApp(cmtlog.NewNopLogger(), dbm.NewMemDB(), nil, true, emptyAppOptions{})
+	// MakeConfig creates an EncodingConfig
+
+
+	encoding:= app.MakeEncodingConfig()
+
+	func MakeConfig() ethermint.EncodingConfig {
+		cdc := amino.NewLegacyAmino()
+		signingOptions := signing.Options{
+		AddressCodec: address.Bech32Codec{
+		Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
+	},
+		ValidatorAddressCodec: address.Bech32Codec{
+		Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
+	},
+	}
+		interfaceRegistry, err := types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
+		ProtoFiles:     gogoproto.HybridResolver,
+		SigningOptions: signingOptions,
+	})
+		if err != nil {
+		panic(err)
+	}
+		if err := interfaceRegistry.SigningContext().Validate(); err != nil {
+		panic(err)
+	}
+		codec := amino.NewProtoCodec(interfaceRegistry)
+		encodingConfig := ethermint.EncodingConfig{
+		InterfaceRegistry: interfaceRegistry,
+		Codec:             codec,
+		TxConfig:          tx.NewTxConfig(codec, tx.DefaultSignModes),
+		Amino:             cdc,
+	}
+		enccodec.RegisterLegacyAminoCodec(cdc)
+		enccodec.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+		// This is needed for the EIP712 txs because currently is using
+		// the deprecated method legacytx.StdSignBytes
+		legacytx.RegressionTestingAminoCodec = cdc
+		return encodingConfig
+	}
+	encodingConfig := tempApp.EncodingConfig()
 	initClientCtx := client.Context{}.
-		WithCodec(encodingConfig.Marshaler).
+		WithCodec(encodingConfig.Codec).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
 		WithTxConfig(encodingConfig.TxConfig).
 		WithLegacyAmino(encodingConfig.Amino).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
+		WithBroadcastMode(flags.BroadcastSync).
 		WithHomeDir(app.DefaultNodeHome).
+		WithKeyringOptions(hd.EthSecp256k1Option()).
 		WithViper(EnvPrefix)
 
 	rootCmd := &cobra.Command{
-		Use:   "joltify",
-		Short: "Daemon and CLI for the Joltify blockchain.",
+		Use:   "ethermintd",
+		Short: "Ethermint Daemon",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
 
-			initClientCtx, err = client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
+			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err
 			}
 
-			initClientCtx, err = config.ReadFromClientConfig(initClientCtx)
+			initClientCtx, err = clientcfg.ReadFromClientConfig(initClientCtx)
 			if err != nil {
 				return err
 			}
 
-			if err = client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
+			// This needs to go after ReadFromClientConfig, as that function
+			// sets the RPC client needed for SIGN_MODE_TEXTUAL. This sign mode
+			// is only available if the client is online.
+			if !initClientCtx.Offline {
+				txConfigOpts := tx.ConfigOptions{
+					EnabledSignModes:           append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL),
+					TextualCoinMetadataQueryFn: txmodule.NewGRPCCoinMetadataQueryFn(initClientCtx),
+				}
+				txConfig, err := tx.NewTxConfigWithOptions(
+					initClientCtx.Codec,
+					txConfigOpts,
+				)
+				if err != nil {
+					return err
+				}
+
+				initClientCtx = initClientCtx.WithTxConfig(txConfig)
+			}
+			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
 
-			customAppTemplate, customAppConfig := initAppConfig("ujolt")
-			return server.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, tmcfg.DefaultConfig())
+			// FIXME: replace AttoPhoton with bond denom
+			customAppTemplate, customAppConfig := servercfg.AppConfig(ethermint.AttoPhoton)
+
+			return sdkserver.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, cmtcfg.DefaultConfig())
 		},
 	}
 
-	// initRootCmd(rootCmd, encodingConfig.TxConfig, moduleBasicManager)
-	addSubCmds(rootCmd, clientCtx.TxConfig, moduleBasicManager)
+	// TODO: double-check
+	// authclient.Codec = encodingConfig.Codec
 
-	overwriteFlagDefaults(rootCmd, map[string]string{
-		flags.FlagChainID:        strings.ReplaceAll(app.Name, "-", ""),
-		flags.FlagKeyringBackend: "test",
-	})
-
-	return rootCmd
+	initRootCmd(rootCmd, encodingConfig, tempApp.BasicModuleManager)
+	autoCliOpts := tempApp.AutoCliOpts()
+	initClientCtx, _ = clientcfg.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
+	autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
+	autoCliOpts.ClientCtx = initClientCtx
+	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
+		panic(err)
+	}
+	return rootCmd, encodingConfig
 }
 
-// addSubCmds registers all the sub commands used by joltify.
-func addSubCmds(rootCmd *cobra.Command,
-	txConfig client.TxConfig,
+func initRootCmd(
+	rootCmd *cobra.Command,
+	encodingConfig ethermint.EncodingConfig,
 	basicManager module.BasicManager,
 ) {
-	encodingConfig := app.MakeEncodingConfig()
-	ac := appCreator{
-		encodingConfig: encodingConfig,
-	}
+	cfg := sdk.GetConfig()
+	cfg.Seal()
 
 	rootCmd.AddCommand(
-
-		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
+		ethermintclient.ValidateChainID(
+			genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
+		),
+		cmtcli.NewCompletionCmd(rootCmd, true),
+		ethermintclient.NewTestnetCmd(basicManager, banktypes.GenesisBalancesIterator{}),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
-		pruning.Cmd(ac.newApp, app.DefaultNodeHome),
-		snapshot.Cmd(ac.newApp),
-
-		// genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, defaultNodeHome, gentxModule.GenTxValidator),
-		// genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, defaultNodeHome),
-		// genutilcli.ValidateGenesisCmd(app.ModuleBasics),
-		// AddGenesisAccountCmd(defaultNodeHome),
-		// tmcli.NewCompletionCmd(rootCmd, true), // TODO add other shells, drop tmcli dependency, unhide?
-		// testnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}), // TODO add
-		// config.Cmd(),
-		// snapshot.Cmd(newApp),
+		pruning.Cmd(newApp, app.DefaultNodeHome),
+		snapshot.Cmd(newApp),
+		// this line is used by starport scaffolding # stargate/root/commands
 	)
+
+	server.AddCommands(rootCmd, server.NewDefaultStartOptions(newApp, app.DefaultNodeHome), appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
-		StatusCommand(),
-		newQueryCmd(),
-		newTxCmd(),
-		keys.Commands(),
+		sdkserver.StatusCommand(),
+		genesisCommand(encodingConfig.TxConfig, basicManager),
+		queryCommand(),
+		txCommand(),
+		ethermintclient.KeyCommands(app.DefaultNodeHome),
 	)
+
+	rootCmd, err := srvflags.AddGlobalFlags(rootCmd)
+	if err != nil {
+		panic(err)
+	}
+
+	// add rosetta
+	rootCmd.AddCommand(rosettaCmd.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
 }
 
-func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
-	set := func(s *pflag.FlagSet, key, val string) {
-		if f := s.Lookup(key); f != nil {
-			f.DefValue = val
-			_ = f.Value.Set(val)
+// genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter
+func genesisCommand(txConfig client.TxConfig, basicManager module.BasicManager, cmds ...*cobra.Command) *cobra.Command {
+	cmd := genutilcli.Commands(txConfig, basicManager, app.DefaultNodeHome)
+
+	for _, subCmd := range cmds {
+		cmd.AddCommand(subCmd)
+	}
+	return cmd
+}
+
+func addModuleInitFlags(startCmd *cobra.Command) {
+	crisis.AddModuleInitFlags(startCmd)
+}
+
+func queryCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:                        "query",
+		Aliases:                    []string{"q"},
+		Short:                      "Querying subcommands",
+		DisableFlagParsing:         false,
+		SuggestionsMinimumDistance: 2,
+		RunE:                       client.ValidateCmd,
+	}
+
+	cmd.AddCommand(
+		rpc.ValidatorCommand(),
+		sdkserver.QueryBlockCmd(),
+		sdkserver.QueryBlocksCmd(),
+		sdkserver.QueryBlockResultsCmd(),
+		authcmd.QueryTxsByEventsCmd(),
+		authcmd.QueryTxCmd(),
+		rpc.QueryEventForTxCmd(),
+	)
+
+	return cmd
+}
+
+func txCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:                        "tx",
+		Short:                      "Transactions subcommands",
+		DisableFlagParsing:         false,
+		SuggestionsMinimumDistance: 2,
+		RunE:                       client.ValidateCmd,
+	}
+
+	cmd.AddCommand(
+		authcmd.GetSignCommand(),
+		authcmd.GetSignBatchCommand(),
+		authcmd.GetMultiSignCommand(),
+		authcmd.GetMultiSignBatchCmd(),
+		authcmd.GetValidateSignaturesCommand(),
+		authcmd.GetBroadcastCommand(),
+		authcmd.GetEncodeCommand(),
+		authcmd.GetDecodeCommand(),
+		authcmd.GetSimulateCmd(),
+	)
+
+	return cmd
+}
+
+// newApp creates the application
+func newApp(logger cmtlog.Logger, db dbm.DB, traceStore io.Writer, appOpts servertypes.AppOptions) servertypes.Application {
+	baseappOptions := sdkserver.DefaultBaseappOptions(appOpts)
+	ethermintApp := app.NewEthermintApp(
+		logger, db, traceStore, true,
+		appOpts,
+		baseappOptions...,
+	)
+	return ethermintApp
+}
+
+// appExport creates a new app (optionally at a given height)
+// and exports state.
+func appExport(
+	logger cmtlog.Logger,
+	db dbm.DB,
+	traceStore io.Writer,
+	height int64,
+	forZeroHeight bool,
+	jailAllowedAddrs []string,
+	appOpts servertypes.AppOptions,
+	modulesToExport []string,
+) (servertypes.ExportedApp, error) {
+	var ethermintApp *app.EthermintApp
+	homePath, ok := appOpts.Get(flags.FlagHome).(string)
+	if !ok || homePath == "" {
+		return servertypes.ExportedApp{}, errors.New("application home not set")
+	}
+
+	if height != -1 {
+		ethermintApp = app.NewEthermintApp(logger, db, traceStore, false, appOpts, baseapp.SetChainID(ChainID))
+
+		if err := ethermintApp.LoadHeight(height); err != nil {
+			return servertypes.ExportedApp{}, err
 		}
+	} else {
+		ethermintApp = app.NewEthermintApp(logger, db, traceStore, true, appOpts, baseapp.SetChainID(ChainID))
 	}
-	for key, val := range defaults {
-		set(c.Flags(), key, val)
-		set(c.PersistentFlags(), key, val)
-	}
-	for _, c := range c.Commands() {
-		overwriteFlagDefaults(c, defaults)
-	}
+
+	return ethermintApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
 }
