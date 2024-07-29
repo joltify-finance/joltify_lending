@@ -1,24 +1,13 @@
-// Copyright 2021 Evmos Foundation
-// This file is part of Evmos' Ethermint library.
-//
-// The Ethermint library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The Ethermint library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the Ethermint library. If not, see https://github.com/evmos/ethermint/blob/main/LICENSE
 package cmd
 
 import (
 	"errors"
 	"io"
 	"os"
+
+	"github.com/spf13/pflag"
+
+	"github.com/cosmos/cosmos-sdk/client/keys"
 
 	params2 "github.com/joltify-finance/joltify_lending/app/params"
 	"github.com/spf13/viper"
@@ -31,10 +20,6 @@ import (
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 	cmtcli "github.com/cometbft/cometbft/libs/cli"
 	dbm "github.com/cosmos/cosmos-db"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/auth/tx"
-	txmodule "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	clientcfg "github.com/cosmos/cosmos-sdk/client/config"
@@ -45,11 +30,11 @@ import (
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/cosmos/cosmos-sdk/server"
 
 	"github.com/cosmos/cosmos-sdk/client/debug"
-	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -104,21 +89,21 @@ func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
 			// This needs to go after ReadFromClientConfig, as that function
 			// sets the RPC client needed for SIGN_MODE_TEXTUAL. This sign mode
 			// is only available if the client is online.
-			if !initClientCtx.Offline {
-				txConfigOpts := tx.ConfigOptions{
-					EnabledSignModes:           append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL),
-					TextualCoinMetadataQueryFn: txmodule.NewGRPCCoinMetadataQueryFn(initClientCtx),
-				}
-				txConfig, err := tx.NewTxConfigWithOptions(
-					initClientCtx.Codec,
-					txConfigOpts,
-				)
-				if err != nil {
-					return err
-				}
-
-				initClientCtx = initClientCtx.WithTxConfig(txConfig)
-			}
+			//if !initClientCtx.Offline {
+			//	txConfigOpts := tx.ConfigOptions{
+			//		EnabledSignModes:           append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL),
+			//		TextualCoinMetadataQueryFn: txmodule.NewGRPCCoinMetadataQueryFn(initClientCtx),
+			//	}
+			//	txConfig, err := tx.NewTxConfigWithOptions(
+			//		initClientCtx.Codec,
+			//		txConfigOpts,
+			//	)
+			//	if err != nil {
+			//		return err
+			//	}
+			//
+			//	initClientCtx = initClientCtx.WithTxConfig(txConfig)
+			//}
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
@@ -137,12 +122,33 @@ func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
 	initRootCmd(rootCmd, encodingConfig, tempApp.BasicModuleManager)
 	autoCliOpts := tempApp.AutoCliOpts()
 	initClientCtx, _ = clientcfg.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
-	//autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
+	// autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
 	autoCliOpts.ClientCtx = initClientCtx
+
+	overwriteFlagDefaults(rootCmd, map[string]string{
+		flags.FlagKeyringBackend: "test",
+	})
+
 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
 		panic(err)
 	}
 	return rootCmd, encodingConfig
+}
+
+func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
+	set := func(s *pflag.FlagSet, key, val string) {
+		if f := s.Lookup(key); f != nil {
+			f.DefValue = val
+			_ = f.Value.Set(val)
+		}
+	}
+	for key, val := range defaults {
+		set(c.Flags(), key, val)
+		set(c.PersistentFlags(), key, val)
+	}
+	for _, c := range c.Commands() {
+		overwriteFlagDefaults(c, defaults)
+	}
 }
 
 func initRootCmd(
@@ -154,7 +160,7 @@ func initRootCmd(
 	cfg.Seal()
 
 	rootCmd.AddCommand(
-
+		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
 		cmtcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
@@ -171,10 +177,12 @@ func initRootCmd(
 		genesisCommand(encodingConfig.TxConfig, basicManager),
 		queryCommand(),
 		txCommand(),
+		keys.Commands(),
 	)
 
 	rootCmd.PersistentFlags().String(flags.FlagChainID, ChainID, "Specify Chain ID for sending Tx")
 	rootCmd.PersistentFlags().String(flags.FlagNode, "tcp://localhost:26657", "<host>:<port> to CometBFT RPC interface for this chain")
+	rootCmd.PersistentFlags().String(flags.FlagKeyringBackend, "test", "Select keyring's backend (os|file|test)")
 
 	if err := viper.BindPFlag(flags.FlagNode, rootCmd.PersistentFlags().Lookup(flags.FlagNode)); err != nil {
 		panic(err)

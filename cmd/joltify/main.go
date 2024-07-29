@@ -14,6 +14,9 @@ import (
 )
 
 func main() {
+	app.RegisterDenoms()
+	app.SetSDKConfig()
+
 	rootCmd, _ := cmd.NewRootCmd()
 	if err := svrcmd.Execute(rootCmd, clienthelpers.EnvPrefix, app.DefaultNodeHome); err != nil {
 		fmt.Fprintln(rootCmd.OutOrStderr(), err)

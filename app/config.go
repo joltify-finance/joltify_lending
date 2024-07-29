@@ -2,6 +2,7 @@ package app
 
 import (
 	sdkmath "cosmossdk.io/math"
+
 	cmtcfg "github.com/cometbft/cometbft/config"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -43,10 +44,6 @@ func SetBech32AddressPrefixes(config *sdk.Config) {
 	config.SetBech32PrefixForAccount(Bech32MainPrefix, Bech32PrefixAccPub)
 	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
 	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
-}
-
-func init() {
-	RegisterDenoms()
 }
 
 func RegisterDenoms() {
