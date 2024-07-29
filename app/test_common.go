@@ -7,6 +7,12 @@ import (
 	"testing"
 	"time"
 
+	dbm "github.com/cosmos/cosmos-db"
+
+	pruningtypes "cosmossdk.io/store/pruning/types"
+
+	storetypes "cosmossdk.io/store/types"
+
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -16,9 +22,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 
-	pruningtypes "cosmossdk.io/store"
+	log "cosmossdk.io/log"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	tmlog "github.com/cometbft/cometbft/libs/log"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -26,9 +31,7 @@ import (
 
 	tmtypes "github.com/cometbft/cometbft/types"
 
-	tmdb "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
@@ -76,7 +79,7 @@ type TestApp struct {
 // NewTestApp creates a new TestApp
 //
 // Note, it also sets the sdk config with the app's address prefix, coin type, etc.
-func NewTestApp(logger tmlog.Logger, rootDir string) TestApp {
+func NewTestApp(logger log.Logger, rootDir string) TestApp {
 	SetSDKConfig()
 	return NewTestAppFromSealed(logger, rootDir)
 }
@@ -114,11 +117,11 @@ func genesisStateWithValSet(
 			Description:       stakingtypes.Description{},
 			UnbondingHeight:   int64(0),
 			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
+			Commission:        stakingtypes.NewCommission(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
 			MinSelfDelegation: sdkmath.ZeroInt(),
 		}
 		validators = append(validators, validator)
-		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdkmath.LegacyOneDec()))
+		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), val.Address.String(), sdkmath.LegacyOneDec()))
 
 	}
 	// set validators and delegations
@@ -152,10 +155,10 @@ func genesisStateWithValSet(
 var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 
 // NewTestAppFromSealed creates a TestApp without first setting sdk config.
-func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
+func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 	encCfg := MakeEncodingConfig()
 	app := NewApp(
-		logger, tmdb.NewMemDB(), rootDir, nil, encCfg,
+		logger, dbm.NewMemDB(), rootDir, nil, encCfg,
 		Options{},
 		0,
 		simtestutil.NewAppOptionsWithFlagHome(rootDir),
@@ -192,7 +195,7 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 
 	// Initialize the chain
 	app.InitChain(
-		abci.RequestInitChain{
+		&abci.RequestInitChain{
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
@@ -200,10 +203,8 @@ func NewTestAppFromSealed(logger tmlog.Logger, rootDir string) TestApp {
 		},
 	)
 
-	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: time.Now().UTC()}
-
-	ctx := app.BaseApp.NewContext(false, header)
-	ctx = ctx.WithBlockGasMeter(sdk.NewGasMeter(1000000000000000000))
+	ctx := app.BaseApp.NewContext(false)
+	ctx = ctx.WithBlockGasMeter(storetypes.NewGasMeter(1000000000000000000))
 	return TestApp{App: *app, Ctx: ctx}
 }
 
@@ -304,22 +305,17 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	}
 
 	tApp.InitChain(
-		abci.RequestInitChain{
+		&abci.RequestInitChain{
 			Time:          genTime,
 			Validators:    []abci.ValidatorUpdate{},
 			AppStateBytes: stateBytes,
 			ChainId:       chainID,
 			// Set consensus params, which is needed by x/feemarket
-			ConsensusParams: app.DefaultConsensusParams,
+			ConsensusParams: simtestutil.DefaultConsensusParams,
 			InitialHeight:   initialHeight,
 		},
 	)
 	tApp.Commit()
-	tApp.BeginBlock(abci.RequestBeginBlock{
-		Header: tmproto.Header{
-			Height: tApp.LastBlockHeight() + 1, Time: genTime, ChainID: chainID,
-		},
-	})
 	return tApp
 }
 

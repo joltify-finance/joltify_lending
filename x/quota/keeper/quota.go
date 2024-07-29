@@ -45,7 +45,8 @@ func (k Keeper) WhetherOnwhitelist(rctx context.Context, moduleName, sender stri
 	return false
 }
 
-func (k Keeper) WhetherOnBanlist(ctx sdk.Context, moduleName, sender string) bool {
+func (k Keeper) WhetherOnBanlist(rctx context.Context, moduleName, sender string) bool {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	params := k.GetParams(ctx)
 	for _, el := range params.Banlist {
 		if el.ModuleName == moduleName {

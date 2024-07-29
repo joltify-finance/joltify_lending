@@ -1,6 +1,9 @@
 package app
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	sdkmath "cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 const (
 	// Bech32MainPrefix defines the Bech32 prefix for account addresses
@@ -49,7 +52,7 @@ func RegisterDenoms() {
 	if err != nil {
 		panic(err)
 	}
-	err = sdk.RegisterDenom(BaseCoinUnit, sdk.NewDecWithPrec(1, JoltExponent))
+	err = sdk.RegisterDenom(BaseCoinUnit, sdkmath.LegacyNewDecWithPrec(1, JoltExponent))
 	if err != nil {
 		panic(err)
 	}
