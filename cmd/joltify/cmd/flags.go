@@ -18,9 +18,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/spf13/cobra"
-
-	"github.com/evmos/ethermint/version"
 )
 
 const flagLong = "long"
@@ -33,7 +32,7 @@ var infoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Print version info",
 	RunE: func(_ *cobra.Command, _ []string) error {
-		fmt.Println(version.Version())
+		fmt.Println(version.Version)
 		return nil
 	},
 }

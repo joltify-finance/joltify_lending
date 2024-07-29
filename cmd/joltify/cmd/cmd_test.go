@@ -4,18 +4,17 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/joltify-finance/joltify_lending/app"
+	"github.com/joltify-finance/joltify_lending/cmd/joltify/cmd"
 	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 	"github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
-
-	"github.com/evmos/ethermint/app"
-	ethermintd "github.com/evmos/ethermint/cmd/ethermintd"
 )
 
 func TestInitCmd(t *testing.T) {
-	rootCmd, _ := ethermintd.NewRootCmd()
+	rootCmd, _ := cmd.NewRootCmd()
 	rootCmd.SetArgs([]string{
 		"init",          // Test the init cmd
 		"etherminttest", // Moniker

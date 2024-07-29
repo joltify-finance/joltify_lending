@@ -21,6 +21,7 @@ import (
 	"os"
 
 	params2 "github.com/joltify-finance/joltify_lending/app/params"
+	"github.com/spf13/viper"
 
 	"github.com/joltify-finance/joltify_lending/app"
 
@@ -41,10 +42,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/pruning"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/cosmos/cosmos-sdk/server"
 
 	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
@@ -65,7 +67,7 @@ func (ao emptyAppOptions) Get(_ string) interface{} { return nil }
 
 // NewRootCmd creates a new root command for simd. It is called once in the
 // main function.
-func NewRootCmd() (*cobra.Command, EncodingConfig) {
+func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
 	tempApp := app.NewApp(cmtlog.NewNopLogger(), dbm.NewMemDB(), nil, true, emptyAppOptions{})
 	// MakeConfig creates an EncodingConfig
 
@@ -135,7 +137,7 @@ func NewRootCmd() (*cobra.Command, EncodingConfig) {
 	initRootCmd(rootCmd, encodingConfig, tempApp.BasicModuleManager)
 	autoCliOpts := tempApp.AutoCliOpts()
 	initClientCtx, _ = clientcfg.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
-	autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
+	//autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
 	autoCliOpts.ClientCtx = initClientCtx
 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
 		panic(err)
@@ -161,7 +163,7 @@ func initRootCmd(
 		// this line is used by starport scaffolding # stargate/root/commands
 	)
 
-	server.AddCommands(rootCmd, server.NewDefaultStartOptions(newApp, app.DefaultNodeHome), appExport, addModuleInitFlags)
+	server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
@@ -171,13 +173,18 @@ func initRootCmd(
 		txCommand(),
 	)
 
-	rootCmd, err := srvflags.AddGlobalFlags(rootCmd)
-	if err != nil {
+	rootCmd.PersistentFlags().String(flags.FlagChainID, ChainID, "Specify Chain ID for sending Tx")
+	rootCmd.PersistentFlags().String(flags.FlagNode, "tcp://localhost:26657", "<host>:<port> to CometBFT RPC interface for this chain")
+
+	if err := viper.BindPFlag(flags.FlagNode, rootCmd.PersistentFlags().Lookup(flags.FlagNode)); err != nil {
 		panic(err)
 	}
-
+	//if err := viper.BindPFlag(flags.FlagKeyringBackend, rootCmd.PersistentFlags().Lookup(flags.FlagKeyringBackend)); err != nil {
+	//	panic(err)
+	//}
+	//
 	// add rosetta
-	rootCmd.AddCommand(rosettaCmd.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
+	//rootCmd.AddCommand(rosettaCmd.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
 }
 
 // genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter

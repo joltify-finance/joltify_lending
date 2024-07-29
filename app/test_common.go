@@ -160,9 +160,8 @@ var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 	encCfg := MakeEncodingConfig()
 	app := NewApp(
-		logger, dbm.NewMemDB(), rootDir, nil, encCfg,
-		Options{},
-		0,
+		logger, dbm.NewMemDB(), nil,
+		false,
 		simtestutil.NewAppOptionsWithFlagHome(rootDir),
 		baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(pruningtypes.PruningOptionDefault)),
 		baseapp.SetMinGasPrices("0stake"),

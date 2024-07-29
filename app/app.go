@@ -7,7 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"cosmossdk.io/client/v2/autocli"
+	"cosmossdk.io/core/appmodule"
 	tmos "github.com/cometbft/cometbft/libs/os"
+	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 
 	params2 "github.com/joltify-finance/joltify_lending/app/params"
 
@@ -68,7 +71,6 @@ import (
 
 	nftmoduletypes "cosmossdk.io/x/nft"
 	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
-	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
@@ -313,6 +315,8 @@ type App struct {
 	// the module manager
 	mm *module.Manager
 
+	BasicModuleManager module.BasicManager
+
 	// simulation manager
 	sm *module.SimulationManager
 
@@ -396,6 +400,7 @@ func NewApp(
 		keys:              keys,
 		tkeys:             tkeys,
 		memKeys:           memKeys,
+		txConfig:          txConfig,
 	}
 
 	// init params keeper and subspaces
@@ -728,6 +733,24 @@ func NewApp(
 		burnauctionmodule.NewAppModule(appCodec, app.burnauctionKeeper, app.accountKeeper, app.bankKeeper),
 	)
 
+	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
+	// non-dependant module elements, such as codec registration and genesis verification.
+	// By default, it is composed of all the modules from the module manager.
+	// Additionally, app module basics can be overwritten by passing them as an argument.
+	app.BasicModuleManager = module.NewBasicManagerFromManager(
+		app.mm,
+		map[string]module.AppModuleBasic{
+			genutiltypes.ModuleName: genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
+			govtypes.ModuleName: gov.NewAppModuleBasic(
+				[]govclient.ProposalHandler{
+					paramsclient.ProposalHandler,
+				},
+			),
+		},
+	)
+	//app.BasicModuleManager.RegisterLegacyAminoCodec(encodingConfig.Amino)
+	app.BasicModuleManager.RegisterInterfaces(interfaceRegistry)
+
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
 	app.mm.SetOrderBeginBlockers(
 		// Upgrade begin blocker runs migrations on the first block after an upgrade. It should run before any other module.
@@ -846,7 +869,10 @@ func NewApp(
 
 	app.mm.RegisterInvariants(app.crisisKeeper)
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
-	app.mm.RegisterServices(app.configurator)
+	err := app.mm.RegisterServices(app.configurator)
+	if err != nil {
+		panic(err)
+	}
 
 	autocliv1.RegisterQueryServer(app.GRPCQueryRouter(), runtimeservices.NewAutoCLIQueryService(app.mm.Modules))
 	reflectionSvc, err := runtimeservices.NewReflectionService()
@@ -993,6 +1019,8 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
+	app.BasicModuleManager.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
+
 	if apiConfig.Swagger {
 		RegisterSwaggerAPI(apiSvr.Router)
 	}
@@ -1053,33 +1081,35 @@ func (app *App) setupUpgradeHandlers() {
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
 
-	// Set param key table for params module migration
-	for _, subspace := range app.ParamsKeeper.GetSubspaces() {
-		subspace := subspace
-		var keyTable paramstypes.KeyTable
-		switch subspace.Name() {
-		case authtypes.ModuleName:
-			keyTable = authtypes.ParamKeyTable() //nolint:staticcheck
-		case banktypes.ModuleName:
-			keyTable = banktypes.ParamKeyTable() //nolint:staticcheck
-		case stakingtypes.ModuleName:
-			keyTable = stakingtypes.ParamKeyTable()
-		case minttypes.ModuleName:
-			keyTable = minttypes.ParamKeyTable()
-		case distrtypes.ModuleName:
-			keyTable = distrtypes.ParamKeyTable() //nolint:staticcheck
-		case slashingtypes.ModuleName:
-			keyTable = slashingtypes.ParamKeyTable() //nolint:staticcheck
-		case govtypes.ModuleName:
-			keyTable = govv1.ParamKeyTable() //nolint:staticcheck
-		case crisistypes.ModuleName:
-			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
+	/*
+		// Set param key table for params module migration
+		for _, subspace := range app.ParamsKeeper.GetSubspaces() {
+			subspace := subspace
+			var keyTable paramstypes.KeyTable
+			switch subspace.Name() {
+			case authtypes.ModuleName:
+				keyTable = authtypes.ParamKeyTable() //nolint:staticcheck
+			case banktypes.ModuleName:
+				keyTable = banktypes.ParamKeyTable() //nolint:staticcheck
+			case stakingtypes.ModuleName:
+				keyTable = stakingtypes.ParamKeyTable()
+			case minttypes.ModuleName:
+				keyTable = minttypes.ParamKeyTable()
+			case distrtypes.ModuleName:
+				keyTable = distrtypes.ParamKeyTable() //nolint:staticcheck
+			case slashingtypes.ModuleName:
+				keyTable = slashingtypes.ParamKeyTable() //nolint:staticcheck
+			case govtypes.ModuleName:
+				keyTable = govv1.ParamKeyTable() //nolint:staticcheck
+			case crisistypes.ModuleName:
+				keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
 
+			}
+			if !subspace.HasKeyTable() {
+				subspace.WithKeyTable(keyTable)
+			}
 		}
-		if !subspace.HasKeyTable() {
-			subspace.WithKeyTable(keyTable)
-		}
-	}
+	*/
 
 	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator, app.kycKeeper, app.spvKeeper, app.QuotaKeeper, app.incentiveKeeper))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.mm, app.configurator))
@@ -1107,5 +1137,25 @@ func (app *App) EncodingConfig() params2.EncodingConfig {
 		Marshaler:         app.AppCodec(),
 		TxConfig:          app.TxConfig(),
 		Amino:             app.LegacyAmino(),
+	}
+}
+
+// AutoCliOpts returns the autocli options for the app.
+func (app *App) AutoCliOpts() autocli.AppOptions {
+	modules := make(map[string]appmodule.AppModule, 0)
+	for _, m := range app.mm.Modules {
+		if moduleWithName, ok := m.(module.HasName); ok {
+			moduleName := moduleWithName.Name()
+			if appModule, ok := moduleWithName.(appmodule.AppModule); ok {
+				modules[moduleName] = appModule
+			}
+		}
+	}
+	return autocli.AppOptions{
+		Modules:               modules,
+		ModuleOptions:         runtimeservices.ExtractAutoCLIOptions(app.mm.Modules),
+		AddressCodec:          authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
+		ValidatorAddressCodec: authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
+		ConsensusAddressCodec: authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	}
 }
