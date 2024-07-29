@@ -7,24 +7,19 @@ import (
 	confixcmd "cosmossdk.io/tools/confix/cmd"
 	"github.com/cosmos/cosmos-sdk/client/pruning"
 
-	"cosmossdk.io/simapp"
-
 	"github.com/cosmos/cosmos-sdk/client/snapshot"
 
 	"github.com/cosmos/cosmos-sdk/client/keys"
 
-	"github.com/cosmos/cosmos-sdk/client/debug"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
-	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-
 	tmcfg "github.com/cometbft/cometbft/config"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
+	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -80,7 +75,7 @@ func NewRootCmd() *cobra.Command {
 		},
 	}
 
-	initRootCmd(rootCmd, encodingConfig.TxConfig, moduleBasicManager)
+	// initRootCmd(rootCmd, encodingConfig.TxConfig, moduleBasicManager)
 	addSubCmds(rootCmd, clientCtx.TxConfig, moduleBasicManager)
 
 	overwriteFlagDefaults(rootCmd, map[string]string{
@@ -96,14 +91,18 @@ func addSubCmds(rootCmd *cobra.Command,
 	txConfig client.TxConfig,
 	basicManager module.BasicManager,
 ) {
-	gentxModule := simapp.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
+	encodingConfig := app.MakeEncodingConfig()
+	ac := appCreator{
+		encodingConfig: encodingConfig,
+	}
+
 	rootCmd.AddCommand(
 
 		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
-		pruning.Cmd(newApp, app.DefaultNodeHome),
-		snapshot.Cmd(newApp),
+		pruning.Cmd(ac.newApp, app.DefaultNodeHome),
+		snapshot.Cmd(ac.newApp),
 
 		// genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, defaultNodeHome, gentxModule.GenTxValidator),
 		// genutilcli.GenTxCmd(app.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, defaultNodeHome),
@@ -114,10 +113,6 @@ func addSubCmds(rootCmd *cobra.Command,
 		// config.Cmd(),
 		// snapshot.Cmd(newApp),
 	)
-
-	ac := appCreator{
-		encodingConfig: encodingConfig,
-	}
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(

@@ -6,14 +6,8 @@ import (
 	"io"
 	"strings"
 
-	confixcmd "cosmossdk.io/tools/confix/cmd"
-
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/debug"
-	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/pruning"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
-	"github.com/cosmos/cosmos-sdk/client/snapshot"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
@@ -44,30 +38,30 @@ type appCreator struct {
 	encodingConfig params.EncodingConfig
 }
 
-func initRootCmd(
-	rootCmd *cobra.Command,
-	txConfig client.TxConfig,
-	basicManager module.BasicManager,
-) {
-	rootCmd.AddCommand(
-		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
-		debug.Cmd(),
-		confixcmd.ConfigCommand(),
-		pruning.Cmd(newApp, app.DefaultNodeHome),
-		snapshot.Cmd(newApp),
-	)
-
-	server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
-
-	// add keybase, auxiliary RPC, query, genesis, and tx child commands
-	rootCmd.AddCommand(
-		server.StatusCommand(),
-		genesisCommand(txConfig, basicManager),
-		queryCommand(),
-		txCommand(),
-		keys.Commands(),
-	)
-}
+//func initRootCmd(
+//	rootCmd *cobra.Command,
+//	txConfig client.TxConfig,
+//	basicManager module.BasicManager,
+//) {
+//	rootCmd.AddCommand(
+//		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
+//		debug.Cmd(),
+//		confixcmd.ConfigCommand(),
+//		pruning.Cmd(newApp, app.DefaultNodeHome),
+//		snapshot.Cmd(newApp),
+//	)
+//
+//	server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
+//
+//	// add keybase, auxiliary RPC, query, genesis, and tx child commands
+//	rootCmd.AddCommand(
+//		server.StatusCommand(),
+//		genesisCommand(txConfig, basicManager),
+//		queryCommand(),
+//		txCommand(),
+//		keys.Commands(),
+//	)
+//}
 
 func addModuleInitFlags(startCmd *cobra.Command) {
 	crisis.AddModuleInitFlags(startCmd)
