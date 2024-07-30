@@ -67,9 +67,6 @@ validatorKeyName="validator"
 printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover --keyring-backend test
 $BINARY genesis add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3,123456usd-ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
-exit
-
-
 # Create faucet keys and add account to genesis
 faucetKeyName="faucet"
 printf "$faucetMnemonic\n" | $BINARY keys add $faucetKeyName --recover
@@ -108,9 +105,12 @@ do
   $BINARY genesis add-genesis-account $address $amount"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",$amountAtom"ujolt"
 done
 
+$BINARY config  set app minimum-gas-prices "0ujolt"
+
+
 # Create a delegation tx for the validator and add to genesis
-$BINARY gentx $validatorKeyName 1000000000ujolt --keyring-backend test --chain-id $chainID
-$BINARY collect-gentxs
+$BINARY genesis gentx $validatorKeyName 1000000000ujolt --keyring-backend test --chain-id $chainID
+$BINARY genesis collect-gentxs
 
 # Replace stake with ujolt
 sed -in-place='' 's/stake/ujolt/g' $DATA/config/genesis.json
@@ -124,6 +124,7 @@ jq '.app_state.bank.supply = []' $DATA/config/genesis.json|sponge $DATA/config/g
 # update the vote
 jq '.app_state.gov.voting_params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 jq '.app_state.gov.params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+#jq '.app_state.gov.params.expected_voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
 
 jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
