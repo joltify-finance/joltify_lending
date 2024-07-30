@@ -19,7 +19,6 @@ import (
 	ibcante "github.com/cosmos/ibc-go/v8/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
-	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/vault/keeper"
 )
 
 // cosmosHandlerOptions extends HandlerOptions to provide some Cosmos specific configurations
@@ -34,7 +33,6 @@ type HandlerOptions struct {
 	AccountKeeper          *accountkeeper.AccountKeeper
 	BankKeeper             bankkeeper.Keeper
 	IBCKeeper              *ibckeeper.Keeper
-	VaultKeeper            vaultmodulekeeper.Keeper
 	SpvKeeper              spvkeeper.Keeper
 	FeegrantKeeper         authante.FeegrantKeeper
 	SignModeHandler        *txsigning.HandlerMap
@@ -162,7 +160,6 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 		sigVerification,
 		authante.NewIncrementSequenceDecorator(options.AccountKeeper), // innermost AnteDecorator
 		ibcante.NewRedundantRelayDecorator(options.IBCKeeper),
-		NewVaultQuotaDecorate(options.VaultKeeper),
 		NewSPVNFTDecorator(options.SpvKeeper),
 	)
 	return sdk.ChainAnteDecorators(decorators...)

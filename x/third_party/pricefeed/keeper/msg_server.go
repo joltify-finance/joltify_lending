@@ -22,7 +22,7 @@ var _ types2.MsgServer = msgServer{}
 func (k msgServer) PostPrice(goCtx context.Context, msg *types2.MsgPostPrice) (*types2.MsgPostPriceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	from, err := sdk.AccAddressFromBech32(msg.From)
+	from, err := sdk.AccAddressFromBech32(msg.FromAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (k msgServer) PostPrice(goCtx context.Context, msg *types2.MsgPostPrice) (*
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types2.AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.From),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.FromAddress),
 		),
 	)
 

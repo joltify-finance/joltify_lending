@@ -51,6 +51,7 @@ require (
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/ibc-go/modules/capability v1.0.0
 	github.com/spf13/pflag v1.0.5
+	github.com/spf13/viper v1.19.0
 )
 
 require (
@@ -184,7 +185,6 @@ require (
 	github.com/sasha-s/go-deadlock v0.3.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
-	github.com/spf13/viper v1.19.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
@@ -230,9 +230,8 @@ replace (
 	// Use the cosmos keyring code
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 
-	github.com/cosmos/cosmos-sdk => /home/yb/development/cosmos-sdk
+	github.com/cosmos/cosmos-sdk => /Users/yb/development/cosmos-sdk
 
-	//github.com/cometbft/cometbft => github.com/joltify-finance/cometbft v0.37.3-joltify
 
 	github.com/ethereum/go-ethereum => github.com/evmos/go-ethereum v1.10.26-evmos-rc1
 	//github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0

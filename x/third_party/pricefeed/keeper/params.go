@@ -11,6 +11,7 @@ import (
 // GetParams returns the params from the store
 func (k Keeper) GetParams(ctx context.Context) types2.Params {
 	var p types2.Params
+
 	k.paramSubspace.GetParamSet(sdk.UnwrapSDKContext(ctx), &p)
 	return p
 }

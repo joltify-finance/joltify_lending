@@ -1,12 +1,13 @@
 package types
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"strings"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	errorsmod "cosmossdk.io/errors"
 
@@ -27,10 +28,10 @@ var _ sdk.Msg = &MsgPostPrice{}
 // NewMsgPostPrice returns a new MsgPostPrice
 func NewMsgPostPrice(from string, marketID string, price sdkmath.LegacyDec, expiry time.Time) *MsgPostPrice {
 	return &MsgPostPrice{
-		From:     from,
-		MarketID: marketID,
-		Price:    price,
-		Expiry:   expiry,
+		FromAddress: from,
+		MarketID:    marketID,
+		Price:       price,
+		Expiry:      expiry,
 	}
 }
 
@@ -48,7 +49,7 @@ func (msg MsgPostPrice) GetSignBytes() []byte {
 
 // GetSigners Implements Msg.
 func (msg MsgPostPrice) GetSigners() []sdk.AccAddress {
-	from, err := sdk.AccAddressFromBech32(msg.From)
+	from, err := sdk.AccAddressFromBech32(msg.FromAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +58,7 @@ func (msg MsgPostPrice) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic does a simple validation check that doesn't require access to any other information.
 func (msg MsgPostPrice) ValidateBasic() error {
-	if len(msg.From) == 0 {
+	if len(msg.FromAddress) == 0 {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty")
 	}
 	if strings.TrimSpace(msg.MarketID) == "" {
