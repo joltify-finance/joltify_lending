@@ -230,6 +230,8 @@ replace (
 	// Use the cosmos keyring code
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 
+	github.com/cosmos/cosmos-sdk => /home/yb/development/cosmos-sdk
+
 	//github.com/cometbft/cometbft => github.com/joltify-finance/cometbft v0.37.3-joltify
 
 	github.com/ethereum/go-ethereum => github.com/evmos/go-ethereum v1.10.26-evmos-rc1
