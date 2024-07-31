@@ -1,18 +1,15 @@
 package pricefeed
 
 import (
-	"context"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
-	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 )
 
 // InitGenesis sets distribution information for genesis.
-func InitGenesis(rctx context.Context, k keeper.Keeper, gs types2.GenesisState) {
+func InitGenesis(ctx sdk.Context, k keeper.Keeper, gs types.GenesisState) {
 	// Set the markets and oracles from params
-	ctx := sdk.UnwrapSDKContext(rctx)
-	k.SetParams(rctx, gs.Params)
+	k.SetParams(ctx, gs.Params)
 
 	// Iterate through the posted prices and set them in the store if they are not expired
 	for _, pp := range gs.PostedPrices {
@@ -43,15 +40,15 @@ func InitGenesis(rctx context.Context, k keeper.Keeper, gs types2.GenesisState) 
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func ExportGenesis(ctx context.Context, k keeper.Keeper) types2.GenesisState {
+func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types.GenesisState {
 	// Get the params for markets and oracles
 	params := k.GetParams(ctx)
 
-	var postedPrices []types2.PostedPrice
+	var postedPrices []types.PostedPrice
 	for _, market := range k.GetMarkets(ctx) {
 		pp := k.GetRawPrices(ctx, market.MarketID)
 		postedPrices = append(postedPrices, pp...)
 	}
 
-	return types2.NewGenesisState(params, postedPrices)
+	return types.NewGenesisState(params, postedPrices)
 }

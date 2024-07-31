@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/client"
-
 	dbm "github.com/cosmos/cosmos-db"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 
 	pruningtypes "cosmossdk.io/store/pruning/types"
 
@@ -22,16 +22,10 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
-
 	log "cosmossdk.io/log"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	tmtypes "github.com/cometbft/cometbft/types"
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -82,49 +76,52 @@ type TestApp struct {
 //
 // Note, it also sets the sdk config with the app's address prefix, coin type, etc.
 func NewTestApp(logger log.Logger, rootDir string) TestApp {
-	RegisterDenoms()
 	SetSDKConfig()
 	return NewTestAppFromSealed(logger, rootDir)
 }
 
 func genesisStateWithValSet(
 	app *App, genesisState GenesisState,
-	valSet *tmtypes.ValidatorSet, genAccs []authtypes.GenesisAccount,
+	valSet []*stakingtypes.Validator, genAccs []authtypes.GenesisAccount,
 	balances ...banktypes.Balance,
 ) GenesisState {
 	// set genesis accounts
 	// authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
 	// genesisState[authtypes.ModuleName] = app.AppCodec().MustMarshalJSON(authGenesis)
 
-	validators := make([]stakingtypes.Validator, 0, len(valSet.Validators))
-	delegations := make([]stakingtypes.Delegation, 0, len(valSet.Validators))
+	validators := make([]stakingtypes.Validator, 0, len(valSet))
+	delegations := make([]stakingtypes.Delegation, 0, len(valSet))
 
 	bondAmt := sdk.DefaultPowerReduction.Mul(sdkmath.NewInt(1000000))
 
-	for _, val := range valSet.Validators {
-		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
-		if err != nil {
-			panic(err)
-		}
-		pkAny, err := codectypes.NewAnyWithValue(pk)
-		if err != nil {
-			panic(err)
-		}
-		validator := stakingtypes.Validator{
-			OperatorAddress:   sdk.ValAddress(val.Address).String(),
-			ConsensusPubkey:   pkAny,
-			Jailed:            false,
-			Status:            stakingtypes.Bonded,
-			Tokens:            bondAmt,
-			DelegatorShares:   sdkmath.LegacyOneDec(),
-			Description:       stakingtypes.Description{},
-			UnbondingHeight:   int64(0),
-			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
-			MinSelfDelegation: sdkmath.ZeroInt(),
-		}
-		validators = append(validators, validator)
-		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), val.Address.String(), sdkmath.LegacyOneDec()))
+	for _, val := range valSet {
+		//pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
+		//if err != nil {
+		//	panic(err)
+		//}
+		//pkAny, err := codectypes.NewAnyWithValue(pk)
+		//if err != nil {
+		//	panic(err)
+		//}
+		//validator := stakingtypes.Validator{
+		//	OperatorAddress:   sdk.ValAddress(val.Address).String(),
+		//	ConsensusPubkey:   pkAny,
+		//	Jailed:            false,
+		//	Status:            stakingtypes.Bonded,
+		//	Tokens:            bondAmt,
+		//	DelegatorShares:   sdkmath.LegacyOneDec(),
+		//	Description:       stakingtypes.Description{},
+		//	UnbondingHeight:   int64(0),
+		//	UnbondingTime:     time.Unix(0, 0).UTC(),
+		//	Commission:        stakingtypes.NewCommission(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
+		//	MinSelfDelegation: sdkmath.ZeroInt(),
+		//}
+
+		val.DelegatorShares = sdkmath.LegacyOneDec()
+		val.Tokens = bondAmt
+		val.Status = stakingtypes.Bonded
+		validators = append(validators, *val)
+		delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), val.GetOperator(), sdkmath.LegacyOneDec()))
 
 	}
 	// set validators and delegations
@@ -161,7 +158,7 @@ var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 	app := NewApp(
 		logger, dbm.NewMemDB(), nil,
-		false,
+		true,
 		simtestutil.NewAppOptionsWithFlagHome(rootDir),
 		baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(pruningtypes.PruningOptionDefault)),
 		baseapp.SetMinGasPrices("0stake"),
@@ -170,15 +167,12 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 
 	encCfg := app.EncodingConfig()
 
-	privVal := ed25519.GenPrivKey()
-	pubKey, err := cryptocodec.ToTmPubKeyInterface(privVal.PubKey())
+	_, pubKey, addr := testdata.KeyTestPubAddr()
+	valAddr := sdk.ValAddress(addr)
+	val, err := stakingtypes.NewValidator(valAddr.String(), pubKey, stakingtypes.Description{Moniker: "test"})
 	if err != nil {
 		panic(err)
 	}
-
-	// create validator set with single validator
-	validator := tmtypes.NewValidator(pubKey, 1)
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
 
 	// generate genesis account
 	senderPrivKey := secp256k1.GenPrivKey()
@@ -189,7 +183,7 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 	}
 
 	genesisState := NewDefaultGenesisState(encCfg.Marshaler)
-	genesisState = genesisStateWithValSet(app, genesisState, valSet, []authtypes.GenesisAccount{acc}, balance)
+	genesisState = genesisStateWithValSet(app, genesisState, []*stakingtypes.Validator{&val}, []authtypes.GenesisAccount{acc}, balance)
 
 	stateBytes, err := tmjson.MarshalIndent(genesisState, "", " ")
 	if err != nil {
@@ -273,15 +267,14 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		}
 	}
 
-	privVal := ed25519.GenPrivKey()
-	pubKey, err := cryptocodec.ToTmPubKeyInterface(privVal.PubKey())
+	_, pubKey, addr := testdata.KeyTestPubAddr()
+	valAddr := sdk.ValAddress(addr)
+	val, err := stakingtypes.NewValidator(valAddr.String(), pubKey, stakingtypes.Description{Moniker: "test"})
 	if err != nil {
 		panic(err)
 	}
 
 	// create validator set with single validator
-	validator := tmtypes.NewValidator(pubKey, 1)
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
 	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(100000000000000))
 	coins = coins.Add(defaultCoins)
 	var balances []banktypes.Balance
@@ -304,7 +297,7 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		}
 	}
 
-	genesisState = genesisStateWithValSet(&tApp.App, genesisState, valSet, genAccs, balances...)
+	genesisState = genesisStateWithValSet(&tApp.App, genesisState, []*stakingtypes.Validator{&val}, genAccs, balances...)
 	// Initialize the chain
 	stateBytes, err := json.Marshal(genesisState)
 	if err != nil {

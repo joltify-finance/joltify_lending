@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/require"
@@ -17,8 +17,9 @@ import (
 
 func TestKeeper_PostPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(4)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{}).
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true).
 		WithBlockTime(time.Now().UTC())
 	k := tApp.GetPriceFeedKeeper()
 	msgSrv := keeper.NewMsgServerImpl(k)

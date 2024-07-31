@@ -4,23 +4,21 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
-
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
-
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
 // TestKeeper_SetGetMarket tests adding markets to the pricefeed, getting markets from the store
 func TestKeeper_SetGetMarket(t *testing.T) {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{})
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true)
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{
@@ -58,8 +56,9 @@ func TestKeeper_SetGetMarket(t *testing.T) {
 // TestKeeper_GetSetPrice Test Posting the price by an oracle
 func TestKeeper_GetSetPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{})
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true)
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{
@@ -110,9 +109,9 @@ func TestKeeper_GetSetPrice(t *testing.T) {
 // TestKeeper_GetSetCurrentPrice Test Setting the median price of an Asset
 func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{}).
-		WithBlockTime(time.Now().UTC())
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true).WithBlockTime(time.Now().UTC())
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{
@@ -200,9 +199,10 @@ func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 
 func TestKeeper_ExpiredSetCurrentPrices(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{}).
-		WithBlockTime(time.Now().UTC())
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true).WithBlockTime(time.Now().UTC())
+
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{

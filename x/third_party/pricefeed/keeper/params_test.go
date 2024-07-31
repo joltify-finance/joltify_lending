@@ -1,19 +1,16 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
-
+	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
@@ -27,8 +24,13 @@ type KeeperTestSuite struct {
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
+
+	//suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	//suite.ctx = suite.tApp.NewContext(false)
+	//suite.keeper = suite.tApp.GetPriceFeedKeeper()
+
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	ctx := tApp.NewContext(true)
 	tApp.InitializeFromGenesisStates(nil, nil,
 		NewPricefeedGenStateMulti(),
 	)

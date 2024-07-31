@@ -28,10 +28,10 @@ var _ sdk.Msg = &MsgPostPrice{}
 // NewMsgPostPrice returns a new MsgPostPrice
 func NewMsgPostPrice(from string, marketID string, price sdkmath.LegacyDec, expiry time.Time) *MsgPostPrice {
 	return &MsgPostPrice{
-		FromAddress: from,
-		MarketID:    marketID,
-		Price:       price,
-		Expiry:      expiry,
+		From:     from,
+		MarketID: marketID,
+		Price:    price,
+		Expiry:   expiry,
 	}
 }
 
@@ -49,7 +49,7 @@ func (msg MsgPostPrice) GetSignBytes() []byte {
 
 // GetSigners Implements Msg.
 func (msg MsgPostPrice) GetSigners() []sdk.AccAddress {
-	from, err := sdk.AccAddressFromBech32(msg.FromAddress)
+	from, err := sdk.AccAddressFromBech32(msg.From)
 	if err != nil {
 		panic(err)
 	}
@@ -58,7 +58,7 @@ func (msg MsgPostPrice) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic does a simple validation check that doesn't require access to any other information.
 func (msg MsgPostPrice) ValidateBasic() error {
-	if len(msg.FromAddress) == 0 {
+	if len(msg.From) == 0 {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty")
 	}
 	if strings.TrimSpace(msg.MarketID) == "" {
