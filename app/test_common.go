@@ -82,6 +82,7 @@ type TestApp struct {
 //
 // Note, it also sets the sdk config with the app's address prefix, coin type, etc.
 func NewTestApp(logger log.Logger, rootDir string) TestApp {
+	RegisterDenoms()
 	SetSDKConfig()
 	return NewTestAppFromSealed(logger, rootDir)
 }
@@ -158,7 +159,6 @@ var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 
 // NewTestAppFromSealed creates a TestApp without first setting sdk config.
 func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
-	encCfg := MakeEncodingConfig()
 	app := NewApp(
 		logger, dbm.NewMemDB(), nil,
 		false,
@@ -167,6 +167,8 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 		baseapp.SetMinGasPrices("0stake"),
 		baseapp.SetChainID("joltifytest_888-1"),
 	)
+
+	encCfg := app.EncodingConfig()
 
 	privVal := ed25519.GenPrivKey()
 	pubKey, err := cryptocodec.ToTmPubKeyInterface(privVal.PubKey())

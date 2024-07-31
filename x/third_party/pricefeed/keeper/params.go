@@ -2,27 +2,28 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 )
 
 // GetParams returns the params from the store
-func (k Keeper) GetParams(ctx context.Context) types2.Params {
-	var p types2.Params
-
+func (k Keeper) GetParams(ctx context.Context) types.Params {
+	var p types.Params
+	fmt.Printf(">>>>>>>>>>>>>%v\n", p.ParamSetPairs())
 	k.paramSubspace.GetParamSet(sdk.UnwrapSDKContext(ctx), &p)
 	return p
 }
 
 // SetParams sets params on the store
-func (k Keeper) SetParams(ctx context.Context, params types2.Params) {
+func (k Keeper) SetParams(ctx context.Context, params types.Params) {
 	k.paramSubspace.SetParamSet(sdk.UnwrapSDKContext(ctx), &params)
 }
 
 // GetMarkets returns the markets from params
-func (k Keeper) GetMarkets(ctx context.Context) types2.Markets {
+func (k Keeper) GetMarkets(ctx context.Context) types.Markets {
 	return k.GetParams(ctx).Markets
 }
 
@@ -33,7 +34,7 @@ func (k Keeper) GetOracles(ctx context.Context, marketID string) ([]sdk.AccAddre
 			return m.Oracles, nil
 		}
 	}
-	return nil, errorsmod.Wrap(types2.ErrInvalidMarket, marketID)
+	return nil, errorsmod.Wrap(types.ErrInvalidMarket, marketID)
 }
 
 // GetOracle returns the oracle from the store or an error if not found
@@ -48,11 +49,11 @@ func (k Keeper) GetOracle(ctx context.Context, marketID string, address sdk.AccA
 			return addr, nil
 		}
 	}
-	return nil, errorsmod.Wrap(types2.ErrInvalidOracle, address.String())
+	return nil, errorsmod.Wrap(types.ErrInvalidOracle, address.String())
 }
 
 // GetMarket returns the market if it is in the pricefeed system
-func (k Keeper) GetMarket(ctx context.Context, marketID string) (types2.Market, bool) {
+func (k Keeper) GetMarket(ctx context.Context, marketID string) (types.Market, bool) {
 	markets := k.GetMarkets(ctx)
 
 	for i := range markets {
@@ -60,7 +61,7 @@ func (k Keeper) GetMarket(ctx context.Context, marketID string) (types2.Market, 
 			return markets[i], true
 		}
 	}
-	return types2.Market{}, false
+	return types.Market{}, false
 }
 
 // GetAuthorizedAddresses returns a list of addresses that have special authorization within this module, eg the oracles of all markets.

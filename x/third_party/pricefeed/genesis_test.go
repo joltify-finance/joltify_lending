@@ -1,17 +1,13 @@
 package pricefeed_test
 
 import (
+	"context"
 	"testing"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/suite"
@@ -26,8 +22,8 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	suite.ctx = suite.tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	suite.ctx = suite.tApp.NewContext(true)
 	suite.keeper = suite.tApp.GetPriceFeedKeeper()
 }
 
@@ -40,7 +36,7 @@ func (suite *GenesisTestSuite) TestValidGenState() {
 	_, addrs := app.GeneratePrivKeyAddressPairs(10)
 
 	// Must create a new TestApp or InitChain will panic with index already set
-	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.NotPanics(func() {
 		suite.tApp.InitializeFromGenesisStates(nil, nil,
 			NewPricefeedGenStateWithOracles(addrs),

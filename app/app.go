@@ -392,6 +392,12 @@ func NewApp(
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
+	// load state streaming if enabled
+	if err := bApp.RegisterStreamingServices(appOpts, keys); err != nil {
+		fmt.Printf("failed to load state streaming: %s", err)
+		os.Exit(1)
+	}
+
 	app := &App{
 		BaseApp:           bApp,
 		legacyAmino:       legacyAmino,
@@ -429,6 +435,7 @@ func NewApp(
 	swapSubspace := app.ParamsKeeper.Subspace(swaptypes.ModuleName)
 	quotaSubspace := app.ParamsKeeper.Subspace(quotamoduletypes.ModuleName)
 	burnAuctionSubspace := app.ParamsKeeper.Subspace(burnauctionmoduletypes.ModuleName)
+
 	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[consensusparamtypes.StoreKey]),
@@ -748,7 +755,7 @@ func NewApp(
 			),
 		},
 	)
-	//app.BasicModuleManager.RegisterLegacyAminoCodec(encodingConfig.Amino)
+	// app.BasicModuleManager.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	app.BasicModuleManager.RegisterInterfaces(interfaceRegistry)
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
@@ -1081,35 +1088,34 @@ func (app *App) setupUpgradeHandlers() {
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
 
-	/*
-		// Set param key table for params module migration
-		for _, subspace := range app.ParamsKeeper.GetSubspaces() {
-			subspace := subspace
-			var keyTable paramstypes.KeyTable
-			switch subspace.Name() {
-			case authtypes.ModuleName:
-				keyTable = authtypes.ParamKeyTable() //nolint:staticcheck
-			case banktypes.ModuleName:
-				keyTable = banktypes.ParamKeyTable() //nolint:staticcheck
-			case stakingtypes.ModuleName:
-				keyTable = stakingtypes.ParamKeyTable()
-			case minttypes.ModuleName:
-				keyTable = minttypes.ParamKeyTable()
-			case distrtypes.ModuleName:
-				keyTable = distrtypes.ParamKeyTable() //nolint:staticcheck
-			case slashingtypes.ModuleName:
-				keyTable = slashingtypes.ParamKeyTable() //nolint:staticcheck
-			case govtypes.ModuleName:
-				keyTable = govv1.ParamKeyTable() //nolint:staticcheck
-			case crisistypes.ModuleName:
-				keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
-
-			}
-			if !subspace.HasKeyTable() {
-				subspace.WithKeyTable(keyTable)
-			}
-		}
-	*/
+	// Set param key table for params module migration
+	//for _, subspace := range app.ParamsKeeper.GetSubspaces() {
+	//	subspace := subspace
+	//	var keyTable paramstypes.KeyTable
+	//	switch subspace.Name() {
+	//	case authtypes.ModuleName:
+	//		keyTable = authtypes.ParamKeyTable() //nolint:staticcheck
+	//	case banktypes.ModuleName:
+	//		keyTable = banktypes.ParamKeyTable() //nolint:staticcheck
+	//	case stakingtypes.ModuleName:
+	//		keyTable = stakingtypes.ParamKeyTable()
+	//	case minttypes.ModuleName:
+	//		keyTable = minttypes.ParamKeyTable()
+	//	case distrtypes.ModuleName:
+	//		keyTable = distrtypes.ParamKeyTable() //nolint:staticcheck
+	//	case slashingtypes.ModuleName:
+	//		keyTable = slashingtypes.ParamKeyTable() //nolint:staticcheck
+	//	 case govtypes.ModuleName:
+	//		keyTable = paramkeytable//nolint:staticcheck
+	//	case crisistypes.ModuleName:
+	//		keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
+	//
+	//	}
+	//	fmt.Printf("subspace banme3   %v\n", subspace.Name())
+	//	if !subspace.HasKeyTable() {
+	//		subspace.WithKeyTable(keyTable)
+	//	}
+	//}
 
 	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.mm, app.configurator, app.kycKeeper, app.spvKeeper, app.QuotaKeeper, app.incentiveKeeper))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.mm, app.configurator))

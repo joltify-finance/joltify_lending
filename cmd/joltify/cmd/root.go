@@ -42,8 +42,7 @@ import (
 )
 
 const (
-	EnvPrefix = "ETHERMINT"
-	ChainID   = "joltify_1729-1"
+	ChainID = "joltify_1729-1"
 )
 
 type emptyAppOptions struct{}
@@ -66,7 +65,7 @@ func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastSync).
 		WithHomeDir(app.DefaultNodeHome).
-		WithViper(EnvPrefix)
+		WithViper(app.Name)
 
 	rootCmd := &cobra.Command{
 		Use:   "joltify",
