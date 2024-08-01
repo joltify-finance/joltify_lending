@@ -23,7 +23,7 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 
 	depositor, found := k.GetDepositor(ctx, msg.PoolIndex, investorAddress)
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.PoolIndex)
 	}
 
 	if depositor.DepositType != types.DepositorInfo_unset {

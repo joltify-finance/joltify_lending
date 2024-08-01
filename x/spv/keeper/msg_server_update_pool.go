@@ -18,9 +18,9 @@ func (k msgServer) UpdatePool(goCtx context.Context, msg *types.MsgUpdatePool) (
 		return nil, errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, errorsmod.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, errorsmod.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	targetProject, ok := k.kycKeeper.GetProject(ctx, poolInfo.LinkedProject)

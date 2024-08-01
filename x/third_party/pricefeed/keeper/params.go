@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +11,6 @@ import (
 // GetParams returns the params from the store
 func (k Keeper) GetParams(ctx context.Context) types.Params {
 	var p types.Params
-	fmt.Printf(">>>>>>>>>>>>>%v\n", p.ParamSetPairs())
 	k.paramSubspace.GetParamSet(sdk.UnwrapSDKContext(ctx), &p)
 	return p
 }

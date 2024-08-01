@@ -42,9 +42,9 @@ func (k msgServer) PayPrincipal(goCtx context.Context, msg *types.MsgPayPrincipa
 		return nil, errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, errorsmod.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, errorsmod.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	if poolInfo.PrincipalPaid {
@@ -121,9 +121,9 @@ func (k msgServer) PayPrincipalForWithdrawalRequests(goCtx context.Context, msg 
 		return nil, errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, errorsmod.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, errorsmod.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	if poolInfo.PrincipalPaid {

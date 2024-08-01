@@ -71,9 +71,9 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	if msg.BorrowAmount.Denom != poolInfo.TargetAmount.Denom {
@@ -86,7 +86,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	juniorInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 	allBorrowed = k.getAllBorrowed(ctx, juniorInfo)
 

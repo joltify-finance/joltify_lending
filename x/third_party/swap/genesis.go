@@ -1,15 +1,16 @@
 package swap
 
 import (
-	"context"
 	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 )
 
 // InitGenesis initializes story state from genesis file
-func InitGenesis(ctx context.Context, k keeper.Keeper, gs types.GenesisState) {
+func InitGenesis(ctx sdk.Context, k keeper.Keeper, gs types.GenesisState) {
 	if err := gs.Validate(); err != nil {
 		panic(fmt.Sprintf("failed to validate %s genesis state: %s", types.ModuleName, err))
 	}
@@ -24,7 +25,7 @@ func InitGenesis(ctx context.Context, k keeper.Keeper, gs types.GenesisState) {
 }
 
 // ExportGenesis exports the genesis state
-func ExportGenesis(ctx context.Context, k keeper.Keeper) types.GenesisState {
+func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types.GenesisState {
 	params := k.GetParams(ctx)
 	pools := k.GetAllPools(ctx)
 	shares := k.GetAllDepositorShares(ctx)

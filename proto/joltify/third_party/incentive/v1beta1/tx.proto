@@ -3,11 +3,14 @@ package joltify.third_party.incentive.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "amino/amino.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types";
 
 // Msg defines the incentive Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   rpc ClaimJoltReward(MsgClaimJoltReward) returns (MsgClaimJoltRewardResponse);
 
   // ClaimSwapReward is a message type used to claim swap rewards
@@ -29,6 +32,8 @@ message Selection {
 
 // MsgClaimHardReward message type used to claim Hard liquidity provider rewards
 message MsgClaimJoltReward {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name)           = "joltify.third_party.incentive.v1beta1.MsgClaimJoltReward";
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
@@ -41,6 +46,8 @@ message MsgClaimJoltRewardResponse {}
 
 // MsgClaimSwapReward message type used to claim delegator rewards
 message MsgClaimSwapReward {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name)           = "joltify.third_party.incentive.v1beta1.MsgClaimSwapReward";
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
 
@@ -57,6 +64,8 @@ message MsgClaimSwapRewardResponse {}
 
 // MsgClaimSPVReward message type used to claim delegator rewards
 message MsgClaimSPVReward {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name)           = "joltify.third_party.incentive.v1beta1.MsgClaimSPVReward";
   option (gogoproto.equal) = false;
   option (gogoproto.goproto_getters) = false;
 

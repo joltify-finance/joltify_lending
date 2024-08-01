@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"cosmossdk.io/core/appmodule"
+
 	cli2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/client/cli"
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
@@ -21,8 +23,10 @@ import (
 )
 
 var (
-	_ module.AppModule      = AppModule{}
-	_ module.AppModuleBasic = AppModuleBasic{}
+	_ appmodule.AppModule       = AppModule{}
+	_ module.AppModuleBasic     = AppModuleBasic{}
+	_ appmodule.HasBeginBlocker = (*AppModule)(nil)
+	_ appmodule.HasEndBlocker   = (*AppModule)(nil)
 	// _ module.AppModuleSimulation = AppModule{}
 )
 
@@ -122,7 +126,7 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 
 // InitGenesis performs genesis initialization for the jolt module. It returns
 // no validator updates.
-func (am AppModule) InitGenesis(ctx context.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types2.GenesisState
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
@@ -133,19 +137,20 @@ func (am AppModule) InitGenesis(ctx context.Context, cdc codec.JSONCodec, gs jso
 
 // ExportGenesis returns the exported genesis state as raw bytes for the jolt
 // module.
-func (am AppModule) ExportGenesis(ctx context.Context, cdc codec.JSONCodec) json.RawMessage {
+func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
 	return cdc.MustMarshalJSON(&gs)
 }
 
 // BeginBlock module begin-block
-func (am AppModule) BeginBlock(ctx context.Context) {
+func (am AppModule) BeginBlock(ctx context.Context) error {
 	BeginBlocker(ctx, am.keeper)
+	return nil
 }
 
 // EndBlock module end-block
-func (am AppModule) EndBlock(_ context.Context) []abci.ValidatorUpdate {
-	return []abci.ValidatorUpdate{}
+func (am AppModule) EndBlock(_ context.Context) error {
+	return nil
 }
 
 //____________________________________________________________________________

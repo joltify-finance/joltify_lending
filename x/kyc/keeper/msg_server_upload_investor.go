@@ -95,7 +95,7 @@ func (k msgServer) UploadInvestor(rctx context.Context, msg *types.MsgUploadInve
 		}, nil
 	}
 	// we check whether all the wallet address are valid
-	for _, el := range msg.GetWalletAddress() {
+	for _, el := range msg.WalletAddress {
 		_, err := sdk.AccAddressFromBech32(el)
 		if err != nil {
 			return nil, errorsmod.Wrapf(types.ErrInvalidWallets, "invalid wallets: %v", el)
@@ -109,11 +109,11 @@ func (k msgServer) UploadInvestor(rctx context.Context, msg *types.MsgUploadInve
 	}
 
 	// we check whether we exceed the max wallet number
-	if len(msg.GetWalletAddress()) > types.MaxWalletNum {
-		return nil, errorsmod.Wrapf(types.ErrExceedMaxWalletsNum, "wallets submitted %v", len(msg.GetWalletAddress()))
+	if len(msg.WalletAddress) > types.MaxWalletNum {
+		return nil, errorsmod.Wrapf(types.ErrExceedMaxWalletsNum, "wallets submitted %v", len(msg.WalletAddress))
 	}
 
-	investor := types.Investor{InvestorId: msg.InvestorId, WalletAddress: msg.GetWalletAddress()}
+	investor := types.Investor{InvestorId: msg.InvestorId, WalletAddress: msg.WalletAddress}
 	ret := k.SetInvestor(ctx, investor)
 
 	ctx.EventManager().EmitEvent(

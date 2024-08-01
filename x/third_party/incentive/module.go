@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cosmossdk.io/core/appmodule"
+
 	cli2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/client/cli"
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -22,8 +24,11 @@ import (
 )
 
 var (
-	_ module.AppModule      = AppModule{}
-	_ module.AppModuleBasic = AppModuleBasic{}
+	_ appmodule.AppModule       = AppModule{}
+	_ module.AppModuleBasic     = AppModuleBasic{}
+	_ module.HasInvariants      = (*AppModule)(nil)
+	_ appmodule.HasBeginBlocker = (*AppModule)(nil)
+	_ appmodule.HasEndBlocker   = (*AppModule)(nil)
 	// _ module.AppModuleSimulation = AppModule{}
 )
 
@@ -123,7 +128,7 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 }
 
 // InitGenesis performs genesis initialization for the incentive module. It returns no validator updates.
-func (am AppModule) InitGenesis(rctx context.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(rctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types2.GenesisState
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
@@ -133,20 +138,21 @@ func (am AppModule) InitGenesis(rctx context.Context, cdc codec.JSONCodec, gs js
 }
 
 // ExportGenesis returns the exported genesis state as raw bytes for the incentive module
-func (am AppModule) ExportGenesis(rctx context.Context, cdc codec.JSONCodec) json.RawMessage {
+func (am AppModule) ExportGenesis(rctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	ctx := sdk.UnwrapSDKContext(rctx)
 	gs := ExportGenesis(ctx, am.keeper)
 	return cdc.MustMarshalJSON(&gs)
 }
 
 // BeginBlock returns the begin blocker for the incentive module.
-func (am AppModule) BeginBlock(ctx sdk.Context) {
+func (am AppModule) BeginBlock(ctx context.Context) error {
 	BeginBlocker(ctx, am.keeper)
+	return nil
 }
 
 // EndBlock returns the end blocker for the incentive module. It returns no validator updates.
-func (am AppModule) EndBlock(_ context.Context) []abci.ValidatorUpdate {
-	return []abci.ValidatorUpdate{}
+func (am AppModule) EndBlock(_ context.Context) error {
+	return nil
 }
 
 // IsOnePerModuleType implements the depinject.OnePerModuleType interface.

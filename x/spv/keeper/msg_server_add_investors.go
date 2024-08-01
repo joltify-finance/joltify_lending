@@ -41,9 +41,9 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	pool, found := k.GetPools(ctx, msg.GetPoolIndex())
+	pool, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool not found with index %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool not found with index %v", msg.PoolIndex)
 	}
 	if !pool.OwnerAddress.Equals(spvAddress) {
 		return nil, coserrors.Wrap(types.ErrUnauthorized, "unauthorized operations")
@@ -85,7 +85,7 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 		} else {
 			v := types.PoolWithInvestors{
 				PoolIndex: poolIndex,
-				Investors: msg.GetInvestorID(),
+				Investors: msg.InvestorID,
 			}
 			k.AddInvestorToPool(ctx, &v)
 		}

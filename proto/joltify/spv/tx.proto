@@ -1,14 +1,18 @@
 syntax = "proto3";
 package joltify.spv;
 
-import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "amino/amino.proto";
 // this line is used by starport scaffolding # proto/tx/import
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/spv/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   rpc CreatePool(MsgCreatePool) returns (MsgCreatePoolResponse);
   // this line is used by starport scaffolding # proto/tx/rpc
   rpc AddInvestors(MsgAddInvestors) returns (MsgAddInvestorsResponse);
@@ -39,7 +43,10 @@ service Msg {
 }
 
 message MsgCreatePool {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgCreatePool";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   int32 project_index = 2;
   string pool_name=3;
   repeated string apy = 4;
@@ -51,7 +58,10 @@ message MsgCreatePoolResponse {
 }
 
 message MsgAddInvestors {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgAddInvestors";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"] ;
   string pool_index = 2;
   repeated string investor_iD= 3;
 }
@@ -61,7 +71,10 @@ message MsgAddInvestorsResponse {
 }
 
 message MsgDeposit {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgDeposit";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
   cosmos.base.v1beta1.Coin token = 3[
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
@@ -72,7 +85,10 @@ message MsgDepositResponse {
 }
 
 message MsgBorrow {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgBorrow";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
   cosmos.base.v1beta1.Coin borrow_amount= 3[
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
@@ -85,7 +101,10 @@ message MsgBorrowResponse {
 
 
 message MsgRepayInterest{
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgRepayInterest";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
   cosmos.base.v1beta1.Coin token = 4[
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
@@ -98,7 +117,10 @@ message MsgRepayInterestResponse{
 }
 
 message MsgClaimInterest {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgClaimInterest";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
 }
 
@@ -107,7 +129,10 @@ message MsgClaimInterestResponse {
 }
 
 message MsgUpdatePool {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgUpdatePool";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
   string pool_name  = 3;
   string pool_apy  = 4;
@@ -118,7 +143,10 @@ message MsgUpdatePoolResponse {
 }
 
 message MsgActivePool {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgActivePool";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
 }
 
@@ -126,7 +154,10 @@ message MsgActivePoolResponse {
 }
 
 message MsgPayPrincipal {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgPayPrincipal";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
   cosmos.base.v1beta1.Coin token= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
 }
@@ -135,7 +166,10 @@ message MsgPayPrincipalResponse {
 }
 
 message MsgPayPrincipalPartial {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgPayPrincipalPartial";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
   cosmos.base.v1beta1.Coin token= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
 }
@@ -144,7 +178,10 @@ message MsgPayPrincipalPartialResponse {
 }
 
 message MsgWithdrawPrincipal {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgWithdrawPrincipal";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
   cosmos.base.v1beta1.Coin token = 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
@@ -155,7 +192,10 @@ message MsgWithdrawPrincipalResponse {
 
 
 message MsgSubmitWithdrawProposal {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgSubmitWithdrawProposal";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
 }
 
@@ -164,7 +204,10 @@ message MsgSubmitWithdrawProposalResponse {
 }
 
 message MsgTransferOwnership {
-  string creator = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgTransferOwnership";
+  option (gogoproto.goproto_getters) = false;
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string pool_index = 2;
 }
 
@@ -174,7 +217,10 @@ message MsgTransferOwnershipResponse {
 
 // this line is used by starport scaffolding # proto/tx/message
 message MsgLiquidate {
-  string creator   = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name)           = "joltify.spv.MsgLiquidate";
+  option (gogoproto.goproto_getters) = false;
+  string creator   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string poolIndex = 2;
   cosmos.base.v1beta1.Coin amount= 3[(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coin", (gogoproto.nullable) = false];
 }

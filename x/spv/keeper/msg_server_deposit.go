@@ -23,9 +23,9 @@ func (k msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo, ok := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, ok := k.GetPools(ctx, msg.PoolIndex)
 	if !ok {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	if poolInfo.PoolStatus != types.PoolInfo_ACTIVE {
