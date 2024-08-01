@@ -104,44 +104,186 @@ type SPV struct {
 		URI         string `json:"uri"`
 		URIHash     string `json:"uri_hash"`
 		Data        struct {
-			Type          string    `json:"@type"`
-			PoolIndex     string    `json:"pool_index"`
-			Apy           string    `json:"apy"`
-			PayFreq       int       `json:"pay_freq"`
-			IssueTime     time.Time `json:"issue_time"`
-			BorrowDetails []struct {
-				BorrowedAmount struct {
+			Type  string `json:"type"`
+			Value struct {
+				PoolIndex     string    `json:"pool_index"`
+				Apy           string    `json:"apy"`
+				PayFreq       int       `json:"pay_freq"`
+				IssueTime     time.Time `json:"issue_time"`
+				BorrowDetails []struct {
+					BorrowedAmount struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount"`
+					TimeStamp     time.Time `json:"time_stamp"`
+					ExchangeRatio string    `json:"exchange_ratio"`
+				} `json:"borrow_details"`
+				MonthlyRatio string `json:"monthly_ratio"`
+				InterestSPY  string `json:"interest_sPY"`
+				Payments     []struct {
+					PaymentTime   time.Time `json:"payment_time"`
+					PaymentAmount struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"payment_amount"`
+					BorrowedAmount struct {
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount0 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount1 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount2 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount3 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount4 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount5 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount6 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount7 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount8 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount9 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount10 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount11 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount12 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount13 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount14 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount15 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount16 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount17 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount18 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount19 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount20 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+					BorrowedAmount21 struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount,omitempty"`
+				} `json:"payments"`
+				InterestPaid struct {
 					Denom  string `json:"denom"`
 					Amount string `json:"amount"`
-				} `json:"borrowed_amount"`
-				TimeStamp     time.Time `json:"time_stamp"`
-				ExchangeRatio string    `json:"exchange_ratio"`
-			} `json:"borrow_details"`
-			MonthlyRatio string `json:"monthly_ratio"`
-			InterestSPY  string `json:"interest_sPY"`
-			Payments     []struct {
-				PaymentTime   time.Time `json:"payment_time"`
-				PaymentAmount struct {
+				} `json:"interestPaid"`
+				AccInterest struct {
 					Denom  string `json:"denom"`
 					Amount string `json:"amount"`
-				} `json:"payment_amount"`
-				BorrowedAmount struct {
-					Denom  string `json:"denom"`
-					Amount string `json:"amount"`
-				} `json:"borrowed_amount"`
-			} `json:"payments"`
-			InterestPaid struct {
-				Denom  string `json:"denom"`
-				Amount string `json:"amount"`
-			} `json:"interestPaid"`
-			AccInterest struct {
-				Denom  string `json:"denom"`
-				Amount string `json:"amount"`
-			} `json:"acc_interest"`
-			LiquidationItems           []interface{} `json:"liquidation_items"`
-			TotalPaidLiquidationAmount string        `json:"total_paid_liquidation_amount"`
+				} `json:"acc_interest"`
+				TotalPaidLiquidationAmount string `json:"total_paid_liquidation_amount"`
+				IncentivePayments          []struct {
+					PaymentTime    time.Time `json:"payment_time"`
+					BorrowedAmount struct {
+						Denom  string `json:"denom"`
+						Amount string `json:"amount"`
+					} `json:"borrowed_amount"`
+				} `json:"incentive_payments"`
+			} `json:"value"`
 		} `json:"data"`
 	} `json:"class"`
+
+	//Class struct {
+	//	ID          string `json:"id"`
+	//	Name        string `json:"name"`
+	//	Symbol      string `json:"symbol"`
+	//	Description string `json:"description"`
+	//	URI         string `json:"uri"`
+	//	URIHash     string `json:"uri_hash"`
+	//	Data        struct {
+	//		Type          string    `json:"@type"`
+	//		PoolIndex     string    `json:"pool_index"`
+	//		Apy           string    `json:"apy"`
+	//		PayFreq       int       `json:"pay_freq"`
+	//		IssueTime     time.Time `json:"issue_time"`
+	//		BorrowDetails []struct {
+	//			BorrowedAmount struct {
+	//				Denom  string `json:"denom"`
+	//				Amount string `json:"amount"`
+	//			} `json:"borrowed_amount"`
+	//			TimeStamp     time.Time `json:"time_stamp"`
+	//			ExchangeRatio string    `json:"exchange_ratio"`
+	//		} `json:"borrow_details"`
+	//		MonthlyRatio string `json:"monthly_ratio"`
+	//		InterestSPY  string `json:"interest_sPY"`
+	//		Payments     []struct {
+	//			PaymentTime   time.Time `json:"payment_time"`
+	//			PaymentAmount struct {
+	//				Denom  string `json:"denom"`
+	//				Amount string `json:"amount"`
+	//			} `json:"payment_amount"`
+	//			BorrowedAmount struct {
+	//				Denom  string `json:"denom"`
+	//				Amount string `json:"amount"`
+	//			} `json:"borrowed_amount"`
+	//		} `json:"payments"`
+	//		InterestPaid struct {
+	//			Denom  string `json:"denom"`
+	//			Amount string `json:"amount"`
+	//		} `json:"interestPaid"`
+	//		AccInterest struct {
+	//			Denom  string `json:"denom"`
+	//			Amount string `json:"amount"`
+	//		} `json:"acc_interest"`
+	//		LiquidationItems           []interface{} `json:"liquidation_items"`
+	//		TotalPaidLiquidationAmount string        `json:"total_paid_liquidation_amount"`
+	//	} `json:"data"`
+	//} `json:"class"`
 
 	Balances []struct {
 		Denom  string `json:"denom"`

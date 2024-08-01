@@ -138,20 +138,20 @@ func dumpBorrowNFT(poolIndex, fileName string, needWrite bool, logger zlog.Logge
 		var nft SPV
 		err = json.Unmarshal([]byte(out), &nft)
 		_ = err
-		borrow := nft.Class.Data.BorrowDetails[len(nft.Class.Data.BorrowDetails)-1]
-		paidCounter := len(nft.Class.Data.Payments)
+		borrow := nft.Class.Data.Value.BorrowDetails[len(nft.Class.Data.Value.BorrowDetails)-1]
+		paidCounter := len(nft.Class.Data.Value.Payments)
 		counter := strconv.Itoa(paidCounter)
 
-		acc, ok := new(big.Int).SetString(nft.Class.Data.AccInterest.Amount, 10)
+		acc, ok := new(big.Int).SetString(nft.Class.Data.Value.AccInterest.Amount, 10)
 		if !ok {
 			panic("accInterest is not a number")
 		}
-		paid, ok := new(big.Int).SetString(nft.Class.Data.InterestPaid.Amount, 10)
+		paid, ok := new(big.Int).SetString(nft.Class.Data.Value.InterestPaid.Amount, 10)
 		if !ok {
 			panic("paid is not a number")
 		}
 
-		data[i+1] = []string{nft.Class.ID, borrow.BorrowedAmount.Amount, borrow.TimeStamp.String(), borrow.ExchangeRatio, counter, nft.Class.Data.AccInterest.Amount, nft.Class.Data.InterestPaid.Amount, new(big.Int).Sub(acc, paid).String()}
+		data[i+1] = []string{nft.Class.ID, borrow.BorrowedAmount.Amount, borrow.TimeStamp.String(), borrow.ExchangeRatio, counter, nft.Class.Data.Value.AccInterest.Amount, nft.Class.Data.Value.InterestPaid.Amount, new(big.Int).Sub(acc, paid).String()}
 		nftsResult[i] = nft
 	}
 	if needWrite {

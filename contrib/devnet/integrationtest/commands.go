@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/contrib/devnet/integrationtest/common"
 )
 
@@ -121,9 +121,9 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 	}
 
 	price := getprice()
-	ratio := types.MustNewDecFromStr(price.Price.Price)
-	lockedUsd := ratio.MulInt(types.NewIntFromBigInt(totalTransferedLocked)).TruncateInt()
-	delta := lockedUsd.Sub(types.NewIntFromBigInt(totalTransferedWithdrawed)).Abs()
+	ratio := sdkmath.LegacyMustNewDecFromStr(price.Price.Price)
+	lockedUsd := ratio.MulInt(sdkmath.NewIntFromBigInt(totalTransferedLocked)).TruncateInt()
+	delta := lockedUsd.Sub(sdkmath.NewIntFromBigInt(totalTransferedWithdrawed)).Abs()
 
 	if totalTransferedWithdrawed.Cmp(big.NewInt(0)) != 0 {
 		transferBefore, err = queryUSDCBalance("validator")
@@ -133,7 +133,7 @@ func triggerEvent(poolIndex string, wNotify chan int, display *outputData) error
 		mnsg := fmt.Sprintf("transfer amount is %v (suppose %v)and difference between total locked change and withdrawalable change is %v\n", totalTransferedWithdrawed.String(), transferAmount.String(), delta.String())
 		display.showOutput(mnsg, YELLOW)
 		if !transferAmount.IsZero() {
-			if transferAmount.Equal(types.NewIntFromBigInt(totalTransferedWithdrawed)) {
+			if transferAmount.Equal(sdkmath.NewIntFromBigInt(totalTransferedWithdrawed)) {
 				msg := fmt.Sprintf("%v transfer amount is equal to total transfer request", correct)
 				display.showOutput(msg, GREEN)
 			} else {

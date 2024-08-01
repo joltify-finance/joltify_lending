@@ -14,10 +14,9 @@ import (
 	"sync"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	zlog "github.com/rs/zerolog"
-
+	sdkmath "cosmossdk.io/math"
 	"github.com/joho/godotenv"
+	zlog "github.com/rs/zerolog"
 
 	"github.com/joltify-finance/joltify_lending/contrib/devnet/integrationtest/common"
 
@@ -473,7 +472,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 					}
 					totalTransfer := sdkmath.NewIntFromUint64(0)
 					price := getprice()
-					ratio := sdk.MustNewDecFromStr(price.Price.Price)
+					ratio := sdkmath.LegacyMustNewDecFromStr(price.Price.Price)
 					for i, el := range depositorb {
 						before := el.Depositor.DepositType
 						after := depositora[i].Depositor.DepositType
