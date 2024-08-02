@@ -218,6 +218,11 @@ var (
 		burnauctionmodule.AppModuleBasic{},
 	)
 
+	preBlockers = []string{
+		upgradetypes.ModuleName,
+		// this line is used by starport scaffolding # stargate/app/preBlockers
+	}
+
 	// module account permissions
 	// If these are changed, the permissions stored in accounts
 	// must also be migrated during a chain upgrade.
@@ -759,10 +764,10 @@ func NewApp(
 	// app.BasicModuleManager.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	app.BasicModuleManager.RegisterInterfaces(interfaceRegistry)
 
+	app.mm.SetOrderPreBlockers(preBlockers...)
+
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
 	app.mm.SetOrderBeginBlockers(
-		// Upgrade begin blocker runs migrations on the first block after an upgrade. It should run before any other module.
-		upgradetypes.ModuleName,
 		// Capability begin blocker runs non state changing initialization.
 		capabilitytypes.ModuleName,
 		// Committee begin blocker changes module params by enacting proposals.
@@ -947,14 +952,15 @@ func NewApp(
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}
 
+	app.setupUpgradeHandlers()
 	app.SetAnteHandler(anteHandler)
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
+	app.SetPreBlocker(app.PreBlocker)
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
-	app.setupUpgradeHandlers()
 
 	// At startup, after all modules have been registered, check that all prot
 	// annotations are correct.
@@ -990,6 +996,11 @@ func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
 // EndBlocker contains app specific logic for the EndBlock abci call.
 func (app *App) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
 	return app.mm.EndBlock(ctx)
+}
+
+// PreBlocker application updates every pre block
+func (app *App) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+	return app.mm.PreBlock(ctx)
 }
 
 // InitChainer contains app specific logic for the InitChain abci call.
