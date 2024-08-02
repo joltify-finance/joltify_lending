@@ -12,10 +12,9 @@ import (
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/cosmos/gogoproto/proto"
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
-
-	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	solomachine "github.com/cosmos/ibc-go/v8/modules/light-clients/06-solomachine"
 	params2 "github.com/joltify-finance/joltify_lending/app/params"
 
@@ -429,7 +428,7 @@ func NewApp(
 
 	keyTable := ibcclienttypes.ParamKeyTable()
 	keyTable.RegisterParamSet(&ibcconnectiontypes.Params{})
-	keyTable.RegisterParamSet(&banktypes.Params{})
+	keyTable.RegisterParamSet(&ibctransfertypes.Params{})
 
 	// stakingSubspace := app.ParamsKeeper.Subspace(stakingtypes.ModuleName)
 	mintSubspace := app.ParamsKeeper.Subspace(minttypes.ModuleName)
@@ -1134,6 +1133,7 @@ func (app *App) setupUpgradeHandlers() {
 		module.CoreAppModuleBasicAdaptor(name, m).RegisterInterfaces(app.interfaceRegistry)
 	}
 
+	//george
 	//app.ParamsKeeper.Subspace(ibcexported.ModuleName).WithKeyTable(keyTable)
 	//app.ParamsKeeper.Subspace(ibctransfertypes.ModuleName).WithKeyTable(ibctransfertypes.ParamKeyTable())
 
@@ -1158,6 +1158,8 @@ func (app *App) setupUpgradeHandlers() {
 			keyTable = govv1.ParamKeyTable() //nolint:staticcheck
 		case crisistypes.ModuleName:
 			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
+		case ibctransfertypes.ModuleName:
+			keyTable = ibctransfertypes.ParamKeyTable()
 
 		}
 		fmt.Printf("subspace banme3   %v\n", subspace.Name())

@@ -2,11 +2,8 @@ package upgrade
 
 import (
 	"context"
-	"fmt"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
-
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
@@ -29,25 +26,6 @@ func CreateUpgradeHandlerForV014Upgrade(
 			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v014")
 		}
 
-		var params types.Params
-
-		//subspace.GetParamSet(sdk.UnwrapSDKContext(ctx), &params)
-
-		//panow, err := keeper.ClientParams(ctx, nil)
-		//if err != nil {
-		//	panic(err)
-		//}
-		//fmt.Printf(">>>%v\n", panow.String())
-		subspace.IterateKeys(sdk.UnwrapSDKContext(ctx), func(key []byte) bool {
-			fmt.Printf(">>%v---%v\n", string(key), string(subspace.GetRaw(sdk.UnwrapSDKContext(ctx), key)))
-			return false
-		})
-
-		//pa := keeper.ClientKeeper.GetParams(sdk.UnwrapSDKContext(ctx))
-
-		fmt.Printf(">>>%v\n", params)
-
-		//fmt.Printf(">>>>%v\n", pa)
 		return mm.RunMigrations(ctx, configurator, vm)
 	}
 }
