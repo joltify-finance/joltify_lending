@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/joltify-finance/joltify_lending/utils"
 
 	"github.com/stretchr/testify/require"
@@ -30,7 +32,7 @@ func init() {
 }
 
 func d(amount string) sdkmath.LegacyDec     { return sdkmath.LegacyMustNewDecFromStr(amount) }
-func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
 func i(n int64) sdkmath.Int                 { return sdkmath.NewInt(n) }
 func is(ns ...int64) (is []sdkmath.Int) {
 	for _, n := range ns {

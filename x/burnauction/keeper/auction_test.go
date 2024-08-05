@@ -1,9 +1,11 @@
 package keeper_test
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
@@ -11,8 +13,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/burnauction/types"
 
 	testkeeper "github.com/joltify-finance/joltify_lending/testutil/keeper"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestAuction(t *testing.T) {
@@ -41,7 +41,7 @@ func TestAuction(t *testing.T) {
 
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(tb))
+	require.True(t, balance.Equal(tb))
 
 	// we put more token
 	tb = tb.Add(sdk.NewCoin("bfake", sdkmath.NewInt(1)))
@@ -49,7 +49,7 @@ func TestAuction(t *testing.T) {
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(tb))
+	require.True(t, balance.Equal(tb))
 
 	// we put more token
 	tb = tb.Add(sdk.NewCoin("afake", sdkmath.NewInt(99)))
@@ -57,7 +57,7 @@ func TestAuction(t *testing.T) {
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(sdk.NewCoins(sdk.NewCoin("bfake", sdkmath.NewInt(1)))))
+	require.True(t, balance.Equal(sdk.NewCoins(sdk.NewCoin("bfake", sdkmath.NewInt(1)))))
 
 	// we add c coin
 	tb = tb.Add(sdk.NewCoin("cfake", sdkmath.NewInt(1)))
@@ -65,7 +65,7 @@ func TestAuction(t *testing.T) {
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(sdk.NewCoins(sdk.NewCoin("bfake", sdkmath.NewInt(1)), sdk.NewCoin("cfake", sdkmath.NewInt(1)))))
+	require.True(t, balance.Equal(sdk.NewCoins(sdk.NewCoin("bfake", sdkmath.NewInt(1)), sdk.NewCoin("cfake", sdkmath.NewInt(1)))))
 	prebalance := balance
 
 	// coin not in threshold
@@ -73,12 +73,12 @@ func TestAuction(t *testing.T) {
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(prebalance.Add(sdk.NewCoin("ffake", sdkmath.NewInt(1)))))
+	require.True(t, balance.Equal(prebalance.Add(sdk.NewCoin("ffake", sdkmath.NewInt(1)))))
 
 	// empty balance
 	err = bk.SendCoinsFromAccountToModule(ctx, sender, types.ModuleAccount, burntokens)
 	require.NoError(t, err)
 	k.RunSurplusAuctions(ctx)
 	balance = bk.GetAllBalances(ctx, acc.GetAddress())
-	require.True(t, balance.IsEqual(sdk.NewCoins(sdk.NewCoin("ffake", sdkmath.NewInt(1)))))
+	require.True(t, balance.Equal(sdk.NewCoins(sdk.NewCoin("ffake", sdkmath.NewInt(1)))))
 }

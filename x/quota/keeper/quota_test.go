@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	keepertest "github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/quota/types"
@@ -37,9 +38,9 @@ func TestQuotaGet(t *testing.T) {
 	keeper.SetQuotaData(ctx, items)
 	targetItems, found := keeper.GetQuotaData(ctx, "testmodule1")
 	require.True(t, found)
-	require.True(t, targetItems.CoinsSum.IsEqual(items.CoinsSum))
+	require.True(t, targetItems.CoinsSum.Equal(items.CoinsSum))
 	for _, el := range targetItems.History {
-		require.True(t, el.Amount.IsEqual(items.History[0].Amount))
+		require.True(t, el.Amount.Equal(items.History[0].Amount))
 	}
 }
 
@@ -62,14 +63,14 @@ func TestQuotaGetAll(t *testing.T) {
 		i2 = ret[0]
 	}
 
-	require.True(t, i1.CoinsSum.IsEqual(items1.CoinsSum))
+	require.True(t, i1.CoinsSum.Equal(items1.CoinsSum))
 	for _, el := range i1.History {
-		require.True(t, el.Amount.IsEqual(items1.History[0].Amount))
+		require.True(t, el.Amount.Equal(items1.History[0].Amount))
 	}
 
-	require.True(t, i2.CoinsSum.IsEqual(items2.CoinsSum))
+	require.True(t, i2.CoinsSum.Equal(items2.CoinsSum))
 	for _, el := range i2.History {
-		require.True(t, el.Amount.IsEqual(items2.History[0].Amount))
+		require.True(t, el.Amount.Equal(items2.History[0].Amount))
 	}
 }
 
@@ -148,7 +149,7 @@ func TestUpdateQuota(t *testing.T) {
 	require.True(t, found)
 
 	delta := after.CoinsSum.Sub(before.CoinsSum...)
-	require.True(t, delta.IsEqual(sdk.NewCoins(newcoin)))
+	require.True(t, delta.Equal(sdk.NewCoins(newcoin)))
 
 	after.History[0].Amount = sdk.NewCoins(newcoin)
 	after.History[0].BlockHeight = ctx.BlockHeight()
@@ -404,7 +405,7 @@ func TestRevokehistory(t *testing.T) {
 
 	delta := before.CoinsSum.Sub(afterIBC.CoinsSum...)
 
-	require.True(t, delta.IsEqual(totaldeducted))
+	require.True(t, delta.Equal(totaldeducted))
 
 	targets := []uint64{1, 10, 13, 21}
 	for _, el := range afterIBC.History {

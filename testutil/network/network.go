@@ -63,21 +63,16 @@ func DefaultConfig() network.Config {
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		AppConstructor: func(val network.ValidatorI) servertypes.Application {
+
 			localApp := app.NewApp(
-				val.GetCtx().Logger,
-				dbm.NewMemDB(),
-				val.GetCtx().Config.RootDir,
-				nil,
-				encoding,
-				app.Options{
-					EVMMaxGasWanted: 10000,
-				},
-				0,
-				simtestutil.EmptyAppOptions{},
-				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
-				baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
-				baseapp.SetChainID(randomChainID),
+				val.GetCtx().Logger, dbm.NewMemDB(), nil,
+				true,
+				simtestutil.NewAppOptionsWithFlagHome(val.GetCtx().Config.RootDir),
+				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(pruningtypes.PruningOptionDefault)),
+				baseapp.SetMinGasPrices("0stake"),
+				baseapp.SetChainID("joltifytest_888-1"),
 			)
+
 			return localApp
 		},
 

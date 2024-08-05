@@ -5,12 +5,12 @@ import (
 	"time"
 
 	tmlog "cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +21,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 	tApp := app.NewTestApp(lg, t.TempDir())
 	tApp.InitializeFromGenesisStates(nil, nil)
 	auctionsKeeper := tApp.GetAuctionKeeper()
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+	ctx := tApp.NewContext(true)
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
 
 	auctions := []types2.Auction{

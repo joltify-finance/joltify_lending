@@ -55,8 +55,8 @@ func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, c
 }
 
 func (suite *IntegrationTester) NextBlockAt(blockTime time.Time) {
-	if !suite.Ctx.BlockTime().Before(blockTime) {
-		panic(fmt.Sprintf("new block time %s must be after current %s", blockTime, suite.Ctx.BlockTime()))
+	if !sdk.UnwrapSDKContext(suite.ctx).BlockTime().Before(blockTime) {
+		panic(fmt.Sprintf("new block time %s must be after current %s", blockTime, sdk.UnwrapSDKContext(suite.ctx).BlockTime()))
 	}
 	blockHeight := suite.Ctx.BlockHeight() + 1
 
@@ -70,7 +70,7 @@ func (suite *IntegrationTester) NextBlockAt(blockTime time.Time) {
 }
 
 func (suite *IntegrationTester) NextBlockAfter(blockDuration time.Duration) {
-	suite.NextBlockAt(suite.Ctx.BlockTime().Add(blockDuration))
+	suite.NextBlockAt(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(blockDuration))
 }
 
 func (suite *IntegrationTester) DeliverIncentiveMsg(msg sdk.Msg) error {
@@ -134,7 +134,7 @@ func (suite *IntegrationTester) DeliverMsgDelegate(delegator sdk.AccAddress, val
 //		tokenA,
 //		tokenB,
 //		slippage,
-//		suite.Ctx.BlockTime().Add(time.Hour).Unix(), // ensure msg will not fail due to short deadline
+//		sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Hour).Unix(), // ensure msg will not fail due to short deadline
 //	)
 //	msgServer := swapkeeper.NewMsgServerImpl(suite.App.GetSwapKeeper())
 //	_, err := msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), msg)

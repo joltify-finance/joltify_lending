@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"context"
 	"math/rand"
 	"testing"
 	"time"
@@ -126,21 +127,21 @@ func (suite *liquidateTestSuite) TestLiquidate() {
 		},
 		{
 			name: "pool cannot be found",
-			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: "invalid", Amount: sdk.NewCoin("ausdc", sdk.OneInt())}, expectedErr: "pool cannot be found invalid"},
+			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: "invalid", Amount: sdk.NewCoin("ausdc", sdkmath.OneInt())}, expectedErr: "pool cannot be found invalid"},
 		},
 
 		{
 			name: "inconsistent demon",
-			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("abc", sdk.OneInt())}, expectedErr: "the token is not the same as the borrowed token"},
+			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("abc", sdkmath.OneInt())}, expectedErr: "the token is not the same as the borrowed token"},
 		},
 		{
 			name: "success",
-			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", sdk.OneInt())}, expectedErr: ""},
+			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", sdkmath.OneInt())}, expectedErr: ""},
 		},
 
 		{
 			name: "pool is not in liquidation",
-			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", sdk.OneInt())}, expectedErr: "pool is not in liquidation"},
+			args: args{msgLiquidate: &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", sdkmath.OneInt())}, expectedErr: "pool is not in liquidation"},
 		},
 	}
 
@@ -191,7 +192,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdkmath.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
-		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Hour))
 	}
 
 	histories := make([][]*types.LiquidationItem, 1)
@@ -262,7 +263,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 		amount := sdkmath.NewIntFromUint64(uint64(samples[i])).Mul(sdkmath.NewIntFromUint64(1e2))
 		_, err := suite.app.Liquidate(suite.ctx, &types.MsgLiquidate{Creator: suite.investors[1], PoolIndex: suite.investorPool, Amount: sdk.NewCoin("ausdc", amount)})
 		suite.Require().NoError(err)
-		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Hour))
 	}
 
 	histories := make([][]*types.LiquidationItem, 2)

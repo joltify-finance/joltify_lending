@@ -3,7 +3,7 @@ package types
 import (
 	"testing"
 
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/testutil/sample"
 	"github.com/stretchr/testify/require"
 )

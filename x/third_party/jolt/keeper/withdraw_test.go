@@ -12,8 +12,6 @@ import (
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/cometbft/cometbft/crypto"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
@@ -120,7 +118,7 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 
 			// Initialize test app and set context
 			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := tApp.NewContext(true)
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
 				[]sdk.Coins{sdk.NewCoins(
@@ -268,7 +266,7 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
 			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
@@ -357,17 +355,17 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			suite.Require().NoError(err)
 
 			// Attempting to withdraw fails
-			err = suite.keeper.Withdraw(suite.ctx, tc.args.borrower, sdk.NewCoins(sdk.NewCoin("ujolt", sdk.OneInt())))
+			err = suite.keeper.Withdraw(suite.ctx, tc.args.borrower, sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.OneInt())))
 			suite.Require().Error(err)
 			suite.Require().True(strings.Contains(err.Error(), tc.errArgs.contains))
 
 			// Set up future chain context and run begin blocker, increasing user's owed borrow balance
-			runAtTime := time.Unix(suite.ctx.BlockTime().Unix()+(tc.args.futureTime), 0)
+			runAtTime := time.Unix(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Unix()+(tc.args.futureTime), 0)
 			liqCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 			jolt.BeginBlocker(liqCtx, suite.keeper)
 
 			// Attempted withdraw of 1 coin still fails
-			err = suite.keeper.Withdraw(suite.ctx, tc.args.borrower, sdk.NewCoins(sdk.NewCoin("ujolt", sdk.OneInt())))
+			err = suite.keeper.Withdraw(suite.ctx, tc.args.borrower, sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.OneInt())))
 			suite.Require().Error(err)
 			suite.Require().True(strings.Contains(err.Error(), tc.errArgs.contains))
 

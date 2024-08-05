@@ -267,7 +267,7 @@ func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
 			suite.Require().NoError(err)
 
 			// Set up chain context at future time
-			runAtTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * tc.args.timeElapsed))
+			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * tc.args.timeElapsed))
 			runCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 
 			// Run Jolt begin blocker in order to update the denom's index factor
@@ -639,7 +639,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 
 			// Run accumulator at several intervals
 			var timeElapsed int
-			previousBlockTime := suite.ctx.BlockTime()
+			previousBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 			for _, t := range tc.args.blockTimes {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
@@ -655,7 +655,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 					suite.keeper.AccumulateJoltSupplyRewards(blockCtx, multiRewardPeriod)
 				}
 			}
-			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
+			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
 			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 
 			// After we've accumulated, run synchronize
@@ -1000,7 +1000,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 
 			// Run accumulator at several intervals
 			var timeElapsed int
-			previousBlockTime := suite.ctx.BlockTime()
+			previousBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 			for _, t := range tc.args.blockTimes {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
@@ -1015,7 +1015,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 				suite.Require().True(found)
 				suite.keeper.AccumulateJoltSupplyRewards(blockCtx, multiRewardPeriod)
 			}
-			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
+			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
 			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 
 			// Confirm that the user's claim hasn't been synced

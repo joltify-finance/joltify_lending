@@ -683,7 +683,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			suite.Require().NoError(err)
 
 			// Set up liquidation chain context and run begin blocker
-			runAtTime := suite.ctx.BlockTime().Add(tc.args.liquidateAfter)
+			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(tc.args.liquidateAfter)
 			liqCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 			jolt.BeginBlocker(liqCtx, suite.keeper)
 
@@ -1328,7 +1328,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				}
 			}
 			// Set up liquidation chain context and run begin blocker
-			runAtTime := suite.ctx.BlockTime().Add(tc.args.liquidateAfter)
+			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(tc.args.liquidateAfter)
 			liqCtx := sdk.UnwrapSDKContext(suite.ctx)(runAtTime)
 			jolt.BeginBlocker(liqCtx, suite.keeper)
 

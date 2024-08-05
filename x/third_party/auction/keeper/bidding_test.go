@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
+
+	"cosmossdk.io/log"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
 	"github.com/stretchr/testify/require"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -444,7 +445,7 @@ func TestAuctionBidding(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Setup test
 
-			lg := tmlog.TestingLogger()
+			lg := log.NewTestLogger(t)
 			tApp := app.NewTestApp(lg, t.TempDir())
 
 			// Set up module account
@@ -474,7 +475,7 @@ func TestAuctionBidding(t *testing.T) {
 
 			tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
 
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: someTime})
+			ctx := tApp.NewContext(true)
 			keeper := tApp.GetAuctionKeeper()
 			bank := tApp.GetBankKeeper()
 

@@ -2,18 +2,18 @@ package keeper_test
 
 import (
 	"context"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/burnauction/keeper"
 	"github.com/joltify-finance/joltify_lending/x/burnauction/types"
 
 	keepertest "github.com/joltify-finance/joltify_lending/testutil/keeper"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 )
 
 func setupMsgServer(t testing.TB) (types.MsgServer, types.BankKeeper, context.Context) {
@@ -56,5 +56,5 @@ func TestSubmitRequest(t *testing.T) {
 	addr := authtypes.NewModuleAddress(types.ModuleName)
 
 	balances := bk.GetAllBalances(sdk.UnwrapSDKContext(ctx), addr)
-	require.Equal(t, balances.IsEqual(testCoin), true)
+	require.Equal(t, balances.Equal(testCoin), true)
 }

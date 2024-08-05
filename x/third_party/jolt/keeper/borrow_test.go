@@ -12,8 +12,6 @@ import (
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/cometbft/cometbft/crypto"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
@@ -297,7 +295,7 @@ func (suite *KeeperTestSuite) TestBorrow() {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
 			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := tApp.NewContext(true)
 
 			coins := sdk.NewCoins(
 				sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)),
@@ -449,7 +447,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 
 	// Initialize test app and set context
 	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	ctx := tApp.NewContext(true)
 
 	// Auth module genesis state
 	authGS := app.NewFundedGenStateWithSameCoins(
@@ -544,7 +542,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	err = suite.keeper.Borrow(suite.ctx, borrower, initialBorrowCoins)
 	suite.Require().NoError(err)
 
-	runAtTime := suite.ctx.BlockTime().Add(blockDuration)
+	runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(blockDuration)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(runAtTime)
 	jolt.BeginBlocker(suite.ctx, suite.keeper)
 
@@ -566,7 +564,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	err = suite.keeper.Borrow(
 		suite.ctx,
 		borrower,
-		sdk.NewCoins(sdk.NewCoin("ujolt", availableToBorrow.AmountOf("ujolt").Add(sdk.OneInt()))),
+		sdk.NewCoins(sdk.NewCoin("ujolt", availableToBorrow.AmountOf("ujolt").Add(sdkmath.OneInt()))),
 	)
 	suite.Require().Error(err)
 

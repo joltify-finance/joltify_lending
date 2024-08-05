@@ -6,17 +6,17 @@ import (
 	"time"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/stretchr/testify/assert"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	tmlog "cosmossdk.io/log"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/joltify-finance/joltify_lending/app"
 	joltminttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFirstDist(t *testing.T) {
@@ -33,7 +33,7 @@ func TestFirstDist(t *testing.T) {
 
 	firstDrop, ok := sdkmath.NewIntFromString("100000000000")
 	assert.True(t, ok)
-	assert.True(t, balances.Amount.Equal(firstDrop))
+	assert.True(t, balances.Amount.BigInt().Cmp(firstDrop.BigInt()) == 0)
 }
 
 func TestMintCoinsAndDistribute(t *testing.T) {
@@ -77,17 +77,19 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 	received = bk.GetBalance(ctx, tApp.GetAccountKeeper().GetModuleAddress(authtypes.FeeCollectorName), "ujolt")
 
 	stakingkepper := tApp.GetStakingKeeper()
-	totalBounded := stakingkepper.TotalBondedTokens(ctx)
+	totalBounded, err := stakingkepper.TotalBondedTokens(ctx)
+	assert.NoError(t, err)
 	fmt.Printf("total bonded>>>>%v\n", totalBounded.String())
 
-	yearlyWeGet := apy.MulInt(totalBounded).TruncateInt()
+	yearlyWeGet := apy.MulInt(sdkmath.NewIntFromBigInt(totalBounded.BigInt())).TruncateInt()
 	t.Logf("we get yearly %s", yearlyWeGet.String())
 
 	t.Logf("we have received for one minute %v", received.Amount.String())
 	yearlyMinutes := int64(365 * 24 * 60)
+
 	actualReceived := received.Amount.Mul(sdkmath.NewInt(yearlyMinutes))
-	fmt.Printf("gap is %v\n", yearlyWeGet.Sub(actualReceived).Quo(sdkmath.NewInt(1000000)))
-	gap := yearlyWeGet.Sub(actualReceived).Quo(sdkmath.NewInt(1000000))
+	fmt.Printf("gap is %v\n", yearlyWeGet.Sub(sdkmath.NewIntFromBigInt(actualReceived.BigInt()).Quo(sdkmath.NewInt(1000000))))
+	gap := yearlyWeGet.Sub(sdkmath.NewIntFromBigInt(actualReceived.BigInt())).Quo(sdkmath.NewInt(1000000))
 	assert.True(t, gap.LT(sdkmath.NewInt(40000)))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second))

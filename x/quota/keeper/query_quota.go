@@ -5,7 +5,7 @@ import (
 
 	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/joltify-finance/joltify_lending/x/quota/types"
 	"google.golang.org/grpc/codes"
@@ -47,7 +47,7 @@ func (k Keeper) Quota(goCtx context.Context, req *types.QueryGetQuotaRequest) (*
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	quota, found := k.GetQuotaData(ctx, req.QuotaModuleName)
 	if !found {
-		return nil, errorsmod.ErrKeyNotFound
+		return nil, sdkerrors.ErrKeyNotFound
 	}
 
 	return &types.QueryGetQuotaResponse{Quota: quota}, nil
@@ -61,7 +61,7 @@ func (k Keeper) AccountQuota(goCtx context.Context, req *types.QueryGetAccountQu
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	quota, found := k.getAccountQuotaData(ctx, req.QuotaModuleName, req.GetAccountAddress())
 	if !found {
-		return nil, errorsmod.ErrKeyNotFound
+		return nil, sdkerrors.ErrKeyNotFound
 	}
 	return &types.QueryGetAccountQuotaResponse{Quota: quota}, nil
 }

@@ -147,7 +147,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 	expectedAmount := cs(c("jolt", int64(expectedB1)), c("ujolt", int64(expectedB2)))
 	suite.Require().Equal(expectedAmount, reward.PaymentAmount)
 
-	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(10 * time.Microsecond))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(10 * time.Microsecond))
 
 	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
 	reward, ok = suite.keeper.GetSPVReward(suite.ctx, denom)
@@ -356,7 +356,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 
 	// now we do the allication again
 
-	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Hour))
 	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
 
 	suite.keeper.AfterSPVInterestPaid(suite.ctx, rewardIndex, interestPaid)

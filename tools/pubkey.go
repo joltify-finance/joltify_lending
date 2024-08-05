@@ -32,9 +32,6 @@ func keyConvert() { //nolint
 	}
 	sk := secp256k1.PrivKey{Key: data}
 
-	sss := sk.PubKey().Address()
-	fmt.Printf(">>>>ssss %v\n", sss.Bytes())
-
 	accAddr, err := sdk.AccAddressFromHexUnsafe(sk.PubKey().Address().String())
 	if err != nil {
 		panic(err)

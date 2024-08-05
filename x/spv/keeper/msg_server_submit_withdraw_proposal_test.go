@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -141,7 +142,7 @@ func (suite *withdrawProposalSuite) TestWithdrawProposalTooEarlyOrLate() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	currentBlockTime := suite.ctx.BlockTime()
+	currentBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 
 	ctx1 := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(currentBlockTime.Add(time.Second * time.Duration(poolInfo.ProjectLength-uint64(poolInfo.WithdrawRequestWindowSeconds)*3-1)))
 	req := types.MsgSubmitWithdrawProposal{Creator: suite.investors[0], PoolIndex: suite.investorPool}

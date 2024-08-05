@@ -1,11 +1,13 @@
 package keeper_test
 
 import (
+	"context"
 	"math/big"
 	"math/rand"
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -155,7 +157,7 @@ func (suite *mockBurnSuite) TestBurn() {
 		suite.Require().NoError(err)
 		_, err = suite.app.Deposit(suite.ctx, msgDepositUsersJunior[i])
 		suite.Require().NoError(err)
-		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 10))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 10))
 	}
 
 	// now we check the total amount of the pool is 300,000 and 1000,0000, and the borrowed is 0
@@ -169,18 +171,18 @@ func (suite *mockBurnSuite) TestBurn() {
 	suite.Require().True(poolInfo.BorrowedAmount.IsZero())
 
 	// now we borrow 200,000 and 800,000
-	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(oneWeek))
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base)))}
 	_, err := suite.app.Borrow(suite.ctx, &msgSenior)
 	suite.Require().NoError(err)
 
 	//  borrow another one
-	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Minute))
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base)))}
 	_, err = suite.app.Borrow(suite.ctx, &msgJunior)
 	suite.Require().NoError(err)
 
-	startTime := suite.ctx.BlockTime()
+	startTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 
 	// we pay the interest  and principle in the escrow account
 	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{
@@ -240,9 +242,9 @@ func (suite *mockBurnSuite) TestBurn() {
 	checkPointCounter := 0
 
 	for {
-		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
-		spv.EndBlock(suite.ctx, *suite.keeper)
-		if startTime.Add(checkPoints[checkPointCounter]).Before(suite.ctx.BlockTime()) {
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(deltaTime))
+		spv.EndBlock(sdk.UnwrapSDKContext(suite.ctx), *suite.keeper)
+		if startTime.Add(checkPoints[checkPointCounter]).Before(sdk.UnwrapSDKContext(suite.ctx).BlockTime()) {
 			checkPointCounter++
 			suite.Require().True(suite.auctionKeeper.AuctionAmount[0].Amount.String() == "288461538461538359998")
 			if checkPointCounter == len(checkPoints) {

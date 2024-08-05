@@ -96,12 +96,12 @@ func (suite *msgServerTestSuite) TestDeposit_DeadlineExceeded() {
 		suite.BankKeeper.GetBalance(suite.Ctx, depositor.GetAddress(), pool.TokenA),
 		suite.BankKeeper.GetBalance(suite.Ctx, depositor.GetAddress(), pool.TokenB),
 		"0.01",
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
 	res, err := suite.msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), deposit)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), deposit.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.ctx).BlockTime().Unix(), deposit.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 
@@ -351,12 +351,12 @@ func (suite *msgServerTestSuite) TestWithdraw_DeadlineExceeded() {
 		sdkmath.NewInt(2e6),
 		sdk.NewCoin("ukava", sdkmath.NewInt(1e6)),
 		sdk.NewCoin("usdx", sdkmath.NewInt(5e6)),
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
 	res, err := suite.msgServer.Withdraw(sdk.WrapSDKContext(suite.Ctx), withdraw)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), withdraw.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.ctx).BlockTime().Unix(), withdraw.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 
@@ -464,12 +464,12 @@ func (suite *msgServerTestSuite) TestSwapExactForTokens_DeadlineExceeded() {
 		sdk.NewCoin("ukava", sdkmath.NewInt(5e6)),
 		sdk.NewCoin("usdx", sdkmath.NewInt(25e5)),
 		"0.01",
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
 	res, err := suite.msgServer.SwapExactForTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.ctx).BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 
@@ -577,12 +577,12 @@ func (suite *msgServerTestSuite) TestSwapForExactTokens_DeadlineExceeded() {
 		sdk.NewCoin("ukava", sdkmath.NewInt(5e6)),
 		sdk.NewCoin("usdx", sdkmath.NewInt(25e5)),
 		"0.01",
-		suite.Ctx.BlockTime().Add(-1*time.Second).Unix(),
+		sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(-1*time.Second).Unix(),
 	)
 
 	res, err := suite.msgServer.SwapForExactTokens(sdk.WrapSDKContext(suite.Ctx), swapMsg)
 	suite.Require().Nil(res)
-	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", suite.Ctx.BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
+	suite.EqualError(err, fmt.Sprintf("block time %d >= deadline %d: deadline exceeded", sdk.UnwrapSDKContext(suite.ctx).BlockTime().Unix(), swapMsg.GetDeadline().Unix()))
 	suite.Nil(res)
 }
 

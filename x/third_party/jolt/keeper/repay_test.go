@@ -11,8 +11,6 @@ import (
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/cometbft/cometbft/crypto"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
@@ -213,7 +211,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
 			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
 			addrs, coinses := uniqueAddressCoins(

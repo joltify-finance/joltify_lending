@@ -3,6 +3,7 @@ package quota_test
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	keepertest "github.com/joltify-finance/joltify_lending/testutil/keeper"

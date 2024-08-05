@@ -259,7 +259,7 @@ func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
 			suite.Require().NoError(err)
 
 			// Set up chain context at future time
-			runAtTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * tc.args.timeElapsed))
+			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * tc.args.timeElapsed))
 			runCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 
 			// Run Hard begin blocker in order to update the denom's index factor
@@ -634,7 +634,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 
 			// Run accumulator at several intervals
 			var timeElapsed int
-			previousBlockTime := suite.ctx.BlockTime()
+			previousBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 			for _, t := range tc.args.blockTimes {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
@@ -650,7 +650,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 					suite.keeper.AccumulateJoltBorrowRewards(blockCtx, multiRewardPeriod)
 				}
 			}
-			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
+			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
 			suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 			// After we've accumulated, run synchronize
@@ -1012,7 +1012,7 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 
 			// Run accumulator at several intervals
 			var timeElapsed int
-			previousBlockTime := suite.ctx.BlockTime()
+			previousBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 			for _, t := range tc.args.blockTimes {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
@@ -1027,7 +1027,7 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 				suite.Require().True(found)
 				suite.keeper.AccumulateJoltBorrowRewards(blockCtx, multiRewardPeriod)
 			}
-			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
+			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
 			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 
 			// Confirm that the user's claim hasn't been synced

@@ -8,7 +8,6 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errorsmod "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 )
 
@@ -734,7 +733,7 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_OutputLessThanPoolReserves(
 	requester := suite.NewAccountFromAddr(sdk.AccAddress("requester-----------"), balance)
 	coinA := sdk.NewCoin("uoppy", sdkmath.NewInt(1e6))
 
-	coinB := sdk.NewCoin("usdc", sdkmath.NewInt(500e6).Add(sdk.OneInt()))
+	coinB := sdk.NewCoin("usdc", sdkmath.NewInt(500e6).Add(sdkmath.OneInt()))
 	err := suite.Keeper.SwapForExactTokens(suite.Ctx, requester.GetAddress(), coinA, coinB, sdkmath.LegacyMustNewDecFromStr("0.01"))
 	suite.EqualError(err, "output 500000001 >= pool reserves 500000000: insufficient liquidity")
 

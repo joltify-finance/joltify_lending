@@ -1162,7 +1162,6 @@ func (app *App) setupUpgradeHandlers() {
 			keyTable = ibctransfertypes.ParamKeyTable()
 
 		}
-		fmt.Printf("subspace banme3   %v\n", subspace.Name())
 		if !subspace.HasKeyTable() {
 			subspace.WithKeyTable(keyTable)
 		}

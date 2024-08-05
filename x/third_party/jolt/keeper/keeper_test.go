@@ -16,9 +16,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
-
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
@@ -38,7 +35,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 	app.SetBech32AddressPrefixes(config)
 
 	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	ctx := tApp.NewContext(true)
 	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)
 	k := tApp.GetJoltKeeper()

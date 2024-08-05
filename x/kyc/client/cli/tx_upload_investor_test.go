@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -33,6 +35,7 @@ import (
 func networkPrepare(t *testing.T, maxValidator uint32, v *keyring.Record) *network.Network {
 	cfg := localnetwork.DefaultConfig()
 	cfg.MinGasPrices = "0stake"
+	cfg.ChainID = "joltifytest_888-1"
 	cfg.BondedTokens = sdkmath.NewInt(10000000000000000)
 	cfg.StakingTokens = sdkmath.NewInt(100000000000000000)
 	state := types.GenesisState{}

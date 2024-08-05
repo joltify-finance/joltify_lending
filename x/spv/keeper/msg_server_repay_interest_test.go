@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -63,7 +64,8 @@ func TestMsgRepayInterest(t *testing.T) {
 	require.ErrorContains(t, err, "pool is not active")
 }
 
-func mockBorrow(ctx context.Context, nftKeeper types.NFTKeeper, poolInfo *types.PoolInfo, borrowAmount sdk.Coin) {
+func mockBorrow(rctx context.Context, nftKeeper types.NFTKeeper, poolInfo *types.PoolInfo, borrowAmount sdk.Coin) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	classID := fmt.Sprintf("class-%v", poolInfo.Index[2:])
 	poolClass, found := nftKeeper.GetClass(ctx, classID)
 	if !found {

@@ -12,8 +12,6 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -39,7 +37,7 @@ type Suite struct {
 func (suite *Suite) SetupTest() {
 	lg := tmlog.TestingLogger()
 	tApp := app.NewTestApp(lg, suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	ctx := tApp.NewContext(true)
 	ctx.WithConsensusParams(app.DefaultConsensusParams).WithBlockGasMeter(sdk.NewInfiniteGasMeter())
 	suite.Ctx = ctx
 	suite.App = tApp

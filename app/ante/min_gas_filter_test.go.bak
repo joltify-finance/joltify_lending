@@ -30,7 +30,7 @@ func TestEvmMinGasFilter(t *testing.T) {
 	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
 	handler := ante.NewEvmMinGasFilter(tApp.GetEVMKeeper())
 
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	ctx := tApp.NewContext(true)
 	err := tApp.GetEVMKeeper().SetParams(ctx, evmtypes.Params{
 		EvmDenom: "ajolt",
 	})
@@ -77,7 +77,7 @@ func TestEvmMinGasFilter(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := tApp.NewContext(true)
 
 			ctx = ctx.WithMinGasPrices(tc.minGasPrices)
 			mmd := MockAnteHandler{}

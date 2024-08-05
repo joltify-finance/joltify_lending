@@ -1,15 +1,16 @@
 package testutil
 
 import (
-	tmlog "cosmossdk.io/log"
+	"context"
+
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -36,7 +37,7 @@ type Suite struct {
 func (suite *Suite) SetupTest(numAddrs int) {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
-	tg := tmlog.TestingLogger()
+	tg := log.NewTestLogger(suite.T())
 	tApp := app.NewTestApp(tg, suite.T().TempDir())
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(numAddrs)
@@ -47,7 +48,7 @@ func (suite *Suite) SetupTest(numAddrs int) {
 		sdk.NewCoin("token2", sdkmath.NewInt(100)),
 	)
 
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	ctx := tApp.NewContext(true)
 
 	modName := "jolt"
 	modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(modName), nil, 0, 0)

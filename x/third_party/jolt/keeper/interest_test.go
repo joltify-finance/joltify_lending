@@ -15,8 +15,6 @@ import (
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/cometbft/cometbft/crypto"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -819,7 +817,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
 			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
@@ -1228,7 +1226,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
 			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
