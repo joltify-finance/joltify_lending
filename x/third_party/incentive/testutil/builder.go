@@ -173,7 +173,7 @@ func NewStandardMoneyMarket(denom string) types2.MoneyMarket {
 		denom,
 		types2.NewBorrowLimit(
 			false,
-			sdk.NewDec(1e15),
+			sdkmath.LegacyNewDec(1e15),
 			sdkmath.LegacyMustNewDecFromStr("0.6"),
 		),
 		denom+":usd",

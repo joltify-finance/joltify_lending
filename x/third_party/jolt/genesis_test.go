@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -49,7 +49,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 				"ujolt",
 				types2.NewBorrowLimit(
 					false,
-					sdk.NewDec(1e15),
+					sdkmath.LegacyNewDec(1e15),
 					loanToValue,
 				),
 				"joltify:usd",
@@ -64,7 +64,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 				sdkmath.LegacyZeroDec(),
 			),
 		},
-		sdk.NewDec(10),
+		sdkmath.LegacyNewDec(10),
 	)
 
 	deposits := types2.Deposits{
@@ -74,7 +74,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 			types2.SupplyInterestFactors{
 				{
 					Denom: "ujolt",
-					Value: sdk.NewDec(1),
+					Value: sdkmath.LegacyNewDec(1),
 				},
 			},
 		),
@@ -92,7 +92,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 			types2.BorrowInterestFactors{
 				{
 					Denom: "ujolt",
-					Value: sdk.NewDec(1),
+					Value: sdkmath.LegacyNewDec(1),
 				},
 			},
 		),

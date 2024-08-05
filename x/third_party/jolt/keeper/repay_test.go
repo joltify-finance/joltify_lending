@@ -3,7 +3,7 @@ package keeper_test
 import (
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -230,21 +230,21 @@ func (suite *KeeperTestSuite) TestRepay() {
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("usdx",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*UsdxCf), sdkmath.LegacyMustNewDecFromStr("1")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*UsdxCf), sdkmath.LegacyMustNewDecFromStr("1")), // Borrow Limit
 						"usdx:usd",                               // Market ID
 						sdkmath.NewInt(UsdxCf),                   // Conversion Factor
 						model,                                    // Interest Rate Model
 						sdkmath.LegacyMustNewDecFromStr("0.05"),  // Reserve Factor
 						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",                            // Market ID
 						sdkmath.NewInt(JoltCf),                   // Conversion Factor
 						model,                                    // Interest Rate Model
 						sdkmath.LegacyMustNewDecFromStr("0.05"),  // Reserve Factor
 						sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
 				types3.DefaultTotalSupplied, types3.DefaultTotalBorrowed, types3.DefaultTotalReserves,
 			)

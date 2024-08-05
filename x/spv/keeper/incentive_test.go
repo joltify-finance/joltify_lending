@@ -1,9 +1,12 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 
@@ -123,7 +126,7 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 	suite.Require().True(ok)
 	suite.Require().True(incentives.Equal(aa.AmountOf("ujolt")))
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 5))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 5))
 	// now we borrow more money and the incentive should be updated
 	borrow = &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.44e5))}
 	_, err = suite.app.Borrow(suite.ctx, borrow)

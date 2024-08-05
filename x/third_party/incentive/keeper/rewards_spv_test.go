@@ -55,7 +55,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 	suite.keeper.SetSPVRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
-	suite.ctx = suite.ctx.WithBlockTime(newAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
 	endTime := previousAccrualTime.Add(time.Hour * 2)
 
@@ -87,7 +87,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 
 	// 4 hours later
 	newAccrualTime = newAccrualTime.Add(4 * time.Hour)
-	suite.ctx = suite.ctx.WithBlockTime(newAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
 	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
 	reward, ok = suite.keeper.GetSPVReward(suite.ctx, denom)
@@ -114,7 +114,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 	suite.keeper.SetSPVRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(10 * time.Microsecond)
-	suite.ctx = suite.ctx.WithBlockTime(newAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
 	endTime := previousAccrualTime.Add(time.Hour * 2)
 
@@ -135,7 +135,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 	// after less then one second, the token amout should be 0
 	suite.Require().Nil(reward.PaymentAmount)
 
-	suite.ctx = suite.ctx.WithBlockTime(previousAccrualTime.Add(1 * time.Hour))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(previousAccrualTime.Add(1 * time.Hour))
 
 	expectedB1 := 2000 * 3600
 	expectedB2 := 1000 * 3600
@@ -147,7 +147,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 	expectedAmount := cs(c("jolt", int64(expectedB1)), c("ujolt", int64(expectedB2)))
 	suite.Require().Equal(expectedAmount, reward.PaymentAmount)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(10 * time.Microsecond))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(10 * time.Microsecond))
 
 	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
 	reward, ok = suite.keeper.GetSPVReward(suite.ctx, denom)
@@ -285,7 +285,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 	suite.keeper.SetSPVRewardAccrualTime(suite.ctx, rewardIndex, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
-	suite.ctx = suite.ctx.WithBlockTime(newAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
 	endTime := previousAccrualTime.Add(time.Hour * 2)
 
@@ -356,7 +356,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 
 	// now we do the allication again
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
 	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
 
 	suite.keeper.AfterSPVInterestPaid(suite.ctx, rewardIndex, interestPaid)

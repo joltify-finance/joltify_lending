@@ -1,18 +1,22 @@
 package ante_test
 
 import (
+	"context"
 	"encoding/hex"
 	"math/rand"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/cometbft/cometbft/libs/log"
+	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/store/metrics"
+
+	"cosmossdk.io/log"
 
 	"cosmossdk.io/store"
 	storetypes "cosmossdk.io/store/types"
-	tmdb "github.com/cometbft/cometbft-db"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
@@ -32,42 +36,42 @@ import (
 
 type mockStakingKeeper struct{}
 
-func (m mockStakingKeeper) IterateLastValidators(_ sdk.Context, _ func(index int64, validator types2.ValidatorI) (stop bool)) {
+func (m mockStakingKeeper) IterateLastValidators(_ context.Context, _ func(index int64, validator types2.ValidatorI) (stop bool)) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetParams(_ sdk.Context) types2.Params {
+func (m mockStakingKeeper) GetParams(_ context.Context) types2.Params {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) LastValidatorsIterator(_ sdk.Context) (iterator sdk.Iterator) {
+func (m mockStakingKeeper) LastValidatorsIterator(_ context.Context) (iterator storetypes.Iterator) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetValidator(_ sdk.Context, _ sdk.ValAddress) (validator types2.Validator, found bool) {
+func (m mockStakingKeeper) GetValidator(_ context.Context, _ sdk.ValAddress) (validator types2.Validator, found bool) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetHistoricalInfo(_ sdk.Context, _ int64) (types2.HistoricalInfo, bool) {
+func (m mockStakingKeeper) GetHistoricalInfo(_ context.Context, _ int64) (types2.HistoricalInfo, bool) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockStakingKeeper) GetBondedValidatorsByPower(_ sdk.Context) (validators []types2.Validator) {
+func (m mockStakingKeeper) GetBondedValidatorsByPower(_ context.Context) (validators []types2.Validator) {
 	v := types2.Validator{}
 	return []types2.Validator{v, v}
 }
 
-func setupVaultApp(t *testing.T) (sdk.Context, *vaultkeeper.Keeper) {
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
+func setupVaultApp(t *testing.T) (context.Context, *vaultkeeper.Keeper) {
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
-	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db)
+	db := dbm.NewMemDB()
+	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())

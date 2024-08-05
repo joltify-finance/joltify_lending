@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -47,8 +48,8 @@ func (suite *ArchiveTestSuite) TestArchiveClass() {
 		Symbol: "NFT1",
 	}
 
-	t1 := suite.ctx.BlockTime().Add(time.Second * 5)
-	suite.ctx = suite.ctx.WithBlockTime(t1)
+	t1 := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 5)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(t1)
 	err := suite.keeper.NftKeeper.SaveClass(suite.ctx, mockClass)
 	suite.Require().NoError(err)
 
@@ -67,8 +68,8 @@ func (suite *ArchiveTestSuite) TestArchiveNFT() {
 		ClassId: "class-1",
 	}
 
-	t1 := suite.ctx.BlockTime().Add(time.Second * 5)
-	suite.ctx = suite.ctx.WithBlockTime(t1)
+	t1 := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 5)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(t1)
 
 	mockAddr := sdk.AccAddress("addr1")
 
@@ -105,8 +106,8 @@ func (suite *ArchiveTestSuite) TestArchiveNFT() {
 	suite.Assert().True(found)
 	suite.Assert().Equal(aa, a.Id)
 
-	t2 := suite.ctx.BlockTime().Add(time.Second * 10)
-	suite.ctx = suite.ctx.WithBlockTime(t2)
+	t2 := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 10)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(t2)
 
 	err = suite.keeper.ArchiveNFT(suite.ctx, "class-2", "nft2")
 	suite.Require().NoError(err)

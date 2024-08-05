@@ -206,11 +206,11 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
@@ -239,7 +239,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
@@ -266,7 +266,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 
 	// for the rest of 10 month
 	for i := 0; i < 10; i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 		err := suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 		suite.Require().NoError(err)
 	}
@@ -287,7 +287,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonth() {
 	amount2 = a2.AmountOf("ausdc").Quo(sdkmath.NewInt(10))
 	checkInterestCorrectness(suite, creatorAddr1, creatorAddr2, 0, convertBorrowToLocal(amount1).String(), convertBorrowToLocal(amount2).String())
 
-	expectedInterest := sdkmath.LegacyNewDecFromInt(convertBorrowToUsd(investor1Borrowed)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).Mul(sdk.NewDecWithPrec(85, 2)).TruncateInt()
+	expectedInterest := sdkmath.LegacyNewDecFromInt(convertBorrowToUsd(investor1Borrowed)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).Mul(sdkmath.LegacyNewDecWithPrec(85, 2)).TruncateInt()
 	fmt.Printf("expected interest %v, investor1TotalClaimed %v", expectedInterest, investor1TotalClaimed)
 
 	dat := strings.Split(depositor1.LinkedNFT[0], ":")
@@ -356,7 +356,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
@@ -403,7 +403,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 
 	payCounter := poolInfo.InterestPrepayment.Counter
 	for i := 1; i < int(payCounter+1); i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
 		err := suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 		suite.Require().NoError(err)
 	}
@@ -411,7 +411,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	poolCheck, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(poolCheck.InterestPrepayment == nil)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(3600*24*15)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(3600*24*15)))
 
 	// clear the interest
 	req.Creator = suite.investors[0]
@@ -475,7 +475,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 
 	totalCounter := poolInfo.InterestPrepayment.Counter
 	for i := 0; i < int(totalCounter); i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
 		err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	}
 
@@ -533,7 +533,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	suite.Require().True(expectedToUser1.Sub(resultCoinUser1.Amount).LT(sdkmath.NewInt(int64(totalCounter))))
 	suite.Require().True(expectedToUser2.Sub(resultCoinUser2.Amount).LT(sdkmath.NewInt(int64(totalCounter))))
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	req.Creator = suite.investors[0]
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
@@ -592,7 +592,7 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
@@ -601,7 +601,7 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 		PoolIndex: suite.investorPool,
 	}
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	result1, err := suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -627,19 +627,19 @@ func (suite *claimInterestSuite) TestClaimInterest() {
 
 	// we add one second after the withdraw the interest
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(100)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(100)))
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 	suite.Require().True(result1.Amount == "0ausdc")
 
 	// we add less than a month, so the amount should still be zero
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth-101)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth-101)))
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 	suite.Require().True(result1.Amount == "0ausdc")
 
 	// since the spv not paid the interest, we cannont claim the interest
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth+150)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth+150)))
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 	suite.Require().True(result1.Amount == "0ausdc")
@@ -696,7 +696,7 @@ func (suite *claimInterestSuite) TestClaimInterestNoAuthorized() {
 
 	month := 3600 * 24 * 30
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
@@ -707,7 +707,7 @@ func (suite *claimInterestSuite) TestClaimInterestNoAuthorized() {
 
 	req.Creator = "jolt15anuxmcus4tyh2rttydj0cyfa8ldfg9akdek0f"
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(month)))
 	_, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().ErrorContains(err, "not found for pool index")
 
@@ -780,7 +780,7 @@ func (suite *claimInterestSuite) TestQueryOutStandingInterest() {
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
@@ -789,7 +789,7 @@ func (suite *claimInterestSuite) TestQueryOutStandingInterest() {
 		PoolIndex: suite.investorPool,
 	}
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	result1, err := suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -837,7 +837,7 @@ func (suite *claimInterestSuite) TestQueryOutStandingInterest() {
 	dueTime := suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq))
 	// the correctness of the calculation is verified in  interest_test.go
 	for {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(200)))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(200)))
 		resp, err = suite.keeper.OutstandingInterest(suite.ctx, &types.QueryOutstandingInterestRequest{
 			Wallet:    creator1,
 			PoolIndex: suite.investorPool,
@@ -896,18 +896,18 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonthWithSomePaymentMi
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 
@@ -920,7 +920,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonthWithSomePaymentMi
 
 	// for the rest of 10 month
 	for i := 0; i < 10; i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 		err := suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 		suite.Require().NoError(err)
 	}
@@ -959,7 +959,7 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleMonthWithSomePaymentMi
 
 	escrowInterestAmount1 := poolInfo.EscrowInterestAmount
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(spvkeeper.OneMonth)))
 	err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 	suite.Require().NoError(err)
 

@@ -134,7 +134,7 @@ func TestPostedPriceValidate(t *testing.T) {
 			PostedPrice{
 				MarketID:      "market",
 				OracleAddress: addr,
-				Price:         sdk.NewDec(-1),
+				Price:         sdkmath.LegacyNewDec(-1),
 			},
 			false,
 		},

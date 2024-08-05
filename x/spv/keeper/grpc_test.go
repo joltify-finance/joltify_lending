@@ -1,8 +1,11 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -119,7 +122,7 @@ func (suite *querySuite) TestAllQuery() {
 	suite.Require().NoError(err)
 	suite.Require().Lenf(respPool.PoolsIndex, 2, "should be 2")
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 5))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 5))
 
 	_, err = suite.keeper.WithdrawalPrincipal(suite.ctx, &types.QuerywithdrawalPrincipalRequest{PoolIndex: suite.investorPool, WalletAddress: "1234invalid"})
 	suite.Require().ErrorContains(err, "invalid address")

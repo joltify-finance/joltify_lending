@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -121,12 +121,12 @@ func (suite *KeeperTestSuite) TestDeposit() {
 			loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
-					types3.NewMoneyMarket("usdx", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "usdx:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("ujolt", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "joltify:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "bnb:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("btcb", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "btcb:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("usdx", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1000000000000000), loanToValue), "usdx:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("ujolt", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1000000000000000), loanToValue), "joltify:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1000000000000000), loanToValue), "bnb:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("btcb", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1000000000000000), loanToValue), "btcb:usd", sdkmath.NewInt(1000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
 				types3.DefaultTotalSupplied, types3.DefaultTotalBorrowed, types3.DefaultTotalReserves,
 			)
@@ -287,9 +287,9 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 			)
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
-					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "bnb:usd", sdkmath.NewInt(100000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("busd", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "busd:usd", sdkmath.NewInt(100000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("xrpb", types3.NewBorrowLimit(false, sdk.NewDec(1000000000000000), loanToValue), "xrpb:usd", sdkmath.NewInt(100000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1000000000000000), loanToValue), "bnb:usd", sdkmath.NewInt(100000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("busd", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1000000000000000), loanToValue), "busd:usd", sdkmath.NewInt(100000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("xrpb", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1000000000000000), loanToValue), "xrpb:usd", sdkmath.NewInt(100000000), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 				},
 				sdkmath.LegacyMustNewDecFromStr("10"),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,

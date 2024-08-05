@@ -40,7 +40,7 @@ func (suite *abciTestSuite) TestKeeper_BeginBlocker() {
 
 	// Run the beginblocker, simulating a block time 1ns before auction expiry
 	preExpiryTime := suite.Ctx.BlockTime().Add(types.DefaultForwardBidDuration - 1)
-	auction.BeginBlocker(suite.Ctx.WithBlockTime(preExpiryTime), suite.Keeper)
+	auction.BeginBlocker(sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(preExpiryTime), suite.Keeper)
 
 	// Check auction has not been closed yet
 	_, found := suite.Keeper.GetAuction(suite.Ctx, auctionID)
@@ -48,7 +48,7 @@ func (suite *abciTestSuite) TestKeeper_BeginBlocker() {
 
 	// Run the endblocker, simulating a block time equal to auction expiry
 	expiryTime := suite.Ctx.BlockTime().Add(types.DefaultForwardBidDuration)
-	auction.BeginBlocker(suite.Ctx.WithBlockTime(expiryTime), suite.Keeper)
+	auction.BeginBlocker(sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(expiryTime), suite.Keeper)
 
 	// Check auction has been closed
 	_, found = suite.Keeper.GetAuction(suite.Ctx, auctionID)

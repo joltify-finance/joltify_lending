@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
@@ -48,14 +48,14 @@ func (suite *GenesisTestSuite) SetupTest() {
 		WithSimpleModuleAccount(types.IncentiveMacc, cs(c("hard", 1e15), c("ujolt", 1e15)))
 
 	loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
-	borrowLimit := sdk.NewDec(1000000000000000)
+	borrowLimit := sdkmath.LegacyNewDec(1000000000000000)
 	joltGS := types2.NewGenesisState(
 		types2.NewParams(
 			types2.MoneyMarkets{
 				types2.NewMoneyMarket("ujolt", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "jolt:usd", sdkmath.NewInt(1000000), types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 				types2.NewMoneyMarket("bnb", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "bnb:usd", sdkmath.NewInt(1000000), types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 			},
-			sdk.NewDec(10),
+			sdkmath.LegacyNewDec(10),
 		),
 		types2.DefaultAccumulationTimes,
 		types2.DefaultDeposits,

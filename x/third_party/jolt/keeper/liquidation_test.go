@@ -4,8 +4,8 @@ import (
 	"strings"
 	"time"
 
+	tmlog "cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
-	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -557,56 +557,56 @@ func (suite *KeeperTestSuite) TestKeeperLiquidation() {
 			hardGS := types4.NewGenesisState(types4.NewParams(
 				types4.MoneyMarkets{
 					types4.NewMoneyMarket("usdx",
-						types4.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
+						types4.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdx:usd",                   // Market ID
 						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types4.NewMoneyMarket("usdt",
-						types4.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
+						types4.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdt:usd",                   // Market ID
 						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types4.NewMoneyMarket("usdc",
-						types4.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
+						types4.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdc:usd",                   // Market ID
 						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types4.NewMoneyMarket("dai",
-						types4.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
+						types4.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"dai:usd",                    // Market ID
 						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types4.NewMoneyMarket("ujolt",
-						types4.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+						types4.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",                // Market ID
 						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types4.NewMoneyMarket("bnb",
-						types4.NewBorrowLimit(false, sdk.NewDec(100000000*BnbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+						types4.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BnbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"bnb:usd",                    // Market ID
 						sdkmath.NewInt(BnbCf),        // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types4.NewMoneyMarket("btc",
-						types4.NewBorrowLimit(false, sdk.NewDec(100000000*BtcbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+						types4.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BtcbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"btc:usd",                    // Market ID
 						sdkmath.NewInt(BtcbCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types4.DefaultAccumulationTimes, types4.DefaultDeposits, types4.DefaultBorrows,
 				types4.DefaultTotalSupplied, types4.DefaultTotalBorrowed, types4.DefaultTotalReserves,
 			)
@@ -709,7 +709,7 @@ func (suite *KeeperTestSuite) TestKeeperLiquidation() {
 
 			// Set up liquidation chain context and run begin blocker
 			runAtTime := suite.ctx.BlockTime().Add(tc.args.liquidateAfter)
-			liqCtx := suite.ctx.WithBlockTime(runAtTime)
+			liqCtx := sdk.UnwrapSDKContext(suite.ctx)(runAtTime)
 			jolt.BeginBlocker(liqCtx, suite.keeper)
 
 			// Check borrow exists before liquidation

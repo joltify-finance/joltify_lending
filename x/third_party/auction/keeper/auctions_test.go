@@ -55,7 +55,7 @@ func (suite *auctionTestSuite) TestSurplusAuctionBasic() {
 	suite.NoError(err)
 
 	// Close auction just at auction expiry time
-	suite.Ctx = suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
+	suite.Ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
 	suite.NoError(suite.Keeper.CloseAuction(suite.Ctx, auctionID))
 	// Check buyer's coins increased
 	suite.CheckAccountBalanceEqual(buyer, cs(c("token1", 120), c("token2", 80)))
@@ -85,7 +85,7 @@ func (suite *auctionTestSuite) TestDebtAuctionBasic() {
 	suite.CheckAccountBalanceEqual(suite.ModAcc.GetAddress(), cs(c("token1", 20), c("debt", 100)))
 
 	// Close auction at just after auction expiry
-	ctx := suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
+	ctx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
 	suite.NoError(suite.Keeper.CloseAuction(ctx, auctionID))
 	// Check seller's coins increased
 	suite.CheckAccountBalanceEqual(seller, cs(c("token1", 80), c("token2", 110)))
@@ -115,7 +115,7 @@ func (suite *auctionTestSuite) TestDebtAuctionDebtRemaining() {
 	suite.CheckAccountBalanceEqual(buyerAddr, cs(c("token1", 10), c("debt", 90)))
 
 	// Close auction at just after auction expiry
-	ctx := suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
+	ctx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
 	suite.NoError(suite.Keeper.CloseAuction(ctx, auctionID))
 	// Check seller's coins increased
 	suite.CheckAccountBalanceEqual(seller, cs(c("token1", 90), c("token2", 110)))
@@ -165,7 +165,7 @@ func (suite *auctionTestSuite) TestCollateralAuctionBasic() {
 	suite.CheckAccountBalanceEqual(suite.Addrs[3], cs(c("token1", 101), c("token2", 100)))
 
 	// Close auction at just after auction expiry
-	ctx := suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultReverseBidDuration))
+	ctx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultReverseBidDuration))
 	suite.NoError(suite.Keeper.CloseAuction(ctx, auctionID))
 	// Check buyer's coins increased
 	suite.CheckAccountBalanceEqual(buyer, cs(c("token1", 115), c("token2", 50)))
@@ -200,7 +200,7 @@ func (suite *auctionTestSuite) TestCollateralAuctionDebtRemaining() {
 	for _, ra := range suite.Addrs[1:] {
 		suite.CheckAccountBalanceEqual(ra, cs(c("token1", 100), c("token2", 100)))
 	}
-	ctx := suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
+	ctx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultForwardBidDuration))
 	suite.NoError(suite.Keeper.CloseAuction(ctx, auctionID))
 
 	// check that buyers coins have increased
@@ -330,7 +330,7 @@ func (suite *auctionTestSuite) TestCloseExpiredAuctions() {
 	suite.NoError(err)
 
 	// Fast forward the block time
-	ctx := suite.Ctx.WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultMaxAuctionDuration).Add(1))
+	ctx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.Ctx.BlockTime().Add(types2.DefaultMaxAuctionDuration).Add(1))
 
 	// Close expired auctions
 	err = suite.Keeper.CloseExpiredAuctions(ctx)

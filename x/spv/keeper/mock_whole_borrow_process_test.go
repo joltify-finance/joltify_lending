@@ -1,10 +1,13 @@
 package keeper_test
 
 import (
+	"context"
 	"math/big"
 	"math/rand"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -181,7 +184,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 		suite.Require().NoError(err)
 		_, err = suite.app.Deposit(suite.ctx, msgDepositUsersJunior[i])
 		suite.Require().NoError(err)
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 10))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 10))
 	}
 
 	// now we check the total amount of the pool is 300,000 and 1000,0000, and the borrowed is 0
@@ -195,13 +198,13 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	suite.Require().True(poolInfo.BorrowedAmount.IsZero())
 
 	// now we borrow 200,000 and 800,000
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base)))}
 	_, err := suite.app.Borrow(suite.ctx, &msgSenior)
 	suite.Require().NoError(err)
 
 	//  borrow another one
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base)))}
 	_, err = suite.app.Borrow(suite.ctx, &msgJunior)
 	suite.Require().NoError(err)
@@ -268,7 +271,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 	allCoinsSenior := make(map[int]sdk.Coins)
 	allCoinsJunior := make(map[int]sdk.Coins)
 	for {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
 
 		if startTime.Add(checkPoints[checkPointCounter]).Before(suite.ctx.BlockTime()) {
@@ -342,12 +345,12 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearSimple() {
 
 	for i, el := range secondMonthJuniorCoins {
 		ratioGet := sdkmath.LegacyNewDecFromInt(el.Amount).QuoTruncate(sdkmath.LegacyNewDecFromInt(sumJunior.Amount))
-		suite.Require().True(ratioGet.Sub(ratioJunior[i]).Abs().LT(sdk.NewDecWithPrec(1, 8)))
+		suite.Require().True(ratioGet.Sub(ratioJunior[i]).Abs().LT(sdkmath.LegacyNewDecWithPrec(1, 8)))
 	}
 
 	for i, el := range secondMonthSeniorCoins {
 		ratioGet := sdkmath.LegacyNewDecFromInt(el.Amount).QuoTruncate(sdkmath.LegacyNewDecFromInt(sumSenior.Amount))
-		suite.Require().True(ratioGet.Sub(ratioSenior[i]).Abs().LT(sdk.NewDecWithPrec(1, 8)))
+		suite.Require().True(ratioGet.Sub(ratioSenior[i]).Abs().LT(sdkmath.LegacyNewDecWithPrec(1, 8)))
 	}
 
 	// so the total interest should be 100000, we calcualte the 4 weeks' interest, and one year we have 52/4=13 payments
@@ -414,7 +417,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 		suite.Require().NoError(err)
 		_, err = suite.app.Deposit(suite.ctx, msgDepositUsersJunior[i])
 		suite.Require().NoError(err)
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 10))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 10))
 	}
 
 	// now we check the total amount of the pool is 300,000 and 1000,0000, and the borrowed is 0
@@ -428,13 +431,13 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	suite.Require().True(poolInfo.BorrowedAmount.IsZero())
 
 	// now we borrow 200,000 and 800,000
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base)))}
 	_, err := suite.app.Borrow(suite.ctx, &msgSenior)
 	suite.Require().NoError(err)
 
 	//  borrow another one
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base)))}
 	_, err = suite.app.Borrow(suite.ctx, &msgJunior)
 	suite.Require().NoError(err)
@@ -516,7 +519,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	processed := false
 
 	for {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
 
 		// now we submit the withdrawal request
@@ -628,7 +631,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().True(found)
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour * 2))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Hour * 2))
 	ret := suite.keeper.HandlePartialPrincipalPayment(suite.ctx, &poolInfo, poolInfo.WithdrawAccounts)
 	suite.Require().True(ret)
 
@@ -712,8 +715,8 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	seniorLocked := p1.BorrowedAmount
 	juniorLocked := p2.BorrowedAmount
 	// senior apy is
-	seniorInterest := sdkmath.LegacyNewDecFromInt(seniorLocked.Amount).Mul(sdk.NewDecWithPrec(875, 4))
-	juniorInterest := sdkmath.LegacyNewDecFromInt(juniorLocked.Amount).Mul(sdk.NewDecWithPrec(15, 2))
+	seniorInterest := sdkmath.LegacyNewDecFromInt(seniorLocked.Amount).Mul(sdkmath.LegacyNewDecWithPrec(875, 4))
+	juniorInterest := sdkmath.LegacyNewDecFromInt(juniorLocked.Amount).Mul(sdkmath.LegacyNewDecWithPrec(15, 2))
 
 	currentTime := suite.ctx.BlockTime()
 
@@ -721,7 +724,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 	totalJuniorInterest := sdkmath.ZeroInt()
 	eightWeeks := oneWeek * 8
 	for {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
 
 		if currentTime.Add(time.Second * time.Duration(eightWeeks)).Before(suite.ctx.BlockTime()) {
@@ -789,23 +792,23 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawal() {
 		totalJuniorInterest = totalJuniorInterest.Add(tokens[0].Amount)
 	}
 
-	expectedYearSenior := sdkmath.LegacyNewDecFromInt(totalSeniorInterest).Mul(sdk.NewDec(52)).Quo(sdk.NewDec(8)).QuoTruncate(sdk.NewDecWithPrec(85, 2))
-	expectedYearJunior := sdkmath.LegacyNewDecFromInt(totalJuniorInterest).Mul(sdk.NewDec(52)).Quo(sdk.NewDec(8)).QuoTruncate(sdk.NewDecWithPrec(85, 2))
+	expectedYearSenior := sdkmath.LegacyNewDecFromInt(totalSeniorInterest).Mul(sdkmath.LegacyNewDec(52)).Quo(sdkmath.LegacyNewDec(8)).QuoTruncate(sdkmath.LegacyNewDecWithPrec(85, 2))
+	expectedYearJunior := sdkmath.LegacyNewDecFromInt(totalJuniorInterest).Mul(sdkmath.LegacyNewDec(52)).Quo(sdkmath.LegacyNewDec(8)).QuoTruncate(sdkmath.LegacyNewDecWithPrec(85, 2))
 
-	oneWeekTotal := sdkmath.LegacyNewDecFromInt(totalSeniorInterest).Quo(sdk.NewDec(8)).Add(sdkmath.LegacyNewDecFromInt(totalJuniorInterest).Quo(sdk.NewDec(8)))
+	oneWeekTotal := sdkmath.LegacyNewDecFromInt(totalSeniorInterest).Quo(sdkmath.LegacyNewDec(8)).Add(sdkmath.LegacyNewDecFromInt(totalJuniorInterest).Quo(sdkmath.LegacyNewDec(8)))
 
-	suite.Require().True(sdkmath.LegacyNewDecFromInt(convertBorrowToUsd(seniorInterest.TruncateInt())).Sub(expectedYearSenior).LT(sdk.NewDecWithPrec(1e8, 0)))
-	suite.Require().True(sdkmath.LegacyNewDecFromInt(convertBorrowToUsd(juniorInterest.TruncateInt())).Sub(expectedYearJunior).LT(sdk.NewDecWithPrec(1e8, 0)))
+	suite.Require().True(sdkmath.LegacyNewDecFromInt(convertBorrowToUsd(seniorInterest.TruncateInt())).Sub(expectedYearSenior).LT(sdkmath.LegacyNewDecWithPrec(1e8, 0)))
+	suite.Require().True(sdkmath.LegacyNewDecFromInt(convertBorrowToUsd(juniorInterest.TruncateInt())).Sub(expectedYearJunior).LT(sdkmath.LegacyNewDecWithPrec(1e8, 0)))
 
 	// another week!!!!!!!!!!!!!!!!!!!!
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(oneWeek)))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(oneWeek)))
 	spv.EndBlock(suite.ctx, *suite.keeper)
 	p, _ := suite.keeper.GetPools(suite.ctx, seniorPool)
 	suite.Require().Equal(p.PoolStatus, types.PoolInfo_FROZEN)
 	p, _ = suite.keeper.GetPools(suite.ctx, juniorPool)
 	suite.Require().Equal(p.PoolStatus, types.PoolInfo_FROZEN)
 
-	// suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second))
+	// suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second))
 
 	for _, el := range suite.investors[2:6] {
 		resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{
@@ -917,7 +920,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 		suite.Require().NoError(err)
 		_, err = suite.app.Deposit(suite.ctx, msgDepositUsersJunior[i])
 		suite.Require().NoError(err)
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 10))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * 10))
 	}
 
 	// now we check the total amount of the pool is 300,000 and 1000,0000, and the borrowed is 0
@@ -932,20 +935,20 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 
 	// now we borrow 200,000 and 800,000
 	token1 := sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(800000), base))
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(oneWeek))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(oneWeek))
 	msgSenior := types.MsgBorrow{Creator: suite.creator, PoolIndex: seniorPool, BorrowAmount: sdk.NewCoin("ausdc", token1)}
 	_, err := suite.app.Borrow(suite.ctx, &msgSenior)
 	suite.Require().NoError(err)
 
 	token2 := sdkmath.NewIntFromBigInt(new(big.Int).Mul(big.NewInt(200000), base))
 	//  borrow another one
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Minute))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Minute))
 	msgJunior := types.MsgBorrow{Creator: suite.creator, PoolIndex: juniorPool, BorrowAmount: sdk.NewCoin("ausdc", token2)}
 	_, err = suite.app.Borrow(suite.ctx, &msgJunior)
 	suite.Require().NoError(err)
 
-	seniorInterest := sdkmath.LegacyNewDecFromInt(token1).Mul(sdk.NewDecWithPrec(875, 4)).Mul(sdk.NewDecWithPrec(85, 2))
-	juniorInterest := sdkmath.LegacyNewDecFromInt(token2).Mul(sdk.NewDecWithPrec(15, 2)).Mul(sdk.NewDecWithPrec(85, 2))
+	seniorInterest := sdkmath.LegacyNewDecFromInt(token1).Mul(sdkmath.LegacyNewDecWithPrec(875, 4)).Mul(sdkmath.LegacyNewDecWithPrec(85, 2))
+	juniorInterest := sdkmath.LegacyNewDecFromInt(token2).Mul(sdkmath.LegacyNewDecWithPrec(15, 2)).Mul(sdkmath.LegacyNewDecWithPrec(85, 2))
 
 	startTime := suite.ctx.BlockTime()
 
@@ -967,12 +970,14 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 		time.Duration(oneYear) * time.Second,
 	}
 
+	sdk.UnwrapSDKContext(suite.ctx)
+
 	checkPointCounter := 0
 
 	allCoinsSenior := make(map[int]sdk.Coins)
 	allCoinsJunior := make(map[int]sdk.Coins)
 	for {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
 
 		if startTime.Add(checkPoints[checkPointCounter]).Before(suite.ctx.BlockTime()) {
@@ -1043,7 +1048,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	suite.Require().True(found)
 
 	// now we transfer owner
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Hour))
 	for i, el := range suite.investors[6:] {
 
 		_, err := suite.app.Deposit(suite.ctx, &types.MsgDeposit{
@@ -1061,7 +1066,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 		suite.Require().NoError(err)
 	}
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Hour))
 
 	_, err = suite.app.TransferOwnership(suite.ctx, &types.MsgTransferOwnership{
 		Creator:   suite.investors[0],
@@ -1080,7 +1085,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	checkPointCounter = 0
 	newStartTime := suite.ctx.BlockTime()
 	for {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
 
 		if newStartTime.Add(checkPoints[checkPointCounter]).Before(suite.ctx.BlockTime()) {
@@ -1116,7 +1121,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	// check investor 1 interest
 
 	// investor 1 can withdraw all the amount
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Hour))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Hour))
 	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &types.MsgWithdrawPrincipal{
 		Creator:   suite.investors[1],
 		PoolIndex: juniorPool,
@@ -1205,7 +1210,7 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 	checkPointCounter = 0
 	newStartTime = suite.ctx.BlockTime()
 	for {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(deltaTime))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(deltaTime))
 		spv.EndBlock(suite.ctx, *suite.keeper)
 		if newStartTime.Add(checkPoints[checkPointCounter]).Before(suite.ctx.BlockTime()) {
 			checkPointCounter++
@@ -1230,13 +1235,13 @@ func (suite *mockWholeProcessSuite) TestMockSystemOneYearWithWithdrawalTransferN
 
 	for i, el := range allSeniorsInterest {
 		ratioGet := sdkmath.LegacyNewDecFromInt(el.Amount).QuoTruncate(sdkmath.LegacyNewDecFromInt(sumSenior.Amount))
-		suite.Require().True(ratioGet.Sub(seniorRatios[i]).Abs().LT(sdk.NewDecWithPrec(1, 8)))
+		suite.Require().True(ratioGet.Sub(seniorRatios[i]).Abs().LT(sdkmath.LegacyNewDecWithPrec(1, 8)))
 	}
 
 	for i, el := range allJuniorInterest {
 		ratioGet := sdkmath.LegacyNewDecFromInt(el.Amount).QuoTruncate(sdkmath.LegacyNewDecFromInt(sumJunior.Amount))
 		if i != 1 {
-			suite.Require().True(ratioGet.Sub(juniorRatios[i]).Abs().LT(sdk.NewDecWithPrec(1, 8)))
+			suite.Require().True(ratioGet.Sub(juniorRatios[i]).Abs().LT(sdkmath.LegacyNewDecWithPrec(1, 8)))
 		}
 	}
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -268,7 +268,7 @@ func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
 
 			// Set up chain context at future time
 			runAtTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * tc.args.timeElapsed))
-			runCtx := suite.ctx.WithBlockTime(runAtTime)
+			runCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 
 			// Run Jolt begin blocker in order to update the denom's index factor
 			jolt.BeginBlocker(runCtx, suite.joltKeeper)
@@ -644,7 +644,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
 				previousBlockTime = updatedBlockTime
-				blockCtx := suite.ctx.WithBlockTime(updatedBlockTime)
+				blockCtx := sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 
 				// Run Jolt begin blocker for each block ctx to update denom's interest factor
 				jolt.BeginBlocker(blockCtx, suite.joltKeeper)
@@ -656,7 +656,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 				}
 			}
 			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
-			suite.ctx = suite.ctx.WithBlockTime(updatedBlockTime)
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 
 			// After we've accumulated, run synchronize
 			deposit, found := suite.joltKeeper.GetDeposit(suite.ctx, userAddr)
@@ -750,7 +750,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 
 			// Now we can jump forward in time and accumulate rewards
 			updatedBlockTime = previousBlockTime.Add(time.Duration(int(time.Second) * tc.args.updatedTimeDuration))
-			suite.ctx = suite.ctx.WithBlockTime(updatedBlockTime)
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 			suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, multiRewardPeriod)
 
 			// After we've accumulated, run synchronize
@@ -1005,7 +1005,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
 				previousBlockTime = updatedBlockTime
-				blockCtx := suite.ctx.WithBlockTime(updatedBlockTime)
+				blockCtx := sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 
 				// Run Jolt begin blocker for each block ctx to update denom's interest factor
 				jolt.BeginBlocker(blockCtx, suite.joltKeeper)
@@ -1016,7 +1016,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 				suite.keeper.AccumulateJoltSupplyRewards(blockCtx, multiRewardPeriod)
 			}
 			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
-			suite.ctx = suite.ctx.WithBlockTime(updatedBlockTime)
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
 
 			// Confirm that the user's claim hasn't been synced
 			claimPre, foundPre := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)

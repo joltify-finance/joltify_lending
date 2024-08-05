@@ -49,7 +49,7 @@ func main() {
 		}
 		// 85% of the interest is paid to the user, 15% is to the pool
 		a = apyToPayFreq.MulInt(amount).TruncateInt()
-		interestToReserve = sdk.NewDecFromInt(a).Mul(sdk.MustNewDecFromStr("0.15")).TruncateInt()
+		interestToReserve = sdk.NewDecFromInt(a).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 		interestToUser = a.Sub(interestToReserve)
 	}
 

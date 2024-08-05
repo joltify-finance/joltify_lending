@@ -120,7 +120,7 @@ package simulation
 // 		if err != nil {
 // 			panic(err)
 // 		}
-// 		slippage := slippageRaw.ToDec().Quo(sdk.NewDec(100))
+// 		slippage := slippageRaw.ToDec().Quo(sdkmath.LegacyNewDec(100))
 
 // 		// Generate random deadline
 // 		deadline := genRandDeadline(r, blockTime)
@@ -330,7 +330,7 @@ package simulation
 // 		if err != nil {
 // 			panic(err)
 // 		}
-// 		slippage := slippageRaw.ToDec().Quo(sdk.NewDec(100))
+// 		slippage := slippageRaw.ToDec().Quo(sdkmath.LegacyNewDec(100))
 
 // 		// Generate random deadline
 // 		blockTime := ctx.BlockHeader().Time
@@ -429,7 +429,7 @@ package simulation
 // 		if err != nil {
 // 			panic(err)
 // 		}
-// 		slippage := slippageRaw.ToDec().Quo(sdk.NewDec(100))
+// 		slippage := slippageRaw.ToDec().Quo(sdkmath.LegacyNewDec(100))
 
 // 		// Generate random deadline
 // 		blockTime := ctx.BlockHeader().Time

@@ -58,7 +58,7 @@ func (suite *AccumulateSwapRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreas
 	suite.keeper.SetSwapRewardAccrualTime(suite.ctx, pool, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
-	suite.ctx = suite.ctx.WithBlockTime(newAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
 	period := types.NewMultiRewardPeriod(
 		true,
@@ -110,7 +110,7 @@ func (suite *AccumulateSwapRewardsTests) TestStateUnchangedWhenBlockTimeHasNotIn
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
 	suite.keeper.SetSwapRewardAccrualTime(suite.ctx, pool, previousAccrualTime)
 
-	suite.ctx = suite.ctx.WithBlockTime(previousAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(previousAccrualTime)
 
 	period := types.NewMultiRewardPeriod(
 		true,
@@ -156,7 +156,7 @@ func (suite *AccumulateSwapRewardsTests) TestNoAccumulationWhenSourceSharesAreZe
 	suite.keeper.SetSwapRewardAccrualTime(suite.ctx, pool, previousAccrualTime)
 
 	firstAccrualTime := previousAccrualTime.Add(7 * time.Second)
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	period := types.NewMultiRewardPeriod(
 		true,
@@ -191,7 +191,7 @@ func (suite *AccumulateSwapRewardsTests) TestStateAddedWhenStateDoesNotExist() {
 	)
 
 	firstAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.keeper.AccumulateSwapRewards(suite.ctx, period)
 
@@ -201,7 +201,7 @@ func (suite *AccumulateSwapRewardsTests) TestStateAddedWhenStateDoesNotExist() {
 	suite.storedIndexesEqual(pool, nil)
 
 	secondAccrualTime := firstAccrualTime.Add(10 * time.Second)
-	suite.ctx = suite.ctx.WithBlockTime(secondAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(secondAccrualTime)
 
 	suite.keeper.AccumulateSwapRewards(suite.ctx, period)
 
@@ -234,7 +234,7 @@ func (suite *AccumulateSwapRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 	)
 
 	accrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.ctx = suite.ctx.WithBlockTime(accrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(accrualTime)
 
 	// Accumulate with no swap shares and no rewards per second will result in no increment to the indexes.
 	// No increment and no previous indexes stored, results in an updated of nil. Setting this in the state panics.
@@ -282,7 +282,7 @@ func (suite *AccumulateSwapRewardsTests) TestNoAccumulationWhenBeforeStartTime()
 		cs(c("swap", 2000), c("ukava", 1000)),
 	)
 
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.keeper.AccumulateSwapRewards(suite.ctx, period)
 
@@ -312,7 +312,7 @@ func (suite *AccumulateSwapRewardsTests) TestPanicWhenCurrentTimeLessThanPreviou
 		cs(c("swap", 2000), c("ukava", 1000)),
 	)
 
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.Panics(func() {
 		suite.keeper.AccumulateSwapRewards(suite.ctx, period)

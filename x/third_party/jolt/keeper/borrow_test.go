@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -319,13 +319,13 @@ func (suite *KeeperTestSuite) TestBorrow() {
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("usdx", types3.NewBorrowLimit(true, tc.args.usdxBorrowLimit, sdkmath.LegacyMustNewDecFromStr("1")), "usdx:usd", sdkmath.NewInt(UsdxCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("busd", types3.NewBorrowLimit(false, sdk.NewDec(100000000*BusdCf), sdkmath.LegacyMustNewDecFromStr("1")), "busd:usd", sdkmath.NewInt(BusdCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("ujolt", types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), tc.args.loanToValueJolt), "joltify:usd", sdkmath.NewInt(JoltCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("btcb", types3.NewBorrowLimit(false, sdk.NewDec(100000000*BtcbCf), tc.args.loanToValueBTCB), "btcb:usd", sdkmath.NewInt(BtcbCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdk.NewDec(100000000*BnbCf), tc.args.loanToValueBNB), "bnb:usd", sdkmath.NewInt(BnbCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
-					types3.NewMoneyMarket("xyz", types3.NewBorrowLimit(false, sdk.NewDec(1), tc.args.loanToValueBNB), "xyz:usd", sdkmath.NewInt(1), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("busd", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BusdCf), sdkmath.LegacyMustNewDecFromStr("1")), "busd:usd", sdkmath.NewInt(BusdCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("ujolt", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), tc.args.loanToValueJolt), "joltify:usd", sdkmath.NewInt(JoltCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("btcb", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BtcbCf), tc.args.loanToValueBTCB), "btcb:usd", sdkmath.NewInt(BtcbCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("bnb", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BnbCf), tc.args.loanToValueBNB), "bnb:usd", sdkmath.NewInt(BnbCf), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+					types3.NewMoneyMarket("xyz", types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(1), tc.args.loanToValueBNB), "xyz:usd", sdkmath.NewInt(1), types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
 				types3.DefaultTotalSupplied, types3.DefaultTotalBorrowed, types3.DefaultTotalReserves,
 			)
@@ -463,21 +463,21 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 		types3.NewParams(
 			types3.MoneyMarkets{
 				types3.NewMoneyMarket("usdx",
-					types3.NewBorrowLimit(false, sdk.NewDec(100000000*UsdxCf), sdkmath.LegacyMustNewDecFromStr("1")), // Borrow Limit
+					types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*UsdxCf), sdkmath.LegacyMustNewDecFromStr("1")), // Borrow Limit
 					"usdx:usd",                               // Market ID
 					sdkmath.NewInt(UsdxCf),                   // Conversion Factor
 					model,                                    // Interest Rate Model
 					sdkmath.LegacyMustNewDecFromStr("1.0"),   // Reserve Factor (high)
 					sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 				types3.NewMoneyMarket("ujolt",
-					types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
+					types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 					"joltify:usd",                            // Market ID
 					sdkmath.NewInt(JoltCf),                   // Conversion Factor
 					model,                                    // Interest Rate Model
 					sdkmath.LegacyMustNewDecFromStr("1.0"),   // Reserve Factor (high)
 					sdkmath.LegacyMustNewDecFromStr("0.05")), // Keeper Reward Percent
 			},
-			sdk.NewDec(10),
+			sdkmath.LegacyNewDec(10),
 		),
 		types3.DefaultAccumulationTimes,
 		types3.DefaultDeposits,
@@ -545,7 +545,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	suite.Require().NoError(err)
 
 	runAtTime := suite.ctx.BlockTime().Add(blockDuration)
-	suite.ctx = suite.ctx.WithBlockTime(runAtTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(runAtTime)
 	jolt.BeginBlocker(suite.ctx, suite.keeper)
 
 	repayCoins := sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))) // repay everything including accumulated interest

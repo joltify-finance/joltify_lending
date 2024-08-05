@@ -140,7 +140,7 @@ func (suite *addBorrowSuite) TestAddBorrow() {
 
 			if tc.name == "expire borrow time" {
 				expiredTime := poolInfo.PoolCreatedTime.Add(time.Second*time.Duration(poolInfo.PoolLockedSeconds) + poolInfo.GraceTime + time.Second)
-				suite.ctx = suite.ctx.WithBlockTime(expiredTime)
+				suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(expiredTime)
 			}
 
 			suite.keeper.SetPool(suite.ctx, poolInfo)
@@ -312,7 +312,7 @@ func (suite *addBorrowSuite) TestBorrowValueCheck() {
 
 	lastBorrow := borrowClassInfo.BorrowDetails[len(borrowClassInfo.BorrowDetails)-1].BorrowedAmount
 	suite.True(checkValueEqualWithExchange(lastBorrow.Amount, borrow.BorrowAmount.Amount))
-	suite.Require().True(borrowClassInfo.Apy.Equal(sdk.NewDecWithPrec(15, 2)))
+	suite.Require().True(borrowClassInfo.Apy.Equal(sdkmath.LegacyNewDecWithPrec(15, 2)))
 
 	// nft ID is the hash(nft class ID, investorWallet)
 	indexHash := crypto.Keccak256Hash([]byte(nftClassID), p1.DepositorAddress)
@@ -486,7 +486,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 	interestWithReserve := sdkmath.LegacyNewDecFromInt(sdkmath.NewIntFromUint64(1.34e5)).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).QuoInt64(int64(period)).TruncateInt()
 
 	for i := 0; i < 10; i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
 		err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 		suite.Require().NoError(err)
 		if i == 0 {
@@ -519,7 +519,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaid() {
 	borrower, err := sdk.AccAddressFromBech32(borrow.Creator)
 	suite.Require().NoError(err)
 	userCoinBefore := suite.bankKeeper.GetBalance(suite.ctx, borrower, "ausdc")
-	ctx := suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(half)))
+	ctx := sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(half)))
 	// now we borrow again
 	_, err = suite.app.Borrow(ctx, borrow)
 	suite.Require().NoError(err)
@@ -599,7 +599,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 
 	var oneInterest sdkmath.Int
 	for i := 0; i < 10; i++ {
-		suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
+		suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(poolInfo.PayFreq)))
 		err = suite.keeper.HandleInterest(suite.ctx, &poolInfo)
 		suite.Require().NoError(err)
 		if i == 0 {
@@ -633,7 +633,7 @@ func (suite *addBorrowSuite) TestMultipleBorrowWithInterestPaidUpdatePrePaid() {
 	escrowInterestBefore := poolInfo.EscrowInterestAmount
 
 	half := poolInfo.PayFreq / 2
-	ctx := suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * time.Duration(half)))
+	ctx := sdk.UnwrapSDKContext(suite.ctx)(suite.ctx.BlockTime().Add(time.Second * time.Duration(half)))
 	// now we borrow again
 
 	borrower, err := sdk.AccAddressFromBech32(borrow.Creator)

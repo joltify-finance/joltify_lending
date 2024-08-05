@@ -59,7 +59,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUpdatedWhenBlockTimeHasIncre
 	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
-	suite.ctx = suite.ctx.WithBlockTime(newAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -111,7 +111,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUnchangedWhenBlockTimeHasNot
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
 	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
 
-	suite.ctx = suite.ctx.WithBlockTime(previousAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(previousAccrualTime)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -157,7 +157,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenSourceSharesAre
 	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
 
 	firstAccrualTime := previousAccrualTime.Add(7 * time.Second)
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -192,7 +192,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateAddedWhenStateDoesNotExist()
 	)
 
 	firstAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
 
@@ -202,7 +202,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateAddedWhenStateDoesNotExist()
 	suite.storedIndexesEqual(denom, nil)
 
 	secondAccrualTime := firstAccrualTime.Add(10 * time.Second)
-	suite.ctx = suite.ctx.WithBlockTime(secondAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(secondAccrualTime)
 
 	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
 
@@ -235,7 +235,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 	)
 
 	accrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.ctx = suite.ctx.WithBlockTime(accrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(accrualTime)
 
 	// Accumulate with no source shares and no rewards per second will result in no increment to the indexes.
 	// No increment and no previous indexes stored, results in an updated of nil. Setting this in the state panics.
@@ -283,7 +283,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenBeforeStartTime
 		cs(c("jolt", 2000), c("ujolt", 1000)),
 	)
 
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
 
@@ -313,7 +313,7 @@ func (suite *AccumulateSupplyRewardsTests) TestPanicWhenCurrentTimeLessThanPrevi
 		cs(c("jolt", 2000), c("ujolt", 1000)),
 	)
 
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.Panics(func() {
 		suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)

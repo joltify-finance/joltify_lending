@@ -11,7 +11,7 @@ import (
 
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"

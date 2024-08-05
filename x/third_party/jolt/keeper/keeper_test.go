@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"

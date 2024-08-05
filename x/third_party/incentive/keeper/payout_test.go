@@ -10,7 +10,7 @@ import (
 
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 

@@ -25,7 +25,7 @@ package simulation
 // 	min := int(1)
 // 	max := int(100)
 // 	percentage := int64(r.Intn(int(max)-min) + min)
-// 	return sdk.NewDec(percentage).Quo(sdk.NewDec(100))
+// 	return sdkmath.LegacyNewDec(percentage).Quo(sdkmath.LegacyNewDec(100))
 // }
 
 // // GenAllowedPools generates random allowed pools

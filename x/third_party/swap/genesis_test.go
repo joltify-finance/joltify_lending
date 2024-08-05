@@ -20,7 +20,7 @@ type genesisTestSuite struct {
 func (suite *genesisTestSuite) Test_InitGenesis_ValidationPanic() {
 	invalidState := types.NewGenesisState(
 		types.Params{
-			SwapFee: sdk.NewDec(-1),
+			SwapFee: sdkmath.LegacyNewDec(-1),
 		},
 		types.PoolRecords{},
 		types.ShareRecords{},

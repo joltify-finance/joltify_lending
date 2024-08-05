@@ -3,7 +3,7 @@ package keeper_test
 import (
 	"testing"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/joltify-finance/joltify_lending/app"

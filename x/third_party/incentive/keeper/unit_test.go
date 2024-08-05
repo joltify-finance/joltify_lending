@@ -10,15 +10,15 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
+	"cosmossdk.io/log"
 	"cosmossdk.io/store"
-	db "github.com/cometbft/cometbft-db"
-	"github.com/cometbft/cometbft/libs/log"
+	db "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -59,7 +59,7 @@ func (suite *unitTester) SetupSuite() {
 	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
 	suite.cdc = tApp.AppCodec()
 
-	suite.incentiveStoreKey = sdk.NewKVStoreKey(types.StoreKey)
+	suite.incentiveStoreKey = storetypes.NewKVStoreKey(types.StoreKey)
 }
 
 func (suite *unitTester) SetupTest() {

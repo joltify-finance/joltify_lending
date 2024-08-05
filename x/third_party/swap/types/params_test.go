@@ -10,7 +10,6 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -150,7 +149,7 @@ func TestParams_Validation(t *testing.T) {
 			name: "negative swap fee",
 			key:  types.KeySwapFee,
 			testFn: func(params *types.Params) {
-				params.SwapFee = sdk.NewDec(-1)
+				params.SwapFee = sdkmath.LegacyNewDec(-1)
 			},
 			expectedErr: "invalid swap fee: -1.000000000000000000",
 		},

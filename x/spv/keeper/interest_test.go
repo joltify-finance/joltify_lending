@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/stretchr/testify/suite"
 )
 
@@ -96,7 +97,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 			accTime := tc.args.payfrq
 			accumulate := i.Power(uint64(accTime))
 
-			total := (accumulate.Sub(sdkmath.LegacyOneDec())).Mul(sdk.NewDec(OneYear / int64(accTime)))
+			total := (accumulate.Sub(sdkmath.LegacyOneDec())).Mul(sdkmath.LegacyNewDec(OneYear / int64(accTime)))
 			gap := total.Sub(tc.args.apy)
 			suite.Require().True(gap.LT(sdkmath.LegacyNewDecFromIntWithPrec(sdkmath.NewInt(1), 8)))
 		})
@@ -104,7 +105,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 }
 
 func checkPayFreqApy(oneYearApy sdkmath.LegacyDec, freqApy sdkmath.LegacyDec, circle uint64) bool {
-	return oneYearApy.Sub(freqApy.MulInt(sdkmath.NewIntFromUint64(circle))).Abs().LTE(sdk.NewDecWithPrec(1, 8))
+	return oneYearApy.Sub(freqApy.MulInt(sdkmath.NewIntFromUint64(circle))).Abs().LTE(sdkmath.LegacyNewDecWithPrec(1, 8))
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestAmount() {
@@ -130,7 +131,7 @@ func (suite *InterestTestSuite) TestCalculateInterestFactor() {
 	suite.Require().NoError(err)
 
 	result := CalculateInterestFactor(spy, sdkmath.NewIntFromUint64(uint64(payfreq)))
-	suite.Require().True(apyEachPayment.Sub(result).Abs().LTE(sdk.NewDecWithPrec(1, 8)))
+	suite.Require().True(apyEachPayment.Sub(result).Abs().LTE(sdkmath.LegacyNewDecWithPrec(1, 8)))
 }
 
 func (suite *InterestTestSuite) TestCalculateInterestPerSecond() {
@@ -142,7 +143,7 @@ func (suite *InterestTestSuite) TestCalculateInterestPerSecond() {
 
 	fmt.Printf(">>>>val is %v\n", val.String())
 
-	result := (val.Sub(sdkmath.LegacyOneDec())).Mul(sdk.NewDec(OneYear))
+	result := (val.Sub(sdkmath.LegacyOneDec())).Mul(sdkmath.LegacyNewDec(OneYear))
 
 	gap := testapy.Sub(result)
 

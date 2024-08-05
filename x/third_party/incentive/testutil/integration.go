@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmlog "cosmossdk.io/log"
 
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -62,7 +62,7 @@ func (suite *IntegrationTester) NextBlockAt(blockTime time.Time) {
 
 	_ = suite.App.EndBlocker(suite.Ctx, abcitypes.RequestEndBlock{})
 
-	suite.Ctx = suite.Ctx.WithBlockTime(blockTime).WithBlockHeight(blockHeight).WithChainID(testChainID)
+	suite.Ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(blockTime).WithBlockHeight(blockHeight).WithChainID(testChainID)
 	suite.Ctx = suite.Ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
 	suite.Ctx = suite.Ctx.WithConsensusParams(app.DefaultConsensusParams)
 
