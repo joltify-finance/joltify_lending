@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	sdkmath "cosmossdk.io/math"
@@ -816,7 +815,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
@@ -1225,7 +1224,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state

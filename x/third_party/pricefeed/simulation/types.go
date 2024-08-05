@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"sort"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // PriceGenerator allows deterministic price generation in simulations
@@ -72,7 +72,7 @@ func (p *PriceGenerator) Step(r *rand.Rand, blockHeight int64) {
 			upDown := r.Intn(2)
 
 			if upDown == 0 {
-				lastPrice = sdk.MinDec(lastPrice.Add(increment), maxPrice)
+				lastPrice = sdkmath.LegacyMinDec(lastPrice.Add(increment), maxPrice)
 			} else {
 				lastPrice = sdkmath.LegacyMaxDec(lastPrice.Sub(increment), minPrice)
 			}

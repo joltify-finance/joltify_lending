@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"cosmossdk.io/log"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
@@ -48,10 +49,10 @@ func (suite *GenesisTestSuite) TestInitExportGenState() {
 	gs := NewPricefeedGen()
 
 	suite.NotPanics(func() {
-		pricefeed.InitGenesis(suite.ctx, suite.keeper, gs)
+		pricefeed.InitGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper, gs)
 	})
 
-	exportedGs := pricefeed.ExportGenesis(suite.ctx, suite.keeper)
+	exportedGs := pricefeed.ExportGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper)
 	suite.NoError(gs.VerboseEqual(exportedGs), "exported genesis should match init genesis")
 }
 
@@ -59,7 +60,7 @@ func (suite *GenesisTestSuite) TestParamPricesGenState() {
 	gs := NewPricefeedGen()
 
 	suite.NotPanics(func() {
-		pricefeed.InitGenesis(suite.ctx, suite.keeper, gs)
+		pricefeed.InitGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper, gs)
 	})
 
 	params := suite.keeper.GetParams(suite.ctx)

@@ -10,13 +10,12 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/spv/types"
 
-	tmlog "cosmossdk.io/log"
+	"cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
-	"cosmossdk.io/log"
 	"cosmossdk.io/store"
 	db "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -56,7 +55,7 @@ type unitTester struct {
 }
 
 func (suite *unitTester) SetupSuite() {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 	suite.cdc = tApp.AppCodec()
 
 	suite.incentiveStoreKey = storetypes.NewKVStoreKey(types.StoreKey)

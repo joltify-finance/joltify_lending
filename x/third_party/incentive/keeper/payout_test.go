@@ -10,7 +10,6 @@ import (
 
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
-	tmlog "cosmossdk.io/log"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
@@ -54,7 +53,7 @@ func (suite *PayoutTestSuite) SetupTest() {
 }
 
 func (suite *PayoutTestSuite) SetupApp() {
-	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.app = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()

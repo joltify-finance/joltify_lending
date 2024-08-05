@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"testing"
 
-	tmlog "cosmossdk.io/log"
-
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
@@ -34,7 +32,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
 
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 	ctx := tApp.NewContext(true)
 	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)

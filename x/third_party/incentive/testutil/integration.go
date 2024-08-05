@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	tmlog "cosmossdk.io/log"
-
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -39,7 +37,7 @@ func (suite *IntegrationTester) SetupSuite() {
 }
 
 func (suite *IntegrationTester) SetApp() {
-	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.App = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 }
 
 func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisTime time.Time, genesisStates ...app.GenesisState) {

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -12,7 +14,7 @@ import (
 func d(str string) sdkmath.LegacyDec { return sdkmath.LegacyMustNewDecFromStr(str) }
 
 // c is a helper function for created sdk.Coin types in tests
-func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
 
 // c is a helper function for created sdk.Coins types in tests
 func cs(coins ...sdk.Coin) sdk.Coins { return sdk.NewCoins(coins...) }

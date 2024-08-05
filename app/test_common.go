@@ -40,7 +40,7 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 
-	log "cosmossdk.io/log"
+	"cosmossdk.io/log"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 
 	abci "github.com/cometbft/cometbft/abci/types"

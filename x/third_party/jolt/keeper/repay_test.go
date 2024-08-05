@@ -3,7 +3,8 @@ package keeper_test
 import (
 	"time"
 
-	tmlog "cosmossdk.io/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -210,7 +211,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state

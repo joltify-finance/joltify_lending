@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -36,7 +34,7 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 	suite.app = tApp
 	k := tApp.GetIncentiveKeeper()
 	suite.genesisTime = time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -220,7 +218,7 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 		},
 	)
 
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 	ctx := tApp.NewContext(true, tmproto.Header{Height: 0, Time: genesisTime})
 
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.

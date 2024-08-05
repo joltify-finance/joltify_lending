@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	tmlog "cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -294,7 +293,7 @@ func (suite *KeeperTestSuite) TestBorrow() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			coins := sdk.NewCoins(
@@ -446,7 +445,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	model := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("1.0"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
 
 	// Initialize test app and set context
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 	ctx := tApp.NewContext(true)
 
 	// Auth module genesis state

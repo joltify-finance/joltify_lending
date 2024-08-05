@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
+	"cosmossdk.io/log"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
 	"github.com/stretchr/testify/require"
@@ -14,7 +14,7 @@ import (
 
 func TestIncrementNextAuctionID(t *testing.T) {
 	// setup keeper
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true)
@@ -33,7 +33,7 @@ func TestIncrementNextAuctionID(t *testing.T) {
 
 func TestIterateAuctions(t *testing.T) {
 	// setup
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
 	tApp.InitializeFromGenesisStates(nil, nil)
 	keeper := tApp.GetAuctionKeeper()
@@ -61,7 +61,7 @@ func TestIterateAuctions(t *testing.T) {
 
 func TestIterateAuctionsByTime(t *testing.T) {
 	// setup keeper
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true)

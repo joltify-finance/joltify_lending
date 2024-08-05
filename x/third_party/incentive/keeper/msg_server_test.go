@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -40,7 +39,7 @@ func (suite *HandlerTestSuite) SetupTest() {
 }
 
 func (suite *HandlerTestSuite) SetupApp() {
-	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.App = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
 }
 

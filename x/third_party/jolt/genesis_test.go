@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
-
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
@@ -31,7 +29,7 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(t), suite.T().TempDir())
 	suite.genTime = tmtime.Canonical(time.Date(2021, 1, 1, 1, 1, 1, 1, time.UTC))
 	suite.ctx = tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genTime})
 	suite.keeper = tApp.GetJoltKeeper()

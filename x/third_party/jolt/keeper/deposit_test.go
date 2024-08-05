@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	tmlog "cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -107,7 +106,7 @@ func (suite *KeeperTestSuite) TestDeposit() {
 			)
 
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
@@ -274,7 +273,7 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 			loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
 			depositor := sdk.AccAddress(crypto.AddressHash([]byte("test")))

@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
@@ -127,7 +126,7 @@ func (suite *BorrowRewardsTestSuite) SetupTest() {
 }
 
 func (suite *BorrowRewardsTestSuite) SetupApp() {
-	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.app = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()

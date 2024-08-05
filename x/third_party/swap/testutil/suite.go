@@ -1,11 +1,12 @@
 package testutil
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"time"
 
-	tmlog "cosmossdk.io/log"
+	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
@@ -35,10 +36,10 @@ type Suite struct {
 
 // SetupTest instantiates a new app, keepers, and sets suite state
 func (suite *Suite) SetupTest() {
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(suite.T())
 	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true)
-	ctx.WithConsensusParams(app.DefaultConsensusParams).WithBlockGasMeter(sdk.NewInfiniteGasMeter())
+	//ctx.WithConsensusParams(app.DefaultConsensusParams).WithBlockGasMeter(storetypes.NewInfiniteGasMeter())
 	suite.Ctx = ctx
 	suite.App = tApp
 	suite.Keeper = tApp.GetSwapKeeper()
@@ -75,7 +76,7 @@ func (suite *Suite) CreateAccount(initialBalance sdk.Coins) authtypes.AccountI {
 	acc := ak.NewAccountWithAddress(suite.Ctx, addrs[0])
 	ak.SetAccount(suite.Ctx, acc)
 
-	err := suite.App.FundAccount(suite.Ctx, acc.GetAddress(), initialBalance)
+	err := suite.App.FundAccount(sdk.UnwrapSDKContext(suite.Ctx), acc.GetAddress(), initialBalance)
 	suite.Require().NoError(err)
 
 	return acc

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	tmlog "cosmossdk.io/log"
+		"cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/ante"
@@ -27,7 +27,7 @@ func mustParseDecCoins(value string) sdkmath.LegacyDecCoins {
 }
 
 func TestEvmMinGasFilter(t *testing.T) {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
 	handler := ante.NewEvmMinGasFilter(tApp.GetEVMKeeper())
 
 	ctx := tApp.NewContext(true)

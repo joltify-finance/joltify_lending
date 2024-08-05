@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	tmlog "cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/joltify-finance/joltify_lending/x/mint/types"

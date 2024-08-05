@@ -3,7 +3,6 @@ package keeper_test
 import (
 	"time"
 
-	tmlog "cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
@@ -507,7 +506,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
 
 			// account which will deposit "initial module account coins"
@@ -1137,7 +1136,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 	for i, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
 
 			// account which will deposit "initial module account coins"

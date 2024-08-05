@@ -3,6 +3,8 @@ package types
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/joltify-finance/joltify_lending/utils"
 
 	"github.com/stretchr/testify/require"

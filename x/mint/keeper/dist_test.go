@@ -14,7 +14,6 @@ import (
 
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
-	tmlog "cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/app"
 	joltminttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
 )

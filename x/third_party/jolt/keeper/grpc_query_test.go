@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	tmlog "cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -28,7 +27,7 @@ type grpcQueryTestSuite struct {
 }
 
 func (suite *grpcQueryTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
 
 	suite.addrs = addrs

@@ -1129,7 +1129,6 @@ func (app *App) setupUpgradeHandlers() {
 	}
 
 	for name, m := range modules {
-		fmt.Printf("we reiger %v\n", name)
 		module.CoreAppModuleBasicAdaptor(name, m).RegisterInterfaces(app.interfaceRegistry)
 	}
 
