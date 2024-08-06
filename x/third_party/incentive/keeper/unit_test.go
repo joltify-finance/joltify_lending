@@ -71,7 +71,7 @@ func (suite *unitTester) SetupTest() {
 
 func (suite *unitTester) TearDownTest() {
 	suite.keeper = keeper.Keeper{}
-	suite.ctx = context.Context{}
+	suite.ctx = nil
 }
 
 func (suite *unitTester) NewKeeper(paramSubspace types.ParamSubspace, bk types.BankKeeper, hk types.JoltKeeper, ak types.AccountKeeper, swapKeeper types.SwapKeeper, spvKeeper types.SPVKeeper, nftKeeper types.NFTKeeper) keeper.Keeper {

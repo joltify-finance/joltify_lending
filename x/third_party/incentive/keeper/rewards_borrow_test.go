@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -130,17 +131,15 @@ func (suite *BorrowRewardsTestSuite) SetupTest() {
 
 func (suite *BorrowRewardsTestSuite) SetupApp() {
 	suite.app = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-
+	suite.ctx = suite.app.Ctx
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
-
-	suite.ctx = suite.app.NewContext(true)
 }
 
 func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil2.IncentiveGenesisBuilder, hardBuilder testutil2.JoltGenesisBuilder) {
 	suite.SetupApp()
 
-	suite.app.InitializeFromGenesisStatesWithTime(
+	suite.app = suite.app.InitializeFromGenesisStatesWithTime(
 		suite.genesisTime, nil, nil,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
@@ -903,6 +902,13 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 
 			err = fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
+
+			pa := suite.joltKeeper.GetParams(suite.ctx)
+			_, found := suite.joltKeeper.GetMoneyMarket(suite.ctx, "bnb")
+			for _, el := range pa.MoneyMarkets {
+				fmt.Printf(">>>>%v\n", el.Denom)
+			}
+			fmt.Printf(">>>>found>>>>>>%v\n", found)
 
 			// Fill the hard supply to allow user to borrow
 			err = suite.joltKeeper.Deposit(suite.ctx, suite.addrs[0], tc.args.firstBorrow.Add(tc.args.modification.coins...))

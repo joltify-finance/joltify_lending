@@ -50,8 +50,7 @@ func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, c
 		testChainID, genAccs, coins,
 		genesisStates...,
 	)
-
-	suite.Ctx = suite.App.NewContext(false)
+	suite.Ctx = suite.App.Ctx
 	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithBlockGasMeter(storetypes.NewInfiniteGasMeter())
 	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithConsensusParams(*app.DefaultConsensusParams)
 }
