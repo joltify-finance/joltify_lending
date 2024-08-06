@@ -28,6 +28,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, accountKeeper types2.AccountK
 		k.SetBorrowInterestFactor(ctx, gat.CollateralType, gat.BorrowInterestFactor)
 	}
 
+	_, found := k.GetMoneyMarket(ctx, "ujolt")
+	fmt.Printf("found is jolt module %v\n", found)
+
 	for _, deposit := range gs.Deposits {
 		k.SetDeposit(ctx, deposit)
 	}

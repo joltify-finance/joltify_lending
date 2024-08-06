@@ -24,13 +24,12 @@ type KeeperTestSuite struct {
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
-
-	//suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-	//suite.ctx = suite.tApp.NewContext(false)
-	//suite.keeper = suite.tApp.GetPriceFeedKeeper()
+	// suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	// suite.ctx = suite.tApp.NewContext(false)
+	// suite.keeper = suite.tApp.GetPriceFeedKeeper()
 
 	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-	ctx := tApp.NewContext(true)
+	ctx := tApp.Ctx
 	tApp.InitializeFromGenesisStates(nil, nil,
 		NewPricefeedGenStateMulti(),
 	)
@@ -43,7 +42,8 @@ func (suite *KeeperTestSuite) SetupTest() {
 
 func (suite *KeeperTestSuite) TestGetSetOracles() {
 	params := suite.keeper.GetParams(suite.ctx)
-	suite.Equal([]sdk.AccAddress(nil), params.Markets[0].Oracles)
+	acc, err := sdk.AccAddressFromBech32("jolt15qdefkmwswysgg4qxgqpqr35k3m49pkxu8ygkq")
+	suite.Equal([]sdk.AccAddress{acc}, params.Markets[0].Oracles)
 
 	params.Markets[0].Oracles = suite.addrs
 	suite.NotPanics(func() { suite.keeper.SetParams(suite.ctx, params) })

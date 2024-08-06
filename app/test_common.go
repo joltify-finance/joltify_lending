@@ -8,8 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -248,7 +246,8 @@ func (tApp TestApp) InitializeFromGenesisStates(genAccs []authtypes.GenesisAccou
 // InitializeFromGenesisStatesWithTime calls InitChain on the app using the provided genesis states and time.
 // If any module genesis states are missing, defaults are used.
 func (tApp TestApp) InitializeFromGenesisStatesWithTime(genTime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+	t := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+	return t
 }
 
 // InitializeFromGenesisStatesWithTimeAndChainID calls InitChain on the app using the provided genesis states, time, and chain id.
@@ -308,32 +307,31 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		panic(err)
 	}
 
-	for _, state := range genesisStates {
-		for k, v := range state {
-			if k == types.ModuleName {
-				fmt.Printf(">>>=-----v\n", string(v))
-			}
-		}
-	}
-
 	_, err = tApp.InitChain(
 		&abci.RequestInitChain{
-			Time:          genTime,
 			Validators:    []abci.ValidatorUpdate{},
 			AppStateBytes: stateBytes,
 			ChainId:       chainID,
 			// Set consensus params, which is needed by x/feemarket
 			ConsensusParams: simtestutil.DefaultConsensusParams,
-			InitialHeight:   initialHeight,
 		},
 	)
 	if err != nil {
 		panic(err)
 	}
+
+	pa := tApp.App.joltKeeper.GetParams(tApp.Ctx)
+	_, found := tApp.joltKeeper.GetMoneyMarket(tApp.Ctx, "bnb")
+	for _, el := range pa.MoneyMarkets {
+		fmt.Printf(">333>>>%v\n", el.Denom)
+	}
+	fmt.Printf(">>>>found>>>>>>%v\n", found)
+
 	_, err = tApp.Commit()
 	if err != nil {
 		panic(err)
 	}
+
 	return tApp
 }
 
