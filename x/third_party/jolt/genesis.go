@@ -33,6 +33,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, accountKeeper types2.AccountK
 		k.SetDeposit(ctx, deposit)
 	}
 
+	_, found := k.GetMoneyMarket(ctx, "bnb")
+	fmt.Printf(">>>>genesis found>>>>>>%v\n", found)
+
 	for _, borrow := range gs.Borrows {
 		k.SetBorrow(ctx, borrow)
 	}

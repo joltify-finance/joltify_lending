@@ -3,6 +3,7 @@ package app
 import (
 	crand "crypto/rand"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -157,8 +158,9 @@ var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 
 // NewTestAppFromSealed creates a TestApp without first setting sdk config.
 func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
+	mdb := dbm.NewMemDB()
 	app := NewApp(
-		logger, dbm.NewMemDB(), nil,
+		logger, mdb, nil,
 		true,
 		simtestutil.NewAppOptionsWithFlagHome(rootDir),
 		baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(pruningtypes.PruningOptionDefault)),
@@ -201,7 +203,12 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 		},
 	)
 
-	ctx := app.BaseApp.NewContext(false)
+	ctx, err := app.BaseApp.CreateQueryContext(0, false)
+	if err != nil {
+		panic(err)
+	}
+
+	// ctx := sdk.NewContext(app., tmproto.Header{}, false, log.NewNopLogger())
 	ctx = ctx.WithBlockGasMeter(storetypes.NewGasMeter(1000000000000000000))
 	return TestApp{App: *app, Ctx: ctx}
 }
@@ -323,6 +330,13 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	if err != nil {
 		panic(err)
 	}
+
+	pa := tApp.joltKeeper.GetParams(tApp.Ctx)
+	_, found := tApp.joltKeeper.GetMoneyMarket(tApp.Ctx, "bnb")
+	for _, el := range pa.MoneyMarkets {
+		fmt.Printf(">333>>>%v\n", el.Denom)
+	}
+	fmt.Printf(">>>>found>>>>>>%v\n", found)
 
 	return tApp
 }
