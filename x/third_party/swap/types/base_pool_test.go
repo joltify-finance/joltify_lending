@@ -5,10 +5,9 @@ import (
 	"math/big"
 	"testing"
 
-	types "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 
 	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

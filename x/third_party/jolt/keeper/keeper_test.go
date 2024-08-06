@@ -1,9 +1,13 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
+
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -12,7 +16,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
@@ -32,13 +35,12 @@ func (suite *KeeperTestSuite) SetupTest() {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
 
-	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
-	ctx := tApp.NewContext(true)
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)
 	k := tApp.GetJoltKeeper()
 	suite.app = tApp
-	suite.ctx = ctx
+	suite.ctx = tApp.Ctx
 	suite.keeper = k
 	suite.addrs = addrs
 }
@@ -160,27 +162,27 @@ func (suite *KeeperTestSuite) TestGetSetBorrowedCoins_Empty() {
 	suite.Require().Empty(coins)
 }
 
-func (suite *KeeperTestSuite) getAccountCoins(acc authtypes.AccountI) sdk.Coins {
+func (suite *KeeperTestSuite) getAccountCoins(acc sdk.AccountI) sdk.Coins {
 	bk := suite.app.GetBankKeeper()
 	return bk.GetAllBalances(suite.ctx, acc.GetAddress())
 }
 
-func (suite *KeeperTestSuite) getAccount(addr sdk.AccAddress) authtypes.AccountI {
+func (suite *KeeperTestSuite) getAccount(addr sdk.AccAddress) sdk.AccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetAccount(suite.ctx, addr)
 }
 
-func (suite *KeeperTestSuite) getAccountAtCtx(addr sdk.AccAddress, ctx context.Context) authtypes.AccountI {
+func (suite *KeeperTestSuite) getAccountAtCtx(addr sdk.AccAddress, ctx context.Context) sdk.AccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetAccount(ctx, addr)
 }
 
-func (suite *KeeperTestSuite) getModuleAccount(name string) authtypes.ModuleAccountI {
+func (suite *KeeperTestSuite) getModuleAccount(name string) sdk.ModuleAccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetModuleAccount(suite.ctx, name)
 }
 
-func (suite *KeeperTestSuite) getModuleAccountAtCtx(name string, ctx context.Context) authtypes.ModuleAccountI {
+func (suite *KeeperTestSuite) getModuleAccountAtCtx(name string, ctx context.Context) sdk.ModuleAccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetModuleAccount(ctx, name)
 }

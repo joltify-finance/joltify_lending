@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
+
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	sdkmath "cosmossdk.io/math"
@@ -815,7 +817,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
@@ -881,7 +883,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 				depositCoins = depositCoins.Add(sdk.NewCoin(borrowCoin.Denom, borrowCoin.Amount.Mul(sdkmath.NewInt(2))))
 			}
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.user, tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.user, tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
 			err = suite.keeper.Deposit(suite.ctx, tc.args.user, depositCoins)
@@ -929,8 +931,8 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 				// -------------------------------------------------------------------------------------
 
 				// Set up snapshot chain context and run begin blocker
-				runAtTime := prevCtx.BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
-				snapshotCtx := prevCtx.WithBlockTime(runAtTime)
+				runAtTime := sdk.UnwrapSDKContext(prevCtx).BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
+				snapshotCtx := sdk.UnwrapSDKContext(prevCtx).WithBlockTime(runAtTime)
 				jolt.BeginBlocker(snapshotCtx, suite.keeper)
 
 				// Check that the total amount of borrowed coins has increased by expected interest amount
@@ -940,7 +942,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 
 				// Check that the total reserves have changed as expected
 				currTotalReserves, _ := suite.keeper.GetTotalReserves(snapshotCtx)
-				suite.Require().True(expectedReserves.IsEqual(currTotalReserves))
+				suite.Require().True(expectedReserves.Equal(currTotalReserves))
 
 				// Check that the borrow index has increased as expected
 				currIndexPrior, _ := suite.keeper.GetBorrowInterestFactor(snapshotCtx, tc.args.borrowCoinDenom)
@@ -1224,7 +1226,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
@@ -1299,7 +1301,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			// Run begin blocker
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.user, tc.args.depositCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.user, tc.args.depositCoins)
 			suite.Require().NoError(err)
 
 			// // Deposit coins
@@ -1360,8 +1362,8 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 					// -------------------------------------------------------------------------------------
 
 					// Set up snapshot chain context and run begin blocker
-					runAtTime := prevCtx.BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
-					snapshotCtx := prevCtx.WithBlockTime(runAtTime)
+					runAtTime := sdk.UnwrapSDKContext(prevCtx).BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
+					snapshotCtx := sdk.UnwrapSDKContext(prevCtx).WithBlockTime(runAtTime)
 					jolt.BeginBlocker(snapshotCtx, suite.keeper)
 
 					borrowInterestFactor, _ := suite.keeper.GetBorrowInterestFactor(ctx, coinDenom)

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	sdkmath "cosmossdk.io/math"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 )
@@ -39,7 +39,7 @@ func (suite *keeperTestSuite) TestSwapExactForTokens() {
 	suite.ModuleAccountBalanceEqual(reserves.Add(coinA).Sub(expectedOutput))
 	suite.PoolLiquidityEqual(reserves.Add(coinA).Sub(expectedOutput))
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapTrade,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyRequester, requester.GetAddress().String()),
@@ -89,7 +89,7 @@ func (suite *keeperTestSuite) TestSwapExactForBatchTokens() {
 	suite.PoolLiquidityEqual(reserves2.Add(intermediateOutput).Sub(expectedOutput))
 	suite.PoolLiquidityEqual(reserves.Add(coinA).Sub(intermediateOutput))
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapTrade,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyRequester, requester.GetAddress().String()),
@@ -99,7 +99,7 @@ func (suite *keeperTestSuite) TestSwapExactForBatchTokens() {
 		sdk.NewAttribute(types.AttributeKeyExactDirection, "input"),
 	))
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapTrade,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID2),
 		sdk.NewAttribute(types.AttributeKeyRequester, requester.GetAddress().String()),
@@ -255,7 +255,7 @@ func (suite *keeperTestSuite) TestSwapExactBatchForTokens_Slippage() {
 			)
 			requester := suite.NewAccountFromAddr(sdk.AccAddress("requester-----------"), balance)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapExactForBatchTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, tc.slippage)
 
 			if tc.shouldFail {
@@ -343,7 +343,7 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_Slippage() {
 			)
 			requester := suite.NewAccountFromAddr(sdk.AccAddress("requester-----------"), balance)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapExactForTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, tc.slippage)
 
 			if tc.shouldFail {
@@ -383,9 +383,9 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_InsufficientFunds() {
 			balance := sdk.NewCoins(tc.balanceA)
 			requester := suite.NewAccountFromAddr(sdk.AccAddress("requester-----------"), balance)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapExactForTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdkmath.LegacyMustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -426,9 +426,9 @@ func (suite *keeperTestSuite) TestSwapBatchExactForTokens_InsufficientFunds() {
 			balance := sdk.NewCoins(tc.balanceA)
 			requester := suite.NewAccountFromAddr(sdk.AccAddress("requester-----------"), balance)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapExactForBatchTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdkmath.LegacyMustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -463,9 +463,9 @@ func (suite *keeperTestSuite) TestSwapExactForTokens_InsufficientFunds_Vesting()
 			vesting := sdk.NewCoins(tc.vestingA)
 			requester := suite.CreateVestingAccount(balance, vesting)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapExactForTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdkmath.LegacyMustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -707,7 +707,7 @@ func (suite *keeperTestSuite) TestSwapForExactTokens() {
 	suite.ModuleAccountBalanceEqual(reserves.Add(expectedInput).Sub(coinB))
 	suite.PoolLiquidityEqual(reserves.Add(expectedInput).Sub(coinB))
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapTrade,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyRequester, requester.GetAddress().String()),
@@ -817,7 +817,7 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_Slippage() {
 			)
 			requester := suite.NewAccountFromAddr(sdk.AccAddress("requester-----------"), balance)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapForExactTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, tc.slippage)
 
 			if tc.shouldFail {
@@ -858,9 +858,9 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_InsufficientFunds() {
 			balance := sdk.NewCoins(tc.balanceA)
 			requester := suite.NewAccountFromAddr(sdk.AccAddress("requester-----------"), balance)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapForExactTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdkmath.LegacyMustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }
@@ -895,9 +895,9 @@ func (suite *keeperTestSuite) TestSwapForExactTokens_InsufficientFunds_Vesting()
 			vesting := sdk.NewCoins(tc.vestingA)
 			requester := suite.CreateVestingAccount(balance, vesting)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 			err := suite.Keeper.SwapForExactTokens(ctx, requester.GetAddress(), tc.coinA, tc.coinB, sdkmath.LegacyMustNewDecFromStr("0.1"))
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 		})
 	}
 }

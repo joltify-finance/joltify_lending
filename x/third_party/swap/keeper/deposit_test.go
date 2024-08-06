@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 
 	sdkmath "cosmossdk.io/math"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -65,13 +65,13 @@ func (suite *keeperTestSuite) TestDeposit_InsufficientFunds() {
 
 			err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdkmath.LegacyMustNewDecFromStr("0"))
 			// TODO: wrap in module specific error?
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds), fmt.Sprintf("got err %s", err))
 			suite.SetupTest()
 			// test deposit to existing pool insuffient funds
 			err = suite.CreatePool(sdk.NewCoins(sdk.NewCoin("ukava", sdkmath.NewInt(10e6)), sdk.NewCoin("usdx", sdkmath.NewInt(50e6))))
 			suite.Require().NoError(err)
 			err = suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdkmath.LegacyMustNewDecFromStr("10"))
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds))
 		})
 	}
 }
@@ -130,14 +130,14 @@ func (suite *keeperTestSuite) TestDeposit_InsufficientFunds_Vesting() {
 			// test create pool insuffient funds
 			err := suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdkmath.LegacyMustNewDecFromStr("0"))
 			// TODO: wrap in module specific error?
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds))
 
 			suite.SetupTest()
 			// test deposit to existing pool insuffient funds
 			err = suite.CreatePool(sdk.NewCoins(sdk.NewCoin("ukava", sdkmath.NewInt(10e6)), sdk.NewCoin("usdx", sdkmath.NewInt(50e6))))
 			suite.Require().NoError(err)
 			err = suite.Keeper.Deposit(suite.Ctx, depositor.GetAddress(), tc.depositA, tc.depositB, sdkmath.LegacyMustNewDecFromStr("4"))
-			suite.Require().True(errors.Is(err, errorsmod.ErrInsufficientFunds))
+			suite.Require().True(errors.Is(err, sdkerrors.ErrInsufficientFunds))
 		})
 	}
 }
@@ -163,7 +163,7 @@ func (suite *keeperTestSuite) TestDeposit_CreatePool() {
 	suite.PoolLiquidityEqual(deposit)
 	suite.PoolShareValueEqual(depositor, pool, deposit)
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapDeposit,
 		sdk.NewAttribute(types.AttributeKeyPoolID, pool.Name()),
 		sdk.NewAttribute(types.AttributeKeyDepositor, depositor.GetAddress().String()),
@@ -190,7 +190,7 @@ func (suite *keeperTestSuite) TestDeposit_PoolExists() {
 	depositA := sdk.NewCoin("usdx", balance.AmountOf("usdx"))
 	depositB := sdk.NewCoin("ukava", balance.AmountOf("ukava"))
 
-	ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	ctx := suite.App.NewContext(true)
 
 	err = suite.Keeper.Deposit(ctx, depositor.GetAddress(), depositA, depositB, sdkmath.LegacyMustNewDecFromStr("4"))
 	suite.Require().NoError(err)
@@ -246,7 +246,7 @@ func (suite *keeperTestSuite) TestDeposit_MultipleDeposit() {
 	suite.PoolLiquidityEqual(totalDeposit)
 	suite.PoolDepositorSharesEqual(owner.GetAddress(), poolID, totalShares)
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapDeposit,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyDepositor, owner.GetAddress().String()),
@@ -289,7 +289,7 @@ func (suite *keeperTestSuite) TestDeposit_Slippage() {
 			)
 			depositor := suite.CreateAccount(balance)
 
-			ctx := suite.App.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+			ctx := suite.App.NewContext(true)
 
 			err = suite.Keeper.Deposit(ctx, depositor.GetAddress(), tc.depositA, tc.depositB, tc.slippage)
 			if tc.shouldFail {

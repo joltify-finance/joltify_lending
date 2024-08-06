@@ -4,6 +4,9 @@ import (
 	"strings"
 	"time"
 
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -106,7 +109,7 @@ func (suite *KeeperTestSuite) TestDeposit() {
 			)
 
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
@@ -179,7 +182,7 @@ func (suite *KeeperTestSuite) TestDeposit() {
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
 			var err error
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.depositor, coins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.depositor, coins)
 			suite.Require().NoError(err)
 
 			// run the test
@@ -273,7 +276,7 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 			loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
 			depositor := sdk.AccAddress(crypto.AddressHash([]byte("test")))
@@ -334,7 +337,7 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err := testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor, tc.args.suppliedInitial)
+			err := testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), depositor, tc.args.suppliedInitial)
 			suite.Require().NoError(err)
 
 			err = suite.keeper.Deposit(suite.ctx, depositor, tc.args.suppliedInitial)
@@ -348,5 +351,5 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 	}
 }
 
-func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
 func cs(coins ...sdk.Coin) sdk.Coins        { return sdk.NewCoins(coins...) }

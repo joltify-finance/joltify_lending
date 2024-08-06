@@ -9,7 +9,7 @@ import (
 func i(in int64) sdkmath.Int { return sdkmath.NewInt(in) }
 
 // nolint
-func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
 
 // nolint
 func cs(coins ...sdk.Coin) sdk.Coins { return sdk.NewCoins(coins...) }

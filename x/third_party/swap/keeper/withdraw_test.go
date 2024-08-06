@@ -25,7 +25,7 @@ func (suite *keeperTestSuite) TestWithdraw_AllShares() {
 	suite.AccountBalanceEqual(owner.GetAddress(), reserves)
 	suite.ModuleAccountBalanceEqual(sdk.Coins{})
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapWithdraw,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyOwner, owner.GetAddress().String()),
@@ -59,7 +59,7 @@ func (suite *keeperTestSuite) TestWithdraw_PartialShares() {
 	suite.AccountBalanceEqual(owner.GetAddress(), sdk.NewCoins(minCoinA, minCoinB))
 	suite.ModuleAccountBalanceEqual(reservesLeft)
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapWithdraw,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyOwner, owner.GetAddress().String()),

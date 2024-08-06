@@ -74,7 +74,7 @@ func (suite *PayoutTestSuite) SetupWithGenState(authBuilder app.AuthBankGenesisB
 	)
 }
 
-func (suite *PayoutTestSuite) getAccount(addr sdk.AccAddress) authtypes.AccountI {
+func (suite *PayoutTestSuite) getAccount(addr sdk.AccAddress) sdk.AccountI {
 	ak := suite.app.GetAccountKeeper()
 	return ak.GetAccount(suite.ctx, addr)
 }

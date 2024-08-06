@@ -1,9 +1,13 @@
 package jolt_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
+
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -11,7 +15,6 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -29,9 +32,9 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp(log.NewTestLogger(t), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.genTime = tmtime.Canonical(time.Date(2021, 1, 1, 1, 1, 1, 1, time.UTC))
-	suite.ctx = tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genTime})
+	suite.ctx = tApp.Ctx
 	suite.keeper = tApp.GetJoltKeeper()
 	suite.app = tApp
 
@@ -184,7 +187,7 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 	expectedGenesis := joltGenesis
 	expectedGenesis.Deposits = expectedDeposits
 	expectedGenesis.Borrows = expectedBorrows
-	exportedGenesis := jolt.ExportGenesis(suite.ctx, suite.keeper)
+	exportedGenesis := jolt.ExportGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper)
 	suite.Equal(expectedGenesis, exportedGenesis)
 }
 

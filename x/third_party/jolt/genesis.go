@@ -23,13 +23,11 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, accountKeeper types2.AccountK
 	}
 
 	for _, gat := range gs.PreviousAccumulationTimes {
+		fmt.Printf(">>genesis set>>%v\n", gat.String())
 		k.SetPreviousAccrualTime(ctx, gat.CollateralType, gat.PreviousAccumulationTime)
 		k.SetSupplyInterestFactor(ctx, gat.CollateralType, gat.SupplyInterestFactor)
 		k.SetBorrowInterestFactor(ctx, gat.CollateralType, gat.BorrowInterestFactor)
 	}
-
-	_, found := k.GetMoneyMarket(ctx, "ujolt")
-	fmt.Printf("found is jolt module %v\n", found)
 
 	for _, deposit := range gs.Deposits {
 		k.SetDeposit(ctx, deposit)
@@ -92,6 +90,7 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types2.GenesisState {
 	}
 
 	for _, mm := range params.MoneyMarkets {
+		fmt.Printf(">>>>%v\n", mm.String())
 		supplyFactor, f := k.GetSupplyInterestFactor(ctx, mm.Denom)
 		if !f {
 			supplyFactor = sdkmath.LegacyOneDec()

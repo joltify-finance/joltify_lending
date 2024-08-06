@@ -131,7 +131,7 @@ func (suite *Suite) AddCoinsToNamedModule(moduleName string, amount sdk.Coins) {
 }
 
 // NewModuleAccountFromAddr creates a new module account from the provided address with the provided balance
-// func (suite *Suite) NewModuleAccount(moduleName string, balance sdk.Coins) authtypes.AccountI {
+// func (suite *Suite) NewModuleAccount(moduleName string, balance sdk.Coins) sdk.AccountI {
 // 	ak := suite.App.GetAccountKeeper()
 
 // 	modAccAddr := authtypes.NewModuleAddress(moduleName)

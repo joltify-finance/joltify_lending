@@ -290,10 +290,10 @@ func (suite *KeeperTestSuite) TestRepay() {
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower, tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower, tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.repayer, tc.args.initialRepayerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.repayer, tc.args.initialRepayerCoins)
 			suite.Require().NoError(err)
 
 			// Deposit coins to jolt
@@ -318,7 +318,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 				expectedRepayerCoins := previousRepayerCoins.Sub(repaymentCoins...)
 				acc := suite.getAccount(tc.args.repayer)
 				// use IsEqual for sdk.Coins{nil} vs sdk.Coins{}
-				suite.Require().True(expectedRepayerCoins.IsEqual(bankKeeper.GetAllBalances(suite.ctx, acc.GetAddress())))
+				suite.Require().True(expectedRepayerCoins.Equal(bankKeeper.GetAllBalances(suite.ctx, acc.GetAddress())))
 
 				// Check module account balance
 				expectedModuleCoins := tc.args.initialModuleCoins.Add(tc.args.depositCoins...).Sub(tc.args.borrowCoins...).Add(repaymentCoins...)

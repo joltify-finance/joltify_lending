@@ -3,7 +3,6 @@ package app
 import (
 	crand "crypto/rand"
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -319,13 +318,6 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	if err != nil {
 		panic(err)
 	}
-
-	pa := tApp.App.joltKeeper.GetParams(tApp.Ctx)
-	_, found := tApp.joltKeeper.GetMoneyMarket(tApp.Ctx, "bnb")
-	for _, el := range pa.MoneyMarkets {
-		fmt.Printf(">333>>>%v\n", el.Denom)
-	}
-	fmt.Printf(">>>>found>>>>>>%v\n", found)
 
 	_, err = tApp.Commit()
 	if err != nil {

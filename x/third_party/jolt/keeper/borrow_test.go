@@ -4,8 +4,11 @@ import (
 	"strings"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
+	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
@@ -293,7 +296,7 @@ func (suite *KeeperTestSuite) TestBorrow() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			coins := sdk.NewCoins(
@@ -393,7 +396,7 @@ func (suite *KeeperTestSuite) TestBorrow() {
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower, coins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower, coins)
 			suite.Require().NoError(err)
 
 			err = suite.keeper.Deposit(suite.ctx, tc.args.borrower, tc.args.depositCoins)
@@ -445,7 +448,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	model := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("1.0"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
 
 	// Initialize test app and set context
-	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	ctx := tApp.NewContext(true)
 
 	// Auth module genesis state
@@ -531,7 +534,7 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 		sdk.NewCoin("usdx", sdkmath.NewInt(100*UsdxCf)),
 	)
 
-	err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, borrower, depositCoins)
+	err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), borrower, depositCoins)
 	suite.Require().NoError(err)
 
 	err = suite.keeper.Deposit(suite.ctx, borrower, depositCoins)
@@ -542,12 +545,12 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	suite.Require().NoError(err)
 
 	runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(blockDuration)
-	suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(runAtTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 	jolt.BeginBlocker(suite.ctx, suite.keeper)
 
 	repayCoins := sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))) // repay everything including accumulated interest
 
-	err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, borrower, repayCoins)
+	err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), borrower, repayCoins)
 	suite.Require().NoError(err)
 
 	err = suite.keeper.Repay(suite.ctx, borrower, borrower, repayCoins)

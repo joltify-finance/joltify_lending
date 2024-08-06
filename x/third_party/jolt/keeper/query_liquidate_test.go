@@ -3,11 +3,12 @@ package keeper_test
 import (
 	"time"
 
+	"cosmossdk.io/log"
+
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/cometbft/cometbft/crypto"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	types4 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -73,7 +74,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
 				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
-				expectedTotalSuppliedCoins: sdk.NewCoins(sdkmath.NewInt64Coin("ujolt", 100004118)),
+				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100004118)),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100500020))),
 				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98000001))), // initial - deposit + borrow + liquidation leftovers
@@ -82,15 +83,15 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 9500390),
+							Lot:             sdk.NewInt64Coin("ujolt", 9500390),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 8004766),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 8004766),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -112,8 +113,8 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
 				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
-				expectedTotalSuppliedCoins: sdk.NewCoins(sdkmath.NewInt64Coin("ujolt", 100_004_117)),
-				expectedTotalBorrowedCoins: sdk.NewCoins(sdkmath.NewInt64Coin("ujolt", 1)),
+				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100_004_117)),
+				expectedTotalBorrowedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 1)),
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98*JoltCf))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions: []types4.Auction{
@@ -121,15 +122,15 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 10000411),
+							Lot:             sdk.NewInt64Coin("ujolt", 10000411),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 8004765),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 8004765),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -151,8 +152,8 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
 				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
-				expectedTotalSuppliedCoins: sdk.NewCoins(sdkmath.NewInt64Coin("ujolt", 100_004_117)),
-				expectedTotalBorrowedCoins: sdk.NewCoins(sdkmath.NewInt64Coin("ujolt", 8_004_766)),
+				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100_004_117)),
+				expectedTotalBorrowedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 8_004_766)),
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(110_000_411))),
 				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98*JoltCf))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions:           nil,
@@ -175,10 +176,10 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.2*BtcbCf))), // $20+$20+$20 = $80 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("ujolt", 1000000710),
-					sdkmath.NewInt64Coin("usdc", 1000003120),
-					sdkmath.NewInt64Coin("bnb", 100000003123),
-					sdkmath.NewInt64Coin("btc", 100000000031),
+					sdk.NewInt64Coin("ujolt", 1000000710),
+					sdk.NewInt64Coin("usdc", 1000003120),
+					sdk.NewInt64Coin("bnb", 100000003123),
+					sdk.NewInt64Coin("btc", 100000000031),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500001))),
@@ -188,60 +189,60 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11874430),
+							Lot:             sdk.NewInt64Coin("ujolt", 11874430),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("bnb", 0),
+							Bid:             sdk.NewInt64Coin("bnb", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("bnb", 200003287),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("bnb", 200003287),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11874254),
+							Lot:             sdk.NewInt64Coin("ujolt", 11874254),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("btc", 0),
+							Bid:             sdk.NewInt64Coin("btc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("btc", 20000032),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("btc", 20000032),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11875163),
+							Lot:             sdk.NewInt64Coin("ujolt", 11875163),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 10000782),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 10000782),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              4,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11876185),
+							Lot:             sdk.NewInt64Coin("ujolt", 11876185),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdc", 0),
+							Bid:             sdk.NewInt64Coin("usdc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdc", 20003284),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdc", 20003284),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -264,7 +265,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(120*JoltCf))),                                                                                            // $240 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("ujolt", 1000101456),
+					sdk.NewInt64Coin("ujolt", 1000101456),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500253)), sdk.NewCoin("bnb", sdkmath.NewInt(0.5*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.05*BtcbCf))), // 5% of each seized coin + initial balances
@@ -274,45 +275,45 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("bnb", 950000000),
+							Lot:             sdk.NewInt64Coin("bnb", 950000000),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 40036023),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 40036023),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("btc", 95000000),
+							Lot:             sdk.NewInt64Coin("btc", 95000000),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 40036023),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 40036023),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 47504818),
+							Lot:             sdk.NewInt64Coin("ujolt", 47504818),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 40040087),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 40040087),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -336,10 +337,10 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(35*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf))),       // $270 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("bnb", 100000078047),
-					sdkmath.NewInt64Coin("btc", 100000000780),
-					sdkmath.NewInt64Coin("ujolt", 1000009550),
-					sdkmath.NewInt64Coin("usdx", 1),
+					sdk.NewInt64Coin("bnb", 100000078047),
+					sdk.NewInt64Coin("btc", 100000000780),
+					sdk.NewInt64Coin("ujolt", 1000009550),
+					sdk.NewInt64Coin("usdx", 1),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(5*JoltCf))), // 5% of each seized coin + initial balances
@@ -349,75 +350,75 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdc", 95000000), // $95.00
+							Lot:             sdk.NewInt64Coin("usdc", 95000000), // $95.00
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("bnb", 0),
+							Bid:             sdk.NewInt64Coin("bnb", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("bnb", 900097134), // $90.00
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("bnb", 900097134), // $90.00
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdt", 10552835), // $10.55
+							Lot:             sdk.NewInt64Coin("usdt", 10552835), // $10.55
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("bnb", 0),
+							Bid:             sdk.NewInt64Coin("bnb", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("bnb", 99985020), // $10.00
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("bnb", 99985020), // $10.00
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdt", 84447165), // $84.45
+							Lot:             sdk.NewInt64Coin("usdt", 84447165), // $84.45
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("btc", 0),
+							Bid:             sdk.NewInt64Coin("btc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("btc", 80011211), // $80.01
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("btc", 80011211), // $80.01
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              4,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdx", 21097866), // $21.10
+							Lot:             sdk.NewInt64Coin("usdx", 21097866), // $21.10
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("btc", 0),
+							Bid:             sdk.NewInt64Coin("btc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("btc", 19989610), // $19.99
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("btc", 19989610), // $19.99
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              5,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdx", 73902133), //$73.90
+							Lot:             sdk.NewInt64Coin("usdx", 73902133), //$73.90
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 35010052), // $70.02
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 35010052), // $70.02
 						LotReturns:        lotReturns,
 					},
 				},
@@ -440,10 +441,10 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdt", sdkmath.NewInt(250*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(245*JoltCf))),
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("dai", 1000000000),
-					sdkmath.NewInt64Coin("usdc", 1000000001),
-					sdkmath.NewInt64Coin("usdt", 1000482503),
-					sdkmath.NewInt64Coin("usdx", 1000463500),
+					sdk.NewInt64Coin("dai", 1000000000),
+					sdk.NewInt64Coin("usdc", 1000000001),
+					sdk.NewInt64Coin("usdt", 1000482503),
+					sdk.NewInt64Coin("usdx", 1000463500),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(1017.50*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1010*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf))),
@@ -453,45 +454,45 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("dai", 263894126),
+							Lot:             sdk.NewInt64Coin("dai", 263894126),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdt", 0),
+							Bid:             sdk.NewInt64Coin("usdt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdt", 250507897),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdt", 250507897),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("dai", 68605874),
+							Lot:             sdk.NewInt64Coin("dai", 68605874),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdx", 0),
+							Bid:             sdk.NewInt64Coin("usdx", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdx", 65125788),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdx", 65125788),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdc", 189999999),
+							Lot:             sdk.NewInt64Coin("usdc", 189999999),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdx", 0),
+							Bid:             sdk.NewInt64Coin("usdx", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdx", 180362106),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdx", 180362106),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -506,8 +507,9 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+			// ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
+			ctx := tApp.Ctx
 
 			// account which will deposit "initial module account coins"
 			depositor := sdk.AccAddress(crypto.AddressHash([]byte("testdepositor")))
@@ -660,13 +662,13 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[0], tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower[0], tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.keeper, tc.args.initialKeeperCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.keeper, tc.args.initialKeeperCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor, tc.args.initialModuleCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), depositor, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
 
 			// Deposit initial module account coins
@@ -696,7 +698,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			queryServer := joltKeeper.NewQueryServerImpl(suite.keeper, suite.app.GetAccountKeeper(), suite.app.GetBankKeeper())
 
 			req := types3.QueryLiquidateRequest{}
-			ret, err := queryServer.Liquidate(sdk.WrapSDKContext(suite.ctx), &req)
+			ret, err := queryServer.Liquidate(suite.ctx, &req)
 			suite.Require().NoError(err)
 
 			result := sdkmath.LegacyMustNewDecFromStr(ret.LiquidateItems[0].Ltv)
@@ -764,7 +766,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
 				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
-				expectedTotalSuppliedCoins: sdk.NewCoins(sdkmath.NewInt64Coin("ujolt", 100004118)),
+				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100004118)),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100500020))),
 				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98000001))), // initial - deposit + borrow + liquidation leftovers
@@ -773,15 +775,15 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 9500390),
+							Lot:             sdk.NewInt64Coin("ujolt", 9500390),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 8004766),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 8004766),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -805,10 +807,10 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.2*BtcbCf))), // $20+$20+$20 = $80 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("ujolt", 1000000710),
-					sdkmath.NewInt64Coin("usdc", 1000003120),
-					sdkmath.NewInt64Coin("bnb", 100000003123),
-					sdkmath.NewInt64Coin("btc", 100000000031),
+					sdk.NewInt64Coin("ujolt", 1000000710),
+					sdk.NewInt64Coin("usdc", 1000003120),
+					sdk.NewInt64Coin("bnb", 100000003123),
+					sdk.NewInt64Coin("btc", 100000000031),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500001))),
@@ -818,60 +820,60 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11874430),
+							Lot:             sdk.NewInt64Coin("ujolt", 11874430),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("bnb", 0),
+							Bid:             sdk.NewInt64Coin("bnb", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("bnb", 200003287),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("bnb", 200003287),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11874254),
+							Lot:             sdk.NewInt64Coin("ujolt", 11874254),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("btc", 0),
+							Bid:             sdk.NewInt64Coin("btc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("btc", 20000032),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("btc", 20000032),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11875163),
+							Lot:             sdk.NewInt64Coin("ujolt", 11875163),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 10000782),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 10000782),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              4,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 11876185),
+							Lot:             sdk.NewInt64Coin("ujolt", 11876185),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdc", 0),
+							Bid:             sdk.NewInt64Coin("usdc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdc", 20003284),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdc", 20003284),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -894,7 +896,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(120*JoltCf))),                                                                                            // $240 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("ujolt", 1000101456),
+					sdk.NewInt64Coin("ujolt", 1000101456),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500253)), sdk.NewCoin("bnb", sdkmath.NewInt(0.5*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.05*BtcbCf))), // 5% of each seized coin + initial balances
@@ -904,45 +906,45 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("bnb", 950000000),
+							Lot:             sdk.NewInt64Coin("bnb", 950000000),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 40036023),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 40036023),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("btc", 95000000),
+							Lot:             sdk.NewInt64Coin("btc", 95000000),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 40036023),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 40036023),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("ujolt", 47504818),
+							Lot:             sdk.NewInt64Coin("ujolt", 47504818),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 40040087),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 40040087),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -966,10 +968,10 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(35*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf))),       // $270 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("bnb", 100000078047),
-					sdkmath.NewInt64Coin("btc", 100000000780),
-					sdkmath.NewInt64Coin("ujolt", 1000009550),
-					sdkmath.NewInt64Coin("usdx", 1),
+					sdk.NewInt64Coin("bnb", 100000078047),
+					sdk.NewInt64Coin("btc", 100000000780),
+					sdk.NewInt64Coin("ujolt", 1000009550),
+					sdk.NewInt64Coin("usdx", 1),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(5*JoltCf))), // 5% of each seized coin + initial balances
@@ -979,75 +981,75 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdc", 95000000), // $95.00
+							Lot:             sdk.NewInt64Coin("usdc", 95000000), // $95.00
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("bnb", 0),
+							Bid:             sdk.NewInt64Coin("bnb", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("bnb", 900097134), // $90.00
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("bnb", 900097134), // $90.00
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdt", 10552835), // $10.55
+							Lot:             sdk.NewInt64Coin("usdt", 10552835), // $10.55
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("bnb", 0),
+							Bid:             sdk.NewInt64Coin("bnb", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("bnb", 99985020), // $10.00
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("bnb", 99985020), // $10.00
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdt", 84447165), // $84.45
+							Lot:             sdk.NewInt64Coin("usdt", 84447165), // $84.45
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("btc", 0),
+							Bid:             sdk.NewInt64Coin("btc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("btc", 80011211), // $80.01
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("btc", 80011211), // $80.01
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              4,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdx", 21097866), // $21.10
+							Lot:             sdk.NewInt64Coin("usdx", 21097866), // $21.10
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("btc", 0),
+							Bid:             sdk.NewInt64Coin("btc", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("btc", 19989610), // $19.99
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("btc", 19989610), // $19.99
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              5,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdx", 73902133), //$73.90
+							Lot:             sdk.NewInt64Coin("usdx", 73902133), //$73.90
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("ujolt", 0),
+							Bid:             sdk.NewInt64Coin("ujolt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("ujolt", 35010052), // $70.02
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("ujolt", 35010052), // $70.02
 						LotReturns:        lotReturns,
 					},
 				},
@@ -1070,10 +1072,10 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdt", sdkmath.NewInt(250*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(245*JoltCf))),
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
-					sdkmath.NewInt64Coin("dai", 1000000000),
-					sdkmath.NewInt64Coin("usdc", 1000000001),
-					sdkmath.NewInt64Coin("usdt", 1000482503),
-					sdkmath.NewInt64Coin("usdx", 1000463500),
+					sdk.NewInt64Coin("dai", 1000000000),
+					sdk.NewInt64Coin("usdc", 1000000001),
+					sdk.NewInt64Coin("usdt", 1000482503),
+					sdk.NewInt64Coin("usdx", 1000463500),
 				),
 				expectedTotalBorrowedCoins: nil,
 				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(1017.50*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1010*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf))),
@@ -1083,45 +1085,45 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 						BaseAuction: types4.BaseAuction{
 							ID:              1,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("dai", 263894126),
+							Lot:             sdk.NewInt64Coin("dai", 263894126),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdt", 0),
+							Bid:             sdk.NewInt64Coin("usdt", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdt", 250507897),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdt", 250507897),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              2,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("dai", 68605874),
+							Lot:             sdk.NewInt64Coin("dai", 68605874),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdx", 0),
+							Bid:             sdk.NewInt64Coin("usdx", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdx", 65125788),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdx", 65125788),
 						LotReturns:        lotReturns,
 					},
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
 							ID:              3,
 							Initiator:       "jolt",
-							Lot:             sdkmath.NewInt64Coin("usdc", 189999999),
+							Lot:             sdk.NewInt64Coin("usdc", 189999999),
 							Bidder:          sdk.AccAddress(nil),
-							Bid:             sdkmath.NewInt64Coin("usdx", 0),
+							Bid:             sdk.NewInt64Coin("usdx", 0),
 							HasReceivedBids: false,
 							EndTime:         endTime,
 							MaxEndTime:      endTime,
 						},
-						CorrespondingDebt: sdkmath.NewInt64Coin("debt", 0),
-						MaxBid:            sdkmath.NewInt64Coin("usdx", 180362106),
+						CorrespondingDebt: sdk.NewInt64Coin("debt", 0),
+						MaxBid:            sdk.NewInt64Coin("usdx", 180362106),
 						LotReturns:        lotReturns,
 					},
 				},
@@ -1136,9 +1138,9 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 	for i, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
-
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+			// ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
+			ctx := tApp.Ctx
 			// account which will deposit "initial module account coins"
 			depositor1 := sdk.AccAddress(crypto.AddressHash([]byte("testdepositor1")))
 
@@ -1292,16 +1294,16 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[0], tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower[0], tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[1], tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower[1], tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.keeper, tc.args.initialKeeperCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.keeper, tc.args.initialKeeperCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor1, tc.args.initialModuleCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), depositor1, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
 
 			// Deposit initial module account coins
@@ -1328,7 +1330,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			}
 			// Set up liquidation chain context and run begin blocker
 			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(tc.args.liquidateAfter)
-			liqCtx := sdk.UnwrapSDKContext(suite.ctx)(runAtTime)
+			liqCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 			jolt.BeginBlocker(liqCtx, suite.keeper)
 
 			for _, el := range tc.args.borrower {
@@ -1341,7 +1343,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			}
 			queryServer := joltKeeper.NewQueryServerImpl(suite.keeper, suite.app.GetAccountKeeper(), suite.app.GetBankKeeper())
 			req := types3.QueryLiquidateRequest{}
-			ret, err := queryServer.Liquidate(sdk.WrapSDKContext(suite.ctx), &req)
+			ret, err := queryServer.Liquidate(suite.ctx, &req)
 			suite.Require().NoError(err)
 			if oneLiquidate {
 				suite.Require().Equal(1, len(ret.LiquidateItems))

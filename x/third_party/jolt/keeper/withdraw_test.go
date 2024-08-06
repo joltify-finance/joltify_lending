@@ -4,6 +4,9 @@ import (
 	"strings"
 	"time"
 
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -116,7 +119,7 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			// create new app with one funded account
 
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 			authGS := app.NewFundedGenStateWithCoins(
 				tApp.AppCodec(),
@@ -178,7 +181,7 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			suite.ctx = ctx
 			suite.keeper = keeper
 
-			err := testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.depositor, []sdk.Coin{sdk.NewCoin("bnb", sdkmath.NewInt(1000)), sdk.NewCoin("btcb", sdkmath.NewInt(1000))})
+			err := testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.depositor, []sdk.Coin{sdk.NewCoin("bnb", sdkmath.NewInt(1000)), sdk.NewCoin("btcb", sdkmath.NewInt(1000))})
 			suite.Require().NoError(err)
 
 			// Mint coins to Hard module account
@@ -198,7 +201,7 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 				acc := suite.getAccount(tc.args.depositor)
 				suite.Require().Equal(tc.args.expectedAccountBalance, bankKeeper.GetAllBalances(ctx, acc.GetAddress()))
 				mAcc := suite.getModuleAccount(types3.ModuleAccountName)
-				suite.Require().True(tc.args.expectedModAccountBalance.IsEqual(bankKeeper.GetAllBalances(ctx, mAcc.GetAddress())))
+				suite.Require().True(tc.args.expectedModAccountBalance.Equal(bankKeeper.GetAllBalances(ctx, mAcc.GetAddress())))
 				testDeposit, f := suite.keeper.GetDeposit(suite.ctx, tc.args.depositor)
 				if tc.errArgs.expectDelete {
 					suite.Require().False(f)
@@ -264,7 +267,7 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 			ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
@@ -342,7 +345,7 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower, tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower, tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
 			// Borrower deposits coins

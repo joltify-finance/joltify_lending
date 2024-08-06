@@ -177,7 +177,7 @@ func (suite *IntegrationTester) DeliverJoltMsgWithdraw(owner sdk.AccAddress, wit
 	return err
 }
 
-func (suite *IntegrationTester) GetAccount(addr sdk.AccAddress) authtypes.AccountI {
+func (suite *IntegrationTester) GetAccount(addr sdk.AccAddress) sdk.AccountI {
 	ak := suite.App.GetAccountKeeper()
 	return ak.GetAccount(suite.Ctx, addr)
 }

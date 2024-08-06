@@ -27,7 +27,7 @@ func (suite *genesisTestSuite) Test_InitGenesis_ValidationPanic() {
 	)
 
 	suite.Panics(func() {
-		swap.InitGenesis(suite.Ctx, suite.Keeper, invalidState)
+		swap.InitGenesis(sdk.UnwrapSDKContext(suite.Ctx), suite.Keeper, invalidState)
 	}, "expected init genesis to panic with invalid state")
 }
 
@@ -53,7 +53,7 @@ func (suite *genesisTestSuite) Test_InitAndExportGenesis() {
 		},
 	)
 
-	swap.InitGenesis(suite.Ctx, suite.Keeper, state)
+	swap.InitGenesis(sdk.UnwrapSDKContext(suite.Ctx), suite.Keeper, state)
 	suite.Equal(state.Params, suite.Keeper.GetParams(suite.Ctx))
 
 	poolRecord1, _ := suite.Keeper.GetPool(suite.Ctx, types.PoolID("hard", "usdx"))
@@ -66,7 +66,7 @@ func (suite *genesisTestSuite) Test_InitAndExportGenesis() {
 	shareRecord2, _ := suite.Keeper.GetDepositorShares(suite.Ctx, depositor_1, types.PoolID("ukava", "usdx"))
 	suite.Equal(state.ShareRecords[1], shareRecord2)
 
-	exportedState := swap.ExportGenesis(suite.Ctx, suite.Keeper)
+	exportedState := swap.ExportGenesis(sdk.UnwrapSDKContext(suite.Ctx), suite.Keeper)
 	suite.Equal(state, exportedState)
 }
 

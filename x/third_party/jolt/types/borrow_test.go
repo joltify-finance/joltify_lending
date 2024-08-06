@@ -3,6 +3,7 @@ package types_test
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,15 +14,15 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 	testCases := []struct {
 		name      string
 		borrow    types2.Borrow
-		expect    sdkmath.LegacyDecCoins
+		expect    sdk.DecCoins
 		expectErr string
 	}{
 		{
 			name: "multiple denoms are calculated correctly",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdkmath.NewInt64Coin("bnb", 100e8),
-					sdkmath.NewInt64Coin("xrpb", 1e8),
+					sdk.NewInt64Coin("bnb", 100e8),
+					sdk.NewInt64Coin("xrpb", 1e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{
@@ -35,8 +36,8 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				},
 			},
 			expect: sdk.NewDecCoins(
-				sdkmath.NewInt64DecCoin("bnb", 50e8),
-				sdkmath.NewInt64DecCoin("xrpb", 8e7),
+				sdk.NewInt64DecCoin("bnb", 50e8),
+				sdk.NewInt64DecCoin("xrpb", 8e7),
 			),
 		},
 		{
@@ -45,7 +46,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Amount: sdk.Coins{},
 				Index:  types2.BorrowInterestFactors{},
 			},
-			expect: sdkmath.LegacyDecCoins{},
+			expect: sdk.DecCoins{},
 		},
 		{
 			name: "nil borrow amount returns empty dec coins",
@@ -53,13 +54,13 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Amount: nil,
 				Index:  types2.BorrowInterestFactors{},
 			},
-			expect: sdkmath.LegacyDecCoins{},
+			expect: sdk.DecCoins{},
 		},
 		{
 			name: "missing indexes return error",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdkmath.NewInt64Coin("bnb", 100e8),
+					sdk.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{
@@ -74,7 +75,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 			name: "invalid indexes return error",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdkmath.NewInt64Coin("bnb", 100e8),
+					sdk.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{
@@ -89,7 +90,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 			name: "zero indexes return error rather than panicking",
 			borrow: types2.Borrow{
 				Amount: sdk.NewCoins(
-					sdkmath.NewInt64Coin("bnb", 100e8),
+					sdk.NewInt64Coin("bnb", 100e8),
 				),
 				Index: types2.BorrowInterestFactors{
 					{

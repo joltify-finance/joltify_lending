@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"time"
 
+	storetypes "cosmossdk.io/store/types"
+
 	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
@@ -39,7 +41,7 @@ func (suite *Suite) SetupTest() {
 	lg := log.NewTestLogger(suite.T())
 	tApp := app.NewTestApp(lg, suite.T().TempDir())
 	ctx := tApp.NewContext(true)
-	//ctx.WithConsensusParams(app.DefaultConsensusParams).WithBlockGasMeter(storetypes.NewInfiniteGasMeter())
+	ctx = ctx.WithConsensusParams(*app.DefaultConsensusParams).WithBlockGasMeter(storetypes.NewInfiniteGasMeter())
 	suite.Ctx = ctx
 	suite.App = tApp
 	suite.Keeper = tApp.GetSwapKeeper()
@@ -49,13 +51,13 @@ func (suite *Suite) SetupTest() {
 
 // GetEvents returns emitted events on the sdk context
 func (suite *Suite) GetEvents() sdk.Events {
-	return suite.Ctx.EventManager().Events()
+	return sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events()
 }
 
 // AddCoinsToModule adds coins to the swap module account
 func (suite *Suite) AddCoinsToModule(amount sdk.Coins) {
 	// Does not use suite.BankKeeper.MintCoins as module account would not have permission to mint
-	err := suite.App.FundModuleAccount(suite.Ctx, types.ModuleName, amount)
+	err := suite.App.FundModuleAccount(sdk.UnwrapSDKContext(suite.Ctx), types.ModuleName, amount)
 	suite.Require().NoError(err)
 }
 
@@ -69,7 +71,7 @@ func (suite *Suite) RemoveCoinsFromModule(amount sdk.Coins) {
 }
 
 // CreateAccount creates a new account from the provided balance
-func (suite *Suite) CreateAccount(initialBalance sdk.Coins) authtypes.AccountI {
+func (suite *Suite) CreateAccount(initialBalance sdk.Coins) sdk.AccountI {
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)
 	ak := suite.App.GetAccountKeeper()
 
@@ -83,20 +85,20 @@ func (suite *Suite) CreateAccount(initialBalance sdk.Coins) authtypes.AccountI {
 }
 
 // NewAccountFromAddr creates a new account from the provided address with the provided balance
-func (suite *Suite) NewAccountFromAddr(addr sdk.AccAddress, balance sdk.Coins) authtypes.AccountI {
+func (suite *Suite) NewAccountFromAddr(addr sdk.AccAddress, balance sdk.Coins) sdk.AccountI {
 	ak := suite.App.GetAccountKeeper()
 
 	acc := ak.NewAccountWithAddress(suite.Ctx, addr)
 	ak.SetAccount(suite.Ctx, acc)
 
-	err := suite.App.FundAccount(suite.Ctx, acc.GetAddress(), balance)
+	err := suite.App.FundAccount(sdk.UnwrapSDKContext(suite.Ctx), acc.GetAddress(), balance)
 	suite.Require().NoError(err)
 
 	return acc
 }
 
 // CreateVestingAccount creates a new vesting account from the provided balance and vesting balance
-func (suite *Suite) CreateVestingAccount(initialBalance sdk.Coins, vestingBalance sdk.Coins) authtypes.AccountI {
+func (suite *Suite) CreateVestingAccount(initialBalance sdk.Coins, vestingBalance sdk.Coins) sdk.AccountI {
 	acc := suite.CreateAccount(initialBalance)
 	accv := acc.(*authtypes.BaseAccount)
 
@@ -107,8 +109,9 @@ func (suite *Suite) CreateVestingAccount(initialBalance sdk.Coins, vestingBalanc
 			Amount: vestingBalance,
 		},
 	}
-	vacc := vestingtypes.NewPeriodicVestingAccount(bacc, initialBalance, time.Now().Unix(), periods) // TODO is initialBalance correct for originalVesting?
-
+	vacc, err := vestingtypes.NewPeriodicVestingAccount(bacc, initialBalance, time.Now().Unix(), periods) // TODO is initialBalance correct for originalVesting?
+	// fixme we avoid check the error as err check starts from the cosmos-sdk 50
+	_ = err
 	return vacc
 }
 
@@ -174,7 +177,7 @@ func (suite *Suite) PoolReservesEqual(poolID string, reserves sdk.Coins) {
 }
 
 // PoolShareValueEqual asserts that the depositor shares are in state and the value matches the expected coins
-func (suite *Suite) PoolShareValueEqual(depositor authtypes.AccountI, pool types.AllowedPool, coins sdk.Coins) {
+func (suite *Suite) PoolShareValueEqual(depositor sdk.AccountI, pool types.AllowedPool, coins sdk.Coins) {
 	poolRecord, ok := suite.Keeper.GetPool(suite.Ctx, pool.Name())
 	suite.Require().True(ok, fmt.Sprintf("expected pool %s to exist", pool.Name()))
 	shares, ok := suite.Keeper.GetDepositorShares(suite.Ctx, depositor.GetAddress(), poolRecord.PoolID)
