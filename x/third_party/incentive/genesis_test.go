@@ -1,8 +1,12 @@
 package incentive_test
 
 import (
+	"context"
 	"testing"
 	"time"
+
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
@@ -12,8 +16,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
@@ -34,7 +36,7 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.app = tApp
 	k := tApp.GetIncentiveKeeper()
 	suite.genesisTime = time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -113,7 +115,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 		authBuilder.BuildMarshalled(cdc),
 	)
 
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
+	ctx := tApp.NewContext(true)
 
 	suite.addrs = addrs
 	suite.keeper = k
@@ -218,8 +220,8 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 		},
 	)
 
-	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 0, Time: genesisTime})
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	ctx := tApp.NewContext(true)
 
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 	// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.

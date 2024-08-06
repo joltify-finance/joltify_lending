@@ -25,13 +25,13 @@ type SPVRewardsTests struct {
 }
 
 func (suite *SPVRewardsTests) storedTimeEquals(denom string, expected time.Time) {
-	storedTime, found := suite.keeper.GetSPVRewardAccrualTime(suite.ctx, denom)
+	storedTime, found := suite.keeper.GetSPVRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.True(found)
 	suite.Equal(expected, storedTime)
 }
 
 func (suite *SPVRewardsTests) storedIndexesEqual(denom string, expected types2.RewardIndexes) {
-	storedIndexes, found := suite.keeper.GetSPVReward(suite.ctx, denom)
+	storedIndexes, found := suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Equal(found, expected != nil)
 
 	if found {
@@ -52,7 +52,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, nil, spvKeeper, nil)
 
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetSPVRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetSPVRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
@@ -69,8 +69,8 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 		cs(c("jolt", b1amount), c("ujolt", b2amount)), // same denoms as in global indexes
 	)
 
-	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
-	reward, ok := suite.keeper.GetSPVReward(suite.ctx, denom)
+	suite.keeper.AccumulateSPVRewards(sdk.UnwrapSDKContext(suite.ctx), period)
+	reward, ok := suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Require().True(ok)
 
 	// after one hour,the token amout should be
@@ -80,7 +80,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 	expectedAmount := cs(c("jolt", int64(expectedB1)), c("ujolt", int64(expectedB2)))
 	suite.Require().Equal(expectedAmount, reward.PaymentAmount)
 
-	lasttime, ok := suite.keeper.GetSPVRewardAccrualTime(suite.ctx, denom)
+	lasttime, ok := suite.keeper.GetSPVRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Require().True(ok)
 
 	suite.Require().True(lasttime.Equal(newAccrualTime))
@@ -89,8 +89,8 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 	newAccrualTime = newAccrualTime.Add(4 * time.Hour)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
-	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
-	reward, ok = suite.keeper.GetSPVReward(suite.ctx, denom)
+	suite.keeper.AccumulateSPVRewards(sdk.UnwrapSDKContext(suite.ctx), period)
+	reward, ok = suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Require().True(ok)
 
 	expectedB1 = 2000 * 3600 * 2
@@ -98,7 +98,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasIncreased() {
 	expectedAmount = cs(c("jolt", int64(expectedB1)), c("ujolt", int64(expectedB2)))
 	suite.Require().Equal(expectedAmount, reward.PaymentAmount)
 
-	lasttime, ok = suite.keeper.GetSPVRewardAccrualTime(suite.ctx, denom)
+	lasttime, ok = suite.keeper.GetSPVRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Require().True(ok)
 
 	suite.Require().True(lasttime.Equal(previousAccrualTime.Add(time.Hour * 2)))
@@ -111,7 +111,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, nil, spvKeeper, nil)
 
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetSPVRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetSPVRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(10 * time.Microsecond)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
@@ -128,8 +128,8 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 		cs(c("jolt", b1amount), c("ujolt", b2amount)), // same denoms as in global indexes
 	)
 
-	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
-	reward, ok := suite.keeper.GetSPVReward(suite.ctx, denom)
+	suite.keeper.AccumulateSPVRewards(sdk.UnwrapSDKContext(suite.ctx), period)
+	reward, ok := suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Require().True(ok)
 
 	// after less then one second, the token amout should be 0
@@ -140,8 +140,8 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 	expectedB1 := 2000 * 3600
 	expectedB2 := 1000 * 3600
 
-	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
-	reward, ok = suite.keeper.GetSPVReward(suite.ctx, denom)
+	suite.keeper.AccumulateSPVRewards(sdk.UnwrapSDKContext(suite.ctx), period)
+	reward, ok = suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Require().True(ok)
 
 	expectedAmount := cs(c("jolt", int64(expectedB1)), c("ujolt", int64(expectedB2)))
@@ -149,8 +149,8 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasnotIncreased() {
 
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(10 * time.Microsecond))
 
-	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
-	reward, ok = suite.keeper.GetSPVReward(suite.ctx, denom)
+	suite.keeper.AccumulateSPVRewards(sdk.UnwrapSDKContext(suite.ctx), period)
+	reward, ok = suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Require().True(ok)
 	suite.Require().Equal(expectedAmount, reward.PaymentAmount)
 }
@@ -282,7 +282,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, nil, spvKeeper, nftKeeper)
 
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetSPVRewardAccrualTime(suite.ctx, rewardIndex, previousAccrualTime)
+	suite.keeper.SetSPVRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), rewardIndex, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
@@ -300,8 +300,8 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 		coins, // same denoms as in global indexes
 	)
 
-	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
-	reward, ok := suite.keeper.GetSPVReward(suite.ctx, rewardIndex)
+	suite.keeper.AccumulateSPVRewards(sdk.UnwrapSDKContext(suite.ctx), period)
+	reward, ok := suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), rewardIndex)
 	suite.Require().True(ok)
 
 	// after one hour,the token amout should be
@@ -311,7 +311,7 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 	expectedAmount := cs(c("jolt", int64(expectedB1)), c("ujolt", int64(expectedB2)))
 	suite.Require().Equal(expectedAmount, reward.PaymentAmount)
 
-	suite.keeper.AfterSPVInterestPaid(suite.ctx, rewardIndex, interestPaid)
+	suite.keeper.AfterSPVInterestPaid(sdk.UnwrapSDKContext(suite.ctx), rewardIndex, interestPaid)
 
 	reserveAmt := sdkmath.LegacyNewDecFromInt(interestPaid).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	paymentToInvestor := interestPaid.Sub(reserveAmt)
@@ -346,10 +346,10 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 			continue
 		}
 		lastpayment := borrowInterest.IncentivePayments[len(borrowInterest.Payments)-1]
-		suite.Require().True(lastpayment.PaymentAmount.IsEqual(allincentives[index]))
+		suite.Require().True(lastpayment.PaymentAmount.Equal(allincentives[index]))
 	}
 
-	reward, ok = suite.keeper.GetSPVReward(suite.ctx, rewardIndex)
+	reward, ok = suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), rewardIndex)
 	suite.Require().True(ok)
 
 	suite.Require().True(reward.PaymentAmount.IsZero())
@@ -357,9 +357,9 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 	// now we do the allication again
 
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Hour))
-	suite.keeper.AccumulateSPVRewards(suite.ctx, period)
+	suite.keeper.AccumulateSPVRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 
-	suite.keeper.AfterSPVInterestPaid(suite.ctx, rewardIndex, interestPaid)
+	suite.keeper.AfterSPVInterestPaid(sdk.UnwrapSDKContext(suite.ctx), rewardIndex, interestPaid)
 
 	reserveAmt = sdkmath.LegacyNewDecFromInt(interestPaid).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 	paymentToInvestor = interestPaid.Sub(reserveAmt)
@@ -379,11 +379,11 @@ func (suite *SPVRewardsTests) TestStateUpdatedWhenBlockTimeHasDecreased() {
 			continue
 		}
 		lastpayment := borrowInterest.IncentivePayments[len(borrowInterest.Payments)-1]
-		suite.Require().True(lastpayment.PaymentAmount.IsEqual(allincentives[index]))
+		suite.Require().True(lastpayment.PaymentAmount.Equal(allincentives[index]))
 		suite.Require().Len(borrowInterest.IncentivePayments, 2)
 	}
 
-	reward, ok = suite.keeper.GetSPVReward(suite.ctx, rewardIndex)
+	reward, ok = suite.keeper.GetSPVReward(sdk.UnwrapSDKContext(suite.ctx), rewardIndex)
 	suite.Require().True(ok)
 
 	suite.Require().True(reward.PaymentAmount.IsZero())
@@ -444,23 +444,23 @@ func (suite *SPVRewardsTests) TestClaimIncentives() {
 
 	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, nil, nil, nil, spvKeeper, nftKeeper)
 
-	c, err := keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
+	c, err := keeper.CalculateTotalIncentives(sdk.UnwrapSDKContext(suite.ctx), []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
 	suite.Require().NoError(err)
 
 	circleNum := 0
 	rewards := calcualteInterest([]sdkmath.Int{sdkmath.NewInt(2e17), sdkmath.NewInt(3e17)}, allIncentivepayments, circleNum)
-	suite.Require().True(c.IsEqual(rewards))
+	suite.Require().True(c.Equal(rewards))
 
-	c2, err := keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
+	c2, err := keeper.CalculateTotalIncentives(sdk.UnwrapSDKContext(suite.ctx), []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
 	suite.Require().NoError(err)
-	suite.Require().True(c2.IsEqual(rewards))
+	suite.Require().True(c2.Equal(rewards))
 
-	c, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)
+	c, err = keeper.CalculateTotalIncentives(sdk.UnwrapSDKContext(suite.ctx), []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)
 	suite.Require().NoError(err)
 
-	suite.Require().True(c.IsEqual(rewards))
+	suite.Require().True(c.Equal(rewards))
 
-	c2, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
+	c2, err = keeper.CalculateTotalIncentives(sdk.UnwrapSDKContext(suite.ctx), []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
 	suite.Require().NoError(err)
 	suite.Require().True(c2.IsZero())
 
@@ -481,17 +481,17 @@ func (suite *SPVRewardsTests) TestClaimIncentives() {
 	err = suite.keeper.NftKeeper.UpdateClass(suite.ctx, classinf)
 	suite.Require().NoError(err)
 
-	c, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
+	c, err = keeper.CalculateTotalIncentives(sdk.UnwrapSDKContext(suite.ctx), []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, false)
 	suite.Require().NoError(err)
 
 	rewards = calcualteInterest([]sdkmath.Int{sdkmath.NewInt(2e17), sdkmath.NewInt(3e17)}, new2payments, circleNum)
-	suite.Require().True(c.IsEqual(rewards))
+	suite.Require().True(c.Equal(rewards))
 
-	c, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)
+	c, err = keeper.CalculateTotalIncentives(sdk.UnwrapSDKContext(suite.ctx), []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)
 	suite.Require().NoError(err)
-	suite.Require().True(c.IsEqual(rewards))
+	suite.Require().True(c.Equal(rewards))
 
-	c2, err = keeper.CalculateTotalIncentives(suite.ctx, []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)
+	c2, err = keeper.CalculateTotalIncentives(sdk.UnwrapSDKContext(suite.ctx), []string{"p1:test-nft1", "p1:test-nft2"}, nftKeeper, true)
 	suite.Require().NoError(err)
 	suite.Require().True(c2.IsZero())
 }

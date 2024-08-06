@@ -3,6 +3,7 @@ package incentive_test
 import (
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -14,7 +15,7 @@ import (
 func i(in int64) sdkmath.Int                { return sdkmath.NewInt(in) }
 func d(str string) sdkmath.LegacyDec        { return sdkmath.LegacyMustNewDecFromStr(str) }
 func cs(coins ...sdk.Coin) sdk.Coins        { return sdk.NewCoins(coins...) }
-func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
 
 func NewPricefeedGenStateMultiFromTime(cdc codec.JSONCodec, t time.Time) app.GenesisState {
 	pfGenesis := types.GenesisState{

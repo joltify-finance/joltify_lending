@@ -475,7 +475,7 @@ func TestAuctionBidding(t *testing.T) {
 
 			tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
 
-			ctx := tApp.NewContext(true)
+			ctx := tApp.Ctx
 			keeper := tApp.GetAuctionKeeper()
 			bank := tApp.GetBankKeeper()
 

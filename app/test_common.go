@@ -305,7 +305,7 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		panic(err)
 	}
 
-	tApp.InitChain(
+	_, err = tApp.InitChain(
 		&abci.RequestInitChain{
 			Time:          genTime,
 			Validators:    []abci.ValidatorUpdate{},
@@ -316,7 +316,13 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 			InitialHeight:   initialHeight,
 		},
 	)
-	tApp.Commit()
+	if err != nil {
+		panic(err)
+	}
+	_, err = tApp.Commit()
+	if err != nil {
+		panic(err)
+	}
 	return tApp
 }
 

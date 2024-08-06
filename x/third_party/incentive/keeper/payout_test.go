@@ -1,10 +1,13 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
+
+	"cosmossdk.io/log"
 
 	"github.com/joltify-finance/joltify_lending/client"
 
@@ -20,7 +23,6 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
@@ -53,12 +55,12 @@ func (suite *PayoutTestSuite) SetupTest() {
 }
 
 func (suite *PayoutTestSuite) SetupApp() {
-	suite.app = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+	suite.app = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
 
-	suite.ctx = suite.app.NewContext(true, tmprototypes.Header{Time: suite.genesisTime})
+	suite.ctx = suite.app.NewContext(true)
 }
 
 func (suite *PayoutTestSuite) SetupWithGenState(authBuilder app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, hardBuilder testutil.JoltGenesisBuilder) {

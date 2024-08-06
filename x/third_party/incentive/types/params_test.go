@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -39,7 +41,7 @@ var validMultiRewardPeriod = types2.NewMultiRewardPeriod(
 	"bnb",
 	time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 	time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-	sdk.NewCoins(sdkmath.NewInt64Coin("swap", 1e9)),
+	sdk.NewCoins(sdk.NewInt64Coin("swap", 1e9)),
 )
 
 var validRewardPeriod = types2.NewRewardPeriod(
@@ -47,7 +49,7 @@ var validRewardPeriod = types2.NewRewardPeriod(
 	"bnb-a",
 	time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 	time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-	sdkmath.NewInt64Coin("ujolt", 1e9),
+	sdk.NewInt64Coin("ujolt", 1e9),
 )
 
 func (suite *ParamTestSuite) TestParamValidation() {
@@ -198,7 +200,7 @@ func (suite *ParamTestSuite) TestRewardPeriods() {
 						"bnb-a",
 						time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 						time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-						sdkmath.NewInt64Coin("jolt", 1e9),
+						sdk.NewInt64Coin("jolt", 1e9),
 					),
 				},
 				expect: err{

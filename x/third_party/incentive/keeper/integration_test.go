@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
@@ -15,7 +16,7 @@ import (
 // Avoid cluttering test cases with long function names
 func i(in int64) sdkmath.Int                { return sdkmath.NewInt(in) }
 func d(str string) sdkmath.LegacyDec        { return sdkmath.LegacyMustNewDecFromStr(str) }
-func c(denom string, amount int64) sdk.Coin { return sdkmath.NewInt64Coin(denom, amount) }
+func c(denom string, amount int64) sdk.Coin { return sdk.NewInt64Coin(denom, amount) }
 func cs(coins ...sdk.Coin) sdk.Coins        { return sdk.NewCoins(coins...) }
 
 func NewPricefeedGenStateMultiFromTime(cdc codec.JSONCodec, t time.Time) app.GenesisState {

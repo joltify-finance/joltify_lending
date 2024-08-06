@@ -1,14 +1,17 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 	"time"
+
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	testutil2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/testutil"
 	"github.com/stretchr/testify/suite"
@@ -131,12 +134,12 @@ func (suite *SupplyRewardsTestSuite) SetupTest() {
 }
 
 func (suite *SupplyRewardsTestSuite) SetupApp() {
-	suite.app = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+	suite.app = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
 
-	suite.ctx = suite.app.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
+	suite.ctx = suite.app.NewContext(true)
 }
 
 func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder) {
@@ -421,7 +424,7 @@ func (suite *SupplyRewardsTestSuite) TestInitializeJoltSupplyRewards() {
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.deposit)
 			suite.Require().NoError(err)
 
-			claim, foundClaim := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, foundClaim := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(foundClaim)
 			suite.Require().Equal(tc.args.expectedClaimSupplyRewardIndexes, claim.SupplyRewardIndexes)
 		})
@@ -626,7 +629,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 			suite.Require().NoError(err)
 
 			// Check that Jolt hooks initialized a JoltLiquidityProviderClaim with 0 reward indexes
-			claim, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			multiRewardIndex, _ := claim.SupplyRewardIndexes.GetRewardIndex(tc.args.deposit.Denom)
 			for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
@@ -643,7 +646,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
 				previousBlockTime = updatedBlockTime
-				blockCtx := sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
+				blockCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 				// Run Jolt begin blocker for each block ctx to update denom's interest factor
 				jolt.BeginBlocker(blockCtx, suite.joltKeeper)
@@ -655,19 +658,19 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 				}
 			}
 			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
-			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 			// After we've accumulated, run synchronize
 			deposit, found := suite.joltKeeper.GetDeposit(suite.ctx, userAddr)
 			suite.Require().True(found)
 			suite.Require().NotPanics(func() {
-				suite.keeper.SynchronizeJoltSupplyReward(suite.ctx, deposit)
+				suite.keeper.SynchronizeJoltSupplyReward(sdk.UnwrapSDKContext(suite.ctx), deposit)
 			})
 
 			// Check that the global reward index's reward factor and user's claim have been updated as expected
-			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
-			globalRewardIndexes, foundGlobalRewardIndexes := suite.keeper.GetJoltSupplyRewardIndexes(suite.ctx, tc.args.deposit.Denom)
+			globalRewardIndexes, foundGlobalRewardIndexes := suite.keeper.GetJoltSupplyRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), tc.args.deposit.Denom)
 			if len(tc.args.rewardsPerSecond) > 0 {
 				suite.Require().True(foundGlobalRewardIndexes)
 				for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
@@ -701,7 +704,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 
 			// If are no initial rewards per second, add new rewards through a committee param change
 			// 1. Construct incentive's new JoltSupplyRewardPeriods param
-			currIncentiveJoltSupplyRewardPeriods := suite.keeper.GetParams(suite.ctx).JoltSupplyRewardPeriods
+			currIncentiveJoltSupplyRewardPeriods := suite.keeper.GetParams(sdk.UnwrapSDKContext(suite.ctx)).JoltSupplyRewardPeriods
 			multiRewardPeriod, found := currIncentiveJoltSupplyRewardPeriods.GetMultiRewardPeriod(tc.args.deposit.Denom)
 			if found {
 				// Deposit denom's reward period exists, but it doesn't have any rewards per second
@@ -733,9 +736,9 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 
 			// Value:    string(suite.app.LegacyAmino().MustMarshalJSON(&currIncentiveJoltSupplyRewardPeriods)),
 
-			params := suite.app.GetIncentiveKeeper().GetParams(suite.ctx)
+			params := suite.app.GetIncentiveKeeper().GetParams(sdk.UnwrapSDKContext(suite.ctx))
 			params.JoltSupplyRewardPeriods = currIncentiveJoltSupplyRewardPeriods
-			suite.app.GetIncentiveKeeper().SetParams(suite.ctx, params)
+			suite.app.GetIncentiveKeeper().SetParams(sdk.UnwrapSDKContext(suite.ctx), params)
 
 			// We need to accumulate jolt supply-side rewards again
 			multiRewardPeriod, found = suite.keeper.GetJoltSupplyRewardPeriods(suite.ctx, tc.args.deposit.Denom)
@@ -744,25 +747,25 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 			// But new deposit denoms don't have their PreviousJoltSupplyRewardAccrualTime set yet,
 			// so we need to call the accumulation method once to set the initial reward accrual time
 			if tc.args.deposit.Denom != tc.args.incentiveSupplyRewardDenom {
-				suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, multiRewardPeriod)
+				suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), multiRewardPeriod)
 			}
 
 			// Now we can jump forward in time and accumulate rewards
 			updatedBlockTime = previousBlockTime.Add(time.Duration(int(time.Second) * tc.args.updatedTimeDuration))
-			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
-			suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, multiRewardPeriod)
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
+			suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), multiRewardPeriod)
 
 			// After we've accumulated, run synchronize
 			deposit, found = suite.joltKeeper.GetDeposit(suite.ctx, userAddr)
 			suite.Require().True(found)
 			suite.Require().NotPanics(func() {
-				suite.keeper.SynchronizeJoltSupplyReward(suite.ctx, deposit)
+				suite.keeper.SynchronizeJoltSupplyReward(sdk.UnwrapSDKContext(suite.ctx), deposit)
 			})
 
 			// Check that the global reward index's reward factor and user's claim have been updated as expected
-			globalRewardIndexes, found = suite.keeper.GetJoltSupplyRewardIndexes(suite.ctx, tc.args.deposit.Denom)
+			globalRewardIndexes, found = suite.keeper.GetJoltSupplyRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), tc.args.deposit.Denom)
 			suite.Require().True(found)
-			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			for _, expectedRewardIndex := range tc.args.updatedExpectedRewardIndexes {
 				expectedRewardIndex.RewardFactor = expectedRewardIndex.RewardFactor.MulInt64(1000000000000)
@@ -913,7 +916,7 @@ func (suite *SupplyRewardsTestSuite) TestUpdateJoltSupplyIndexDenoms() {
 			suite.Require().NoError(err)
 
 			// Confirm that a claim was created and populated with the correct supply indexes
-			claimAfterFirstDeposit, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claimAfterFirstDeposit, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			for _, coin := range tc.args.firstDeposit {
 				_, hasIndex := claimAfterFirstDeposit.HasSupplyRewardIndex(coin.Denom)
@@ -930,7 +933,7 @@ func (suite *SupplyRewardsTestSuite) TestUpdateJoltSupplyIndexDenoms() {
 			suite.Require().NoError(err)
 
 			// Confirm that the claim contains all expected supply indexes
-			claimAfterModification, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claimAfterModification, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			for _, denom := range tc.args.expectedSupplyIndexDenoms {
 				_, hasIndex := claimAfterModification.HasSupplyRewardIndex(denom)
@@ -1004,7 +1007,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
 				previousBlockTime = updatedBlockTime
-				blockCtx := sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
+				blockCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 				// Run Jolt begin blocker for each block ctx to update denom's interest factor
 				jolt.BeginBlocker(blockCtx, suite.joltKeeper)
@@ -1015,10 +1018,10 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 				suite.keeper.AccumulateJoltSupplyRewards(blockCtx, multiRewardPeriod)
 			}
 			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
-			suite.ctx = sdk.UnwrapSDKContext(suite.ctx)(updatedBlockTime)
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 			// Confirm that the user's claim hasn't been synced
-			claimPre, foundPre := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claimPre, foundPre := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(foundPre)
 			multiRewardIndexPre, _ := claimPre.SupplyRewardIndexes.GetRewardIndex(tc.args.deposit.Denom)
 			for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
@@ -1028,7 +1031,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 			}
 
 			// Check that the synced claim held in memory has properly simulated syncing
-			syncedClaim := suite.keeper.SimulateJoltSynchronization(suite.ctx, claimPre)
+			syncedClaim := suite.keeper.SimulateJoltSynchronization(sdk.UnwrapSDKContext(suite.ctx), claimPre)
 			for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
 				expectedRewardIndex.RewardFactor = expectedRewardIndex.RewardFactor.MulInt64(1000000000000)
 				// Check that the user's claim's reward index matches the expected reward index

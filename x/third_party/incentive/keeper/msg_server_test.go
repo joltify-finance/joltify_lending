@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -39,8 +40,8 @@ func (suite *HandlerTestSuite) SetupTest() {
 }
 
 func (suite *HandlerTestSuite) SetupApp() {
-	suite.App = app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
+	suite.App = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	suite.Ctx = suite.App.NewContext(true)
 }
 
 type genesisBuilder interface {

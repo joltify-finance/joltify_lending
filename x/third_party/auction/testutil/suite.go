@@ -48,8 +48,6 @@ func (suite *Suite) SetupTest(numAddrs int) {
 		sdk.NewCoin("token2", sdkmath.NewInt(100)),
 	)
 
-	ctx := tApp.NewContext(true)
-
 	modName := "jolt"
 	modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(modName), nil, 0, 0)
 	modAcc := authtypes.NewModuleAccount(modBaseAcc, modName, []string{authtypes.Minter, authtypes.Burner}...)
@@ -87,7 +85,7 @@ func (suite *Suite) SetupTest(numAddrs int) {
 	tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
 
 	suite.App = tApp
-	suite.Ctx = ctx
+	suite.Ctx = tApp.Ctx
 	suite.Addrs = addrs
 	suite.Keeper = tApp.GetAuctionKeeper()
 	suite.BankKeeper = tApp.GetBankKeeper()

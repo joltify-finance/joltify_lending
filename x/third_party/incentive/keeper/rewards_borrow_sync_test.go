@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -39,9 +41,9 @@ func (suite *SynchronizeJoltBorrowRewardTests) TestClaimIndexesAreUpdatedWhenGlo
 		WithArbitrarySourceShares(extractCollateralTypes(claim.BorrowRewardIndexes)...).
 		Build()
 
-	suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+	suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(globalIndexes, syncedClaim.BorrowRewardIndexes)
 }
 
@@ -64,9 +66,9 @@ func (suite *SynchronizeJoltBorrowRewardTests) TestClaimIndexesAreUnchangedWhenG
 		WithArbitrarySourceShares(extractCollateralTypes(unchangingIndexes)...).
 		Build()
 
-	suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+	suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(unchangingIndexes, syncedClaim.BorrowRewardIndexes)
 }
 
@@ -89,9 +91,9 @@ func (suite *SynchronizeJoltBorrowRewardTests) TestClaimIndexesAreUpdatedWhenNew
 		WithArbitrarySourceShares(extractCollateralTypes(globalIndexes)...).
 		Build()
 
-	suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+	suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(globalIndexes, syncedClaim.BorrowRewardIndexes)
 }
 
@@ -114,9 +116,9 @@ func (suite *SynchronizeJoltBorrowRewardTests) TestClaimIndexesAreUpdatedWhenNew
 		WithArbitrarySourceShares(extractCollateralTypes(globalIndexes)...).
 		Build()
 
-	suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+	suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(globalIndexes, syncedClaim.BorrowRewardIndexes)
 }
 
@@ -163,10 +165,10 @@ func (suite *SynchronizeJoltBorrowRewardTests) TestRewardIsIncrementedWhenGlobal
 		WithSourceShares("borrowdenom", 1e9).
 		Build()
 
-	suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+	suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
 	// new reward is (new index - old index) * borrow amount
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(
 		cs(c("rewarddenom", 1_000_001_000_000)).Add(originalReward...),
 		syncedClaim.Reward,
@@ -226,11 +228,11 @@ func (suite *SynchronizeJoltBorrowRewardTests) TestRewardIsIncrementedWhenNewRew
 		WithSourceShares("newlyrewarded", 1e9).
 		Build()
 
-	suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+	suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
 	// new reward is (new index - old index) * borrow amount for each borrowed denom
 	// The old index for `newlyrewarded` isn't in the claim, so it's added starting at 0 for calculating the reward.
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(
 		cs(c("otherreward", 1_000_001_000_000), c("reward", 1_000_001_000_000)).Add(originalReward...),
 		syncedClaim.Reward,
@@ -284,11 +286,11 @@ func (suite *SynchronizeJoltBorrowRewardTests) TestRewardIsIncrementedWhenNewRew
 		WithSourceShares("borrowed", 1e9).
 		Build()
 
-	suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+	suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
 	// new reward is (new index - old index) * borrow amount for each borrowed denom
 	// The old index for `otherreward` isn't in the claim, so it's added starting at 0 for calculating the reward.
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(
 		cs(c("reward", 1_000_001_000_000), c("otherreward", 1_000_001_000_000)).Add(originalReward...),
 		syncedClaim.Reward,

@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/stretchr/testify/suite"
@@ -14,13 +16,13 @@ type AccumulateSupplyRewardsTests struct {
 }
 
 func (suite *AccumulateSupplyRewardsTests) storedTimeEquals(denom string, expected time.Time) {
-	storedTime, found := suite.keeper.GetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom)
+	storedTime, found := suite.keeper.GetPreviousJoltSupplyRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.True(found)
 	suite.Equal(expected, storedTime)
 }
 
 func (suite *AccumulateSupplyRewardsTests) storedIndexesEqual(denom string, expected types2.RewardIndexes) {
-	storedIndexes, found := suite.keeper.GetJoltSupplyRewardIndexes(suite.ctx, denom)
+	storedIndexes, found := suite.keeper.GetJoltSupplyRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Equal(found, expected != nil)
 
 	if found {
@@ -56,7 +58,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUpdatedWhenBlockTimeHasIncre
 		},
 	})
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
@@ -69,7 +71,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUpdatedWhenBlockTimeHasIncre
 		cs(c("jolt", 2000), c("ujolt", 1000)), // same denoms as in global indexes
 	)
 
-	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+	suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 
 	// check time and factors
 
@@ -109,7 +111,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUnchangedWhenBlockTimeHasNot
 	}
 	suite.storeGlobalSupplyIndexes(previousIndexes)
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(previousAccrualTime)
 
@@ -121,7 +123,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateUnchangedWhenBlockTimeHasNot
 		cs(c("jolt", 2000), c("ujolt", 1000)), // same denoms as in global indexes
 	)
 
-	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+	suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 
 	// check time and factors
 
@@ -154,7 +156,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenSourceSharesAre
 	}
 	suite.storeGlobalSupplyIndexes(previousIndexes)
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	firstAccrualTime := previousAccrualTime.Add(7 * time.Second)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
@@ -167,7 +169,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenSourceSharesAre
 		cs(c("jolt", 2000), c("ujolt", 1000)), // same denoms as in global indexes
 	)
 
-	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+	suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 
 	// check time and factors
 
@@ -194,7 +196,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateAddedWhenStateDoesNotExist()
 	firstAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
-	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+	suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 
 	// After the first accumulation only the current block time should be stored.
 	// The indexes will be empty as no time has passed since the previous block because it didn't exist.
@@ -204,7 +206,7 @@ func (suite *AccumulateSupplyRewardsTests) TestStateAddedWhenStateDoesNotExist()
 	secondAccrualTime := firstAccrualTime.Add(10 * time.Second)
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(secondAccrualTime)
 
-	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+	suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 
 	// After the second accumulation both current block time and indexes should be stored.
 	suite.storedTimeEquals(denom, secondAccrualTime)
@@ -241,7 +243,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 	// No increment and no previous indexes stored, results in an updated of nil. Setting this in the state panics.
 	// Check there is no panic.
 	suite.NotPanics(func() {
-		suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+		suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 	})
 
 	suite.storedTimeEquals(denom, accrualTime)
@@ -271,7 +273,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenBeforeStartTime
 	}
 	suite.storeGlobalSupplyIndexes(previousIndexes)
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	firstAccrualTime := previousAccrualTime.Add(10 * time.Second)
 
@@ -285,7 +287,7 @@ func (suite *AccumulateSupplyRewardsTests) TestNoAccumulationWhenBeforeStartTime
 
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
-	suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+	suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 
 	// The accrual time should be updated, but the indexes unchanged
 	suite.storedTimeEquals(denom, firstAccrualTime)
@@ -301,7 +303,7 @@ func (suite *AccumulateSupplyRewardsTests) TestPanicWhenCurrentTimeLessThanPrevi
 	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil, nil, nil)
 
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltSupplyRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	firstAccrualTime := time.Time{}
 
@@ -316,6 +318,6 @@ func (suite *AccumulateSupplyRewardsTests) TestPanicWhenCurrentTimeLessThanPrevi
 	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.Panics(func() {
-		suite.keeper.AccumulateJoltSupplyRewards(suite.ctx, period)
+		suite.keeper.AccumulateJoltSupplyRewards(sdk.UnwrapSDKContext(suite.ctx), period)
 	})
 }

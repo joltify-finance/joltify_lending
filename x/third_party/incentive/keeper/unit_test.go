@@ -1,8 +1,11 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"time"
+
+	"cosmossdk.io/store/metrics"
 
 	nfttypes "cosmossdk.io/x/nft"
 
@@ -30,7 +33,7 @@ import (
 // NewTestContext sets up a basic context with an in-memory db
 func NewTestContext(requiredStoreKeys ...storetypes.StoreKey) context.Context {
 	memDB := db.NewMemDB()
-	cms := store.NewCommitMultiStore(memDB)
+	cms := store.NewCommitMultiStore(memDB, log.NewNopLogger(), metrics.NewNoOpMetrics())
 
 	for _, key := range requiredStoreKeys {
 		cms.MountStoreWithDB(key, storetypes.StoreTypeIAVL, nil)
@@ -55,7 +58,7 @@ type unitTester struct {
 }
 
 func (suite *unitTester) SetupSuite() {
-	tApp := app.NewTestApp(log.NewTestLogger(suite.T(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.cdc = tApp.AppCodec()
 
 	suite.incentiveStoreKey = storetypes.NewKVStoreKey(types.StoreKey)
@@ -76,18 +79,18 @@ func (suite *unitTester) NewKeeper(paramSubspace types.ParamSubspace, bk types.B
 }
 
 func (suite *unitTester) storeJoltClaim(claim types.JoltLiquidityProviderClaim) {
-	suite.keeper.SetJoltLiquidityProviderClaim(suite.ctx, claim)
+	suite.keeper.SetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim)
 }
 
 func (suite *unitTester) storeGlobalBorrowIndexes(indexes types.MultiRewardIndexes) {
 	for _, i := range indexes {
-		suite.keeper.SetJoltBorrowRewardIndexes(suite.ctx, i.CollateralType, i.RewardIndexes)
+		suite.keeper.SetJoltBorrowRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), i.CollateralType, i.RewardIndexes)
 	}
 }
 
 func (suite *unitTester) storeGlobalSupplyIndexes(indexes types.MultiRewardIndexes) {
 	for _, i := range indexes {
-		suite.keeper.SetJoltSupplyRewardIndexes(suite.ctx, i.CollateralType, i.RewardIndexes)
+		suite.keeper.SetJoltSupplyRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), i.CollateralType, i.RewardIndexes)
 	}
 }
 
@@ -96,11 +99,11 @@ type fakeParamSubspace struct {
 	params types.Params
 }
 
-func (subspace *fakeParamSubspace) GetParamSet(_ context.Context, ps paramtypes.ParamSet) {
+func (subspace *fakeParamSubspace) GetParamSet(_ sdk.Context, ps paramtypes.ParamSet) {
 	*(ps.(*types.Params)) = subspace.params
 }
 
-func (subspace *fakeParamSubspace) SetParamSet(_ context.Context, ps paramtypes.ParamSet) {
+func (subspace *fakeParamSubspace) SetParamSet(_ sdk.Context, ps paramtypes.ParamSet) {
 	subspace.params = *(ps.(*types.Params))
 }
 
@@ -110,12 +113,12 @@ func (subspace *fakeParamSubspace) HasKeyTable() bool {
 }
 
 func (suite *unitTester) storeSwapClaim(claim types.SwapClaim) {
-	suite.keeper.SetSwapClaim(suite.ctx, claim)
+	suite.keeper.SetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim)
 }
 
 func (suite *unitTester) storeGlobalSwapIndexes(indexes types.MultiRewardIndexes) {
 	for _, i := range indexes {
-		suite.keeper.SetSwapRewardIndexes(suite.ctx, i.CollateralType, i.RewardIndexes)
+		suite.keeper.SetSwapRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), i.CollateralType, i.RewardIndexes)
 	}
 }
 

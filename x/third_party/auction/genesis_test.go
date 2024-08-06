@@ -137,6 +137,7 @@ func TestExportGenesis(t *testing.T) {
 		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true)
 		tApp.InitializeFromGenesisStates(nil, nil)
+		ctx = tApp.Ctx
 
 		// export
 		gs := auction.ExportGenesis(ctx, tApp.GetAuctionKeeper())
@@ -149,8 +150,8 @@ func TestExportGenesis(t *testing.T) {
 		// setup state
 		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
-		ctx := tApp.NewContext(true)
 		tApp.InitializeFromGenesisStates(nil, nil)
+		ctx := tApp.Ctx
 		tApp.GetAuctionKeeper().SetAuction(ctx, testAuction)
 
 		// export
