@@ -45,7 +45,7 @@ func (suite *IntegrationTester) SetApp() {
 }
 
 func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisTime time.Time, genesisStates ...app.GenesisState) {
-	suite.App.InitializeFromGenesisStatesWithTimeAndChainID(
+	suite.App = suite.App.InitializeFromGenesisStatesWithTimeAndChainID(
 		genesisTime,
 		testChainID, genAccs, coins,
 		genesisStates...,

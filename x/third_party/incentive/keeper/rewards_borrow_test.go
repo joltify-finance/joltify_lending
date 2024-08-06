@@ -146,6 +146,14 @@ func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBank
 		hardBuilder.BuildMarshalled(suite.app.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
+
+	suite.ctx = suite.app.Ctx
+	pa := suite.joltKeeper.GetParams(suite.app.Ctx)
+	_, found := suite.joltKeeper.GetMoneyMarket(suite.app.Ctx, "bnb")
+	for _, el := range pa.MoneyMarkets {
+		fmt.Printf(">333>>>%v\n", el.Denom)
+	}
+	fmt.Printf(">>>>found>>>>>>%v\n", found)
 }
 
 func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
@@ -248,6 +256,7 @@ func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
 				WithGenesisTime(suite.genesisTime).
 				WithSimpleBorrowRewardPeriod(tc.args.borrow.Denom, tc.args.rewardsPerSecond)
 
+			fmt.Printf("in borrow@@@@@@@@@@@@@@@@\n")
 			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
@@ -902,13 +911,6 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 
 			err = fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
-
-			pa := suite.joltKeeper.GetParams(suite.ctx)
-			_, found := suite.joltKeeper.GetMoneyMarket(suite.ctx, "bnb")
-			for _, el := range pa.MoneyMarkets {
-				fmt.Printf(">>>>%v\n", el.Denom)
-			}
-			fmt.Printf(">>>>found>>>>>>%v\n", found)
 
 			// Fill the hard supply to allow user to borrow
 			err = suite.joltKeeper.Deposit(suite.ctx, suite.addrs[0], tc.args.firstBorrow.Add(tc.args.modification.coins...))

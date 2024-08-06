@@ -212,7 +212,7 @@ func (suite *KeeperTestSuite) TestRepay() {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
 			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
+			ctx := tApp.Ctx
 
 			// Auth module genesis state
 			addrs, coinses := uniqueAddressCoins(

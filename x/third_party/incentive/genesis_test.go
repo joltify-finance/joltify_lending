@@ -107,19 +107,16 @@ func (suite *GenesisTestSuite) SetupTest() {
 
 	cdc := suite.app.AppCodec()
 
-	tApp.InitializeFromGenesisStatesWithTime(
+	suite.app = tApp.InitializeFromGenesisStatesWithTime(
 		suite.genesisTime, nil, nil,
 		app.GenesisState{types.ModuleName: cdc.MustMarshalJSON(&incentiveGS)},
 		app.GenesisState{types2.ModuleName: cdc.MustMarshalJSON(&joltGS)},
 		NewPricefeedGenStateMultiFromTime(cdc, suite.genesisTime),
 		authBuilder.BuildMarshalled(cdc),
 	)
-
-	ctx := tApp.NewContext(true)
-
 	suite.addrs = addrs
 	suite.keeper = k
-	suite.ctx = ctx
+	suite.ctx = suite.app.Ctx
 }
 
 func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
@@ -221,8 +218,8 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 	)
 
 	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-	ctx := tApp.NewContext(true)
-
+	suite.app = tApp
+	tApp.Ctx = suite.app.Ctx
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 	// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
 	tApp.InitializeFromGenesisStates(nil, nil,
@@ -230,13 +227,13 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 	)
 
 	incentive.InitGenesis(
-		ctx,
+		suite.app.Ctx,
 		tApp.GetIncentiveKeeper(),
 		tApp.GetAccountKeeper(),
 		genesisState,
 	)
 
-	exportedGenesisState := incentive.ExportGenesis(ctx, tApp.GetIncentiveKeeper())
+	exportedGenesisState := incentive.ExportGenesis(suite.app.Ctx, tApp.GetIncentiveKeeper())
 	suite.True(exportedGenesisState.String() == genesisState.String())
 	// suite.Equal(genesisState.String(), exportedGenesisState.String())
 }

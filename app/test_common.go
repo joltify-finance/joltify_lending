@@ -3,9 +3,12 @@ package app
 import (
 	crand "crypto/rand"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -303,6 +306,14 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 	stateBytes, err := json.Marshal(genesisState)
 	if err != nil {
 		panic(err)
+	}
+
+	for _, state := range genesisStates {
+		for k, v := range state {
+			if k == types.ModuleName {
+				fmt.Printf(">>>=-----v\n", string(v))
+			}
+		}
 	}
 
 	_, err = tApp.InitChain(

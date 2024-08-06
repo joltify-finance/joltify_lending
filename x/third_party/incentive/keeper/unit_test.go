@@ -60,7 +60,6 @@ type unitTester struct {
 func (suite *unitTester) SetupSuite() {
 	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.cdc = tApp.AppCodec()
-
 	suite.incentiveStoreKey = storetypes.NewKVStoreKey(types.StoreKey)
 }
 
