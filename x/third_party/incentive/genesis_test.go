@@ -107,7 +107,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 
 	cdc := suite.app.AppCodec()
 
-	suite.app = tApp.InitializeFromGenesisStatesWithTime(
+	suite.app = tApp.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, nil, nil,
 		app.GenesisState{types.ModuleName: cdc.MustMarshalJSON(&incentiveGS)},
 		app.GenesisState{types2.ModuleName: cdc.MustMarshalJSON(&joltGS)},
@@ -222,7 +222,7 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 	tApp.Ctx = suite.app.Ctx
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 	// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
-	tApp.InitializeFromGenesisStates(suite.T(), nil, nil,
+	tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 		NewPricefeedGenStateMultiFromTime(tApp.AppCodec(), genesisTime),
 	)
 

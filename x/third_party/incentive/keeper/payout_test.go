@@ -348,15 +348,27 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 				tc.args.accArgs.startTime,
 			)
 
+			var genAcc []authtypes.GenesisAccount
+			b := authtypes.NewBaseAccount(suite.addrs[1], nil, 0, 0)
+			genAcc = append(genAcc, b)
+
 			if tc.args.mintModAccountCoins {
 				authBuilder = authBuilder.WithSimpleModuleAccount(types.ModuleName, tc.args.period.Amount)
 			}
 
 			suite.genesisTime = tc.args.ctxTime
 			suite.SetupApp()
-			suite.app.InitializeFromGenesisStates(suite.T(), suite.genesisTime, nil, nil,
+			na := suite.app.InitializeFromGenesisStates(suite.T(), suite.genesisTime, genAcc, nil,
 				authBuilder.BuildMarshalled(suite.app.AppCodec()),
 			)
+			na.Ctx = sdk.UnwrapSDKContext(na.Ctx).WithBlockTime(suite.genesisTime)
+			suite.ctx = na.Ctx
+			suite.app = na
+			suite.app.Ctx = na.Ctx
+			suite.keeper = na.GetIncentiveKeeper()
+			suite.joltKeeper = na.GetJoltKeeper()
+			found := na.GetAccountKeeper().HasAccount(na.Ctx, suite.addrs[0])
+			fmt.Printf("########found is %v\n", found)
 
 			if tc.args.mintModAccountCoins {
 				err := fundModuleAccount(suite.app.GetBankKeeper(), suite.ctx, types.ModuleName, tc.args.period.Amount)
@@ -402,21 +414,23 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 		WithSimpleModuleAccount(types.ModuleName, cs(c("ujolt", 600)))
 
 	suite.genesisTime = time.Unix(100, 0)
-	suite.SetupApp()
 
 	var genAcc []authtypes.GenesisAccount
 	b := authtypes.NewBaseAccount(suite.addrs[1], nil, 0, 0)
 	genAcc = append(genAcc, b)
 
-	na := suite.app.InitializeFromGenesisStates(suite.T(), suite.genesisTime, genAcc, cs(c("ujolt", 400)),
+	suite.SetupApp()
+	mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+		suite.genesisTime, genAcc, cs(c("ujolt", 400)),
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
+		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
+		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.app.AppCodec()),
 	)
-
-	suite.ctx = na.Ctx
-	suite.app = na
-	suite.app.Ctx = na.Ctx
-	suite.keeper = na.GetIncentiveKeeper()
-	suite.joltKeeper = na.GetJoltKeeper()
+	suite.app.App = mapp.App
+	suite.ctx = mapp.Ctx
+	suite.app.Ctx = mapp.Ctx
+	suite.joltKeeper = mapp.GetJoltKeeper()
+	suite.keeper = mapp.GetIncentiveKeeper()
 
 	err := fundModuleAccount(suite.app.GetBankKeeper(), suite.app.Ctx, types.ModuleName, cs(c("ujolt", 600)))
 	suite.Require().NoError(err)
@@ -424,7 +438,6 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 	fmt.Printf("test account is %v\n", suite.addrs[1].String())
 	// send coins to base account
 	err = suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types.ModuleName, suite.addrs[1], cs(c("ujolt", 100)), 5)
-	fmt.Printf(">>>>err is %v\n", err)
 	suite.Require().NoError(err)
 	acc := suite.getAccount(suite.addrs[1])
 	vacc, ok := acc.(*vestingtypes.PeriodicVestingAccount)
@@ -434,6 +447,8 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 	}
 
 	bk := suite.app.GetBankKeeper()
+
+	fmt.Printf("we get  %v\n", bk.GetAllBalances(suite.ctx, vacc.GetAddress()))
 
 	suite.Equal(expectedPeriods, vacc.VestingPeriods)
 	suite.Equal(cs(c("ujolt", 100)), vacc.OriginalVesting)

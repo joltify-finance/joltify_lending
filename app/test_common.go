@@ -256,9 +256,11 @@ func (tApp TestApp) InitializeFromGenesisStates(t *testing.T, gentime time.Time,
 
 	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(gentime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
 
-	tApp = NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	tApp.Ctx = mapp.Ctx
 	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(gentime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
-	return tApp
+	mapp.Ctx = tApp.Ctx
+	return mapp
 }
 
 // InitializeFromGenesisStatesWithTime calls InitChain on the app using the provided genesis states and time.
@@ -268,9 +270,10 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTime(t *testing.T, genTime ti
 
 	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
 	tApp.Ctx = mapp.Ctx
+	tApp.App = mapp.App
 	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(genTime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
-
-	return tApp
+	mapp.Ctx = tApp.Ctx
+	return mapp
 }
 
 // InitializeFromGenesisStatesWithTimeAndChainID calls InitChain on the app using the provided genesis states, time, and chain id.
@@ -282,8 +285,9 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(t *testing.T, 
 
 	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
 	tApp.Ctx = mapp.Ctx
+	tApp.App = mapp.App
 	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(genTime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
-	return tApp
+	return mapp
 }
 
 func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(

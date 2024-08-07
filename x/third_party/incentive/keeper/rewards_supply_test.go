@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 
@@ -139,21 +137,25 @@ func (suite *SupplyRewardsTestSuite) SetupApp() {
 
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
-
 	suite.ctx = suite.app.Ctx
 }
 
-func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder, genTime time.Time) {
+func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder, genTime time.Time) app.TestApp {
 	suite.SetupApp()
 
-	suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+	mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, genAcc, coins,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
 		joltBuilder.BuildMarshalled(suite.app.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
-	suite.ctx = suite.app.NewContextLegacy(false, tmproto.Header{Height: 1, Time: suite.genesisTime})
+	mapp.Ctx = mapp.Ctx.WithBlockTime(suite.genesisTime)
+	suite.app = mapp
+	suite.ctx = mapp.Ctx
+	suite.joltKeeper = mapp.GetJoltKeeper()
+	suite.keeper = mapp.GetIncentiveKeeper()
+	return mapp
 }
 
 func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
@@ -264,7 +266,7 @@ func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
 			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 			genAcc = append(genAcc, b)
 
-			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
+			suite.app = suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			// User deposits to increase total supplied amount
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(tc.args.deposit))
@@ -911,8 +913,11 @@ func (suite *SupplyRewardsTestSuite) TestUpdateJoltSupplyIndexDenoms() {
 			var genAcc []authtypes.GenesisAccount
 			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 			genAcc = append(genAcc, b)
-			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
-
+			mapp := suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
+			suite.app = mapp
+			suite.ctx = mapp.Ctx
+			suite.keeper = mapp.GetIncentiveKeeper()
+			suite.joltKeeper = mapp.GetJoltKeeper()
 			// User deposits (first time)
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.firstDeposit)
 			suite.Require().NoError(err)

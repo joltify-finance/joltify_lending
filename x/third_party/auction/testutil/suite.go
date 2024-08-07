@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"context"
+	"time"
 
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
@@ -82,7 +83,7 @@ func (suite *Suite) SetupTest(numAddrs int) {
 	//b := authtypes.NewBaseAccount(addr, nil, 0, 0)
 	//genAcc = append(genAcc, b)
 	//
-	tApp.InitializeFromGenesisStates(suite.T(), nil, nil, authGS, gs)
+	tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS, gs)
 
 	suite.App = tApp
 	suite.Ctx = tApp.Ctx
