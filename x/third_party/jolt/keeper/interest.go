@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"math"
 
 	errorsmod "cosmossdk.io/errors"
@@ -68,12 +69,16 @@ func (k Keeper) AccrueInterest(rctx context.Context, denom string) error {
 		return nil
 	}
 
+	fmt.Printf(">>111222>>>previous time is %v\n", previousAccrualTime)
+
 	timeElapsed := int64(math.RoundToEven(
 		ctx.BlockTime().Sub(previousAccrualTime).Seconds(),
 	))
 	if timeElapsed == 0 {
 		return nil
 	}
+
+	fmt.Printf(">>>>>>>>>>>>>>timeElapsed is %v--%v\n", ctx.BlockTime(), previousAccrualTime)
 
 	// Get current protocol state and hold in memory as 'prior'
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleName)

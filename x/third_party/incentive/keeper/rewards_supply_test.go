@@ -139,7 +139,7 @@ func (suite *SupplyRewardsTestSuite) SetupApp() {
 	suite.keeper = suite.app.GetIncentiveKeeper()
 	suite.joltKeeper = suite.app.GetJoltKeeper()
 
-	suite.ctx = suite.app.NewContext(true)
+	suite.ctx = suite.app.Ctx
 }
 
 func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder) {

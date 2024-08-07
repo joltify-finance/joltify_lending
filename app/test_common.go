@@ -1,13 +1,14 @@
 package app
 
 import (
-	storetypes "cosmossdk.io/store/types"
 	crand "crypto/rand"
 	"encoding/json"
 	"fmt"
 	"math/rand"
 	"testing"
 	"time"
+
+	storetypes "cosmossdk.io/store/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -78,7 +79,12 @@ type TestApp struct {
 // Note, it also sets the sdk config with the app's address prefix, coin type, etc.
 func NewTestApp(logger log.Logger, rootDir string) TestApp {
 	SetSDKConfig()
-	return NewTestAppFromSealed(logger, rootDir)
+	return NewTestAppFromSealed(logger, rootDir, nil)
+}
+
+func NewTestAppWithGenesis(logger log.Logger, rootDir string, genesisBytes []byte) TestApp {
+	SetSDKConfig()
+	return NewTestAppFromSealed(logger, rootDir, genesisBytes)
 }
 
 func genesisStateWithValSet(
@@ -156,7 +162,7 @@ func genesisStateWithValSet(
 var DefaultConsensusParams = simtestutil.DefaultConsensusParams
 
 // NewTestAppFromSealed creates a TestApp without first setting sdk config.
-func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
+func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) TestApp {
 	mdb := dbm.NewMemDB()
 	app := NewApp(
 		logger, mdb, nil,
@@ -184,12 +190,16 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 		Coins:   sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(12300000000000000))),
 	}
 
-	genesisState := NewDefaultGenesisState(encCfg.Marshaler)
-	genesisState = genesisStateWithValSet(app, genesisState, []*stakingtypes.Validator{&val}, []authtypes.GenesisAccount{acc}, balance)
+	if genbytes == nil {
 
-	stateBytes, err := tmjson.MarshalIndent(genesisState, "", " ")
-	if err != nil {
-		panic(err)
+		genesisState := NewDefaultGenesisState(encCfg.Marshaler)
+		genesisState = genesisStateWithValSet(app, genesisState, []*stakingtypes.Validator{&val}, []authtypes.GenesisAccount{acc}, balance)
+
+		stateBytes, err := tmjson.MarshalIndent(genesisState, "", " ")
+		if err != nil {
+			panic(err)
+		}
+		genbytes = stateBytes
 	}
 
 	// Initialize the chain
@@ -197,7 +207,7 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 		&abci.RequestInitChain{
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: DefaultConsensusParams,
-			AppStateBytes:   stateBytes,
+			AppStateBytes:   genbytes,
 			ChainId:         "joltifytest_888-1",
 		},
 	)
@@ -256,6 +266,56 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(genTime time.T
 	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState,
 ) TestApp {
 	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, chainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+}
+
+func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
+	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState,
+) []byte {
+	encoding := MakeEncodingConfig()
+	genesisState := NewDefaultGenesisState(encoding.Marshaler)
+	for _, state := range genesisStates {
+		for k, v := range state {
+			genesisState[k] = v
+		}
+	}
+
+	_, pubKey, addr := testdata.KeyTestPubAddr()
+	valAddr := sdk.ValAddress(addr)
+	val, err := stakingtypes.NewValidator(valAddr.String(), pubKey, stakingtypes.Description{Moniker: "test"})
+	if err != nil {
+		panic(err)
+	}
+
+	// create validator set with single validator
+	defaultCoins := sdk.NewCoin(sdk.DefaultBondDenom, sdkmath.NewInt(100000000000000))
+	coins = coins.Add(defaultCoins)
+	var balances []banktypes.Balance
+	if len(genAccs) == 0 {
+		senderPrivKey := secp256k1.GenPrivKey()
+		acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
+		balanceItem := banktypes.Balance{
+			Address: acc.GetAddress().String(),
+			Coins:   coins,
+		}
+		genAccs = []authtypes.GenesisAccount{acc}
+		balances = []banktypes.Balance{balanceItem}
+	} else {
+		for _, el := range genAccs {
+			balanceItem := banktypes.Balance{
+				Address: el.GetAddress().String(),
+				Coins:   coins,
+			}
+			balances = append(balances, balanceItem)
+		}
+	}
+
+	genesisState = genesisStateWithValSet(&tApp.App, genesisState, []*stakingtypes.Validator{&val}, genAccs, balances...)
+	// Initialize the chain
+	stateBytes, err := json.Marshal(genesisState)
+	if err != nil {
+		panic(err)
+	}
+	return stateBytes
 }
 
 // InitializeFromGenesisStatesWithTimeAndChainIDAndHeight calls InitChain on the app using the provided genesis states and other parameters.
