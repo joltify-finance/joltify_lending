@@ -1,6 +1,7 @@
 package app
 
 import (
+	storetypes "cosmossdk.io/store/types"
 	crand "crypto/rand"
 	"encoding/json"
 	"fmt"
@@ -32,8 +33,6 @@ import (
 	dbm "github.com/cosmos/cosmos-db"
 
 	pruningtypes "cosmossdk.io/store/pruning/types"
-
-	storetypes "cosmossdk.io/store/types"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 
@@ -203,12 +202,7 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string) TestApp {
 		},
 	)
 
-	ctx, err := app.BaseApp.CreateQueryContext(0, false)
-	if err != nil {
-		panic(err)
-	}
-
-	// ctx := sdk.NewContext(app., tmproto.Header{}, false, log.NewNopLogger())
+	ctx := app.NewContext(false)
 	ctx = ctx.WithBlockGasMeter(storetypes.NewGasMeter(1000000000000000000))
 	return TestApp{App: *app, Ctx: ctx}
 }
@@ -322,11 +316,6 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 			ConsensusParams: simtestutil.DefaultConsensusParams,
 		},
 	)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = tApp.Commit()
 	if err != nil {
 		panic(err)
 	}
