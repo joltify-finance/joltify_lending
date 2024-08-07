@@ -222,7 +222,7 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 	tApp.Ctx = suite.app.Ctx
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 	// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
-	tApp.InitializeFromGenesisStates(nil, nil,
+	tApp.InitializeFromGenesisStates(suite.T(), nil, nil,
 		NewPricefeedGenStateMultiFromTime(tApp.AppCodec(), genesisTime),
 	)
 

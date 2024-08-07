@@ -3,14 +3,12 @@ package app
 import (
 	crand "crypto/rand"
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"testing"
 	"time"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-
 	storetypes "cosmossdk.io/store/types"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -217,7 +215,6 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 	)
 
 	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: currentTime}
-
 	ctx := app.NewContextLegacy(false, header)
 	ctx = ctx.WithBlockGasMeter(storetypes.NewGasMeter(1000000000000000000))
 	return TestApp{App: *app, Ctx: ctx}
@@ -255,23 +252,38 @@ func (app *App) TxConfig() client.TxConfig {
 
 // InitializeFromGenesisStates calls InitChain on the app using the provided genesis states.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStates(genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(emptyTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+func (tApp TestApp) InitializeFromGenesisStates(t *testing.T, gentime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+
+	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(gentime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+
+	tApp = NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(gentime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
+	return tApp
 }
 
 // InitializeFromGenesisStatesWithTime calls InitChain on the app using the provided genesis states and time.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTime(genTime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
-	t := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
-	return t
+func (tApp TestApp) InitializeFromGenesisStatesWithTime(t *testing.T, genTime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+
+	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	tApp.Ctx = mapp.Ctx
+	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(genTime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
+
+	return tApp
 }
 
 // InitializeFromGenesisStatesWithTimeAndChainID calls InitChain on the app using the provided genesis states, time, and chain id.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(genTime time.Time, chainID string,
+func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(t *testing.T, genTime time.Time, chainID string,
 	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState,
 ) TestApp {
-	return tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, chainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime, chainID, defaultInitialHeight, genAccs, coins, genesisStates...)
+
+	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)
+	tApp.Ctx = mapp.Ctx
+	tApp.Ctx = sdk.UnwrapSDKContext(tApp.Ctx).WithBlockTime(genTime).WithBlockGasMeter(storetypes.NewInfiniteGasMeter()).WithConsensusParams(*DefaultConsensusParams)
+	return tApp
 }
 
 func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
@@ -326,7 +338,7 @@ func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
 
 // InitializeFromGenesisStatesWithTimeAndChainIDAndHeight calls InitChain on the app using the provided genesis states and other parameters.
 // If any module genesis states are missing, defaults are used.
-func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
+func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) []byte {
 	// Create a default genesis state and overwrite with provided values
 	encoding := MakeEncodingConfig()
 	genesisState := NewDefaultGenesisState(encoding.Marshaler)
@@ -373,27 +385,7 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTi
 		panic(err)
 	}
 
-	_, err = tApp.InitChain(
-		&abci.RequestInitChain{
-			Validators:    []abci.ValidatorUpdate{},
-			AppStateBytes: stateBytes,
-			ChainId:       chainID,
-			// Set consensus params, which is needed by x/feemarket
-			ConsensusParams: simtestutil.DefaultConsensusParams,
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	pa := tApp.joltKeeper.GetParams(tApp.Ctx)
-	_, found := tApp.joltKeeper.GetMoneyMarket(tApp.Ctx, "bnb")
-	for _, el := range pa.MoneyMarkets {
-		fmt.Printf(">333>>>%v\n", el.Denom)
-	}
-	fmt.Printf(">>>>found>>>>>>%v\n", found)
-
-	return tApp
+	return stateBytes
 }
 
 // RandomAddress non-deterministically generates a new address, discarding the private key.

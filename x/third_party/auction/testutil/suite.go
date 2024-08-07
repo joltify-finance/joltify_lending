@@ -82,7 +82,7 @@ func (suite *Suite) SetupTest(numAddrs int) {
 	//b := authtypes.NewBaseAccount(addr, nil, 0, 0)
 	//genAcc = append(genAcc, b)
 	//
-	tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
+	tApp.InitializeFromGenesisStates(suite.T(), nil, nil, authGS, gs)
 
 	suite.App = tApp
 	suite.Ctx = tApp.Ctx

@@ -60,14 +60,13 @@ func (suite *SupplyIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncin
 		WithSimpleSupplyRewardPeriod("bnb", cs(c("jjolt", 1e6))). // only borrow rewards
 		WithSimpleSupplyRewardPeriod("sbnb", cs(c("jjolt", 1e6))) // only borrow rewards
 
-	suite.SetApp()
-
 	var genAcc []authtypes.GenesisAccount
 	for _, el := range suite.addrs {
 		b := authtypes.NewBaseAccount(el, nil, 0, 0)
 		genAcc = append(genAcc, b)
 	}
 
+	suite.SetApp()
 	suite.StartChain(genAcc, cs(c("bnb", 1e12), c("sbnb", 1e12)),
 		suite.genesisTime,
 		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
@@ -147,7 +146,7 @@ func (suite *SupplyRewardsTestSuite) SetupApp() {
 func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder, genTime time.Time) {
 	suite.SetupApp()
 
-	suite.app.InitializeFromGenesisStatesWithTime(
+	suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, genAcc, coins,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),

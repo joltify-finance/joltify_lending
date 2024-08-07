@@ -139,7 +139,7 @@ func (suite *BorrowRewardsTestSuite) SetupApp() {
 func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil2.IncentiveGenesisBuilder, hardBuilder testutil2.JoltGenesisBuilder, genesisTime time.Time) {
 	suite.SetupApp()
 
-	suite.app = suite.app.InitializeFromGenesisStatesWithTime(
+	suite.app = suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, nil, nil,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),

@@ -27,7 +27,7 @@ func (k Keeper) SendTimeLockedCoinsToAccount(ctx context.Context, senderModule s
 	macc := k.accountKeeper.GetModuleAccount(ctx, senderModule)
 	maccCoins := k.bankKeeper.GetAllBalances(ctx, macc.GetAddress())
 	if !maccCoins.IsAllGTE(amt) {
-		return errorsmod.Wrapf(types2.ErrInsufficientModAccountBalance, "%s", senderModule)
+		return errorsmod.Wrapf(types2.ErrInsufficientModAccountBalance, "%s, we have %v and we need to send %v", senderModule, maccCoins, amt)
 	}
 
 	// 0. Get the account from the account keeper and do a type switch, error if it's a validator vesting account or module account (can make this work for validator vesting later if necessary)

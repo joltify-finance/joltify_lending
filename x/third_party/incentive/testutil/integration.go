@@ -52,6 +52,7 @@ func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, c
 
 	suite.App = app.NewTestAppWithGenesis(log.NewTestLogger(suite.T()), suite.T().TempDir(), bz)
 	suite.Ctx = suite.App.Ctx
+	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithBlockTime(genesisTime)
 	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithBlockGasMeter(storetypes.NewInfiniteGasMeter())
 	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithConsensusParams(*app.DefaultConsensusParams)
 }

@@ -61,7 +61,7 @@ func (suite *HandlerTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccou
 		builtGenStates = append(builtGenStates, builder.BuildMarshalled(suite.App.AppCodec()))
 	}
 
-	suite.App.InitializeFromGenesisStatesWithTime(
+	suite.App.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, genAcc, coins,
 		builtGenStates...,
 	)

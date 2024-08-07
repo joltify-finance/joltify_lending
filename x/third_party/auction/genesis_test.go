@@ -5,9 +5,8 @@ import (
 	"testing"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
-
 	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
@@ -136,7 +135,8 @@ func TestExportGenesis(t *testing.T) {
 		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
 		ctx := tApp.NewContext(true)
-		tApp.InitializeFromGenesisStates(nil, nil)
+
+		tApp.InitializeFromGenesisStates(t, nil, nil)
 		ctx = tApp.Ctx
 
 		// export
@@ -150,7 +150,7 @@ func TestExportGenesis(t *testing.T) {
 		// setup state
 		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
-		tApp.InitializeFromGenesisStates(nil, nil)
+		tApp.InitializeFromGenesisStates(t, nil, nil)
 		ctx := tApp.Ctx
 		tApp.GetAuctionKeeper().SetAuction(ctx, testAuction)
 
