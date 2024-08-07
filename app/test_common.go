@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	storetypes "cosmossdk.io/store/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -202,9 +204,11 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 		genbytes = stateBytes
 	}
 
+	currentTime := time.Now().UTC()
 	// Initialize the chain
 	app.InitChain(
 		&abci.RequestInitChain{
+			Time:            currentTime,
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: DefaultConsensusParams,
 			AppStateBytes:   genbytes,
@@ -212,7 +216,9 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 		},
 	)
 
-	ctx := app.NewContext(false)
+	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: currentTime}
+
+	ctx := app.NewContextLegacy(false, header)
 	ctx = ctx.WithBlockGasMeter(storetypes.NewGasMeter(1000000000000000000))
 	return TestApp{App: *app, Ctx: ctx}
 }

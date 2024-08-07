@@ -448,6 +448,7 @@ func TestAuctionBidding(t *testing.T) {
 			lg := log.NewTestLogger(t)
 			tApp := app.NewTestApp(lg, t.TempDir())
 
+			tApp.Ctx = tApp.Ctx.WithBlockTime(someTime)
 			// Set up module account
 			modName := "jolt"
 			modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(modName), nil, 0, 0)

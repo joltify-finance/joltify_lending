@@ -235,7 +235,6 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 
 	exportedGenesisState := incentive.ExportGenesis(suite.app.Ctx, tApp.GetIncentiveKeeper())
 	suite.True(exportedGenesisState.String() == genesisState.String())
-	// suite.Equal(genesisState.String(), exportedGenesisState.String())
 }
 
 func (suite *GenesisTestSuite) TestValidateAccumulationTime() {

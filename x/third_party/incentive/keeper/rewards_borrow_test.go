@@ -2,11 +2,11 @@ package keeper_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"cosmossdk.io/log"
 
@@ -136,7 +136,7 @@ func (suite *BorrowRewardsTestSuite) SetupApp() {
 	suite.joltKeeper = suite.app.GetJoltKeeper()
 }
 
-func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil2.IncentiveGenesisBuilder, hardBuilder testutil2.JoltGenesisBuilder) {
+func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil2.IncentiveGenesisBuilder, hardBuilder testutil2.JoltGenesisBuilder, genesisTime time.Time) {
 	suite.SetupApp()
 
 	suite.app = suite.app.InitializeFromGenesisStatesWithTime(
@@ -147,13 +147,8 @@ func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBank
 		incentBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
 
-	suite.ctx = suite.app.Ctx
-	pa := suite.joltKeeper.GetParams(suite.app.Ctx)
-	_, found := suite.joltKeeper.GetMoneyMarket(suite.app.Ctx, "bnb")
-	for _, el := range pa.MoneyMarkets {
-		fmt.Printf(">333>>>%v\n", el.Denom)
-	}
-	fmt.Printf(">>>>found>>>>>>%v\n", found)
+	header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: genesisTime}
+	suite.ctx = suite.app.NewContextLegacy(false, header)
 }
 
 func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
@@ -256,8 +251,7 @@ func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
 				WithGenesisTime(suite.genesisTime).
 				WithSimpleBorrowRewardPeriod(tc.args.borrow.Denom, tc.args.rewardsPerSecond)
 
-			fmt.Printf("in borrow@@@@@@@@@@@@@@@@\n")
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
@@ -414,7 +408,7 @@ func (suite *BorrowRewardsTestSuite) TestInitializeHardBorrowRewards() {
 				incentBuilder = incentBuilder.WithSimpleBorrowRewardPeriod(moneyMarketDenom, rewardsPerSecond)
 			}
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
@@ -610,7 +604,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 			// Set the minimum borrow to 0 to allow testing small borrows
 			hardBuilder := NewJoltGenStateMulti(suite.genesisTime).WithMinBorrow(sdkmath.LegacyZeroDec())
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, hardBuilder)
+			suite.SetupWithGenState(authBuilder, incentBuilder, hardBuilder, suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[2], cs(c("pjolt", 1e9)))
 			suite.Require().NoError(err)
@@ -904,7 +898,7 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 				WithSimpleBorrowRewardPeriod("btcb", tc.args.rewardsPerSecond).
 				WithSimpleBorrowRewardPeriod("xrp", tc.args.rewardsPerSecond)
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[0], cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
@@ -1009,7 +1003,7 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 				WithGenesisTime(suite.genesisTime).
 				WithSimpleBorrowRewardPeriod(tc.args.borrow.Denom, tc.args.rewardsPerSecond)
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)

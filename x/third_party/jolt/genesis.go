@@ -23,7 +23,6 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, accountKeeper types2.AccountK
 	}
 
 	for _, gat := range gs.PreviousAccumulationTimes {
-		fmt.Printf(">>genesis set>>%v\n", gat.String())
 		k.SetPreviousAccrualTime(ctx, gat.CollateralType, gat.PreviousAccumulationTime)
 		k.SetSupplyInterestFactor(ctx, gat.CollateralType, gat.SupplyInterestFactor)
 		k.SetBorrowInterestFactor(ctx, gat.CollateralType, gat.BorrowInterestFactor)
@@ -32,9 +31,6 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, accountKeeper types2.AccountK
 	for _, deposit := range gs.Deposits {
 		k.SetDeposit(ctx, deposit)
 	}
-
-	_, found := k.GetMoneyMarket(ctx, "bnb")
-	fmt.Printf(">>>>genesis found>>>>>>%v\n", found)
 
 	for _, borrow := range gs.Borrows {
 		k.SetBorrow(ctx, borrow)

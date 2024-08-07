@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 
@@ -142,7 +144,7 @@ func (suite *SupplyRewardsTestSuite) SetupApp() {
 	suite.ctx = suite.app.Ctx
 }
 
-func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder) {
+func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccount, coins sdk.Coins, authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil.IncentiveGenesisBuilder, joltBuilder testutil.JoltGenesisBuilder, genTime time.Time) {
 	suite.SetupApp()
 
 	suite.app.InitializeFromGenesisStatesWithTime(
@@ -152,6 +154,7 @@ func (suite *SupplyRewardsTestSuite) SetupWithGenState(genAcc []authtypes.Genesi
 		joltBuilder.BuildMarshalled(suite.app.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
+	suite.ctx = suite.app.NewContextLegacy(false, tmproto.Header{Height: 1, Time: suite.genesisTime})
 }
 
 func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
@@ -262,7 +265,7 @@ func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
 			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 			genAcc = append(genAcc, b)
 
-			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			// User deposits to increase total supplied amount
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(tc.args.deposit))
@@ -418,7 +421,7 @@ func (suite *SupplyRewardsTestSuite) TestInitializeJoltSupplyRewards() {
 			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 			genAcc = append(genAcc, b)
 
-			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			// User deposits
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.deposit)
@@ -614,7 +617,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 			genAcc = append(genAcc, b)
 
-			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[2], cs(c("ujolt", 1e9), c("sbnb", 1e9)))
 			suite.Require().NoError(err)
@@ -909,7 +912,7 @@ func (suite *SupplyRewardsTestSuite) TestUpdateJoltSupplyIndexDenoms() {
 			var genAcc []authtypes.GenesisAccount
 			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 			genAcc = append(genAcc, b)
-			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			// User deposits (first time)
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, tc.args.firstDeposit)
@@ -994,7 +997,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 			var genAcc []authtypes.GenesisAccount
 			b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 			genAcc = append(genAcc, b)
-			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupWithGenState(genAcc, coins, authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			// User deposits and borrows to increase total borrowed amount
 			err := suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(tc.args.deposit))

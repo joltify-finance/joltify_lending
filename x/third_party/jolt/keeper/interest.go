@@ -69,8 +69,6 @@ func (k Keeper) AccrueInterest(rctx context.Context, denom string) error {
 		return nil
 	}
 
-	fmt.Printf(">>111222>>>previous time is %v\n", previousAccrualTime)
-
 	timeElapsed := int64(math.RoundToEven(
 		ctx.BlockTime().Sub(previousAccrualTime).Seconds(),
 	))
@@ -78,7 +76,7 @@ func (k Keeper) AccrueInterest(rctx context.Context, denom string) error {
 		return nil
 	}
 
-	fmt.Printf(">>>>>>>>>>>>>>timeElapsed is %v--%v\n", ctx.BlockTime(), previousAccrualTime)
+	fmt.Printf(">>>>>>>>>>>>>>timeElapsed(%v) is %v--%v\n", timeElapsed, ctx.BlockTime(), previousAccrualTime)
 
 	// Get current protocol state and hold in memory as 'prior'
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleName)
