@@ -62,8 +62,10 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 			checkTx: false,
 		},
 		{
-			name:    "a blocked msg is not blocked when not wrapped in MsgExec",
-			msgs:    []sdk.Msg{},
+			name: "a blocked msg is not blocked when not wrapped in MsgExec",
+			msgs: []sdk.Msg{
+				&stakingtypes.MsgUndelegate{},
+			},
 			checkTx: false,
 		},
 		{
@@ -90,7 +92,19 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 			},
 			checkTx: false,
 		},
-
+		{
+			name: "when a MsgGrant contains a blocked msg, it is blocked",
+			msgs: []sdk.Msg{
+				newMsgGrant(
+					testAddresses[0],
+					testAddresses[1],
+					authz.NewGenericAuthorization(sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{})),
+					distantFuture,
+				),
+			},
+			checkTx:     false,
+			expectedErr: sdkerrors.ErrUnauthorized,
+		},
 		{
 			name: "when a MsgGrant contains a blocked msg, it is blocked",
 			msgs: []sdk.Msg{
@@ -122,7 +136,9 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 			msgs: []sdk.Msg{
 				newMsgExec(
 					testAddresses[1],
-					[]sdk.Msg{},
+					[]sdk.Msg{
+						&stakingtypes.MsgUndelegate{},
+					},
 				),
 			},
 			checkTx:     false,
@@ -145,6 +161,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 							testAddresses[3],
 							sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
 						),
+						&stakingtypes.MsgUndelegate{},
 					},
 				),
 			},
@@ -159,7 +176,27 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 					[]sdk.Msg{
 						newMsgExec(
 							testAddresses[2],
-							[]sdk.Msg{},
+							[]sdk.Msg{
+								&stakingtypes.MsgUndelegate{},
+							},
+						),
+					},
+				),
+			},
+			checkTx:     false,
+			expectedErr: sdkerrors.ErrUnauthorized,
+		},
+		{
+			name: "a nested MsgGrant containing a blocked msg is still blocked",
+			msgs: []sdk.Msg{
+				newMsgExec(
+					testAddresses[1],
+					[]sdk.Msg{
+						newMsgGrant(
+							testAddresses[0],
+							testAddresses[1],
+							authz.NewGenericAuthorization(sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{})),
+							distantFuture,
 						),
 					},
 				),
