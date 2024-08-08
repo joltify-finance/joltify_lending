@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"cosmossdk.io/store/metrics"
 	"testing"
+
+	"cosmossdk.io/store/metrics"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/store"

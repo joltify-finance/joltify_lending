@@ -46,7 +46,6 @@ The pass backend requires GnuPG: https://gnupg.org/
 	addCmd.Flags().Bool(ethFlag, false, "use default evm coin-type (60) and key signing algorithm (\"eth_secp256k1\")")
 
 	// todo enable it if you need ethermint key
-	//addCmd.RunE = runAddCmd
 
 	cmd.AddCommand(
 		keys.MnemonicKeyCommand(),
@@ -68,7 +67,7 @@ The pass backend requires GnuPG: https://gnupg.org/
 	return cmd
 }
 
-//func runAddCmd(cmd *cobra.Command, args []string) error {
+// func runAddCmd(cmd *cobra.Command, args []string) error {
 //	buf := bufio.NewReader(cmd.InOrStdin())
 //	clientCtx := client.GetClientContextFromCmd(cmd)
 //

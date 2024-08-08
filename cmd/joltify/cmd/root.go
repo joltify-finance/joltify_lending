@@ -32,8 +32,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	"github.com/cosmos/cosmos-sdk/server"
-
 	"github.com/cosmos/cosmos-sdk/client/debug"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -88,7 +86,7 @@ func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
 			// This needs to go after ReadFromClientConfig, as that function
 			// sets the RPC client needed for SIGN_MODE_TEXTUAL. This sign mode
 			// is only available if the client is online.
-			//if !initClientCtx.Offline {
+			// if !initClientCtx.Offline {
 			//	txConfigOpts := tx.ConfigOptions{
 			//		EnabledSignModes:           append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL),
 			//		TextualCoinMetadataQueryFn: txmodule.NewGRPCCoinMetadataQueryFn(initClientCtx),
@@ -168,7 +166,7 @@ func initRootCmd(
 		// this line is used by starport scaffolding # stargate/root/commands
 	)
 
-	server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
+	sdkserver.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
@@ -186,12 +184,12 @@ func initRootCmd(
 	if err := viper.BindPFlag(flags.FlagNode, rootCmd.PersistentFlags().Lookup(flags.FlagNode)); err != nil {
 		panic(err)
 	}
-	//if err := viper.BindPFlag(flags.FlagKeyringBackend, rootCmd.PersistentFlags().Lookup(flags.FlagKeyringBackend)); err != nil {
+	// if err := viper.BindPFlag(flags.FlagKeyringBackend, rootCmd.PersistentFlags().Lookup(flags.FlagKeyringBackend)); err != nil {
 	//	panic(err)
 	//}
 	//
 	// add rosetta
-	//rootCmd.AddCommand(rosettaCmd.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
+	// rootCmd.AddCommand(rosettaCmd.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
 }
 
 // genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter

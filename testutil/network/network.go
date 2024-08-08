@@ -63,7 +63,6 @@ func DefaultConfig() network.Config {
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		AppConstructor: func(val network.ValidatorI) servertypes.Application {
-
 			localApp := app.NewApp(
 				val.GetCtx().Logger, dbm.NewMemDB(), nil,
 				true,

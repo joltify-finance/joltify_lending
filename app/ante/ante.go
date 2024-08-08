@@ -79,7 +79,6 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 	return func(
 		ctx sdk.Context, tx sdk.Tx, sim bool,
 	) (newCtx sdk.Context, err error) {
-
 		defer Recover(ctx.Logger(), &err)
 
 		ctxR := sdk.UnwrapSDKContext(ctx)
@@ -135,14 +134,14 @@ func newCosmosAnteHandler(options cosmosHandlerOptions) sdk.AnteHandler {
 	}
 
 	var sigVerification sdk.AnteDecorator = authante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler)
-	//if options.isEIP712 {
+	// if options.isEIP712 {
 	// fixme ignore the deprecated warning
 	//	sigVerification = evmante.NewLegacyEip712SigVerificationDecorator(options.AccountKeeper, options.SignModeHandler) //nolint
 	//}
 
 	decorators = append(decorators,
 		NewAuthzLimiterDecorator(
-		//sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{}),
+
 		// sdk.MsgTypeURL(&vesting.MsgCreateVestingAccount{}),
 		// sdk.MsgTypeURL(&vesting.MsgCreatePermanentLockedAccount{}),
 		// sdk.MsgTypeURL(&vesting.MsgCreatePeriodicVestingAccount{}),

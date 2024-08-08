@@ -54,7 +54,6 @@ import (
 )
 
 var (
-	emptyTime            time.Time
 	testChainID                = "joltifytest_888-1"
 	defaultInitialHeight int64 = 1
 )
@@ -102,27 +101,6 @@ func genesisStateWithValSet(
 	bondAmt := sdk.DefaultPowerReduction.Mul(sdkmath.NewInt(1000000))
 
 	for _, val := range valSet {
-		//pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
-		//if err != nil {
-		//	panic(err)
-		//}
-		//pkAny, err := codectypes.NewAnyWithValue(pk)
-		//if err != nil {
-		//	panic(err)
-		//}
-		//validator := stakingtypes.Validator{
-		//	OperatorAddress:   sdk.ValAddress(val.Address).String(),
-		//	ConsensusPubkey:   pkAny,
-		//	Jailed:            false,
-		//	Status:            stakingtypes.Bonded,
-		//	Tokens:            bondAmt,
-		//	DelegatorShares:   sdkmath.LegacyOneDec(),
-		//	Description:       stakingtypes.Description{},
-		//	UnbondingHeight:   int64(0),
-		//	UnbondingTime:     time.Unix(0, 0).UTC(),
-		//	Commission:        stakingtypes.NewCommission(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
-		//	MinSelfDelegation: sdkmath.ZeroInt(),
-		//}
 
 		val.DelegatorShares = sdkmath.LegacyOneDec()
 		val.Tokens = bondAmt
@@ -253,7 +231,6 @@ func (app *App) TxConfig() client.TxConfig {
 // InitializeFromGenesisStates calls InitChain on the app using the provided genesis states.
 // If any module genesis states are missing, defaults are used.
 func (tApp TestApp) InitializeFromGenesisStates(t *testing.T, gentime time.Time, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) TestApp {
-
 	bz := tApp.InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(gentime, testChainID, defaultInitialHeight, genAccs, coins, genesisStates...)
 
 	mapp := NewTestAppWithGenesis(log.NewTestLogger(t), t.TempDir(), bz)

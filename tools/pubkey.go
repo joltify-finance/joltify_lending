@@ -74,9 +74,4 @@ func keyConvert() { //nolint
 	fmt.Printf(">>%v\n", bb)
 	fmt.Printf(">>equal??>>%v\n", bytes.Equal(bb, sk.PubKey().Bytes()))
 	fmt.Printf(">IIIIIIII>%v\n", in)
-	//eAddr, _ := types.PubKeyToEthAddr(in)
-	//
-	//coAddr, _ := types.PubKeyToJoltAddr(in)
-	//fmt.Printf(">>>%v\n", eAddr.String())
-	//fmt.Printf(">>>%v\n", coAddr.String())
 }
