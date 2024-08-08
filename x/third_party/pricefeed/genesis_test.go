@@ -3,6 +3,7 @@ package pricefeed_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"cosmossdk.io/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -30,7 +31,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 
 func (suite *GenesisTestSuite) TestValidGenState() {
 	suite.NotPanics(func() {
-		suite.tApp.InitializeFromGenesisStates(nil, nil,
+		suite.tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 			NewPricefeedGenStateMulti(),
 		)
 	})
@@ -39,7 +40,7 @@ func (suite *GenesisTestSuite) TestValidGenState() {
 	// Must create a new TestApp or InitChain will panic with index already set
 	suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.NotPanics(func() {
-		suite.tApp.InitializeFromGenesisStates(nil, nil,
+		suite.tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 			NewPricefeedGenStateWithOracles(addrs),
 		)
 	})

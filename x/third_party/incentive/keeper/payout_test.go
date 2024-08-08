@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -367,8 +366,6 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 			suite.app.Ctx = na.Ctx
 			suite.keeper = na.GetIncentiveKeeper()
 			suite.joltKeeper = na.GetJoltKeeper()
-			found := na.GetAccountKeeper().HasAccount(na.Ctx, suite.addrs[0])
-			fmt.Printf("########found is %v\n", found)
 
 			if tc.args.mintModAccountCoins {
 				err := fundModuleAccount(suite.app.GetBankKeeper(), suite.ctx, types.ModuleName, tc.args.period.Amount)
@@ -435,7 +432,6 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 	err := fundModuleAccount(suite.app.GetBankKeeper(), suite.app.Ctx, types.ModuleName, cs(c("ujolt", 600)))
 	suite.Require().NoError(err)
 
-	fmt.Printf("test account is %v\n", suite.addrs[1].String())
 	// send coins to base account
 	err = suite.keeper.SendTimeLockedCoinsToAccount(suite.ctx, types.ModuleName, suite.addrs[1], cs(c("ujolt", 100)), 5)
 	suite.Require().NoError(err)
@@ -447,8 +443,6 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 	}
 
 	bk := suite.app.GetBankKeeper()
-
-	fmt.Printf("we get  %v\n", bk.GetAllBalances(suite.ctx, vacc.GetAddress()))
 
 	suite.Equal(expectedPeriods, vacc.VestingPeriods)
 	suite.Equal(cs(c("ujolt", 100)), vacc.OriginalVesting)

@@ -113,7 +113,6 @@ func getSPVGenesisRewardState(ctx sdk.Context, keeper keeper.Keeper) types.SPVGe
 		data := strings.Split(out, "-")
 		poolID := data[0]
 		walletAddr := data[1]
-		fmt.Printf(">>>%v:%v\n", data, poolID)
 		spvInvestors = append(spvInvestors, &types.SPVGenRewardInvestorState{Wallet: walletAddr, Pool: poolID, Reward: reward.PaymentAmount})
 		return false
 	})

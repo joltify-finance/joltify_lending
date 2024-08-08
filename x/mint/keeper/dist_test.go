@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/assert"
 
@@ -19,7 +21,7 @@ import (
 )
 
 func TestFirstDist(t *testing.T) {
-	lg := tmlog.NewNopLogger()
+	lg := log.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	k := tApp.GetMintKeeper()
 	ctx := tApp.Ctx
@@ -36,7 +38,7 @@ func TestFirstDist(t *testing.T) {
 }
 
 func TestMintCoinsAndDistribute(t *testing.T) {
-	lg := tmlog.NewNopLogger()
+	lg := log.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	k := tApp.GetMintKeeper()
 
@@ -94,10 +96,10 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second))
 	k.DoDistribute(ctx)
 	received2 := bk.GetBalance(ctx, tApp.GetAccountKeeper().GetModuleAddress(authtypes.FeeCollectorName), "ujolt")
-	assert.True(t, received.IsEqual(received2))
+	assert.True(t, received.Equal(received2))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 59))
 	k.DoDistribute(ctx)
 	received3 := bk.GetBalance(ctx, tApp.GetAccountKeeper().GetModuleAddress(authtypes.FeeCollectorName), "ujolt")
-	assert.True(t, received3.IsEqual(received2.Add(received2)))
+	assert.True(t, received3.Equal(received2.Add(received2)))
 }

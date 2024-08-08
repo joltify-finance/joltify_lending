@@ -3,7 +3,6 @@ package keeper_test
 import (
 	"time"
 
-	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
@@ -210,17 +209,13 @@ func (suite *KeeperTestSuite) TestRepay() {
 
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.Ctx
-
 			// Auth module genesis state
 			addrs, coinses := uniqueAddressCoins(
 				[]sdk.AccAddress{tc.args.borrower, tc.args.repayer},
 				[]sdk.Coins{tc.args.initialBorrowerCoins, tc.args.initialRepayerCoins},
 			)
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				coinses,
 				addrs,
 			)
@@ -273,19 +268,21 @@ func (suite *KeeperTestSuite) TestRepay() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)},
 			)
 
-			// Mint coins to Hard module account
-			bankKeeper := tApp.GetBankKeeper()
-			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
-			suite.Require().NoError(err)
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = tApp.GetJoltKeeper()
+			// Mint coins to Hard module account
+			bankKeeper := suite.app.GetBankKeeper()
+			err := bankKeeper.MintCoins(mapp.Ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
+			suite.Require().NoError(err)
 
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)

@@ -56,7 +56,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 				banktypes.NewMsgSend(
 					testAddresses[0],
 					testAddresses[1],
-					sdk.NewCoins(sdkmath.NewInt64Coin("ukava", 100e6)),
+					sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
 				),
 			},
 			checkTx: false,
@@ -112,7 +112,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 					[]sdk.Msg{banktypes.NewMsgSend(
 						testAddresses[0],
 						testAddresses[3],
-						sdk.NewCoins(sdkmath.NewInt64Coin("ukava", 100e6)),
+						sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
 					)}),
 			},
 			checkTx: false,
@@ -143,7 +143,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 						banktypes.NewMsgSend(
 							testAddresses[0],
 							testAddresses[3],
-							sdk.NewCoins(sdkmath.NewInt64Coin("ukava", 100e6)),
+							sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
 						),
 					},
 				),

@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
@@ -109,10 +108,8 @@ func (suite *KeeperTestSuite) TestDeposit() {
 			)
 
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{
 					coins,
 				},
@@ -169,14 +166,16 @@ func (suite *KeeperTestSuite) TestDeposit() {
 				},
 			}
 
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)},
 			)
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
@@ -275,13 +274,10 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 	}
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
 			loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
 			depositor := sdk.AccAddress(crypto.AddressHash([]byte("test")))
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{tc.args.suppliedInitial},
 				[]sdk.AccAddress{depositor},
 			)
@@ -325,13 +321,18 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 					},
 				},
 			}
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)},
 			)
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
+
+			keeper := mapp.GetJoltKeeper()
 			suite.keeper = keeper
 
 			// Run BeginBlocker once to transition MoneyMarkets
@@ -342,7 +343,7 @@ func (suite *KeeperTestSuite) TestDecrementSuppliedCoins() {
 
 			err = suite.keeper.Deposit(suite.ctx, depositor, tc.args.suppliedInitial)
 			suite.Require().NoError(err)
-			err = suite.keeper.DecrementSuppliedCoins(ctx, tc.args.decrementCoins)
+			err = suite.keeper.DecrementSuppliedCoins(suite.ctx, tc.args.decrementCoins)
 			suite.Require().NoError(err)
 			totalSuppliedActual, found := suite.keeper.GetSuppliedCoins(suite.ctx)
 			suite.Require().True(found)

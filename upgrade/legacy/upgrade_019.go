@@ -1,7 +1,11 @@
 package legacy
 
 import (
+	"context"
+
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
@@ -18,9 +22,9 @@ func CreateUpgradeHandlerForV019Upgrade(
 	spvKeeper spvmodulekeeper.Keeper,
 	kycKeeper kycmodulekeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v019")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v019")
 		}
 		defaultAmount, _ := sdkmath.NewIntFromString("200000000000000000000")
 		spvKeeper.IteratePool(ctx, func(poolInfo spvmoduletypes.PoolInfo) bool {

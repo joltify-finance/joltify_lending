@@ -3,8 +3,6 @@ package keeper_test
 import (
 	"time"
 
-	"cosmossdk.io/log"
-
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
@@ -507,16 +505,13 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			// ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
-			ctx := tApp.Ctx
 
 			// account which will deposit "initial module account coins"
 			depositor := sdk.AccAddress(crypto.AddressHash([]byte("testdepositor")))
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{
 					tc.args.initialBorrowerCoins,
 					tc.args.initialKeeperCoins,
@@ -647,15 +642,16 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&joltGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGS)})
 
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
-			suite.auctionKeeper = tApp.GetAuctionKeeper()
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
+			suite.auctionKeeper = mapp.GetAuctionKeeper()
 
 			var err error
 
@@ -1137,16 +1133,12 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 
 	for i, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			// ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
-			ctx := tApp.Ctx
 			// account which will deposit "initial module account coins"
 			depositor1 := sdk.AccAddress(crypto.AddressHash([]byte("testdepositor1")))
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{
 					tc.args.initialBorrowerCoins,
 					tc.args.initialBorrowerCoins,
@@ -1279,15 +1271,15 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&joltGS)})
-
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
-			suite.auctionKeeper = tApp.GetAuctionKeeper()
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGS)})
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
+			suite.auctionKeeper = mapp.GetAuctionKeeper()
 
 			var err error
 

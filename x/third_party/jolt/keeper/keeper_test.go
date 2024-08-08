@@ -36,12 +36,10 @@ func (suite *KeeperTestSuite) SetupTest() {
 	app.SetBech32AddressPrefixes(config)
 
 	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-	tApp.InitializeFromGenesisStates(nil, nil)
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)
-	k := tApp.GetJoltKeeper()
 	suite.app = tApp
 	suite.ctx = tApp.Ctx
-	suite.keeper = k
+	suite.keeper = tApp.GetJoltKeeper()
 	suite.addrs = addrs
 }
 

@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -794,7 +793,6 @@ func (suite *withDrawPrincipalSuite) TestWithdrawWithSPVBorrowAndRepay() {
 	withdraw.Creator = suite.investors[1]
 	withdraw.Token = withdraw.Token.AddAmount(sdkmath.OneInt())
 
-	fmt.Printf(">>>>>>>.is hook set>>>>>>>>%v\n", suite.keeper.IsHookSet())
 	resp, err := suite.app.WithdrawPrincipal(suite.ctx, &withdraw)
 	suite.Require().NoError(err)
 

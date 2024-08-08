@@ -1,8 +1,10 @@
 package legacy
 
 import (
+	"context"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	minttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
 
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -25,9 +27,9 @@ func CreateUpgradeHandlerForV022Upgrade(
 	mintKeeper mintkeeper.Keeper,
 	incentiveKeeper incentivekeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v022")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v022")
 		}
 
 		amt := spvKeeper.GetParamsV21(ctx)
@@ -46,7 +48,7 @@ func CreateUpgradeHandlerForV022Upgrade(
 		})
 
 		mintKeeper.SetDistInfo(ctx, minttypes.HistoricalDistInfo{
-			PayoutTime:     ctx.BlockTime(),
+			PayoutTime:     sdk.UnwrapSDKContext(ctx).BlockTime(),
 			TotalMintCoins: sdk.NewCoins(),
 		})
 
@@ -54,7 +56,7 @@ func CreateUpgradeHandlerForV022Upgrade(
 
 		tpoolID := "0x4f1f7526042987d595fa135ed33a392a98bcc31f7ad79d6a5928e753ff7e8c8c"
 
-		incentiveKeeper.LegacyIterateSPVInvestorReward(ctx, func(key string, reward incentivetypes.SPVRewardAccTokens) bool {
+		incentiveKeeper.LegacyIterateSPVInvestorReward(sdk.UnwrapSDKContext(ctx), func(key string, reward incentivetypes.SPVRewardAccTokens) bool {
 			out := strings.TrimPrefix(key, incentivetypes.Incentiveclassprefix)
 			data := strings.Split(out, "-")
 			poolID := data[0]
@@ -66,11 +68,11 @@ func CreateUpgradeHandlerForV022Upgrade(
 			amtAdj := myreward.Amount.Quo(sdkmath.NewInt(1e12))
 
 			if amtAdj.IsZero() {
-				incentiveKeeper.SetSPVInvestorReward(ctx, poolID, data[1], reward.PaymentAmount)
+				incentiveKeeper.SetSPVInvestorReward(sdk.UnwrapSDKContext(ctx), poolID, data[1], reward.PaymentAmount)
 				return false
 			}
 			adjReward := sdk.NewCoins(sdk.NewCoin(myreward.Denom, amtAdj))
-			incentiveKeeper.SetSPVInvestorReward(ctx, poolID, data[1], adjReward)
+			incentiveKeeper.SetSPVInvestorReward(sdk.UnwrapSDKContext(ctx), poolID, data[1], adjReward)
 
 			return false
 		})

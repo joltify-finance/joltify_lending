@@ -9,8 +9,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +18,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 	lg := log.NewTestLogger(t)
 	log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
-	tApp.InitializeFromGenesisStates(t, nil, nil)
+	tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil)
 	auctionsKeeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true)
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
@@ -121,7 +119,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.giveName, func(t *testing.T) {
-			res, err := qs.Auctions(sdk.WrapSDKContext(ctx), &tc.giveRequest)
+			res, err := qs.Auctions(ctx, &tc.giveRequest)
 			require.NoError(t, err)
 
 			var unpackedAuctions []types2.Auction

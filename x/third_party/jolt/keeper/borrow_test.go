@@ -8,7 +8,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
-	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	types3 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
@@ -295,10 +294,6 @@ func (suite *KeeperTestSuite) TestBorrow() {
 	}
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
-
 			coins := sdk.NewCoins(
 				sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)),
 				sdk.NewCoin("btcb", sdkmath.NewInt(100*BtcbCf)),
@@ -308,7 +303,7 @@ func (suite *KeeperTestSuite) TestBorrow() {
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{
 					coins,
 				},
@@ -377,21 +372,22 @@ func (suite *KeeperTestSuite) TestBorrow() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)})
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
 			// Mint coins to jolt module account
-			bankKeeper := tApp.GetBankKeeper()
+			bankKeeper := mapp.GetBankKeeper()
 			hardMaccCoins := sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)),
 				sdk.NewCoin("usdx", sdkmath.NewInt(200*UsdxCf)), sdk.NewCoin("busd", sdkmath.NewInt(100*BusdCf)))
-			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, hardMaccCoins)
+			err := bankKeeper.MintCoins(mapp.Ctx, types3.ModuleAccountName, hardMaccCoins)
 			suite.Require().NoError(err)
-
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
 
 			// Run BeginBlocker once to transition MoneyMarkets
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
@@ -447,13 +443,9 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 
 	model := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("1.0"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10"))
 
-	// Initialize test app and set context
-	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-	ctx := tApp.NewContext(true)
-
 	// Auth module genesis state
 	authGS := app.NewFundedGenStateWithSameCoins(
-		tApp.AppCodec(),
+		suite.app.AppCodec(),
 		initialBorrowerBalance,
 		[]sdk.AccAddress{borrower},
 	)
@@ -512,15 +504,21 @@ func (suite *KeeperTestSuite) TestValidateBorrow() {
 	}
 
 	// Initialize test application
-	tApp.InitializeFromGenesisStates(
-		nil, nil, authGS,
-		app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-		app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)},
+	mapp := suite.app.InitializeFromGenesisStates(suite.T(),
+		time.Now(), nil, nil, authGS,
+		app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+		app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)},
 	)
 
-	keeper := tApp.GetJoltKeeper()
-	suite.app = tApp
-	suite.ctx = ctx
+	suite.app = mapp
+	suite.app.App = mapp.App
+	suite.ctx = mapp.Ctx
+	suite.app.Ctx = mapp.Ctx
+	suite.keeper = mapp.GetJoltKeeper()
+
+	keeper := suite.app.GetJoltKeeper()
+	suite.app = mapp
+	suite.ctx = mapp.Ctx
 	suite.keeper = keeper
 
 	var err error

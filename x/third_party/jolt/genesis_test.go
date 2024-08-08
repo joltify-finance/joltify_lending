@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cosmossdk.io/log"
+
 	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
@@ -34,8 +35,8 @@ type GenesisTestSuite struct {
 func (suite *GenesisTestSuite) SetupTest() {
 	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.genTime = tmtime.Canonical(time.Date(2021, 1, 1, 1, 1, 1, 1, time.UTC))
-	suite.ctx = tApp.Ctx
-	suite.keeper = tApp.GetJoltKeeper()
+	// suite.ctx = tApp.Ctx
+	// suite.keeper = tApp.GetJoltKeeper()
 	suite.app = tApp
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(3)
@@ -120,14 +121,15 @@ func (suite *GenesisTestSuite) Test_InitExportGenesis() {
 		sdk.Coins{},
 	)
 
-	suite.NotPanics(
-		func() {
-			suite.app.InitializeFromGenesisStatesWithTime(
-				suite.genTime, nil, nil,
-				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGenesis)},
-			)
-		},
+	mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+		suite.genTime, nil, nil,
+		app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGenesis)},
 	)
+	suite.app = mapp
+	suite.app.App = mapp.App
+	suite.ctx = mapp.Ctx
+	suite.app.Ctx = mapp.Ctx
+	suite.keeper = mapp.GetJoltKeeper()
 
 	var expectedDeposits types2.Deposits
 	for _, deposit := range deposits {

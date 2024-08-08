@@ -4,7 +4,6 @@ import (
 	"strings"
 	"time"
 
-	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
@@ -119,10 +118,8 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			// create new app with one funded account
 
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{sdk.NewCoins(
 					sdk.NewCoin("bnb", sdkmath.NewInt(1000)),
 					sdk.NewCoin("btcb", sdkmath.NewInt(1000)),
@@ -173,20 +170,22 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 				},
 			}
 
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)})
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
 			err := testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.depositor, []sdk.Coin{sdk.NewCoin("bnb", sdkmath.NewInt(1000)), sdk.NewCoin("btcb", sdkmath.NewInt(1000))})
 			suite.Require().NoError(err)
 
 			// Mint coins to Hard module account
-			bankKeeper := tApp.GetBankKeeper()
-			err = bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModAccountBalance)
+			bankKeeper := suite.app.GetBankKeeper()
+			err = bankKeeper.MintCoins(suite.ctx, types3.ModuleAccountName, tc.args.initialModAccountBalance)
 			suite.Require().NoError(err)
 
 			if tc.args.createDeposit {
@@ -199,9 +198,9 @@ func (suite *KeeperTestSuite) TestWithdraw() {
 			if tc.errArgs.expectPass {
 				suite.Require().NoError(err)
 				acc := suite.getAccount(tc.args.depositor)
-				suite.Require().Equal(tc.args.expectedAccountBalance, bankKeeper.GetAllBalances(ctx, acc.GetAddress()))
+				suite.Require().Equal(tc.args.expectedAccountBalance, bankKeeper.GetAllBalances(suite.ctx, acc.GetAddress()))
 				mAcc := suite.getModuleAccount(types3.ModuleAccountName)
-				suite.Require().True(tc.args.expectedModAccountBalance.Equal(bankKeeper.GetAllBalances(ctx, mAcc.GetAddress())))
+				suite.Require().True(tc.args.expectedModAccountBalance.Equal(bankKeeper.GetAllBalances(suite.ctx, mAcc.GetAddress())))
 				testDeposit, f := suite.keeper.GetDeposit(suite.ctx, tc.args.depositor)
 				if tc.errArgs.expectDelete {
 					suite.Require().False(f)
@@ -267,12 +266,12 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
+			// tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+			// ctx := tApp.NewContext(true)
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{tc.args.initialBorrowerCoins},
 				[]sdk.AccAddress{tc.args.borrower},
 			)
@@ -325,22 +324,21 @@ func (suite *KeeperTestSuite) TestLtvWithdraw() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&harvestGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&harvestGS)})
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
+			suite.auctionKeeper = mapp.GetAuctionKeeper()
 
 			// Mint coins to Harvest module account
-			bankKeeper := tApp.GetBankKeeper()
-			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
+			bankKeeper := suite.app.GetBankKeeper()
+			err := bankKeeper.MintCoins(suite.ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
-
-			auctionKeeper := tApp.GetAuctionKeeper()
-
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
-			suite.auctionKeeper = auctionKeeper
 
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)

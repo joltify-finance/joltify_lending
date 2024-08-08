@@ -7,7 +7,6 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/joltify-finance/joltify_lending/x/spv/keeper"
 )
@@ -18,7 +17,7 @@ func main() {
 		return
 	}
 
-	apy, err := sdk.NewDecFromStr(os.Args[1])
+	apy, err := sdkmath.LegacyNewDecFromStr(os.Args[1])
 	if err != nil {
 		// print the log of the err
 		fmt.Printf("use : cmd apy payfreq(seconds) ")
@@ -49,7 +48,7 @@ func main() {
 		}
 		// 85% of the interest is paid to the user, 15% is to the pool
 		a = apyToPayFreq.MulInt(amount).TruncateInt()
-		interestToReserve = sdk.NewDecFromInt(a).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
+		interestToReserve = sdkmath.LegacyNewDecFromInt(a).Mul(sdkmath.LegacyMustNewDecFromStr("0.15")).TruncateInt()
 		interestToUser = a.Sub(interestToReserve)
 	}
 

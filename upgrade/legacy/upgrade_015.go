@@ -1,6 +1,7 @@
 package legacy
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -19,9 +20,9 @@ func CreateUpgradeHandlerForV015Upgrade(
 	configurator module.Configurator,
 	spvKeeper spvmodulekeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v015")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v015")
 		}
 
 		bigCounter := 0

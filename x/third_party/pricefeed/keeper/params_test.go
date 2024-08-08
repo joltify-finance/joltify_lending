@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
@@ -30,7 +31,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 
 	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	ctx := tApp.Ctx
-	tApp.InitializeFromGenesisStates(nil, nil,
+	tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 		NewPricefeedGenStateMulti(),
 	)
 	suite.keeper = tApp.GetPriceFeedKeeper()

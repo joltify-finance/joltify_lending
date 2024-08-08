@@ -93,7 +93,6 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 
 	poolInfo, ok := suite.keeper.GetPools(suite.ctx, depositorPool)
 	suite.Require().True(ok)
-	fmt.Printf(">>>%v\n", poolInfo.BorrowedAmount)
 
 	// now we test the incentive
 	suite.keeper.UpdateIncentive(suite.ctx, poolInfo)

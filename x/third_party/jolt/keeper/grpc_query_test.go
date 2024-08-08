@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -34,8 +33,25 @@ func (suite *grpcQueryTestSuite) SetupTest() {
 
 	suite.addrs = addrs
 
-	suite.ctx = suite.tApp.NewContext(true).WithBlockTime(time.Now().UTC())
-	suite.keeper = suite.tApp.GetJoltKeeper()
+	mapp := suite.tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
+		NewPricefeedGenStateMulti(suite.tApp.AppCodec()),
+		NewJoltGenState(suite.tApp.AppCodec()),
+		app.NewFundedGenStateWithSameCoins(
+			suite.tApp.AppCodec(),
+			cs(
+				c("bnb", 10000000000),
+				c("busd", 20000000000),
+			),
+			addrs,
+		),
+	)
+
+	suite.tApp = mapp
+	suite.tApp.App = mapp.App
+	suite.ctx = mapp.Ctx
+	suite.tApp.Ctx = mapp.Ctx
+	suite.keeper = mapp.GetJoltKeeper()
+
 	suite.queryServer = keeper2.NewQueryServerImpl(suite.keeper, suite.tApp.GetAccountKeeper(), suite.tApp.GetBankKeeper())
 
 	err := suite.tApp.FundModuleAccount(
@@ -48,18 +64,6 @@ func (suite *grpcQueryTestSuite) SetupTest() {
 	)
 	suite.Require().NoError(err)
 
-	suite.tApp.InitializeFromGenesisStates(nil, nil,
-		NewPricefeedGenStateMulti(suite.tApp.AppCodec()),
-		NewJoltGenState(suite.tApp.AppCodec()),
-		app.NewFundedGenStateWithSameCoins(
-			suite.tApp.AppCodec(),
-			cs(
-				c("bnb", 10000000000),
-				c("busd", 20000000000),
-			),
-			addrs,
-		),
-	)
 	coins := cs(
 		c("bnb", 10000000000),
 		c("busd", 20000000000),
@@ -94,10 +98,8 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryAccounts() {
 }
 
 func (suite *grpcQueryTestSuite) TestGrpcQueryDeposits_EmptyResponse() {
-	res, err := suite.queryServer.Deposits(suite.ctx, &types2.QueryDepositsRequest{})
+	_, err := suite.queryServer.Deposits(suite.ctx, &types2.QueryDepositsRequest{})
 	suite.Require().NoError(err)
-
-	fmt.Printf(">>>>>%v\n", res.Pagination)
 }
 
 func (suite *grpcQueryTestSuite) addDeposits() {

@@ -14,6 +14,7 @@ import (
 )
 
 func TestInitCmd(t *testing.T) {
+	app.SetSDKConfig()
 	rootCmd, _ := cmd.NewRootCmd()
 	rootCmd.SetArgs([]string{
 		"init",          // Test the init cmd

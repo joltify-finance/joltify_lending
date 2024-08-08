@@ -89,7 +89,6 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types2.GenesisState {
 	}
 
 	for _, mm := range params.MoneyMarkets {
-		fmt.Printf(">>>>%v\n", mm.String())
 		supplyFactor, f := k.GetSupplyInterestFactor(ctx, mm.Denom)
 		if !f {
 			supplyFactor = sdkmath.LegacyOneDec()

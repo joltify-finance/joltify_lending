@@ -35,7 +35,7 @@ func TestIterateAuctions(t *testing.T) {
 	// setup
 	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
-	tApp.InitializeFromGenesisStates(t, nil, nil)
+	tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil)
 	keeper := tApp.GetAuctionKeeper()
 	ctx := tApp.NewContext(true)
 

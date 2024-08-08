@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"cosmossdk.io/log"
-
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	sdkmath "cosmossdk.io/math"
@@ -816,13 +814,9 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
-
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{tc.args.initialBorrowerCoins},
 				[]sdk.AccAddress{tc.args.user},
 			)
@@ -861,18 +855,21 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)})
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			ctx := mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
 			// Mint coins to Hard module account
-			bankKeeper := tApp.GetBankKeeper()
+			bankKeeper := suite.app.GetBankKeeper()
 			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
-
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = tApp.GetJoltKeeper()
 
 			// Run begin blocker and store initial block time
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
@@ -1226,12 +1223,9 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-			ctx := tApp.NewContext(true)
-
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{tc.args.initialBorrowerCoins},
 				[]sdk.AccAddress{tc.args.user},
 			)
@@ -1284,19 +1278,22 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)})
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
 			// Mint coins to Hard module account
-			bankKeeper := tApp.GetBankKeeper()
-			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
+			bankKeeper := suite.app.GetBankKeeper()
+			err := bankKeeper.MintCoins(mapp.Ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
 
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = tApp.GetJoltKeeper()
-			suite.keeper.SetSuppliedCoins(ctx, tc.args.initialModuleCoins)
+			suite.keeper.SetSuppliedCoins(mapp.Ctx, tc.args.initialModuleCoins)
 
 			// Run begin blocker
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
@@ -1366,7 +1363,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 					snapshotCtx := sdk.UnwrapSDKContext(prevCtx).WithBlockTime(runAtTime)
 					jolt.BeginBlocker(snapshotCtx, suite.keeper)
 
-					borrowInterestFactor, _ := suite.keeper.GetBorrowInterestFactor(ctx, coinDenom)
+					borrowInterestFactor, _ := suite.keeper.GetBorrowInterestFactor(mapp.Ctx, coinDenom)
 					suite.Require().Equal(expectedBorrowInterestFactor, borrowInterestFactor)
 					suite.Require().Equal(expectedBorrowInterest, expectedSupplyInterest.Add(expectedReserves.AmountOf(coinDenom)))
 

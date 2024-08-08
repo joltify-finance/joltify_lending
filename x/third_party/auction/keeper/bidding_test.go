@@ -474,7 +474,7 @@ func TestAuctionBidding(t *testing.T) {
 			moduleGs := tApp.AppCodec().MustMarshalJSON(auctionGs)
 			gs := app.GenesisState{types2.ModuleName: moduleGs}
 
-			tApp.InitializeFromGenesisStates(t, nil, nil, authGS, gs)
+			tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil, authGS, gs)
 
 			ctx := tApp.Ctx
 			keeper := tApp.GetAuctionKeeper()

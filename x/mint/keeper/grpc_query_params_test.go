@@ -3,7 +3,8 @@ package keeper_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/log"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/joltify-finance/joltify_lending/app"
@@ -12,13 +13,13 @@ import (
 )
 
 func TestParamsQuery(t *testing.T) {
-	lg := tmlog.NewNopLogger()
+	lg := log.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	ctx := tApp.NewContext(true)
 
 	keeper := tApp.GetMintKeeper()
 
-	wctx := sdk.WrapSDKContext(ctx)
+	wctx := ctx
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)
 
