@@ -1161,15 +1161,10 @@ func (app *App) setupUpgradeHandlers() {
 		}
 	}
 
-	sbs, ok := app.ParamsKeeper.GetSubspace(ibcexported.ModuleName)
-	if !ok {
-		panic("subspace not found")
-	}
-
 	app.upgradeKeeper.SetUpgradeHandler(v1.V011UpgradeName, v1.CreateUpgradeHandlerForV011Upgrade(app.ModuleManger, app.configurator, app.kycKeeper, app.spvKeeper, app.QuotaKeeper, app.incentiveKeeper))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V012UpgradeName, v1.CreateUpgradeHandlerForV012Upgrade(app.ModuleManger, app.configurator))
 	app.upgradeKeeper.SetUpgradeHandler(v1.V013UpgradeName, v1.CreateUpgradeHandlerForV013Upgrade(app.ModuleManger, app.configurator))
-	app.upgradeKeeper.SetUpgradeHandler(v1.V014UpgradeName, v1.CreateUpgradeHandlerForV014Upgrade(app.ModuleManger, app.configurator, app.ibcKeeper, sbs))
+	app.upgradeKeeper.SetUpgradeHandler(v1.V014UpgradeName, v1.CreateUpgradeHandlerForV014Upgrade(app.ModuleManger, app.configurator))
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
