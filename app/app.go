@@ -7,8 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
+	config2 "github.com/joltify-finance/joltify_lending/app/config"
+
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
+	daemonservertypes "github.com/joltify-finance/joltify_lending/daemons/server/types"
+
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
@@ -16,7 +20,7 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	solomachine "github.com/cosmos/ibc-go/v8/modules/light-clients/06-solomachine"
-	params2 "github.com/joltify-finance/joltify_lending/app/params"
+	statsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/keeper"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 
@@ -39,10 +43,14 @@ import (
 	quotamodulekeeper "github.com/joltify-finance/joltify_lending/x/quota/keeper"
 	quotamoduletypes "github.com/joltify-finance/joltify_lending/x/quota/types"
 
+	clobmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/keeper"
+
 	ibcratelimit "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit"
 	ibcratelimittypes "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit/types"
 
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
+
+	subaccountsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/keeper"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -77,6 +85,7 @@ import (
 	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -91,6 +100,7 @@ import (
 	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	swaptypes "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
+	blocktimemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
 
 	"github.com/joltify-finance/joltify_lending/x/mint"
 	mintkeeper "github.com/joltify-finance/joltify_lending/x/mint/keeper"
@@ -158,6 +168,9 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v8/modules/core"
 	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+
+	perpetualsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/keeper"
+	pricesmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
 
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
@@ -284,13 +297,13 @@ type App struct {
 	memKeys map[string]*storetypes.MemoryStoreKey
 
 	// keepers from all the modules
-	accountKeeper    authkeeper.AccountKeeper
+	AccountKeeper    authkeeper.AccountKeeper
 	bankKeeper       bankkeeper.Keeper
 	capabilityKeeper *capabilitykeeper.Keeper
 	stakingKeeper    *stakingkeeper.Keeper
 	mintKeeper       mintkeeper.Keeper
 	distrKeeper      distrkeeper.Keeper
-	govKeeper        govkeeper.Keeper
+	GovKeeper        govkeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	authzKeeper      authzkeeper.Keeper
 	crisisKeeper     *crisiskeeper.Keeper
@@ -320,6 +333,14 @@ type App struct {
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 
+	// dydx keepers
+	ClobKeeper        *clobmodulekeeper.Keeper
+	PerpetualsKeeper  *perpetualsmodulekeeper.Keeper
+	PricesKeeper      pricesmodulekeeper.Keeper
+	StatsKeeper       statsmodulekeeper.Keeper
+	SubaccountsKeeper subaccountsmodulekeeper.Keeper
+	BlockTimeKeeper   blocktimemodulekeeper.Keeper
+
 	// the module manager
 	ModuleManger *module.Manager
 
@@ -330,6 +351,9 @@ type App struct {
 
 	// configurator
 	configurator module.Configurator
+
+	// dydx related
+	DaemonHealthMonitor *daemonservertypes.HealthMonitor
 }
 
 func init() {
@@ -350,7 +374,7 @@ func NewApp(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
-	encodingConfig := MakeEncodingConfig()
+	encodingConfig := appconfig.MakeEncodingConfig()
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -465,7 +489,7 @@ func NewApp(
 	app.capabilityKeeper.Seal()
 
 	// add keepers
-	app.accountKeeper = authkeeper.NewAccountKeeper(
+	app.AccountKeeper = authkeeper.NewAccountKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[authtypes.StoreKey]),
 		authtypes.ProtoBaseAccount,
@@ -475,11 +499,11 @@ func NewApp(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
-	app.feeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.accountKeeper)
+	app.feeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
 	app.bankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[banktypes.StoreKey]),
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.BlockedModuleAccountAddrs(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		logger,
@@ -488,7 +512,7 @@ func NewApp(
 	app.stakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[stakingtypes.StoreKey]),
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.bankKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
@@ -499,13 +523,13 @@ func NewApp(
 		runtime.NewKVStoreService(keys[authzkeeper.StoreKey]),
 		appCodec,
 		app.MsgServiceRouter(),
-		app.accountKeeper,
+		app.AccountKeeper,
 	)
 
 	app.distrKeeper = distrkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[distrtypes.StoreKey]),
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.bankKeeper,
 		app.stakingKeeper,
 		authtypes.FeeCollectorName,
@@ -525,7 +549,7 @@ func NewApp(
 		app.bankKeeper,
 		authtypes.FeeCollectorName,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-		app.accountKeeper.AddressCodec(),
+		app.AccountKeeper.AddressCodec(),
 	)
 	app.upgradeKeeper = upgradekeeper.NewKeeper(
 		skipUpgradeHeights,
@@ -540,7 +564,7 @@ func NewApp(
 		runtime.NewKVStoreService(keys[evidencetypes.StoreKey]),
 		app.stakingKeeper,
 		app.slashingKeeper,
-		app.accountKeeper.AddressCodec(),
+		app.AccountKeeper.AddressCodec(),
 		runtime.ProvideCometInfoService(),
 	)
 
@@ -562,7 +586,7 @@ func NewApp(
 
 	rateLimitingICS4Wrapper := ibcratelimit.NewICS4Middleware(
 		app.ibcKeeper.ChannelKeeper,
-		&app.accountKeeper,
+		&app.AccountKeeper,
 		&app.bankKeeper,
 		app.QuotaKeeper,
 		ibcQuotaSubspace,
@@ -577,7 +601,7 @@ func NewApp(
 		app.RateLimitingICS4Wrapper,
 		app.ibcKeeper.ChannelKeeper,
 		app.ibcKeeper.PortKeeper,
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.bankKeeper,
 		scopedTransferKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
@@ -589,7 +613,7 @@ func NewApp(
 		appCodec,
 		keys[minttypes.StoreKey],
 		mintSubspace,
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.bankKeeper,
 		app.distrKeeper,
 		*app.stakingKeeper,
@@ -610,7 +634,7 @@ func NewApp(
 		keys[auctiontypes.StoreKey],
 		auctionSubspace,
 		app.bankKeeper,
-		app.accountKeeper,
+		app.AccountKeeper,
 	)
 
 	app.pricefeedKeeper = pricefeedkeeper.NewKeeper(
@@ -623,7 +647,7 @@ func NewApp(
 		appCodec,
 		keys[jolttypes.StoreKey],
 		joltSubspace,
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.bankKeeper,
 		app.pricefeedKeeper,
 		app.auctionKeeper,
@@ -633,14 +657,14 @@ func NewApp(
 		appCodec,
 		keys[swaptypes.StoreKey],
 		swapSubspace,
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.bankKeeper,
 	)
 
 	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace, authtypes.NewModuleAddress(govtypes.ModuleName))
-	app.nftKeeper = nftmodulekeeper.NewKeeper(runtime.NewKVStoreService(keys[nftmoduletypes.StoreKey]), appCodec, app.accountKeeper, app.bankKeeper)
+	app.nftKeeper = nftmodulekeeper.NewKeeper(runtime.NewKVStoreService(keys[nftmoduletypes.StoreKey]), appCodec, app.AccountKeeper, app.bankKeeper)
 
-	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.accountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper, app.incentiveKeeper)
+	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.bankKeeper, app.AccountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper, app.incentiveKeeper)
 
 	app.incentiveKeeper = incentivekeeper.NewKeeper(
 		appCodec,
@@ -649,7 +673,7 @@ func NewApp(
 		app.bankKeeper,
 		// &cdpKeeper,
 		&joltKeeper,
-		app.accountKeeper,
+		app.AccountKeeper,
 		mSwapKeeper,
 		mSpvKeeper,
 		app.nftKeeper,
@@ -663,7 +687,7 @@ func NewApp(
 		appCodec,
 		keys[burnauctionmoduletypes.StoreKey],
 		keys[burnauctionmoduletypes.MemStoreKey],
-		burnAuctionSubspace, app.accountKeeper, app.bankKeeper, app.auctionKeeper)
+		burnAuctionSubspace, app.AccountKeeper, app.bankKeeper, app.auctionKeeper)
 
 	allKeys := make(map[string]storetypes.StoreKey, len(keys)+len(tkeys)+len(memKeys))
 	for k, v := range keys {
@@ -680,7 +704,7 @@ func NewApp(
 	govKeeper := govkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[govtypes.StoreKey]),
-		app.accountKeeper,
+		app.AccountKeeper,
 		app.bankKeeper,
 		app.stakingKeeper,
 		app.distrKeeper,
@@ -699,7 +723,7 @@ func NewApp(
 
 	govKeeper.SetLegacyRouter(govRouter)
 
-	app.govKeeper = *govKeeper.SetHooks(
+	app.GovKeeper = *govKeeper.SetHooks(
 		govtypes.NewMultiGovHooks(
 		// register the governance hooks
 		),
@@ -717,40 +741,40 @@ func NewApp(
 
 	// create the module manager (Note: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.)
-	authModule := auth.NewAppModule(appCodec, app.accountKeeper, authsims.RandomGenesisAccounts, app.ParamsKeeper.Subspace(authtypes.ModuleName))
+	authModule := auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.ParamsKeeper.Subspace(authtypes.ModuleName))
 	app.ModuleManger = module.NewManager(
-		genutil.NewAppModule(app.accountKeeper, app.stakingKeeper, app, encodingConfig.TxConfig),
+		genutil.NewAppModule(app.AccountKeeper, app.stakingKeeper, app, encodingConfig.TxConfig),
 		authModule,
-		bank.NewAppModule(appCodec, app.bankKeeper, app.accountKeeper, app.ParamsKeeper.Subspace(banktypes.ModuleName)),
+		bank.NewAppModule(appCodec, app.bankKeeper, app.AccountKeeper, app.ParamsKeeper.Subspace(banktypes.ModuleName)),
 		capability.NewAppModule(appCodec, *app.capabilityKeeper, false),
-		feegrantmodule.NewAppModule(appCodec, app.accountKeeper, app.bankKeeper, app.feeGrantKeeper, app.interfaceRegistry),
-		staking.NewAppModule(appCodec, app.stakingKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(stakingtypes.ModuleName)),
-		mint.NewAppModule(appCodec, app.mintKeeper, app.accountKeeper, app.bankKeeper),
-		distr.NewAppModule(appCodec, app.distrKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
-		gov.NewAppModule(appCodec, &app.govKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(govtypes.ModuleName)),
+		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.bankKeeper, app.feeGrantKeeper, app.interfaceRegistry),
+		staking.NewAppModule(appCodec, app.stakingKeeper, app.AccountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(stakingtypes.ModuleName)),
+		mint.NewAppModule(appCodec, app.mintKeeper, app.AccountKeeper, app.bankKeeper),
+		distr.NewAppModule(appCodec, app.distrKeeper, app.AccountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
+		gov.NewAppModule(appCodec, &app.GovKeeper, app.AccountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(govtypes.ModuleName)),
 		params.NewAppModule(app.ParamsKeeper),
-		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName), app.interfaceRegistry),
+		slashing.NewAppModule(appCodec, app.slashingKeeper, app.AccountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName), app.interfaceRegistry),
 		ibc.NewAppModule(app.ibcKeeper),
 		upgrade.NewAppModule(app.upgradeKeeper, addresscodec.NewBech32Codec(sdk.Bech32PrefixAccAddr)),
 		evidence.NewAppModule(*app.evidenceKeeper),
 		transferModule,
-		vesting.NewAppModule(app.accountKeeper, app.bankKeeper),
-		authzmodule.NewAppModule(appCodec, app.authzKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
-		auction.NewAppModule(app.auctionKeeper, app.accountKeeper, app.bankKeeper),
-		// issuance.NewAppModule(app.issuanceKeeper, app.accountKeeper, app.bankKeeper),
-		pricefeed.NewAppModule(app.pricefeedKeeper, app.accountKeeper),
-		// cdp.NewAppModule(app.cdpKeeper, app.accountKeeper, app.pricefeedKeeper, app.bankKeeper),
-		jolt.NewAppModule(app.joltKeeper, app.accountKeeper, app.bankKeeper, app.pricefeedKeeper),
-		incentive.NewAppModule(app.incentiveKeeper, app.accountKeeper, app.bankKeeper),
-		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.accountKeeper, app.bankKeeper),
+		vesting.NewAppModule(app.AccountKeeper, app.bankKeeper),
+		authzmodule.NewAppModule(appCodec, app.authzKeeper, app.AccountKeeper, app.bankKeeper, app.interfaceRegistry),
+		auction.NewAppModule(app.auctionKeeper, app.AccountKeeper, app.bankKeeper),
+		// issuance.NewAppModule(app.issuanceKeeper, app.AccountKeeper, app.bankKeeper),
+		pricefeed.NewAppModule(app.pricefeedKeeper, app.AccountKeeper),
+		// cdp.NewAppModule(app.cdpKeeper, app.AccountKeeper, app.pricefeedKeeper, app.bankKeeper),
+		jolt.NewAppModule(app.joltKeeper, app.AccountKeeper, app.bankKeeper, app.pricefeedKeeper),
+		incentive.NewAppModule(app.incentiveKeeper, app.AccountKeeper, app.bankKeeper),
+		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.AccountKeeper, app.bankKeeper),
 
-		spvmodule.NewAppModule(appCodec, app.spvKeeper, app.accountKeeper, app.bankKeeper),
-		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.accountKeeper, app.bankKeeper, app.interfaceRegistry),
+		spvmodule.NewAppModule(appCodec, app.spvKeeper, app.AccountKeeper, app.bankKeeper),
+		nftmodule.NewAppModule(appCodec, app.nftKeeper, app.AccountKeeper, app.bankKeeper, app.interfaceRegistry),
 		ibcratelimit.NewAppModule(*app.RateLimitingICS4Wrapper),
 		quotamodule.NewAppModule(appCodec, app.QuotaKeeper),
-		swap.NewAppModule(app.swapKeeper, app.accountKeeper),
+		swap.NewAppModule(app.swapKeeper, app.AccountKeeper),
 		crisis.NewAppModule(app.crisisKeeper, skipGenesisInvariants, app.ParamsKeeper.Subspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
-		burnauctionmodule.NewAppModule(appCodec, app.burnauctionKeeper, app.accountKeeper, app.bankKeeper),
+		burnauctionmodule.NewAppModule(appCodec, app.burnauctionKeeper, app.AccountKeeper, app.bankKeeper),
 	)
 
 	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
@@ -914,13 +938,13 @@ func NewApp(
 	// transactions.
 	// TODO
 	// app.sm = module.NewSimulationManager(
-	// 	auth.NewAppModule(app.accountKeeper),
-	// 	bank.NewAppModule(app.bankKeeper, app.accountKeeper),
-	// 	gov.NewAppModule(app.govKeeper, app.accountKeeper, app.accountKeeper, app.bankKeeper),
+	// 	auth.NewAppModule(app.AccountKeeper),
+	// 	bank.NewAppModule(app.bankKeeper, app.AccountKeeper),
+	// 	gov.NewAppModule(app.GovKeeper, app.AccountKeeper, app.AccountKeeper, app.bankKeeper),
 	// 	mint.NewAppModule(app.mintKeeper),
-	// 	distr.NewAppModule(app.distrKeeper, app.accountKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper),
-	//  staking.NewAppModule(app.stakingKeeper, app.accountKeeper, app.accountKeeper, app.bankKeeper),
-	// 	slashing.NewAppModule(app.slashingKeeper, app.accountKeeper, app.stakingKeeper),
+	// 	distr.NewAppModule(app.distrKeeper, app.AccountKeeper, app.AccountKeeper, app.bankKeeper, app.stakingKeeper),
+	//  staking.NewAppModule(app.stakingKeeper, app.AccountKeeper, app.AccountKeeper, app.bankKeeper),
+	// 	slashing.NewAppModule(app.slashingKeeper, app.AccountKeeper, app.stakingKeeper),
 	// )
 	// app.sm.RegisterStoreDecoders()
 
@@ -930,7 +954,7 @@ func NewApp(
 	app.MountMemoryStores(memKeys)
 
 	// baseAnte := cosante.HandlerOptions{
-	//	AccountKeeper:   app.accountKeeper,
+	//	AccountKeeper:   app.AccountKeeper,
 	//	BankKeeper:      app.bankKeeper,
 	//	SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
 	//	FeegrantKeeper:  app.feeGrantKeeper,
@@ -943,7 +967,7 @@ func NewApp(
 	}
 
 	anteOptions := ante.HandlerOptions{
-		AccountKeeper:          &app.accountKeeper,
+		AccountKeeper:          &app.AccountKeeper,
 		BankKeeper:             app.bankKeeper,
 		SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
 		FeegrantKeeper:         app.feeGrantKeeper,
@@ -1095,7 +1119,7 @@ func (app *App) RegisterTendermintService(clientCtx client.Context) {
 // loadBlockedMaccAddrs returns a map indicating the blocked status of each module account address
 // func (app *App) loadBlockedMaccAddrs() map[string]bool {
 //	modAccAddrs := app.ModuleAccountAddrs()
-//	joltIncentiveMaccAddr := app.accountKeeper.GetModuleAddress(incentivetypes.ModuleName)
+//	joltIncentiveMaccAddr := app.AccountKeeper.GetModuleAddress(incentivetypes.ModuleName)
 //	for addr := range modAccAddrs {
 //		// Set the joltincentives module account address as unblocked
 //		if addr == joltIncentiveMaccAddr.String() {
@@ -1182,8 +1206,8 @@ func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-func (app *App) EncodingConfig() params2.EncodingConfig {
-	return params2.EncodingConfig{
+func (app *App) EncodingConfig() config2.EncodingConfig {
+	return config2.EncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
 		Marshaler:         app.AppCodec(),
 		TxConfig:          app.TxConfig(),

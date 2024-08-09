@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/app/config"
+
 	storetypes "cosmossdk.io/store/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
@@ -77,12 +79,12 @@ type TestApp struct {
 //
 // Note, it also sets the sdk config with the app's address prefix, coin type, etc.
 func NewTestApp(logger log.Logger, rootDir string) TestApp {
-	SetSDKConfig()
+	config.SetupConfig()
 	return NewTestAppFromSealed(logger, rootDir, nil)
 }
 
 func NewTestAppWithGenesis(logger log.Logger, rootDir string, genesisBytes []byte) TestApp {
-	SetSDKConfig()
+	config.SetupConfig()
 	return NewTestAppFromSealed(logger, rootDir, genesisBytes)
 }
 
@@ -198,13 +200,13 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 	return TestApp{App: *app, Ctx: ctx}
 }
 
-func (tApp TestApp) GetAccountKeeper() authkeeper.AccountKeeper { return tApp.accountKeeper }
+func (tApp TestApp) GetAccountKeeper() authkeeper.AccountKeeper { return tApp.AccountKeeper }
 func (tApp TestApp) GetBankKeeper() bankkeeper.Keeper           { return tApp.bankKeeper }
 func (tApp TestApp) GetStakingKeeper() stakingkeeper.Keeper     { return *tApp.stakingKeeper }
 func (tApp TestApp) GetSlashingKeeper() slashingkeeper.Keeper   { return tApp.slashingKeeper }
 func (tApp TestApp) GetMintKeeper() mintkeeper.Keeper           { return tApp.mintKeeper }
 func (tApp TestApp) GetDistrKeeper() distkeeper.Keeper          { return tApp.distrKeeper }
-func (tApp TestApp) GetGovKeeper() govkeeper.Keeper             { return tApp.govKeeper }
+func (tApp TestApp) GetGovKeeper() govkeeper.Keeper             { return tApp.GovKeeper }
 func (tApp TestApp) GetCrisisKeeper() crisiskeeper.Keeper       { return *tApp.crisisKeeper }
 func (tApp TestApp) GetParamsKeeper() paramskeeper.Keeper       { return tApp.ParamsKeeper }
 
@@ -270,7 +272,7 @@ func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainID(t *testing.T, 
 func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
 	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState,
 ) []byte {
-	encoding := MakeEncodingConfig()
+	encoding := config.MakeEncodingConfig()
 	genesisState := NewDefaultGenesisState(encoding.Marshaler)
 	for _, state := range genesisStates {
 		for k, v := range state {
@@ -321,7 +323,7 @@ func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
 // If any module genesis states are missing, defaults are used.
 func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) []byte {
 	// Create a default genesis state and overwrite with provided values
-	encoding := MakeEncodingConfig()
+	encoding := config.MakeEncodingConfig()
 	genesisState := NewDefaultGenesisState(encoding.Marshaler)
 	for _, state := range genesisStates {
 		for k, v := range state {
@@ -388,7 +390,7 @@ func (tApp TestApp) CheckBalance(t *testing.T, ctx sdk.Context, owner sdk.AccAdd
 
 // GetModuleAccountBalance gets the current balance of the denom for a module account
 func (tApp TestApp) GetModuleAccountBalance(ctx sdk.Context, moduleName string, denom string) sdkmath.Int {
-	moduleAcc := tApp.accountKeeper.GetModuleAccount(ctx, moduleName)
+	moduleAcc := tApp.AccountKeeper.GetModuleAccount(ctx, moduleName)
 	balance := tApp.bankKeeper.GetBalance(ctx, moduleAcc.GetAddress(), denom)
 	return balance.Amount
 }

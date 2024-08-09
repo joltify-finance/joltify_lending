@@ -4,208 +4,274 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
+	"time"
 
-	"github.com/spf13/pflag"
-
-	"github.com/cosmos/cosmos-sdk/client/keys"
-
-	params2 "github.com/joltify-finance/joltify_lending/app/params"
-	"github.com/spf13/viper"
-
-	"github.com/joltify-finance/joltify_lending/app"
-
-	"github.com/spf13/cobra"
-
-	cmtlog "cosmossdk.io/log"
+	"cosmossdk.io/client/v2/autocli"
+	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/log"
+	"cosmossdk.io/store"
+	"cosmossdk.io/store/snapshots"
+	snapshottypes "cosmossdk.io/store/snapshots/types"
+	storetypes "cosmossdk.io/store/types"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
-	cmtcli "github.com/cometbft/cometbft/libs/cli"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	clientcfg "github.com/cosmos/cosmos-sdk/client/config"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/pruning"
-	"github.com/cosmos/cosmos-sdk/client/rpc"
-	"github.com/cosmos/cosmos-sdk/client/snapshot"
-	sdkserver "github.com/cosmos/cosmos-sdk/server"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
-
+	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/debug"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/codec/address"
+	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
+	"github.com/cosmos/cosmos-sdk/server"
+	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	sdktypes "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	rosettaCmd "github.com/cosmos/rosetta/cmd"
+	joltapp "github.com/joltify-finance/joltify_lending/app"
+	"github.com/joltify-finance/joltify_lending/app/constants"
+	protocolflags "github.com/joltify-finance/joltify_lending/app/flags"
+
+	"github.com/spf13/cast"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
+	// Unnamed import of statik for swagger UI support.
+	// Used in cosmos-sdk when registering the route for swagger docs.
+	_ "github.com/joltify-finance/joltify_lending/client/docs/statik"
 )
 
 const (
-	ChainID = "joltify_1729-1"
+	EnvPrefix = "DYDX"
+
+	flagIAVLCacheSize = "iavl-cache-size"
+
+	// TimeoutProposeOverride is the software override for the `timeout_propose` consensus parameter.
+	TimeoutProposeOverride = 1 * time.Second
 )
 
-type emptyAppOptions struct{}
+// NewRootCmd creates a new root command for `dydxprotocold`. It is called once in the main function.
+// TODO(DEC-1097): improve `cmd/` by adding tests, custom app configs, custom init cmd, and etc.
+func NewRootCmd(
+	option *RootCmdOption,
+	homeDir string,
+) *cobra.Command {
+	return NewRootCmdWithInterceptors(
+		option,
+		homeDir,
+		func(serverCtxPtr *server.Context) {
+			// Provide an override for `timeout_propose`. This value should be consistent across the network
+			// for synchrony, and should never be tweaked by individual validators in practice.
+			serverCtxPtr.Config.Consensus.TimeoutPropose = TimeoutProposeOverride
+		},
+		func(s string, appConfig *JoltAppConfig) (string, *JoltAppConfig) {
+			return s, appConfig
+		},
+		func(app *joltapp.App) *joltapp.App {
+			return app
+		},
+	)
+}
 
-func (ao emptyAppOptions) Get(_ string) interface{} { return nil }
+func NewRootCmdWithInterceptors(
+	option *RootCmdOption,
+	homeDir string,
+	serverCtxInterceptor func(serverCtxPtr *server.Context),
+	appConfigInterceptor func(string, *JoltAppConfig) (string, *JoltAppConfig),
+	appInterceptor func(app *joltapp.App) *joltapp.App,
+) *cobra.Command {
+	initAppOptions := viper.New()
+	initAppOptions.Set(flags.FlagHome, tempDir())
+	tempApp := joltapp.NewApp(
+		log.NewNopLogger(),
+		dbm.NewMemDB(),
+		nil,
+		true,
+		initAppOptions,
+	)
+	defer func() {
+		if err := tempApp.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
-// NewRootCmd creates a new root command for simd. It is called once in the
-// main function.
-func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
-	tempApp := app.NewApp(cmtlog.NewNopLogger(), dbm.NewMemDB(), nil, true, emptyAppOptions{})
-	// MakeConfig creates an EncodingConfig
-
-	encodingConfig := tempApp.EncodingConfig()
 	initClientCtx := client.Context{}.
-		WithCodec(encodingConfig.Marshaler).
-		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
-		WithTxConfig(encodingConfig.TxConfig).
-		WithLegacyAmino(encodingConfig.Amino).
+		WithCodec(tempApp.AppCodec()).
+		WithInterfaceRegistry(tempApp.InterfaceRegistry()).
+		WithTxConfig(tempApp.TxConfig()).
+		WithLegacyAmino(tempApp.LegacyAmino()).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastSync).
-		WithHomeDir(app.DefaultNodeHome).
-		WithViper(app.Name)
+		WithHomeDir(homeDir).
+		WithViper(EnvPrefix)
 
 	rootCmd := &cobra.Command{
-		Use:   "joltify",
-		Short: "joltify Daemon",
-		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+		Use:   constants.AppDaemonName,
+		Short: "Start dydxprotocol app",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
 
+			initClientCtx = initClientCtx.WithCmdContext(cmd.Context()).WithViper("")
 			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err
 			}
 
-			initClientCtx, err = clientcfg.ReadFromClientConfig(initClientCtx)
+			initClientCtx, err = config.ReadFromClientConfig(initClientCtx)
 			if err != nil {
 				return err
 			}
 
-			// This needs to go after ReadFromClientConfig, as that function
-			// sets the RPC client needed for SIGN_MODE_TEXTUAL. This sign mode
-			// is only available if the client is online.
-			// if !initClientCtx.Offline {
-			//	txConfigOpts := tx.ConfigOptions{
-			//		EnabledSignModes:           append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL),
-			//		TextualCoinMetadataQueryFn: txmodule.NewGRPCCoinMetadataQueryFn(initClientCtx),
-			//	}
-			//	txConfig, err := tx.NewTxConfigWithOptions(
-			//		initClientCtx.Codec,
-			//		txConfigOpts,
-			//	)
-			//	if err != nil {
-			//		return err
-			//	}
-			//
-			//	initClientCtx = initClientCtx.WithTxConfig(txConfig)
-			//}
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
 
-			// FIXME: replace AttoPhoton with bond denom
-			customAppTemplate, customAppConfig := app.InitAppConfig()
-			customCMTConfig := app.InitCometBFTConfig()
+			customAppTemplate, customAppConfig := appConfigInterceptor(initAppConfig())
+			customTMConfig := initTendermintConfig()
 
-			return sdkserver.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customCMTConfig)
+			if err := server.InterceptConfigsPreRunHandler(
+				cmd,
+				customAppTemplate,
+				customAppConfig,
+				customTMConfig,
+			); err != nil {
+				return err
+			}
+
+			serverCtx := server.GetServerContextFromCmd(cmd)
+
+			// Format logs for error tracking if it is enabled via flags.
+			if ddErrorTrackingFormatterEnabled :=
+				serverCtx.Viper.Get(protocolflags.DdErrorTrackingFormat); ddErrorTrackingFormatterEnabled != nil {
+				if enabled, err := cast.ToBoolE(ddErrorTrackingFormatterEnabled); err == nil && enabled {
+					joltapp.SetZerologDatadogErrorTrackingFormat()
+				}
+			}
+			serverCtxInterceptor(serverCtx)
+
+			return nil
 		},
+		SilenceUsage: true,
 	}
 
-	// TODO: double-check
-	// authclient.Codec = encodingConfig.Codec
-
-	initRootCmd(rootCmd, encodingConfig, tempApp.BasicModuleManager)
-	autoCliOpts := tempApp.AutoCliOpts()
-	initClientCtx, _ = clientcfg.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
-	// autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
-	autoCliOpts.ClientCtx = initClientCtx
-
-	overwriteFlagDefaults(rootCmd, map[string]string{
-		flags.FlagKeyringBackend: "test",
-	})
-
-	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
+	initRootCmd(tempApp, rootCmd, option, appInterceptor)
+	initClientCtx, err := config.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
+	if err != nil {
 		panic(err)
 	}
-	return rootCmd, encodingConfig
+	if err := autoCliOpts(tempApp, initClientCtx).EnhanceRootCommand(rootCmd); err != nil {
+		panic(err)
+	}
+
+	return rootCmd
 }
 
-func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
-	set := func(s *pflag.FlagSet, key, val string) {
-		if f := s.Lookup(key); f != nil {
-			f.DefValue = val
-			_ = f.Value.Set(val)
-		}
-	}
-	for key, val := range defaults {
-		set(c.Flags(), key, val)
-		set(c.PersistentFlags(), key, val)
-	}
-	for _, c := range c.Commands() {
-		overwriteFlagDefaults(c, defaults)
-	}
-}
-
+// initRootCmd initializes the app's root command with useful commands.
 func initRootCmd(
+	tempApp *joltapp.App,
 	rootCmd *cobra.Command,
-	encodingConfig params2.EncodingConfig,
-	basicManager module.BasicManager,
+	option *RootCmdOption,
+	appInterceptor func(app *joltapp.App) *joltapp.App,
 ) {
-	cfg := sdk.GetConfig()
-	cfg.Seal()
-
+	valOperAddressCodec := address.NewBech32Codec(sdktypes.GetConfig().GetBech32ValidatorAddrPrefix())
 	rootCmd.AddCommand(
-		genutilcli.InitCmd(basicManager, app.DefaultNodeHome),
-		cmtcli.NewCompletionCmd(rootCmd, true),
+		genutilcli.InitCmd(tempApp.BasicModuleManager, joltapp.DefaultNodeHome),
+		genutilcli.CollectGenTxsCmd(
+			banktypes.GenesisBalancesIterator{},
+			joltapp.DefaultNodeHome,
+			genutiltypes.DefaultMessageValidator,
+			valOperAddressCodec,
+		),
+		genutilcli.MigrateGenesisCmd(genutilcli.MigrationMap),
+		genutilcli.GenTxCmd(
+			tempApp.BasicModuleManager,
+			tempApp.TxConfig(),
+			banktypes.GenesisBalancesIterator{},
+			joltapp.DefaultNodeHome,
+			valOperAddressCodec,
+		),
+		genutilcli.ValidateGenesisCmd(tempApp.BasicModuleManager),
+		AddGenesisAccountCmd(joltapp.DefaultNodeHome),
+		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
-		pruning.Cmd(newApp, app.DefaultNodeHome),
-		snapshot.Cmd(newApp),
-		// this line is used by starport scaffolding # stargate/root/commands
 	)
 
-	sdkserver.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
+	server.AddCommands(
+		rootCmd,
+		joltapp.DefaultNodeHome,
+		func(logger log.Logger, db dbm.DB, writer io.Writer, options servertypes.AppOptions) servertypes.Application {
+			return appInterceptor(newApp(logger, db, writer, options))
+		},
+		appExport,
+		func(cmd *cobra.Command) {
+			addModuleInitFlags(cmd)
+
+			if option.startCmdCustomizer != nil {
+				option.startCmdCustomizer(cmd)
+			}
+		},
+	)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
-		sdkserver.StatusCommand(),
-		genesisCommand(encodingConfig.TxConfig, basicManager),
+		server.StatusCommand(),
 		queryCommand(),
 		txCommand(),
 		keys.Commands(),
 	)
 
-	rootCmd.PersistentFlags().String(flags.FlagChainID, ChainID, "Specify Chain ID for sending Tx")
-	rootCmd.PersistentFlags().String(flags.FlagNode, "tcp://localhost:26657", "<host>:<port> to CometBFT RPC interface for this chain")
-	rootCmd.PersistentFlags().String(flags.FlagKeyringBackend, "test", "Select keyring's backend (os|file|test)")
+	rootCmd.AddCommand(rosettaCmd.RosettaCommand(tempApp.InterfaceRegistry(), tempApp.AppCodec()))
+}
 
-	if err := viper.BindPFlag(flags.FlagNode, rootCmd.PersistentFlags().Lookup(flags.FlagNode)); err != nil {
-		panic(err)
+// autoCliOpts returns options based upon the modules in the dYdX v4 app.
+//
+// Creates an instance of the application that is discarded to enumerate the modules.
+func autoCliOpts(tempApp *joltapp.App, initClientCtx client.Context) autocli.AppOptions {
+	modules := make(map[string]appmodule.AppModule, 0)
+	for _, m := range tempApp.ModuleManger.Modules {
+		if moduleWithName, ok := m.(module.HasName); ok {
+			moduleName := moduleWithName.Name()
+			if appModule, ok := moduleWithName.(appmodule.AppModule); ok {
+				modules[moduleName] = appModule
+			}
+		}
 	}
-	// if err := viper.BindPFlag(flags.FlagKeyringBackend, rootCmd.PersistentFlags().Lookup(flags.FlagKeyringBackend)); err != nil {
+
+	//cliKR, err := keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
+	//if err != nil {
 	//	panic(err)
 	//}
-	//
-	// add rosetta
-	// rootCmd.AddCommand(rosettaCmd.RosettaCommand(encodingConfig.InterfaceRegistry, encodingConfig.Codec))
-}
 
-// genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter
-func genesisCommand(txConfig client.TxConfig, basicManager module.BasicManager, cmds ...*cobra.Command) *cobra.Command {
-	cmd := genutilcli.Commands(txConfig, basicManager, app.DefaultNodeHome)
-
-	for _, subCmd := range cmds {
-		cmd.AddCommand(subCmd)
+	return autocli.AppOptions{
+		Modules:               modules,
+		ModuleOptions:         runtimeservices.ExtractAutoCLIOptions(tempApp.ModuleManger.Modules),
+		AddressCodec:          authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32AccountAddrPrefix()),
+		ValidatorAddressCodec: authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32ValidatorAddrPrefix()),
+		ConsensusAddressCodec: authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32ConsensusAddrPrefix()),
+		ClientCtx:             initClientCtx,
 	}
-	return cmd
 }
 
+// addModuleInitFlags adds module specific init flags.
 func addModuleInitFlags(startCmd *cobra.Command) {
 	crisis.AddModuleInitFlags(startCmd)
 }
 
+// queryCommand adds transaction and account querying commands.
 func queryCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "query",
@@ -218,22 +284,24 @@ func queryCommand() *cobra.Command {
 
 	cmd.AddCommand(
 		rpc.ValidatorCommand(),
-		sdkserver.QueryBlockCmd(),
-		sdkserver.QueryBlocksCmd(),
-		sdkserver.QueryBlockResultsCmd(),
+		server.QueryBlockCmd(),
 		authcmd.QueryTxsByEventsCmd(),
 		authcmd.QueryTxCmd(),
-		rpc.QueryEventForTxCmd(),
 	)
+
+	// Module specific query sub-commands are added by AutoCLI
+
+	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
 }
 
+// txCommand adds transaction signing, encoding / decoding, and broadcasting commands.
 func txCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "tx",
 		Short:                      "Transactions subcommands",
-		DisableFlagParsing:         false,
+		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
 	}
@@ -244,30 +312,96 @@ func txCommand() *cobra.Command {
 		authcmd.GetMultiSignCommand(),
 		authcmd.GetMultiSignBatchCmd(),
 		authcmd.GetValidateSignaturesCommand(),
+		flags.LineBreak,
 		authcmd.GetBroadcastCommand(),
 		authcmd.GetEncodeCommand(),
 		authcmd.GetDecodeCommand(),
-		authcmd.GetSimulateCmd(),
 	)
+
+	// Module specific tx sub-commands are added by AutoCLI
+
+	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
 }
 
-// newApp creates the application
-func newApp(logger cmtlog.Logger, db dbm.DB, traceStore io.Writer, appOpts servertypes.AppOptions) servertypes.Application {
-	baseappOptions := sdkserver.DefaultBaseappOptions(appOpts)
-	napp := app.NewApp(
-		logger, db, traceStore, true,
-		appOpts,
-		baseappOptions...,
+// newApp initializes and returns a new app.
+func newApp(
+	logger log.Logger,
+	db dbm.DB,
+	traceStore io.Writer,
+	appOpts servertypes.AppOptions,
+) *joltapp.App {
+	var cache storetypes.MultiStorePersistentCache
+
+	if cast.ToBool(appOpts.Get(server.FlagInterBlockCache)) {
+		cache = store.NewCommitKVStoreCacheManager()
+	}
+
+	skipUpgradeHeights := make(map[int64]bool)
+	for _, h := range cast.ToIntSlice(appOpts.Get(server.FlagUnsafeSkipUpgrades)) {
+		skipUpgradeHeights[int64(h)] = true
+	}
+
+	pruningOpts, err := server.GetPruningOptionsFromFlags(appOpts)
+	if err != nil {
+		panic(err)
+	}
+
+	homeDir := cast.ToString(appOpts.Get(flags.FlagHome))
+	chainID := cast.ToString(appOpts.Get(flags.FlagChainID))
+	if chainID == "" {
+		// fallback to genesis chain-id
+		appGenesis, err := genutiltypes.AppGenesisFromFile(filepath.Join(homeDir, "config", "genesis.json"))
+		if err != nil {
+			panic(err)
+		}
+
+		chainID = appGenesis.ChainID
+	}
+
+	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
+	snapshotDB, err := dbm.NewDB("metadata", server.GetAppDBBackend(appOpts), snapshotDir)
+	if err != nil {
+		panic(err)
+	}
+	snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
+	if err != nil {
+		panic(err)
+	}
+
+	snapshotOptions := snapshottypes.NewSnapshotOptions(
+		cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)),
+		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
 	)
-	return napp
+
+	return joltapp.NewApp(
+		logger,
+		db,
+		traceStore,
+		true,
+		appOpts,
+		baseapp.SetPruning(pruningOpts),
+		baseapp.SetMinGasPrices(cast.ToString(appOpts.Get(server.FlagMinGasPrices))),
+		baseapp.SetHaltHeight(cast.ToUint64(appOpts.Get(server.FlagHaltHeight))),
+		baseapp.SetHaltTime(cast.ToUint64(appOpts.Get(server.FlagHaltTime))),
+		baseapp.SetMinRetainBlocks(cast.ToUint64(appOpts.Get(server.FlagMinRetainBlocks))),
+		baseapp.SetInterBlockCache(cache),
+		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
+		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
+		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
+		baseapp.SetIAVLCacheSize(int(cast.ToUint64(appOpts.Get(flagIAVLCacheSize)))),
+		baseapp.SetIAVLDisableFastNode(true),
+		baseapp.SetChainID(chainID),
+	)
 }
 
-// appExport creates a new app (optionally at a given height)
-// and exports state.
+// appExport creates and exports a new app, returns the state of the app for a genesis file.
+//
+// Deprecated: this feature relies on the use of known unstable, legacy export functionality
+// from cosmos.
 func appExport(
-	logger cmtlog.Logger,
+	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
 	height int64,
@@ -276,21 +410,34 @@ func appExport(
 	appOpts servertypes.AppOptions,
 	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
-	var ethermintApp *app.App
 	homePath, ok := appOpts.Get(flags.FlagHome).(string)
 	if !ok || homePath == "" {
 		return servertypes.ExportedApp{}, errors.New("application home not set")
 	}
 
-	if height != -1 {
-		ethermintApp = app.NewApp(logger, db, traceStore, false, appOpts, baseapp.SetChainID(ChainID))
+	joltApp := joltapp.NewApp(
+		logger,
+		db,
+		traceStore,
+		height == -1, // -1: no height provided
+		appOpts,
+	)
 
-		if err := ethermintApp.LoadHeight(height); err != nil {
+	if height != -1 {
+		if err := joltApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
-	} else {
-		ethermintApp = app.NewApp(logger, db, traceStore, true, appOpts, baseapp.SetChainID(ChainID))
 	}
 
-	return ethermintApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
+	return joltApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
+}
+
+var tempDir = func() string {
+	dir, err := os.MkdirTemp("", "dydxprotocol")
+	if err != nil {
+		dir = joltapp.DefaultNodeHome
+	}
+	defer os.RemoveAll(dir)
+
+	return dir
 }
