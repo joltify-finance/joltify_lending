@@ -5,6 +5,8 @@ import (
 	"math"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -30,7 +32,7 @@ func NewAccumulator(previousAccrual time.Time, indexes RewardIndexes) *Accumulat
 // If a period ends before currentTime, the PreviousAccrualTime is shortened to the end time. This allows accumulate to be called sequentially on consecutive reward periods.
 //
 // totalSourceShares is the sum of all users' source shares. For example:total btcb supplied to jolt, total usdx borrowed from all bnb CDPs, or total shares in a swap pool.
-func (acc *Accumulator) Accumulate(period MultiRewardPeriod, totalSourceShares sdk.Dec, currentTime time.Time) {
+func (acc *Accumulator) Accumulate(period MultiRewardPeriod, totalSourceShares sdkmath.LegacyDec, currentTime time.Time) {
 	accumulationDuration := acc.getTimeElapsedWithinLimits(acc.PreviousAccumulationTime, currentTime, period.Start, period.End)
 
 	indexesIncrement := acc.calculateNewRewards(period.RewardsPerSecond, totalSourceShares, accumulationDuration)
@@ -59,8 +61,8 @@ func (*Accumulator) getTimeElapsedWithinLimits(start, end, limitMin, limitMax ti
 // The total rewards to distribute in this block are given by reward rate * duration. This value divided by the sum of all source shares to give
 // total rewards per source share, which is what the indexes store.
 // Note, duration is rounded to the nearest second to keep rewards calculation consistent with joltify.
-func (*Accumulator) calculateNewRewards(rewardsPerSecond sdk.Coins, totalSourceShares sdk.Dec, duration time.Duration) RewardIndexes {
-	if totalSourceShares.LTE(sdk.ZeroDec()) {
+func (*Accumulator) calculateNewRewards(rewardsPerSecond sdk.Coins, totalSourceShares sdkmath.LegacyDec, duration time.Duration) RewardIndexes {
+	if totalSourceShares.LTE(sdkmath.LegacyZeroDec()) {
 		// When there is zero source shares, there is no users with deposits/borrows/delegations to pay out the current block's rewards to.
 		// So drop the rewards and pay out nothing.
 		return nil
@@ -72,7 +74,7 @@ func (*Accumulator) calculateNewRewards(rewardsPerSecond sdk.Coins, totalSourceS
 		return nil
 	}
 	increment := newRewardIndexesFromCoins(rewardsPerSecond)
-	increment = increment.Mul(sdk.NewDec(durationSeconds)).Mul(sdk.NewDecFromInt(sdk.NewInt(1e12))).Quo(totalSourceShares)
+	increment = increment.Mul(sdkmath.LegacyNewDec(durationSeconds)).Mul(sdkmath.LegacyNewDecFromInt(sdkmath.NewInt(1e12))).Quo(totalSourceShares)
 	return increment
 }
 
@@ -96,7 +98,7 @@ func maxTime(t1, t2 time.Time) time.Time {
 func newRewardIndexesFromCoins(coins sdk.Coins) RewardIndexes {
 	var indexes RewardIndexes
 	for _, coin := range coins {
-		value := sdk.NewDecFromInt(coin.Amount)
+		value := sdkmath.LegacyNewDecFromInt(coin.Amount)
 		indexes = append(indexes, NewRewardIndex(coin.Denom, value))
 	}
 	return indexes

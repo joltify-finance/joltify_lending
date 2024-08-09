@@ -1,10 +1,12 @@
 package upgrade
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	incentivemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
@@ -17,9 +19,9 @@ import (
 
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 )
 
 const (
@@ -35,12 +37,12 @@ func CreateUpgradeHandlerForV011Upgrade(
 	quotaKeeper quotamodulekeeper.Keeper,
 	incentiveKeeper incentivemodulekeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v011")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v011")
 		}
 
-		burncoin := sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdk.NewInt(10000000)))
+		burncoin := sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdkmath.NewInt(10000000)))
 
 		m := spvmoduletypes.Moneymarket{Denom: "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", ConversionFactor: 6}
 
@@ -69,7 +71,7 @@ func CreateUpgradeHandlerForV011Upgrade(
 		})
 
 		// update the quota demon !!!!
-		quotaParams := quotaKeeper.GetParams(ctx)
+		quotaParams := quotaKeeper.GetParams(sdk.UnwrapSDKContext(ctx))
 
 		fmt.Printf(">>>beofre <<<%v\n", quotaParams.String())
 		globalTargets := quotaParams.Targets
@@ -101,18 +103,18 @@ func CreateUpgradeHandlerForV011Upgrade(
 		}
 
 		quotaParams.PerAccounttargets = perAccountTargets
-		quotaKeeper.SetParams(ctx, quotaParams)
+		quotaKeeper.SetParams(sdk.UnwrapSDKContext(ctx), quotaParams)
 
-		panew := quotaKeeper.GetParams(ctx)
+		panew := quotaKeeper.GetParams(sdk.UnwrapSDKContext(ctx))
 		fmt.Printf(">>>>%v\n", panew.String())
 
 		// update the incentive module parameter
-		currentTime := ctx.BlockTime()
-		incentiveParams := incentiveKeeper.GetParams(ctx)
-		addedIncentive := incentivetypes.NewMultiRewardPeriod(true, "0x3a0e72aefc820a7ec5a04cd3b987df8794d5adc48df082a5f8c2aba80a5f6e20", currentTime.Add(-1*24*time.Hour), currentTime.Add(oneyear), sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(0))))
+		currentTime := sdk.UnwrapSDKContext(ctx).BlockTime()
+		incentiveParams := incentiveKeeper.GetParams(sdk.UnwrapSDKContext(ctx))
+		addedIncentive := incentivetypes.NewMultiRewardPeriod(true, "0x3a0e72aefc820a7ec5a04cd3b987df8794d5adc48df082a5f8c2aba80a5f6e20", currentTime.Add(-1*24*time.Hour), currentTime.Add(oneyear), sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(0))))
 
 		incentiveParams.SPVRewardPeriods = append(incentiveParams.SPVRewardPeriods, addedIncentive)
-		incentiveKeeper.SetParams(ctx, incentiveParams)
+		incentiveKeeper.SetParams(sdk.UnwrapSDKContext(ctx), incentiveParams)
 
 		return mm.RunMigrations(ctx, configurator, vm)
 	}

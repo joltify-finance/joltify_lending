@@ -4,11 +4,9 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/cometbft/cometbft/crypto"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	types4 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -22,7 +20,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	type args struct {
 		borrower                   []sdk.AccAddress
 		keeper                     sdk.AccAddress
-		keeperRewardPercent        sdk.Dec
+		keeperRewardPercent        sdkmath.LegacyDec
 		initialModuleCoins         sdk.Coins
 		initialBorrowerCoins       sdk.Coins
 		initialKeeperCoins         sdk.Coins
@@ -48,8 +46,8 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	}
 
 	// Set up test constants
-	model := types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("0.5"))
-	reserveFactor := sdk.MustNewDecFromStr("0.05")
+	model := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("0.5"))
+	reserveFactor := sdkmath.LegacyMustNewDecFromStr("0.05")
 	oneMonthDur := time.Second * 30 * 24 * 3600
 	borrower := sdk.AccAddress(crypto.AddressHash([]byte("testborrower")))
 	keeper := sdk.AccAddress(crypto.AddressHash([]byte("testkeeper")))
@@ -59,7 +57,7 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	endTimeStr := "9000-01-01T00:00:00.000Z"
 	endTime, _ := time.Parse(layout, endTimeStr)
 
-	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower}, []sdkmath.Int{sdk.NewInt(100)})
+	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower}, []sdkmath.Int{sdkmath.NewInt(100)})
 
 	testCases := []liqTest{
 		{
@@ -67,17 +65,17 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			args{
 				borrower:                   []sdk.AccAddress{borrower},
 				keeper:                     keeper,
-				keeperRewardPercent:        sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))),
-				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(8*JoltCf))),
+				keeperRewardPercent:        sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
+				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100004118)),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100500020))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(98000001))), // initial - deposit + borrow + liquidation leftovers
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100500020))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98000001))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -106,17 +104,17 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			args{
 				borrower:                   []sdk.AccAddress{borrower},
 				keeper:                     keeper,
-				keeperRewardPercent:        sdk.MustNewDecFromStr("0.0"),
-				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))),
-				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(8*JoltCf))),
+				keeperRewardPercent:        sdkmath.LegacyMustNewDecFromStr("0.0"),
+				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
+				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100_004_117)),
 				expectedTotalBorrowedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 1)),
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(98*JoltCf))), // initial - deposit + borrow + liquidation leftovers
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98*JoltCf))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -145,17 +143,17 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			args{
 				borrower:                   []sdk.AccAddress{borrower},
 				keeper:                     keeper,
-				keeperRewardPercent:        sdk.MustNewDecFromStr("1.0"),
-				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))),
-				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(8*JoltCf))),
+				keeperRewardPercent:        sdkmath.LegacyMustNewDecFromStr("1.0"),
+				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
+				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100_004_117)),
 				expectedTotalBorrowedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 8_004_766)),
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(110_000_411))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(98*JoltCf))), // initial - deposit + borrow + liquidation leftovers
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(110_000_411))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98*JoltCf))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions:           nil,
 			},
 			errArgs{
@@ -168,12 +166,12 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1000*BtcbCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),                                                                                                                                  // $100 * 0.8 = $80 borrowable
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdc", sdk.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(0.2*BtcbCf))), // $20+$20+$20 = $80 borrowed
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1000*BtcbCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),                                                                                                                                              // $100 * 0.8 = $80 borrowable
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.2*BtcbCf))), // $20+$20+$20 = $80 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("ujolt", 1000000710),
@@ -182,8 +180,8 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 					sdk.NewInt64Coin("btc", 100000000031),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(102500001))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("usdc", sdk.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdk.NewInt(60000002)), sdk.NewCoin("bnb", sdk.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(0.2*BtcbCf))), // initial - deposit + borrow + liquidation leftovers
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500001))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(60000002)), sdk.NewCoin("bnb", sdkmath.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.2*BtcbCf))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -257,19 +255,19 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(100*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(100*BtcbCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1*BtcbCf))), // $100 + $100 + $100 = $300 * 0.8 = $240 borrowable                                                                                                                                       // $100 * 0.8 = $80 borrowable
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(120*JoltCf))),                                                                                    // $240 borrowed
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(100*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(100*BtcbCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf))), // $100 + $100 + $100 = $300 * 0.8 = $240 borrowable                                                                                                                                       // $100 * 0.8 = $80 borrowable
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(120*JoltCf))),                                                                                            // $240 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("ujolt", 1000101456),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(102500253)), sdk.NewCoin("bnb", sdk.NewInt(0.5*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(0.05*BtcbCf))), // 5% of each seized coin + initial balances
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(170.000001*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(90*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(99*BtcbCf))),
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500253)), sdk.NewCoin("bnb", sdkmath.NewInt(0.5*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.05*BtcbCf))), // 5% of each seized coin + initial balances
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(170.000001*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(90*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(99*BtcbCf))),
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -329,12 +327,12 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1000*BtcbCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdc", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(100*JoltCf))), // $100 + $100 + $100 = $300 * 0.9 = $270 borrowable
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(35*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1*BtcbCf))),       // $270 borrowed
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1000*BtcbCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(100*JoltCf))), // $100 + $100 + $100 = $300 * 0.9 = $270 borrowable
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(35*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf))),       // $270 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("bnb", 100000078047),
@@ -343,8 +341,8 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 					sdk.NewInt64Coin("usdx", 1),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(5*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(5*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(5*JoltCf))), // 5% of each seized coin + initial balances
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(135*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1*BtcbCf)), sdk.NewCoin("usdx", sdk.NewInt(0.000001*JoltCf))),
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(5*JoltCf))), // 5% of each seized coin + initial balances
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(135*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf)), sdk.NewCoin("usdx", sdkmath.NewInt(0.000001*JoltCf))),
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -433,12 +431,12 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("dai", sdk.NewInt(350*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(200*JoltCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdt", sdk.NewInt(250*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(245*JoltCf))),
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(350*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(200*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdt", sdkmath.NewInt(250*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(245*JoltCf))),
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("dai", 1000000000),
@@ -447,8 +445,8 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 					sdk.NewInt64Coin("usdx", 1000463500),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("dai", sdk.NewInt(1017.50*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1010*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("dai", sdk.NewInt(650*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(800000001)), sdk.NewCoin("usdt", sdk.NewInt(1250*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1245*JoltCf))),
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(1017.50*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1010*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(650*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(800000001)), sdk.NewCoin("usdt", sdkmath.NewInt(1250*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1245*JoltCf))),
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -507,15 +505,13 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
 
 			// account which will deposit "initial module account coins"
 			depositor := sdk.AccAddress(crypto.AddressHash([]byte("testdepositor")))
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{
 					tc.args.initialBorrowerCoins,
 					tc.args.initialKeeperCoins,
@@ -532,56 +528,56 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			joltGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("usdx",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdx:usd",                   // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("usdt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdt:usd",                   // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("usdc",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdc:usd",                   // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("dai",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"dai:usd",                    // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",                // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("bnb",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BnbCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BnbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"bnb:usd",                    // Market ID
-						sdk.NewInt(BnbCf),            // Conversion Factor
+						sdkmath.NewInt(BnbCf),        // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("btc",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BtcbCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BtcbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"btc:usd",                    // Market ID
-						sdk.NewInt(BtcbCf),           // Conversion Factor
+						sdkmath.NewInt(BtcbCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
 				types3.DefaultTotalSupplied, types3.DefaultTotalBorrowed, types3.DefaultTotalReserves,
 			)
@@ -603,71 +599,72 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 					{
 						MarketID:      "usdx:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "usdt:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "usdc:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "dai:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "joltify:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("2.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "bnb:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("10.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("10.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "btc:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("100.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("100.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 				},
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&joltGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGS)})
 
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
-			suite.auctionKeeper = tApp.GetAuctionKeeper()
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
+			suite.auctionKeeper = mapp.GetAuctionKeeper()
 
 			var err error
 
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[0], tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower[0], tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.keeper, tc.args.initialKeeperCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.keeper, tc.args.initialKeeperCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor, tc.args.initialModuleCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), depositor, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
 
 			// Deposit initial module account coins
@@ -683,8 +680,8 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			suite.Require().NoError(err)
 
 			// Set up liquidation chain context and run begin blocker
-			runAtTime := suite.ctx.BlockTime().Add(tc.args.liquidateAfter)
-			liqCtx := suite.ctx.WithBlockTime(runAtTime)
+			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(tc.args.liquidateAfter)
+			liqCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 			jolt.BeginBlocker(liqCtx, suite.keeper)
 
 			// Check borrow exists before liquidation
@@ -697,11 +694,11 @@ func (suite *KeeperTestSuite) TestKeeperQueryLiquidation() {
 			queryServer := joltKeeper.NewQueryServerImpl(suite.keeper, suite.app.GetAccountKeeper(), suite.app.GetBankKeeper())
 
 			req := types3.QueryLiquidateRequest{}
-			ret, err := queryServer.Liquidate(sdk.WrapSDKContext(suite.ctx), &req)
+			ret, err := queryServer.Liquidate(suite.ctx, &req)
 			suite.Require().NoError(err)
 
-			result := sdk.MustNewDecFromStr(ret.LiquidateItems[0].Ltv)
-			suite.Require().True(result.GTE(sdk.MustNewDecFromStr("1.0")))
+			result := sdkmath.LegacyMustNewDecFromStr(ret.LiquidateItems[0].Ltv)
+			suite.Require().True(result.GTE(sdkmath.LegacyMustNewDecFromStr("1.0")))
 		})
 	}
 }
@@ -712,7 +709,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 	type args struct {
 		borrower                   []sdk.AccAddress
 		keeper                     sdk.AccAddress
-		keeperRewardPercent        sdk.Dec
+		keeperRewardPercent        sdkmath.LegacyDec
 		initialModuleCoins         sdk.Coins
 		initialBorrowerCoins       sdk.Coins
 		initialKeeperCoins         sdk.Coins
@@ -738,8 +735,8 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 	}
 
 	// Set up test constants
-	model := types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("0.5"))
-	reserveFactor := sdk.MustNewDecFromStr("0.05")
+	model := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("0.5"))
+	reserveFactor := sdkmath.LegacyMustNewDecFromStr("0.05")
 	oneMonthDur := time.Second * 30 * 24 * 3600
 	borrower1 := sdk.AccAddress(crypto.AddressHash([]byte("testborrower")))
 	borrower2 := sdk.AccAddress(crypto.AddressHash([]byte("testborrower2")))
@@ -750,7 +747,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 	endTimeStr := "9000-01-01T00:00:00.000Z"
 	endTime, _ := time.Parse(layout, endTimeStr)
 
-	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower1}, []sdkmath.Int{sdk.NewInt(100)})
+	lotReturns, _ := types4.NewWeightedAddresses([]sdk.AccAddress{borrower1}, []sdkmath.Int{sdkmath.NewInt(100)})
 
 	testCases := []liqTest{
 		{
@@ -758,17 +755,17 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			args{
 				borrower:                   []sdk.AccAddress{borrower1, borrower2},
 				keeper:                     keeper,
-				keeperRewardPercent:        sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf))),
-				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(8*JoltCf))),
+				keeperRewardPercent:        sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialBorrowerCoins:       sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:               sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf))),
+				borrowCoins:                sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(8*JoltCf))),
 				liquidateAfter:             oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(sdk.NewInt64Coin("ujolt", 100004118)),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100500020))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(98000001))), // initial - deposit + borrow + liquidation leftovers
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100500020))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(98000001))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -798,12 +795,12 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower1, borrower2},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1000*BtcbCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),                                                                                                                                  // $100 * 0.8 = $80 borrowable
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdc", sdk.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdk.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(0.2*BtcbCf))), // $20+$20+$20 = $80 borrowed
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1000*BtcbCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),                                                                                                                                              // $100 * 0.8 = $80 borrowable
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(10*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.2*BtcbCf))), // $20+$20+$20 = $80 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("ujolt", 1000000710),
@@ -812,8 +809,8 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 					sdk.NewInt64Coin("btc", 100000000031),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(102500001))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("usdc", sdk.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdk.NewInt(60000002)), sdk.NewCoin("bnb", sdk.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(0.2*BtcbCf))), // initial - deposit + borrow + liquidation leftovers
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500001))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(20*JoltCf)), sdk.NewCoin("ujolt", sdkmath.NewInt(60000002)), sdk.NewCoin("bnb", sdkmath.NewInt(2*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.2*BtcbCf))), // initial - deposit + borrow + liquidation leftovers
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -887,19 +884,19 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower1, borrower2},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(100*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(100*BtcbCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1*BtcbCf))), // $100 + $100 + $100 = $300 * 0.8 = $240 borrowable                                                                                                                                       // $100 * 0.8 = $80 borrowable
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(120*JoltCf))),                                                                                    // $240 borrowed
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(100*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(100*BtcbCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf))), // $100 + $100 + $100 = $300 * 0.8 = $240 borrowable                                                                                                                                       // $100 * 0.8 = $80 borrowable
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(120*JoltCf))),                                                                                            // $240 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("ujolt", 1000101456),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(102500253)), sdk.NewCoin("bnb", sdk.NewInt(0.5*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(0.05*BtcbCf))), // 5% of each seized coin + initial balances
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(170.000001*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(90*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(99*BtcbCf))),
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(102500253)), sdk.NewCoin("bnb", sdkmath.NewInt(0.5*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(0.05*BtcbCf))), // 5% of each seized coin + initial balances
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(170.000001*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(90*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(99*BtcbCf))),
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -959,12 +956,12 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower1, borrower2},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1000*BtcbCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(100*JoltCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdc", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(100*JoltCf))), // $100 + $100 + $100 = $300 * 0.9 = $270 borrowable
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(35*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1*BtcbCf))),       // $270 borrowed
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(1000*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1000*BtcbCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(100*JoltCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("usdc", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(100*JoltCf))), // $100 + $100 + $100 = $300 * 0.9 = $270 borrowable
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(35*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf))),       // $270 borrowed
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("bnb", 100000078047),
@@ -973,8 +970,8 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 					sdk.NewInt64Coin("usdx", 1),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(5*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(5*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(5*JoltCf))), // 5% of each seized coin + initial balances
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(135*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdk.NewInt(1*BtcbCf)), sdk.NewCoin("usdx", sdk.NewInt(0.000001*JoltCf))),
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(5*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(5*JoltCf))), // 5% of each seized coin + initial balances
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(135*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(10*BnbCf)), sdk.NewCoin("btc", sdkmath.NewInt(1*BtcbCf)), sdk.NewCoin("usdx", sdkmath.NewInt(0.000001*JoltCf))),
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -1063,12 +1060,12 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			args{
 				borrower:             []sdk.AccAddress{borrower1, borrower2},
 				keeper:               keeper,
-				keeperRewardPercent:  sdk.MustNewDecFromStr("0.05"),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf))),
-				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("dai", sdk.NewInt(350*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(200*JoltCf))),
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdt", sdk.NewInt(250*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(245*JoltCf))),
+				keeperRewardPercent:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf))),
+				initialKeeperCoins:   sdk.NewCoins(sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("dai", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(350*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(200*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("usdt", sdkmath.NewInt(250*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(245*JoltCf))),
 				liquidateAfter:       oneMonthDur,
 				expectedTotalSuppliedCoins: sdk.NewCoins(
 					sdk.NewInt64Coin("dai", 1000000000),
@@ -1077,8 +1074,8 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 					sdk.NewInt64Coin("usdx", 1000463500),
 				),
 				expectedTotalBorrowedCoins: nil,
-				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("dai", sdk.NewInt(1017.50*JoltCf)), sdk.NewCoin("usdt", sdk.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(1010*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1000*JoltCf))),
-				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("dai", sdk.NewInt(650*JoltCf)), sdk.NewCoin("usdc", sdk.NewInt(800000001)), sdk.NewCoin("usdt", sdk.NewInt(1250*JoltCf)), sdk.NewCoin("usdx", sdk.NewInt(1245*JoltCf))),
+				expectedKeeperCoins:        sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(1017.50*JoltCf)), sdk.NewCoin("usdt", sdkmath.NewInt(1000*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(1010*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1000*JoltCf))),
+				expectedBorrowerCoins:      sdk.NewCoins(sdk.NewCoin("dai", sdkmath.NewInt(650*JoltCf)), sdk.NewCoin("usdc", sdkmath.NewInt(800000001)), sdk.NewCoin("usdt", sdkmath.NewInt(1250*JoltCf)), sdk.NewCoin("usdx", sdkmath.NewInt(1245*JoltCf))),
 				expectedAuctions: []types4.Auction{
 					&types4.CollateralAuction{
 						BaseAuction: types4.BaseAuction{
@@ -1136,16 +1133,12 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 
 	for i, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)})
-
 			// account which will deposit "initial module account coins"
 			depositor1 := sdk.AccAddress(crypto.AddressHash([]byte("testdepositor1")))
 
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{
 					tc.args.initialBorrowerCoins,
 					tc.args.initialBorrowerCoins,
@@ -1164,56 +1157,56 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			joltGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("usdx",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdx:usd",                   // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("usdt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdt:usd",                   // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("usdc",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"usdc:usd",                   // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("dai",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.9")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.9")), // Borrow Limit
 						"dai:usd",                    // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",                // Market ID
-						sdk.NewInt(JoltCf),           // Conversion Factor
+						sdkmath.NewInt(JoltCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("bnb",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BnbCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BnbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"bnb:usd",                    // Market ID
-						sdk.NewInt(BnbCf),            // Conversion Factor
+						sdkmath.NewInt(BnbCf),        // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 					types3.NewMoneyMarket("btc",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BtcbCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BtcbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"btc:usd",                    // Market ID
-						sdk.NewInt(BtcbCf),           // Conversion Factor
+						sdkmath.NewInt(BtcbCf),       // Conversion Factor
 						model,                        // Interest Rate Model
 						reserveFactor,                // Reserve Factor
 						tc.args.keeperRewardPercent), // Keeper Reward Percent
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
 				types3.DefaultTotalSupplied, types3.DefaultTotalBorrowed, types3.DefaultTotalReserves,
 			)
@@ -1235,74 +1228,74 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 					{
 						MarketID:      "usdx:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "usdt:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "usdc:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "dai:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("1.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("1.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "joltify:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("2.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "bnb:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("10.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("10.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "btc:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("100.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("100.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 				},
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&joltGS)})
-
-			keeper := tApp.GetJoltKeeper()
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = keeper
-			suite.auctionKeeper = tApp.GetAuctionKeeper()
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&joltGS)})
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
+			suite.auctionKeeper = mapp.GetAuctionKeeper()
 
 			var err error
 
 			// Run begin blocker to set up state
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[0], tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower[0], tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.borrower[1], tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.borrower[1], tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.keeper, tc.args.initialKeeperCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.keeper, tc.args.initialKeeperCoins)
 			suite.Require().NoError(err)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, depositor1, tc.args.initialModuleCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), depositor1, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
 
 			// Deposit initial module account coins
@@ -1318,7 +1311,7 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				if j == 1 && i == 0 {
 					// Borrow coins
 					oneLiquidate = true
-					borrowCoinsSmall := sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(5*JoltCf)))
+					borrowCoinsSmall := sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(5*JoltCf)))
 					err = suite.keeper.Borrow(suite.ctx, el, borrowCoinsSmall)
 					suite.Require().NoError(err)
 				} else {
@@ -1328,8 +1321,8 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 				}
 			}
 			// Set up liquidation chain context and run begin blocker
-			runAtTime := suite.ctx.BlockTime().Add(tc.args.liquidateAfter)
-			liqCtx := suite.ctx.WithBlockTime(runAtTime)
+			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(tc.args.liquidateAfter)
+			liqCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 			jolt.BeginBlocker(liqCtx, suite.keeper)
 
 			for _, el := range tc.args.borrower {
@@ -1342,15 +1335,15 @@ func (suite *KeeperTestSuite) TestKeeperMultiQueryLiquidation() {
 			}
 			queryServer := joltKeeper.NewQueryServerImpl(suite.keeper, suite.app.GetAccountKeeper(), suite.app.GetBankKeeper())
 			req := types3.QueryLiquidateRequest{}
-			ret, err := queryServer.Liquidate(sdk.WrapSDKContext(suite.ctx), &req)
+			ret, err := queryServer.Liquidate(suite.ctx, &req)
 			suite.Require().NoError(err)
 			if oneLiquidate {
 				suite.Require().Equal(1, len(ret.LiquidateItems))
 			} else {
 				suite.Require().Equal(2, len(ret.LiquidateItems))
 			}
-			result := sdk.MustNewDecFromStr(ret.LiquidateItems[0].Ltv)
-			suite.Require().True(result.GTE(sdk.MustNewDecFromStr("1.0")))
+			result := sdkmath.LegacyMustNewDecFromStr(ret.LiquidateItems[0].Ltv)
+			suite.Require().True(result.GTE(sdkmath.LegacyMustNewDecFromStr("1.0")))
 		})
 	}
 }

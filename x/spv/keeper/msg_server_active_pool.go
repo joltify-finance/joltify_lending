@@ -4,6 +4,7 @@ import (
 	"context"
 
 	coserrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
 
@@ -21,9 +22,9 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo1, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo1, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	if poolInfo1.PoolStatus != types.PoolInfo_PREPARE {
@@ -52,7 +53,7 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 
 	juniorPoolInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	if juniorPoolInfo.PoolStatus != types.PoolInfo_ACTIVE {
@@ -60,7 +61,7 @@ func (k msgServer) ActivePool(goCtx context.Context, msg *types.MsgActivePool) (
 	}
 
 	totalTarget := poolInfo1.TargetAmount.Add(juniorPoolInfo.TargetAmount)
-	poolAmount := sdk.NewDecFromInt(juniorPoolInfo.TargetAmount.Amount)
+	poolAmount := sdkmath.LegacyNewDecFromInt(juniorPoolInfo.TargetAmount.Amount)
 
 	ratio := poolAmount.QuoInt(totalTarget.Amount)
 

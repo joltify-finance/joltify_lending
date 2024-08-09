@@ -1,10 +1,10 @@
 package burnauction
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/joltify-finance/joltify_lending/x/burnauction/keeper"
 	"github.com/joltify-finance/joltify_lending/x/burnauction/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.

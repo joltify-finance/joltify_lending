@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,8 +24,8 @@ func TestGenesisState_Validate(t *testing.T) {
 			{
 				Denom: "ujolt",
 				Multipliers: Multipliers{
-					NewMultiplier("small", 1, sdk.MustNewDecFromStr("0.33")),
-					NewMultiplier("large", 12, sdk.MustNewDecFromStr("1.00")),
+					NewMultiplier("small", 1, sdkmath.LegacyMustNewDecFromStr("0.33")),
+					NewMultiplier("large", 12, sdkmath.LegacyMustNewDecFromStr("1.00")),
 				},
 			},
 		},

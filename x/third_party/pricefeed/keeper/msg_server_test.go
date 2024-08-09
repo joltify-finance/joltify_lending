@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/require"
@@ -17,8 +17,9 @@ import (
 
 func TestKeeper_PostPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(4)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{}).
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true).
 		WithBlockTime(time.Now().UTC())
 	k := tApp.GetPriceFeedKeeper()
 	msgSrv := keeper.NewMsgServerImpl(k)
@@ -52,7 +53,7 @@ func TestKeeper_PostPrice(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.giveMsg, func(t *testing.T) {
 			// Use MsgServer over keeper methods directly to tests against valid oracles
-			msg := types2.NewMsgPostPrice(tt.giveOracle.String(), tt.giveMarketId, sdk.MustNewDecFromStr("0.5"), tt.giveExpiry)
+			msg := types2.NewMsgPostPrice(tt.giveOracle.String(), tt.giveMarketId, sdkmath.LegacyMustNewDecFromStr("0.5"), tt.giveExpiry)
 			_, err := msgSrv.PostPrice(sdk.WrapSDKContext(ctx), msg)
 
 			if tt.wantAccepted {

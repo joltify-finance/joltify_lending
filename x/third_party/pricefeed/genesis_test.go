@@ -1,17 +1,15 @@
 package pricefeed_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/suite"
@@ -21,28 +19,28 @@ type GenesisTestSuite struct {
 	suite.Suite
 
 	tApp   app.TestApp
-	ctx    sdk.Context
+	ctx    context.Context
 	keeper keeper.Keeper
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	suite.ctx = suite.tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
+	suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	suite.ctx = suite.tApp.NewContext(true)
 	suite.keeper = suite.tApp.GetPriceFeedKeeper()
 }
 
 func (suite *GenesisTestSuite) TestValidGenState() {
 	suite.NotPanics(func() {
-		suite.tApp.InitializeFromGenesisStates(nil, nil,
+		suite.tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 			NewPricefeedGenStateMulti(),
 		)
 	})
 	_, addrs := app.GeneratePrivKeyAddressPairs(10)
 
 	// Must create a new TestApp or InitChain will panic with index already set
-	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.NotPanics(func() {
-		suite.tApp.InitializeFromGenesisStates(nil, nil,
+		suite.tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 			NewPricefeedGenStateWithOracles(addrs),
 		)
 	})
@@ -52,10 +50,10 @@ func (suite *GenesisTestSuite) TestInitExportGenState() {
 	gs := NewPricefeedGen()
 
 	suite.NotPanics(func() {
-		pricefeed.InitGenesis(suite.ctx, suite.keeper, gs)
+		pricefeed.InitGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper, gs)
 	})
 
-	exportedGs := pricefeed.ExportGenesis(suite.ctx, suite.keeper)
+	exportedGs := pricefeed.ExportGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper)
 	suite.NoError(gs.VerboseEqual(exportedGs), "exported genesis should match init genesis")
 }
 
@@ -63,7 +61,7 @@ func (suite *GenesisTestSuite) TestParamPricesGenState() {
 	gs := NewPricefeedGen()
 
 	suite.NotPanics(func() {
-		pricefeed.InitGenesis(suite.ctx, suite.keeper, gs)
+		pricefeed.InitGenesis(sdk.UnwrapSDKContext(suite.ctx), suite.keeper, gs)
 	})
 
 	params := suite.keeper.GetParams(suite.ctx)

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	coserrors "cosmossdk.io/errors"
+	types2 "cosmossdk.io/store/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -15,7 +16,7 @@ import (
 // TransferOwnership will allow the investor to submit the request to transfer/update their ratio in the pool
 func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransferOwnership) (*types.MsgTransferOwnershipResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(types2.NewInfiniteGasMeter())
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -35,7 +36,7 @@ func (k msgServer) TransferOwnership(goCtx context.Context, msg *types.MsgTransf
 		return &types.MsgTransferOwnershipResponse{}, fmt.Errorf("you current status is  %v must be in deposit unset to submit the request", d.DepositType)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
 		return &types.MsgTransferOwnershipResponse{}, types.ErrPoolNotFound
 	}

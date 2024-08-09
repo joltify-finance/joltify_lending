@@ -4,24 +4,23 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGrpcAuctionsFilter(t *testing.T) {
 	// setup
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
+	log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
-	tApp.InitializeFromGenesisStates(nil, nil)
+	tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil)
 	auctionsKeeper := tApp.GetAuctionKeeper()
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+	ctx := tApp.NewContext(true)
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
 
 	auctions := []types2.Auction{
@@ -45,7 +44,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 			c("usdx", 12345678),
 			types2.WeightedAddresses{
 				Addresses: addrs,
-				Weights:   []sdk.Int{sdk.NewInt(100)},
+				Weights:   []sdkmath.Int{sdkmath.NewInt(100)},
 			},
 			c("debt", 12345678),
 		).WithID(2),
@@ -56,7 +55,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 			c("usdx", 12345678),
 			types2.WeightedAddresses{
 				Addresses: addrs,
-				Weights:   []sdk.Int{sdk.NewInt(100)},
+				Weights:   []sdkmath.Int{sdkmath.NewInt(100)},
 			},
 			c("debt", 12345678),
 		).WithID(3),
@@ -120,7 +119,7 @@ func TestGrpcAuctionsFilter(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.giveName, func(t *testing.T) {
-			res, err := qs.Auctions(sdk.WrapSDKContext(ctx), &tc.giveRequest)
+			res, err := qs.Auctions(ctx, &tc.giveRequest)
 			require.NoError(t, err)
 
 			var unpackedAuctions []types2.Auction

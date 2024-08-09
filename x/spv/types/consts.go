@@ -1,8 +1,6 @@
 package types
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-)
+import sdkmath "cosmossdk.io/math"
 
 const (
 	Maxfreq         = 31536000
@@ -13,4 +11,4 @@ const (
 	JOLTPRECISION   = 1e6
 )
 
-var RESERVEFACTOR = sdk.NewDecWithPrec(15, 2)
+var RESERVEFACTOR = sdkmath.LegacyNewDecWithPrec(15, 2)

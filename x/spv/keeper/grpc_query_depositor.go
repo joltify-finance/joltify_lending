@@ -3,10 +3,10 @@ package keeper
 import (
 	"context"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"cosmossdk.io/store/prefix"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
-	coserrors "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -22,14 +22,14 @@ func (k Keeper) Depositor(goCtx context.Context, req *types.QueryDepositorReques
 
 	investor, err := sdk.AccAddressFromBech32(req.GetWalletAddress())
 	if err != nil {
-		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", req.GetWalletAddress())
+		return nil, errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", req.GetWalletAddress())
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	depositor, ok := k.GetDepositor(ctx, req.DepositPoolIndex, investor)
 
 	if !ok {
-		return nil, coserrors.Wrap(sdkerrors.ErrNotFound, "depositor not found")
+		return nil, errorsmod.Wrap(sdkerrors.ErrNotFound, "depositor not found")
 	}
 
 	return &types.QueryDepositorResponse{Depositor: &depositor}, nil

@@ -3,6 +3,8 @@ package types
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/joltify-finance/joltify_lending/utils"
 
 	"github.com/stretchr/testify/require"
@@ -35,7 +37,7 @@ func TestMsgPlaceBid_ValidateBasic(t *testing.T) {
 		},
 		{
 			"negative amount",
-			NewMsgPlaceBid(1, testAccAddress1, sdk.Coin{Denom: "token", Amount: sdk.NewInt(-10)}),
+			NewMsgPlaceBid(1, testAccAddress1, sdk.Coin{Denom: "token", Amount: sdkmath.NewInt(-10)}),
 			false,
 		},
 		{

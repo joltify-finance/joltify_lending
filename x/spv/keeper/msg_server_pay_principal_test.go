@@ -1,8 +1,10 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
@@ -17,14 +19,14 @@ type payPrincipalSuite struct {
 	keeper       *spvkeeper.Keeper
 	nftKeeper    types.NFTKeeper
 	app          types.MsgServer
-	ctx          sdk.Context
+	ctx          context.Context
 	investors    []string
 	investorPool string
 }
 
 func setupPools(suite *payPrincipalSuite) {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -75,13 +77,13 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(200000))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(200000))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	req := types.MsgPayPrincipal{
 		Creator:   "invalid",
 		PoolIndex: suite.investorPool,
-		Token:     sdk.NewCoin("abc", sdk.OneInt()),
+		Token:     sdk.NewCoin("abc", sdkmath.OneInt()),
 	}
 
 	_, err := suite.app.PayPrincipal(suite.ctx, &req)
@@ -101,21 +103,21 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   suite.investors[1],
 		PoolIndex: suite.investorPool,
-		Token:     sdk.NewCoin("ausdc", sdk.NewIntFromUint64(2e5)),
+		Token:     sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
-	borrow.BorrowAmount = sdk.NewCoin(borrow.BorrowAmount.Denom, sdk.NewInt(1.2e5))
+	borrow.BorrowAmount = sdk.NewCoin(borrow.BorrowAmount.Denom, sdkmath.NewInt(1.2e5))
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
 	poolInfo, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
-	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(211))
+	req.Token = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(211))
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().ErrorContains(err, "only pool owner can pay the principal")
 
@@ -123,14 +125,14 @@ func (suite *payPrincipalSuite) TestWithExpectedErrors() {
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().ErrorContains(err, "you need to pay interest firstly")
 
-	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.2e5))})
+	_, err = suite.app.RepayInterest(suite.ctx, &types.MsgRepayInterest{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, Token: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.2e5))})
 	suite.Require().NoError(err)
 
 	req.Creator = "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0"
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().ErrorContains(err, "principal is not fully paid")
 
-	req.Token = sdk.NewCoin("ausdc", sdk.NewIntFromUint64(12e4))
+	req.Token = sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(12e4))
 	req.Creator = "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0"
 	_, err = suite.app.PayPrincipal(suite.ctx, &req)
 	suite.Require().NoError(err)

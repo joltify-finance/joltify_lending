@@ -1,14 +1,15 @@
 package keeper
 
 import (
+	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -45,12 +46,15 @@ func NewKeeper(
 	}
 }
 
-func (k Keeper) Logger(ctx sdk.Context) log.Logger {
+func (k Keeper) Logger(rctx context.Context) log.Logger {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k Keeper) SetProject(ctx sdk.Context, p *types.ProjectInfo) (int32, error) {
+func (k Keeper) SetProject(rctx context.Context, p *types.ProjectInfo) (int32, error) {
 	var currentNum uint32
+	ctx := sdk.UnwrapSDKContext(rctx)
+
 	projectStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	projectNum := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoNum))
 	data := projectNum.Get(types.KeyPrefix(types.ProjectInfoNum))
@@ -72,12 +76,14 @@ func (k Keeper) SetProject(ctx sdk.Context, p *types.ProjectInfo) (int32, error)
 	return int32(currentNum), nil
 }
 
-func (k Keeper) UpdateProject(ctx sdk.Context, p *types.ProjectInfo) {
+func (k Keeper) UpdateProject(rctx context.Context, p *types.ProjectInfo) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	projectStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	projectStore.Set(types.KeyPrefix(string(p.Index)), k.cdc.MustMarshal(p))
 }
 
-func (k Keeper) GetProject(ctx sdk.Context, index int32) (val types.ProjectInfo, found bool) {
+func (k Keeper) GetProject(rctx context.Context, index int32) (val types.ProjectInfo, found bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	bz := store.Get(types.KeyPrefix(string(index)))
 	if bz == nil {
@@ -88,9 +94,10 @@ func (k Keeper) GetProject(ctx sdk.Context, index int32) (val types.ProjectInfo,
 }
 
 // IteratePool iterates over all deposit objects in the store and performs a callback function
-func (k Keeper) IterateProject(ctx sdk.Context, cb func(poolInfo types.ProjectInfo) (stop bool)) {
+func (k Keeper) IterateProject(rctx context.Context, cb func(poolInfo types.ProjectInfo) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var projects types.ProjectInfo
@@ -101,7 +108,8 @@ func (k Keeper) IterateProject(ctx sdk.Context, cb func(poolInfo types.ProjectIn
 	}
 }
 
-func (k Keeper) DeleteProject(ctx sdk.Context, index int32) {
+func (k Keeper) DeleteProject(rctx context.Context, index int32) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProjectInfoPrefix))
 	store.Delete(types.KeyPrefix(string(index)))
 }

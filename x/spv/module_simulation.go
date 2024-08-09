@@ -6,7 +6,6 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	"github.com/joltify-finance/joltify_lending/testutil/sample"
@@ -97,14 +96,14 @@ func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedP
 }
 
 // RegisterStoreDecoder registers a decoder
-func (am AppModule) RegisterStoreDecoder(_ sdk.StoreDecoderRegistry) {}
+func (am AppModule) RegisterStoreDecoder(_ simtypes.StoreDecoderRegistry) {}
 
 // WeightedOperations returns the all the gov module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	operations := make([]simtypes.WeightedOperation, 0)
 
 	var weightMsgCreatePool int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgCreatePool, &weightMsgCreatePool, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgCreatePool, &weightMsgCreatePool, nil,
 		func(_ *rand.Rand) {
 			weightMsgCreatePool = defaultWeightMsgCreatePool
 		},
@@ -115,7 +114,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgAddInvestors int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgAddInvestors, &weightMsgAddInvestors, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgAddInvestors, &weightMsgAddInvestors, nil,
 		func(_ *rand.Rand) {
 			weightMsgAddInvestors = defaultWeightMsgAddInvestors
 		},
@@ -126,7 +125,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgDeposit int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgDeposit, &weightMsgDeposit, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgDeposit, &weightMsgDeposit, nil,
 		func(_ *rand.Rand) {
 			weightMsgDeposit = defaultWeightMsgDeposit
 		},
@@ -137,7 +136,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgBorrow int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgBorrow, &weightMsgBorrow, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgBorrow, &weightMsgBorrow, nil,
 		func(_ *rand.Rand) {
 			weightMsgBorrow = defaultWeightMsgBorrow
 		},
@@ -148,7 +147,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgRepayInterest int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgRepayInterest, &weightMsgRepayInterest, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgRepayInterest, &weightMsgRepayInterest, nil,
 		func(_ *rand.Rand) {
 			weightMsgRepayInterest = defaultWeightMsgRepayInterest
 		},
@@ -159,7 +158,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgClaimInterest int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgClaimInterest, &weightMsgClaimInterest, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgClaimInterest, &weightMsgClaimInterest, nil,
 		func(_ *rand.Rand) {
 			weightMsgClaimInterest = defaultWeightMsgClaimInterest
 		},
@@ -170,7 +169,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgUpdatePool int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgUpdatePool, &weightMsgUpdatePool, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgUpdatePool, &weightMsgUpdatePool, nil,
 		func(_ *rand.Rand) {
 			weightMsgUpdatePool = defaultWeightMsgUpdatePool
 		},
@@ -181,7 +180,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgActivePool int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgActivePool, &weightMsgActivePool, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgActivePool, &weightMsgActivePool, nil,
 		func(_ *rand.Rand) {
 			weightMsgActivePool = defaultWeightMsgActivePool
 		},
@@ -192,7 +191,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgPayPrincipal int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgPayPrincipal, &weightMsgPayPrincipal, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgPayPrincipal, &weightMsgPayPrincipal, nil,
 		func(_ *rand.Rand) {
 			weightMsgPayPrincipal = defaultWeightMsgPayPrincipal
 		},
@@ -203,7 +202,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgWithdrawPrincipal int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgWithdrawPrincipal, &weightMsgWithdrawPrincipal, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgWithdrawPrincipal, &weightMsgWithdrawPrincipal, nil,
 		func(_ *rand.Rand) {
 			weightMsgWithdrawPrincipal = defaultWeightMsgWithdrawPrincipal
 		},
@@ -214,7 +213,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgSubmitWitdrawProposal int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgSubmitWitdrawProposal, &weightMsgSubmitWitdrawProposal, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgSubmitWitdrawProposal, &weightMsgSubmitWitdrawProposal, nil,
 		func(_ *rand.Rand) {
 			weightMsgSubmitWitdrawProposal = defaultWeightMsgSubmitWitdrawProposal
 		},
@@ -225,7 +224,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgTransferOwnership int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgTransferOwnership, &weightMsgTransferOwnership, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgTransferOwnership, &weightMsgTransferOwnership, nil,
 		func(_ *rand.Rand) {
 			weightMsgTransferOwnership = defaultWeightMsgTransferOwnership
 		},
@@ -236,7 +235,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgLiquidate int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgLiquidate, &weightMsgLiquidate, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgLiquidate, &weightMsgLiquidate, nil,
 		func(_ *rand.Rand) {
 			weightMsgLiquidate = defaultWeightMsgLiquidate
 		},

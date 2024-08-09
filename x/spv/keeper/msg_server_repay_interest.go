@@ -5,19 +5,21 @@ import (
 	"errors"
 	"time"
 
+	storetypes "cosmossdk.io/store/types"
 	types2 "github.com/cosmos/cosmos-sdk/codec/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 
 	coserrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowInterest, reserve sdk.Dec, firstBorrow bool, exchangeRatio sdk.Dec) (sdk.Coin, time.Time, error) {
+func (k Keeper) updateInterestData(rctx context.Context, interestData *types.BorrowInterest, reserve sdkmath.LegacyDec, firstBorrow bool, exchangeRatio sdkmath.LegacyDec) (sdk.Coin, time.Time, error) {
 	var payment, paymentToInvestor sdk.Coin
 	var thisPaymentTime time.Time
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// as the payment cannot be happened at exact payfreq time, so we need to round down to the latest payment time
 	latestPaymentDueTime := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq*BASE) * time.Second)
 
@@ -29,20 +31,20 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 	}
 	delta := latestPaymentDueTime.Sub(latestPaymentTime)
 	denom := interestData.Payments[0].PaymentAmount.Denom
-	payment = sdk.NewCoin(denom, sdk.ZeroInt())
+	payment = sdk.NewCoin(denom, sdkmath.ZeroInt())
 	lastBorrow := interestData.BorrowDetails[len(interestData.BorrowDetails)-1].BorrowedAmount
 	if delta >= time.Second*time.Duration(interestData.PayFreq) {
 		for delta > 0 {
 			latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 			// we need to pay the whole month
 			freqRatio := interestData.MonthlyRatio
-			paymentAmount := freqRatio.Mul(sdk.NewDecFromInt(lastBorrow.Amount)).TruncateInt()
+			paymentAmount := freqRatio.Mul(sdkmath.LegacyNewDecFromInt(lastBorrow.Amount)).TruncateInt()
 			if paymentAmount.IsZero() {
-				return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
+				return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdkmath.ZeroInt()}, time.Time{}, nil
 			}
 
 			paymentAmountUsd := outboundConvertToUSD(paymentAmount, exchangeRatio)
-			reservedAmount := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+			reservedAmount := sdkmath.LegacyNewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
 			toInvestors := paymentAmountUsd.Sub(reservedAmount)
 			pReserve, found := k.GetReserve(ctx, denom)
 			if !found {
@@ -68,15 +70,15 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 		latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
 		if currentTimeTruncated.Before(latestPaymentTime) {
-			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdk.ZeroInt()}, time.Time{}, nil
+			return sdk.Coin{Denom: lastBorrow.Denom, Amount: sdkmath.ZeroInt()}, time.Time{}, nil
 		}
 		deltaTruncated := currentTimeTruncated.Sub(latestPaymentTime).Seconds()
 		r := CalculateInterestRate(interestData.Apy, int(interestData.PayFreq))
-		interest := r.Power(uint64(deltaTruncated)).Sub(sdk.OneDec())
+		interest := r.Power(uint64(deltaTruncated)).Sub(sdkmath.LegacyOneDec())
 
 		usdInterest := interest.Mul(exchangeRatio)
 		paymentAmountUsd := usdInterest.MulInt(lastBorrow.Amount).TruncateInt()
-		reservedAmountUsd := sdk.NewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
+		reservedAmountUsd := sdkmath.LegacyNewDecFromInt(paymentAmountUsd).Mul(reserve).TruncateInt()
 		toInvestors := paymentAmountUsd.Sub(reservedAmountUsd)
 
 		pReserve, found := k.GetReserve(ctx, denom)
@@ -101,15 +103,15 @@ func (k Keeper) updateInterestData(ctx sdk.Context, interestData *types.BorrowIn
 
 // getAllinterestToBePaid returns the total interest to be paid for all the borrows in the pool using the
 // LOCAL currency
-func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo) (sdkmath.Int, time.Time, error) {
+func (k Keeper) getAllInterestToBePaid(ctx context.Context, poolInfo *types.PoolInfo) (sdkmath.Int, time.Time, error) {
 	nftClasses := poolInfo.PoolNFTIds
 	// the first element is the pool class, we skip it
 	totalPayment := sdkmath.NewInt(0)
 	firstBorrow := true
-	var exchangeRatio sdk.Dec
+	var exchangeRatio sdkmath.LegacyDec
 
 	if poolInfo.PoolStatus == types.PoolInfo_INACTIVE {
-		return sdk.ZeroInt(), time.Time{}, errors.New("no interest to be paid")
+		return sdkmath.ZeroInt(), time.Time{}, errors.New("no interest to be paid")
 	}
 
 	if poolInfo.InterestPrepayment == nil || poolInfo.InterestPrepayment.Counter == 0 {
@@ -162,32 +164,33 @@ func (k Keeper) getAllInterestToBePaid(ctx sdk.Context, poolInfo *types.PoolInfo
 	return totalPayment, poolLatestPaymentTime, nil
 }
 
-func (k msgServer) calculatePaymentMonth(ctx sdk.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdk.Dec, error) {
+func (k msgServer) calculatePaymentMonth(rctx context.Context, poolInfo types.PoolInfo, marketId string, totalPaid sdkmath.Int) (int32, sdkmath.Int, sdkmath.Int, sdkmath.LegacyDec, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	paymentAmount, err := k.calculateTotalDueInterest(ctx, poolInfo)
 	if err != nil {
-		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), err
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.LegacyZeroDec(), err
 	}
 	if paymentAmount.IsZero() {
-		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdk.ZeroDec(), errors.New("no interest to be paid")
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.LegacyZeroDec(), errors.New("no interest to be paid")
 	}
 	usdEachMonth, ratio, err := k.outboundConvertToUSDWithMarketID(ctx, marketId, paymentAmount)
 	if err != nil {
-		return 0, sdkmath.ZeroInt(), sdk.ZeroInt(), sdk.ZeroDec(), err
+		return 0, sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.LegacyZeroDec(), err
 	}
 	counter := totalPaid.Quo(usdEachMonth)
 	return int32(counter.Int64()), usdEachMonth.Mul(counter), usdEachMonth, ratio, nil
 }
 
-func (k msgServer) RepayInterest(goCtx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+func (k msgServer) RepayInterest(rctx context.Context, msg *types.MsgRepayInterest) (*types.MsgRepayInterestResponse, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
+	ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
 		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool %v not found", msg.PoolIndex)
 	}

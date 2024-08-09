@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -23,7 +25,7 @@ var rewardPeriodWithInvalidRewardsPerSecond = types2.NewRewardPeriod(
 	"bnb",
 	time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 	time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-	sdk.Coin{Denom: "INVALID!@#😫", Amount: sdk.ZeroInt()},
+	sdk.Coin{Denom: "INVALID!@#😫", Amount: sdkmath.ZeroInt()},
 )
 
 var rewardMultiPeriodWithInvalidRewardsPerSecond = types2.NewMultiRewardPeriod(
@@ -31,7 +33,7 @@ var rewardMultiPeriodWithInvalidRewardsPerSecond = types2.NewMultiRewardPeriod(
 	"bnb",
 	time.Date(2020, 10, 15, 14, 0, 0, 0, time.UTC),
 	time.Date(2024, 10, 15, 14, 0, 0, 0, time.UTC),
-	sdk.Coins{sdk.Coin{Denom: "INVALID!@#😫", Amount: sdk.ZeroInt()}},
+	sdk.Coins{sdk.Coin{Denom: "INVALID!@#😫", Amount: sdkmath.ZeroInt()}},
 )
 
 var validMultiRewardPeriod = types2.NewMultiRewardPeriod(
@@ -78,15 +80,15 @@ func (suite *ParamTestSuite) TestParamValidation() {
 					{
 						Denom: "jolt",
 						Multipliers: types2.Multipliers{
-							types2.NewMultiplier("small", 1, sdk.MustNewDecFromStr("0.25")),
-							types2.NewMultiplier("large", 12, sdk.MustNewDecFromStr("1.0")),
+							types2.NewMultiplier("small", 1, sdkmath.LegacyMustNewDecFromStr("0.25")),
+							types2.NewMultiplier("large", 12, sdkmath.LegacyMustNewDecFromStr("1.0")),
 						},
 					},
 					{
 						Denom: "ujolt",
 						Multipliers: types2.Multipliers{
-							types2.NewMultiplier("small", 1, sdk.MustNewDecFromStr("0.2")),
-							types2.NewMultiplier("large", 12, sdk.MustNewDecFromStr("1.0")),
+							types2.NewMultiplier("small", 1, sdkmath.LegacyMustNewDecFromStr("0.2")),
+							types2.NewMultiplier("large", 12, sdkmath.LegacyMustNewDecFromStr("1.0")),
 						},
 					},
 				},
@@ -133,7 +135,7 @@ func (suite *ParamTestSuite) TestParamValidation() {
 					{
 						Denom: "jolt",
 						Multipliers: types2.Multipliers{
-							types2.NewMultiplier("small", -9999, sdk.MustNewDecFromStr("0.25")),
+							types2.NewMultiplier("small", -9999, sdkmath.LegacyMustNewDecFromStr("0.25")),
 						},
 					},
 				},

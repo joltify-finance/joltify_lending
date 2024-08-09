@@ -4,6 +4,7 @@ import (
 	"context"
 
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
@@ -34,7 +35,7 @@ func (m msgServer) Deposit(goCtx context.Context, msg *types.MsgDeposit) (*types
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +95,7 @@ func (m msgServer) SwapExactForTokens(goCtx context.Context, msg *types.MsgSwapE
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +127,7 @@ func (m msgServer) SwapExactForBatchTokens(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +159,7 @@ func (m msgServer) SwapForExactTokens(goCtx context.Context, msg *types.MsgSwapF
 		return nil, err
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +180,8 @@ func (m msgServer) SwapForExactTokens(goCtx context.Context, msg *types.MsgSwapF
 }
 
 // checkDeadline returns an error if block time exceeds an included deadline
-func checkDeadline(ctx sdk.Context, msg sdk.Msg) error {
+func checkDeadline(rctx context.Context, msg sdk.Msg) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	deadlineMsg, ok := msg.(types.MsgWithDeadline)
 	if !ok {
 		return nil

@@ -1,26 +1,29 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
+
+	"cosmossdk.io/store/metrics"
 
 	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/gogo/protobuf/proto"
 
+	"cosmossdk.io/x/nft"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/nft"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 
-	tmdb "github.com/cometbft/cometbft-db"
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -47,11 +50,11 @@ var Wallets = []string{
 	"jolt13xxls80rw3p036zyfy8hhtjyvft4ckg5a09agh",
 }
 
-func (m mockKycKeeper) GetInvestorWallets(_ sdk.Context, investorID string) (kycmoduletypes.Investor, error) {
+func (m mockKycKeeper) GetInvestorWallets(_ context.Context, investorID string) (kycmoduletypes.Investor, error) {
 	return kycmoduletypes.Investor{InvestorId: investorID, WalletAddress: Wallets}, nil
 }
 
-func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmoduletypes.ProjectInfo, found bool) {
+func (m mockKycKeeper) GetProject(ctx context.Context, index int32) (val kycmoduletypes.ProjectInfo, found bool) {
 	b := kycmoduletypes.BasicInfo{
 		Description:    "This is the test info",
 		ProjectsUrl:    "empty",
@@ -71,12 +74,12 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		BasicInfo:        &b,
 		ProjectLength:    31536000, // 1 year
 		PayFreq:          "15768000",
-		BaseApy:          sdk.NewDecWithPrec(12, 2),
+		BaseApy:          sdkmath.LegacyNewDecWithPrec(12, 2),
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
-		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(2000000),
-		MinDepositAmount: sdk.NewInt(1000000),
+		JuniorMinRatio:   sdkmath.LegacyNewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdkmath.NewInt(2000000),
+		MinDepositAmount: sdkmath.NewInt(1000000),
 	}
 
 	b2 := kycmoduletypes.BasicInfo{
@@ -97,12 +100,12 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		BasicInfo:        &b2,
 		ProjectLength:    31536000, // 1 year
 		PayFreq:          "15768000",
-		BaseApy:          sdk.NewDecWithPrec(12, 2),
+		BaseApy:          sdkmath.LegacyNewDecWithPrec(12, 2),
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
-		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(10000000000000),
+		JuniorMinRatio:   sdkmath.LegacyNewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(10000000000000),
 	}
 
 	pi3 := kycmoduletypes.ProjectInfo{
@@ -112,12 +115,12 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		BasicInfo:        &b2,
 		ProjectLength:    oneYear, // 1 year
 		PayFreq:          strconv.Itoa(oneMonth),
-		BaseApy:          sdk.NewDecWithPrec(12, 2),
+		BaseApy:          sdkmath.LegacyNewDecWithPrec(12, 2),
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
-		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(5000000000000),
+		JuniorMinRatio:   sdkmath.LegacyNewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(5000000000000),
 	}
 
 	pi4 := kycmoduletypes.ProjectInfo{
@@ -127,12 +130,12 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		BasicInfo:        &b2,
 		ProjectLength:    oneYear, // 1 year
 		PayFreq:          strconv.Itoa(oneWeek),
-		BaseApy:          sdk.NewDecWithPrec(10, 2),
+		BaseApy:          sdkmath.LegacyNewDecWithPrec(10, 2),
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
-		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(100000000000000),
+		JuniorMinRatio:   sdkmath.LegacyNewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(100000000000000),
 	}
 
 	pi5 := kycmoduletypes.ProjectInfo{
@@ -142,12 +145,12 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 		BasicInfo:        &b2,
 		ProjectLength:    oneYear, // 1 year
 		PayFreq:          strconv.Itoa(oneWeek),
-		BaseApy:          sdk.NewDecWithPrec(10, 2),
+		BaseApy:          sdkmath.LegacyNewDecWithPrec(10, 2),
 		MarketId:         "aud:usd",
 		SeparatePool:     false,
-		JuniorMinRatio:   sdk.NewDecWithPrec(1, 15),
-		MinBorrowAmount:  sdk.NewInt(200000000000000),
-		MinDepositAmount: sdk.NewInt(150000000000000),
+		JuniorMinRatio:   sdkmath.LegacyNewDecWithPrec(1, 15),
+		MinBorrowAmount:  sdkmath.NewInt(200000000000000),
+		MinDepositAmount: sdkmath.NewInt(150000000000000),
 	}
 
 	a := []*kycmoduletypes.ProjectInfo{&pi1, &pi2, &pi3, &pi4, &pi5}
@@ -157,7 +160,7 @@ func (m mockKycKeeper) GetProject(ctx sdk.Context, index int32) (val kycmodulety
 	return *a[index-1], true
 }
 
-func (m mockKycKeeper) GetByWallet(_ sdk.Context, wallet string) (kycmoduletypes.Investor, error) {
+func (m mockKycKeeper) GetByWallet(_ context.Context, wallet string) (kycmoduletypes.Investor, error) {
 	inv := kycmoduletypes.Investor{
 		InvestorId:    "1",
 		WalletAddress: []string{wallet},
@@ -176,12 +179,12 @@ func (m mockKycKeeper) GetByWallet(_ sdk.Context, wallet string) (kycmoduletypes
 
 type mockAccKeeper struct{}
 
-func (m mockAccKeeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI {
+func (m mockAccKeeper) GetAccount(ctx context.Context, addr sdk.AccAddress) sdk.AccountI {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockAccKeeper) GetModuleAccount(ctx sdk.Context, name string) authtypes.ModuleAccountI {
+func (m mockAccKeeper) GetModuleAccount(ctx context.Context, name string) sdk.ModuleAccountI {
 	addr := authtypes.NewModuleAddress(name)
 	baseAcc := authtypes.NewBaseAccountWithAddress(addr)
 	return authtypes.NewModuleAccount(baseAcc, name, "mint")
@@ -198,22 +201,22 @@ type mockNFTKeeper struct {
 	nftsWithClassID map[string]*nft.NFT
 }
 
-func (m mockNFTKeeper) GetOwner(ctx sdk.Context, classID string, nftID string) sdk.AccAddress {
+func (m mockNFTKeeper) GetOwner(ctx context.Context, classID string, nftID string) sdk.AccAddress {
 	// TODO implement me
 	return []byte("owner")
 }
 
-func (m mockNFTKeeper) Burn(ctx sdk.Context, classID string, nftID string) error {
+func (m mockNFTKeeper) Burn(ctx context.Context, classID string, nftID string) error {
 	key := fmt.Sprintf("%v:%v", classID, nftID)
 	delete(m.nftsWithClassID, key)
 	return nil
 }
 
-func (m mockNFTKeeper) Transfer(ctx sdk.Context, classID string, nftID string, receiver sdk.AccAddress) error {
+func (m mockNFTKeeper) Transfer(ctx context.Context, classID string, nftID string, receiver sdk.AccAddress) error {
 	panic("implement me")
 }
 
-func (m mockNFTKeeper) GetTotalSupply(ctx sdk.Context, classID string) uint64 {
+func (m mockNFTKeeper) GetTotalSupply(ctx context.Context, classID string) uint64 {
 	counter := 0
 	for k := range m.nftsWithClassID {
 		if classID == k {
@@ -223,7 +226,7 @@ func (m mockNFTKeeper) GetTotalSupply(ctx sdk.Context, classID string) uint64 {
 	return uint64(counter)
 }
 
-func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, bool) {
+func (m mockNFTKeeper) GetNFT(ctx context.Context, classID, nftID string) (nft.NFT, bool) {
 	key := fmt.Sprintf("%v:%v", classID, nftID)
 	thisNft, found := m.nftsWithClassID[key]
 	if !found {
@@ -243,26 +246,26 @@ func (m mockNFTKeeper) GetNFT(ctx sdk.Context, classID, nftID string) (nft.NFT, 
 	return returnNFT, true
 }
 
-func (m mockNFTKeeper) Update(ctx sdk.Context, nftToken nft.NFT) error {
+func (m mockNFTKeeper) Update(ctx context.Context, nftToken nft.NFT) error {
 	key := fmt.Sprintf("%v:%v", nftToken.ClassId, nftToken.Id)
 	m.nftsWithClassID[key] = &nftToken
 
 	return nil
 }
 
-func (m mockNFTKeeper) Mint(ctx sdk.Context, nft nft.NFT, receiver sdk.AccAddress) error {
+func (m mockNFTKeeper) Mint(ctx context.Context, nft nft.NFT, receiver sdk.AccAddress) error {
 	m.nfts[receiver.String()] = &nft
 	key := fmt.Sprintf("%v:%v", nft.ClassId, nft.Id)
 	m.nftsWithClassID[key] = &nft
 	return nil
 }
 
-func (m mockNFTKeeper) SaveClass(ctx sdk.Context, class nft.Class) error {
+func (m mockNFTKeeper) SaveClass(ctx context.Context, class nft.Class) error {
 	m.classes[class.Id] = &class
 	return nil
 }
 
-func (m mockNFTKeeper) UpdateClass(ctx sdk.Context, class nft.Class) error {
+func (m mockNFTKeeper) UpdateClass(ctx context.Context, class nft.Class) error {
 	// var borrowInterest types.BorrowInterest
 	// err := proto.Unmarshal(class.Data.Value, &borrowInterest)
 	// if err != nil {
@@ -272,7 +275,7 @@ func (m mockNFTKeeper) UpdateClass(ctx sdk.Context, class nft.Class) error {
 	return nil
 }
 
-func (m mockNFTKeeper) GetClass(ctx sdk.Context, classID string) (nft.Class, bool) {
+func (m mockNFTKeeper) GetClass(ctx context.Context, classID string) (nft.Class, bool) {
 	r, ok := m.classes[classID]
 	if !ok {
 		return nft.Class{}, ok
@@ -284,30 +287,30 @@ type mockbankKeeper struct {
 	BankData map[string]sdk.Coins
 }
 
-func (m mockbankKeeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) error {
+func (m mockbankKeeper) SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins) error {
 	m.BankData[recipientModule] = m.BankData[recipientModule].Add(amt...)
 	return nil
 }
 
-func (m mockbankKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+func (m mockbankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
 	addr := authtypes.NewModuleAddress(recipientModule)
 	m.BankData[addr.String()] = m.BankData[addr.String()].Add(amt...)
 	return nil
 }
 
-func (m mockbankKeeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
+func (m mockbankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error {
 	// addr := authtypes.NewModuleAddress(senderModule)
 	m.BankData[recipientAddr.String()] = m.BankData[recipientAddr.String()].Add(amt...)
 	// m.BankData[addr.String()]= m.BankData[addr.String()].Sub(amt...)
 	return nil
 }
 
-func (m mockbankKeeper) GetSupply(ctx sdk.Context, denom string) sdk.Coin {
+func (m mockbankKeeper) GetSupply(ctx context.Context, denom string) sdk.Coin {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockbankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+func (m mockbankKeeper) GetBalance(ctx context.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	coins, ok := m.BankData[addr.String()]
 	if !ok {
 		panic("address cannot be found")
@@ -321,7 +324,7 @@ func (m mockbankKeeper) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom s
 	return coin
 }
 
-func (m mockbankKeeper) GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+func (m mockbankKeeper) GetAllBalances(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
 	coins := sdk.NewCoins()
 	for _, v := range m.BankData[addr.String()] {
 		coins = coins.Add(v)
@@ -329,12 +332,12 @@ func (m mockbankKeeper) GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk
 	return coins
 }
 
-func (m mockbankKeeper) SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+func (m mockbankKeeper) SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (m mockbankKeeper) BurnCoins(ctx sdk.Context, name string, amt sdk.Coins) error {
+func (m mockbankKeeper) BurnCoins(ctx context.Context, name string, amt sdk.Coins) error {
 	// TODO implement me
 	panic("implement me")
 }
@@ -347,7 +350,7 @@ type MockAuctionKeeper struct {
 	mockbank      *mockbankKeeper
 }
 
-func (m MockAuctionKeeper) StartSurplusAuction(ctx sdk.Context, seller string, lot sdk.Coin, bidDenom string) (uint64, error) {
+func (m MockAuctionKeeper) StartSurplusAuction(ctx context.Context, seller string, lot sdk.Coin, bidDenom string) (uint64, error) {
 	m.AuctionAmount[0] = lot
 	m.SellerBid[0] = seller
 	m.SellerBid[1] = bidDenom
@@ -359,8 +362,8 @@ func (m MockAuctionKeeper) StartSurplusAuction(ctx sdk.Context, seller string, l
 	return 1, nil
 }
 
-func (m mockPriceFeedKeeper) GetCurrentPrice(ctx sdk.Context, marketID string) (types2.CurrentPrice, error) {
-	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdk.MustNewDecFromStr("0.7")}, nil
+func (m mockPriceFeedKeeper) GetCurrentPrice(ctx context.Context, marketID string) (types2.CurrentPrice, error) {
+	return types2.CurrentPrice{MarketID: "aud:usd", Price: sdkmath.LegacyMustNewDecFromStr("0.7")}, nil
 }
 
 type FakeIncentiveKeeper struct {
@@ -371,25 +374,25 @@ func (f FakeIncentiveKeeper) GetPoolIncentive() map[string]sdk.Coins {
 	return f.poolIncentive
 }
 
-func (f FakeIncentiveKeeper) SetSPVRewardTokens(ctx sdk.Context, poolId string, rewardTokens sdk.Coins) {
+func (f FakeIncentiveKeeper) SetSPVRewardTokens(ctx context.Context, poolId string, rewardTokens sdk.Coins) {
 	f.poolIncentive[poolId] = rewardTokens
 }
 
 type fakeSPVFunctions struct{}
 
-func (f fakeSPVFunctions) AfterSPVInterestPaid(ctx sdk.Context, poolID string, interestPaid sdkmath.Int) {
+func (f fakeSPVFunctions) AfterSPVInterestPaid(ctx context.Context, poolID string, interestPaid sdkmath.Int) {
 }
 
-func (f fakeSPVFunctions) BeforeNFTBurned(ctx sdk.Context, poolIndex, investorID string, linkednfts []string) error {
+func (f fakeSPVFunctions) BeforeNFTBurned(ctx context.Context, poolIndex, investorID string, linkednfts []string) error {
 	return nil
 }
 
-func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, MockAuctionKeeper, FakeIncentiveKeeper, sdk.Context) {
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
+func SpvKeeper(t testing.TB) (*keeper.Keeper, types.NFTKeeper, types.BankKeeper, MockAuctionKeeper, FakeIncentiveKeeper, context.Context) {
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
-	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db)
+	db := dbm.NewMemDB()
+	stateStore := store.NewCommitMultiStore(db, log.NewNopLogger(), metrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())

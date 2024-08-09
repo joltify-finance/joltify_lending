@@ -5,6 +5,7 @@ import (
 	"time"
 
 	coserrors "cosmossdk.io/errors"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -13,7 +14,7 @@ import (
 func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgSubmitWithdrawProposal) (*types.MsgSubmitWithdrawProposalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 
 	investorAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -22,7 +23,7 @@ func (k msgServer) SubmitWithdrawProposal(goCtx context.Context, msg *types.MsgS
 
 	depositor, found := k.GetDepositor(ctx, msg.PoolIndex, investorAddress)
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.PoolIndex)
 	}
 
 	if depositor.DepositType != types.DepositorInfo_unset {

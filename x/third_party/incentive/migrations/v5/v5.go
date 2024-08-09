@@ -1,9 +1,11 @@
 package v5
 
 import (
+	"context"
+
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -25,11 +27,12 @@ var (
 	PreviousSavingsRewardAccrualTimeKeyPrefix     = []byte{0x17} // prefix for key that stores the previous time savings rewards accrued
 )
 
-func MigrateStore(ctx sdk.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+func MigrateStore(rctx context.Context, storeKey storetypes.StoreKey, cdc codec.BinaryCodec) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	toBeDeleted := [][]byte{USDXMintingClaimKeyPrefix, USDXMintingRewardFactorKeyPrefix, PreviousUSDXMintingRewardAccrualTimeKeyPrefix, PreviousSavingsRewardAccrualTimeKeyPrefix, SavingsClaimKeyPrefix, SavingsRewardIndexesKeyPrefix, SwapClaimKeyPrefix, SwapRewardIndexesKeyPrefix, PreviousSwapRewardAccrualTimeKeyPrefix, DelegatorClaimKeyPrefix, DelegatorRewardIndexesKeyPrefix, PreviousDelegatorRewardAccrualTimeKeyPrefix}
 	for _, el := range toBeDeleted {
 		store := prefix.NewStore(ctx.KVStore(storeKey), el)
-		iterator := sdk.KVStorePrefixIterator(store, []byte{})
+		iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 		if iterator.Valid() {
 			panic("should be empty")
 		}

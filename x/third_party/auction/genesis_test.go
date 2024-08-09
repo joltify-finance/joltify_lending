@@ -5,14 +5,13 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
 	"github.com/stretchr/testify/require"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
@@ -26,7 +25,7 @@ var (
 		c("lotdenom", 10),
 		testTime,
 		c("biddenom", 1000),
-		types2.WeightedAddresses{Addresses: testAddrs, Weights: []sdk.Int{sdk.OneInt(), sdk.OneInt()}},
+		types2.WeightedAddresses{Addresses: testAddrs, Weights: []sdkmath.Int{sdkmath.OneInt(), sdkmath.OneInt()}},
 		c("debt", 1000),
 	).WithID(3).(types2.GenesisAuction)
 )
@@ -34,9 +33,9 @@ var (
 func TestInitGenesis(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		// setup keepers
-		lg := tmlog.TestingLogger()
+		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
-		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+		ctx := tApp.NewContext(true)
 
 		// setup module account
 		modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(types2.ModuleName), nil, 0, 0)
@@ -83,9 +82,9 @@ func TestInitGenesis(t *testing.T) {
 	})
 	t.Run("invalid (invalid nextAuctionID)", func(t *testing.T) {
 		// setup keepers
-		lg := tmlog.TestingLogger()
+		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
-		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+		ctx := tApp.NewContext(true)
 
 		// setup module account
 		modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(types2.ModuleName), nil, 0, 0)
@@ -109,9 +108,9 @@ func TestInitGenesis(t *testing.T) {
 	})
 	t.Run("invalid (missing mod account coins)", func(t *testing.T) {
 		// setup keepers
-		lg := tmlog.TestingLogger()
+		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
-		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+		ctx := tApp.NewContext(true)
 
 		// invalid as there is no module account setup
 
@@ -133,10 +132,12 @@ func TestInitGenesis(t *testing.T) {
 func TestExportGenesis(t *testing.T) {
 	t.Run("default", func(t *testing.T) {
 		// setup state
-		lg := tmlog.TestingLogger()
+		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
-		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
-		tApp.InitializeFromGenesisStates(nil, nil)
+		ctx := tApp.NewContext(true)
+
+		tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil)
+		ctx = tApp.Ctx
 
 		// export
 		gs := auction.ExportGenesis(ctx, tApp.GetAuctionKeeper())
@@ -147,10 +148,10 @@ func TestExportGenesis(t *testing.T) {
 	})
 	t.Run("one auction", func(t *testing.T) {
 		// setup state
-		lg := tmlog.TestingLogger()
+		lg := log.NewTestLogger(t)
 		tApp := app.NewTestApp(lg, t.TempDir())
-		ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
-		tApp.InitializeFromGenesisStates(nil, nil)
+		tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil)
+		ctx := tApp.Ctx
 		tApp.GetAuctionKeeper().SetAuction(ctx, testAuction)
 
 		// export

@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	errorsmod "cosmossdk.io/errors"
@@ -38,7 +39,7 @@ import (
 //
 // These slippages can be calculated by S_B = ((A/B')/(A/B) - 1) and S_A ((B/A')/(B/A) - 1), simplifying to
 // S_B = (A/A' - 1), and S_B = (B/B' - 1).  An error is returned when max(S_A, S_B) > slippageLimit.
-func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coinA sdk.Coin, coinB sdk.Coin, slippageLimit sdk.Dec) error {
+func (k Keeper) Deposit(ctx context.Context, depositor sdk.AccAddress, coinA sdk.Coin, coinB sdk.Coin, slippageLimit sdkmath.LegacyDec) error {
 	desiredAmount := sdk.NewCoins(coinA, coinB)
 
 	poolID := types.PoolIDFromCoins(desiredAmount)
@@ -67,11 +68,11 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coinA sdk.Coi
 		return errorsmod.Wrap(types.ErrInsufficientLiquidity, "deposit must be increased")
 	}
 
-	maxPercentPriceChange := sdk.MaxDec(
-		sdk.NewDecFromInt(desiredAmount.AmountOf(coinA.Denom)).Quo(sdk.NewDecFromInt(depositAmount.AmountOf(coinA.Denom))),
-		sdk.NewDecFromInt(desiredAmount.AmountOf(coinB.Denom)).Quo(sdk.NewDecFromInt(depositAmount.AmountOf(coinB.Denom))),
+	maxPercentPriceChange := sdkmath.LegacyMaxDec(
+		sdkmath.LegacyNewDecFromInt(desiredAmount.AmountOf(coinA.Denom)).Quo(sdkmath.LegacyNewDecFromInt(depositAmount.AmountOf(coinA.Denom))),
+		sdkmath.LegacyNewDecFromInt(desiredAmount.AmountOf(coinB.Denom)).Quo(sdkmath.LegacyNewDecFromInt(depositAmount.AmountOf(coinB.Denom))),
 	)
-	slippage := maxPercentPriceChange.Sub(sdk.OneDec())
+	slippage := maxPercentPriceChange.Sub(sdkmath.LegacyOneDec())
 
 	if slippage.GT(slippageLimit) {
 		return errorsmod.Wrapf(types.ErrSlippageExceeded, "slippage %s > limit %s", slippage, slippageLimit)
@@ -91,7 +92,7 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coinA sdk.Coi
 		return err
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdk.UnwrapSDKContext(ctx).EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeSwapDeposit,
 			sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
@@ -104,7 +105,7 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coinA sdk.Coi
 	return nil
 }
 
-func (k Keeper) depositAllowed(ctx sdk.Context, poolID string) bool {
+func (k Keeper) depositAllowed(ctx context.Context, poolID string) bool {
 	params := k.GetParams(ctx)
 	for _, p := range params.AllowedPools {
 		if poolID == types.PoolID(p.TokenA, p.TokenB) {
@@ -114,23 +115,23 @@ func (k Keeper) depositAllowed(ctx sdk.Context, poolID string) bool {
 	return false
 }
 
-func (k Keeper) initializePool(ctx sdk.Context, poolID string, depositor sdk.AccAddress, reserves sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
+func (k Keeper) initializePool(ctx context.Context, poolID string, depositor sdk.AccAddress, reserves sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
 	if allowed := k.depositAllowed(ctx, poolID); !allowed {
-		return nil, sdk.Coins{}, sdk.ZeroInt(), errorsmod.Wrap(types.ErrNotAllowed, fmt.Sprintf("can not create pool '%s'", poolID))
+		return nil, sdk.Coins{}, sdkmath.ZeroInt(), errorsmod.Wrap(types.ErrNotAllowed, fmt.Sprintf("can not create pool '%s'", poolID))
 	}
 
 	pool, err := types.NewDenominatedPool(reserves)
 	if err != nil {
-		return nil, sdk.Coins{}, sdk.ZeroInt(), err
+		return nil, sdk.Coins{}, sdkmath.ZeroInt(), err
 	}
 
 	return pool, pool.Reserves(), pool.TotalShares(), nil
 }
 
-func (k Keeper) addLiquidityToPool(ctx sdk.Context, record types.PoolRecord, depositor sdk.AccAddress, desiredAmount sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
+func (k Keeper) addLiquidityToPool(ctx context.Context, record types.PoolRecord, depositor sdk.AccAddress, desiredAmount sdk.Coins) (*types.DenominatedPool, sdk.Coins, sdkmath.Int, error) {
 	pool, err := types.NewDenominatedPoolWithExistingShares(record.Reserves(), record.TotalShares)
 	if err != nil {
-		return nil, sdk.Coins{}, sdk.ZeroInt(), err
+		return nil, sdk.Coins{}, sdkmath.ZeroInt(), err
 	}
 
 	depositAmount, shares := pool.AddLiquidity(desiredAmount)

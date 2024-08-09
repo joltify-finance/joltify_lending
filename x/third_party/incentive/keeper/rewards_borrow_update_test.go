@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/stretchr/testify/suite"
@@ -33,9 +35,9 @@ func (suite *UpdateJoltBorrowIndexDenomsTests) TestClaimIndexesAreRemovedForDeno
 		WithArbitrarySourceShares(extractCollateralTypes(expectedIndexes)...).
 		Build()
 
-	suite.keeper.UpdateJoltBorrowIndexDenoms(suite.ctx, borrow)
+	suite.keeper.UpdateJoltBorrowIndexDenoms(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(expectedIndexes, syncedClaim.BorrowRewardIndexes)
 }
 
@@ -54,9 +56,9 @@ func (suite *UpdateJoltBorrowIndexDenomsTests) TestClaimIndexesAreAddedForNewlyB
 		WithArbitrarySourceShares(extractCollateralTypes(globalIndexes)...).
 		Build()
 
-	suite.keeper.UpdateJoltBorrowIndexDenoms(suite.ctx, borrow)
+	suite.keeper.UpdateJoltBorrowIndexDenoms(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(globalIndexes, syncedClaim.BorrowRewardIndexes)
 }
 
@@ -76,9 +78,9 @@ func (suite *UpdateJoltBorrowIndexDenomsTests) TestClaimIndexesAreUnchangedWhenB
 		WithArbitrarySourceShares(extractCollateralTypes(claim.BorrowRewardIndexes)...).
 		Build()
 
-	suite.keeper.UpdateJoltBorrowIndexDenoms(suite.ctx, borrow)
+	suite.keeper.UpdateJoltBorrowIndexDenoms(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(claim.BorrowRewardIndexes, syncedClaim.BorrowRewardIndexes)
 }
 
@@ -99,8 +101,8 @@ func (suite *UpdateJoltBorrowIndexDenomsTests) TestEmptyClaimIndexesAreAddedForN
 		WithArbitrarySourceShares(borrowedDenoms...).
 		Build()
 
-	suite.keeper.UpdateJoltBorrowIndexDenoms(suite.ctx, borrow)
+	suite.keeper.UpdateJoltBorrowIndexDenoms(sdk.UnwrapSDKContext(suite.ctx), borrow)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(expectedIndexes, syncedClaim.BorrowRewardIndexes)
 }

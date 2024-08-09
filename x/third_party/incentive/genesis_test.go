@@ -1,10 +1,12 @@
 package incentive_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
@@ -14,8 +16,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
@@ -27,7 +27,7 @@ const (
 type GenesisTestSuite struct {
 	suite.Suite
 
-	ctx    sdk.Context
+	ctx    context.Context
 	app    app.TestApp
 	keeper keeper.Keeper
 	addrs  []sdk.AccAddress
@@ -36,7 +36,7 @@ type GenesisTestSuite struct {
 }
 
 func (suite *GenesisTestSuite) SetupTest() {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	suite.app = tApp
 	k := tApp.GetIncentiveKeeper()
 	suite.genesisTime = time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -47,15 +47,15 @@ func (suite *GenesisTestSuite) SetupTest() {
 		WithSimpleAccount(addrs[0], cs(c("bnb", 1e10), c("ujolt", 1e10))).
 		WithSimpleModuleAccount(types.IncentiveMacc, cs(c("hard", 1e15), c("ujolt", 1e15)))
 
-	loanToValue, _ := sdk.NewDecFromStr("0.6")
-	borrowLimit := sdk.NewDec(1000000000000000)
+	loanToValue, _ := sdkmath.LegacyNewDecFromStr("0.6")
+	borrowLimit := sdkmath.LegacyNewDec(1000000000000000)
 	joltGS := types2.NewGenesisState(
 		types2.NewParams(
 			types2.MoneyMarkets{
-				types2.NewMoneyMarket("ujolt", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "jolt:usd", sdk.NewInt(1000000), types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
-				types2.NewMoneyMarket("bnb", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "bnb:usd", sdk.NewInt(1000000), types2.NewInterestRateModel(sdk.MustNewDecFromStr("0.05"), sdk.MustNewDecFromStr("2"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("10")), sdk.MustNewDecFromStr("0.05"), sdk.ZeroDec()),
+				types2.NewMoneyMarket("ujolt", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "jolt:usd", sdkmath.NewInt(1000000), types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
+				types2.NewMoneyMarket("bnb", types2.NewBorrowLimit(false, borrowLimit, loanToValue), "bnb:usd", sdkmath.NewInt(1000000), types2.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyMustNewDecFromStr("2"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("10")), sdkmath.LegacyMustNewDecFromStr("0.05"), sdkmath.LegacyZeroDec()),
 			},
-			sdk.NewDec(10),
+			sdkmath.LegacyNewDec(10),
 		),
 		types2.DefaultAccumulationTimes,
 		types2.DefaultDeposits,
@@ -107,19 +107,16 @@ func (suite *GenesisTestSuite) SetupTest() {
 
 	cdc := suite.app.AppCodec()
 
-	tApp.InitializeFromGenesisStatesWithTime(
+	suite.app = tApp.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, nil, nil,
 		app.GenesisState{types.ModuleName: cdc.MustMarshalJSON(&incentiveGS)},
 		app.GenesisState{types2.ModuleName: cdc.MustMarshalJSON(&joltGS)},
 		NewPricefeedGenStateMultiFromTime(cdc, suite.genesisTime),
 		authBuilder.BuildMarshalled(cdc),
 	)
-
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
-
 	suite.addrs = addrs
 	suite.keeper = k
-	suite.ctx = ctx
+	suite.ctx = suite.app.Ctx
 }
 
 func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
@@ -192,7 +189,7 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 			[]*types.SPVGenRewardInvestorState{{
 				Pool:   "spv:1",
 				Wallet: suite.addrs[0].String(),
-				Reward: sdk.NewCoins(sdk.NewCoin("jolt", sdk.NewInt(1e9))),
+				Reward: sdk.NewCoins(sdk.NewCoin("jolt", sdkmath.NewInt(1e9))),
 			}},
 		),
 
@@ -220,25 +217,24 @@ func (suite *GenesisTestSuite) TestExportedGenesisMatchesImported() {
 		},
 	)
 
-	tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 0, Time: genesisTime})
-
+	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	suite.app = tApp
+	tApp.Ctx = suite.app.Ctx
 	// Incentive init genesis reads from the cdp keeper to check params are ok. So it needs to be initialized first.
 	// Then the cdp keeper reads from pricefeed keeper to check its params are ok. So it also need initialization.
-	tApp.InitializeFromGenesisStates(nil, nil,
+	tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 		NewPricefeedGenStateMultiFromTime(tApp.AppCodec(), genesisTime),
 	)
 
 	incentive.InitGenesis(
-		ctx,
+		suite.app.Ctx,
 		tApp.GetIncentiveKeeper(),
 		tApp.GetAccountKeeper(),
 		genesisState,
 	)
 
-	exportedGenesisState := incentive.ExportGenesis(ctx, tApp.GetIncentiveKeeper())
+	exportedGenesisState := incentive.ExportGenesis(suite.app.Ctx, tApp.GetIncentiveKeeper())
 	suite.True(exportedGenesisState.String() == genesisState.String())
-	// suite.Equal(genesisState.String(), exportedGenesisState.String())
 }
 
 func (suite *GenesisTestSuite) TestValidateAccumulationTime() {

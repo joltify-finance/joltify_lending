@@ -1,6 +1,7 @@
 package legacy
 
 import (
+	"context"
 	"strings"
 
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -9,9 +10,9 @@ import (
 
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 )
 
 const V011UpgradeName = "v011_upgrade"
@@ -22,9 +23,9 @@ func CreateUpgradeHandlerForV011Upgrade(
 	kycKeeper kycmodulekeeper.Keeper,
 	spvKeeper spvmodulekeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v011")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v011")
 		}
 
 		kycKeeper.IterateProject(ctx, func(projectInfo kycmoduletypes.ProjectInfo) bool {

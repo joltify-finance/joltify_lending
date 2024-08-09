@@ -1,18 +1,19 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	storetypes "cosmossdk.io/store/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
+	"cosmossdk.io/store/prefix"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 )
 
 type Keeper struct {
@@ -75,18 +76,21 @@ func (k Keeper) UnmarshalAuction(bz []byte) (types2.Auction, error) {
 }
 
 // Logger returns a module-specific logger.
-func (k Keeper) Logger(ctx sdk.Context) log.Logger {
+func (k Keeper) Logger(rctx context.Context) log.Logger {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types2.ModuleName))
 }
 
 // SetNextAuctionID stores an ID to be used for the next created auction
-func (k Keeper) SetNextAuctionID(ctx sdk.Context, id uint64) {
+func (k Keeper) SetNextAuctionID(rctx context.Context, id uint64) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types2.NextAuctionIDKey)
 	store.Set(types2.NextAuctionIDKey, types2.Uint64ToBytes(id))
 }
 
 // GetNextAuctionID reads the next available global ID from store
-func (k Keeper) GetNextAuctionID(ctx sdk.Context) (uint64, error) {
+func (k Keeper) GetNextAuctionID(rctx context.Context) (uint64, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types2.NextAuctionIDKey)
 	bz := store.Get(types2.NextAuctionIDKey)
 	if bz == nil {
@@ -96,7 +100,7 @@ func (k Keeper) GetNextAuctionID(ctx sdk.Context) (uint64, error) {
 }
 
 // IncrementNextAuctionID increments the next auction ID in the store by 1.
-func (k Keeper) IncrementNextAuctionID(ctx sdk.Context) error {
+func (k Keeper) IncrementNextAuctionID(ctx context.Context) error {
 	id, err := k.GetNextAuctionID(ctx)
 	if err != nil {
 		return err
@@ -106,7 +110,7 @@ func (k Keeper) IncrementNextAuctionID(ctx sdk.Context) error {
 }
 
 // StoreNewAuction stores an auction, adding a new ID
-func (k Keeper) StoreNewAuction(ctx sdk.Context, auction types2.Auction) (uint64, error) {
+func (k Keeper) StoreNewAuction(ctx context.Context, auction types2.Auction) (uint64, error) {
 	newAuctionID, err := k.GetNextAuctionID(ctx)
 	if err != nil {
 		return 0, err
@@ -123,7 +127,8 @@ func (k Keeper) StoreNewAuction(ctx sdk.Context, auction types2.Auction) (uint64
 }
 
 // SetAuction puts the auction into the store, and updates any indexes.
-func (k Keeper) SetAuction(ctx sdk.Context, auction types2.Auction) {
+func (k Keeper) SetAuction(rctx context.Context, auction types2.Auction) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// remove the auction from the byTime index if it is already in there
 	existingAuction, found := k.GetAuction(ctx, auction.GetID())
 	if found {
@@ -137,7 +142,8 @@ func (k Keeper) SetAuction(ctx sdk.Context, auction types2.Auction) {
 }
 
 // GetAuction gets an auction from the store.
-func (k Keeper) GetAuction(ctx sdk.Context, auctionID uint64) (types2.Auction, bool) {
+func (k Keeper) GetAuction(rctx context.Context, auctionID uint64) (types2.Auction, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	var auction types2.Auction
 
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types2.AuctionKeyPrefix)
@@ -150,7 +156,8 @@ func (k Keeper) GetAuction(ctx sdk.Context, auctionID uint64) (types2.Auction, b
 }
 
 // DeleteAuction removes an auction from the store, and any indexes.
-func (k Keeper) DeleteAuction(ctx sdk.Context, auctionID uint64) {
+func (k Keeper) DeleteAuction(rctx context.Context, auctionID uint64) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	auction, found := k.GetAuction(ctx, auctionID)
 	if found {
 		k.removeFromByTimeIndex(ctx, auction.GetEndTime(), auctionID)
@@ -161,24 +168,27 @@ func (k Keeper) DeleteAuction(ctx sdk.Context, auctionID uint64) {
 }
 
 // InsertIntoByTimeIndex adds an auction ID and end time into the byTime index.
-func (k Keeper) InsertIntoByTimeIndex(ctx sdk.Context, endTime time.Time, auctionID uint64) {
+func (k Keeper) InsertIntoByTimeIndex(rctx context.Context, endTime time.Time, auctionID uint64) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types2.AuctionByTimeKeyPrefix)
 	store.Set(types2.GetAuctionByTimeKey(endTime, auctionID), types2.Uint64ToBytes(auctionID))
 }
 
 // removeFromByTimeIndex removes an auction ID and end time from the byTime index.
-func (k Keeper) removeFromByTimeIndex(ctx sdk.Context, endTime time.Time, auctionID uint64) {
+func (k Keeper) removeFromByTimeIndex(rctx context.Context, endTime time.Time, auctionID uint64) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types2.AuctionByTimeKeyPrefix)
 	store.Delete(types2.GetAuctionByTimeKey(endTime, auctionID))
 }
 
 // IterateAuctionsByTime provides an iterator over auctions ordered by auction.EndTime.
 // For each auction cb will be called. If cb returns true the iterator will close and stop.
-func (k Keeper) IterateAuctionsByTime(ctx sdk.Context, inclusiveCutoffTime time.Time, cb func(auctionID uint64) (stop bool)) {
+func (k Keeper) IterateAuctionsByTime(rctx context.Context, inclusiveCutoffTime time.Time, cb func(auctionID uint64) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types2.AuctionByTimeKeyPrefix)
 	iterator := store.Iterator(
 		nil, // start at the very start of the prefix store
-		sdk.PrefixEndBytes(sdk.FormatTimeBytes(inclusiveCutoffTime)), // include any keys with times equal to inclusiveCutoffTime
+		storetypes.PrefixEndBytes(sdk.FormatTimeBytes(inclusiveCutoffTime)), // include any keys with times equal to inclusiveCutoffTime
 	)
 
 	defer iterator.Close()
@@ -194,8 +204,9 @@ func (k Keeper) IterateAuctionsByTime(ctx sdk.Context, inclusiveCutoffTime time.
 
 // IterateAuctions provides an iterator over all stored auctions.
 // For each auction, cb will be called. If cb returns true, the iterator will close and stop.
-func (k Keeper) IterateAuctions(ctx sdk.Context, cb func(auction types2.Auction) (stop bool)) {
-	iterator := sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types2.AuctionKeyPrefix)
+func (k Keeper) IterateAuctions(rctx context.Context, cb func(auction types2.Auction) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
+	iterator := storetypes.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types2.AuctionKeyPrefix)
 
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
@@ -208,7 +219,7 @@ func (k Keeper) IterateAuctions(ctx sdk.Context, cb func(auction types2.Auction)
 }
 
 // GetAllAuctions returns all auctions from the store
-func (k Keeper) GetAllAuctions(ctx sdk.Context) (auctions []types2.Auction) {
+func (k Keeper) GetAllAuctions(ctx context.Context) (auctions []types2.Auction) {
 	k.IterateAuctions(ctx, func(auction types2.Auction) bool {
 		auctions = append(auctions, auction)
 		return false

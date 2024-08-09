@@ -3,6 +3,7 @@ package auction_test
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -27,7 +28,7 @@ func TestABCITestSuite(t *testing.T) {
 func (suite *abciTestSuite) TestKeeper_BeginBlocker() {
 	buyer := suite.Addrs[0]
 	returnAddrs := []sdk.AccAddress{suite.Addrs[1]}
-	returnWeights := []sdk.Int{sdk.NewInt(1)}
+	returnWeights := []sdkmath.Int{sdkmath.NewInt(1)}
 
 	suite.AddCoinsToNamedModule(suite.ModAcc.Name, cs(c("token1", 100), c("token2", 100), c("debt", 100)))
 
@@ -39,16 +40,16 @@ func (suite *abciTestSuite) TestKeeper_BeginBlocker() {
 	suite.Require().NoError(suite.Keeper.PlaceBid(suite.Ctx, auctionID, buyer, c("token2", 30)))
 
 	// Run the beginblocker, simulating a block time 1ns before auction expiry
-	preExpiryTime := suite.Ctx.BlockTime().Add(types.DefaultForwardBidDuration - 1)
-	auction.BeginBlocker(suite.Ctx.WithBlockTime(preExpiryTime), suite.Keeper)
+	preExpiryTime := sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(types.DefaultForwardBidDuration - 1)
+	auction.BeginBlocker(sdk.UnwrapSDKContext(suite.Ctx).WithBlockTime(preExpiryTime), suite.Keeper)
 
 	// Check auction has not been closed yet
 	_, found := suite.Keeper.GetAuction(suite.Ctx, auctionID)
 	suite.True(found)
 
 	// Run the endblocker, simulating a block time equal to auction expiry
-	expiryTime := suite.Ctx.BlockTime().Add(types.DefaultForwardBidDuration)
-	auction.BeginBlocker(suite.Ctx.WithBlockTime(expiryTime), suite.Keeper)
+	expiryTime := sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(types.DefaultForwardBidDuration)
+	auction.BeginBlocker(sdk.UnwrapSDKContext(suite.Ctx).WithBlockTime(expiryTime), suite.Keeper)
 
 	// Check auction has been closed
 	_, found = suite.Keeper.GetAuction(suite.Ctx, auctionID)

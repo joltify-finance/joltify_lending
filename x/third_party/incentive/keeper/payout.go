@@ -1,12 +1,13 @@
 package keeper
 
 import (
+	"context"
 	"time"
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	// validatorvesting "github.com/joltify-finance/joltify_lending/x/validator-vesting"
@@ -22,17 +23,17 @@ const (
 )
 
 // SendTimeLockedCoinsToAccount sends time-locked coins from the input module account to the recipient. If the recipients account is not a vesting account and the input length is greater than zero, the recipient account is converted to a periodic vesting account and the coins are added to the vesting balance as a vesting period with the input length.
-func (k Keeper) SendTimeLockedCoinsToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
+func (k Keeper) SendTimeLockedCoinsToAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
 	macc := k.accountKeeper.GetModuleAccount(ctx, senderModule)
 	maccCoins := k.bankKeeper.GetAllBalances(ctx, macc.GetAddress())
 	if !maccCoins.IsAllGTE(amt) {
-		return sdkerrors.Wrapf(types2.ErrInsufficientModAccountBalance, "%s", senderModule)
+		return errorsmod.Wrapf(types2.ErrInsufficientModAccountBalance, "%s, we have %v and we need to send %v", senderModule, maccCoins, amt)
 	}
 
 	// 0. Get the account from the account keeper and do a type switch, error if it's a validator vesting account or module account (can make this work for validator vesting later if necessary)
 	acc := k.accountKeeper.GetAccount(ctx, recipientAddr)
 	if acc == nil {
-		return sdkerrors.Wrapf(types2.ErrAccountNotFound, recipientAddr.String())
+		return errorsmod.Wrapf(types2.ErrAccountNotFound, recipientAddr.String())
 	}
 	if length == 0 {
 		return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, senderModule, recipientAddr, amt)
@@ -40,18 +41,18 @@ func (k Keeper) SendTimeLockedCoinsToAccount(ctx sdk.Context, senderModule strin
 
 	switch acc.(type) {
 	case *vestingtypes.ContinuousVestingAccount, authtypes.ModuleAccountI:
-		return sdkerrors.Wrapf(types2.ErrInvalidAccountType, "%T", acc)
+		return errorsmod.Wrapf(types2.ErrInvalidAccountType, "%T", acc)
 	case *vestingtypes.PeriodicVestingAccount:
 		return k.SendTimeLockedCoinsToPeriodicVestingAccount(ctx, senderModule, recipientAddr, amt, length)
 	case *authtypes.BaseAccount:
 		return k.SendTimeLockedCoinsToBaseAccount(ctx, senderModule, recipientAddr, amt, length)
 	default:
-		return sdkerrors.Wrapf(types2.ErrInvalidAccountType, "%T", acc)
+		return errorsmod.Wrapf(types2.ErrInvalidAccountType, "%T", acc)
 	}
 }
 
 // SendTimeLockedCoinsToPeriodicVestingAccount sends time-locked coins from the input module account to the recipient
-func (k Keeper) SendTimeLockedCoinsToPeriodicVestingAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
+func (k Keeper) SendTimeLockedCoinsToPeriodicVestingAccount(ctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, senderModule, recipientAddr, amt)
 	if err != nil {
 		return err
@@ -61,7 +62,8 @@ func (k Keeper) SendTimeLockedCoinsToPeriodicVestingAccount(ctx sdk.Context, sen
 }
 
 // SendTimeLockedCoinsToBaseAccount sends time-locked coins from the input module account to the recipient, converting the recipient account to a vesting account
-func (k Keeper) SendTimeLockedCoinsToBaseAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
+func (k Keeper) SendTimeLockedCoinsToBaseAccount(rctx context.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins, length int64) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, senderModule, recipientAddr, amt)
 	if err != nil {
 		return err
@@ -71,7 +73,10 @@ func (k Keeper) SendTimeLockedCoinsToBaseAccount(ctx sdk.Context, senderModule s
 	bacc := authtypes.NewBaseAccount(acc.GetAddress(), acc.GetPubKey(), acc.GetAccountNumber(), acc.GetSequence())
 
 	newPeriods := vestingtypes.Periods{types2.NewPeriod(amt, length)}
-	bva := vestingtypes.NewBaseVestingAccount(bacc, amt, ctx.BlockTime().Unix()+length)
+	bva, err := vestingtypes.NewBaseVestingAccount(bacc, amt, ctx.BlockTime().Unix()+length)
+	if err != nil {
+		return err
+	}
 	pva := vestingtypes.NewPeriodicVestingAccountRaw(bva, ctx.BlockTime().Unix(), newPeriods)
 	k.accountKeeper.SetAccount(ctx, pva)
 
@@ -101,7 +106,8 @@ func (k Keeper) GetPeriodLength(blockTime time.Time, monthsLockup int64) int64 {
 
 // addCoinsToVestingSchedule adds coins to the input account's vesting schedule where length is the amount of time (from the current block time), in seconds, that the coins will be vesting for
 // the input address must be a periodic vesting account
-func (k Keeper) addCoinsToVestingSchedule(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins, length int64) {
+func (k Keeper) addCoinsToVestingSchedule(rctx context.Context, addr sdk.AccAddress, amt sdk.Coins, length int64) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	acc := k.accountKeeper.GetAccount(ctx, addr)
 	vacc := acc.(*vestingtypes.PeriodicVestingAccount)
 	// Add the new vesting coins to OriginalVesting

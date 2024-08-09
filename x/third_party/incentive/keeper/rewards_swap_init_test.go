@@ -35,9 +35,9 @@ func (suite *InitializeSwapRewardTests) TestClaimAddedWhenClaimDoesNotExistAndNo
 
 	owner := arbitraryAddress()
 
-	suite.keeper.InitializeSwapReward(suite.ctx, poolID, owner)
+	suite.keeper.InitializeSwapReward(sdk.UnwrapSDKContext(suite.ctx), poolID, owner)
 
-	syncedClaim, found := suite.keeper.GetSwapClaim(suite.ctx, owner)
+	syncedClaim, found := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), owner)
 	suite.True(found)
 	// A new claim should have empty indexes. It doesn't strictly need the poolID either.
 	expectedIndexes := types.MultiRewardIndexes{{
@@ -70,9 +70,9 @@ func (suite *InitializeSwapRewardTests) TestClaimAddedWhenClaimDoesNotExistAndRe
 
 	owner := arbitraryAddress()
 
-	suite.keeper.InitializeSwapReward(suite.ctx, poolID, owner)
+	suite.keeper.InitializeSwapReward(sdk.UnwrapSDKContext(suite.ctx), poolID, owner)
 
-	syncedClaim, found := suite.keeper.GetSwapClaim(suite.ctx, owner)
+	syncedClaim, found := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), owner)
 	suite.True(found)
 	// a new claim should start with the current global indexes
 	suite.Equal(globalIndexes, syncedClaim.RewardIndexes)
@@ -110,9 +110,9 @@ func (suite *InitializeSwapRewardTests) TestClaimUpdatedWhenClaimExistsAndNoRewa
 
 	// no global indexes stored as the new pool is not rewarded
 
-	suite.keeper.InitializeSwapReward(suite.ctx, newPoolID, claim.Owner)
+	suite.keeper.InitializeSwapReward(sdk.UnwrapSDKContext(suite.ctx), newPoolID, claim.Owner)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	// The preexisting indexes shouldn't be changed. It doesn't strictly need the new poolID either.
 	expectedIndexes := types.MultiRewardIndexes{
 		{
@@ -175,9 +175,9 @@ func (suite *InitializeSwapRewardTests) TestClaimUpdatedWhenClaimExistsAndReward
 	}
 	suite.storeGlobalSwapIndexes(globalIndexes)
 
-	suite.keeper.InitializeSwapReward(suite.ctx, newPoolID, claim.Owner)
+	suite.keeper.InitializeSwapReward(sdk.UnwrapSDKContext(suite.ctx), newPoolID, claim.Owner)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	// only the indexes for the new pool should be updated
 	expectedIndexes := types.MultiRewardIndexes{
 		{

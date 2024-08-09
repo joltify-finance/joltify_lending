@@ -89,7 +89,7 @@ package simulation
 // // SimulateMsgDeposit generates a MsgDeposit
 // func SimulateMsgDeposit(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 // 		// Get possible pools and shuffle so that deposits are evenly distributed across pools
 // 		params := k.GetParams(ctx)
@@ -116,11 +116,11 @@ package simulation
 // 		}
 
 // 		// Get random slippage amount between 1-99%
-// 		slippageRaw, err := RandIntInclusive(r, sdk.OneInt(), sdkmath.NewInt(99))
+// 		slippageRaw, err := RandIntInclusive(r, sdkmath.OneInt(), sdkmath.NewInt(99))
 // 		if err != nil {
 // 			panic(err)
 // 		}
-// 		slippage := slippageRaw.ToDec().Quo(sdk.NewDec(100))
+// 		slippage := slippageRaw.ToDec().Quo(sdkmath.LegacyNewDec(100))
 
 // 		// Generate random deadline
 // 		deadline := genRandDeadline(r, blockTime)
@@ -189,7 +189,7 @@ package simulation
 // // SimulateMsgWithdraw generates a MsgWithdraw
 // func SimulateMsgWithdraw(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
 // 		poolRecords := k.GetAllPools(ctx)
@@ -222,7 +222,7 @@ package simulation
 // 		shares := shareRecord.SharesOwned.Mul(sharePercentage).Quo(sdkmath.NewInt(100))
 
 // 		// Expect minimum token amounts relative to the % of shares owned and withdrawn
-// 		oneLessThanSharePercentage := sharePercentage.Sub(sdk.OneInt())
+// 		oneLessThanSharePercentage := sharePercentage.Sub(sdkmath.OneInt())
 
 // 		amtTokenAOwned := coinsOwned.AmountOf(poolRecord.ReservesA.Denom)
 // 		minAmtTokenA := amtTokenAOwned.Mul(oneLessThanSharePercentage).Quo(sdkmath.NewInt(100))
@@ -266,7 +266,7 @@ package simulation
 // // SimulateMsgSwapExactForTokens generates a MsgSwapExactForTokens
 // func SimulateMsgSwapExactForTokens(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
 // 		poolRecords := k.GetAllPools(ctx)
@@ -289,7 +289,7 @@ package simulation
 // 		}
 
 // 		// Select input token
-// 		randInt, err := RandInt(r, sdk.OneInt(), sdkmath.NewInt(9))
+// 		randInt, err := RandInt(r, sdkmath.OneInt(), sdkmath.NewInt(9))
 // 		if err != nil {
 // 			panic(err)
 // 		}
@@ -317,7 +317,7 @@ package simulation
 
 // 		// Calculate expected output coin
 // 		globalSwapFee := k.GetSwapFee(ctx)
-// 		tradeAmountAfterFee := exactInputToken.Amount.ToDec().Mul(sdk.OneDec().Sub(globalSwapFee)).TruncateInt()
+// 		tradeAmountAfterFee := exactInputToken.Amount.ToDec().Mul(sdkmath.LegacyOneDec().Sub(globalSwapFee)).TruncateInt()
 
 // 		var outputAmt big.Int
 // 		outputAmt.Mul(outputToken.Amount.BigInt(), tradeAmountAfterFee.BigInt())
@@ -330,7 +330,7 @@ package simulation
 // 		if err != nil {
 // 			panic(err)
 // 		}
-// 		slippage := slippageRaw.ToDec().Quo(sdk.NewDec(100))
+// 		slippage := slippageRaw.ToDec().Quo(sdkmath.LegacyNewDec(100))
 
 // 		// Generate random deadline
 // 		blockTime := ctx.BlockHeader().Time
@@ -365,7 +365,7 @@ package simulation
 // // SimulateMsgSwapForExactTokens generates a MsgSwapForExactTokens
 // func SimulateMsgSwapForExactTokens(ak types.AccountKeeper, k keeper.Keeper) simulation.Operation {
 // 	return func(
-// 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simulation.Account, chainID string,
+// 		r *rand.Rand, app *baseapp.BaseApp, ctx context.Context, accs []simulation.Account, chainID string,
 // 	) (simulation.OperationMsg, []simulation.FutureOperation, error) {
 
 // 		poolRecords := k.GetAllPools(ctx)
@@ -388,7 +388,7 @@ package simulation
 // 		}
 
 // 		// Select input token
-// 		randInt, err := RandInt(r, sdk.OneInt(), sdkmath.NewInt(9))
+// 		randInt, err := RandInt(r, sdkmath.OneInt(), sdkmath.NewInt(9))
 // 		if err != nil {
 // 			panic(err)
 // 		}
@@ -416,7 +416,7 @@ package simulation
 
 // 		// Calculate exact output coin
 // 		globalSwapFee := k.GetSwapFee(ctx)
-// 		tradeAmountAfterFee := expectedInputToken.Amount.ToDec().Mul(sdk.OneDec().Sub(globalSwapFee)).TruncateInt()
+// 		tradeAmountAfterFee := expectedInputToken.Amount.ToDec().Mul(sdkmath.LegacyOneDec().Sub(globalSwapFee)).TruncateInt()
 
 // 		var outputAmt big.Int
 // 		outputAmt.Mul(outputToken.Amount.BigInt(), tradeAmountAfterFee.BigInt())
@@ -429,7 +429,7 @@ package simulation
 // 		if err != nil {
 // 			panic(err)
 // 		}
-// 		slippage := slippageRaw.ToDec().Quo(sdk.NewDec(100))
+// 		slippage := slippageRaw.ToDec().Quo(sdkmath.LegacyNewDec(100))
 
 // 		// Generate random deadline
 // 		blockTime := ctx.BlockHeader().Time
@@ -463,7 +463,7 @@ package simulation
 
 // // From a set of coins return a coin of the specified denom with 1-10% of the total amount
 // func randCoinFromCoins(r *rand.Rand, coins sdk.Coins, denom string) sdk.Coin {
-// 	percentOfBalance, err := RandIntInclusive(r, sdk.OneInt(), sdkmath.NewInt(10))
+// 	percentOfBalance, err := RandIntInclusive(r, sdkmath.OneInt(), sdkmath.NewInt(10))
 // 	if err != nil {
 // 		panic(err)
 // 	}
@@ -472,7 +472,7 @@ package simulation
 // 	return sdk.NewCoin(denom, amtToken)
 // }
 
-// func validateDepositor(ctx sdk.Context, k keeper.Keeper, allowedPool types.AllowedPool,
+// func validateDepositor(ctx context.Context, k keeper.Keeper, allowedPool types.AllowedPool,
 // 	depositor authexported.Account, blockTime time.Time) error {
 // 	depositorCoins := depositor.SpendableCoins(blockTime)
 // 	tokenABalance := depositorCoins.AmountOf(allowedPool.TokenA)
@@ -530,7 +530,7 @@ package simulation
 // 	if inclusiveMin.GT(inclusiveMax) {
 // 		return sdkmath.Int{}, fmt.Errorf("min larger than max")
 // 	}
-// 	return RandInt(r, inclusiveMin, inclusiveMax.Add(sdk.OneInt()))
+// 	return RandInt(r, inclusiveMin, inclusiveMax.Add(sdkmath.OneInt()))
 // }
 
 // // RandInt randomly generates an sdkmath.Int in the range [inclusiveMin, exclusiveMax). It works for negative and positive integers.

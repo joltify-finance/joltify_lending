@@ -1,19 +1,21 @@
 package testutil
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	storetypes "cosmossdk.io/store/types"
+
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 
 	incentivekeeper "github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 	hardkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	hardtypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
-	abcitypes "github.com/cometbft/cometbft/abci/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -30,7 +32,7 @@ var testChainID = "joltifytest_888-1"
 type IntegrationTester struct {
 	suite.Suite
 	App app.TestApp
-	Ctx sdk.Context
+	Ctx context.Context
 }
 
 func (suite *IntegrationTester) SetupSuite() {
@@ -39,38 +41,41 @@ func (suite *IntegrationTester) SetupSuite() {
 }
 
 func (suite *IntegrationTester) SetApp() {
-	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.App = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 }
 
 func (suite *IntegrationTester) StartChain(genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisTime time.Time, genesisStates ...app.GenesisState) {
-	suite.App.InitializeFromGenesisStatesWithTimeAndChainID(
-		genesisTime,
-		testChainID, genAccs, coins,
+	bz := suite.App.GenerateFromGenesisStatesWithTimeAndChainID(
+		genAccs, coins,
 		genesisStates...,
 	)
 
-	suite.Ctx = suite.App.NewContext(false, tmproto.Header{Height: 1, Time: genesisTime, ChainID: testChainID})
-	suite.Ctx = suite.Ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
-	suite.Ctx = suite.Ctx.WithConsensusParams(app.DefaultConsensusParams)
+	suite.App = app.NewTestAppWithGenesis(log.NewTestLogger(suite.T()), suite.T().TempDir(), bz)
+	suite.Ctx = suite.App.Ctx
+	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithBlockTime(genesisTime)
+	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithBlockGasMeter(storetypes.NewInfiniteGasMeter())
+	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithConsensusParams(*app.DefaultConsensusParams)
 }
 
 func (suite *IntegrationTester) NextBlockAt(blockTime time.Time) {
-	if !suite.Ctx.BlockTime().Before(blockTime) {
-		panic(fmt.Sprintf("new block time %s must be after current %s", blockTime, suite.Ctx.BlockTime()))
+	if !sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Before(blockTime) {
+		panic(fmt.Sprintf("new block time %s must be after current %s", blockTime, sdk.UnwrapSDKContext(suite.Ctx).BlockTime()))
 	}
-	blockHeight := suite.Ctx.BlockHeight() + 1
+	blockHeight := sdk.UnwrapSDKContext(suite.Ctx).BlockHeight() + 1
 
-	_ = suite.App.EndBlocker(suite.Ctx, abcitypes.RequestEndBlock{})
+	_, err := suite.App.EndBlocker(sdk.UnwrapSDKContext(suite.Ctx))
+	suite.Require().NoError(err)
 
-	suite.Ctx = suite.Ctx.WithBlockTime(blockTime).WithBlockHeight(blockHeight).WithChainID(testChainID)
-	suite.Ctx = suite.Ctx.WithBlockGasMeter(sdk.NewInfiniteGasMeter())
-	suite.Ctx = suite.Ctx.WithConsensusParams(app.DefaultConsensusParams)
+	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithBlockTime(blockTime).WithBlockHeight(blockHeight).WithChainID(testChainID)
+	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithBlockGasMeter(storetypes.NewInfiniteGasMeter())
+	suite.Ctx = sdk.UnwrapSDKContext(suite.Ctx).WithConsensusParams(*app.DefaultConsensusParams)
 
-	_ = suite.App.BeginBlocker(suite.Ctx, abcitypes.RequestBeginBlock{}) // height and time in RequestBeginBlock are ignored by module begin blockers
+	_, err = suite.App.BeginBlocker(sdk.UnwrapSDKContext(suite.Ctx)) // height and time in RequestBeginBlock are ignored by module begin blockers
+	suite.Require().NoError(err)
 }
 
 func (suite *IntegrationTester) NextBlockAfter(blockDuration time.Duration) {
-	suite.NextBlockAt(suite.Ctx.BlockTime().Add(blockDuration))
+	suite.NextBlockAt(sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(blockDuration))
 }
 
 func (suite *IntegrationTester) DeliverIncentiveMsg(msg sdk.Msg) error {
@@ -80,9 +85,9 @@ func (suite *IntegrationTester) DeliverIncentiveMsg(msg sdk.Msg) error {
 
 	switch msg := msg.(type) {
 	case *types.MsgClaimJoltReward:
-		_, err = msgServer.ClaimJoltReward(sdk.WrapSDKContext(suite.Ctx), msg)
+		_, err = msgServer.ClaimJoltReward(suite.Ctx, msg)
 	case *types.MsgClaimSwapReward:
-		_, err = msgServer.ClaimSwapReward(sdk.WrapSDKContext(suite.Ctx), msg)
+		_, err = msgServer.ClaimSwapReward(suite.Ctx, msg)
 		//	case *types.MsgClaimUSDXMintingReward:
 		//		_, err = msgServer.ClaimUSDXMintingReward(sdk.WrapSDKContext(suite.Ctx), msg)
 	// case *types.MsgClaimDelegatorReward:
@@ -96,12 +101,12 @@ func (suite *IntegrationTester) DeliverIncentiveMsg(msg sdk.Msg) error {
 
 func (suite *IntegrationTester) DeliverMsgCreateValidator(address sdk.ValAddress, selfDelegation sdk.Coin) error {
 	msg, err := stakingtypes.NewMsgCreateValidator(
-		address,
+		address.String(),
 		ed25519.GenPrivKey().PubKey(),
 		selfDelegation,
 		stakingtypes.Description{},
-		stakingtypes.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-		sdk.NewInt(1_000_000),
+		stakingtypes.NewCommissionRates(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
+		sdkmath.NewInt(1_000_000),
 	)
 	if err != nil {
 		return err
@@ -109,32 +114,32 @@ func (suite *IntegrationTester) DeliverMsgCreateValidator(address sdk.ValAddress
 
 	stk := suite.App.GetStakingKeeper()
 	msgServer := stakingkeeper.NewMsgServerImpl(&stk)
-	_, err = msgServer.CreateValidator(sdk.WrapSDKContext(suite.Ctx), msg)
+	_, err = msgServer.CreateValidator(suite.Ctx, msg)
 
 	return err
 }
 
 func (suite *IntegrationTester) DeliverMsgDelegate(delegator sdk.AccAddress, validator sdk.ValAddress, amount sdk.Coin) error {
 	msg := stakingtypes.NewMsgDelegate(
-		delegator,
-		validator,
+		delegator.String(),
+		validator.String(),
 		amount,
 	)
 
 	stk := suite.App.GetStakingKeeper()
 	msgServer := stakingkeeper.NewMsgServerImpl(&stk)
-	_, err := msgServer.Delegate(sdk.WrapSDKContext(suite.Ctx), msg)
+	_, err := msgServer.Delegate(suite.Ctx, msg)
 	return err
 }
 
 //
-//func (suite *IntegrationTester) DeliverSwapMsgDeposit(depositor sdk.AccAddress, tokenA, tokenB sdk.Coin, slippage sdk.Dec) error {
+//func (suite *IntegrationTester) DeliverSwapMsgDeposit(depositor sdk.AccAddress, tokenA, tokenB sdk.Coin, slippage sdkmath.LegacyDec) error {
 //	msg := swaptypes.NewMsgDeposit(
 //		depositor.String(),
 //		tokenA,
 //		tokenB,
 //		slippage,
-//		suite.Ctx.BlockTime().Add(time.Hour).Unix(), // ensure msg will not fail due to short deadline
+//		sdk.UnwrapSDKContext(suite.Ctx).BlockTime().Add(time.Hour).Unix(), // ensure msg will not fail due to short deadline
 //	)
 //	msgServer := swapkeeper.NewMsgServerImpl(suite.App.GetSwapKeeper())
 //	_, err := msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), msg)
@@ -146,7 +151,7 @@ func (suite *IntegrationTester) DeliverJoltMsgDeposit(owner sdk.AccAddress, depo
 	msg := hardtypes.NewMsgDeposit(owner, deposit)
 	msgServer := hardkeeper.NewMsgServerImpl(suite.App.GetJoltKeeper())
 
-	_, err := msgServer.Deposit(sdk.WrapSDKContext(suite.Ctx), &msg)
+	_, err := msgServer.Deposit(suite.Ctx, &msg)
 	return err
 }
 
@@ -154,7 +159,7 @@ func (suite *IntegrationTester) DeliverJoltMsgBorrow(owner sdk.AccAddress, borro
 	msg := hardtypes.NewMsgBorrow(owner, borrow)
 	msgServer := hardkeeper.NewMsgServerImpl(suite.App.GetJoltKeeper())
 
-	_, err := msgServer.Borrow(sdk.WrapSDKContext(suite.Ctx), &msg)
+	_, err := msgServer.Borrow(suite.Ctx, &msg)
 	return err
 }
 
@@ -162,7 +167,7 @@ func (suite *IntegrationTester) DeliverHardMsgRepay(owner sdk.AccAddress, repay 
 	msg := hardtypes.NewMsgRepay(owner, owner, repay)
 	msgServer := hardkeeper.NewMsgServerImpl(suite.App.GetJoltKeeper())
 
-	_, err := msgServer.Repay(sdk.WrapSDKContext(suite.Ctx), &msg)
+	_, err := msgServer.Repay(suite.Ctx, &msg)
 	return err
 }
 
@@ -170,11 +175,11 @@ func (suite *IntegrationTester) DeliverJoltMsgWithdraw(owner sdk.AccAddress, wit
 	msg := hardtypes.NewMsgWithdraw(owner, withdraw)
 	msgServer := hardkeeper.NewMsgServerImpl(suite.App.GetJoltKeeper())
 
-	_, err := msgServer.Withdraw(sdk.WrapSDKContext(suite.Ctx), &msg)
+	_, err := msgServer.Withdraw(suite.Ctx, &msg)
 	return err
 }
 
-func (suite *IntegrationTester) GetAccount(addr sdk.AccAddress) authtypes.AccountI {
+func (suite *IntegrationTester) GetAccount(addr sdk.AccAddress) sdk.AccountI {
 	ak := suite.App.GetAccountKeeper()
 	return ak.GetAccount(suite.Ctx, addr)
 }
@@ -227,7 +232,7 @@ func (suite *IntegrationTester) VestingPeriodsEqual(address sdk.AccAddress, expe
 }
 
 func (suite *IntegrationTester) JoltRewardEquals(owner sdk.AccAddress, expected sdk.Coins) {
-	claim, found := suite.App.GetIncentiveKeeper().GetJoltLiquidityProviderClaim(suite.Ctx, owner)
+	claim, found := suite.App.GetIncentiveKeeper().GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.Ctx), owner)
 	suite.Require().Truef(found, "expected delegator claim to be found for %s", owner)
 	suite.Equalf(expected, claim.Reward, "expected delegator claim reward to be %s, but got %s", expected, claim.Reward)
 }

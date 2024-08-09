@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -31,11 +33,11 @@ func (d Deposit) NormalizedDeposit() (sdk.DecCoins, error) {
 		if !found {
 			return nil, fmt.Errorf("deposited amount '%s' missing interest factor", coin.Denom)
 		}
-		if factor.LT(sdk.OneDec()) {
+		if factor.LT(sdkmath.LegacyOneDec()) {
 			return nil, fmt.Errorf("interest factor '%s' < 1", coin.Denom)
 		}
 
-		value := sdk.NewDecFromInt(coin.Amount).Quo(factor)
+		value := sdkmath.LegacyNewDecFromInt(coin.Amount).Quo(factor)
 		normalized = normalized.Add(
 			sdk.NewDecCoinFromDec(
 				coin.Denom,
@@ -109,7 +111,7 @@ func NewDepositResponse(depositor sdk.AccAddress, amount sdk.Coins, indexes Supp
 type DepositResponses []DepositResponse
 
 // NewSupplyInterestFactor returns a new SupplyInterestFactor instance
-func NewSupplyInterestFactor(denom string, value sdk.Dec) SupplyInterestFactor {
+func NewSupplyInterestFactor(denom string, value sdkmath.LegacyDec) SupplyInterestFactor {
 	return SupplyInterestFactor{
 		Denom: denom,
 		Value: value,
@@ -133,7 +135,7 @@ func (sif SupplyInterestFactor) ToResponse() SupplyInterestFactorResponse {
 }
 
 // NewSupplyInterestFactorResponse returns a new SupplyInterestFactorResponse instance
-func NewSupplyInterestFactorResponse(denom string, value sdk.Dec) SupplyInterestFactorResponse {
+func NewSupplyInterestFactorResponse(denom string, value sdkmath.LegacyDec) SupplyInterestFactorResponse {
 	return SupplyInterestFactorResponse{
 		Denom: denom,
 		Value: value.String(),
@@ -144,17 +146,17 @@ func NewSupplyInterestFactorResponse(denom string, value sdk.Dec) SupplyInterest
 type SupplyInterestFactors []SupplyInterestFactor
 
 // GetInterestFactor returns a denom's interest factor value
-func (sifs SupplyInterestFactors) GetInterestFactor(denom string) (sdk.Dec, bool) {
+func (sifs SupplyInterestFactors) GetInterestFactor(denom string) (sdkmath.LegacyDec, bool) {
 	for _, sif := range sifs {
 		if sif.Denom == denom {
 			return sif.Value, true
 		}
 	}
-	return sdk.ZeroDec(), false
+	return sdkmath.LegacyZeroDec(), false
 }
 
 // SetInterestFactor sets a denom's interest factor value
-func (sifs SupplyInterestFactors) SetInterestFactor(denom string, factor sdk.Dec) SupplyInterestFactors {
+func (sifs SupplyInterestFactors) SetInterestFactor(denom string, factor sdkmath.LegacyDec) SupplyInterestFactors {
 	for i, sif := range sifs {
 		if sif.Denom == denom {
 			sif.Value = factor
