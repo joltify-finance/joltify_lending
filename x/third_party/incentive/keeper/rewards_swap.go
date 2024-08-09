@@ -11,7 +11,8 @@ import (
 
 // AccumulateSwapRewards calculates new rewards to distribute this block and updates the global indexes to reflect this.
 // The provided rewardPeriod must be valid to avoid panics in calculating time durations.
-func (k Keeper) AccumulateSwapRewards(ctx sdk.Context, rewardPeriod types.MultiRewardPeriod) {
+func (k Keeper) AccumulateSwapRewards(rctx sdk.Context, rewardPeriod types.MultiRewardPeriod) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	previousAccrualTime, found := k.GetSwapRewardAccrualTime(ctx, rewardPeriod.CollateralType)
 	if !found {
 		previousAccrualTime = ctx.BlockTime()
@@ -37,12 +38,12 @@ func (k Keeper) AccumulateSwapRewards(ctx sdk.Context, rewardPeriod types.MultiR
 
 // getSwapTotalSourceShares fetches the sum of all source shares for a swap reward.
 // In the case of swap, these are the total (swap module) shares in a particular pool.
-func (k Keeper) getSwapTotalSourceShares(ctx sdk.Context, poolID string) sdk.Dec {
+func (k Keeper) getSwapTotalSourceShares(ctx sdk.Context, poolID string) sdkmath.LegacyDec {
 	totalShares, found := k.swapKeeper.GetPoolShares(ctx, poolID)
 	if !found {
-		totalShares = sdk.ZeroInt()
+		totalShares = sdkmath.ZeroInt()
 	}
-	return sdk.NewDecFromInt(totalShares)
+	return sdkmath.LegacyNewDecFromInt(totalShares)
 }
 
 // InitializeSwapReward creates a new claim with zero rewards and indexes matching the global indexes.
@@ -95,7 +96,7 @@ func (k *Keeper) synchronizeSwapReward(ctx sdk.Context, claim types.SwapClaim, p
 		userRewardIndexes = types.RewardIndexes{}
 	}
 
-	newRewards, err := k.CalculateRewards(userRewardIndexes, globalRewardIndexes, sdk.NewDecFromInt(shares))
+	newRewards, err := k.CalculateRewards(userRewardIndexes, globalRewardIndexes, sdkmath.LegacyNewDecFromInt(shares))
 	if err != nil {
 		// Global reward factors should never decrease, as it would lead to a negative update to claim.Rewards.
 		// This panics if a global reward factor decreases or disappears between the old and new indexes.
@@ -118,7 +119,7 @@ func (k Keeper) GetSynchronizedSwapClaim(ctx sdk.Context, owner sdk.AccAddress) 
 	k.IterateSwapRewardIndexes(ctx, func(poolID string, _ types.RewardIndexes) bool {
 		shares, found := k.swapKeeper.GetDepositorSharesAmount(ctx, owner, poolID)
 		if !found {
-			shares = sdk.ZeroInt()
+			shares = sdkmath.ZeroInt()
 		}
 
 		claim = k.synchronizeSwapReward(ctx, claim, poolID, owner, shares)

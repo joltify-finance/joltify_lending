@@ -145,7 +145,8 @@ func TestMsgClaim_Validate(t *testing.T) {
 		msgs := []sdk.Msg{&msgClaimJoltReward}
 		for _, msg := range msgs {
 			t.Run(tc.name, func(t *testing.T) {
-				err := msg.ValidateBasic()
+				lmsg := msg.(*types2.MsgClaimJoltReward)
+				err := lmsg.ValidateBasic()
 				if tc.expect.pass {
 					require.NoError(t, err)
 				} else {

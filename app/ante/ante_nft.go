@@ -3,7 +3,7 @@ package ante
 import (
 	"fmt"
 
-	nfttypes "github.com/cosmos/cosmos-sdk/x/nft"
+	nfttypes "cosmossdk.io/x/nft"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 

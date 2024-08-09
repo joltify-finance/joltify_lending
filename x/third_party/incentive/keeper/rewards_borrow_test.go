@@ -1,10 +1,13 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
@@ -13,7 +16,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	joltkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -109,7 +111,7 @@ type BorrowRewardsTestSuite struct {
 	joltKeeper joltkeeper.Keeper
 
 	app app.TestApp
-	ctx sdk.Context
+	ctx context.Context
 
 	genesisTime time.Time
 	addrs       []sdk.AccAddress
@@ -126,24 +128,28 @@ func (suite *BorrowRewardsTestSuite) SetupTest() {
 }
 
 func (suite *BorrowRewardsTestSuite) SetupApp() {
-	suite.app = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-
-	suite.keeper = suite.app.GetIncentiveKeeper()
-	suite.joltKeeper = suite.app.GetJoltKeeper()
-
-	suite.ctx = suite.app.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
+	suite.app = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	//suite.ctx = suite.app.Ctx
+	//suite.keeper = suite.app.GetIncentiveKeeper()
+	//suite.joltKeeper = suite.app.GetJoltKeeper()
 }
 
-func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil2.IncentiveGenesisBuilder, hardBuilder testutil2.JoltGenesisBuilder) {
+func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil2.IncentiveGenesisBuilder, hardBuilder testutil2.JoltGenesisBuilder, genesisTime time.Time) app.TestApp {
 	suite.SetupApp()
 
-	suite.app.InitializeFromGenesisStatesWithTime(
+	mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, nil, nil,
 		authBuilder.BuildMarshalled(suite.app.AppCodec()),
 		NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
 		hardBuilder.BuildMarshalled(suite.app.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.app.AppCodec()),
 	)
+	suite.app.App = mapp.App
+	suite.ctx = mapp.Ctx
+	suite.app.Ctx = mapp.Ctx
+	return mapp
+	//header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: genesisTime}
+	//suite.ctx = suite.app.NewContextLegacy(false, header)
 }
 
 func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
@@ -246,20 +252,32 @@ func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
 				WithGenesisTime(suite.genesisTime).
 				WithSimpleBorrowRewardPeriod(tc.args.borrow.Denom, tc.args.rewardsPerSecond)
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupApp()
+			mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+				suite.genesisTime, nil, nil,
+				authBuilder.BuildMarshalled(suite.app.AppCodec()),
+				NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
+				NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.app.AppCodec()),
+				incentBuilder.BuildMarshalled(suite.app.AppCodec()),
+			)
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.joltKeeper = mapp.GetJoltKeeper()
+			suite.keeper = mapp.GetIncentiveKeeper()
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
 
 			// User deposits and borrows to increase total borrowed amount
-			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdkmath.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)
 
 			// Set up chain context at future time
-			runAtTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * tc.args.timeElapsed))
-			runCtx := suite.ctx.WithBlockTime(runAtTime)
+			runAtTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * tc.args.timeElapsed))
+			runCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(runAtTime)
 
 			// Run Hard begin blocker in order to update the denom's index factor
 			jolt.BeginBlocker(runCtx, suite.joltKeeper)
@@ -403,7 +421,19 @@ func (suite *BorrowRewardsTestSuite) TestInitializeHardBorrowRewards() {
 				incentBuilder = incentBuilder.WithSimpleBorrowRewardPeriod(moneyMarketDenom, rewardsPerSecond)
 			}
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			suite.SetupApp()
+			mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+				suite.genesisTime, nil, nil,
+				authBuilder.BuildMarshalled(suite.app.AppCodec()),
+				NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
+				NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.app.AppCodec()),
+				incentBuilder.BuildMarshalled(suite.app.AppCodec()),
+			)
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.joltKeeper = mapp.GetJoltKeeper()
+			suite.keeper = mapp.GetIncentiveKeeper()
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
@@ -415,7 +445,7 @@ func (suite *BorrowRewardsTestSuite) TestInitializeHardBorrowRewards() {
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, tc.args.borrow)
 			suite.Require().NoError(err)
 
-			claim, foundClaim := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, foundClaim := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(foundClaim)
 			suite.Require().Equal(tc.args.expectedClaimBorrowRewardIndexes, claim.BorrowRewardIndexes)
 		})
@@ -597,9 +627,23 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 				incentBuilder = incentBuilder.WithSimpleBorrowRewardPeriod(tc.args.incentiveBorrowRewardDenom, tc.args.rewardsPerSecond)
 			}
 			// Set the minimum borrow to 0 to allow testing small borrows
-			hardBuilder := NewJoltGenStateMulti(suite.genesisTime).WithMinBorrow(sdk.ZeroDec())
+			hardBuilder := NewJoltGenStateMulti(suite.genesisTime).WithMinBorrow(sdkmath.LegacyZeroDec())
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, hardBuilder)
+			suite.SetupApp()
+			mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+				suite.genesisTime, nil, nil,
+				authBuilder.BuildMarshalled(suite.app.AppCodec()),
+				NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
+				hardBuilder.BuildMarshalled(suite.app.AppCodec()),
+				incentBuilder.BuildMarshalled(suite.app.AppCodec()),
+			)
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.joltKeeper = mapp.GetJoltKeeper()
+			suite.keeper = mapp.GetIncentiveKeeper()
+
+			//suite.SetupWithGenState(authBuilder, incentBuilder, hardBuilder, suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[2], cs(c("pjolt", 1e9)))
 			suite.Require().NoError(err)
@@ -616,29 +660,29 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 			)
 
 			// User deposits and borrows to increase total borrowed amount
-			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdkmath.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)
 
 			// Check that Hard hooks initialized a HardLiquidityProviderClaim
-			claim, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			multiRewardIndex, _ := claim.BorrowRewardIndexes.GetRewardIndex(tc.args.borrow.Denom)
 			for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
 				currRewardIndex, found := multiRewardIndex.RewardIndexes.GetRewardIndex(expectedRewardIndex.CollateralType)
 				suite.Require().True(found)
-				suite.Require().Equal(sdk.ZeroDec(), currRewardIndex.RewardFactor)
+				suite.Require().Equal(sdkmath.LegacyZeroDec(), currRewardIndex.RewardFactor)
 			}
 
 			// Run accumulator at several intervals
 			var timeElapsed int
-			previousBlockTime := suite.ctx.BlockTime()
+			previousBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 			for _, t := range tc.args.blockTimes {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
 				previousBlockTime = updatedBlockTime
-				blockCtx := suite.ctx.WithBlockTime(updatedBlockTime)
+				blockCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 				// Run Hard begin blocker for each block ctx to update denom's interest factor
 				jolt.BeginBlocker(blockCtx, suite.joltKeeper)
@@ -649,20 +693,20 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 					suite.keeper.AccumulateJoltBorrowRewards(blockCtx, multiRewardPeriod)
 				}
 			}
-			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
-			suite.ctx = suite.ctx.WithBlockTime(updatedBlockTime)
+			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 			// After we've accumulated, run synchronize
 			borrow, found := suite.joltKeeper.GetBorrow(suite.ctx, userAddr)
 			suite.Require().True(found)
 			suite.Require().NotPanics(func() {
-				suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+				suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 			})
 
 			// Check that the global reward index's reward factor and user's claim have been updated as expected
-			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
-			globalRewardIndexes, foundGlobalRewardIndexes := suite.keeper.GetJoltBorrowRewardIndexes(suite.ctx, tc.args.borrow.Denom)
+			globalRewardIndexes, foundGlobalRewardIndexes := suite.keeper.GetJoltBorrowRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), tc.args.borrow.Denom)
 			if len(tc.args.rewardsPerSecond) > 0 {
 				suite.Require().True(foundGlobalRewardIndexes)
 				for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
@@ -693,7 +737,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 
 			// If are no initial rewards per second, add new rewards through a committee param change
 			// 1. Construct incentive's new JoltBorrowRewardPeriods param
-			currIncentiveHardBorrowRewardPeriods := suite.keeper.GetParams(suite.ctx).JoltBorrowRewardPeriods
+			currIncentiveHardBorrowRewardPeriods := suite.keeper.GetParams(sdk.UnwrapSDKContext(suite.ctx)).JoltBorrowRewardPeriods
 			multiRewardPeriod, found := currIncentiveHardBorrowRewardPeriods.GetMultiRewardPeriod(tc.args.borrow.Denom)
 			if found {
 				// Borrow denom's reward period exists, but it doesn't have any rewards per second
@@ -709,9 +753,9 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 				currIncentiveHardBorrowRewardPeriods = append(currIncentiveHardBorrowRewardPeriods, newMultiRewardPeriod)
 			}
 
-			params := suite.keeper.GetParams(suite.ctx)
+			params := suite.keeper.GetParams(sdk.UnwrapSDKContext(suite.ctx))
 			params.JoltBorrowRewardPeriods = currIncentiveHardBorrowRewardPeriods
-			suite.keeper.SetParams(suite.ctx, params)
+			suite.keeper.SetParams(sdk.UnwrapSDKContext(suite.ctx), params)
 
 			// We need to accumulate hard supply-side rewards again
 			multiRewardPeriod, found = suite.keeper.GetJoltBorrowRewardPeriods(suite.ctx, tc.args.borrow.Denom)
@@ -725,20 +769,20 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 
 			// Now we can jump forward in time and accumulate rewards
 			updatedBlockTime = previousBlockTime.Add(time.Duration(int(time.Second) * tc.args.updatedTimeDuration))
-			suite.ctx = suite.ctx.WithBlockTime(updatedBlockTime)
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 			suite.keeper.AccumulateJoltBorrowRewards(suite.ctx, multiRewardPeriod)
 
 			// After we've accumulated, run synchronize
 			borrow, found = suite.joltKeeper.GetBorrow(suite.ctx, userAddr)
 			suite.Require().True(found)
 			suite.Require().NotPanics(func() {
-				suite.keeper.SynchronizeJoltBorrowReward(suite.ctx, borrow)
+				suite.keeper.SynchronizeJoltBorrowReward(sdk.UnwrapSDKContext(suite.ctx), borrow)
 			})
 
 			// Check that the global reward index's reward factor and user's claim have been updated as expected
-			globalRewardIndexes, found = suite.keeper.GetJoltBorrowRewardIndexes(suite.ctx, tc.args.borrow.Denom)
+			globalRewardIndexes, found = suite.keeper.GetJoltBorrowRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), tc.args.borrow.Denom)
 			suite.Require().True(found)
-			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claim, found = suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 
 			for _, expectedRewardIndex := range tc.args.updatedExpectedRewardIndexes {
@@ -893,9 +937,36 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 				WithSimpleBorrowRewardPeriod("btcb", tc.args.rewardsPerSecond).
 				WithSimpleBorrowRewardPeriod("xrp", tc.args.rewardsPerSecond)
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			//suite.app = suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
-			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[0], cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			suite.SetupApp()
+			//mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+			//	suite.genesisTime, nil, nil,
+			//	authBuilder.BuildMarshalled(suite.app.AppCodec()),
+			//	NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
+			//	NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.app.AppCodec()),
+			//	incentBuilder.BuildMarshalled(suite.app.AppCodec()),
+			//)
+			//suite.app.App = mapp.App
+			//suite.ctx = mapp.Ctx
+
+			var genAcc []authtypes.GenesisAccount
+			b := authtypes.NewBaseAccount(suite.addrs[0], nil, 0, 0)
+			genAcc = append(genAcc, b)
+			na := suite.app.InitializeFromGenesisStates(suite.T(), suite.genesisTime, genAcc, nil,
+				authBuilder.BuildMarshalled(suite.app.AppCodec()),
+				NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
+				NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.app.AppCodec()),
+				incentBuilder.BuildMarshalled(suite.app.AppCodec()),
+			)
+
+			suite.ctx = na.Ctx
+			suite.app = na
+			suite.app.Ctx = na.Ctx
+			suite.keeper = na.GetIncentiveKeeper()
+			suite.joltKeeper = na.GetJoltKeeper()
+
+			err := fundAccount(na.GetBankKeeper(), na.Ctx, suite.addrs[0], cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
 
 			err = fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
@@ -910,7 +981,7 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 			suite.Require().NoError(err)
 
 			// Confirm that claim exists but no borrow reward indexes have been added
-			claimAfterDeposit, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claimAfterDeposit, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			suite.Require().Equal(0, len(claimAfterDeposit.BorrowRewardIndexes))
 
@@ -919,7 +990,7 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 			suite.Require().NoError(err)
 
 			// Confirm that claim's borrow reward indexes have been updated
-			claimAfterFirstBorrow, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claimAfterFirstBorrow, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			for _, coin := range tc.args.firstBorrow {
 				_, hasIndex := claimAfterFirstBorrow.HasBorrowRewardIndex(coin.Denom)
@@ -936,7 +1007,7 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 			suite.Require().NoError(err)
 
 			// Confirm that claim's borrow reward indexes contain expected values
-			claimAfterModification, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claimAfterModification, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(found)
 			for _, coin := range tc.args.modification.coins {
 				_, hasIndex := claimAfterModification.HasBorrowRewardIndex(coin.Denom)
@@ -998,25 +1069,39 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 				WithGenesisTime(suite.genesisTime).
 				WithSimpleBorrowRewardPeriod(tc.args.borrow.Denom, tc.args.rewardsPerSecond)
 
-			suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime))
+			//suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
+
+			suite.SetupApp()
+			mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
+				suite.genesisTime, nil, nil,
+				authBuilder.BuildMarshalled(suite.app.AppCodec()),
+				NewPricefeedGenStateMultiFromTime(suite.app.AppCodec(), suite.genesisTime),
+				NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.app.AppCodec()),
+				incentBuilder.BuildMarshalled(suite.app.AppCodec()),
+			)
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.joltKeeper = mapp.GetJoltKeeper()
+			suite.keeper = mapp.GetIncentiveKeeper()
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 			suite.Require().NoError(err)
 
 			// User deposits and borrows to increase total borrowed amount
-			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdk.NewInt(2)))))
+			err = suite.joltKeeper.Deposit(suite.ctx, userAddr, sdk.NewCoins(sdk.NewCoin(tc.args.borrow.Denom, tc.args.borrow.Amount.Mul(sdkmath.NewInt(2)))))
 			suite.Require().NoError(err)
 			err = suite.joltKeeper.Borrow(suite.ctx, userAddr, sdk.NewCoins(tc.args.borrow))
 			suite.Require().NoError(err)
 
 			// Run accumulator at several intervals
 			var timeElapsed int
-			previousBlockTime := suite.ctx.BlockTime()
+			previousBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime()
 			for _, t := range tc.args.blockTimes {
 				timeElapsed += t
 				updatedBlockTime := previousBlockTime.Add(time.Duration(int(time.Second) * t))
 				previousBlockTime = updatedBlockTime
-				blockCtx := suite.ctx.WithBlockTime(updatedBlockTime)
+				blockCtx := sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 				// Run Hard begin blocker for each block ctx to update denom's interest factor
 				jolt.BeginBlocker(blockCtx, suite.joltKeeper)
@@ -1026,21 +1111,21 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 				suite.Require().True(found)
 				suite.keeper.AccumulateJoltBorrowRewards(blockCtx, multiRewardPeriod)
 			}
-			updatedBlockTime := suite.ctx.BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
-			suite.ctx = suite.ctx.WithBlockTime(updatedBlockTime)
+			updatedBlockTime := sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Duration(int(time.Second) * timeElapsed))
+			suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(updatedBlockTime)
 
 			// Confirm that the user's claim hasn't been synced
-			claimPre, foundPre := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, userAddr)
+			claimPre, foundPre := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), userAddr)
 			suite.Require().True(foundPre)
 			multiRewardIndexPre, _ := claimPre.BorrowRewardIndexes.GetRewardIndex(tc.args.borrow.Denom)
 			for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
 				currRewardIndex, found := multiRewardIndexPre.RewardIndexes.GetRewardIndex(expectedRewardIndex.CollateralType)
 				suite.Require().True(found)
-				suite.Require().Equal(sdk.ZeroDec(), currRewardIndex.RewardFactor)
+				suite.Require().Equal(sdkmath.LegacyZeroDec(), currRewardIndex.RewardFactor)
 			}
 
 			// Check that the synced claim held in memory has properly simulated syncing
-			syncedClaim := suite.keeper.SimulateJoltSynchronization(suite.ctx, claimPre)
+			syncedClaim := suite.keeper.SimulateJoltSynchronization(sdk.UnwrapSDKContext(suite.ctx), claimPre)
 			for _, expectedRewardIndex := range tc.args.expectedRewardIndexes {
 				// Check that the user's claim's reward index matches the expected reward index
 				multiRewardIndex, found := syncedClaim.BorrowRewardIndexes.GetRewardIndex(tc.args.borrow.Denom)

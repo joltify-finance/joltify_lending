@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -104,7 +105,7 @@ func TestAccumulator(t *testing.T) {
 		type args struct {
 			rewardsPerSecond  sdk.Coins
 			duration          time.Duration
-			totalSourceShares sdk.Dec
+			totalSourceShares sdkmath.LegacyDec
 		}
 		testcases := []struct {
 			name     string
@@ -197,7 +198,7 @@ func TestAccumulator(t *testing.T) {
 		type args struct {
 			accumulator       Accumulator
 			period            MultiRewardPeriod
-			totalSourceShares sdk.Dec
+			totalSourceShares sdkmath.LegacyDec
 			currentTime       time.Time
 		}
 		testcases := []struct {

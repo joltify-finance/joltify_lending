@@ -25,7 +25,7 @@ var (
 	MoneyMarketsPrefix            = []byte{0x05}
 	PreviousAccrualTimePrefix     = []byte{0x06} // denom -> time
 	TotalReservesPrefix           = []byte{0x07} // denom -> sdk.Coin
-	BorrowInterestFactorPrefix    = []byte{0x08} // denom -> sdk.Dec
-	SupplyInterestFactorPrefix    = []byte{0x09} // denom -> sdk.Dec
-	DelegatorInterestFactorPrefix = []byte{0x10} // denom -> sdk.Dec
+	BorrowInterestFactorPrefix    = []byte{0x08} // denom -> sdkmath.LegacyDec
+	SupplyInterestFactorPrefix    = []byte{0x09} // denom -> sdkmath.LegacyDec
+	DelegatorInterestFactorPrefix = []byte{0x10} // denom -> sdkmath.LegacyDec
 )

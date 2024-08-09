@@ -3,7 +3,8 @@ package keeper
 import (
 	"context"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -29,7 +30,8 @@ func (k Keeper) QueryByWallet(goCtx context.Context, req *types.QueryByWalletReq
 	return &types.QueryByWalletResponse{Investor: &ret}, nil
 }
 
-func (k Keeper) GetByWallet(ctx sdk.Context, wallet string) (types.Investor, error) {
+func (k Keeper) GetByWallet(rctx context.Context, wallet string) (types.Investor, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	gasBefore := ctx.GasMeter().GasConsumed()
 	defer func() {
 		gasAfter := ctx.GasMeter().GasConsumed()
@@ -38,7 +40,7 @@ func (k Keeper) GetByWallet(ctx sdk.Context, wallet string) (types.Investor, err
 
 	store := ctx.KVStore(k.storeKey)
 	investorStores := prefix.NewStore(store, types.KeyPrefix(types.InvestorToWalletsPrefix))
-	iterator := sdk.KVStorePrefixIterator(investorStores, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(investorStores, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var investor types.Investor

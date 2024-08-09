@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	"errors"
 	"fmt"
 	"strings"
@@ -88,7 +89,7 @@ func NewMarketResponse(id, base, quote string, oracles []sdk.AccAddress, active 
 type MarketResponses []MarketResponse
 
 // NewCurrentPrice returns an instance of CurrentPrice
-func NewCurrentPrice(marketID string, price sdk.Dec) CurrentPrice {
+func NewCurrentPrice(marketID string, price sdkmath.LegacyDec) CurrentPrice {
 	return CurrentPrice{MarketID: marketID, Price: price}
 }
 
@@ -96,7 +97,7 @@ func NewCurrentPrice(marketID string, price sdk.Dec) CurrentPrice {
 type CurrentPrices []CurrentPrice
 
 // NewCurrentPriceResponse returns an instance of CurrentPriceResponse
-func NewCurrentPriceResponse(marketID string, price sdk.Dec) CurrentPriceResponse {
+func NewCurrentPriceResponse(marketID string, price sdkmath.LegacyDec) CurrentPriceResponse {
 	return CurrentPriceResponse{MarketID: marketID, Price: price}
 }
 
@@ -104,7 +105,7 @@ func NewCurrentPriceResponse(marketID string, price sdk.Dec) CurrentPriceRespons
 type CurrentPriceResponses []CurrentPriceResponse
 
 // NewPostedPrice returns a new PostedPrice
-func NewPostedPrice(marketID string, oracle sdk.AccAddress, price sdk.Dec, expiry time.Time) PostedPrice {
+func NewPostedPrice(marketID string, oracle sdk.AccAddress, price sdkmath.LegacyDec, expiry time.Time) PostedPrice {
 	return PostedPrice{
 		MarketID:      marketID,
 		OracleAddress: oracle,
@@ -152,7 +153,7 @@ func (pps PostedPrices) Validate() error {
 }
 
 // NewPostedPriceResponse returns a new PostedPrice
-func NewPostedPriceResponse(marketID string, oracle sdk.AccAddress, price sdk.Dec, expiry time.Time) PostedPriceResponse {
+func NewPostedPriceResponse(marketID string, oracle sdk.AccAddress, price sdkmath.LegacyDec, expiry time.Time) PostedPriceResponse {
 	return PostedPriceResponse{
 		MarketID:      marketID,
 		OracleAddress: oracle.String(),
@@ -164,8 +165,8 @@ func NewPostedPriceResponse(marketID string, oracle sdk.AccAddress, price sdk.De
 // PostedPriceResponses is a slice of PostedPriceResponse
 type PostedPriceResponses []PostedPriceResponse
 
-// SortDecs provides the interface needed to sort sdk.Dec slices
-type SortDecs []sdk.Dec
+// SortDecs provides the interface needed to sort sdkmath.LegacyDec slices
+type SortDecs []sdkmath.LegacyDec
 
 func (a SortDecs) Len() int           { return len(a) }
 func (a SortDecs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

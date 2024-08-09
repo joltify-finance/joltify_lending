@@ -3,6 +3,8 @@ package pricefeed_test
 import (
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -22,13 +24,13 @@ func NewPricefeedGen() types2.GenesisState {
 			{
 				MarketID:      "btc:usd",
 				OracleAddress: sdk.AccAddress("oracle1"),
-				Price:         sdk.MustNewDecFromStr("8000.00"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("8000.00"),
 				Expiry:        time.Now().Add(1 * time.Hour),
 			},
 			{
 				MarketID:      "xrp:usd",
 				OracleAddress: sdk.AccAddress("oracle2"),
-				Price:         sdk.MustNewDecFromStr("0.25"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("0.25"),
 				Expiry:        time.Now().Add(1 * time.Hour),
 			},
 		},
@@ -52,13 +54,13 @@ func NewPricefeedGenStateWithOracles(addrs []sdk.AccAddress) app.GenesisState {
 			{
 				MarketID:      "btc:usd",
 				OracleAddress: addrs[0],
-				Price:         sdk.MustNewDecFromStr("8000.00"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("8000.00"),
 				Expiry:        time.Now().Add(1 * time.Hour),
 			},
 			{
 				MarketID:      "xrp:usd",
 				OracleAddress: addrs[0],
-				Price:         sdk.MustNewDecFromStr("0.25"),
+				Price:         sdkmath.LegacyMustNewDecFromStr("0.25"),
 				Expiry:        time.Now().Add(1 * time.Hour),
 			},
 		},

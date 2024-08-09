@@ -1,8 +1,10 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
@@ -16,7 +18,7 @@ type addInvestorSuite struct {
 	suite.Suite
 	keeper     *spvkeeper.Keeper
 	app        types.MsgServer
-	ctx        sdk.Context
+	ctx        context.Context
 	poolIndexs []string
 }
 
@@ -33,7 +35,7 @@ func (suite *addInvestorSuite) SetupTest() {
 	ctx := sdk.UnwrapSDKContext(wctx)
 
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(322)), sdk.NewCoin("ausdc", sdk.NewInt(322))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 1, PoolName: "hello", Apy: []string{"7.8", "7.2"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(322)), sdk.NewCoin("ausdc", sdkmath.NewInt(322))}}
 	resp, err := lapp.CreatePool(ctx, &req)
 	suite.Require().NoError(err)
 	suite.poolIndexs = resp.PoolIndex

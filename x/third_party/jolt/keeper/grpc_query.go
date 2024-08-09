@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -79,7 +81,7 @@ func (s queryServer) Deposits(ctx context.Context, req *types2.QueryDepositsRequ
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -168,7 +170,7 @@ func (s queryServer) UnsyncedDeposits(ctx context.Context, req *types2.QueryUnsy
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -239,7 +241,7 @@ func (s queryServer) Borrows(ctx context.Context, req *types2.QueryBorrowsReques
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -325,7 +327,7 @@ func (s queryServer) UnsyncedBorrows(ctx context.Context, req *types2.QueryUnsyn
 	if hasOwner {
 		owner, err = sdk.AccAddressFromBech32(req.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
 		}
 	}
 
@@ -450,7 +452,7 @@ func (s queryServer) InterestRate(ctx context.Context, req *types2.QueryInterest
 		macc := s.accountKeeper.GetModuleAccount(sdkCtx, types2.ModuleName)
 		cash := s.bankKeeper.GetBalance(sdkCtx, macc.GetAddress(), denom).Amount
 
-		borrowed := sdk.NewCoin(denom, sdk.ZeroInt())
+		borrowed := sdk.NewCoin(denom, sdkmath.ZeroInt())
 		borrowedCoins, foundBorrowedCoins := s.keeper.GetBorrowedCoins(sdkCtx)
 		if foundBorrowedCoins {
 			borrowed = sdk.NewCoin(denom, borrowedCoins.AmountOf(denom))
@@ -462,14 +464,14 @@ func (s queryServer) InterestRate(ctx context.Context, req *types2.QueryInterest
 		}
 
 		// CalculateBorrowRate calculates the current interest rate based on utilization (the fraction of supply that has ien borrowed)
-		borrowAPY, err := CalculateBorrowRate(moneyMarket.InterestRateModel, sdk.NewDecFromInt(cash), sdk.NewDecFromInt(borrowed.Amount), sdk.NewDecFromInt(reserves.AmountOf(denom)))
+		borrowAPY, err := CalculateBorrowRate(moneyMarket.InterestRateModel, sdkmath.LegacyNewDecFromInt(cash), sdkmath.LegacyNewDecFromInt(borrowed.Amount), sdkmath.LegacyNewDecFromInt(reserves.AmountOf(denom)))
 		if err != nil {
 			return nil, err
 		}
 
-		utilRatio := CalculateUtilizationRatio(sdk.NewDecFromInt(cash), sdk.NewDecFromInt(borrowed.Amount), sdk.NewDecFromInt(reserves.AmountOf(denom)))
+		utilRatio := CalculateUtilizationRatio(sdkmath.LegacyNewDecFromInt(cash), sdkmath.LegacyNewDecFromInt(borrowed.Amount), sdkmath.LegacyNewDecFromInt(reserves.AmountOf(denom)))
 		fullSupplyAPY := borrowAPY.Mul(utilRatio)
-		realSupplyAPY := fullSupplyAPY.Mul(sdk.OneDec().Sub(moneyMarket.ReserveFactor))
+		realSupplyAPY := fullSupplyAPY.Mul(sdkmath.LegacyOneDec().Sub(moneyMarket.ReserveFactor))
 
 		moneyMarketInterestRate := types2.MoneyMarketInterestRate{
 			Denom:              denom,
@@ -531,13 +533,13 @@ func (s queryServer) InterestFactors(ctx context.Context, req *types2.QueryInter
 	} else {
 		interestFactorMap := make(map[string]types2.InterestFactor)
 		// Populate mapping with supply interest factors
-		s.keeper.IterateSupplyInterestFactors(sdkCtx, func(denom string, factor sdk.Dec) (stop bool) {
+		s.keeper.IterateSupplyInterestFactors(sdkCtx, func(denom string, factor sdkmath.LegacyDec) (stop bool) {
 			interestFactor := types2.InterestFactor{Denom: denom, SupplyInterestFactor: factor.String()}
 			interestFactorMap[denom] = interestFactor
 			return false
 		})
 		// Populate mapping with borrow interest factors
-		s.keeper.IterateBorrowInterestFactors(sdkCtx, func(denom string, factor sdk.Dec) (stop bool) {
+		s.keeper.IterateBorrowInterestFactors(sdkCtx, func(denom string, factor sdkmath.LegacyDec) (stop bool) {
 			interestFactor, ok := interestFactorMap[denom]
 			if !ok {
 				newInterestFactor := types2.InterestFactor{Denom: denom, BorrowInterestFactor: factor.String()}
@@ -584,7 +586,7 @@ func (s queryServer) Liquidate(ctx context.Context, req *types2.QueryLiquidateRe
 	}
 	ret, err = doQueryAllLiquidate(sdkCtx, s.keeper, v)
 	if err != nil {
-		return nil, sdkerrors.Wrap(errors.New("err in query the liquidate users"), err.Error())
+		return nil, errorsmod.Wrap(errors.New("err in query the liquidate users"), err.Error())
 	}
 
 	start, end := client.Paginate(len(ret), page, limit, 100)

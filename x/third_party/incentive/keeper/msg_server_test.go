@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -40,8 +40,8 @@ func (suite *HandlerTestSuite) SetupTest() {
 }
 
 func (suite *HandlerTestSuite) SetupApp() {
-	suite.App = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-	suite.Ctx = suite.App.NewContext(true, tmproto.Header{Height: 1, Time: suite.genesisTime})
+	suite.App = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
+	suite.Ctx = suite.App.NewContext(true)
 }
 
 type genesisBuilder interface {
@@ -61,7 +61,7 @@ func (suite *HandlerTestSuite) SetupWithGenState(genAcc []authtypes.GenesisAccou
 		builtGenStates = append(builtGenStates, builder.BuildMarshalled(suite.App.AppCodec()))
 	}
 
-	suite.App.InitializeFromGenesisStatesWithTime(
+	suite.App.InitializeFromGenesisStatesWithTime(suite.T(),
 		suite.genesisTime, genAcc, coins,
 		builtGenStates...,
 	)
@@ -105,7 +105,7 @@ func (suite *HandlerTestSuite) incentiveBuilder() testutil2.IncentiveGenesisBuil
 func (suite *HandlerTestSuite) TestPayoutJoltClaimMultiDenom() {
 	userAddr, receiverAddr := suite.addrs[0], suite.addrs[1]
 
-	authBulder := suite.authBuilder().
+	authBuilder := suite.authBuilder().
 		WithSimpleAccount(userAddr, cs(c("bnb", 1e12))).
 		WithSimpleAccount(receiverAddr, nil).
 		WithSimpleModuleAccount(minttypes.ModuleName, cs(), "minter").
@@ -119,7 +119,20 @@ func (suite *HandlerTestSuite) TestPayoutJoltClaimMultiDenom() {
 	b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 	genAcc = append(genAcc, b)
 	coin := cs(c("bnb", 1e12))
-	suite.SetupWithGenState(genAcc, coin, authBulder, incentBuilder)
+
+	suite.SetupApp()
+
+	mapp := suite.App.InitializeFromGenesisStatesWithTime(suite.T(),
+		suite.genesisTime, genAcc, coin,
+		authBuilder.BuildMarshalled(suite.App.AppCodec()),
+		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
+		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.App.AppCodec()),
+		incentBuilder.BuildMarshalled(suite.App.AppCodec()),
+	)
+	suite.App = mapp
+	suite.App.App = mapp.App
+	suite.Ctx = mapp.Ctx
+	suite.App.Ctx = mapp.Ctx
 
 	err := suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
 	suite.Require().NoError(err)
@@ -154,7 +167,7 @@ func (suite *HandlerTestSuite) TestPayoutJoltClaimMultiDenom() {
 func (suite *HandlerTestSuite) TestPayoutHardClaimSingleDenom() {
 	userAddr := suite.addrs[0]
 
-	authBulder := suite.authBuilder().
+	authBuilder := suite.authBuilder().
 		WithSimpleAccount(userAddr, cs(c("bnb", 1e12))).
 		WithSimpleModuleAccount(minttypes.ModuleName, cs(), "minter").
 		WithSimpleModuleAccount(types2.ModuleName, cs(), "minter")
@@ -167,7 +180,21 @@ func (suite *HandlerTestSuite) TestPayoutHardClaimSingleDenom() {
 	b := authtypes.NewBaseAccount(userAddr, nil, 0, 0)
 	genAcc = append(genAcc, b)
 	coin := cs(c("bnb", 1e12))
-	suite.SetupWithGenState(genAcc, coin, authBulder, incentBuilder)
+
+	suite.SetupApp()
+
+	mapp := suite.App.InitializeFromGenesisStatesWithTime(suite.T(),
+		suite.genesisTime, genAcc, coin,
+		authBuilder.BuildMarshalled(suite.App.AppCodec()),
+		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
+		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.App.AppCodec()),
+		incentBuilder.BuildMarshalled(suite.App.AppCodec()),
+	)
+	suite.App = mapp
+	suite.App.App = mapp.App
+	suite.Ctx = mapp.Ctx
+	suite.App.Ctx = mapp.Ctx
+
 	err := suite.App.GetBankKeeper().MintCoins(suite.Ctx, types2.ModuleName, cs(c("hard", 1e12), c("swap", 1e12)))
 	suite.Require().NoError(err)
 

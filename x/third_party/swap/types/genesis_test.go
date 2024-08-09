@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,24 +25,24 @@ func TestGenesis_Default(t *testing.T) {
 func TestGenesis_Validate_SwapFee(t *testing.T) {
 	type args struct {
 		name      string
-		swapFee   sdk.Dec
+		swapFee   sdkmath.LegacyDec
 		expectErr bool
 	}
 	// More comprehensive swap fee tests are in prams_test.go
 	testCases := []args{
 		{
 			"normal",
-			sdk.MustNewDecFromStr("0.25"),
+			sdkmath.LegacyMustNewDecFromStr("0.25"),
 			false,
 		},
 		{
 			"negative",
-			sdk.MustNewDecFromStr("-0.5"),
+			sdkmath.LegacyMustNewDecFromStr("-0.5"),
 			true,
 		},
 		{
 			"greater than 1.0",
-			sdk.MustNewDecFromStr("1.001"),
+			sdkmath.LegacyMustNewDecFromStr("1.001"),
 			true,
 		},
 	}
@@ -157,7 +158,7 @@ func TestGenesis_JSONEncoding(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, 2, len(state.Params.AllowedPools))
-	assert.Equal(t, sdk.MustNewDecFromStr("0.003"), state.Params.SwapFee)
+	assert.Equal(t, sdkmath.LegacyMustNewDecFromStr("0.003"), state.Params.SwapFee)
 	assert.Equal(t, 2, len(state.PoolRecords))
 	assert.Equal(t, 2, len(state.ShareRecords))
 }
@@ -207,7 +208,7 @@ share_records:
 				types.NewAllowedPool("ukava", "usdx"),
 				types.NewAllowedPool("hard", "busd"),
 			),
-			sdk.MustNewDecFromStr("0.003"),
+			sdkmath.LegacyMustNewDecFromStr("0.003"),
 		),
 		types.PoolRecords{
 			types.NewPoolRecord(sdk.NewCoins(ukava(1e6), usdx(5e6)), i(3e6)),

@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/stretchr/testify/suite"
@@ -36,9 +38,9 @@ func (suite *InitializeJoltSupplyRewardTests) TestClaimIndexesAreSetWhenClaimExi
 		WithArbitrarySourceShares(extractCollateralTypes(globalIndexes)...).
 		Build()
 
-	suite.keeper.InitializeJoltSupplyReward(suite.ctx, deposit)
+	suite.keeper.InitializeJoltSupplyReward(sdk.UnwrapSDKContext(suite.ctx), deposit)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(globalIndexes, syncedClaim.SupplyRewardIndexes)
 }
 
@@ -51,9 +53,9 @@ func (suite *InitializeJoltSupplyRewardTests) TestClaimIndexesAreSetWhenClaimDoe
 		WithArbitrarySourceShares(extractCollateralTypes(globalIndexes)...).
 		Build()
 
-	suite.keeper.InitializeJoltSupplyReward(suite.ctx, deposit)
+	suite.keeper.InitializeJoltSupplyReward(sdk.UnwrapSDKContext(suite.ctx), deposit)
 
-	syncedClaim, found := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, owner)
+	syncedClaim, found := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), owner)
 	suite.True(found)
 	suite.Equal(globalIndexes, syncedClaim.SupplyRewardIndexes)
 }
@@ -71,8 +73,8 @@ func (suite *InitializeJoltSupplyRewardTests) TestClaimIndexesAreSetEmptyForMiss
 		WithArbitrarySourceShares(depositedDenoms...).
 		Build()
 
-	suite.keeper.InitializeJoltSupplyReward(suite.ctx, deposit)
+	suite.keeper.InitializeJoltSupplyReward(sdk.UnwrapSDKContext(suite.ctx), deposit)
 
-	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(suite.ctx, owner)
+	syncedClaim, _ := suite.keeper.GetJoltLiquidityProviderClaim(sdk.UnwrapSDKContext(suite.ctx), owner)
 	suite.Equal(expectedIndexes, syncedClaim.SupplyRewardIndexes)
 }

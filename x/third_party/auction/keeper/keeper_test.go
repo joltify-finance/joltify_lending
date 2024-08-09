@@ -4,22 +4,20 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 
 	"github.com/stretchr/testify/require"
-
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
 func TestIncrementNextAuctionID(t *testing.T) {
 	// setup keeper
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
 	keeper := tApp.GetAuctionKeeper()
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+	ctx := tApp.NewContext(true)
 
 	// store id
 	var id uint64 = 123456
@@ -35,11 +33,11 @@ func TestIncrementNextAuctionID(t *testing.T) {
 
 func TestIterateAuctions(t *testing.T) {
 	// setup
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
-	tApp.InitializeFromGenesisStates(nil, nil)
+	tApp.InitializeFromGenesisStates(t, time.Now(), nil, nil)
 	keeper := tApp.GetAuctionKeeper()
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+	ctx := tApp.NewContext(true)
 
 	auctions := []types2.Auction{
 		types2.NewSurplusAuction("sellerMod", c("denom", 12345678), "anotherdenom", time.Date(1998, time.January, 1, 0, 0, 0, 0, time.UTC)).WithID(0),
@@ -63,10 +61,10 @@ func TestIterateAuctions(t *testing.T) {
 
 func TestIterateAuctionsByTime(t *testing.T) {
 	// setup keeper
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
 	keeper := tApp.GetAuctionKeeper()
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1})
+	ctx := tApp.NewContext(true)
 
 	// setup byTime index
 	byTimeIndex := []struct {

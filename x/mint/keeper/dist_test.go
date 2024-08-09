@@ -5,22 +5,23 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/stretchr/testify/assert"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/joltify-finance/joltify_lending/app"
 	joltminttypes "github.com/joltify-finance/joltify_lending/x/mint/types"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFirstDist(t *testing.T) {
-	lg := tmlog.NewNopLogger()
+	lg := log.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	k := tApp.GetMintKeeper()
 	ctx := tApp.Ctx
@@ -31,22 +32,22 @@ func TestFirstDist(t *testing.T) {
 	acc := tApp.GetAccountKeeper().GetModuleAddress(incentivetypes.ModuleName)
 	balances := tApp.GetBankKeeper().GetBalance(ctx, acc, "ujolt")
 
-	firstDrop, ok := sdk.NewIntFromString("100000000000")
+	firstDrop, ok := sdkmath.NewIntFromString("100000000000")
 	assert.True(t, ok)
-	assert.True(t, balances.Amount.Equal(firstDrop))
+	assert.True(t, balances.Amount.BigInt().Cmp(firstDrop.BigInt()) == 0)
 }
 
 func TestMintCoinsAndDistribute(t *testing.T) {
-	lg := tmlog.NewNopLogger()
+	lg := log.NewNopLogger()
 	tApp := app.NewTestApp(lg, t.TempDir())
 	k := tApp.GetMintKeeper()
 
 	ctx := tApp.Ctx
 
-	apy, err := sdk.NewDecFromStr("0.08")
+	apy, err := sdkmath.LegacyNewDecFromStr("0.08")
 	assert.NoError(t, err)
 
-	adjAPY := sdk.OneDec().Add(apy)
+	adjAPY := sdkmath.LegacyOneDec().Add(apy)
 
 	spy, err := keeper.APYToSPY(adjAPY)
 	assert.NoError(t, err)
@@ -77,26 +78,28 @@ func TestMintCoinsAndDistribute(t *testing.T) {
 	received = bk.GetBalance(ctx, tApp.GetAccountKeeper().GetModuleAddress(authtypes.FeeCollectorName), "ujolt")
 
 	stakingkepper := tApp.GetStakingKeeper()
-	totalBounded := stakingkepper.TotalBondedTokens(ctx)
+	totalBounded, err := stakingkepper.TotalBondedTokens(ctx)
+	assert.NoError(t, err)
 	fmt.Printf("total bonded>>>>%v\n", totalBounded.String())
 
-	yearlyWeGet := apy.MulInt(totalBounded).TruncateInt()
+	yearlyWeGet := apy.MulInt(sdkmath.NewIntFromBigInt(totalBounded.BigInt())).TruncateInt()
 	t.Logf("we get yearly %s", yearlyWeGet.String())
 
 	t.Logf("we have received for one minute %v", received.Amount.String())
 	yearlyMinutes := int64(365 * 24 * 60)
-	actualReceived := received.Amount.Mul(sdk.NewInt(yearlyMinutes))
-	fmt.Printf("gap is %v\n", yearlyWeGet.Sub(actualReceived).Quo(sdk.NewInt(1000000)))
-	gap := yearlyWeGet.Sub(actualReceived).Quo(sdk.NewInt(1000000))
-	assert.True(t, gap.LT(sdk.NewInt(40000)))
+
+	actualReceived := received.Amount.Mul(sdkmath.NewInt(yearlyMinutes))
+	fmt.Printf("gap is %v\n", yearlyWeGet.Sub(sdkmath.NewIntFromBigInt(actualReceived.BigInt()).Quo(sdkmath.NewInt(1000000))))
+	gap := yearlyWeGet.Sub(sdkmath.NewIntFromBigInt(actualReceived.BigInt())).Quo(sdkmath.NewInt(1000000))
+	assert.True(t, gap.LT(sdkmath.NewInt(40000)))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second))
 	k.DoDistribute(ctx)
 	received2 := bk.GetBalance(ctx, tApp.GetAccountKeeper().GetModuleAddress(authtypes.FeeCollectorName), "ujolt")
-	assert.True(t, received.IsEqual(received2))
+	assert.True(t, received.Equal(received2))
 
 	ctx = ctx.WithBlockTime(ctx.BlockTime().Add(time.Second * 59))
 	k.DoDistribute(ctx)
 	received3 := bk.GetBalance(ctx, tApp.GetAccountKeeper().GetModuleAddress(authtypes.FeeCollectorName), "ujolt")
-	assert.True(t, received3.IsEqual(received2.Add(received2)))
+	assert.True(t, received3.Equal(received2.Add(received2)))
 }

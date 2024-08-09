@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
@@ -14,8 +14,8 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 
 var (
 	KeyFirstProvision     = []byte("FirstProvision")
-	DefaultFirstProvision = sdk.MustNewDecFromStr("0")
-	DefaultNodeSPY        = sdk.MustNewDecFromStr("1.000000002440418609")
+	DefaultFirstProvision = sdkmath.LegacyMustNewDecFromStr("0")
+	DefaultNodeSPY        = sdkmath.LegacyMustNewDecFromStr("1.000000002440418609")
 	NodeSPY               = []byte("NodeSPY")
 )
 
@@ -31,9 +31,9 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams(
-	firstProvision sdk.Dec,
+	firstProvision sdkmath.LegacyDec,
 	unit string,
-	nodeSPY sdk.Dec,
+	nodeSPY sdkmath.LegacyDec,
 ) Params {
 	return Params{
 		FirstProvisions: firstProvision,
@@ -84,7 +84,7 @@ func (p Params) String() string {
 }
 
 func validateSPY(v interface{}) error {
-	nodeAPY, ok := v.(sdk.Dec)
+	nodeAPY, ok := v.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", v)
 	}
@@ -96,7 +96,7 @@ func validateSPY(v interface{}) error {
 
 // validateEachProvision validates the CurrentProvision param
 func validateEachProvision(v interface{}) error {
-	eachProvision, ok := v.(sdk.Dec)
+	eachProvision, ok := v.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", v)
 	}

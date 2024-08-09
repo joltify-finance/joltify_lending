@@ -42,7 +42,7 @@ message Multiplier {
 
   int64 months_lockup = 2;
 
-  bytes factor = 3 [(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec", (gogoproto.nullable) = false];
+  bytes factor = 3 [(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
 }
 
 // MultipliersPerDenom is a map of denoms to a set of multipliers

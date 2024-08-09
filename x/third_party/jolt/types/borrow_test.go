@@ -3,6 +3,7 @@ package types_test
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -26,11 +27,11 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Index: types2.BorrowInterestFactors{
 					{
 						Denom: "xrpb",
-						Value: sdk.MustNewDecFromStr("1.25"),
+						Value: sdkmath.LegacyMustNewDecFromStr("1.25"),
 					},
 					{
 						Denom: "bnb",
-						Value: sdk.MustNewDecFromStr("2.0"),
+						Value: sdkmath.LegacyMustNewDecFromStr("2.0"),
 					},
 				},
 			},
@@ -64,7 +65,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Index: types2.BorrowInterestFactors{
 					{
 						Denom: "xrpb",
-						Value: sdk.MustNewDecFromStr("1.25"),
+						Value: sdkmath.LegacyMustNewDecFromStr("1.25"),
 					},
 				},
 			},
@@ -79,7 +80,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Index: types2.BorrowInterestFactors{
 					{
 						Denom: "bnb",
-						Value: sdk.MustNewDecFromStr("0.999999999999999999"),
+						Value: sdkmath.LegacyMustNewDecFromStr("0.999999999999999999"),
 					},
 				},
 			},
@@ -94,7 +95,7 @@ func TestBorrow_NormalizedBorrow(t *testing.T) {
 				Index: types2.BorrowInterestFactors{
 					{
 						Denom: "bnb",
-						Value: sdk.MustNewDecFromStr("0"),
+						Value: sdkmath.LegacyMustNewDecFromStr("0"),
 					},
 				},
 			},

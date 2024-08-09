@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
@@ -12,7 +14,7 @@ var _ paramtypes.ParamSet = (*Params)(nil)
 
 var (
 	KeyBurnThreshold     = []byte("auctionBurnThreshold")
-	DefaultBurnThreshold = sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdk.NewInt(15e6)))
+	DefaultBurnThreshold = sdk.NewCoins(sdk.NewCoin("ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3", sdkmath.NewInt(15e6)), sdk.NewCoin("ujolt", sdkmath.NewInt(20e6)))
 )
 
 // ParamKeyTable the param key table for launch module
@@ -31,14 +33,8 @@ func NewParams(
 
 // DefaultParams returns a default set of parameters
 func DefaultParams() Params {
-	threshold := DefaultBurnThreshold
-	threshold.Add(sdk.NewCoin("uatom", sdk.NewInt(10e6)))
-
-	amt, _ := sdk.NewIntFromString("10000000000000000000")
-	threshold.Add(sdk.NewCoin("ausdc", amt))
-	threshold.Add(sdk.NewCoin("ujolt", sdk.NewInt(13e6)))
 	return NewParams(
-		threshold,
+		DefaultBurnThreshold,
 	)
 }
 

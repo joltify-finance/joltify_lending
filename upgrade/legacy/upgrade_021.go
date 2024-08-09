@@ -1,15 +1,18 @@
 package legacy
 
 import (
+	"context"
 	"fmt"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	"github.com/cosmos/gogoproto/proto"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 
@@ -25,23 +28,23 @@ func CreateUpgradeHandlerForV021Upgrade(
 	spvKeeper spvkeeper.Keeper,
 	nftKeeper types.NFTKeeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v021")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v021")
 		}
 
-		incentiveParams := incentiveKeeper.GetParams(ctx)
+		incentiveParams := incentiveKeeper.GetParams(sdk.UnwrapSDKContext(ctx))
 
 		for i, el := range incentiveParams.SPVRewardPeriods {
 			if el.CollateralType == "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9" {
-				el.RewardsPerSecond = sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(34722)))
+				el.RewardsPerSecond = sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(34722)))
 				incentiveParams.SPVRewardPeriods[i] = el
 			}
 		}
 
-		incentiveKeeper.SetParams(ctx, incentiveParams)
+		incentiveKeeper.SetParams(sdk.UnwrapSDKContext(ctx), incentiveParams)
 
-		newincentive := incentiveKeeper.GetParams(ctx)
+		newincentive := incentiveKeeper.GetParams(sdk.UnwrapSDKContext(ctx))
 		for _, el := range newincentive.SPVRewardPeriods {
 			fmt.Printf(">>>%v\n", el)
 		}
@@ -79,7 +82,7 @@ func CreateUpgradeHandlerForV021Upgrade(
 
 				onlyIncentiveCoin := eachincentive.PaymentAmount[0]
 
-				amt := onlyIncentiveCoin.Amount.Quo(sdk.NewInt(1e12))
+				amt := onlyIncentiveCoin.Amount.Quo(sdkmath.NewInt(1e12))
 				incentivepaments[index].PaymentAmount = sdk.NewCoins(sdk.NewCoin("ujolt", amt))
 			}
 
@@ -95,14 +98,14 @@ func CreateUpgradeHandlerForV021Upgrade(
 		}
 
 		// fix the incorrect reward store
-		rewards, ok := incentiveKeeper.GetSPVReward(ctx, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9")
+		rewards, ok := incentiveKeeper.GetSPVReward(sdk.UnwrapSDKContext(ctx), "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9")
 		if !ok {
 			panic("fail to find the reward")
 		}
 
 		var newrewards sdk.Coins
 		for _, el := range rewards.PaymentAmount {
-			amt := el.Amount.Quo(sdk.NewInt(1e12))
+			amt := el.Amount.Quo(sdkmath.NewInt(1e12))
 			c := sdk.NewCoin("ujolt", amt)
 			newrewards.Add(c)
 		}
@@ -110,7 +113,7 @@ func CreateUpgradeHandlerForV021Upgrade(
 		rt := types2.SPVRewardAccTokens{
 			PaymentAmount: newrewards,
 		}
-		incentiveKeeper.SetSPVReward(ctx, "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", rt)
+		incentiveKeeper.SetSPVReward(sdk.UnwrapSDKContext(ctx), "0x70606714efcc24afe4736427c8a3df8168865daf01413008d7d98efcf03466b9", rt)
 
 		// we now update the project due time
 		spvKeeper.IteratePool(ctx, func(poolInfo types.PoolInfo) bool {

@@ -1,17 +1,17 @@
 package keeper_test
 
 import (
-	"fmt"
+	"context"
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/suite"
@@ -21,34 +21,19 @@ type grpcQueryTestSuite struct {
 	suite.Suite
 
 	tApp        app.TestApp
-	ctx         sdk.Context
+	ctx         context.Context
 	keeper      keeper2.Keeper
 	queryServer types2.QueryServer
 	addrs       []sdk.AccAddress
 }
 
 func (suite *grpcQueryTestSuite) SetupTest() {
-	suite.tApp = app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
+	suite.tApp = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
 
 	suite.addrs = addrs
 
-	suite.ctx = suite.tApp.NewContext(true, tmprototypes.Header{}).
-		WithBlockTime(time.Now().UTC())
-	suite.keeper = suite.tApp.GetJoltKeeper()
-	suite.queryServer = keeper2.NewQueryServerImpl(suite.keeper, suite.tApp.GetAccountKeeper(), suite.tApp.GetBankKeeper())
-
-	err := suite.tApp.FundModuleAccount(
-		suite.ctx,
-		types2.ModuleAccountName,
-		cs(
-			c("usdx", 10000000000),
-			c("busd", 10000000000),
-		),
-	)
-	suite.Require().NoError(err)
-
-	suite.tApp.InitializeFromGenesisStates(nil, nil,
+	mapp := suite.tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil,
 		NewPricefeedGenStateMulti(suite.tApp.AppCodec()),
 		NewJoltGenState(suite.tApp.AppCodec()),
 		app.NewFundedGenStateWithSameCoins(
@@ -60,19 +45,38 @@ func (suite *grpcQueryTestSuite) SetupTest() {
 			addrs,
 		),
 	)
+
+	suite.tApp = mapp
+	suite.tApp.App = mapp.App
+	suite.ctx = mapp.Ctx
+	suite.tApp.Ctx = mapp.Ctx
+	suite.keeper = mapp.GetJoltKeeper()
+
+	suite.queryServer = keeper2.NewQueryServerImpl(suite.keeper, suite.tApp.GetAccountKeeper(), suite.tApp.GetBankKeeper())
+
+	err := suite.tApp.FundModuleAccount(
+		sdk.UnwrapSDKContext(suite.ctx),
+		types2.ModuleAccountName,
+		cs(
+			c("usdx", 10000000000),
+			c("busd", 10000000000),
+		),
+	)
+	suite.Require().NoError(err)
+
 	coins := cs(
 		c("bnb", 10000000000),
 		c("busd", 20000000000),
 	)
 
 	for _, addr := range addrs {
-		err = testutil.FundAccount(suite.tApp.GetBankKeeper(), suite.ctx, addr, coins)
+		err = testutil.FundAccount(suite.ctx, suite.tApp.GetBankKeeper(), addr, coins)
 		suite.Require().NoError(err)
 	}
 }
 
 func (suite *grpcQueryTestSuite) TestGrpcQueryParams() {
-	res, err := suite.queryServer.Params(sdk.WrapSDKContext(suite.ctx), &types2.QueryParamsRequest{})
+	res, err := suite.queryServer.Params(suite.ctx, &types2.QueryParamsRequest{})
 	suite.Require().NoError(err)
 
 	var expected types2.GenesisState
@@ -83,7 +87,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryParams() {
 }
 
 func (suite *grpcQueryTestSuite) TestGrpcQueryAccounts() {
-	res, err := suite.queryServer.Accounts(sdk.WrapSDKContext(suite.ctx), &types2.QueryAccountsRequest{})
+	res, err := suite.queryServer.Accounts(suite.ctx, &types2.QueryAccountsRequest{})
 	suite.Require().NoError(err)
 
 	ak := suite.tApp.GetAccountKeeper()
@@ -94,10 +98,8 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryAccounts() {
 }
 
 func (suite *grpcQueryTestSuite) TestGrpcQueryDeposits_EmptyResponse() {
-	res, err := suite.queryServer.Deposits(sdk.WrapSDKContext(suite.ctx), &types2.QueryDepositsRequest{})
+	_, err := suite.queryServer.Deposits(suite.ctx, &types2.QueryDepositsRequest{})
 	suite.Require().NoError(err)
-
-	fmt.Printf(">>>>>%v\n", res.Pagination)
 }
 
 func (suite *grpcQueryTestSuite) addDeposits() {
@@ -233,7 +235,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryDeposits() {
 
 	for _, tt := range tests {
 		suite.Run(tt.giveName, func() {
-			res, err := suite.queryServer.Deposits(sdk.WrapSDKContext(suite.ctx), tt.giveRequest)
+			res, err := suite.queryServer.Deposits(suite.ctx, tt.giveRequest)
 
 			if tt.shouldError {
 				suite.Error(err)
@@ -246,7 +248,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryDeposits() {
 
 		// Unsynced deposits should be the same
 		suite.Run(tt.giveName+"_unsynced", func() {
-			res, err := suite.queryServer.UnsyncedDeposits(sdk.WrapSDKContext(suite.ctx), &types2.QueryUnsyncedDepositsRequest{
+			res, err := suite.queryServer.UnsyncedDeposits(suite.ctx, &types2.QueryUnsyncedDepositsRequest{
 				Denom:      tt.giveRequest.Denom,
 				Owner:      tt.giveRequest.Owner,
 				Pagination: tt.giveRequest.Pagination,
@@ -335,7 +337,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryBorrows() {
 
 	for _, tt := range tests {
 		suite.Run(tt.giveName, func() {
-			res, err := suite.queryServer.Borrows(sdk.WrapSDKContext(suite.ctx), tt.giveRequest)
+			res, err := suite.queryServer.Borrows(suite.ctx, tt.giveRequest)
 
 			if tt.shouldError {
 				suite.Error(err)
@@ -348,7 +350,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryBorrows() {
 
 		// Unsynced deposits should be the same
 		suite.Run(tt.giveName+"_unsynced", func() {
-			res, err := suite.queryServer.UnsyncedBorrows(sdk.WrapSDKContext(suite.ctx), &types2.QueryUnsyncedBorrowsRequest{
+			res, err := suite.queryServer.UnsyncedBorrows(suite.ctx, &types2.QueryUnsyncedBorrowsRequest{
 				Denom:      tt.giveRequest.Denom,
 				Owner:      tt.giveRequest.Owner,
 				Pagination: tt.giveRequest.Pagination,
@@ -368,7 +370,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryBorrows() {
 func (suite *grpcQueryTestSuite) TestGrpcQueryTotalDeposited() {
 	suite.addDeposits()
 
-	totalDeposited, err := suite.queryServer.TotalDeposited(sdk.WrapSDKContext(suite.ctx), &types2.QueryTotalDepositedRequest{})
+	totalDeposited, err := suite.queryServer.TotalDeposited(suite.ctx, &types2.QueryTotalDepositedRequest{})
 	suite.Require().NoError(err)
 
 	suite.Equal(&types2.QueryTotalDepositedResponse{
@@ -382,7 +384,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryTotalDeposited() {
 func (suite *grpcQueryTestSuite) TestGrpcQueryTotalDeposited_Denom() {
 	suite.addDeposits()
 
-	totalDeposited, err := suite.queryServer.TotalDeposited(sdk.WrapSDKContext(suite.ctx), &types2.QueryTotalDepositedRequest{
+	totalDeposited, err := suite.queryServer.TotalDeposited(suite.ctx, &types2.QueryTotalDepositedRequest{
 		Denom: "bnb",
 	})
 	suite.Require().NoError(err)
@@ -398,7 +400,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryTotalBorrowed() {
 	suite.addDeposits()
 	suite.addBorrows()
 
-	totalDeposited, err := suite.queryServer.TotalBorrowed(sdk.WrapSDKContext(suite.ctx), &types2.QueryTotalBorrowedRequest{})
+	totalDeposited, err := suite.queryServer.TotalBorrowed(suite.ctx, &types2.QueryTotalBorrowedRequest{})
 	suite.Require().NoError(err)
 
 	suite.Equal(&types2.QueryTotalBorrowedResponse{
@@ -413,7 +415,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryTotalBorrowed_denom() {
 	suite.addDeposits()
 	suite.addBorrows()
 
-	totalDeposited, err := suite.queryServer.TotalBorrowed(sdk.WrapSDKContext(suite.ctx), &types2.QueryTotalBorrowedRequest{
+	totalDeposited, err := suite.queryServer.TotalBorrowed(suite.ctx, &types2.QueryTotalBorrowedRequest{
 		Denom: "usdx",
 	})
 	suite.Require().NoError(err)
@@ -476,7 +478,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryInterestRate() {
 
 	for _, tt := range tests {
 		suite.Run(tt.giveName, func() {
-			res, err := suite.queryServer.InterestRate(sdk.WrapSDKContext(suite.ctx), &types2.QueryInterestRateRequest{
+			res, err := suite.queryServer.InterestRate(suite.ctx, &types2.QueryInterestRateRequest{
 				Denom: tt.giveDenom,
 			})
 
@@ -492,7 +494,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryInterestRate() {
 }
 
 func (suite *grpcQueryTestSuite) TestGrpcQueryInterestFactors() {
-	res, err := suite.queryServer.InterestFactors(sdk.WrapSDKContext(suite.ctx), &types2.QueryInterestFactorsRequest{
+	res, err := suite.queryServer.InterestFactors(suite.ctx, &types2.QueryInterestFactorsRequest{
 		Denom: "usdx",
 	})
 	suite.Require().NoError(err)
@@ -512,7 +514,7 @@ func (suite *grpcQueryTestSuite) TestGrpcQueryReserves() {
 	suite.addDeposits()
 	suite.addBorrows()
 
-	res, err := suite.queryServer.Reserves(sdk.WrapSDKContext(suite.ctx), &types2.QueryReservesRequest{})
+	res, err := suite.queryServer.Reserves(suite.ctx, &types2.QueryReservesRequest{})
 	suite.Require().NoError(err)
 
 	suite.Equal(&types2.QueryReservesResponse{
