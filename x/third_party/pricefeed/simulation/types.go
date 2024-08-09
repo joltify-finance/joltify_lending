@@ -4,38 +4,38 @@ import (
 	"math/rand"
 	"sort"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // PriceGenerator allows deterministic price generation in simulations
 type PriceGenerator struct {
 	markets            []string
-	currentPrice       map[string]sdk.Dec
-	maxPrice           map[string]sdk.Dec
-	minPrice           map[string]sdk.Dec
-	increment          map[string]sdk.Dec
+	currentPrice       map[string]sdkmath.LegacyDec
+	maxPrice           map[string]sdkmath.LegacyDec
+	minPrice           map[string]sdkmath.LegacyDec
+	increment          map[string]sdkmath.LegacyDec
 	currentBlockHeight int64
 }
 
 // NewPriceGenerator returns a new market price generator from starting values
-func NewPriceGenerator(startingPrice map[string]sdk.Dec) *PriceGenerator {
+func NewPriceGenerator(startingPrice map[string]sdkmath.LegacyDec) *PriceGenerator {
 	p := &PriceGenerator{
 		markets:            []string{},
 		currentPrice:       startingPrice,
-		maxPrice:           map[string]sdk.Dec{},
-		minPrice:           map[string]sdk.Dec{},
-		increment:          map[string]sdk.Dec{},
+		maxPrice:           map[string]sdkmath.LegacyDec{},
+		minPrice:           map[string]sdkmath.LegacyDec{},
+		increment:          map[string]sdkmath.LegacyDec{},
 		currentBlockHeight: 0,
 	}
 
-	divisor := sdk.MustNewDecFromStr("20")
+	divisor := sdkmath.LegacyMustNewDecFromStr("20")
 
 	for marketID, startPrice := range startingPrice {
 		p.markets = append(p.markets, marketID)
 		// allow 10x price increase
-		p.maxPrice[marketID] = sdk.MustNewDecFromStr("10.0").Mul(startPrice)
+		p.maxPrice[marketID] = sdkmath.LegacyMustNewDecFromStr("10.0").Mul(startPrice)
 		// allow 100x price decrease
-		p.minPrice[marketID] = sdk.MustNewDecFromStr("0.01").Mul(startPrice)
+		p.minPrice[marketID] = sdkmath.LegacyMustNewDecFromStr("0.01").Mul(startPrice)
 		// set increment - should we use a random increment?
 		p.increment[marketID] = startPrice.Quo(divisor)
 	}
@@ -72,9 +72,9 @@ func (p *PriceGenerator) Step(r *rand.Rand, blockHeight int64) {
 			upDown := r.Intn(2)
 
 			if upDown == 0 {
-				lastPrice = sdk.MinDec(lastPrice.Add(increment), maxPrice)
+				lastPrice = sdkmath.LegacyMinDec(lastPrice.Add(increment), maxPrice)
 			} else {
-				lastPrice = sdk.MaxDec(lastPrice.Sub(increment), minPrice)
+				lastPrice = sdkmath.LegacyMaxDec(lastPrice.Sub(increment), minPrice)
 			}
 
 			lastHeight++
@@ -87,7 +87,7 @@ func (p *PriceGenerator) Step(r *rand.Rand, blockHeight int64) {
 }
 
 // GetCurrentPrice returns price for last blockHeight set by Step
-func (p *PriceGenerator) GetCurrentPrice(marketID string) sdk.Dec {
+func (p *PriceGenerator) GetCurrentPrice(marketID string) sdkmath.LegacyDec {
 	price, ok := p.currentPrice[marketID]
 
 	if !ok {

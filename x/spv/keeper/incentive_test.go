@@ -1,9 +1,12 @@
 package keeper_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 
@@ -23,7 +26,7 @@ type IncentiveSuite struct {
 	bankKeeper      types.BankKeeper
 	IncentiveKeeper keeper.FakeIncentiveKeeper
 	app             types.MsgServer
-	ctx             sdk.Context
+	ctx             context.Context
 }
 
 func TestIncentiveSuite(t *testing.T) {
@@ -46,7 +49,7 @@ func (suite *IncentiveSuite) SetupTest() {
 }
 
 func (suite *IncentiveSuite) TestUpdateIncentive() {
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: []string{"0.15", "0.15"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(1*1e6)), sdk.NewCoin("ausdc", sdk.NewInt(1e6))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 2, PoolName: "hello", Apy: []string{"0.15", "0.15"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(1*1e6)), sdk.NewCoin("ausdc", sdkmath.NewInt(1e6))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -54,7 +57,7 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 	suite.Require().True(found)
 	poolInfo.CurrentPoolTotalBorrowCounter = 0
 	poolInfo.PoolTotalBorrowLimit = 10
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(1*1e6))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(1*1e6))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	depositorPool := resp.PoolIndex[0]
@@ -73,7 +76,7 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 
 	// now we deposit some token and it should be enough to borrow
 	creator1 := "jolt166yyvsypvn6cwj2rc8sme4dl6v0g62hn3862kl"
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
 		PoolIndex: depositorPool,
@@ -84,13 +87,12 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 	suite.Require().NoError(err)
 
 	// now we borrow 2e5
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
 	poolInfo, ok := suite.keeper.GetPools(suite.ctx, depositorPool)
 	suite.Require().True(ok)
-	fmt.Printf(">>>%v\n", poolInfo.BorrowedAmount)
 
 	// now we test the incentive
 	suite.keeper.UpdateIncentive(suite.ctx, poolInfo)
@@ -113,9 +115,9 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 	suite.keeper.UpdateIncentive(suite.ctx, poolInfo)
 	ret = suite.IncentiveKeeper.GetPoolIncentive()
 
-	spvDev := sdk.MustNewDecFromStr(spy)
-	jotlM := sdk.MustNewDecFromStr("0.7")
-	incentives := sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdk.OneDec())).Quo(jotlM).TruncateInt()
+	spvDev := sdkmath.LegacyMustNewDecFromStr(spy)
+	jotlM := sdkmath.LegacyMustNewDecFromStr("0.7")
+	incentives := sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdkmath.LegacyOneDec())).Quo(jotlM).TruncateInt()
 
 	aa, ok := ret[poolInfo.Index]
 
@@ -123,9 +125,9 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 	suite.Require().True(ok)
 	suite.Require().True(incentives.Equal(aa.AmountOf("ujolt")))
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 5))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 5))
 	// now we borrow more money and the incentive should be updated
-	borrow = &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.44e5))}
+	borrow = &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: depositorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.44e5))}
 	_, err = suite.app.Borrow(suite.ctx, borrow)
 	suite.Require().NoError(err)
 
@@ -133,10 +135,10 @@ func (suite *IncentiveSuite) TestUpdateIncentive() {
 	suite.Require().True(found)
 	suite.keeper.UpdateIncentive(suite.ctx, poolInfo)
 	ret = suite.IncentiveKeeper.GetPoolIncentive()
-	spvDev = sdk.MustNewDecFromStr(spy)
-	jotlM = sdk.MustNewDecFromStr("0.7")
+	spvDev = sdkmath.LegacyMustNewDecFromStr(spy)
+	jotlM = sdkmath.LegacyMustNewDecFromStr("0.7")
 	fmt.Printf(">>>borrowed new %v\n", poolInfo.BorrowedAmount.Amount)
-	incentives = sdk.NewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdk.OneDec())).Quo(jotlM).TruncateInt()
+	incentives = sdkmath.LegacyNewDecFromInt(poolInfo.BorrowedAmount.Amount).Mul(spvDev.Sub(sdkmath.LegacyOneDec())).Quo(jotlM).TruncateInt()
 
 	aa, ok = ret[poolInfo.Index]
 

@@ -5,7 +5,7 @@ import (
 
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -15,7 +15,7 @@ type ParamTestSuite struct {
 
 func (suite *ParamTestSuite) TestParamValidation() {
 	type args struct {
-		minBorrowVal sdk.Dec
+		minBorrowVal sdkmath.LegacyDec
 		mms          types2.MoneyMarkets
 	}
 	testCases := []struct {
@@ -42,14 +42,14 @@ func (suite *ParamTestSuite) TestParamValidation() {
 						Denom: "btcb",
 						BorrowLimit: types2.NewBorrowLimit(
 							false,
-							sdk.MustNewDecFromStr("100000000000"),
-							sdk.MustNewDecFromStr("0.5"),
+							sdkmath.LegacyMustNewDecFromStr("100000000000"),
+							sdkmath.LegacyMustNewDecFromStr("0.5"),
 						),
 						SpotMarketID:           "btc:usd",
-						ConversionFactor:       sdk.NewInt(0),
+						ConversionFactor:       sdkmath.NewInt(0),
 						InterestRateModel:      types2.InterestRateModel{},
-						ReserveFactor:          sdk.MustNewDecFromStr("0.05"),
-						KeeperRewardPercentage: sdk.MustNewDecFromStr("0.05"),
+						ReserveFactor:          sdkmath.LegacyMustNewDecFromStr("0.05"),
+						KeeperRewardPercentage: sdkmath.LegacyMustNewDecFromStr("0.05"),
 					},
 				},
 			},

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	types2 "cosmossdk.io/store/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/gogo/protobuf/proto"
 
@@ -14,9 +15,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k msgServer) getAllBorrowed(ctx sdk.Context, poolInfo types.PoolInfo) sdkmath.Int {
+func (k msgServer) getAllBorrowed(ctx context.Context, poolInfo types.PoolInfo) sdkmath.Int {
 	var err error
-	sum := sdk.ZeroInt()
+	sum := sdkmath.ZeroInt()
 	for _, el := range poolInfo.PoolNFTIds {
 
 		class, found := k.NftKeeper.GetClass(ctx, el)
@@ -63,16 +64,16 @@ func checkEligibility(blockTime time.Time, poolInfo types.PoolInfo, borrowAmount
 
 func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.MsgBorrowResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(types2.NewInfiniteGasMeter())
 
 	caller, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	poolInfo, found := k.GetPools(ctx, msg.GetPoolIndex())
+	poolInfo, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 
 	if msg.BorrowAmount.Denom != poolInfo.TargetAmount.Denom {
@@ -85,12 +86,12 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	juniorInfo, found := k.GetPools(ctx, juniorPoolIndex.Hex())
 	if !found {
-		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(sdkerrors.ErrNotFound, "pool cannot be found %v", msg.PoolIndex)
 	}
 	allBorrowed = k.getAllBorrowed(ctx, juniorInfo)
 
 	if poolInfo.PoolType == types.PoolInfo_SENIOR && !poolInfo.SeparatePool {
-		if juniorInfo.TargetAmount.Amount.Sub(allBorrowed).GT(sdk.NewIntFromUint64(10)) {
+		if juniorInfo.TargetAmount.Amount.Sub(allBorrowed).GT(sdkmath.NewIntFromUint64(10)) {
 			return nil, coserrors.Wrapf(types.ErrPoolNotActive, "junior pool has not met its target amount, cannot borrow from senior pool current Borrowed Junior %v and target is %v", allBorrowed, juniorInfo.TargetAmount.Amount)
 		}
 	}
@@ -112,7 +113,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 
 	k.updateDepositorStatus(ctx, &poolInfo)
 
-	err = k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdk.ZeroInt(), false)
+	err = k.doBorrow(ctx, &poolInfo, msg.BorrowAmount, true, nil, sdkmath.ZeroInt(), false)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidRequest, "borrow failed %v", err)
 	}
@@ -133,7 +134,7 @@ func (k msgServer) Borrow(goCtx context.Context, msg *types.MsgBorrow) (*types.M
 			if err != nil {
 				return nil, coserrors.Wrapf(err, "fail to transfer the repayment from spv to module")
 			}
-			poolInfo.EscrowInterestAmount = sdk.ZeroInt()
+			poolInfo.EscrowInterestAmount = sdkmath.ZeroInt()
 			poolInfo.InterestPrepayment = nil
 			k.SetPool(ctx, poolInfo)
 		} else {

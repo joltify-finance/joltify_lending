@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
+	"cosmossdk.io/store/prefix"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -68,15 +68,17 @@ func (k Keeper) SetJoltLiquidityProviderClaim(ctx sdk.Context, c types.JoltLiqui
 }
 
 // DeleteJoltLiquidityProviderClaim deletes the claim in the store corresponding to the input address, collateral type, and id
-func (k Keeper) DeleteJoltLiquidityProviderClaim(ctx sdk.Context, owner sdk.AccAddress) {
+func (k Keeper) DeleteJoltLiquidityProviderClaim(rctx sdk.Context, owner sdk.AccAddress) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
 	store.Delete(owner)
 }
 
 // IterateJoltLiquidityProviderClaims iterates over all claim  objects in the store and preforms a callback function
-func (k Keeper) IterateJoltLiquidityProviderClaims(ctx sdk.Context, cb func(c types.JoltLiquidityProviderClaim) (stop bool)) {
+func (k Keeper) IterateJoltLiquidityProviderClaims(rctx sdk.Context, cb func(c types.JoltLiquidityProviderClaim) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltLiquidityClaimKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var c types.JoltLiquidityProviderClaim
@@ -122,7 +124,7 @@ func (k Keeper) GetJoltSupplyRewardIndexes(ctx sdk.Context, denom string) (types
 // IterateJoltSupplyRewardIndexes iterates over all Hard supply reward index objects in the store and preforms a callback function
 func (k Keeper) IterateJoltSupplyRewardIndexes(ctx sdk.Context, cb func(denom string, indexes types.RewardIndexes) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltSupplyRewardIndexesKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var proto types.RewardIndexesProto
@@ -135,7 +137,7 @@ func (k Keeper) IterateJoltSupplyRewardIndexes(ctx sdk.Context, cb func(denom st
 
 func (k Keeper) IterateJoltSupplyRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltSupplyRewardAccrualTimeKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var accrualTime time.Time
@@ -174,7 +176,7 @@ func (k Keeper) GetJoltBorrowRewardIndexes(ctx sdk.Context, denom string) (types
 // IterateJoltBorrowRewardIndexes iterates over all Hard borrow reward index objects in the store and preforms a callback function
 func (k Keeper) IterateJoltBorrowRewardIndexes(ctx sdk.Context, cb func(denom string, indexes types.RewardIndexes) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.JoltBorrowRewardIndexesKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var proto types.RewardIndexesProto
@@ -187,7 +189,7 @@ func (k Keeper) IterateJoltBorrowRewardIndexes(ctx sdk.Context, cb func(denom st
 
 func (k Keeper) IterateJoltBorrowRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousJoltBorrowRewardAccrualTimeKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		denom := string(iterator.Key())
@@ -298,7 +300,7 @@ func (k Keeper) DeleteSwapClaim(ctx sdk.Context, owner sdk.AccAddress) {
 // IterateSwapClaims iterates over all claim  objects in the store and preforms a callback function
 func (k Keeper) IterateSwapClaims(ctx sdk.Context, cb func(c types.SwapClaim) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapClaimKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var c types.SwapClaim
@@ -343,7 +345,7 @@ func (k Keeper) GetSwapRewardIndexes(ctx sdk.Context, poolID string) (types.Rewa
 // IterateSwapRewardIndexes iterates over all swap reward index objects in the store and preforms a callback function
 func (k Keeper) IterateSwapRewardIndexes(ctx sdk.Context, cb func(poolID string, indexes types.RewardIndexes) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SwapRewardIndexesKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var proto types.RewardIndexesProto
@@ -379,7 +381,7 @@ func (k Keeper) SetSwapRewardAccrualTime(ctx sdk.Context, poolID string, blockTi
 
 func (k Keeper) IterateSwapRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSwapRewardAccrualTimeKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		poolID := string(iterator.Key())
@@ -442,7 +444,7 @@ func (k Keeper) GetSPVInvestorReward(ctx sdk.Context, poolID, walletAddr string)
 // IterateSPVInvestorRewards iterates over all SPV reward index objects in the store and preforms a callback function
 func (k Keeper) IterateSPVInvestorReward(ctx sdk.Context, cb func(key string, accTokens types.SPVRewardAccTokens) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardInvestorKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var accTokens types.SPVRewardAccTokens
@@ -456,7 +458,7 @@ func (k Keeper) IterateSPVInvestorReward(ctx sdk.Context, cb func(key string, ac
 // IterateSPVInvestorRewards iterates over all SPV reward index objects in the store and preforms a callback function
 func (k Keeper) LegacyIterateSPVInvestorReward(ctx sdk.Context, cb func(key string, accTokens types.SPVRewardAccTokens) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		if !strings.Contains(string(iterator.Key()), types.Incentiveclassprefix) {
@@ -479,7 +481,7 @@ func (k Keeper) DeleteSPVInvestorReward(ctx sdk.Context, poolID, walletAddr stri
 // IterateSPVRewardIndexes iterates over all SPV global reward index objects in the store and preforms a callback function
 func (k Keeper) IterateSPVRewardIndexes(ctx sdk.Context, cb func(poolID string, accTokens types.SPVRewardAccTokens) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.SPVRewardIndexesKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var proto types.SPVRewardAccTokens
@@ -517,7 +519,7 @@ func (k Keeper) SetSPVRewardAccrualTime(ctx sdk.Context, poolID string, blockTim
 
 func (k Keeper) IterateSPVRewardAccrualTimes(ctx sdk.Context, cb func(string, time.Time) (stop bool)) {
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PreviousSPVRewardAccrualTimeKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		poolID := string(iterator.Key())

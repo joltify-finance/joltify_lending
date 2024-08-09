@@ -1,23 +1,28 @@
 package keeper
 
 import (
+	"context"
 	"errors"
 
+	errorsmod "cosmossdk.io/errors"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // Deposit deposit
-func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+func (k Keeper) Deposit(rctx context.Context, depositor sdk.AccAddress, coins sdk.Coins) error {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	// Set any new denoms' global supply index to 1.0
 	for _, coin := range coins {
 		_, foundInterestFactor := k.GetSupplyInterestFactor(ctx, coin.Denom)
 		if !foundInterestFactor {
 			_, foundMm := k.GetMoneyMarket(ctx, coin.Denom)
 			if foundMm {
-				k.SetSupplyInterestFactor(ctx, coin.Denom, sdk.OneDec())
+				k.SetSupplyInterestFactor(ctx, coin.Denom, sdkmath.LegacyOneDec())
 			}
 		}
 	}
@@ -44,7 +49,7 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Coi
 			for _, coin := range coins {
 				_, isNegative := accCoins.SafeSub(coin)
 				if isNegative {
-					return sdkerrors.Wrapf(types2.ErrBorrowExceedsAvailableBalance,
+					return errorsmod.Wrapf(types2.ErrBorrowExceedsAvailableBalance,
 						"insufficient funds: the requested deposit amount of %s exceeds the total available account funds of %s%s",
 						coin, accCoins.AmountOf(coin.Denom), coin.Denom,
 					)
@@ -90,7 +95,6 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Coi
 	} else {
 		k.AfterDepositModified(ctx, deposit)
 	}
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types2.EventTypeHardDeposit,
@@ -103,11 +107,11 @@ func (k Keeper) Deposit(ctx sdk.Context, depositor sdk.AccAddress, coins sdk.Coi
 }
 
 // ValidateDeposit validates a deposit
-func (k Keeper) ValidateDeposit(ctx sdk.Context, coins sdk.Coins) error {
+func (k Keeper) ValidateDeposit(ctx context.Context, coins sdk.Coins) error {
 	for _, depCoin := range coins {
 		_, foundMm := k.GetMoneyMarket(ctx, depCoin.Denom)
 		if !foundMm {
-			return sdkerrors.Wrapf(types2.ErrInvalidDepositDenom, "money market denom %s not found", depCoin.Denom)
+			return errorsmod.Wrapf(types2.ErrInvalidDepositDenom, "money market denom %s not found", depCoin.Denom)
 		}
 	}
 
@@ -115,13 +119,13 @@ func (k Keeper) ValidateDeposit(ctx sdk.Context, coins sdk.Coins) error {
 }
 
 // GetTotalDeposited returns the total amount deposited for the input deposit type and deposit denom
-func (k Keeper) GetTotalDeposited(ctx sdk.Context, depositDenom string) (total sdk.Int) {
+func (k Keeper) GetTotalDeposited(ctx context.Context, depositDenom string) (total sdkmath.Int) {
 	macc := k.accountKeeper.GetModuleAccount(ctx, types2.ModuleAccountName)
 	return k.bankKeeper.GetBalance(ctx, macc.GetAddress(), depositDenom).Amount
 }
 
 // IncrementSuppliedCoins increments the total amount of supplied coins by the newCoins parameter
-func (k Keeper) IncrementSuppliedCoins(ctx sdk.Context, newCoins sdk.Coins) {
+func (k Keeper) IncrementSuppliedCoins(ctx context.Context, newCoins sdk.Coins) {
 	suppliedCoins, found := k.GetSuppliedCoins(ctx)
 	if !found {
 		if !newCoins.Empty() {
@@ -133,17 +137,17 @@ func (k Keeper) IncrementSuppliedCoins(ctx sdk.Context, newCoins sdk.Coins) {
 }
 
 // DecrementSuppliedCoins decrements the total amount of supplied coins by the coins parameter
-func (k Keeper) DecrementSuppliedCoins(ctx sdk.Context, coins sdk.Coins) error {
+func (k Keeper) DecrementSuppliedCoins(ctx context.Context, coins sdk.Coins) error {
 	suppliedCoins, found := k.GetSuppliedCoins(ctx)
 	if !found {
-		return sdkerrors.Wrapf(types2.ErrSuppliedCoinsNotFound, "cannot withdraw if no coins are deposited")
+		return errorsmod.Wrapf(types2.ErrSuppliedCoinsNotFound, "cannot withdraw if no coins are deposited")
 	}
 	updatedSuppliedCoins, isNegative := suppliedCoins.SafeSub(coins...)
 	if isNegative {
 		coinsToSubtract := sdk.NewCoins()
 		for _, coin := range coins {
 			if suppliedCoins.AmountOf(coin.Denom).LT(coin.Amount) {
-				if suppliedCoins.AmountOf(coin.Denom).GT(sdk.ZeroInt()) {
+				if suppliedCoins.AmountOf(coin.Denom).GT(sdkmath.ZeroInt()) {
 					coinsToSubtract = coinsToSubtract.Add(sdk.NewCoin(coin.Denom, suppliedCoins.AmountOf(coin.Denom)))
 				}
 			} else {
@@ -158,7 +162,7 @@ func (k Keeper) DecrementSuppliedCoins(ctx sdk.Context, coins sdk.Coins) error {
 }
 
 // GetSyncedDeposit returns a deposit object containing current balances and indexes
-func (k Keeper) GetSyncedDeposit(ctx sdk.Context, depositor sdk.AccAddress) (types2.Deposit, bool) {
+func (k Keeper) GetSyncedDeposit(ctx context.Context, depositor sdk.AccAddress) (types2.Deposit, bool) {
 	deposit, found := k.GetDeposit(ctx, depositor)
 	if !found {
 		return types2.Deposit{}, false
@@ -168,7 +172,7 @@ func (k Keeper) GetSyncedDeposit(ctx sdk.Context, depositor sdk.AccAddress) (typ
 }
 
 // loadSyncedDeposit calculates a user's synced deposit, but does not update state
-func (k Keeper) loadSyncedDeposit(ctx sdk.Context, deposit types2.Deposit) types2.Deposit {
+func (k Keeper) loadSyncedDeposit(ctx context.Context, deposit types2.Deposit) types2.Deposit {
 	totalNewInterest := sdk.Coins{}
 	newSupplyIndexes := types2.SupplyInterestFactors{}
 	for _, coin := range deposit.Amount {
@@ -185,7 +189,7 @@ func (k Keeper) loadSyncedDeposit(ctx sdk.Context, deposit types2.Deposit) types
 
 			// Calculate interest that will be paid to user for this asset
 			if foundAtIndex != -1 {
-				storedAmount := sdk.NewDecFromInt(deposit.Amount.AmountOf(coin.Denom))
+				storedAmount := sdkmath.LegacyNewDecFromInt(deposit.Amount.AmountOf(coin.Denom))
 				userLastInterestFactor := deposit.Index[foundAtIndex].Value
 				coinInterest := (storedAmount.Quo(userLastInterestFactor).Mul(interestFactorValue)).Sub(storedAmount)
 				totalNewInterest = totalNewInterest.Add(sdk.NewCoin(coin.Denom, coinInterest.TruncateInt()))

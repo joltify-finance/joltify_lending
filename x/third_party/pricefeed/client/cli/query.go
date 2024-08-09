@@ -60,7 +60,8 @@ func GetCmdOracles() *cobra.Command {
 				MarketId: marketID,
 			}
 
-			res, err := queryClient.Oracles(context.Background(), &params)
+			ctx := cmd.Context()
+			res, err := queryClient.Oracles(ctx, &params)
 			if err != nil {
 				return err
 			}

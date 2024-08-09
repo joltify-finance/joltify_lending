@@ -1,16 +1,15 @@
 package pricefeed
 
 import (
+	"context"
 	"errors"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // EndBlocker updates the current pricefeed
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
+func EndBlocker(ctx context.Context, k keeper.Keeper) {
 	// Update the current price of each asset.
 	for _, market := range k.GetMarkets(ctx) {
 		if !market.Active {

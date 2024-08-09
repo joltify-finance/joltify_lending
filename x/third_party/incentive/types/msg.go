@@ -4,6 +4,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 )
 
@@ -47,7 +48,7 @@ func (msg MsgClaimJoltReward) Type() string {
 func (msg MsgClaimJoltReward) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty or invalid")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty or invalid")
 	}
 	if err := msg.DenomsToClaim.Validate(); err != nil {
 		return err
@@ -136,7 +137,7 @@ func (msg MsgClaimSPVReward) ValidateBasic() error {
 		return errorsmod.Wrap(sdkerrors.ErrInvalidAddress, "sender address cannot be empty or invalid")
 	}
 	if msg.PoolIndex == "" {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "pool index cannot be empty")
+		return errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "pool index cannot be empty")
 	}
 	return nil
 }

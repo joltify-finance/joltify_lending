@@ -1,6 +1,8 @@
 #! /bin/bash
+set -x
 base=1000000000000000000
 base2=1000000
+
 
 validatorMnemonic="equip town gesture square tomorrow volume nephew minute witness beef rich gadget actress egg sing secret pole winter alarm law today check violin uncover"
 #jolt1a33x0juy5t8a0zgksfz50yluw8jyvy764p9ych
@@ -25,6 +27,7 @@ BINARY=joltify
 # Create new data directory, overwriting any that alread existed
 chainID="joltify_1729-1"
 $BINARY init validator --chain-id $chainID --trace
+
 #cp  $DATA/config/genesis.json /home/yb/development/joltify/joltify_lending/contrib/gen_raw.json
 
 # hacky enable of rest api
@@ -53,39 +56,40 @@ sed -in-place='' 's/tracer = ""/tracer = "json"/g' $DATA/config/app.toml
 
 # Set client chain id
 sed -in-place='' 's/chain-id = ""/chain-id = "joltify_1729-1"/g' $DATA/config/client.toml
+sed -in-place='' 's/keyring-backend = "os" = ""/keyring-backend = "test"/g' $DATA/config/client.toml
 sed -in-place='' 's/broadcast-mode = "sync"/broadcast-mode = "sync"/g' $DATA/config/client.toml
 
 # avoid having to use password for keys
-$BINARY config keyring-backend test
-set -x
+$BINARY config  set client keyring-backend test
+
 # Create validator keys and add account to genesis
 validatorKeyName="validator"
-printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover
-$BINARY add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3,123456usd-ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover --keyring-backend test
+$BINARY genesis add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3,123456usd-ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 # Create faucet keys and add account to genesis
 faucetKeyName="faucet"
 printf "$faucetMnemonic\n" | $BINARY keys add $faucetKeyName --recover
-$BINARY add-genesis-account $faucetKeyName 2000000000000000ujolt,100000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+$BINARY genesis add-genesis-account $faucetKeyName 2000000000000000ujolt,100000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 evmFaucetKeyName="evm-faucet"
 printf "$evmFaucetMnemonic\n" | $BINARY keys add $evmFaucetKeyName  --recover
-$BINARY add-genesis-account $evmFaucetKeyName 100000000000000ujolt
+$BINARY genesis add-genesis-account $evmFaucetKeyName 100000000000000ujolt
 
 userKeyName="user"
 printf "$userMnemonic\n" | $BINARY keys add $userKeyName --recover
-$BINARY add-genesis-account $userKeyName  200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+$BINARY genesis add-genesis-account $userKeyName  200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
-$BINARY add-genesis-account jolt1kdgjxwdk4w5pexwhtvek009pnp4qw07f4s89ea   200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+$BINARY genesis add-genesis-account jolt1kdgjxwdk4w5pexwhtvek009pnp4qw07f4s89ea   200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 
 #ibc test account
-$BINARY add-genesis-account jolt1nlrlywakama45q59cqfx3sksf4xdkup6d439zk 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+$BINARY genesis add-genesis-account jolt1nlrlywakama45q59cqfx3sksf4xdkup6d439zk 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 
 relayerKeyName="relayer"
 printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
-$BINARY add-genesis-account $relayerKeyName 1000000000ujolt
+$BINARY genesis add-genesis-account $relayerKeyName 1000000000ujolt
 
 
 for i in {1..100}
@@ -98,12 +102,15 @@ do
   amount=$(echo 5000000*$base2|bc)
   amountAtom=10000000
 
-  $BINARY add-genesis-account $address $amount"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",$amountAtom"ujolt"
+  $BINARY genesis add-genesis-account $address $amount"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",$amountAtom"ujolt"
 done
 
+$BINARY config  set app minimum-gas-prices "0ujolt"
+
+
 # Create a delegation tx for the validator and add to genesis
-$BINARY gentx $validatorKeyName 1000000000ujolt --keyring-backend test --chain-id $chainID
-$BINARY collect-gentxs
+$BINARY genesis gentx $validatorKeyName 1000000000ujolt --keyring-backend test --chain-id $chainID
+$BINARY genesis collect-gentxs
 
 # Replace stake with ujolt
 sed -in-place='' 's/stake/ujolt/g' $DATA/config/genesis.json
@@ -117,6 +124,7 @@ jq '.app_state.bank.supply = []' $DATA/config/genesis.json|sponge $DATA/config/g
 # update the vote
 jq '.app_state.gov.voting_params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 jq '.app_state.gov.params.voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+#jq '.app_state.gov.params.expected_voting_period = "60s"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
 
 jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json

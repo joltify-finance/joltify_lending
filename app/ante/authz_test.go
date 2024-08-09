@@ -14,7 +14,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	evmtypes "github.com/evmos/ethermint/x/evm/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,7 +41,6 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 	require.NoError(t, err)
 
 	decorator := ante.NewAuthzLimiterDecorator(
-		sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{}),
 		sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{}),
 	)
 
@@ -66,7 +64,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 		{
 			name: "a blocked msg is not blocked when not wrapped in MsgExec",
 			msgs: []sdk.Msg{
-				&evmtypes.MsgEthereumTx{},
+				&stakingtypes.MsgUndelegate{},
 			},
 			checkTx: false,
 		},
@@ -100,7 +98,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 				newMsgGrant(
 					testAddresses[0],
 					testAddresses[1],
-					authz.NewGenericAuthorization(sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{})),
+					authz.NewGenericAuthorization(sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{})),
 					distantFuture,
 				),
 			},
@@ -139,7 +137,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 				newMsgExec(
 					testAddresses[1],
 					[]sdk.Msg{
-						&evmtypes.MsgEthereumTx{},
+						&stakingtypes.MsgUndelegate{},
 					},
 				),
 			},
@@ -163,7 +161,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 							testAddresses[3],
 							sdk.NewCoins(sdk.NewInt64Coin("ukava", 100e6)),
 						),
-						&evmtypes.MsgEthereumTx{},
+						&stakingtypes.MsgUndelegate{},
 					},
 				),
 			},
@@ -179,7 +177,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 						newMsgExec(
 							testAddresses[2],
 							[]sdk.Msg{
-								&evmtypes.MsgEthereumTx{},
+								&stakingtypes.MsgUndelegate{},
 							},
 						),
 					},
@@ -197,7 +195,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 						newMsgGrant(
 							testAddresses[0],
 							testAddresses[1],
-							authz.NewGenericAuthorization(sdk.MsgTypeURL(&evmtypes.MsgEthereumTx{})),
+							authz.NewGenericAuthorization(sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{})),
 							distantFuture,
 						),
 					},

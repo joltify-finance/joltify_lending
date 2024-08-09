@@ -1,25 +1,31 @@
 syntax = "proto3";
 package joltify.third_party.auction.v1beta1;
 
+
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "amino/amino.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/auction/types";
 
 // Msg defines the auction Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // PlaceBid message type used by bidders to place bids on auctions
   rpc PlaceBid(MsgPlaceBid) returns (MsgPlaceBidResponse);
 }
 
 // MsgPlaceBid represents a message used by bidders to place bids on auctions
 message MsgPlaceBid {
+  option (cosmos.msg.v1.signer) = "bidder";
+  option (amino.name)           = "joltify.third_party.incentive.v1beta1.MsgPlaceBid";
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
   uint64 auction_id = 1;
-
-  string bidder = 2;
+  string bidder = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
 }

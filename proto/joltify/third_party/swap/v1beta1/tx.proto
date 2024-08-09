@@ -4,11 +4,14 @@ package joltify.third_party.swap.v1beta1;
 import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "cosmos/msg/v1/msg.proto";
+import "amino/amino.proto";
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/swap/types";
 
 // Msg defines the swap Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // Deposit defines a method for depositing liquidity into a pool
   rpc Deposit(MsgDeposit) returns (MsgDepositResponse);
   // Withdraw defines a method for withdrawing liquidity into a pool
@@ -23,6 +26,8 @@ service Msg {
 
 // MsgDeposit represents a message for depositing liquidity into a pool
 message MsgDeposit {
+  option (cosmos.msg.v1.signer) = "depositor";
+  option (amino.name)           = "joltify.third_party.swap.v1beta1.MsgDeposit";
   option (gogoproto.goproto_getters) = false;
 
   // depositor represents the address to deposit funds from
@@ -42,13 +47,15 @@ message MsgDepositResponse {}
 
 // MsgWithdraw represents a message for withdrawing liquidity from a pool
 message MsgWithdraw {
+  option (cosmos.msg.v1.signer) = "from";
+  option (amino.name)           = "joltify.third_party.swap.v1beta1.MsgWithdraw";
   option (gogoproto.goproto_getters) = false;
 
   // from represents the address we are withdrawing for
   string from = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // shares represents the amount of shares to withdraw
   string shares = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
   // min_token_a represents the minimum a token to withdraw
@@ -64,6 +71,8 @@ message MsgWithdrawResponse {}
 
 // MsgSwapExactForTokens represents a message for trading exact coinA for coinB
 message MsgSwapExactForTokens {
+  option (cosmos.msg.v1.signer) = "requester";
+  option (amino.name)           = "joltify.third_party.swap.v1beta1.MsgSwapExactForTokens";
   option (gogoproto.goproto_getters) = false;
 
   // represents the address swaping the tokens
@@ -85,6 +94,8 @@ message MsgSwapExactForTokensResponse {}
 
 // MsgSwapExactForBatchTokens represents a message for trading exact coinA for coinB
 message MsgSwapExactForBatchTokens {
+  option (cosmos.msg.v1.signer) = "requester";
+  option (amino.name)           = "joltify.third_party.swap.v1beta1.MsgSwapExactForBatchTokens";
   option (gogoproto.goproto_getters) = false;
 
   // represents the address swaping the tokens
@@ -107,6 +118,8 @@ message MsgSwapExactForBatchTokensResponse {}
 // MsgSwapForExactTokens represents a message for trading coinA for an exact
 // coinB
 message MsgSwapForExactTokens {
+  option (cosmos.msg.v1.signer) = "requester";
+  option (amino.name)           = "joltify.third_party.swap.v1beta1.MsgSwapForExactTokens";
   option (gogoproto.goproto_getters) = false;
 
   // represents the address swaping the tokens

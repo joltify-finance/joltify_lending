@@ -4,23 +4,21 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
-
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/stretchr/testify/require"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
-
 	"github.com/joltify-finance/joltify_lending/app"
 )
 
 // TestKeeper_SetGetMarket tests adding markets to the pricefeed, getting markets from the store
 func TestKeeper_SetGetMarket(t *testing.T) {
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{})
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true)
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{
@@ -58,8 +56,9 @@ func TestKeeper_SetGetMarket(t *testing.T) {
 // TestKeeper_GetSetPrice Test Posting the price by an oracle
 func TestKeeper_GetSetPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(2)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{})
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true)
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{
@@ -72,12 +71,12 @@ func TestKeeper_GetSetPrice(t *testing.T) {
 	prices := []struct {
 		oracle   sdk.AccAddress
 		marketID string
-		price    sdk.Dec
+		price    sdkmath.LegacyDec
 		total    int
 	}{
-		{addrs[0], "tstusd", sdk.MustNewDecFromStr("0.33"), 1},
-		{addrs[1], "tstusd", sdk.MustNewDecFromStr("0.35"), 2},
-		{addrs[0], "tstusd", sdk.MustNewDecFromStr("0.37"), 2},
+		{addrs[0], "tstusd", sdkmath.LegacyMustNewDecFromStr("0.33"), 1},
+		{addrs[1], "tstusd", sdkmath.LegacyMustNewDecFromStr("0.35"), 2},
+		{addrs[0], "tstusd", sdkmath.LegacyMustNewDecFromStr("0.37"), 2},
 	}
 
 	for _, p := range prices {
@@ -110,9 +109,9 @@ func TestKeeper_GetSetPrice(t *testing.T) {
 // TestKeeper_GetSetCurrentPrice Test Setting the median price of an Asset
 func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{}).
-		WithBlockTime(time.Now().UTC())
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true).WithBlockTime(time.Now().UTC())
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{
@@ -124,33 +123,33 @@ func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 
 	_, err := keeper.SetPrice(
 		ctx, addrs[0], "tstusd",
-		sdk.MustNewDecFromStr("0.33"),
+		sdkmath.LegacyMustNewDecFromStr("0.33"),
 		time.Now().Add(time.Hour*1))
 	require.NoError(t, err)
 
 	_, err = keeper.SetPrice(
 		ctx, addrs[1], "tstusd",
-		sdk.MustNewDecFromStr("0.35"),
+		sdkmath.LegacyMustNewDecFromStr("0.35"),
 		time.Now().Add(time.Hour*1))
 	require.NoError(t, err)
 
 	_, err = keeper.SetPrice(
 		ctx, addrs[2], "tstusd",
-		sdk.MustNewDecFromStr("0.34"),
+		sdkmath.LegacyMustNewDecFromStr("0.34"),
 		time.Now().Add(time.Hour*1))
 	require.NoError(t, err)
 
 	// Add an expired one which should fail
 	_, err = keeper.SetPrice(
 		ctx, addrs[3], "tstusd",
-		sdk.MustNewDecFromStr("0.9"),
+		sdkmath.LegacyMustNewDecFromStr("0.9"),
 		ctx.BlockTime().Add(-time.Hour*1))
 	require.Error(t, err)
 
 	// Add a non-expired price, but will not be counted when BlockTime is changed
 	_, err = keeper.SetPrice(
 		ctx, addrs[3], "tstusd",
-		sdk.MustNewDecFromStr("0.9"),
+		sdkmath.LegacyMustNewDecFromStr("0.9"),
 		time.Now().Add(time.Minute*30))
 	require.NoError(t, err)
 
@@ -165,7 +164,7 @@ func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 	price, err := keeper.GetCurrentPrice(ctx, "tstusd")
 	require.Nil(t, err)
 
-	expCurPrice := sdk.MustNewDecFromStr("0.34")
+	expCurPrice := sdkmath.LegacyMustNewDecFromStr("0.34")
 	require.Truef(
 		t,
 		price.Price.Equal(expCurPrice),
@@ -176,7 +175,7 @@ func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 	// Even number of oracles
 	_, err = keeper.SetPrice(
 		ctx, addrs[4], "tstusd",
-		sdk.MustNewDecFromStr("0.36"),
+		sdkmath.LegacyMustNewDecFromStr("0.36"),
 		time.Now().Add(time.Hour*1))
 	require.NoError(t, err)
 
@@ -186,7 +185,7 @@ func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 	price, err = keeper.GetCurrentPrice(ctx, "tstusd")
 	require.Nil(t, err)
 
-	exp := sdk.MustNewDecFromStr("0.345")
+	exp := sdkmath.LegacyMustNewDecFromStr("0.345")
 	require.Truef(t, price.Price.Equal(exp),
 		"current price %s should be %s",
 		price.Price.String(),
@@ -200,9 +199,10 @@ func TestKeeper_GetSetCurrentPrice(t *testing.T) {
 
 func TestKeeper_ExpiredSetCurrentPrices(t *testing.T) {
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
-	tApp := app.NewTestApp(tmlog.TestingLogger(), t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{}).
-		WithBlockTime(time.Now().UTC())
+
+	tApp := app.NewTestApp(log.NewTestLogger(t), t.TempDir())
+	ctx := tApp.NewContext(true).WithBlockTime(time.Now().UTC())
+
 	keeper := tApp.GetPriceFeedKeeper()
 
 	mp := types2.Params{
@@ -214,19 +214,19 @@ func TestKeeper_ExpiredSetCurrentPrices(t *testing.T) {
 
 	_, err := keeper.SetPrice(
 		ctx, addrs[0], "tstusd",
-		sdk.MustNewDecFromStr("0.33"),
+		sdkmath.LegacyMustNewDecFromStr("0.33"),
 		time.Now().Add(time.Hour*1))
 	require.NoError(t, err)
 
 	_, err = keeper.SetPrice(
 		ctx, addrs[1], "tstusd",
-		sdk.MustNewDecFromStr("0.35"),
+		sdkmath.LegacyMustNewDecFromStr("0.35"),
 		time.Now().Add(time.Hour*1))
 	require.NoError(t, err)
 
 	_, err = keeper.SetPrice(
 		ctx, addrs[2], "tstusd",
-		sdk.MustNewDecFromStr("0.34"),
+		sdkmath.LegacyMustNewDecFromStr("0.34"),
 		time.Now().Add(time.Hour*1))
 	require.NoError(t, err)
 

@@ -7,12 +7,15 @@ import (
 	"time"
 
 	coserrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdk.Coin, error) {
+func (k Keeper) handlerPoolClose(rctx context.Context, poolInfo types.PoolInfo, depositor types.DepositorInfo) (sdk.Coin, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	amount, err := k.cleanupDepositor(ctx, poolInfo, depositor)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -30,7 +33,8 @@ func (k Keeper) handlerPoolClose(ctx sdk.Context, poolInfo types.PoolInfo, depos
 	return tokenSend, err
 }
 
-func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
+func (k Keeper) handlerPoolLiquidation(rctx context.Context, depositor types.DepositorInfo) (sdk.Coin, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	interest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -43,7 +47,7 @@ func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.Deposito
 
 	depositor.TotalPaidLiquidationAmount = depositor.TotalPaidLiquidationAmount.Add(totalRedeem)
 	totalWithdraw := depositor.WithdrawalAmount.AddAmount(interest).AddAmount(totalRedeem)
-	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdkmath.ZeroInt())
 	k.SetDepositor(ctx, depositor)
 
 	ctx.EventManager().EmitEvent(
@@ -57,7 +61,7 @@ func (k Keeper) handlerPoolLiquidation(ctx sdk.Context, depositor types.Deposito
 	return totalWithdraw, err
 }
 
-func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
+func (k Keeper) isEmptyPool(ctx context.Context, poolInfo types.PoolInfo) bool {
 	if !poolInfo.BorrowedAmount.IsZero() || !poolInfo.UsableAmount.IsZero() {
 		return false
 	}
@@ -74,7 +78,8 @@ func (k Keeper) isEmptyPool(ctx sdk.Context, poolInfo types.PoolInfo) bool {
 	return true
 }
 
-func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
+func (k msgServer) handleDepositClose(rctx context.Context, depositor types.DepositorInfo, poolInfo types.PoolInfo) (*types.MsgWithdrawPrincipalResponse, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	depositor.DepositType = types.DepositorInfo_deactive
 	amountToSend := depositor.WithdrawalAmount
 	interest, err := k.claimInterest(ctx, &depositor)
@@ -98,8 +103,8 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 			sdk.NewAttribute(types.AttributeAmount, amountToSend.String()),
 		),
 	)
-	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdk.ZeroInt())
-	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdk.ZeroInt())
+	depositor.LockedAmount = sdk.NewCoin(depositor.LockedAmount.Denom, sdkmath.ZeroInt())
+	depositor.WithdrawalAmount = sdk.NewCoin(depositor.WithdrawalAmount.Denom, sdkmath.ZeroInt())
 
 	// burn the nft if it is existed
 	for _, el := range depositor.LinkedNFT {
@@ -151,7 +156,7 @@ func (k msgServer) handleDepositClose(ctx sdk.Context, depositor types.Depositor
 func (k msgServer) WithdrawPrincipal(goCtx context.Context, msg *types.MsgWithdrawPrincipal) (*types.MsgWithdrawPrincipalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(storetypes.NewInfiniteGasMeter())
 
 	investor, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {

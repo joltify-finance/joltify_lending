@@ -1,15 +1,17 @@
 package testutil
 
 import (
-	tmlog "github.com/cometbft/cometbft/libs/log"
+	"context"
+	"time"
+
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -27,7 +29,7 @@ type Suite struct {
 	BankKeeper    bankkeeper.Keeper
 	AccountKeeper authkeeper.AccountKeeper
 	App           app.TestApp
-	Ctx           sdk.Context
+	Ctx           context.Context
 	Addrs         []sdk.AccAddress
 	ModAcc        *authtypes.ModuleAccount
 }
@@ -36,18 +38,16 @@ type Suite struct {
 func (suite *Suite) SetupTest(numAddrs int) {
 	config := sdk.GetConfig()
 	app.SetBech32AddressPrefixes(config)
-	tg := tmlog.TestingLogger()
+	tg := log.NewTestLogger(suite.T())
 	tApp := app.NewTestApp(tg, suite.T().TempDir())
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(numAddrs)
 
 	// Fund liquidator module account
 	coins := sdk.NewCoins(
-		sdk.NewCoin("token1", sdk.NewInt(100)),
-		sdk.NewCoin("token2", sdk.NewInt(100)),
+		sdk.NewCoin("token1", sdkmath.NewInt(100)),
+		sdk.NewCoin("token2", sdkmath.NewInt(100)),
 	)
-
-	ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
 
 	modName := "jolt"
 	modBaseAcc := authtypes.NewBaseAccount(authtypes.NewModuleAddress(modName), nil, 0, 0)
@@ -83,10 +83,10 @@ func (suite *Suite) SetupTest(numAddrs int) {
 	//b := authtypes.NewBaseAccount(addr, nil, 0, 0)
 	//genAcc = append(genAcc, b)
 	//
-	tApp.InitializeFromGenesisStates(nil, nil, authGS, gs)
+	tApp.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS, gs)
 
 	suite.App = tApp
-	suite.Ctx = ctx
+	suite.Ctx = tApp.Ctx
 	suite.Addrs = addrs
 	suite.Keeper = tApp.GetAuctionKeeper()
 	suite.BankKeeper = tApp.GetBankKeeper()
@@ -103,7 +103,7 @@ func (suite *Suite) AddCoinsToAccount(addr sdk.AccAddress, coins sdk.Coins) {
 	suite.Require().NoError(err)
 }
 
-func fundAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, addr sdk.AccAddress, amounts sdk.Coins) error {
+func fundAccount(bankKeeper bankkeeper.Keeper, ctx context.Context, addr sdk.AccAddress, amounts sdk.Coins) error {
 	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func fundAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, addr sdk.AccAddr
 //
 // TODO: Instead of using the mint module account, which has the
 // permission of minting, create a "faucet" account. (@fdymylja)
-func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx sdk.Context, recipientMod string, amounts sdk.Coins) error {
+func fundModuleAccount(bankKeeper bankkeeper.Keeper, ctx context.Context, recipientMod string, amounts sdk.Coins) error {
 	if err := bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (suite *Suite) AddCoinsToNamedModule(moduleName string, amount sdk.Coins) {
 }
 
 // NewModuleAccountFromAddr creates a new module account from the provided address with the provided balance
-// func (suite *Suite) NewModuleAccount(moduleName string, balance sdk.Coins) authtypes.AccountI {
+// func (suite *Suite) NewModuleAccount(moduleName string, balance sdk.Coins) sdk.AccountI {
 // 	ak := suite.App.GetAccountKeeper()
 
 // 	modAccAddr := authtypes.NewModuleAddress(moduleName)

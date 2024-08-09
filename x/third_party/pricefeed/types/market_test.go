@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/stretchr/testify/require"
 
 	tmtypes "github.com/cometbft/cometbft/types"
@@ -109,7 +111,7 @@ func TestPostedPriceValidate(t *testing.T) {
 			PostedPrice{
 				MarketID:      "market",
 				OracleAddress: addr,
-				Price:         sdk.OneDec(),
+				Price:         sdkmath.LegacyOneDec(),
 				Expiry:        now,
 			},
 			true,
@@ -134,7 +136,7 @@ func TestPostedPriceValidate(t *testing.T) {
 			PostedPrice{
 				MarketID:      "market",
 				OracleAddress: addr,
-				Price:         sdk.NewDec(-1),
+				Price:         sdkmath.LegacyNewDec(-1),
 			},
 			false,
 		},
@@ -143,7 +145,7 @@ func TestPostedPriceValidate(t *testing.T) {
 			PostedPrice{
 				MarketID:      "market",
 				OracleAddress: addr,
-				Price:         sdk.OneDec(),
+				Price:         sdkmath.LegacyOneDec(),
 				Expiry:        time.Time{},
 			},
 			false,

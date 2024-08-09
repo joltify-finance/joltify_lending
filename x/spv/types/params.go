@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
@@ -23,8 +24,8 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewTestParams creates a new Params instance
 func NewTestParams() Params {
 	// 100 usdc
-	// amt, ok := sdk.NewIntFromString("100000000000000000000")
-	amt, ok := sdk.NewIntFromString("10000000000000000")
+	// amt, ok := sdkmath.NewIntFromString("100000000000000000000")
+	amt, ok := sdkmath.NewIntFromString("10000000000000000")
 	if !ok {
 		panic("invalid threshold setting")
 	}
@@ -41,8 +42,8 @@ func NewTestParams() Params {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	// 100 usdc
-	// amt, ok := sdk.NewIntFromString("100000000000000000000")
-	amt, ok := sdk.NewIntFromString("10000000000000000")
+	// amt, ok := sdkmath.NewIntFromString("100000000000000000000")
+	amt, ok := sdkmath.NewIntFromString("10000000000000000")
 	if !ok {
 		panic("invalid threshold setting")
 	}
@@ -91,7 +92,7 @@ func validateIncentive(i interface{}) error {
 		if el.Poolid == "" {
 			return fmt.Errorf("invalid pool id: %s", el.Poolid)
 		}
-		_, err := sdk.NewDecFromStr(el.Spy)
+		_, err := sdkmath.LegacyNewDecFromStr(el.Spy)
 		if err != nil {
 			return fmt.Errorf("invalid spy: %s with err %v", el.Spy, err)
 		}

@@ -1,13 +1,14 @@
 package keeper
 
 import (
+	"context"
 	"time"
 
 	"github.com/joltify-finance/joltify_lending/client"
 
 	sdkmath "cosmossdk.io/math"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
 	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -15,18 +16,18 @@ import (
 
 const MAXMINT = 100000000
 
-func (k Keeper) FirstDist(ctx sdk.Context) error {
+func (k Keeper) FirstDist(ctx context.Context) error {
 	if client.MAINNETFLAG == "unittest" {
 		return nil
 	}
 
-	base := sdk.NewInt(1000000)
-	firstDropIncentive := sdk.NewInt(100000)
+	base := sdkmath.NewInt(1000000)
+	firstDropIncentive := sdkmath.NewInt(100000)
 
 	c1 := sdk.NewCoin("ujolt", firstDropIncentive.Mul(base))
 	incentiveReceived := sdk.NewCoins(c1)
 
-	firstDropCommunity := sdk.NewInt(20000000)
+	firstDropCommunity := sdkmath.NewInt(20000000)
 	c2 := sdk.NewCoin("ujolt", firstDropCommunity.Mul(base))
 
 	minttedCoin := incentiveReceived.Add(c2)
@@ -49,14 +50,16 @@ func (k Keeper) FirstDist(ctx sdk.Context) error {
 }
 
 // SetDistInfo sets the historical distribution info
-func (k Keeper) SetDistInfo(ctx sdk.Context, h types.HistoricalDistInfo) {
+func (k Keeper) SetDistInfo(rctx context.Context, h types.HistoricalDistInfo) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FirstDistTime))
 	b := k.cdc.MustMarshal(&h)
 	store.Set(types.KeyPrefix("history"), b)
 }
 
 // GetDistInfo returns a createPool from its index
-func (k Keeper) GetDistInfo(ctx sdk.Context) (h types.HistoricalDistInfo) {
+func (k Keeper) GetDistInfo(rctx context.Context) (h types.HistoricalDistInfo) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.FirstDistTime))
 
 	b := store.Get(types.KeyPrefix("history"))
@@ -68,16 +71,20 @@ func (k Keeper) GetDistInfo(ctx sdk.Context) (h types.HistoricalDistInfo) {
 	return h
 }
 
-func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params, delta time.Duration) (sdk.Coins, error) {
+func (k Keeper) mintCoinsAndDistribute(rctx context.Context, pa types.Params, delta time.Duration) (sdk.Coins, error) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	truncatedDelta := int64(delta.Truncate(time.Second).Seconds())
 	interestFactor := CalculateInterestFactor(pa.NodeSPY, sdkmath.NewInt(truncatedDelta))
 
-	totalBoned := k.stakingKeeper.TotalBondedTokens(ctx)
+	totalBoned, err := k.stakingKeeper.TotalBondedTokens(rctx)
+	if err != nil {
+		return sdk.Coins{}, err
+	}
 
-	minttedAmt := interestFactor.Sub(sdk.OneDec()).MulInt(totalBoned)
+	minttedAmt := interestFactor.Sub(sdkmath.LegacyOneDec()).MulInt(sdkmath.NewIntFromBigInt(totalBoned.BigInt()))
 	minttedCoins := sdk.NewCoins(sdk.NewCoin("ujolt", minttedAmt.TruncateInt()))
 
-	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, minttedCoins)
+	err = k.bankKeeper.MintCoins(ctx, types.ModuleName, minttedCoins)
 	if err != nil {
 		return sdk.Coins{}, err
 	}
@@ -98,15 +105,16 @@ func (k Keeper) mintCoinsAndDistribute(ctx sdk.Context, pa types.Params, delta t
 	return minttedCoins, nil
 }
 
-func (k Keeper) DoDistribute(ctx sdk.Context) {
+func (k Keeper) DoDistribute(rctx context.Context) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	h := k.GetDistInfo(ctx)
 	pa := k.GetParams(ctx)
 	if pa.NodeSPY.IsZero() {
 		return
 	}
 
-	base := sdk.NewInt(1000000)
-	maxMint := base.Mul(sdk.NewInt(MAXMINT))
+	base := sdkmath.NewInt(1000000)
+	maxMint := base.Mul(sdkmath.NewInt(MAXMINT))
 	if h.TotalMintCoins.AmountOf("ujolt").GTE(maxMint) {
 		return
 	}

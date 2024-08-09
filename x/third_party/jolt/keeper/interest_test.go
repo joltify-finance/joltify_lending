@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	tmlog "github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	sdkmath "cosmossdk.io/math"
@@ -15,8 +14,6 @@ import (
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/cometbft/cometbft/crypto"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -29,10 +26,10 @@ type InterestTestSuite struct {
 
 func (suite *InterestTestSuite) TestCalculateUtilizationRatio() {
 	type args struct {
-		cash          sdk.Dec
-		borrows       sdk.Dec
-		reserves      sdk.Dec
-		expectedValue sdk.Dec
+		cash          sdkmath.LegacyDec
+		borrows       sdkmath.LegacyDec
+		reserves      sdkmath.LegacyDec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -44,46 +41,46 @@ func (suite *InterestTestSuite) TestCalculateUtilizationRatio() {
 		{
 			"normal",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("5000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
-				expectedValue: sdk.MustNewDecFromStr("0.847457627118644068"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("5000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.847457627118644068"),
 			},
 		},
 		{
 			"high util ratio",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("250000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
-				expectedValue: sdk.MustNewDecFromStr("0.996412913511359107"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("250000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.996412913511359107"),
 			},
 		},
 		{
 			"very high util ratio",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("250000000000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
-				expectedValue: sdk.MustNewDecFromStr("0.999999996400000013"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("250000000000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.999999996400000013"),
 			},
 		},
 		{
 			"low util ratio",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("50"),
-				reserves:      sdk.MustNewDecFromStr("100"),
-				expectedValue: sdk.MustNewDecFromStr("0.052631578947368421"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("50"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.052631578947368421"),
 			},
 		},
 		{
 			"very low util ratio",
 			args{
-				cash:          sdk.MustNewDecFromStr("10000000"),
-				borrows:       sdk.MustNewDecFromStr("50"),
-				reserves:      sdk.MustNewDecFromStr("100"),
-				expectedValue: sdk.MustNewDecFromStr("0.000005000025000125"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("10000000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("50"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.000005000025000125"),
 			},
 		},
 	}
@@ -98,11 +95,11 @@ func (suite *InterestTestSuite) TestCalculateUtilizationRatio() {
 
 func (suite *InterestTestSuite) TestCalculateBorrowRate() {
 	type args struct {
-		cash          sdk.Dec
-		borrows       sdk.Dec
-		reserves      sdk.Dec
+		cash          sdkmath.LegacyDec
+		borrows       sdkmath.LegacyDec
+		reserves      sdkmath.LegacyDec
 		model         types3.InterestRateModel
-		expectedValue sdk.Dec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -115,102 +112,102 @@ func (suite *InterestTestSuite) TestCalculateBorrowRate() {
 	// 	- BaseMultiplier:   0.1
 	// 	- Kink:             0.8
 	// 	- JumpMultiplier:   0.5
-	normalModel := types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("0.5"))
+	normalModel := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("0.5"))
 
 	testCases := []test{
 		{
 			"normal no jump",
 			args{
-				cash:          sdk.MustNewDecFromStr("5000"),
-				borrows:       sdk.MustNewDecFromStr("1000"),
-				reserves:      sdk.MustNewDecFromStr("1000"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("5000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("1000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("1000"),
 				model:         normalModel,
-				expectedValue: sdk.MustNewDecFromStr("0.020000000000000000"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.020000000000000000"),
 			},
 		},
 		{
 			"normal with jump",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("5000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("5000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
 				model:         normalModel,
-				expectedValue: sdk.MustNewDecFromStr("0.103728813559322034"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.103728813559322034"),
 			},
 		},
 		{
 			"high cash",
 			args{
-				cash:          sdk.MustNewDecFromStr("10000000"),
-				borrows:       sdk.MustNewDecFromStr("5000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("10000000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("5000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
 				model:         normalModel,
-				expectedValue: sdk.MustNewDecFromStr("0.000049975511999120"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.000049975511999120"),
 			},
 		},
 		{
 			"high borrows",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("5000000000000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("5000000000000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
 				model:         normalModel,
-				expectedValue: sdk.MustNewDecFromStr("0.179999999910000000"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.179999999910000000"),
 			},
 		},
 		{
 			"high reserves",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("5000"),
-				reserves:      sdk.MustNewDecFromStr("1000000000000"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("5000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("1000000000000"),
 				model:         normalModel,
-				expectedValue: sdk.MustNewDecFromStr("0.180000000000000000"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.180000000000000000"),
 			},
 		},
 		{
 			"random numbers",
 			args{
-				cash:          sdk.MustNewDecFromStr("125"),
-				borrows:       sdk.MustNewDecFromStr("11"),
-				reserves:      sdk.MustNewDecFromStr("82"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("125"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("11"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("82"),
 				model:         normalModel,
-				expectedValue: sdk.MustNewDecFromStr("0.020370370370370370"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.020370370370370370"),
 			},
 		},
 		{
 			"increased base multiplier",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("5000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
-				model:         types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.5"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("1.0")),
-				expectedValue: sdk.MustNewDecFromStr("0.447457627118644068"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("5000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
+				model:         types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.5"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("1.0")),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.447457627118644068"),
 			},
 		},
 		{
 			"decreased kink",
 			args{
-				cash:          sdk.MustNewDecFromStr("1000"),
-				borrows:       sdk.MustNewDecFromStr("5000"),
-				reserves:      sdk.MustNewDecFromStr("100"),
-				model:         types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.5"), sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("1.0")),
-				expectedValue: sdk.MustNewDecFromStr("0.797457627118644068"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("5000"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("100"),
+				model:         types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.5"), sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("1.0")),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.797457627118644068"),
 			},
 		},
 		{
 			"zero model returns zero",
 			args{
-				cash:     sdk.MustNewDecFromStr("1000"),
-				borrows:  sdk.MustNewDecFromStr("5000"),
-				reserves: sdk.MustNewDecFromStr("100"),
+				cash:     sdkmath.LegacyMustNewDecFromStr("1000"),
+				borrows:  sdkmath.LegacyMustNewDecFromStr("5000"),
+				reserves: sdkmath.LegacyMustNewDecFromStr("100"),
 				model: types3.NewInterestRateModel(
-					sdk.MustNewDecFromStr("0.0"),
-					sdk.MustNewDecFromStr("0.0"),
-					sdk.MustNewDecFromStr("0.8"),
-					sdk.MustNewDecFromStr("0.0"),
+					sdkmath.LegacyMustNewDecFromStr("0.0"),
+					sdkmath.LegacyMustNewDecFromStr("0.0"),
+					sdkmath.LegacyMustNewDecFromStr("0.8"),
+					sdkmath.LegacyMustNewDecFromStr("0.0"),
 				),
-				expectedValue: sdk.MustNewDecFromStr("0.0"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.0"),
 			},
 		},
 	}
@@ -226,9 +223,9 @@ func (suite *InterestTestSuite) TestCalculateBorrowRate() {
 
 func (suite *InterestTestSuite) TestCalculateBorrowInterestFactor() {
 	type args struct {
-		perSecondInterestRate sdk.Dec
+		perSecondInterestRate sdkmath.LegacyDec
 		timeElapsed           sdkmath.Int
-		expectedValue         sdk.Dec
+		expectedValue         sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -242,105 +239,105 @@ func (suite *InterestTestSuite) TestCalculateBorrowInterestFactor() {
 		{
 			"1 year",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000005555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds),
-				expectedValue:         sdk.MustNewDecFromStr("1.191463614477847370"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000005555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("1.191463614477847370"),
 			},
 		},
 		{
 			"10 year",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000005555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds * 10),
-				expectedValue:         sdk.MustNewDecFromStr("5.765113233897391189"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000005555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds * 10),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("5.765113233897391189"),
 			},
 		},
 		{
 			"1 month",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000005555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds / 12),
-				expectedValue:         sdk.MustNewDecFromStr("1.014705619075717373"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000005555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds / 12),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("1.014705619075717373"),
 			},
 		},
 		{
 			"1 day",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000005555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds / 365),
-				expectedValue:         sdk.MustNewDecFromStr("1.000480067194057924"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000005555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds / 365),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("1.000480067194057924"),
 			},
 		},
 		{
 			"1 year: low interest rate",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000000555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds),
-				expectedValue:         sdk.MustNewDecFromStr("1.017656545925063632"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000000555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("1.017656545925063632"),
 			},
 		},
 		{
 			"1 year, lower interest rate",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000000055"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds),
-				expectedValue:         sdk.MustNewDecFromStr("1.001735985079841390"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000000055"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("1.001735985079841390"),
 			},
 		},
 		{
 			"1 year, lowest interest rate",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000000005"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds),
-				expectedValue:         sdk.MustNewDecFromStr("1.000157692432076670"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000000005"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("1.000157692432076670"),
 			},
 		},
 		{
 			"1 year: high interest rate",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000055555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds),
-				expectedValue:         sdk.MustNewDecFromStr("5.766022095987868825"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000055555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("5.766022095987868825"),
 			},
 		},
 		{
 			"1 year: higher interest rate",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000000555555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds),
-				expectedValue:         sdk.MustNewDecFromStr("40628388.864535408465693310"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000000555555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("40628388.864535408465693310"),
 			},
 		},
 		{
 			"1 year: highest interest rate",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("1.000001555555"),
-				timeElapsed:           sdk.NewInt(oneYearInSeconds),
-				expectedValue:         sdk.MustNewDecFromStr("2017093013158200407564.613502861572552603"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("1.000001555555"),
+				timeElapsed:           sdkmath.NewInt(oneYearInSeconds),
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("2017093013158200407564.613502861572552603"),
 			},
 		},
 		{
 			"largest per second interest rate with practical elapsed time",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("18.445"), // Begins to panic at ~18.45 (1845%/second interest rate)
-				timeElapsed:           sdk.NewInt(30),                  // Assume a 30 second period, longer than any expected individual block
-				expectedValue:         sdk.MustNewDecFromStr("94702138679846565921082258202543002089.215969366091911769"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("18.445"), // Begins to panic at ~18.45 (1845%/second interest rate)
+				timeElapsed:           sdkmath.NewInt(30),                        // Assume a 30 second period, longer than any expected individual block
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("94702138679846565921082258202543002089.215969366091911769"),
 			},
 		},
 		{
 			"supports calculated values greater than 1.84x10^19",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("18.5"), // Old uint64 conversion would panic at ~18.45 (1845%/second interest rate)
-				timeElapsed:           sdk.NewInt(30),                // Assume a 30 second period, longer than any expected individual block
-				expectedValue:         sdk.MustNewDecFromStr("103550416986452240450480615551792302106.072205164469778538"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("18.5"), // Old uint64 conversion would panic at ~18.45 (1845%/second interest rate)
+				timeElapsed:           sdkmath.NewInt(30),                      // Assume a 30 second period, longer than any expected individual block
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("103550416986452240450480615551792302106.072205164469778538"),
 			},
 		},
 		{
 			"largest per second interest rate before sdk.Uint overflows 256 bytes",
 			args{
-				perSecondInterestRate: sdk.MustNewDecFromStr("23.3"), // 23.4 overflows bit length 256 by 1 byte
-				timeElapsed:           sdk.NewInt(30),                // Assume a 30 second period, longer than any expected individual block
-				expectedValue:         sdk.MustNewDecFromStr("104876366068119517411103023062013348034546.437155815200037999"),
+				perSecondInterestRate: sdkmath.LegacyMustNewDecFromStr("23.3"), // 23.4 overflows bit length 256 by 1 byte
+				timeElapsed:           sdkmath.NewInt(30),                      // Assume a 30 second period, longer than any expected individual block
+				expectedValue:         sdkmath.LegacyMustNewDecFromStr("104876366068119517411103023062013348034546.437155815200037999"),
 			},
 		},
 	}
@@ -355,12 +352,12 @@ func (suite *InterestTestSuite) TestCalculateBorrowInterestFactor() {
 
 func (suite *InterestTestSuite) TestCalculateSupplyInterestFactor() {
 	type args struct {
-		newInterest   sdk.Dec
-		cash          sdk.Dec
-		borrows       sdk.Dec
-		reserves      sdk.Dec
-		reserveFactor sdk.Dec
-		expectedValue sdk.Dec
+		newInterest   sdkmath.LegacyDec
+		cash          sdkmath.LegacyDec
+		borrows       sdkmath.LegacyDec
+		reserves      sdkmath.LegacyDec
+		reserveFactor sdkmath.LegacyDec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -372,34 +369,34 @@ func (suite *InterestTestSuite) TestCalculateSupplyInterestFactor() {
 		{
 			"low new interest",
 			args{
-				newInterest:   sdk.MustNewDecFromStr("1"),
-				cash:          sdk.MustNewDecFromStr("100.0"),
-				borrows:       sdk.MustNewDecFromStr("1000.0"),
-				reserves:      sdk.MustNewDecFromStr("10.0"),
-				reserveFactor: sdk.MustNewDecFromStr("0.05"),
-				expectedValue: sdk.MustNewDecFromStr("1.000917431192660550"),
+				newInterest:   sdkmath.LegacyMustNewDecFromStr("1"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("100.0"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("1000.0"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("10.0"),
+				reserveFactor: sdkmath.LegacyMustNewDecFromStr("0.05"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("1.000917431192660550"),
 			},
 		},
 		{
 			"medium new interest",
 			args{
-				newInterest:   sdk.MustNewDecFromStr("5"),
-				cash:          sdk.MustNewDecFromStr("100.0"),
-				borrows:       sdk.MustNewDecFromStr("1000.0"),
-				reserves:      sdk.MustNewDecFromStr("10.0"),
-				reserveFactor: sdk.MustNewDecFromStr("0.05"),
-				expectedValue: sdk.MustNewDecFromStr("1.004587155963302752"),
+				newInterest:   sdkmath.LegacyMustNewDecFromStr("5"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("100.0"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("1000.0"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("10.0"),
+				reserveFactor: sdkmath.LegacyMustNewDecFromStr("0.05"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("1.004587155963302752"),
 			},
 		},
 		{
 			"high new interest",
 			args{
-				newInterest:   sdk.MustNewDecFromStr("10"),
-				cash:          sdk.MustNewDecFromStr("100.0"),
-				borrows:       sdk.MustNewDecFromStr("1000.0"),
-				reserves:      sdk.MustNewDecFromStr("10.0"),
-				reserveFactor: sdk.MustNewDecFromStr("0.05"),
-				expectedValue: sdk.MustNewDecFromStr("1.009174311926605505"),
+				newInterest:   sdkmath.LegacyMustNewDecFromStr("10"),
+				cash:          sdkmath.LegacyMustNewDecFromStr("100.0"),
+				borrows:       sdkmath.LegacyMustNewDecFromStr("1000.0"),
+				reserves:      sdkmath.LegacyMustNewDecFromStr("10.0"),
+				reserveFactor: sdkmath.LegacyMustNewDecFromStr("0.05"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("1.009174311926605505"),
 			},
 		},
 	}
@@ -415,8 +412,8 @@ func (suite *InterestTestSuite) TestCalculateSupplyInterestFactor() {
 
 func (suite *InterestTestSuite) TestAPYToSPY() {
 	type args struct {
-		apy           sdk.Dec
-		expectedValue sdk.Dec
+		apy           sdkmath.LegacyDec
+		expectedValue sdkmath.LegacyDec
 	}
 
 	type test struct {
@@ -429,57 +426,57 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 		{
 			"lowest apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("0.005"),
-				expectedValue: sdk.MustNewDecFromStr("0.999999831991472557"),
+				apy:           sdkmath.LegacyMustNewDecFromStr("0.005"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.999999831991472557"),
 			},
 			false,
 		},
 		{
 			"lower apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("0.05"),
-				expectedValue: sdk.MustNewDecFromStr("0.999999905005957279"),
+				apy:           sdkmath.LegacyMustNewDecFromStr("0.05"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.999999905005957279"),
 			},
 			false,
 		},
 		{
 			"medium-low apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("0.5"),
-				expectedValue: sdk.MustNewDecFromStr("0.999999978020447332"),
+				apy:           sdkmath.LegacyMustNewDecFromStr("0.5"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("0.999999978020447332"),
 			},
 			false,
 		},
 		{
 			"medium-high apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("5"),
-				expectedValue: sdk.MustNewDecFromStr("1.000000051034942717"),
+				apy:           sdkmath.LegacyMustNewDecFromStr("5"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("1.000000051034942717"),
 			},
 			false,
 		},
 		{
 			"high apy",
 			args{
-				apy:           sdk.MustNewDecFromStr("50"),
-				expectedValue: sdk.MustNewDecFromStr("1.000000124049443433"),
+				apy:           sdkmath.LegacyMustNewDecFromStr("50"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("1.000000124049443433"),
 			},
 			false,
 		},
 		{
 			"highest apy",
 			args{
-				apy: sdk.MustNewDecFromStr("177"),
+				apy: sdkmath.LegacyMustNewDecFromStr("177"),
 				// fixme previous was 1.000002441641340532
-				expectedValue: sdk.MustNewDecFromStr("1.000000164134644767"),
+				expectedValue: sdkmath.LegacyMustNewDecFromStr("1.000000164134644767"),
 			},
 			false,
 		},
 		{
 			"out of bounds error after 178",
 			args{
-				apy:           sdk.MustNewDecFromStr("179"),
-				expectedValue: sdk.ZeroDec(),
+				apy:           sdkmath.LegacyMustNewDecFromStr("179"),
+				expectedValue: sdkmath.LegacyZeroDec(),
 			},
 			true,
 		},
@@ -499,7 +496,7 @@ func (suite *InterestTestSuite) TestAPYToSPY() {
 
 func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 	type args struct {
-		spy             sdk.Dec
+		spy             sdkmath.LegacyDec
 		expectedAPY     float64
 		acceptableRange float64
 	}
@@ -513,7 +510,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 		{
 			"lowest apy",
 			args{
-				spy:             sdk.MustNewDecFromStr("0.999999831991472557"),
+				spy:             sdkmath.LegacyMustNewDecFromStr("0.999999831991472557"),
 				expectedAPY:     0.005,   // Returned value: 0.004999999888241291
 				acceptableRange: 0.00001, // +/- 1/10000th of a precent
 			},
@@ -521,7 +518,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 		{
 			"lower apy",
 			args{
-				spy:             sdk.MustNewDecFromStr("0.999999905005957279"),
+				spy:             sdkmath.LegacyMustNewDecFromStr("0.999999905005957279"),
 				expectedAPY:     0.05,    // Returned value: 0.05000000074505806
 				acceptableRange: 0.00001, // +/- 1/10000th of a precent
 			},
@@ -529,7 +526,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 		{
 			"medium-low apy",
 			args{
-				spy:             sdk.MustNewDecFromStr("0.999999978020447332"),
+				spy:             sdkmath.LegacyMustNewDecFromStr("0.999999978020447332"),
 				expectedAPY:     0.5,     // Returned value: 0.5
 				acceptableRange: 0.00001, // +/- 1/10000th of a precent
 			},
@@ -537,7 +534,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 		{
 			"medium-high apy",
 			args{
-				spy:             sdk.MustNewDecFromStr("1.000000051034942717"),
+				spy:             sdkmath.LegacyMustNewDecFromStr("1.000000051034942717"),
 				expectedAPY:     5,       // Returned value: 5
 				acceptableRange: 0.00001, // +/- 1/10000th of a precent
 			},
@@ -545,7 +542,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 		{
 			"high apy",
 			args{
-				spy:             sdk.MustNewDecFromStr("1.000000124049443433"),
+				spy:             sdkmath.LegacyMustNewDecFromStr("1.000000124049443433"),
 				expectedAPY:     50,      // Returned value: 50
 				acceptableRange: 0.00001, // +/- 1/10000th of a precent
 			},
@@ -553,7 +550,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 		{
 			"highest apy",
 			args{
-				spy:             sdk.MustNewDecFromStr("1.000000146028999310"),
+				spy:             sdkmath.LegacyMustNewDecFromStr("1.000000146028999310"),
 				expectedAPY:     100,     // 100
 				acceptableRange: 0.00001, // +/- 1/10000th of a precent
 			},
@@ -561,7 +558,7 @@ func (suite *InterestTestSuite) TestSPYToEstimatedAPY() {
 	}
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// From SPY calculate APY and parse result from sdk.Dec to float64
+			// From SPY calculate APY and parse result from sdkmath.LegacyDec to float64
 			calculatedAPY := keeper.SPYToEstimatedAPY(tc.args.spy)
 			calculatedAPYFloat, err := strconv.ParseFloat(calculatedAPY.String(), 32)
 			suite.Require().NoError(err)
@@ -586,7 +583,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 		borrowCoinDenom          string
 		borrowCoins              sdk.Coins
 		interestRateModel        types3.InterestRateModel
-		reserveFactor            sdk.Dec
+		reserveFactor            sdkmath.LegacyDec
 		expectedInterestSnaphots []ExpectedBorrowInterest
 	}
 
@@ -601,7 +598,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 		errArgs errArgs
 	}
 
-	normalModel := types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("0.5"))
+	normalModel := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("0.5"))
 
 	oneDayInSeconds := int64(86400)
 	oneWeekInSeconds := int64(604800)
@@ -613,12 +610,12 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one day",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneDayInSeconds,
@@ -636,12 +633,12 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one week",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneWeekInSeconds,
@@ -659,12 +656,12 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one month",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
@@ -682,12 +679,12 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"one year",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneYearInSeconds,
@@ -705,12 +702,12 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"0 reserve factor",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneYearInSeconds,
@@ -728,17 +725,17 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"borrow during snapshot",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneYearInSeconds,
 						shouldBorrow: true,
-						borrowCoin:   sdk.NewCoin("ujolt", sdk.NewInt(1*JoltCf)),
+						borrowCoin:   sdk.NewCoin("ujolt", sdkmath.NewInt(1*JoltCf)),
 					},
 				},
 			},
@@ -751,12 +748,12 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"multiple snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
@@ -779,12 +776,12 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			"varied snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
 				borrowCoinDenom:      "ujolt",
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedBorrowInterest{
 					{
 						elapsedTime:  oneDayInSeconds,
@@ -817,13 +814,9 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{tc.args.initialBorrowerCoins},
 				[]sdk.AccAddress{tc.args.user},
 			)
@@ -832,14 +825,14 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",             // Market ID
-						sdk.NewInt(JoltCf),        // Conversion Factor
+						sdkmath.NewInt(JoltCf),    // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
-						sdk.ZeroDec()),            // Keeper Reward Percentage
+						sdkmath.LegacyZeroDec()),  // Keeper Reward Percentage
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
 				types3.DefaultTotalSupplied, types3.DefaultTotalBorrowed, types3.DefaultTotalReserves,
 			)
@@ -855,25 +848,28 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 					{
 						MarketID:      "joltify:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("2.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 				},
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)})
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			ctx := mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
 			// Mint coins to Hard module account
-			bankKeeper := tApp.GetBankKeeper()
+			bankKeeper := suite.app.GetBankKeeper()
 			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
-
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = tApp.GetJoltKeeper()
 
 			// Run begin blocker and store initial block time
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
@@ -881,10 +877,10 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 			// Deposit 2x as many coins for each coin we intend to borrow
 			depositCoins := sdk.NewCoins()
 			for _, borrowCoin := range tc.args.borrowCoins {
-				depositCoins = depositCoins.Add(sdk.NewCoin(borrowCoin.Denom, borrowCoin.Amount.Mul(sdk.NewInt(2))))
+				depositCoins = depositCoins.Add(sdk.NewCoin(borrowCoin.Denom, borrowCoin.Amount.Mul(sdkmath.NewInt(2))))
 			}
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.user, tc.args.initialBorrowerCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.user, tc.args.initialBorrowerCoins)
 			suite.Require().NoError(err)
 
 			err = suite.keeper.Deposit(suite.ctx, tc.args.user, depositCoins)
@@ -911,29 +907,29 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 
 				reservesPrior, foundReservesPrior := suite.keeper.GetTotalReserves(prevCtx)
 				if !foundReservesPrior {
-					reservesPrior = sdk.NewCoins(sdk.NewCoin(tc.args.borrowCoinDenom, sdk.ZeroInt()))
+					reservesPrior = sdk.NewCoins(sdk.NewCoin(tc.args.borrowCoinDenom, sdkmath.ZeroInt()))
 				}
 
 				interestFactorPrior, foundInterestFactorPrior := suite.keeper.GetBorrowInterestFactor(prevCtx, tc.args.borrowCoinDenom)
 				suite.Require().True(foundInterestFactorPrior)
 
 				// 2. Calculate expected interest owed
-				borrowRateApy, err := keeper.CalculateBorrowRate(tc.args.interestRateModel, sdk.NewDecFromInt(cashPrior), sdk.NewDecFromInt(borrowCoinPriorAmount), sdk.NewDecFromInt(reservesPrior.AmountOf(tc.args.borrowCoinDenom)))
+				borrowRateApy, err := keeper.CalculateBorrowRate(tc.args.interestRateModel, sdkmath.LegacyNewDecFromInt(cashPrior), sdkmath.LegacyNewDecFromInt(borrowCoinPriorAmount), sdkmath.LegacyNewDecFromInt(reservesPrior.AmountOf(tc.args.borrowCoinDenom)))
 				suite.Require().NoError(err)
 
 				// Convert from APY to SPY, expressed as (1 + borrow rate)
-				borrowRateSpy, err := keeper.APYToSPY(sdk.OneDec().Add(borrowRateApy))
+				borrowRateSpy, err := keeper.APYToSPY(sdkmath.LegacyOneDec().Add(borrowRateApy))
 				suite.Require().NoError(err)
 
-				interestFactor := keeper.CalculateBorrowInterestFactor(borrowRateSpy, sdk.NewInt(snapshot.elapsedTime))
-				expectedInterest := (interestFactor.Mul(sdk.NewDecFromInt(borrowCoinPriorAmount)).TruncateInt()).Sub(borrowCoinPriorAmount)
-				expectedReserves := reservesPrior.Add(sdk.NewCoin(tc.args.borrowCoinDenom, sdk.NewDecFromInt(expectedInterest).Mul(tc.args.reserveFactor).TruncateInt()))
+				interestFactor := keeper.CalculateBorrowInterestFactor(borrowRateSpy, sdkmath.NewInt(snapshot.elapsedTime))
+				expectedInterest := (interestFactor.Mul(sdkmath.LegacyNewDecFromInt(borrowCoinPriorAmount)).TruncateInt()).Sub(borrowCoinPriorAmount)
+				expectedReserves := reservesPrior.Add(sdk.NewCoin(tc.args.borrowCoinDenom, sdkmath.LegacyNewDecFromInt(expectedInterest).Mul(tc.args.reserveFactor).TruncateInt()))
 				expectedInterestFactor := interestFactorPrior.Mul(interestFactor)
 				// -------------------------------------------------------------------------------------
 
 				// Set up snapshot chain context and run begin blocker
-				runAtTime := prevCtx.BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
-				snapshotCtx := prevCtx.WithBlockTime(runAtTime)
+				runAtTime := sdk.UnwrapSDKContext(prevCtx).BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
+				snapshotCtx := sdk.UnwrapSDKContext(prevCtx).WithBlockTime(runAtTime)
 				jolt.BeginBlocker(snapshotCtx, suite.keeper)
 
 				// Check that the total amount of borrowed coins has increased by expected interest amount
@@ -943,7 +939,7 @@ func (suite *KeeperTestSuite) TestBorrowInterest() {
 
 				// Check that the total reserves have changed as expected
 				currTotalReserves, _ := suite.keeper.GetTotalReserves(snapshotCtx)
-				suite.Require().True(expectedReserves.IsEqual(currTotalReserves))
+				suite.Require().True(expectedReserves.Equal(currTotalReserves))
 
 				// Check that the borrow index has increased as expected
 				currIndexPrior, _ := suite.keeper.GetBorrowInterestFactor(snapshotCtx, tc.args.borrowCoinDenom)
@@ -983,7 +979,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 		coinDenoms               []string
 		borrowCoins              sdk.Coins
 		interestRateModel        types3.InterestRateModel
-		reserveFactor            sdk.Dec
+		reserveFactor            sdkmath.LegacyDec
 		expectedInterestSnaphots []ExpectedSupplyInterest
 	}
 
@@ -998,7 +994,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 		errArgs errArgs
 	}
 
-	normalModel := types3.NewInterestRateModel(sdk.MustNewDecFromStr("0"), sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.8"), sdk.MustNewDecFromStr("0.5"))
+	normalModel := types3.NewInterestRateModel(sdkmath.LegacyMustNewDecFromStr("0"), sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("0.8"), sdkmath.LegacyMustNewDecFromStr("0.5"))
 
 	oneDayInSeconds := int64(86400)
 	oneWeekInSeconds := int64(604800)
@@ -1010,13 +1006,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one day",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneDayInSeconds,
@@ -1034,13 +1030,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one week",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneWeekInSeconds,
@@ -1058,13 +1054,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one month",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
@@ -1082,13 +1078,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"one year",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneYearInSeconds,
@@ -1106,13 +1102,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"supply/borrow multiple coins",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(100*BnbCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(100*BnbCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(100*BnbCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(100*BnbCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf)), sdk.NewCoin("bnb", sdk.NewInt(20*BnbCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf)), sdk.NewCoin("bnb", sdkmath.NewInt(20*BnbCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
@@ -1130,18 +1126,18 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"supply during snapshot",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
 						shouldSupply: true,
-						supplyCoin:   sdk.NewCoin("ujolt", sdk.NewInt(20*JoltCf)),
+						supplyCoin:   sdk.NewCoin("ujolt", sdkmath.NewInt(20*JoltCf)),
 					},
 				},
 			},
@@ -1154,13 +1150,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"multiple snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(80*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(80*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
@@ -1188,13 +1184,13 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			"varied snapshots",
 			args{
 				user:                 sdk.AccAddress(crypto.AddressHash([]byte("test"))),
-				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
-				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(1000*JoltCf))),
-				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(100*JoltCf))),
+				initialBorrowerCoins: sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
+				initialModuleCoins:   sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(1000*JoltCf))),
+				depositCoins:         sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(100*JoltCf))),
 				coinDenoms:           []string{"ujolt"},
-				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdk.NewInt(50*JoltCf))),
+				borrowCoins:          sdk.NewCoins(sdk.NewCoin("ujolt", sdkmath.NewInt(50*JoltCf))),
 				interestRateModel:    normalModel,
-				reserveFactor:        sdk.MustNewDecFromStr("0.05"),
+				reserveFactor:        sdkmath.LegacyMustNewDecFromStr("0.05"),
 				expectedInterestSnaphots: []ExpectedSupplyInterest{
 					{
 						elapsedTime:  oneMonthInSeconds,
@@ -1227,12 +1223,9 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			// Initialize test app and set context
-			tApp := app.NewTestApp(tmlog.TestingLogger(), suite.T().TempDir())
-			ctx := tApp.NewContext(true, tmproto.Header{Height: 1, Time: tmtime.Now()})
-
 			// Auth module genesis state
 			authGS := app.NewFundedGenStateWithCoins(
-				tApp.AppCodec(),
+				suite.app.AppCodec(),
 				[]sdk.Coins{tc.args.initialBorrowerCoins},
 				[]sdk.AccAddress{tc.args.user},
 			)
@@ -1241,21 +1234,21 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 			hardGS := types3.NewGenesisState(types3.NewParams(
 				types3.MoneyMarkets{
 					types3.NewMoneyMarket("ujolt",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*JoltCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*JoltCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"joltify:usd",             // Market ID
-						sdk.NewInt(JoltCf),        // Conversion Factor
+						sdkmath.NewInt(JoltCf),    // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
-						sdk.ZeroDec()),            // Keeper Reward Percentage
+						sdkmath.LegacyZeroDec()),  // Keeper Reward Percentage
 					types3.NewMoneyMarket("bnb",
-						types3.NewBorrowLimit(false, sdk.NewDec(100000000*BnbCf), sdk.MustNewDecFromStr("0.8")), // Borrow Limit
+						types3.NewBorrowLimit(false, sdkmath.LegacyNewDec(100000000*BnbCf), sdkmath.LegacyMustNewDecFromStr("0.8")), // Borrow Limit
 						"bnb:usd",                 // Market ID
-						sdk.NewInt(BnbCf),         // Conversion Factor
+						sdkmath.NewInt(BnbCf),     // Conversion Factor
 						tc.args.interestRateModel, // Interest Rate Model
 						tc.args.reserveFactor,     // Reserve Factor
-						sdk.ZeroDec()),            // Keeper Reward Percentage
+						sdkmath.LegacyZeroDec()),  // Keeper Reward Percentage
 				},
-				sdk.NewDec(10),
+				sdkmath.LegacyNewDec(10),
 			), types3.DefaultAccumulationTimes, types3.DefaultDeposits, types3.DefaultBorrows,
 				types3.DefaultTotalSupplied, types3.DefaultTotalBorrowed, types3.DefaultTotalReserves,
 			)
@@ -1272,37 +1265,40 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 					{
 						MarketID:      "joltify:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("2.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("2.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 					{
 						MarketID:      "bnb:usd",
 						OracleAddress: sdk.AccAddress{},
-						Price:         sdk.MustNewDecFromStr("20.00"),
+						Price:         sdkmath.LegacyMustNewDecFromStr("20.00"),
 						Expiry:        time.Now().Add(100 * time.Hour),
 					},
 				},
 			}
 
 			// Initialize test application
-			tApp.InitializeFromGenesisStates(nil, nil, authGS,
-				app.GenesisState{types2.ModuleName: tApp.AppCodec().MustMarshalJSON(&pricefeedGS)},
-				app.GenesisState{types3.ModuleName: tApp.AppCodec().MustMarshalJSON(&hardGS)})
+			mapp := suite.app.InitializeFromGenesisStates(suite.T(), time.Now(), nil, nil, authGS,
+				app.GenesisState{types2.ModuleName: suite.app.AppCodec().MustMarshalJSON(&pricefeedGS)},
+				app.GenesisState{types3.ModuleName: suite.app.AppCodec().MustMarshalJSON(&hardGS)})
+
+			suite.app = mapp
+			suite.app.App = mapp.App
+			suite.ctx = mapp.Ctx
+			suite.app.Ctx = mapp.Ctx
+			suite.keeper = mapp.GetJoltKeeper()
 
 			// Mint coins to Hard module account
-			bankKeeper := tApp.GetBankKeeper()
-			err := bankKeeper.MintCoins(ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
+			bankKeeper := suite.app.GetBankKeeper()
+			err := bankKeeper.MintCoins(mapp.Ctx, types3.ModuleAccountName, tc.args.initialModuleCoins)
 			suite.Require().NoError(err)
 
-			suite.app = tApp
-			suite.ctx = ctx
-			suite.keeper = tApp.GetJoltKeeper()
-			suite.keeper.SetSuppliedCoins(ctx, tc.args.initialModuleCoins)
+			suite.keeper.SetSuppliedCoins(mapp.Ctx, tc.args.initialModuleCoins)
 
 			// Run begin blocker
 			jolt.BeginBlocker(suite.ctx, suite.keeper)
 
-			err = testutil.FundAccount(suite.app.GetBankKeeper(), suite.ctx, tc.args.user, tc.args.depositCoins)
+			err = testutil.FundAccount(suite.ctx, suite.app.GetBankKeeper(), tc.args.user, tc.args.depositCoins)
 			suite.Require().NoError(err)
 
 			// // Deposit coins
@@ -1333,7 +1329,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 
 					reservesPrior, foundReservesPrior := suite.keeper.GetTotalReserves(prevCtx)
 					if !foundReservesPrior {
-						reservesPrior = sdk.NewCoins(sdk.NewCoin(coinDenom, sdk.ZeroInt()))
+						reservesPrior = sdk.NewCoins(sdk.NewCoin(coinDenom, sdkmath.ZeroInt()))
 					}
 
 					borrowInterestFactorPrior, foundBorrowInterestFactorPrior := suite.keeper.GetBorrowInterestFactor(prevCtx, coinDenom)
@@ -1343,31 +1339,31 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 					suite.Require().True(foundSupplyInterestFactorPrior)
 
 					// 2. Calculate expected borrow interest owed
-					borrowRateApy, err := keeper.CalculateBorrowRate(tc.args.interestRateModel, sdk.NewDecFromInt(cashPrior), sdk.NewDecFromInt(borrowCoinPriorAmount), sdk.NewDecFromInt(reservesPrior.AmountOf(coinDenom)))
+					borrowRateApy, err := keeper.CalculateBorrowRate(tc.args.interestRateModel, sdkmath.LegacyNewDecFromInt(cashPrior), sdkmath.LegacyNewDecFromInt(borrowCoinPriorAmount), sdkmath.LegacyNewDecFromInt(reservesPrior.AmountOf(coinDenom)))
 					suite.Require().NoError(err)
 
 					// Convert from APY to SPY, expressed as (1 + borrow rate)
-					borrowRateSpy, err := keeper.APYToSPY(sdk.OneDec().Add(borrowRateApy))
+					borrowRateSpy, err := keeper.APYToSPY(sdkmath.LegacyOneDec().Add(borrowRateApy))
 					suite.Require().NoError(err)
 
-					newBorrowInterestFactor := keeper.CalculateBorrowInterestFactor(borrowRateSpy, sdk.NewInt(snapshot.elapsedTime))
-					expectedBorrowInterest := (newBorrowInterestFactor.Mul(sdk.NewDecFromInt(borrowCoinPriorAmount)).TruncateInt()).Sub(borrowCoinPriorAmount)
-					expectedReserves := reservesPrior.Add(sdk.NewCoin(coinDenom, sdk.NewDecFromInt(expectedBorrowInterest).Mul(tc.args.reserveFactor).TruncateInt())).Sub(reservesPrior...)
+					newBorrowInterestFactor := keeper.CalculateBorrowInterestFactor(borrowRateSpy, sdkmath.NewInt(snapshot.elapsedTime))
+					expectedBorrowInterest := (newBorrowInterestFactor.Mul(sdkmath.LegacyNewDecFromInt(borrowCoinPriorAmount)).TruncateInt()).Sub(borrowCoinPriorAmount)
+					expectedReserves := reservesPrior.Add(sdk.NewCoin(coinDenom, sdkmath.LegacyNewDecFromInt(expectedBorrowInterest).Mul(tc.args.reserveFactor).TruncateInt())).Sub(reservesPrior...)
 					expectedTotalReserves := expectedReserves.Add(reservesPrior...)
 
 					expectedBorrowInterestFactor := borrowInterestFactorPrior.Mul(newBorrowInterestFactor)
 					expectedSupplyInterest := expectedBorrowInterest.Sub(expectedReserves.AmountOf(coinDenom))
 
-					newSupplyInterestFactor := keeper.CalculateSupplyInterestFactor(sdk.NewDecFromInt(expectedSupplyInterest), sdk.NewDecFromInt(cashPrior), sdk.NewDecFromInt(borrowCoinPriorAmount), sdk.NewDecFromInt(reservesPrior.AmountOf(coinDenom)))
+					newSupplyInterestFactor := keeper.CalculateSupplyInterestFactor(sdkmath.LegacyNewDecFromInt(expectedSupplyInterest), sdkmath.LegacyNewDecFromInt(cashPrior), sdkmath.LegacyNewDecFromInt(borrowCoinPriorAmount), sdkmath.LegacyNewDecFromInt(reservesPrior.AmountOf(coinDenom)))
 					expectedSupplyInterestFactor := supplyInterestFactorPrior.Mul(newSupplyInterestFactor)
 					// -------------------------------------------------------------------------------------
 
 					// Set up snapshot chain context and run begin blocker
-					runAtTime := prevCtx.BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
-					snapshotCtx := prevCtx.WithBlockTime(runAtTime)
+					runAtTime := sdk.UnwrapSDKContext(prevCtx).BlockTime().Add(time.Duration(int64(time.Second) * snapshot.elapsedTime))
+					snapshotCtx := sdk.UnwrapSDKContext(prevCtx).WithBlockTime(runAtTime)
 					jolt.BeginBlocker(snapshotCtx, suite.keeper)
 
-					borrowInterestFactor, _ := suite.keeper.GetBorrowInterestFactor(ctx, coinDenom)
+					borrowInterestFactor, _ := suite.keeper.GetBorrowInterestFactor(mapp.Ctx, coinDenom)
 					suite.Require().Equal(expectedBorrowInterestFactor, borrowInterestFactor)
 					suite.Require().Equal(expectedBorrowInterest, expectedSupplyInterest.Add(expectedReserves.AmountOf(coinDenom)))
 
@@ -1401,7 +1397,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 						// Calculate percentage of supply interest profits owed to user
 						userSupplyBefore, _ := suite.keeper.GetDeposit(snapshotCtx, tc.args.user)
 						userSupplyCoinAmount := userSupplyBefore.Amount.AmountOf(coinDenom)
-						userPercentOfTotalSupplied := sdk.NewDecFromInt(userSupplyCoinAmount).Quo(sdk.NewDecFromInt(supplyCoinPriorAmount))
+						userPercentOfTotalSupplied := sdkmath.LegacyNewDecFromInt(userSupplyCoinAmount).Quo(sdkmath.LegacyNewDecFromInt(supplyCoinPriorAmount))
 						userExpectedSupplyInterestCoin := sdk.NewCoin(coinDenom, userPercentOfTotalSupplied.MulInt(expectedSupplyInterest).TruncateInt())
 
 						// Supplying syncs user's owed supply and borrow interest
@@ -1412,7 +1408,7 @@ func (suite *KeeperTestSuite) TestSupplyInterest() {
 						userSupplyAfter, _ := suite.keeper.GetDeposit(snapshotCtx, tc.args.user)
 
 						// Confirm that user's supply index for the denom has increased as expected
-						var userSupplyAfterIndexFactor sdk.Dec
+						var userSupplyAfterIndexFactor sdkmath.LegacyDec
 						for _, indexFactor := range userSupplyAfter.Index {
 							if indexFactor.Denom == coinDenom {
 								userSupplyAfterIndexFactor = indexFactor.Value

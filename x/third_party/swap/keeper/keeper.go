@@ -1,12 +1,13 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -60,29 +61,30 @@ func (k *Keeper) ClearHooks() {
 }
 
 // GetParams returns the params from the store
-func (k Keeper) GetParams(ctx sdk.Context) types.Params {
+func (k Keeper) GetParams(ctx context.Context) types.Params {
 	var p types.Params
-	k.paramSubspace.GetParamSet(ctx, &p)
+	k.paramSubspace.GetParamSet(sdk.UnwrapSDKContext(ctx), &p)
 	return p
 }
 
 // SetParams sets params on the store
-func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
-	k.paramSubspace.SetParamSet(ctx, &params)
+func (k Keeper) SetParams(ctx context.Context, params types.Params) {
+	k.paramSubspace.SetParamSet(sdk.UnwrapSDKContext(ctx), &params)
 }
 
 // GetSwapFee returns the swap fee set in the module parameters
-func (k Keeper) GetSwapFee(ctx sdk.Context) sdk.Dec {
+func (k Keeper) GetSwapFee(ctx context.Context) sdkmath.LegacyDec {
 	return k.GetParams(ctx).SwapFee
 }
 
 // GetSwapModuleAccount returns the swap ModuleAccount
-func (k Keeper) GetSwapModuleAccount(ctx sdk.Context) authtypes.ModuleAccountI {
+func (k Keeper) GetSwapModuleAccount(ctx context.Context) authtypes.ModuleAccountI {
 	return k.accountKeeper.GetModuleAccount(ctx, types.ModuleAccountName)
 }
 
 // GetPool retrieves a pool record from the store
-func (k Keeper) GetPool(ctx sdk.Context, poolID string) (types.PoolRecord, bool) {
+func (k Keeper) GetPool(rctx context.Context, poolID string) (types.PoolRecord, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PoolKeyPrefix)
 
 	bz := store.Get(types.PoolKey(poolID))
@@ -97,14 +99,15 @@ func (k Keeper) GetPool(ctx sdk.Context, poolID string) (types.PoolRecord, bool)
 }
 
 // SetPool_Raw saves a pool record to the store without any validation
-func (k Keeper) SetPool_Raw(ctx sdk.Context, record types.PoolRecord) {
+func (k Keeper) SetPool_Raw(rctx context.Context, record types.PoolRecord) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PoolKeyPrefix)
 	bz := k.cdc.MustMarshal(&record)
 	store.Set(types.PoolKey(record.PoolID), bz)
 }
 
 // SetPool saves a pool to the store and panics if the record is invalid
-func (k Keeper) SetPool(ctx sdk.Context, record types.PoolRecord) {
+func (k Keeper) SetPool(ctx context.Context, record types.PoolRecord) {
 	if err := record.Validate(); err != nil {
 		panic(fmt.Sprintf("invalid pool record: %s", err))
 	}
@@ -113,15 +116,17 @@ func (k Keeper) SetPool(ctx sdk.Context, record types.PoolRecord) {
 }
 
 // DeletePool deletes a pool record from the store
-func (k Keeper) DeletePool(ctx sdk.Context, poolID string) {
+func (k Keeper) DeletePool(rctx context.Context, poolID string) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PoolKeyPrefix)
 	store.Delete(types.PoolKey(poolID))
 }
 
 // IteratePools iterates over all pool objects in the store and performs a callback function
-func (k Keeper) IteratePools(ctx sdk.Context, cb func(record types.PoolRecord) (stop bool)) {
+func (k Keeper) IteratePools(rctx context.Context, cb func(record types.PoolRecord) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.PoolKeyPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var record types.PoolRecord
@@ -133,7 +138,7 @@ func (k Keeper) IteratePools(ctx sdk.Context, cb func(record types.PoolRecord) (
 }
 
 // GetAllPools returns all pool records from the store
-func (k Keeper) GetAllPools(ctx sdk.Context) (records types.PoolRecords) {
+func (k Keeper) GetAllPools(ctx context.Context) (records types.PoolRecords) {
 	k.IteratePools(ctx, func(record types.PoolRecord) bool {
 		records = append(records, record)
 		return false
@@ -142,7 +147,7 @@ func (k Keeper) GetAllPools(ctx sdk.Context) (records types.PoolRecords) {
 }
 
 // GetPoolShares gets the total shares in a pool from the store
-func (k Keeper) GetPoolShares(ctx sdk.Context, poolID string) (sdkmath.Int, bool) {
+func (k Keeper) GetPoolShares(ctx context.Context, poolID string) (sdkmath.Int, bool) {
 	pool, found := k.GetPool(ctx, poolID)
 	if !found {
 		return sdkmath.Int{}, false
@@ -151,7 +156,8 @@ func (k Keeper) GetPoolShares(ctx sdk.Context, poolID string) (sdkmath.Int, bool
 }
 
 // GetDepositorShares gets a share record from the store
-func (k Keeper) GetDepositorShares(ctx sdk.Context, depositor sdk.AccAddress, poolID string) (types.ShareRecord, bool) {
+func (k Keeper) GetDepositorShares(rctx context.Context, depositor sdk.AccAddress, poolID string) (types.ShareRecord, bool) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.DepositorPoolSharesPrefix)
 	bz := store.Get(types.DepositorPoolSharesKey(depositor, poolID))
 	if bz == nil {
@@ -163,14 +169,15 @@ func (k Keeper) GetDepositorShares(ctx sdk.Context, depositor sdk.AccAddress, po
 }
 
 // SetDepositorShares_Raw saves a share record to the store without validation
-func (k Keeper) SetDepositorShares_Raw(ctx sdk.Context, record types.ShareRecord) {
+func (k Keeper) SetDepositorShares_Raw(rctx context.Context, record types.ShareRecord) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.DepositorPoolSharesPrefix)
 	bz := k.cdc.MustMarshal(&record)
 	store.Set(types.DepositorPoolSharesKey(record.Depositor, record.PoolID), bz)
 }
 
 // SetDepositorShares saves a share record to the store and panics if the record is invalid
-func (k Keeper) SetDepositorShares(ctx sdk.Context, record types.ShareRecord) {
+func (k Keeper) SetDepositorShares(ctx context.Context, record types.ShareRecord) {
 	if err := record.Validate(); err != nil {
 		panic(fmt.Sprintf("invalid share record: %s", err))
 	}
@@ -179,15 +186,17 @@ func (k Keeper) SetDepositorShares(ctx sdk.Context, record types.ShareRecord) {
 }
 
 // DeleteDepositorShares deletes a share record from the store
-func (k Keeper) DeleteDepositorShares(ctx sdk.Context, depositor sdk.AccAddress, poolID string) {
+func (k Keeper) DeleteDepositorShares(rctx context.Context, depositor sdk.AccAddress, poolID string) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.DepositorPoolSharesPrefix)
 	store.Delete(types.DepositorPoolSharesKey(depositor, poolID))
 }
 
 // IterateDepositorShares iterates over all pool objects in the store and performs a callback function
-func (k Keeper) IterateDepositorShares(ctx sdk.Context, cb func(record types.ShareRecord) (stop bool)) {
+func (k Keeper) IterateDepositorShares(rctx context.Context, cb func(record types.ShareRecord) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.DepositorPoolSharesPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, []byte{})
+	iterator := storetypes.KVStorePrefixIterator(store, []byte{})
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var record types.ShareRecord
@@ -199,7 +208,7 @@ func (k Keeper) IterateDepositorShares(ctx sdk.Context, cb func(record types.Sha
 }
 
 // GetAllDepositorShares returns all depositor share records from the store
-func (k Keeper) GetAllDepositorShares(ctx sdk.Context) (records types.ShareRecords) {
+func (k Keeper) GetAllDepositorShares(ctx context.Context) (records types.ShareRecords) {
 	k.IterateDepositorShares(ctx, func(record types.ShareRecord) bool {
 		records = append(records, record)
 		return false
@@ -208,9 +217,10 @@ func (k Keeper) GetAllDepositorShares(ctx sdk.Context) (records types.ShareRecor
 }
 
 // IterateDepositorSharesByOwner iterates over share records for a specific address and performs a callback function
-func (k Keeper) IterateDepositorSharesByOwner(ctx sdk.Context, owner sdk.AccAddress, cb func(record types.ShareRecord) (stop bool)) {
+func (k Keeper) IterateDepositorSharesByOwner(rctx context.Context, owner sdk.AccAddress, cb func(record types.ShareRecord) (stop bool)) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	store := prefix.NewStore(ctx.KVStore(k.key), types.DepositorPoolSharesPrefix)
-	iterator := sdk.KVStorePrefixIterator(store, owner.Bytes())
+	iterator := storetypes.KVStorePrefixIterator(store, owner.Bytes())
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var record types.ShareRecord
@@ -222,7 +232,7 @@ func (k Keeper) IterateDepositorSharesByOwner(ctx sdk.Context, owner sdk.AccAddr
 }
 
 // GetAllDepositorSharesByOwner returns all depositor share records from the store for a specific address
-func (k Keeper) GetAllDepositorSharesByOwner(ctx sdk.Context, owner sdk.AccAddress) (records types.ShareRecords) {
+func (k Keeper) GetAllDepositorSharesByOwner(ctx context.Context, owner sdk.AccAddress) (records types.ShareRecords) {
 	k.IterateDepositorSharesByOwner(ctx, owner, func(record types.ShareRecord) bool {
 		records = append(records, record)
 		return false
@@ -231,7 +241,7 @@ func (k Keeper) GetAllDepositorSharesByOwner(ctx sdk.Context, owner sdk.AccAddre
 }
 
 // GetDepositorSharesAmount gets a depositor's shares in a pool from the store
-func (k Keeper) GetDepositorSharesAmount(ctx sdk.Context, depositor sdk.AccAddress, poolID string) (sdkmath.Int, bool) {
+func (k Keeper) GetDepositorSharesAmount(ctx context.Context, depositor sdk.AccAddress, poolID string) (sdkmath.Int, bool) {
 	record, found := k.GetDepositorShares(ctx, depositor, poolID)
 	if !found {
 		return sdkmath.Int{}, false
@@ -240,7 +250,7 @@ func (k Keeper) GetDepositorSharesAmount(ctx sdk.Context, depositor sdk.AccAddre
 }
 
 // updatePool updates a pool, deleting the pool record if the shares are zero
-func (k Keeper) updatePool(ctx sdk.Context, poolID string, pool *types.DenominatedPool) {
+func (k Keeper) updatePool(ctx context.Context, poolID string, pool *types.DenominatedPool) {
 	if pool.TotalShares().IsZero() {
 		k.DeletePool(ctx, poolID)
 	} else {
@@ -249,7 +259,7 @@ func (k Keeper) updatePool(ctx sdk.Context, poolID string, pool *types.Denominat
 }
 
 // updateDepositorShares updates a depositor share records for a pool, deleting the record if the new shares are zero
-func (k Keeper) updateDepositorShares(ctx sdk.Context, owner sdk.AccAddress, poolID string, shares sdkmath.Int) {
+func (k Keeper) updateDepositorShares(ctx context.Context, owner sdk.AccAddress, poolID string, shares sdkmath.Int) {
 	if shares.IsZero() {
 		k.DeleteDepositorShares(ctx, owner, poolID)
 	} else {
@@ -258,7 +268,7 @@ func (k Keeper) updateDepositorShares(ctx sdk.Context, owner sdk.AccAddress, poo
 	}
 }
 
-func (k Keeper) loadDenominatedPool(ctx sdk.Context, poolID string) (*types.DenominatedPool, error) {
+func (k Keeper) loadDenominatedPool(ctx context.Context, poolID string) (*types.DenominatedPool, error) {
 	poolRecord, found := k.GetPool(ctx, poolID)
 	if !found {
 		return &types.DenominatedPool{}, types.ErrInvalidPool

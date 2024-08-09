@@ -1,8 +1,11 @@
 package keeper_test
 
 import (
+	"context"
 	"testing"
 	"time"
+
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/joltify-finance/joltify_lending/app"
@@ -22,14 +25,14 @@ type querySuite struct {
 	nftKeeper    types.NFTKeeper
 	bankKeeper   types.BankKeeper
 	app          types.MsgServer
-	ctx          sdk.Context
+	ctx          context.Context
 	investors    []string
 	investorPool string
 }
 
 func setupPoolForQueryTest(suite *querySuite) {
 	// create the first pool apy 7.8%
-	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdk.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdk.NewInt(3*1e9))}}
+	req := types.MsgCreatePool{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", ProjectIndex: 3, PoolName: "hello", Apy: []string{"0.15", "0.12"}, TargetTokenAmount: sdk.Coins{sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9)), sdk.NewCoin("ausdc", sdkmath.NewInt(3*1e9))}}
 	resp, err := suite.app.CreatePool(suite.ctx, &req)
 	suite.Require().NoError(err)
 
@@ -119,7 +122,7 @@ func (suite *querySuite) TestAllQuery() {
 	suite.Require().NoError(err)
 	suite.Require().Lenf(respPool.PoolsIndex, 2, "should be 2")
 
-	suite.ctx = suite.ctx.WithBlockTime(suite.ctx.BlockTime().Add(time.Second * 5))
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(sdk.UnwrapSDKContext(suite.ctx).BlockTime().Add(time.Second * 5))
 
 	_, err = suite.keeper.WithdrawalPrincipal(suite.ctx, &types.QuerywithdrawalPrincipalRequest{PoolIndex: suite.investorPool, WalletAddress: "1234invalid"})
 	suite.Require().ErrorContains(err, "invalid address")
@@ -133,13 +136,13 @@ func (suite *querySuite) TestAllQuery() {
 	poolInfo, found := suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 	poolInfo.PoolTotalBorrowLimit = 100
-	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdk.NewInt(600000))
+	poolInfo.TargetAmount = sdk.NewCoin("ausdc", sdkmath.NewInt(600000))
 	suite.keeper.SetPool(suite.ctx, poolInfo)
 
 	// now we deposit some token and it should be enough to borrow
 	creator1 := suite.investors[0]
 	creator2 := suite.investors[1]
-	depositAmount := sdk.NewCoin("ausdc", sdk.NewInt(4e5))
+	depositAmount := sdk.NewCoin("ausdc", sdkmath.NewInt(4e5))
 	// suite.Require().NoError(err)
 	msgDepositUser1 := &types.MsgDeposit{
 		Creator:   creator1,
@@ -151,7 +154,7 @@ func (suite *querySuite) TestAllQuery() {
 	msgDepositUser2 := &types.MsgDeposit{
 		Creator:   creator2,
 		PoolIndex: suite.investorPool,
-		Token:     depositAmount.SubAmount(sdk.NewInt(2e5)),
+		Token:     depositAmount.SubAmount(sdkmath.NewInt(2e5)),
 	}
 
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser1)
@@ -160,7 +163,7 @@ func (suite *querySuite) TestAllQuery() {
 	_, err = suite.app.Deposit(suite.ctx, msgDepositUser2)
 	suite.Require().NoError(err)
 
-	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdk.NewIntFromUint64(1.34e5))}
+	borrow := &types.MsgBorrow{Creator: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0", PoolIndex: suite.investorPool, BorrowAmount: sdk.NewCoin("ausdc", sdkmath.NewIntFromUint64(1.34e5))}
 
 	// now we borrow 1.34e5
 	_, err = suite.app.Borrow(suite.ctx, borrow)

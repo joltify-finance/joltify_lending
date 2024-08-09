@@ -8,7 +8,7 @@ At the start of each block interest is accumulated
 
 ```go
 // BeginBlocker updates interest rates
-func BeginBlocker(ctx sdk.Context, k Keeper) {
+func BeginBlocker(ctx context.Context, k Keeper) {
   k.ApplyInterestRateUpdates(ctx)
 }
 ```

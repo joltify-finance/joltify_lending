@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/stretchr/testify/suite"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
@@ -68,9 +70,9 @@ func (suite *SynchronizeSwapRewardTests) TestClaimUpdatedWhenGlobalIndexesHaveIn
 
 	userShares := i(1e9)
 
-	suite.keeper.SynchronizeSwapReward(suite.ctx, poolID, claim.Owner, userShares)
+	suite.keeper.SynchronizeSwapReward(sdk.UnwrapSDKContext(suite.ctx), poolID, claim.Owner, userShares)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	// indexes updated from global
 	suite.Equal(globalIndexes, syncedClaim.RewardIndexes)
 	// new reward is (new index - old index) * user shares
@@ -109,9 +111,9 @@ func (suite *SynchronizeSwapRewardTests) TestClaimUnchangedWhenGlobalIndexesUnch
 
 	userShares := i(1e9)
 
-	suite.keeper.SynchronizeSwapReward(suite.ctx, poolID, claim.Owner, userShares)
+	suite.keeper.SynchronizeSwapReward(sdk.UnwrapSDKContext(suite.ctx), poolID, claim.Owner, userShares)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	// claim should have the same rewards and indexes as before
 	suite.Equal(claim, syncedClaim)
 }
@@ -168,9 +170,9 @@ func (suite *SynchronizeSwapRewardTests) TestClaimUpdatedWhenNewRewardAdded() {
 
 	userShares := i(1e9)
 
-	suite.keeper.SynchronizeSwapReward(suite.ctx, newlyRewardPoolID, claim.Owner, userShares)
+	suite.keeper.SynchronizeSwapReward(sdk.UnwrapSDKContext(suite.ctx), newlyRewardPoolID, claim.Owner, userShares)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	// the new indexes should be added to the claim, but the old ones should be unchanged
 	newlyRewrdedIndexes, _ := globalIndexes.Get(newlyRewardPoolID)
 	expectedIndexes := claim.RewardIndexes.With(newlyRewardPoolID, newlyRewrdedIndexes)
@@ -201,9 +203,9 @@ func (suite *SynchronizeSwapRewardTests) TestClaimUnchangedWhenNoReward() {
 
 	userShares := i(1e9)
 
-	suite.keeper.SynchronizeSwapReward(suite.ctx, poolID, claim.Owner, userShares)
+	suite.keeper.SynchronizeSwapReward(sdk.UnwrapSDKContext(suite.ctx), poolID, claim.Owner, userShares)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.Equal(claim, syncedClaim)
 }
 
@@ -254,9 +256,9 @@ func (suite *SynchronizeSwapRewardTests) TestClaimUpdatedWhenNewRewardDenomAdded
 
 	userShares := i(1e9)
 
-	suite.keeper.SynchronizeSwapReward(suite.ctx, poolID, claim.Owner, userShares)
+	suite.keeper.SynchronizeSwapReward(sdk.UnwrapSDKContext(suite.ctx), poolID, claim.Owner, userShares)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	// indexes should have the new reward denom added
 	suite.Equal(globalIndexes, syncedClaim.RewardIndexes)
 	// new reward is (new index - old index) * shares
@@ -308,9 +310,9 @@ func (suite *SynchronizeSwapRewardTests) TestClaimUpdatedWhenGlobalIndexesIncrea
 
 	userShares := i(0)
 
-	suite.keeper.SynchronizeSwapReward(suite.ctx, poolID, claim.Owner, userShares)
+	suite.keeper.SynchronizeSwapReward(sdk.UnwrapSDKContext(suite.ctx), poolID, claim.Owner, userShares)
 
-	syncedClaim, _ := suite.keeper.GetSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, _ := suite.keeper.GetSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	// indexes updated from global
 	suite.Equal(globalIndexes, syncedClaim.RewardIndexes)
 	// reward is unchanged
@@ -341,7 +343,7 @@ func (suite *SynchronizeSwapRewardTests) TestGetSyncedClaim_ClaimUnchangedWhenNo
 
 	// no global indexes for any pool
 
-	syncedClaim, f := suite.keeper.GetSynchronizedSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, f := suite.keeper.GetSynchronizedSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.True(f)
 
 	// indexes are unchanged
@@ -399,7 +401,7 @@ func (suite *SynchronizeSwapRewardTests) TestGetSyncedClaim_ClaimUpdatedWhenMiss
 	}
 	suite.storeGlobalSwapIndexes(globalIndexes)
 
-	syncedClaim, f := suite.keeper.GetSynchronizedSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, f := suite.keeper.GetSynchronizedSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.True(f)
 
 	// indexes updated from global
@@ -459,7 +461,7 @@ func (suite *SynchronizeSwapRewardTests) TestGetSyncedClaim_ClaimUpdatedWhenMiss
 	}
 	suite.storeGlobalSwapIndexes(globalIndexes)
 
-	syncedClaim, f := suite.keeper.GetSynchronizedSwapClaim(suite.ctx, claim.Owner)
+	syncedClaim, f := suite.keeper.GetSynchronizedSwapClaim(sdk.UnwrapSDKContext(suite.ctx), claim.Owner)
 	suite.True(f)
 
 	// indexes updated from global

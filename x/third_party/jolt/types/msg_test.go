@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
 
 	"github.com/stretchr/testify/suite"
@@ -34,7 +36,7 @@ func (suite *MsgTestSuite) TestMsgDeposit() {
 			name: "valid",
 			args: args{
 				depositor: addrs[0],
-				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(10000000))),
+				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(10000000))),
 			},
 			expectPass:  true,
 			expectedErr: "",
@@ -43,7 +45,7 @@ func (suite *MsgTestSuite) TestMsgDeposit() {
 			name: "valid2",
 			args: args{
 				depositor: addrs[0],
-				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(10000000))),
+				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(10000000))),
 			},
 			expectPass:  true,
 			expectedErr: "",
@@ -82,7 +84,7 @@ func (suite *MsgTestSuite) TestMsgWithdraw() {
 			name: "valid",
 			args: args{
 				depositor: addrs[0],
-				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(10000000))),
+				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(10000000))),
 			},
 			expectPass:  true,
 			expectedErr: "",
@@ -91,7 +93,7 @@ func (suite *MsgTestSuite) TestMsgWithdraw() {
 			name: "valid2",
 			args: args{
 				depositor: addrs[0],
-				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdk.NewInt(10000000))),
+				amount:    sdk.NewCoins(sdk.NewCoin("bnb", sdkmath.NewInt(10000000))),
 			},
 			expectPass:  true,
 			expectedErr: "",
@@ -129,7 +131,7 @@ func (suite *MsgTestSuite) TestMsgBorrow() {
 			name: "valid",
 			args: args{
 				borrower: addrs[0],
-				amount:   sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(1000000))),
+				amount:   sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(1000000))),
 			},
 			expectPass:  true,
 			expectedErr: "",
@@ -169,7 +171,7 @@ func (suite *MsgTestSuite) TestMsgRepay() {
 			args: args{
 				sender: addrs[0],
 				owner:  addrs[0],
-				amount: sdk.NewCoins(sdk.NewCoin("test", sdk.NewInt(1000000))),
+				amount: sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(1000000))),
 			},
 			expectPass:  true,
 			expectedErr: "",

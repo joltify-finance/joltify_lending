@@ -79,7 +79,7 @@ func (suite *invariantTestSuite) RegisterRoute(moduleName string, route string, 
 }
 
 func (suite *invariantTestSuite) runInvariant(route string, invariant func(k keeper.Keeper) sdk.Invariant) (string, bool) {
-	ctx := suite.Ctx
+	ctx := sdk.UnwrapSDKContext(suite.Ctx)
 	registeredInvariant := suite.invariants[types.ModuleName][route]
 	suite.Require().NotNil(registeredInvariant)
 

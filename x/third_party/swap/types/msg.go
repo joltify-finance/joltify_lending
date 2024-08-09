@@ -3,10 +3,11 @@ package types
 import (
 	"time"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	errorsmod "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const (
@@ -82,7 +83,7 @@ func (msg MsgDeposit) ValidateBasic() error {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil || slippage.IsNegative() {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}
@@ -235,7 +236,7 @@ func (msg MsgSwapExactForTokens) ValidateBasic() error {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil || slippage.IsNegative() {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}
@@ -312,7 +313,7 @@ func (msg MsgSwapExactForBatchTokens) ValidateBasic() error {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil || slippage.IsNegative() {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}
@@ -389,7 +390,7 @@ func (msg MsgSwapForExactTokens) ValidateBasic() error {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage must be set")
 	}
 
-	slippage, err := sdk.NewDecFromStr(msg.Slippage)
+	slippage, err := sdkmath.LegacyNewDecFromStr(msg.Slippage)
 	if err != nil || slippage.IsNegative() {
 		return errorsmod.Wrapf(ErrInvalidSlippage, "slippage is invalid or can not be negative")
 	}

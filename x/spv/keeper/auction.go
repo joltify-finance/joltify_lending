@@ -1,13 +1,16 @@
 package keeper
 
 import (
+	"context"
+
 	errorsmod "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func (k Keeper) processEachReserve(ctx sdk.Context, c sdk.Coin) (bool, error) {
+func (k Keeper) processEachReserve(ctx context.Context, c sdk.Coin) (bool, error) {
 	pa := k.GetParams(ctx)
 	// now we set the auction
 
@@ -25,7 +28,8 @@ func (k Keeper) processEachReserve(ctx sdk.Context, c sdk.Coin) (bool, error) {
 }
 
 // RunSurplusAuctions nets the surplus and debt balances and then creates surplus or debt auctions if the remaining balance is above the auction threshold parameter
-func (k Keeper) RunSurplusAuctions(ctx sdk.Context) {
+func (k Keeper) RunSurplusAuctions(rctx context.Context) {
+	ctx := sdk.UnwrapSDKContext(rctx)
 	k.IterSPVReserve(ctx, func(totalReserve sdk.Coin) (stop bool) {
 		if totalReserve.IsZero() {
 			return false
@@ -45,7 +49,7 @@ func (k Keeper) RunSurplusAuctions(ctx sdk.Context) {
 			return false
 		}
 		if processed {
-			k.SetReserve(ctx, sdk.NewCoin(totalReserve.Denom, sdk.ZeroInt()))
+			k.SetReserve(ctx, sdk.NewCoin(totalReserve.Denom, sdkmath.ZeroInt()))
 		}
 		return false
 	})

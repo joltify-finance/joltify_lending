@@ -17,7 +17,7 @@ message BorrowDetail{
 
 	string exchange_ratio= 3 [
 		(cosmos_proto.scalar)  = "cosmos.Dec",
-		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
 		(gogoproto.nullable)   = false
 	];
 }
@@ -34,7 +34,7 @@ message NftInfo{
 
 	string total_liquidation_amount = 5 [
 		(cosmos_proto.scalar)  = "cosmos.Int",
-		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+		(gogoproto.customtype) = "cosmossdk.io/math.Int",
 		(gogoproto.nullable)   = false
 	];
 
@@ -71,7 +71,7 @@ message BorrowInterest{
 	string pool_index  =1 ;
 	string      apy      = 2 [
 		(cosmos_proto.scalar)  = "cosmos.Dec",
-		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
 		(gogoproto.nullable)   = false
 	];
 	int32 pay_freq = 3;
@@ -83,14 +83,14 @@ message BorrowInterest{
 
 	string      monthly_ratio      = 6 [
 		(cosmos_proto.scalar)  = "cosmos.Dec",
-		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
 		(gogoproto.nullable)   = false
 	];
 
 
 	string      interest_sPY      = 7 [
 		(cosmos_proto.scalar)  = "cosmos.Dec",
-		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+		(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
 		(gogoproto.nullable)   = false
 	];
 
@@ -108,7 +108,7 @@ message BorrowInterest{
 
 	string total_paid_liquidation_amount = 35 [
 		(cosmos_proto.scalar)  = "cosmos.Int",
-		(gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+		(gogoproto.customtype) = "cosmossdk.io/math.Int",
 		(gogoproto.nullable)   = false
 	];
 

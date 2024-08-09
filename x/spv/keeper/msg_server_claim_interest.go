@@ -4,6 +4,8 @@ import (
 	"context"
 
 	coserrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	types2 "cosmossdk.io/store/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,7 +15,7 @@ import (
 func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInterest) (*types.MsgClaimInterestResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(types2.NewInfiniteGasMeter())
 
 	investorAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -22,7 +24,7 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 
 	depositor, found := k.GetDepositor(ctx, msg.PoolIndex, investorAddress)
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(types.ErrDepositorNotFound, "depositor %v not found for pool index %v", msg.Creator, msg.PoolIndex)
 	}
 
 	if !depositor.DepositorAddress.Equals(investorAddress) {
@@ -55,7 +57,7 @@ func (k msgServer) ClaimInterest(goCtx context.Context, msg *types.MsgClaimInter
 	return &types.MsgClaimInterestResponse{Amount: claimed.String()}, nil
 }
 
-func (k Keeper) claimInterest(ctx sdk.Context, depositor *types.DepositorInfo) (sdk.Coin, error) {
+func (k Keeper) claimInterest(ctx context.Context, depositor *types.DepositorInfo) (sdk.Coin, error) {
 	// for each lending NFT this owner has
 	totalInterest, err := calculateTotalInterest(ctx, depositor.LinkedNFT, k.NftKeeper, true)
 	if err != nil {
@@ -67,7 +69,7 @@ func (k Keeper) claimInterest(ctx sdk.Context, depositor *types.DepositorInfo) (
 	// we add the pending one
 	claimed = claimed.Add(depositor.PendingInterest)
 
-	depositor.PendingInterest = sdk.NewCoin(depositor.GetPendingInterest().Denom, sdk.ZeroInt())
+	depositor.PendingInterest = sdk.NewCoin(depositor.GetPendingInterest().Denom, sdkmath.ZeroInt())
 
 	poolInfo, found := k.GetPools(ctx, depositor.PoolIndex)
 	if !found {

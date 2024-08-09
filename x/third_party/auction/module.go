@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"cosmossdk.io/core/appmodule"
+
 	cli2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/client/cli"
 	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -21,8 +23,10 @@ import (
 )
 
 var (
-	_ module.AppModule      = AppModule{}
-	_ module.AppModuleBasic = AppModuleBasic{}
+	_ appmodule.AppModule       = AppModule{}
+	_ module.AppModuleBasic     = AppModuleBasic{}
+	_ appmodule.HasBeginBlocker = (*AppModule)(nil)
+	_ appmodule.HasEndBlocker   = (*AppModule)(nil)
 	// _ module.AppModuleSimulation = AppModule{}
 )
 
@@ -133,13 +137,14 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock module begin-block
-func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
+func (am AppModule) BeginBlock(ctx context.Context) error {
 	BeginBlocker(ctx, am.keeper)
+	return nil
 }
 
 // EndBlock module end-block
-func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return []abci.ValidatorUpdate{}
+func (am AppModule) EndBlock(_ context.Context) error {
+	return nil
 }
 
 // //____________________________________________________________________________
@@ -160,7 +165,7 @@ func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.Valid
 // }
 
 // // RegisterStoreDecoder registers a decoder for auction module's types
-// func (AppModuleBasic) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+// func (AppModuleBasic) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 // 	sdr[StoreKey] = simulation.DecodeStore
 // }
 
@@ -168,3 +173,8 @@ func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.Valid
 // func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
 // 	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.keeper)
 // }
+
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the appmodule.AppModule interface.
+func (am AppModule) IsAppModule() {}

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	coserrors "cosmossdk.io/errors"
+	types2 "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -33,16 +34,16 @@ func addToList(previousList, newElements []string) []string {
 
 func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestors) (*types.MsgAddInvestorsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	ctx = ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
+	ctx = ctx.WithGasMeter(types2.NewInfiniteGasMeter())
 
 	spvAddress, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
 		return nil, coserrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %v", msg.Creator)
 	}
 
-	pool, found := k.GetPools(ctx, msg.GetPoolIndex())
+	pool, found := k.GetPools(ctx, msg.PoolIndex)
 	if !found {
-		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool not found with index %v", msg.GetPoolIndex())
+		return nil, coserrors.Wrapf(types.ErrPoolNotFound, "pool not found with index %v", msg.PoolIndex)
 	}
 	if !pool.OwnerAddress.Equals(spvAddress) {
 		return nil, coserrors.Wrap(types.ErrUnauthorized, "unauthorized operations")
@@ -84,7 +85,7 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 		} else {
 			v := types.PoolWithInvestors{
 				PoolIndex: poolIndex,
-				Investors: msg.GetInvestorID(),
+				Investors: msg.InvestorID,
 			}
 			k.AddInvestorToPool(ctx, &v)
 		}

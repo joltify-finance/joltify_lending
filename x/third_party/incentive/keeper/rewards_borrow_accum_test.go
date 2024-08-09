@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
 
 	"github.com/stretchr/testify/suite"
@@ -14,13 +16,13 @@ type AccumulateBorrowRewardsTests struct {
 }
 
 func (suite *AccumulateBorrowRewardsTests) storedTimeEquals(denom string, expected time.Time) {
-	storedTime, found := suite.keeper.GetPreviousJoltBorrowRewardAccrualTime(suite.ctx, denom)
+	storedTime, found := suite.keeper.GetPreviousJoltBorrowRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.True(found)
 	suite.Equal(expected, storedTime)
 }
 
 func (suite *AccumulateBorrowRewardsTests) storedIndexesEqual(denom string, expected types2.RewardIndexes) {
-	storedIndexes, found := suite.keeper.GetJoltBorrowRewardIndexes(suite.ctx, denom)
+	storedIndexes, found := suite.keeper.GetJoltBorrowRewardIndexes(sdk.UnwrapSDKContext(suite.ctx), denom)
 	suite.Equal(found, expected != nil)
 
 	if found {
@@ -57,10 +59,10 @@ func (suite *AccumulateBorrowRewardsTests) TestStateUpdatedWhenBlockTimeHasIncre
 		},
 	})
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	newAccrualTime := previousAccrualTime.Add(1 * time.Hour)
-	suite.ctx = suite.ctx.WithBlockTime(newAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(newAccrualTime)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -110,9 +112,9 @@ func (suite *AccumulateBorrowRewardsTests) TestStateUnchangedWhenBlockTimeHasNot
 	}
 	suite.storeGlobalBorrowIndexes(previousIndexes)
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
-	suite.ctx = suite.ctx.WithBlockTime(previousAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(previousAccrualTime)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -155,10 +157,10 @@ func (suite *AccumulateBorrowRewardsTests) TestNoAccumulationWhenSourceSharesAre
 	}
 	suite.storeGlobalBorrowIndexes(previousIndexes)
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	firstAccrualTime := previousAccrualTime.Add(7 * time.Second)
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	period := types2.NewMultiRewardPeriod(
 		true,
@@ -193,7 +195,7 @@ func (suite *AccumulateBorrowRewardsTests) TestStateAddedWhenStateDoesNotExist()
 	)
 
 	firstAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.keeper.AccumulateJoltBorrowRewards(suite.ctx, period)
 
@@ -203,7 +205,7 @@ func (suite *AccumulateBorrowRewardsTests) TestStateAddedWhenStateDoesNotExist()
 	suite.storedIndexesEqual(denom, nil)
 
 	secondAccrualTime := firstAccrualTime.Add(10 * time.Second)
-	suite.ctx = suite.ctx.WithBlockTime(secondAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(secondAccrualTime)
 
 	suite.keeper.AccumulateJoltBorrowRewards(suite.ctx, period)
 
@@ -236,7 +238,7 @@ func (suite *AccumulateBorrowRewardsTests) TestNoPanicWhenStateDoesNotExist() {
 	)
 
 	accrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.ctx = suite.ctx.WithBlockTime(accrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(accrualTime)
 
 	// Accumulate with no source shares and no rewards per second will result in no increment to the indexes.
 	// No increment and no previous indexes stored, results in an updated of nil. Setting this in the state panics.
@@ -272,7 +274,7 @@ func (suite *AccumulateBorrowRewardsTests) TestNoAccumulationWhenBeforeStartTime
 	}
 	suite.storeGlobalBorrowIndexes(previousIndexes)
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	firstAccrualTime := previousAccrualTime.Add(10 * time.Second)
 
@@ -284,7 +286,7 @@ func (suite *AccumulateBorrowRewardsTests) TestNoAccumulationWhenBeforeStartTime
 		cs(c("jolt", 2000), c("ujolt", 1000)),
 	)
 
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.keeper.AccumulateJoltBorrowRewards(suite.ctx, period)
 
@@ -302,7 +304,7 @@ func (suite *AccumulateBorrowRewardsTests) TestPanicWhenCurrentTimeLessThanPrevi
 	suite.keeper = suite.NewKeeper(&fakeParamSubspace{}, nil, joltKeeper, nil, nil, nil, nil)
 
 	previousAccrualTime := time.Date(1998, 1, 1, 0, 0, 0, 0, time.UTC)
-	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(suite.ctx, denom, previousAccrualTime)
+	suite.keeper.SetPreviousJoltBorrowRewardAccrualTime(sdk.UnwrapSDKContext(suite.ctx), denom, previousAccrualTime)
 
 	firstAccrualTime := time.Time{}
 
@@ -314,7 +316,7 @@ func (suite *AccumulateBorrowRewardsTests) TestPanicWhenCurrentTimeLessThanPrevi
 		cs(c("jolt", 2000), c("ujolt", 1000)),
 	)
 
-	suite.ctx = suite.ctx.WithBlockTime(firstAccrualTime)
+	suite.ctx = sdk.UnwrapSDKContext(suite.ctx).WithBlockTime(firstAccrualTime)
 
 	suite.Panics(func() {
 		suite.keeper.AccumulateJoltBorrowRewards(suite.ctx, period)

@@ -8,21 +8,23 @@ import (
 	"strconv"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
+
 	coserrors "cosmossdk.io/errors"
+	"cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/x/nft"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 )
 
-func parameterSanitize(payFreqStr string, apyStr []string) ([]sdk.Dec, int32, error) {
-	apyJunior, err := sdk.NewDecFromStr(apyStr[0])
+func parameterSanitize(payFreqStr string, apyStr []string) ([]sdkmath.LegacyDec, int32, error) {
+	apyJunior, err := sdkmath.LegacyNewDecFromStr(apyStr[0])
 	if err != nil {
 		return nil, 0, err
 	}
 
-	apySenior, err := sdk.NewDecFromStr(apyStr[1])
+	apySenior, err := sdkmath.LegacyNewDecFromStr(apyStr[1])
 	if err != nil {
 		return nil, 0, err
 	}
@@ -34,7 +36,7 @@ func parameterSanitize(payFreqStr string, apyStr []string) ([]sdk.Dec, int32, er
 	if payFreq > types.Maxfreq || payFreq < types.Minfreq {
 		return nil, 0, errors.New("pay frequency is invalid")
 	}
-	return []sdk.Dec{apyJunior, apySenior}, int32(payFreq), nil
+	return []sdkmath.LegacyDec{apyJunior, apySenior}, int32(payFreq), nil
 }
 
 func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (*types.MsgCreatePoolResponse, error) {
@@ -94,8 +96,8 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 	}
 
 	adj := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(gap)), nil)
-	minBorrowAmount := targetProject.MinBorrowAmount.Quo(sdk.NewIntFromBigInt(adj))
-	minDeposit := targetProject.MinDepositAmount.Quo(sdk.NewIntFromBigInt(adj))
+	minBorrowAmount := targetProject.MinBorrowAmount.Quo(sdkmath.NewIntFromBigInt(adj))
+	minDeposit := targetProject.MinDepositAmount.Quo(sdkmath.NewIntFromBigInt(adj))
 
 	supportedTokens := pa.BurnThreshold
 
@@ -151,16 +153,16 @@ func (k msgServer) CreatePool(goCtx context.Context, msg *types.MsgCreatePool) (
 			PoolType:                      ePoolType,
 			ProjectLength:                 targetProject.ProjectLength,
 			LastPaymentTime:               ctx.BlockTime(),
-			BorrowedAmount:                sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.NewInt(0)),
-			UsableAmount:                  sdk.NewCoin(targetAmount.Denom, sdk.NewInt(0)),
-			EscrowInterestAmount:          sdk.NewInt(0),
-			EscrowPrincipalAmount:         sdk.NewCoin(targetAmount.Denom, sdk.NewInt(0)),
-			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.NewInt(0)),
+			BorrowedAmount:                sdk.NewCoin(denomPrefix+targetAmount.Denom, sdkmath.NewInt(0)),
+			UsableAmount:                  sdk.NewCoin(targetAmount.Denom, sdkmath.NewInt(0)),
+			EscrowInterestAmount:          sdkmath.NewInt(0),
+			EscrowPrincipalAmount:         sdk.NewCoin(targetAmount.Denom, sdkmath.NewInt(0)),
+			WithdrawProposalAmount:        sdk.NewCoin(denomPrefix+targetAmount.Denom, sdkmath.NewInt(0)),
 			WithdrawAccounts:              make([]sdk.AccAddress, 0, 200),
 			TransferAccounts:              make([]sdk.AccAddress, 0, 200),
 			ProcessedTransferAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track transferred accounts when we close the pool
 			ProcessedWithdrawAccounts:     make([]sdk.AccAddress, 0, 200), // this is used to track the withdrawal accounts when we close the pool
-			TotalTransferOwnershipAmount:  sdk.NewCoin(denomPrefix+targetAmount.Denom, sdk.ZeroInt()),
+			TotalTransferOwnershipAmount:  sdk.NewCoin(denomPrefix+targetAmount.Denom, sdkmath.ZeroInt()),
 			MinBorrowAmount:               sdk.NewCoin(targetAmount.Denom, minBorrowAmount),
 			WithdrawRequestWindowSeconds:  targetProject.WithdrawRequestWindowSeconds,
 			PoolLockedSeconds:             targetProject.PoolLockedSeconds,

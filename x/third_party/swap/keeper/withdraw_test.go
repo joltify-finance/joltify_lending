@@ -25,7 +25,7 @@ func (suite *keeperTestSuite) TestWithdraw_AllShares() {
 	suite.AccountBalanceEqual(owner.GetAddress(), reserves)
 	suite.ModuleAccountBalanceEqual(sdk.Coins{})
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapWithdraw,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyOwner, owner.GetAddress().String()),
@@ -59,7 +59,7 @@ func (suite *keeperTestSuite) TestWithdraw_PartialShares() {
 	suite.AccountBalanceEqual(owner.GetAddress(), sdk.NewCoins(minCoinA, minCoinB))
 	suite.ModuleAccountBalanceEqual(reservesLeft)
 
-	suite.EventsContains(suite.Ctx.EventManager().Events(), sdk.NewEvent(
+	suite.EventsContains(sdk.UnwrapSDKContext(suite.Ctx).EventManager().Events(), sdk.NewEvent(
 		types.EventTypeSwapWithdraw,
 		sdk.NewAttribute(types.AttributeKeyPoolID, poolID),
 		sdk.NewAttribute(types.AttributeKeyOwner, owner.GetAddress().String()),
@@ -92,7 +92,7 @@ func (suite *keeperTestSuite) TestWithdraw_GreaterThanSharesOwned() {
 	totalShares := sdkmath.NewInt(30e6)
 	suite.setupPool(reserves, totalShares, owner.GetAddress())
 
-	sharesToWithdraw := totalShares.Add(sdk.OneInt())
+	sharesToWithdraw := totalShares.Add(sdkmath.OneInt())
 	err := suite.Keeper.Withdraw(suite.Ctx, owner.GetAddress(), sharesToWithdraw, reserves[0], reserves[1])
 	suite.EqualError(err, fmt.Sprintf("withdraw of %s shares greater than %s shares owned: invalid shares", sharesToWithdraw, totalShares))
 }
@@ -196,7 +196,7 @@ func (suite *keeperTestSuite) TestWithdraw_PanicOnInvalidPool() {
 	poolRecord, found := suite.Keeper.GetPool(suite.Ctx, poolID)
 	suite.Require().True(found, "expected pool record to exist")
 
-	poolRecord.TotalShares = sdk.ZeroInt()
+	poolRecord.TotalShares = sdkmath.ZeroInt()
 	suite.Keeper.SetPool_Raw(suite.Ctx, poolRecord)
 
 	suite.PanicsWithValue("invalid pool ukava:usdx: total shares must be greater than zero: invalid pool", func() {

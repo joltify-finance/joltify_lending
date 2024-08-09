@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 
+	"cosmossdk.io/core/appmodule"
+
 	cli2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/client/cli"
-	keeper2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -22,8 +24,10 @@ import (
 )
 
 var (
-	_ module.AppModule      = AppModule{}
-	_ module.AppModuleBasic = AppModuleBasic{}
+	_ appmodule.AppModule       = AppModule{}
+	_ module.AppModuleBasic     = AppModuleBasic{}
+	_ appmodule.HasBeginBlocker = (*AppModule)(nil)
+	_ appmodule.HasEndBlocker   = (*AppModule)(nil)
 	// _ module.AppModuleSimulation = AppModule{} // TODO simulation
 )
 
@@ -84,12 +88,12 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	keeper        keeper2.Keeper
+	keeper        keeper.Keeper
 	accountKeeper sdkkeeper.AccountKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper keeper2.Keeper, accountKeeper sdkkeeper.AccountKeeper) AppModule {
+func NewAppModule(keeper keeper.Keeper, accountKeeper sdkkeeper.AccountKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
@@ -112,8 +116,8 @@ func (AppModule) ConsensusVersion() uint64 {
 
 // RegisterServices registers module services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types2.RegisterMsgServer(cfg.MsgServer(), keeper2.NewMsgServerImpl(am.keeper))
-	types2.RegisterQueryServer(cfg.QueryServer(), keeper2.NewQueryServerImpl(am.keeper))
+	types2.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	types2.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServerImpl(am.keeper))
 }
 
 // InitGenesis module init-genesis
@@ -134,14 +138,14 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock module begin-block
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {
+func (am AppModule) BeginBlock(_ context.Context) error {
+	return nil
 }
 
 // EndBlock module end-block
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx context.Context) error {
 	EndBlocker(ctx, am.keeper)
-
-	return []abci.ValidatorUpdate{}
+	return nil
 }
 
 //____________________________________________________________________________
@@ -164,7 +168,7 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 // }
 
 // // RegisterStoreDecoder registers a decoder for price feed module's types
-// func (AppModuleBasic) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+// func (AppModuleBasic) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 // 	sdr[StoreKey] = simulation.DecodeStore
 // }
 
@@ -172,3 +176,8 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 // func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
 // 	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.keeper)
 // }
+
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the appmodule.AppModule interface.
+func (am AppModule) IsAppModule() {}

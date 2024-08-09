@@ -1,12 +1,13 @@
 package legacy
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	"github.com/gogo/protobuf/proto"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	spvmoduletypes "github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -19,9 +20,9 @@ func CreateUpgradeHandlerForV015Upgrade(
 	configurator module.Configurator,
 	spvKeeper spvmodulekeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		for i := 0; i < 5; i++ {
-			ctx.Logger().Info("we upgrade to v015")
+			sdk.UnwrapSDKContext(ctx).Logger().Info("we upgrade to v015")
 		}
 
 		bigCounter := 0

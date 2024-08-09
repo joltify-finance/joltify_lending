@@ -4,22 +4,21 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	tmlog "github.com/cometbft/cometbft/libs/log"
-	tmprototypes "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmtime "github.com/cometbft/cometbft/types/time"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"cosmossdk.io/log"
+
+	"github.com/joltify-finance/joltify_lending/app"
 
 	"github.com/joltify-finance/joltify_lending/x/mint"
 	"github.com/joltify-finance/joltify_lending/x/mint/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGenesis(t *testing.T) {
-	lg := tmlog.TestingLogger()
+	lg := log.NewTestLogger(t)
 	tApp := app.NewTestApp(lg, t.TempDir())
-	ctx := tApp.NewContext(true, tmprototypes.Header{Height: 1, Time: tmtime.Now()})
+	ctx := tApp.NewContext(true)
 	k := tApp.GetMintKeeper()
 
 	genesisState := types.GenesisState{

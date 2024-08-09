@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -28,7 +29,7 @@ func GenerateTestProjects() []*ProjectInfo {
 			"empty project Brief",
 			"empty project description",
 		}
-		val, ok := types.NewIntFromString("1000000000000000000")
+		val, ok := sdkmath.NewIntFromString("1000000000000000000")
 		if !ok {
 			panic("fail to convert")
 		}
@@ -39,7 +40,7 @@ func GenerateTestProjects() []*ProjectInfo {
 			BasicInfo:                    &b,
 			ProjectLength:                480, // 5 mins
 			SeparatePool:                 true,
-			BaseApy:                      types.NewDecWithPrec(10, 2),
+			BaseApy:                      sdkmath.LegacyNewDecWithPrec(10, 2),
 			PayFreq:                      "120",
 			PoolLockedSeconds:            100,
 			PoolTotalBorrowLimit:         100,

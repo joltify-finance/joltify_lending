@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/stretchr/testify/require"
@@ -36,7 +38,7 @@ func TestGenesisState_Validate(t *testing.T) {
 		MaxBid:            sdk.NewInt64Coin("usdx", 5e4),
 		LotReturns: WeightedAddresses{
 			Addresses: []sdk.AccAddress{sdk.AccAddress("test return address")},
-			Weights:   []sdk.Int{sdk.OneInt()},
+			Weights:   []sdkmath.Int{sdkmath.OneInt()},
 		},
 	}
 
