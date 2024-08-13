@@ -16,7 +16,6 @@ import (
 
 	perpetualstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 
-	pricefeedapi "github.com/joltify-finance/joltify_lending/daemons/pricefeed/api"
 
 	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 
@@ -1029,42 +1028,6 @@ func (_m *QueryClient) SubaccountAll(ctx context.Context, in *subaccountstypes.Q
 	return r0, r1
 }
 
-// UpdateMarketPrices provides a mock function with given fields: ctx, in, opts
-func (_m *QueryClient) UpdateMarketPrices(ctx context.Context, in *pricefeedapi.UpdateMarketPricesRequest, opts ...grpc.CallOption) (*pricefeedapi.UpdateMarketPricesResponse, error) {
-	_va := make([]interface{}, len(opts))
-	for _i := range opts {
-		_va[_i] = opts[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, in)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateMarketPrices")
-	}
-
-	var r0 *pricefeedapi.UpdateMarketPricesResponse
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *pricefeedapi.UpdateMarketPricesRequest, ...grpc.CallOption) (*pricefeedapi.UpdateMarketPricesResponse, error)); ok {
-		return rf(ctx, in, opts...)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *pricefeedapi.UpdateMarketPricesRequest, ...grpc.CallOption) *pricefeedapi.UpdateMarketPricesResponse); ok {
-		r0 = rf(ctx, in, opts...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*pricefeedapi.UpdateMarketPricesResponse)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *pricefeedapi.UpdateMarketPricesRequest, ...grpc.CallOption) error); ok {
-		r1 = rf(ctx, in, opts...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // NewQueryClient creates a new instance of QueryClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
