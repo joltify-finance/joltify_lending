@@ -2,8 +2,8 @@ package constants
 
 import (
 	"github.com/cosmos/cosmos-sdk/types"
-	"github.com/dydxprotocol/v4-chain/protocol/app/config"
-	satypes "github.com/dydxprotocol/v4-chain/protocol/x/subaccounts/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/app/config"
+	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
 )
 
 func init() {

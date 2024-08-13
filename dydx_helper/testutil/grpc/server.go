@@ -1,6 +1,6 @@
 package grpc
 
-import pricetypes "github.com/dydxprotocol/v4-chain/protocol/x/prices/types"
+import pricetypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
 
 type QueryServer interface {
 	pricetypes.QueryServer

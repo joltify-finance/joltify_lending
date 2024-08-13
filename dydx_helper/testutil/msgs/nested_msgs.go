@@ -6,10 +6,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/encoding"
-	prices "github.com/dydxprotocol/v4-chain/protocol/x/prices/types"
-	sending "github.com/dydxprotocol/v4-chain/protocol/x/sending/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
+	prices "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
+	sending "github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/types"
 )
 
 func init() {

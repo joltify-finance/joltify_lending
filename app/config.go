@@ -28,6 +28,8 @@ const (
 	BaseCoinUnit  = "ujolt"
 
 	JoltExponent = 6
+
+	AppDaemonName = "joltify"
 )
 
 // SetSDKConfig configures the global config with joltify app specific parameters.

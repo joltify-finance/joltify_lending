@@ -1,7 +1,7 @@
 package exchange_config
 
 import (
-	"github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
 )
 
 // StaticMarketNames maps marketIds to their human-readable market names. This list is

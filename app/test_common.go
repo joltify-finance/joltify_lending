@@ -204,7 +204,7 @@ func (tApp TestApp) GetStakingKeeper() stakingkeeper.Keeper     { return *tApp.s
 func (tApp TestApp) GetSlashingKeeper() slashingkeeper.Keeper   { return tApp.slashingKeeper }
 func (tApp TestApp) GetMintKeeper() mintkeeper.Keeper           { return tApp.mintKeeper }
 func (tApp TestApp) GetDistrKeeper() distkeeper.Keeper          { return tApp.distrKeeper }
-func (tApp TestApp) GetGovKeeper() govkeeper.Keeper             { return tApp.govKeeper }
+func (tApp TestApp) GetGovKeeper() govkeeper.Keeper             { return tApp.GovKeeper }
 func (tApp TestApp) GetCrisisKeeper() crisiskeeper.Keeper       { return *tApp.crisisKeeper }
 func (tApp TestApp) GetParamsKeeper() paramskeeper.Keeper       { return tApp.ParamsKeeper }
 

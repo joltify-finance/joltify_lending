@@ -1,7 +1,7 @@
 package constants
 
 import (
-	"github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
 func init() {

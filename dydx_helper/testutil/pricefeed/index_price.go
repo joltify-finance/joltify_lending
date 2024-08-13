@@ -5,11 +5,11 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/stretchr/testify/require"
 
-	"github.com/dydxprotocol/v4-chain/protocol/app"
-	pricefeedapi "github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/api"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/app"
+	pricefeedapi "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/api"
 )
 
 func GetTestMarketPriceUpdates(n int) (indexPrices []*pricefeedapi.MarketPriceUpdate) {

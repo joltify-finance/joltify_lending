@@ -3,9 +3,10 @@ package ante
 import (
 	"testing"
 
+	"github.com/joltify-finance/joltify_lending/app"
+
 	storetypes "cosmossdk.io/store/types"
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/std"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
@@ -14,8 +15,6 @@ import (
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	txtestutil "github.com/cosmos/cosmos-sdk/x/auth/tx/testutil"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	v4module "github.com/dydxprotocol/v4-chain/protocol/app/module"
-
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
@@ -281,15 +280,16 @@ func (suite *AnteTestSuite) CreateTestTx(
 }
 
 func MakeTestEncodingConfig(modules ...module.AppModuleBasic) moduletestutil.TestEncodingConfig {
-	aminoCodec := codec.NewLegacyAmino()
-	interfaceRegistry := v4module.InterfaceRegistry
-	codec := codec.NewProtoCodec(interfaceRegistry)
+	encodingConfig := app.MakeEncodingConfig()
+	appCodec := encodingConfig.Marshaler
+	legacyAmino := encodingConfig.Amino
+	interfaceRegistry := encodingConfig.InterfaceRegistry
 
 	encCfg := moduletestutil.TestEncodingConfig{
 		InterfaceRegistry: interfaceRegistry,
-		Codec:             codec,
-		TxConfig:          authtx.NewTxConfig(codec, authtx.DefaultSignModes),
-		Amino:             aminoCodec,
+		Codec:             appCodec,
+		TxConfig:          authtx.NewTxConfig(appCodec, authtx.DefaultSignModes),
+		Amino:             legacyAmino,
 	}
 
 	mb := module.NewBasicManager(modules...)

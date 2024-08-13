@@ -3,8 +3,8 @@ package ibc_test
 import (
 	"testing"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/ibc"
-	assettypes "github.com/dydxprotocol/v4-chain/protocol/x/assets/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/ibc"
+	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	"github.com/stretchr/testify/require"
 )
 

@@ -4,18 +4,18 @@ import (
 	"testing"
 
 	dbm "github.com/cosmos/cosmos-db"
-	"github.com/dydxprotocol/v4-chain/protocol/lib"
-	delaymsgtypes "github.com/dydxprotocol/v4-chain/protocol/x/delaymsg/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	bridgeserver_types "github.com/dydxprotocol/v4-chain/protocol/daemons/server/types/bridge"
-	"github.com/dydxprotocol/v4-chain/protocol/mocks"
-	"github.com/dydxprotocol/v4-chain/protocol/x/bridge/keeper"
-	"github.com/dydxprotocol/v4-chain/protocol/x/bridge/types"
+	bridgeserver_types "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/bridge"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/bridge/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 )
 
 func BridgeKeepers(

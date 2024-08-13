@@ -3,7 +3,7 @@ package constants
 import (
 	"time"
 
-	"github.com/dydxprotocol/v4-chain/protocol/x/epochs/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/epochs/types"
 )
 
 var Duration_OneYear = time.Hour * 24 * 365

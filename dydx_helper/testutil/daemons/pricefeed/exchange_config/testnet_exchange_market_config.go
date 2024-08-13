@@ -1,8 +1,8 @@
 package exchange_config
 
 import (
-	"github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/client/constants/exchange_common"
-	"github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants/exchange_common"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 )
 
 // TestnetExchangeMarketConfig maps exchange feed ids to exchange market config. This map is used to generate

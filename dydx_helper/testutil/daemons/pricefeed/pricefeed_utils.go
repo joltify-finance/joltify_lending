@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/json"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/json"
 	"github.com/stretchr/testify/require"
 )
 

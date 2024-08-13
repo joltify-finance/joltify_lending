@@ -6,10 +6,10 @@ import (
 
 	"cosmossdk.io/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dydxprotocol/v4-chain/protocol/indexer/indexer_manager"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
-	"github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
-	satypes "github.com/dydxprotocol/v4-chain/protocol/x/subaccounts/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
 var _ types.MemClobKeeper = &FakeMemClobKeeper{}

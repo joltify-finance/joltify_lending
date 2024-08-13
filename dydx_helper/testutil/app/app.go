@@ -15,6 +15,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/app"
+
 	"cosmossdk.io/log"
 	"cosmossdk.io/store/rootmulti"
 	storetypes "cosmossdk.io/store/types"
@@ -26,8 +28,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/dydxprotocol/v4-chain/protocol/cmd/dydxprotocold/cmd"
-	"github.com/dydxprotocol/v4-chain/protocol/indexer"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/cmd/dydxprotocold/cmd"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"
 
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
@@ -43,28 +45,26 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	sdkproto "github.com/cosmos/gogoproto/proto"
-	"github.com/dydxprotocol/v4-chain/protocol/app"
-	appconstants "github.com/dydxprotocol/v4-chain/protocol/app/constants"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/appoptions"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
-	testlog "github.com/dydxprotocol/v4-chain/protocol/testutil/logger"
-	assettypes "github.com/dydxprotocol/v4-chain/protocol/x/assets/types"
-	blocktimetypes "github.com/dydxprotocol/v4-chain/protocol/x/blocktime/types"
-	bridgetypes "github.com/dydxprotocol/v4-chain/protocol/x/bridge/types"
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
-	delaymsgtypes "github.com/dydxprotocol/v4-chain/protocol/x/delaymsg/types"
-	epochstypes "github.com/dydxprotocol/v4-chain/protocol/x/epochs/types"
-	feetiertypes "github.com/dydxprotocol/v4-chain/protocol/x/feetiers/types"
-	govplus "github.com/dydxprotocol/v4-chain/protocol/x/govplus/types"
-	perptypes "github.com/dydxprotocol/v4-chain/protocol/x/perpetuals/types"
-	pricestypes "github.com/dydxprotocol/v4-chain/protocol/x/prices/types"
-	ratelimittypes "github.com/dydxprotocol/v4-chain/protocol/x/ratelimit/types"
-	rewardstypes "github.com/dydxprotocol/v4-chain/protocol/x/rewards/types"
-	sendingtypes "github.com/dydxprotocol/v4-chain/protocol/x/sending/types"
-	stattypes "github.com/dydxprotocol/v4-chain/protocol/x/stats/types"
-	satypes "github.com/dydxprotocol/v4-chain/protocol/x/subaccounts/types"
-	vaulttypes "github.com/dydxprotocol/v4-chain/protocol/x/vault/types"
-	vesttypes "github.com/dydxprotocol/v4-chain/protocol/x/vest/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	testlog "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/logger"
+	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
+	blocktimetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
+	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
+	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
+	epochstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs/types"
+	feetiertypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
+	govplus "github.com/joltify-finance/joltify_lending/x/third_party_dydx/govplus/types"
+	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
+	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
+	ratelimittypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
+	rewardstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/rewards/types"
+	sendingtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"
+	stattypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/types"
+	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
+	vaulttypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types"
+	vesttypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/types"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/slices"
 )
@@ -156,7 +156,7 @@ func DefaultTestApp(customFlags map[string]interface{}, baseAppOptions ...func(*
 		logger, _ = testlog.TestLogger()
 	}
 	db := dbm.NewMemDB()
-	dydxApp := app.New(
+	dydxApp := app.NewApp(
 		logger,
 		db,
 		nil,
@@ -169,7 +169,7 @@ func DefaultTestApp(customFlags map[string]interface{}, baseAppOptions ...func(*
 
 // DefaultGenesis returns a genesis doc using configuration from the local net with a genesis time
 // equivalent to unix epoch + 1 nanosecond. We specifically use non-zero because stateful orders
-// validate that block time is non-zero (https://github.com/dydxprotocol/v4-chain/protocol/blob/
+// validate that block time is non-zero (https://github.com/joltify-finance/joltify_lending/dydx_helper/blob/
 // 84a046554ab1b4725475500d94a0b3179fdd18c2/x/clob/keeper/stateful_order_state.go#L237).
 func DefaultGenesis() (genesis types.GenesisDoc) {
 	// NOTE: Tendermint uses a custom JSON decoder for GenesisDoc
@@ -1306,7 +1306,7 @@ func launchValidatorInDir(
 		tmcfg.LogFormatPlain,
 		"The logging format (json|plain)",
 	)
-	executor := tmcli.PrepareBaseCmd(rootCmd, appconstants.AppDaemonName, app.DefaultNodeHome)
+	executor := tmcli.PrepareBaseCmd(rootCmd, app.AppDaemonName, app.DefaultNodeHome)
 	// We need to launch the root command in a separate go routine since it only returns once the app is shutdown.
 	// So we wait for either the app to be captured representing a successful start or capture an error.
 	go func() {

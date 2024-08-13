@@ -3,8 +3,8 @@ package constants
 import (
 	"math/big"
 
-	"github.com/dydxprotocol/v4-chain/protocol/dtypes"
-	perptypes "github.com/dydxprotocol/v4-chain/protocol/x/perpetuals/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/dtypes"
+	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 )
 
 func init() {

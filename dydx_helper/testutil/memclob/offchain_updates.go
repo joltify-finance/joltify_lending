@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dydxprotocol/v4-chain/protocol/indexer/msgsender"
-	"github.com/dydxprotocol/v4-chain/protocol/indexer/off_chain_updates"
-	ocutypes "github.com/dydxprotocol/v4-chain/protocol/indexer/off_chain_updates/types"
-	indexershared "github.com/dydxprotocol/v4-chain/protocol/indexer/shared/types"
-	"github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/msgsender"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/off_chain_updates"
+	ocutypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/off_chain_updates/types"
+	indexershared "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/typ.v4/slices"
 )

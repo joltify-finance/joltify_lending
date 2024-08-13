@@ -4,10 +4,10 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/dydxprotocol/v4-chain/protocol/app/config"
-	assettypes "github.com/dydxprotocol/v4-chain/protocol/x/assets/types"
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
-	sendingtypes "github.com/dydxprotocol/v4-chain/protocol/x/sending/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/app/config"
+	sendingtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/types"
+	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
+	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
 func init() {

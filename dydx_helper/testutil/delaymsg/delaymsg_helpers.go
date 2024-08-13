@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/stretchr/testify/require"
 )
 

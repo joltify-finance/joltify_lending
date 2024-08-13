@@ -6,9 +6,9 @@ import (
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/gogoproto/proto"
 
-	indexerevents "github.com/dydxprotocol/v4-chain/protocol/indexer/events"
-	"github.com/dydxprotocol/v4-chain/protocol/indexer/indexer_manager"
-	"github.com/dydxprotocol/v4-chain/protocol/mocks"
+	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -16,10 +16,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
-	"github.com/dydxprotocol/v4-chain/protocol/x/assets/keeper"
-	"github.com/dydxprotocol/v4-chain/protocol/x/assets/types"
-	priceskeeper "github.com/dydxprotocol/v4-chain/protocol/x/prices/keeper"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/assets/keeper"
+	priceskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 )
 
 // CreateUsdcAsset creates USDC in the assets module for tests.

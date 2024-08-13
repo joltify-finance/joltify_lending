@@ -20,11 +20,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/dydxprotocol/v4-chain/protocol/app"
-	"github.com/dydxprotocol/v4-chain/protocol/app/basic_manager"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/appoptions"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/ci"
 	"github.com/gofrs/flock"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/app"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/app/basic_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/ci"
 	"github.com/stretchr/testify/require"
 )
 

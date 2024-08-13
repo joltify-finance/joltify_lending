@@ -3,8 +3,8 @@ package constants
 import (
 	"math"
 
-	"github.com/dydxprotocol/v4-chain/protocol/dtypes"
-	satypes "github.com/dydxprotocol/v4-chain/protocol/x/subaccounts/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
+	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
 )
 
 var (

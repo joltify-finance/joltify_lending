@@ -3,9 +3,9 @@ package constants
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dydxprotocol/v4-chain/protocol/x/bridge/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethcoretypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 )
 
 func init() {

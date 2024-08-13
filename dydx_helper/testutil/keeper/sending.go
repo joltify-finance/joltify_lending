@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	dbm "github.com/cosmos/cosmos-db"
-	"github.com/dydxprotocol/v4-chain/protocol/lib"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 
-	"github.com/dydxprotocol/v4-chain/protocol/indexer/indexer_manager"
-	"github.com/dydxprotocol/v4-chain/protocol/mocks"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -17,12 +17,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	assetskeeper "github.com/dydxprotocol/v4-chain/protocol/x/assets/keeper"
-	delaymsgtypes "github.com/dydxprotocol/v4-chain/protocol/x/delaymsg/types"
-	perpkeeper "github.com/dydxprotocol/v4-chain/protocol/x/perpetuals/keeper"
-	priceskeeper "github.com/dydxprotocol/v4-chain/protocol/x/prices/keeper"
-	"github.com/dydxprotocol/v4-chain/protocol/x/sending/keeper"
-	"github.com/dydxprotocol/v4-chain/protocol/x/sending/types"
+	assetskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/assets/keeper"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
+	perpkeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/keeper"
+	priceskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/keeper"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/keeper"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/types"
 )
 
 type SendingKeepersTestContext struct {

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/network"
-	"github.com/dydxprotocol/v4-chain/protocol/x/prices/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/network"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
 	"github.com/stretchr/testify/require"
 )
 

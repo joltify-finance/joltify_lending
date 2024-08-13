@@ -1,7 +1,7 @@
 package constants
 
 import (
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
+	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
 var (

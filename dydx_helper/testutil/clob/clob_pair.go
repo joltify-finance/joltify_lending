@@ -1,8 +1,8 @@
 package clob
 
 import (
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
-	satypes "github.com/dydxprotocol/v4-chain/protocol/x/subaccounts/types"
+	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
+	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
 // MustPerpetualId is a wrapper around ClobPair.GetPerpetualId() which panics if an error is returned.

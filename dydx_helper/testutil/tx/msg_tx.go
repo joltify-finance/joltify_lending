@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/dydxprotocol/v4-chain/protocol/app/module"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 )
 
 // Returns the encoded msg as transaction. Will panic if encoding fails.

@@ -39,6 +39,8 @@ import (
 	quotamodulekeeper "github.com/joltify-finance/joltify_lending/x/quota/keeper"
 	quotamoduletypes "github.com/joltify-finance/joltify_lending/x/quota/types"
 
+	clobmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/keeper"
+
 	ibcratelimit "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit"
 	ibcratelimittypes "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit/types"
 
@@ -158,6 +160,9 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v8/modules/core"
 	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+
+	perpetualsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/keeper"
+	pricesmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
 
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
@@ -290,7 +295,7 @@ type App struct {
 	stakingKeeper    *stakingkeeper.Keeper
 	mintKeeper       mintkeeper.Keeper
 	distrKeeper      distrkeeper.Keeper
-	govKeeper        govkeeper.Keeper
+	GovKeeper        govkeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	authzKeeper      authzkeeper.Keeper
 	crisisKeeper     *crisiskeeper.Keeper
@@ -319,6 +324,11 @@ type App struct {
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
+
+	// dydx keepers
+	ClobKeeper       *clobmodulekeeper.Keeper
+	PerpetualsKeeper *perpetualsmodulekeeper.Keeper
+	PricesKeeper     pricesmodulekeeper.Keeper
 
 	// the module manager
 	ModuleManger *module.Manager
@@ -699,7 +709,7 @@ func NewApp(
 
 	govKeeper.SetLegacyRouter(govRouter)
 
-	app.govKeeper = *govKeeper.SetHooks(
+	app.GovKeeper = *govKeeper.SetHooks(
 		govtypes.NewMultiGovHooks(
 		// register the governance hooks
 		),
@@ -727,7 +737,7 @@ func NewApp(
 		staking.NewAppModule(appCodec, app.stakingKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(stakingtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.mintKeeper, app.accountKeeper, app.bankKeeper),
 		distr.NewAppModule(appCodec, app.distrKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
-		gov.NewAppModule(appCodec, &app.govKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(govtypes.ModuleName)),
+		gov.NewAppModule(appCodec, &app.GovKeeper, app.accountKeeper, app.bankKeeper, app.ParamsKeeper.Subspace(govtypes.ModuleName)),
 		params.NewAppModule(app.ParamsKeeper),
 		slashing.NewAppModule(appCodec, app.slashingKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(slashingtypes.ModuleName), app.interfaceRegistry),
 		ibc.NewAppModule(app.ibcKeeper),
@@ -916,7 +926,7 @@ func NewApp(
 	// app.sm = module.NewSimulationManager(
 	// 	auth.NewAppModule(app.accountKeeper),
 	// 	bank.NewAppModule(app.bankKeeper, app.accountKeeper),
-	// 	gov.NewAppModule(app.govKeeper, app.accountKeeper, app.accountKeeper, app.bankKeeper),
+	// 	gov.NewAppModule(app.GovKeeper, app.accountKeeper, app.accountKeeper, app.bankKeeper),
 	// 	mint.NewAppModule(app.mintKeeper),
 	// 	distr.NewAppModule(app.distrKeeper, app.accountKeeper, app.accountKeeper, app.bankKeeper, app.stakingKeeper),
 	//  staking.NewAppModule(app.stakingKeeper, app.accountKeeper, app.accountKeeper, app.bankKeeper),

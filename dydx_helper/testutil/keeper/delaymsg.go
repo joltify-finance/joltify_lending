@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	dbm "github.com/cosmos/cosmos-db"
-	"github.com/dydxprotocol/v4-chain/protocol/lib"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/ante"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/ante"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -13,11 +13,11 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	"github.com/dydxprotocol/v4-chain/protocol/mocks"
-	bridgekeeper "github.com/dydxprotocol/v4-chain/protocol/x/bridge/keeper"
-	bridgetypes "github.com/dydxprotocol/v4-chain/protocol/x/bridge/types"
-	"github.com/dydxprotocol/v4-chain/protocol/x/delaymsg/keeper"
-	"github.com/dydxprotocol/v4-chain/protocol/x/delaymsg/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+	bridgekeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/bridge/keeper"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/keeper"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
+	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 )
 
 func DelayMsgKeepers(

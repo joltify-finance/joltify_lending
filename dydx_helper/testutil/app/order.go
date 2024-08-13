@@ -6,15 +6,16 @@ package app
 import (
 	"fmt"
 
+	"github.com/joltify-finance/joltify_lending/app"
+
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dydxprotocol/v4-chain/protocol/app"
-	"github.com/dydxprotocol/v4-chain/protocol/lib"
-	clobtest "github.com/dydxprotocol/v4-chain/protocol/testutil/clob"
-	perptest "github.com/dydxprotocol/v4-chain/protocol/testutil/perpetuals"
-	pricestest "github.com/dydxprotocol/v4-chain/protocol/testutil/prices"
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
-	pricestypes "github.com/dydxprotocol/v4-chain/protocol/x/prices/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	clobtest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/clob"
+	perptest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/perpetuals"
+	pricestest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/prices"
+	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
+	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 
 // Subsitute quantums and subticks with value converted from human readable price and amount.

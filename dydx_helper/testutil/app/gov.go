@@ -9,7 +9,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/stretchr/testify/require"
 )
 

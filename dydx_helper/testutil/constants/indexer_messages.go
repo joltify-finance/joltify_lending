@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/cometbft/cometbft/crypto/tmhash"
-	"github.com/dydxprotocol/v4-chain/protocol/indexer/msgsender"
-	"github.com/dydxprotocol/v4-chain/protocol/lib"
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/msgsender"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
 // Used to construct the constants below.

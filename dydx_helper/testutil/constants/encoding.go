@@ -1,6 +1,6 @@
 package constants
 
-import "github.com/dydxprotocol/v4-chain/protocol/testutil/encoding"
+import "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
 
 var (
 	TestEncodingCfg = encoding.GetTestEncodingCfg()

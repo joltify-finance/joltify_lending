@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	dbm "github.com/cosmos/cosmos-db"
-	"github.com/dydxprotocol/v4-chain/protocol/app/module"
-	indexer_manager "github.com/dydxprotocol/v4-chain/protocol/indexer/indexer_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	indexer_manager "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdktest "github.com/dydxprotocol/v4-chain/protocol/testutil/sdk"
+	sdktest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sdk"
 	"github.com/stretchr/testify/require"
 )
 

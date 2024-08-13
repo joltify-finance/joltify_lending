@@ -3,8 +3,8 @@ package constants
 import (
 	"math"
 
-	"github.com/dydxprotocol/v4-chain/protocol/lib"
-	clobtypes "github.com/dydxprotocol/v4-chain/protocol/x/clob/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
 var (

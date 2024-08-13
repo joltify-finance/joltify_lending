@@ -1,11 +1,11 @@
 package constants
 
 import (
-	"github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/api"
-	"github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/client/constants"
-	daemonClientTypes "github.com/dydxprotocol/v4-chain/protocol/daemons/pricefeed/client/types"
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/client"
-	"github.com/dydxprotocol/v4-chain/protocol/x/prices/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/api"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/constants"
+	daemonClientTypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/client"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
 )
 
 var (
