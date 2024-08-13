@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	v4module "github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	v4module "github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"

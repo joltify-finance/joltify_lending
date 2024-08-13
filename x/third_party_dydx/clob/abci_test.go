@@ -11,7 +11,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 
 	tmtypes "github.com/cometbft/cometbft/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/liquidation/api"
+	"github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	indexershared "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared/types"

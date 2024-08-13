@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"math/rand"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"

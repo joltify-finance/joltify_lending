@@ -5,7 +5,7 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/metrics"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/metrics"
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"

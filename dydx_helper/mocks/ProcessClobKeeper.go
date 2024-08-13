@@ -6,7 +6,7 @@ import (
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	mock "github.com/stretchr/testify/mock"
 
-	process "github.com/joltify-finance/joltify_lending/dydx_helper/app/process"
+	process "github.com/joltify-finance/joltify_lending/dydx_helper/process"
 
 	types "github.com/cosmos/cosmos-sdk/types"
 )

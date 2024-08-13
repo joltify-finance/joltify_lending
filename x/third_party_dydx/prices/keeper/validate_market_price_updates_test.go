@@ -5,7 +5,7 @@ import (
 
 	errorsmod "cosmossdk.io/errors"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/api"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/api"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"

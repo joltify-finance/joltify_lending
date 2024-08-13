@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	pricetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 

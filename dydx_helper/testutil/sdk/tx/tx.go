@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	xauthsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app"
+	"github.com/joltify-finance/joltify_lending/app"
 )
 
 // CreateTestTx is a helper function to create a tx given multiple inputs.
@@ -21,7 +21,7 @@ func CreateTestTx(
 	msgs []sdk.Msg,
 	timeoutHeight uint64,
 ) (xauthsigning.Tx, error) {
-	encodingConfig := app.GetEncodingConfig()
+	encodingConfig := app.MakeEncodingConfig()
 	clientCtx := client.Context{}.WithTxConfig(encodingConfig.TxConfig)
 	txBuilder := clientCtx.TxConfig.NewTxBuilder()
 	txBuilder.SetTimeoutHeight(timeoutHeight)

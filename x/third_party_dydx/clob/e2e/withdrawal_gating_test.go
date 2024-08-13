@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/liquidation/api"
+	"github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
 
 	"github.com/cometbft/cometbft/types"
 

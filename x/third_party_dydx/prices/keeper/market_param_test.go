@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/metrics"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/metrics"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/slinky"
 
 	errorsmod "cosmossdk.io/errors"

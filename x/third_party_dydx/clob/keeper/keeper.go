@@ -10,7 +10,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	liquidationtypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/liquidations"
+	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/liquidations"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"

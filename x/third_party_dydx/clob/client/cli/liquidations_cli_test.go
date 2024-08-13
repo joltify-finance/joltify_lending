@@ -12,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/joltify-finance/joltify_lending/app"
 	appflags "github.com/joltify-finance/joltify_lending/app/flags"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
@@ -25,8 +26,7 @@ import (
 	sa_testutil "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/client/testutil"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 
-	appconstants "github.com/joltify-finance/joltify_lending/dydx_helper/app/constants"
-	daemonflags "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/flags"
+	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
 	testutil_bank "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/bank"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
@@ -91,7 +91,7 @@ func TestLiquidationOrderIntegrationTestSuite(t *testing.T) {
 	})
 
 	cfg.Mnemonics = append(cfg.Mnemonics, validatorMnemonic)
-	cfg.ChainID = appconstants.AppName
+	cfg.ChainID = app.Name
 
 	suite.Run(t, NewLiquidationsIntegrationTestSuite(cfg, validatorAddress))
 }

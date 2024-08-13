@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"

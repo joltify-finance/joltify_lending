@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	v4module "github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	v4module "github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"

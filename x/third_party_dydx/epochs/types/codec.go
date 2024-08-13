@@ -3,7 +3,7 @@ package types
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 )
 
 func RegisterCodec(cdc *codec.LegacyAmino) {}

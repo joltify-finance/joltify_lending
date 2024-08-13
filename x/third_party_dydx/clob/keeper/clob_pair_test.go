@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"

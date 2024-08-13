@@ -12,7 +12,7 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	bridgeserver_types "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/bridge"
+	bridgeserver_types "github.com/joltify-finance/joltify_lending/daemons/server/types/bridge"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"

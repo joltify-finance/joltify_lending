@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	api "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/bridge/api"
+	api "github.com/joltify-finance/joltify_lending/daemons/bridge/api"
 
 	grpc "google.golang.org/grpc"
 

@@ -14,7 +14,7 @@ import (
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/config"
+	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/rand"
 	"gopkg.in/typ.v4/slices"
@@ -589,7 +589,7 @@ func TestConcurrentMatchesAndCancels(t *testing.T) {
 				for _, simAccount := range simAccounts {
 					genesisState.Subaccounts = append(genesisState.Subaccounts, satypes.Subaccount{
 						Id: &satypes.SubaccountId{
-							Owner:  sdktypes.MustBech32ifyAddressBytes(config.Bech32PrefixAccAddr, simAccount.PubKey.Address()),
+							Owner:  sdktypes.MustBech32ifyAddressBytes(app.Bech32MainPrefix, simAccount.PubKey.Address()),
 							Number: 0,
 						},
 						AssetPositions: []*satypes.AssetPosition{
@@ -609,7 +609,7 @@ func TestConcurrentMatchesAndCancels(t *testing.T) {
 	checkTxsPerAccount := make([][]abcitypes.RequestCheckTx, len(simAccounts))
 	for i, simAccount := range simAccounts {
 		privKeySupplier := func(accAddress string) cryptotypes.PrivKey {
-			expectedAccAddress := sdktypes.MustBech32ifyAddressBytes(config.Bech32PrefixAccAddr, simAccount.PubKey.Address())
+			expectedAccAddress := sdktypes.MustBech32ifyAddressBytes(app.Bech32MainPrefix, simAccount.PubKey.Address())
 			if accAddress != expectedAccAddress {
 				panic(fmt.Errorf("Unknown account, got %s, expected %s", accAddress, expectedAccAddress))
 			}
@@ -617,7 +617,7 @@ func TestConcurrentMatchesAndCancels(t *testing.T) {
 		}
 		orderId := clobtypes.OrderId{
 			SubaccountId: satypes.SubaccountId{
-				Owner:  sdktypes.MustBech32ifyAddressBytes(config.Bech32PrefixAccAddr, simAccount.PubKey.Address()),
+				Owner:  sdktypes.MustBech32ifyAddressBytes(app.Bech32MainPrefix, simAccount.PubKey.Address()),
 				Number: 0,
 			},
 			ClientId:   0,

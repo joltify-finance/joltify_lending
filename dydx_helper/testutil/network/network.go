@@ -21,8 +21,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/gofrs/flock"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/basic_manager"
+	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/ci"
 	"github.com/stretchr/testify/require"
@@ -130,9 +129,10 @@ func DefaultConfig(options *NetworkConfigOptions) network.Config {
 		onNewApp = options.OnNewApp
 	}
 
-	encoding := app.GetEncodingConfig()
+	encoding := app.MakeEncodingConfig()
+
 	return network.Config{
-		Codec:             encoding.Codec,
+		Codec:             encoding.Marshaler,
 		TxConfig:          encoding.TxConfig,
 		LegacyAmino:       encoding.Amino,
 		InterfaceRegistry: encoding.InterfaceRegistry,
@@ -143,7 +143,7 @@ func DefaultConfig(options *NetworkConfigOptions) network.Config {
 				appOptions.(*appoptions.FakeAppOptions).Set(flags.FlagHome, val.GetCtx().Config.RootDir)
 			}
 
-			return app.New(
+			return app.NewApp(
 				val.GetCtx().Logger,
 				dbm.NewMemDB(),
 				nil,
@@ -154,7 +154,7 @@ func DefaultConfig(options *NetworkConfigOptions) network.Config {
 				baseapp.SetChainID("dydxprotocol"),
 			)
 		},
-		GenesisState:    basic_manager.ModuleBasics.DefaultGenesis(encoding.Codec),
+		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),
 		TimeoutCommit:   2 * time.Second,
 		ChainID:         "dydxprotocol",
 		NumValidators:   1,
@@ -173,7 +173,7 @@ func DefaultConfig(options *NetworkConfigOptions) network.Config {
 // NewTestNetworkFixture returns a new simapp AppConstructor for network simulation tests
 func NewTestNetworkFixture() network.TestFixture {
 	appOptions := appoptions.GetDefaultTestAppOptionsFromTempDirectory("", nil)
-	dydxApp := app.New(
+	dydxApp := app.NewApp(
 		log.NewNopLogger(),
 		dbm.NewMemDB(),
 		nil,
@@ -182,7 +182,7 @@ func NewTestNetworkFixture() network.TestFixture {
 	)
 
 	appCtr := func(val network.ValidatorI) servertypes.Application {
-		return app.New(
+		return app.NewApp(
 			val.GetCtx().Logger,
 			dbm.NewMemDB(),
 			nil,
@@ -195,7 +195,7 @@ func NewTestNetworkFixture() network.TestFixture {
 
 	return network.TestFixture{
 		AppConstructor: appCtr,
-		GenesisState:   dydxApp.DefaultGenesis(),
+		GenesisState:   app.ModuleBasics.DefaultGenesis(dydxApp.EncodingConfig().Marshaler),
 		EncodingConfig: testutil.TestEncodingConfig{
 			InterfaceRegistry: dydxApp.InterfaceRegistry(),
 			Codec:             dydxApp.AppCodec(),

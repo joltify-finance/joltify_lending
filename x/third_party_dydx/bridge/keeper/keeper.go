@@ -7,7 +7,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	bridgeserver "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/bridge"
+	bridgeserver "github.com/joltify-finance/joltify_lending/daemons/server/types/bridge"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"

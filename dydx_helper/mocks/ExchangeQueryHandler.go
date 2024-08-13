@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	daemonstypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/types"
+	daemonstypes "github.com/joltify-finance/joltify_lending/daemons/types"
 
 	mock "github.com/stretchr/testify/mock"
 

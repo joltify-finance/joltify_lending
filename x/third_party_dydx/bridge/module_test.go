@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -17,7 +17,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bank_keeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	bridge_servertypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/bridge"
+	bridge_servertypes "github.com/joltify-finance/joltify_lending/daemons/server/types/bridge"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge"

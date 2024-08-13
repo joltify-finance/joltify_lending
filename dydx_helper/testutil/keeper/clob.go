@@ -9,7 +9,7 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	liquidationtypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/liquidations"
+	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/liquidations"
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"

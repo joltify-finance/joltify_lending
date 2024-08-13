@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	gometrics "github.com/hashicorp/go-metrics"
-	pricefeedmetrics "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/metrics"
+	pricefeedmetrics "github.com/joltify-finance/joltify_lending/daemons/pricefeed/metrics"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
 

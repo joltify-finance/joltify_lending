@@ -4,7 +4,7 @@ package mocks
 
 import (
 	types "github.com/cosmos/cosmos-sdk/types"
-	process "github.com/joltify-finance/joltify_lending/dydx_helper/app/process"
+	process "github.com/joltify-finance/joltify_lending/dydx_helper/process"
 	mock "github.com/stretchr/testify/mock"
 )
 

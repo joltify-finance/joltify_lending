@@ -9,7 +9,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	pricefeedtypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/pricefeed"
+	pricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	libtime "github.com/joltify-finance/joltify_lending/dydx_helper/lib/time"

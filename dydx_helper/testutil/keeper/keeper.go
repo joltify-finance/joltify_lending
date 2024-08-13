@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	dbm "github.com/cosmos/cosmos-db"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
 	indexer_manager "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"

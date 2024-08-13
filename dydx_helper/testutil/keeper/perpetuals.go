@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	pricefeedserver_types "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/server/types/pricefeed"
+	pricefeedserver_types "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"

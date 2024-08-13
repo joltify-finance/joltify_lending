@@ -5,7 +5,7 @@ package mocks
 import (
 	time "time"
 
-	pricefeedtypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/types"
+	pricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/pricefeed/types"
 	mock "github.com/stretchr/testify/mock"
 
 	types "github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"

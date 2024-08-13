@@ -10,7 +10,7 @@ import (
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/bridge/api"
+	"github.com/joltify-finance/joltify_lending/daemons/bridge/api"
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	testtx "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/tx"

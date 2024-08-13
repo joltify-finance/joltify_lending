@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	appconstants "github.com/joltify-finance/joltify_lending/dydx_helper/app/constants"
+	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/network"
 	epochstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs/types"
@@ -50,7 +50,7 @@ func (s *SendingIntegrationTestSuite) SetupTest() {
 	s.cfg = network.DefaultConfig(nil)
 
 	s.cfg.Mnemonics = append(s.cfg.Mnemonics, validatorMnemonic)
-	s.cfg.ChainID = appconstants.AppName
+	s.cfg.ChainID = app.Name
 
 	// Set min gas prices to zero so that we can submit transactions with zero gas price.
 	s.cfg.MinGasPrices = fmt.Sprintf("0%s", sdk.DefaultBondDenom)

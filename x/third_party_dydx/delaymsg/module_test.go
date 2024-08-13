@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed"
 	testutildelaymsg "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/delaymsg"

@@ -3,7 +3,7 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/api"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/api"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"

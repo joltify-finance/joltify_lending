@@ -12,9 +12,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/joltify-finance/joltify_lending/app"
 	appflags "github.com/joltify-finance/joltify_lending/app/flags"
-	appconstants "github.com/joltify-finance/joltify_lending/dydx_helper/app/constants"
-	daemonflags "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/flags"
+	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
 	testutil_bank "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/bank"
@@ -83,7 +83,7 @@ func TestPlaceOrderIntegrationTestSuite(t *testing.T) {
 	})
 
 	cfg.Mnemonics = append(cfg.Mnemonics, validatorMnemonic)
-	cfg.ChainID = appconstants.AppName
+	cfg.ChainID = app.Name
 
 	suite.Run(t, NewPlaceOrderIntegrationTestSuite(cfg, validatorAddress))
 }

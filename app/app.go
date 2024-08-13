@@ -9,6 +9,7 @@ import (
 
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
+
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
@@ -17,6 +18,8 @@ import (
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	solomachine "github.com/cosmos/ibc-go/v8/modules/light-clients/06-solomachine"
 	params2 "github.com/joltify-finance/joltify_lending/app/params"
+
+	statsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/keeper"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 
@@ -45,6 +48,8 @@ import (
 	ibcratelimittypes "github.com/joltify-finance/joltify_lending/x/ibc-rate-limit/types"
 
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
+
+	subaccountsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/keeper"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -326,9 +331,11 @@ type App struct {
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 
 	// dydx keepers
-	ClobKeeper       *clobmodulekeeper.Keeper
-	PerpetualsKeeper *perpetualsmodulekeeper.Keeper
-	PricesKeeper     pricesmodulekeeper.Keeper
+	ClobKeeper        *clobmodulekeeper.Keeper
+	PerpetualsKeeper  *perpetualsmodulekeeper.Keeper
+	PricesKeeper      pricesmodulekeeper.Keeper
+	StatsKeeper       statsmodulekeeper.Keeper
+	SubaccountsKeeper subaccountsmodulekeeper.Keeper
 
 	// the module manager
 	ModuleManger *module.Manager

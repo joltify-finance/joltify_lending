@@ -5,9 +5,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/app/msgs"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/ante"
+	appmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/msgs"
 	testmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/msgs"
 	"github.com/stretchr/testify/require"
 )

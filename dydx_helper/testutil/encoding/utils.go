@@ -28,7 +28,7 @@ import (
 	"github.com/cosmos/ibc-go/v8/modules/apps/transfer"
 	ibc "github.com/cosmos/ibc-go/v8/modules/core"
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
-	custommodule "github.com/joltify-finance/joltify_lending/dydx_helper/app/module"
+	custommodule "github.com/joltify-finance/joltify_lending/dydx_helper/module"
 	bridgemodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers"

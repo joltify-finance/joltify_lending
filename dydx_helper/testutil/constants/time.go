@@ -3,7 +3,7 @@ package constants
 import (
 	"time"
 
-	pricefeed "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/types"
+	pricefeed "github.com/joltify-finance/joltify_lending/daemons/pricefeed/types"
 )
 
 var (
