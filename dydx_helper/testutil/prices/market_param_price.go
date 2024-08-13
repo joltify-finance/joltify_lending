@@ -3,7 +3,7 @@ package prices
 import (
 	"math/big"
 
-	pricestypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
+	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 
 type MarketParamPriceModifierOption func(cp *pricestypes.MarketParamPrice)

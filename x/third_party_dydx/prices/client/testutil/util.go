@@ -3,7 +3,7 @@ package testutil
 import (
 	"sort"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 )
 
 func GetTickersSortedByMarketId(marketToMarketConfig map[uint32]types.MarketConfig) []string {

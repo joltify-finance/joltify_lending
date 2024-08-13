@@ -1,7 +1,7 @@
 package constants
 
 import (
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/feetiers/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
 )
 
 var PerpetualFeeParams = types.PerpetualFeeParams{

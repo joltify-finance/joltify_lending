@@ -15,12 +15,12 @@ import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
-	assetskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/assets/keeper"
-	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
-	feetierskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/feetiers/keeper"
-	priceskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/keeper"
-	rewardskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/rewards/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/rewards/types"
+	assetskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/keeper"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
+	feetierskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/keeper"
+	priceskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
+	rewardskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/rewards/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/rewards/types"
 )
 
 func RewardsKeepers(

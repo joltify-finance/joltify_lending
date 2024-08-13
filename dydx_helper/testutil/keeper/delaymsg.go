@@ -14,10 +14,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
-	bridgekeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/bridge/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
+	bridgekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/keeper"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 )
 
 func DelayMsgKeepers(

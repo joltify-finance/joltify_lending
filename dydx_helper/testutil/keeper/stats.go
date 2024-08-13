@@ -4,13 +4,13 @@ import (
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
-	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	epochskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/epochs/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/stats/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/stats/types"
+	epochskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/types"
 )
 
 func createStatsKeeper(

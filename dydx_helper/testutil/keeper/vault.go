@@ -5,15 +5,15 @@ import (
 
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/vault/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/vault/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types"
 )
 
 func VaultKeepers(

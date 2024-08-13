@@ -3,9 +3,9 @@ package events_test
 import (
 	"testing"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	v1 "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/protocol/v1"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"

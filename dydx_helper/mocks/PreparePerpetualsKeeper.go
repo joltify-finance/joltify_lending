@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	perpetualstypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/types"
+	perpetualstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	mock "github.com/stretchr/testify/mock"
 
 	types "github.com/cosmos/cosmos-sdk/types"

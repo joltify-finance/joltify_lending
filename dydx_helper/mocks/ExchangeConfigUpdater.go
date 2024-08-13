@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	types "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	types "github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	mock "github.com/stretchr/testify/mock"
 )
 

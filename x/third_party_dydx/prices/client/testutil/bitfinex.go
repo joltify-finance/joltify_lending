@@ -2,8 +2,8 @@ package testutil
 
 import (
 	"github.com/h2non/gock"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/handler"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/price_function/bitfinex"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/handler"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/price_function/bitfinex"
 )
 
 // BitfinexTicker represents ticker in Bitfinex response for testing purposes.

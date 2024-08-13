@@ -5,7 +5,7 @@ package mocks
 import (
 	mock "github.com/stretchr/testify/mock"
 
-	pricestypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
+	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 
 	types "github.com/cosmos/cosmos-sdk/types"
 )

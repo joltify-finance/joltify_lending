@@ -2,10 +2,10 @@ package ante
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	perpetualstypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/types"
-	pricestypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
+	perpetualstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
+	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 
 // IsSingleAppInjectedMsg returns true if the given list of msgs contains an "app-injected msg"

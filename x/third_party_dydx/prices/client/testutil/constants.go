@@ -2,8 +2,8 @@ package testutil
 
 import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/constants/exchange_common"
-	pricefeed "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants/exchange_common"
+	pricefeed "github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed/exchange_config"
 )

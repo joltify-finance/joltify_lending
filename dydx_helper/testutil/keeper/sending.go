@@ -17,12 +17,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	assetskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/assets/keeper"
-	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
-	perpkeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/keeper"
-	priceskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/types"
+	assetskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/keeper"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
+	perpkeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/keeper"
+	priceskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"
 )
 
 type SendingKeepersTestContext struct {

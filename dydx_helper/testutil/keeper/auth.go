@@ -13,9 +13,9 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	perpetualstypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/types"
-	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
+	perpetualstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
+	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 
 func createAccountKeeper(

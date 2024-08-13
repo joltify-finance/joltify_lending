@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/server/config"
-	appflags "github.com/joltify-finance/joltify_lending/dydx_helper/app/flags"
-
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	daemonflags "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/flags"
+	appflags "github.com/joltify-finance/joltify_lending/app/flags"
+	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
 )
 
 // FakeAppOptions is a helper struct used for creating `servertypes.AppOptions` for simulator and end-to-end testing.

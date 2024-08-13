@@ -7,11 +7,11 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/feetiers/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/feetiers/types"
-	statskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/stats/keeper"
-	vaultkeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/vault/keeper"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
+	statskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/keeper"
+	vaultkeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/keeper"
 )
 
 func createFeeTiersKeeper(

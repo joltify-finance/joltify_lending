@@ -2,7 +2,7 @@ package constants
 
 import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
+	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 
 var (

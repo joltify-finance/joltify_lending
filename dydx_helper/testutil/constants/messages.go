@@ -5,9 +5,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/app/config"
-	sendingtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/types"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
+	sendingtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"
 )
 
 func init() {

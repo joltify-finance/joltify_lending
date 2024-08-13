@@ -3,7 +3,7 @@ package constants
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
+	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 
 var (

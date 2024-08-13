@@ -8,12 +8,11 @@ import (
 	"math/big"
 	"testing"
 
-	appflags "github.com/joltify-finance/joltify_lending/dydx_helper/app/flags"
-
 	networktestutil "github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	appflags "github.com/joltify-finance/joltify_lending/app/flags"
 	appconstants "github.com/joltify-finance/joltify_lending/dydx_helper/app/constants"
 	daemonflags "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/flags"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"

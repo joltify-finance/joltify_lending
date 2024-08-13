@@ -12,7 +12,7 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/constants"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants"
 
 	errorsmod "cosmossdk.io/errors"
 

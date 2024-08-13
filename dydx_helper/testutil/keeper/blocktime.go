@@ -5,9 +5,9 @@ import (
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/blocktime/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/blocktime/types"
-	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 )
 
 func createBlockTimeKeeper(

@@ -3,11 +3,11 @@ package indexer_manager_test
 import (
 	"time"
 
-	"github.com/dydxprotocol/v4-chain/protocol/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	v1 "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/protocol/v1"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 

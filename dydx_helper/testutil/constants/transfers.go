@@ -1,8 +1,8 @@
 package constants
 
 import (
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/types"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"
 )
 
 var (

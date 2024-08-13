@@ -3,8 +3,8 @@ package constants
 import (
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 )
 
 var (

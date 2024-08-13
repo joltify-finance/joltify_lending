@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed/exchange_config"
 
 	"github.com/h2non/gock"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/price_function/binance"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/price_function/binance"
 )
 
 var binanceUsMarketConfig = map[types.MarketId]types.MarketConfig{

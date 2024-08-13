@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 )
 
 // ExchangeIdMarketPriceTimestamp contains an `ExchangeId` and an associated

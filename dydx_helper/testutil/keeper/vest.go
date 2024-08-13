@@ -10,10 +10,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	blocktimekeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/blocktime/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/vest/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/vest/types"
+	blocktimekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/types"
 )
 
 func VestKeepers(

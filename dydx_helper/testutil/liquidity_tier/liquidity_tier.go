@@ -1,7 +1,7 @@
 package liquidity_tier
 
 import (
-	perptypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/types"
+	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 )
 
 type LtModifierOption func(cp *perptypes.LiquidityTier)

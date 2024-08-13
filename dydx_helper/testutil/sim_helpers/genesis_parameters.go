@@ -3,7 +3,7 @@ package sim_helpers
 import (
 	"math"
 
-	perptypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/types"
+	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 )
 
 // All generated genesis parameters should be defined here.

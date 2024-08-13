@@ -8,7 +8,7 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	subaccountstypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
+	subaccountstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 
 	types "github.com/cosmos/cosmos-sdk/types"
 )

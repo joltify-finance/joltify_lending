@@ -21,13 +21,13 @@ import (
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	asskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/assets/keeper"
-	blocktimekeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/blocktime/keeper"
-	perpskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/keeper"
-	priceskeeper "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
+	asskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/keeper"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
+	blocktimekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
+	perpskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/keeper"
+	priceskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 
 func SubaccountsKeepers(

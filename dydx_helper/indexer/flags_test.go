@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dydxprotocol/v4-chain/protocol/mocks"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

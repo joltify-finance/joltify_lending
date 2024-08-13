@@ -4,7 +4,7 @@ package mocks
 
 import (
 	lib "github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	delaymsgtypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
+	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 
 	log "cosmossdk.io/log"
 

@@ -4,11 +4,11 @@ import (
 	bridgetypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/bridge/api"
 	liquidationtypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/liquidation/api"
 	pricefeedtypes "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/api"
-	blocktimetypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/blocktime/types"
-	perptypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/perpetuals/types"
-	pricetypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
-	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
+	blocktimetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
+	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
+	pricetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
+	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 
 // QueryClient combines all the query clients used in testing into a single mock interface for testing convenience.

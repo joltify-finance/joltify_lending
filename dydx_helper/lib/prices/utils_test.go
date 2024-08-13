@@ -3,7 +3,7 @@ package prices_test
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/prices"
 	"github.com/stretchr/testify/require"
 )

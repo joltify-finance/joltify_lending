@@ -3,8 +3,8 @@
 package mocks
 
 import (
-	types "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
-	pricestypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
+	types "github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
+	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	mock "github.com/stretchr/testify/mock"
 )
 

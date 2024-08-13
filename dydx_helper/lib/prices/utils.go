@@ -3,7 +3,7 @@ package prices
 import (
 	"math/big"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	"github.com/shopspring/decimal"
 )
 

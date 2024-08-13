@@ -18,9 +18,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	delaymsgmoduletypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/delaymsg/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
+	delaymsgmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

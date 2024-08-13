@@ -8,8 +8,8 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
-	prices "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
-	sending "github.com/joltify-finance/joltify_lending/dydx_helper/x/sending/types"
+	prices "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
+	sending "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"
 )
 
 func init() {

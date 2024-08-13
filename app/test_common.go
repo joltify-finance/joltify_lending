@@ -198,7 +198,7 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 	return TestApp{App: *app, Ctx: ctx}
 }
 
-func (tApp TestApp) GetAccountKeeper() authkeeper.AccountKeeper { return tApp.accountKeeper }
+func (tApp TestApp) GetAccountKeeper() authkeeper.AccountKeeper { return tApp.AccountKeeper }
 func (tApp TestApp) GetBankKeeper() bankkeeper.Keeper           { return tApp.bankKeeper }
 func (tApp TestApp) GetStakingKeeper() stakingkeeper.Keeper     { return *tApp.stakingKeeper }
 func (tApp TestApp) GetSlashingKeeper() slashingkeeper.Keeper   { return tApp.slashingKeeper }
@@ -388,7 +388,7 @@ func (tApp TestApp) CheckBalance(t *testing.T, ctx sdk.Context, owner sdk.AccAdd
 
 // GetModuleAccountBalance gets the current balance of the denom for a module account
 func (tApp TestApp) GetModuleAccountBalance(ctx sdk.Context, moduleName string, denom string) sdkmath.Int {
-	moduleAcc := tApp.accountKeeper.GetModuleAccount(ctx, moduleName)
+	moduleAcc := tApp.AccountKeeper.GetModuleAccount(ctx, moduleName)
 	balance := tApp.bankKeeper.GetBalance(ctx, moduleAcc.GetAddress(), denom)
 	return balance.Amount
 }

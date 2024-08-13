@@ -1,9 +1,9 @@
 package constants
 
 import (
-	pricefeedclient "github.com/joltify-finance/joltify_lending/dydx_helper/daemons/pricefeed/client/types"
+	pricefeedclient "github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed/exchange_config"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 
 func init() {

@@ -8,8 +8,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	satypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/subaccounts/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
+	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 
 var _ types.MemClobKeeper = &FakeMemClobKeeper{}

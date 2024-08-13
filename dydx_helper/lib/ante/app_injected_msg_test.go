@@ -9,7 +9,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/ante"
 	testmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/msgs"
-	pricestypes "github.com/joltify-finance/joltify_lending/dydx_helper/x/prices/types"
+	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/stretchr/testify/require"
 )
 
