@@ -3,7 +3,6 @@ package grpc
 import (
 	bridgetypes "github.com/joltify-finance/joltify_lending/daemons/bridge/api"
 	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
-	pricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/pricefeed/api"
 	blocktimetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
@@ -20,5 +19,4 @@ type QueryClient interface {
 	pricetypes.QueryClient
 	bridgetypes.BridgeServiceClient
 	liquidationtypes.LiquidationServiceClient
-	pricefeedtypes.PriceFeedServiceClient
 }
