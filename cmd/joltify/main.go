@@ -1,27 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/joltify-finance/joltify_lending/cmd/joltify/cmd"
-
-	clienthelpers "cosmossdk.io/client/v2/helpers"
-
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-
 	"github.com/joltify-finance/joltify_lending/app"
+	"github.com/joltify-finance/joltify_lending/app/config"
+	"github.com/joltify-finance/joltify_lending/app/constants"
+	"github.com/joltify-finance/joltify_lending/cmd/joltify/cmd"
 )
 
 func main() {
-	app.RegisterDenoms()
-	app.SetSDKConfig()
+	config.SetupConfig()
 
-	options := cmd.GetOptionWithCustomStartCmd()
+	option := cmd.GetOptionWithCustomStartCmd()
+	rootCmd := cmd.NewRootCmd(option, app.DefaultNodeHome)
 
-	rootCmd, _ := cmd.NewRootCmd(options)
-	if err := svrcmd.Execute(rootCmd, clienthelpers.EnvPrefix, app.DefaultNodeHome); err != nil {
-		fmt.Fprintln(rootCmd.OutOrStderr(), err)
+	cmd.AddTendermintSubcommands(rootCmd)
+
+	if err := svrcmd.Execute(rootCmd, constants.AppDaemonName, app.DefaultNodeHome); err != nil {
 		os.Exit(1)
 	}
 }

@@ -14,7 +14,6 @@ import (
 	appflags "github.com/joltify-finance/joltify_lending/app/flags"
 	"github.com/joltify-finance/joltify_lending/daemons/configs"
 	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
-	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	appconstants "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"

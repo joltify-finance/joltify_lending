@@ -1251,7 +1251,7 @@ func launchValidatorInDir(
 			}
 		},
 		// Override the addresses to use domain sockets to avoid port conflicts.
-		func(s string, appConfig *cmd.DydxAppConfig) (string, *cmd.DydxAppConfig) {
+		func(s string, appConfig *cmd.JoltAppConfig) (string, *cmd.JoltAppConfig) {
 			// Note that the domain sockets need to typically be ~100 bytes or fewer otherwise they will fail to be
 			// created. The actual limit is OS specific.
 			apiSocketPath := filepath.Join(validatorHomeDir, "api_socket")
@@ -1263,7 +1263,6 @@ func launchValidatorInDir(
 			appConfig.API.Enable = false
 			// We disable telemetry since multiple instances of the application fail to register causing a panic.
 			appConfig.Telemetry.Enabled = false
-			appConfig.Oracle.MetricsEnabled = false
 			return s, appConfig
 		},
 		// Capture the application instance.
