@@ -9,7 +9,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	pricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
+	pricefeedservertypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	libtime "github.com/joltify-finance/joltify_lending/dydx_helper/lib/time"
@@ -20,7 +20,7 @@ type (
 	Keeper struct {
 		cdc                            codec.BinaryCodec
 		storeKey                       storetypes.StoreKey
-		indexPriceCache                *pricefeedtypes.MarketToExchangePrices
+		indexPriceCache                *pricefeedservertypes.MarketToExchangePrices
 		timeProvider                   libtime.TimeProvider
 		indexerEventManager            indexer_manager.IndexerEventManager
 		marketToCreatedAt              map[uint32]time.Time
@@ -35,7 +35,7 @@ var _ types.PricesKeeper = &Keeper{}
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
-	indexPriceCache *pricefeedtypes.MarketToExchangePrices,
+	indexPriceCache *pricefeedservertypes.MarketToExchangePrices,
 	timeProvider libtime.TimeProvider,
 	indexerEventManager indexer_manager.IndexerEventManager,
 	authorities []string,

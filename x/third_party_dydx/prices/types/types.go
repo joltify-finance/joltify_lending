@@ -3,8 +3,6 @@ package types
 import (
 	"cosmossdk.io/log"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	slinkytypes "github.com/skip-mev/slinky/pkg/types"
-	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
 )
 
 type PricesKeeper interface {
@@ -48,9 +46,4 @@ type PricesKeeper interface {
 
 	// Misc.
 	Logger(ctx sdk.Context) log.Logger
-
-	// Slinky compat
-	GetCurrencyPairFromID(ctx sdk.Context, id uint64) (cp slinkytypes.CurrencyPair, found bool)
-	GetIDForCurrencyPair(ctx sdk.Context, cp slinkytypes.CurrencyPair) (uint64, bool)
-	GetPriceForCurrencyPair(ctx sdk.Context, cp slinkytypes.CurrencyPair) (oracletypes.QuotePrice, error)
 }

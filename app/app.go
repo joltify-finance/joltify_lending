@@ -9,6 +9,7 @@ import (
 
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
+	daemonservertypes "github.com/joltify-finance/joltify_lending/daemons/server/types"
 
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
@@ -347,6 +348,9 @@ type App struct {
 
 	// configurator
 	configurator module.Configurator
+
+	// dydx related
+	DaemonHealthMonitor *daemonservertypes.HealthMonitor
 }
 
 func init() {
