@@ -49,7 +49,7 @@ func (ao emptyAppOptions) Get(_ string) interface{} { return nil }
 
 // NewRootCmd creates a new root command for simd. It is called once in the
 // main function.
-func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
+func NewRootCmd(options *RootCmdOption) (*cobra.Command, params2.EncodingConfig) {
 	tempApp := app.NewApp(cmtlog.NewNopLogger(), dbm.NewMemDB(), nil, true, emptyAppOptions{})
 	// MakeConfig creates an EncodingConfig
 
@@ -116,7 +116,7 @@ func NewRootCmd() (*cobra.Command, params2.EncodingConfig) {
 	// TODO: double-check
 	// authclient.Codec = encodingConfig.Codec
 
-	initRootCmd(rootCmd, encodingConfig, tempApp.BasicModuleManager)
+	initRootCmd(rootCmd, encodingConfig, tempApp.BasicModuleManager, options)
 	autoCliOpts := tempApp.AutoCliOpts()
 	initClientCtx, _ = clientcfg.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
 	// autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
@@ -152,6 +152,7 @@ func initRootCmd(
 	rootCmd *cobra.Command,
 	encodingConfig params2.EncodingConfig,
 	basicManager module.BasicManager,
+	option *RootCmdOption,
 ) {
 	cfg := sdk.GetConfig()
 	cfg.Seal()
@@ -166,7 +167,20 @@ func initRootCmd(
 		// this line is used by starport scaffolding # stargate/root/commands
 	)
 
-	sdkserver.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
+	sdkserver.AddCommands(rootCmd, app.DefaultNodeHome,
+		func(logger cmtlog.Logger, db dbm.DB, writer io.Writer, options servertypes.AppOptions) servertypes.Application {
+			return newApp(logger, db, writer, options)
+		},
+
+		appExport,
+		// addModuleInitFlags
+		func(cmd *cobra.Command) {
+			addModuleInitFlags(cmd)
+			if option.startCmdCustomizer != nil {
+				option.startCmdCustomizer(cmd)
+			}
+		},
+	)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(

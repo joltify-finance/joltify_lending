@@ -28,7 +28,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/cmd/dydxprotocold/cmd"
+	"github.com/joltify-finance/joltify_lending/cmd/joltify/cmd"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"
 
 	abcitypes "github.com/cometbft/cometbft/abci/types"

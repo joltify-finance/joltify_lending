@@ -17,7 +17,7 @@ func main() {
 	app.RegisterDenoms()
 	app.SetSDKConfig()
 
-	option := cmd.GetOptionWithCustomStartCmd()
+	options := cmd.GetOptionWithCustomStartCmd()
 
 	rootCmd, _ := cmd.NewRootCmd(options)
 	if err := svrcmd.Execute(rootCmd, clienthelpers.EnvPrefix, app.DefaultNodeHome); err != nil {
