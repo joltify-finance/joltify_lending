@@ -1305,7 +1305,7 @@ func launchValidatorInDir(
 		tmcfg.LogFormatPlain,
 		"The logging format (json|plain)",
 	)
-	executor := tmcli.PrepareBaseCmd(rootCmd, app.AppDaemonName, app.DefaultNodeHome)
+	executor := tmcli.PrepareBaseCmd(rootCmd, app.Name, app.DefaultNodeHome)
 	// We need to launch the root command in a separate go routine since it only returns once the app is shutdown.
 	// So we wait for either the app to be captured representing a successful start or capture an error.
 	go func() {

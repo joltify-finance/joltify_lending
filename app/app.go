@@ -100,6 +100,7 @@ import (
 	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	swaptypes "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
+	blocktimemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
 
 	"github.com/joltify-finance/joltify_lending/x/mint"
 	mintkeeper "github.com/joltify-finance/joltify_lending/x/mint/keeper"
@@ -338,6 +339,7 @@ type App struct {
 	PricesKeeper      pricesmodulekeeper.Keeper
 	StatsKeeper       statsmodulekeeper.Keeper
 	SubaccountsKeeper subaccountsmodulekeeper.Keeper
+	BlockTimeKeeper   blocktimemodulekeeper.Keeper
 
 	// the module manager
 	ModuleManger *module.Manager
