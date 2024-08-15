@@ -4,7 +4,7 @@ package joltify.third_party.dydxprotocol.vest;
 import "google/protobuf/timestamp.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/vest/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/types";
 
 // VestEntry specifies a Vester Account and the rate at which tokens are
 // dripped into the corresponding Treasury Account.

@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.govplus;
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/govplus/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/govplus/types";
 
 // Query defines the gRPC querier service.
 service Query {}

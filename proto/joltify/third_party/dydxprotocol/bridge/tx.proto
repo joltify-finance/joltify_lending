@@ -7,10 +7,11 @@ import "joltify/third_party/dydxprotocol/bridge/bridge_event.proto";
 import "joltify/third_party/dydxprotocol/bridge/params.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/bridge/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // AcknowledgeBridges acknowledges bridges and sets them to complete at a
   // later block.
   rpc AcknowledgeBridges(MsgAcknowledgeBridges)

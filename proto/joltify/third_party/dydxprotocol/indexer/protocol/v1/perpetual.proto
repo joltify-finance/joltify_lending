@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.indexer.protocol.v1;
 
-option go_package = "github.com/joltify/third_party/dydxprotocol/v4-chain/protocol/indexer/protocol/v1/types";
+option go_package = "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/protocol/v1/types";
 
 // Market type of perpetual.
 // Defined in perpetual.

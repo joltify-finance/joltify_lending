@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.accountplus;
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/accountplus/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/accountplus/types";
 
 // Account State
 message AccountState {

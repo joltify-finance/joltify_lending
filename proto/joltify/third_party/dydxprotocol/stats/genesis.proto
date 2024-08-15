@@ -4,7 +4,7 @@ package joltify.third_party.dydxprotocol.stats;
 import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/stats/params.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/stats/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/types";
 
 // GenesisState defines the stats module's genesis state.
 message GenesisState {

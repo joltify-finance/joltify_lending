@@ -7,10 +7,11 @@ import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/perpetuals/params.proto";
 import "joltify/third_party/dydxprotocol/perpetuals/perpetual.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/perpetuals/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // AddPremiumVotes add new samples of the funding premiums to the
   // application.
   rpc AddPremiumVotes(MsgAddPremiumVotes) returns (MsgAddPremiumVotesResponse);

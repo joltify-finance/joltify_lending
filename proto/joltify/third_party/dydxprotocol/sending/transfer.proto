@@ -7,7 +7,7 @@ import "cosmos/msg/v1/msg.proto";
 import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/subaccounts/subaccount.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/sending/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types";
 
 // Transfer represents a single transfer between two subaccounts.
 message Transfer {

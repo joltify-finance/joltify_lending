@@ -4,7 +4,7 @@ package joltify.third_party.dydxprotocol.vest;
 import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/vest/vest_entry.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/vest/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/types";
 
 // GenesisState defines the vest module's genesis state.
 message GenesisState {

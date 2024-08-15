@@ -4,7 +4,7 @@ package joltify.third_party.dydxprotocol.ratelimit;
 import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/ratelimit/limit_params.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/ratelimit/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types";
 
 // DenomCapacity stores a list of rate limit capacity for a denom.
 message DenomCapacity {
@@ -16,7 +16,7 @@ message DenomCapacity {
   // `LimitParams`.
   repeated bytes capacity_list = 2 [
     (gogoproto.customtype) =
-        "github.com/joltify/third_party/dydxprotocol/v4-chain/protocol/dtypes.SerializableInt",
+        "github.com/joltify-finance/joltify_lending/dydx_helper/dtypes.SerializableInt",
     (gogoproto.nullable) = false
   ];
 }
@@ -26,7 +26,7 @@ message LimiterCapacity {
   Limiter limiter = 1 [ (gogoproto.nullable) = false ];
   bytes capacity = 2 [
     (gogoproto.customtype) =
-        "github.com/joltify/third_party/dydxprotocol/v4-chain/protocol/dtypes.SerializableInt",
+        "github.com/joltify-finance/joltify_lending/dydx_helper/dtypes.SerializableInt",
     (gogoproto.nullable) = false
   ];
 }
