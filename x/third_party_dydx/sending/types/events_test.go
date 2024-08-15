@@ -21,7 +21,7 @@ func TestNewCreateTransferEvent(t *testing.T) {
 	require.Equal(t, event.Attributes, []abci.EventAttribute{
 		{
 			Key:   types.AttributeKeySender,
-			Value: "dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4",
+			Value: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		},
 		{
 			Key:   types.AttributeKeySenderNumber,
@@ -29,7 +29,7 @@ func TestNewCreateTransferEvent(t *testing.T) {
 		},
 		{
 			Key:   types.AttributeKeyRecipient,
-			Value: "dydx10fx7sy6ywd5senxae9dwytf8jxek3t2gcen2vs",
+			Value: "jolt14jux2kfgelja5394dxquqn3wh974psqzv4hzgg",
 		},
 		{
 			Key:   types.AttributeKeyRecipientNumber,
@@ -57,11 +57,11 @@ func TestNewDepositToSubaccountEvent(t *testing.T) {
 	require.Equal(t, event.Attributes, []abci.EventAttribute{
 		{
 			Key:   types.AttributeKeySender,
-			Value: "dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4",
+			Value: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		},
 		{
 			Key:   types.AttributeKeyRecipient,
-			Value: "dydx10fx7sy6ywd5senxae9dwytf8jxek3t2gcen2vs",
+			Value: "jolt14jux2kfgelja5394dxquqn3wh974psqzv4hzgg",
 		},
 		{
 			Key:   types.AttributeKeyRecipientNumber,
@@ -89,7 +89,7 @@ func TestNewWithdrawFromSubaccountEvent(t *testing.T) {
 	require.Equal(t, event.Attributes, []abci.EventAttribute{
 		{
 			Key:   types.AttributeKeySender,
-			Value: "dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4",
+			Value: "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
 		},
 		{
 			Key:   types.AttributeKeySenderNumber,
@@ -97,7 +97,7 @@ func TestNewWithdrawFromSubaccountEvent(t *testing.T) {
 		},
 		{
 			Key:   types.AttributeKeyRecipient,
-			Value: "dydx10fx7sy6ywd5senxae9dwytf8jxek3t2gcen2vs",
+			Value: "jolt14jux2kfgelja5394dxquqn3wh974psqzv4hzgg",
 		},
 		{
 			Key:   types.AttributeKeyAssetId,

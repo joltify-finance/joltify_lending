@@ -7,7 +7,7 @@ import "joltify/third_party/dydxprotocol/ratelimit/limit_params.proto";
 import "joltify/third_party/dydxprotocol/ratelimit/capacity.proto";
 import "joltify/third_party/dydxprotocol/ratelimit/pending_send_packet.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/ratelimit/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types";
 
 // Query defines the gRPC querier service.
 service Query {

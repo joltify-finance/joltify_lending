@@ -3,7 +3,7 @@ package joltify.third_party.dydxprotocol.vault;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/vault/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types";
 
 // Params stores `x/vault` parameters.
 message Params {
@@ -34,7 +34,7 @@ message Params {
   // activate.
   bytes activation_threshold_quote_quantums = 7 [
     (gogoproto.customtype) =
-        "github.com/joltify/third_party/dydxprotocol/v4-chain/protocol/dtypes.SerializableInt",
+        "github.com/joltify-finance/joltify_lending/dydx_helper/dtypes.SerializableInt",
     (gogoproto.nullable) = false
   ];
 }

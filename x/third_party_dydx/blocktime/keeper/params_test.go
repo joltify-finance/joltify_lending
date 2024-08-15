@@ -5,14 +5,20 @@ import (
 	"time"
 
 	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetDowntimeParams(t *testing.T) {
-	tApp := testapp.NewTestAppBuilder(t).Build()
-	ctx := tApp.InitChain()
-	k := tApp.App.BlockTimeKeeper
+	//tApp := testapp.NewTestAppBuilder(t).Build()
+	//ctx := tApp.InitChain()
+	//k := tApp.App.BlockTimeKeeper
+
+	expected := types.DefaultGenesis()
+	ctx, k, _ := keepertest.BlcokTimeKeepers(t)
+	blocktime.InitGenesis(ctx, *k, *expected)
 
 	require.Equal(t, types.DefaultGenesis().Params, k.GetDowntimeParams(ctx))
 }
@@ -20,13 +26,18 @@ func TestGetDowntimeParams(t *testing.T) {
 func TestSetDowntimeParams_Success(t *testing.T) {
 	tApp := testapp.NewTestAppBuilder(t).Build()
 	tApp.InitChain()
+
+	expected := types.DefaultGenesis()
+	ctx, k, _ := keepertest.BlcokTimeKeepers(t)
+	blocktime.InitGenesis(ctx, *k, *expected)
+
 	ctx := tApp.AdvanceToBlock(
 		40,
 		testapp.AdvanceToBlockOptions{
 			BlockTime: time.Unix(400, 0).UTC(),
 		},
 	)
-	k := tApp.App.BlockTimeKeeper
+	//k := tApp.App.BlockTimeKeeper
 
 	k.SetAllDowntimeInfo(ctx, &types.AllDowntimeInfo{
 		Infos: []*types.AllDowntimeInfo_DowntimeInfo{

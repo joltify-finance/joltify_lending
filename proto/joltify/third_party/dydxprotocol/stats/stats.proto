@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.stats;
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/stats/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/types";
 
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";

@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/subaccounts/subaccount.proto";
 import "joltify/third_party/dydxprotocol/clob/order.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/clob/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types";
 
 // ClobMatch represents an operations queue entry around all different types
 // of matches, specifically regular matches, liquidation matches, and

@@ -7,10 +7,11 @@ import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/revshare/params.proto";
 import "joltify/third_party/dydxprotocol/revshare/revshare.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/revshare/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/revshare/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // SetMarketMapperRevenueShare sets the revenue share for a market
   // mapper.
   rpc SetMarketMapperRevenueShare(MsgSetMarketMapperRevenueShare)

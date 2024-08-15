@@ -442,6 +442,7 @@ func (builder TestAppBuilder) Build() *TestApp {
 	}
 
 	if tApp.builder.disableHealthMonitorForTesting {
+		// fixme yb we do not have this enabled
 		tApp.App.DisableHealthMonitorForTesting()
 	}
 
@@ -630,7 +631,10 @@ func (tApp *TestApp) initChainIfNeeded() {
 
 	tApp.initialized = true
 
-	consensusParamsProto := tApp.genesis.ConsensusParams.ToProto()
+	// consensusParamsProto := tApp.genesis.ConsensusParams.ToProto()
+
+	consensusParamsProto := types.DefaultConsensusParams().ToProto()
+
 	initChainRequest := abcitypes.RequestInitChain{
 		InitialHeight:   tApp.genesis.InitialHeight,
 		AppStateBytes:   tApp.genesis.AppState,
@@ -1290,8 +1294,6 @@ func launchValidatorInDir(
 		"false",
 		"--bridge-daemon-eth-rpc-endpoint",
 		"https://eth-sepolia.g.alchemy.com/v2/demo",
-		"--oracle.enabled=false",
-		"--oracle.metrics_enabled=false",
 	})
 
 	ctx := svrcmd.CreateExecuteContext(parentCtx)

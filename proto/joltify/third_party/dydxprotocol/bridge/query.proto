@@ -7,7 +7,7 @@ import "joltify/third_party/dydxprotocol/bridge/bridge_event_info.proto";
 import "joltify/third_party/dydxprotocol/bridge/params.proto";
 import "joltify/third_party/dydxprotocol/bridge/tx.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/bridge/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types";
 
 // Query defines the gRPC querier service.
 service Query {

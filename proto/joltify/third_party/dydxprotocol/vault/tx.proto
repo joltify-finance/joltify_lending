@@ -8,10 +8,11 @@ import "joltify/third_party/dydxprotocol/vault/params.proto";
 import "joltify/third_party/dydxprotocol/vault/vault.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/vault/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // DepositToVault deposits funds into a vault.
   rpc DepositToVault(MsgDepositToVault) returns (MsgDepositToVaultResponse);
 
@@ -36,7 +37,7 @@ message MsgDepositToVault {
   // Number of quote quantums to deposit.
   bytes quote_quantums = 3 [
     (gogoproto.customtype) =
-        "github.com/joltify/third_party/dydxprotocol/v4-chain/protocol/dtypes.SerializableInt",
+        "github.com/joltify-finance/joltify_lending/dydx_helper/dtypes.SerializableInt",
     (gogoproto.nullable) = false
   ];
 }

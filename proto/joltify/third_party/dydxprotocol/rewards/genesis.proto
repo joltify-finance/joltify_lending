@@ -4,7 +4,7 @@ package joltify.third_party.dydxprotocol.rewards;
 import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/rewards/params.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/rewards/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/rewards/types";
 
 // GenesisState defines the rewards module's genesis state.
 message GenesisState {

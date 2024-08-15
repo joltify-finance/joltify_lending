@@ -5,7 +5,7 @@ import "cosmos_proto/cosmos.proto";
 import "joltify/third_party/dydxprotocol/subaccounts/asset_position.proto";
 import "joltify/third_party/dydxprotocol/subaccounts/perpetual_position.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/subaccounts/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types";
 
 // SubaccountId defines a unique identifier for a Subaccount.
 message SubaccountId {

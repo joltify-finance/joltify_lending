@@ -2,6 +2,9 @@ syntax = "proto3";
 package joltify.quota;
 
 option go_package = "github.com/joltify-finance/joltify_lending/x/quota/types";
+import "cosmos/msg/v1/msg.proto";
 
 // Msg defines the Msg service.
-service Msg {}
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+}

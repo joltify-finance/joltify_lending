@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/perpetuals/perpetual.proto";
 import "joltify/third_party/dydxprotocol/perpetuals/params.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/perpetuals/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types";
 
 // GenesisState defines the perpetuals module's genesis state.
 message GenesisState {

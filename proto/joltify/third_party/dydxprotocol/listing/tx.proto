@@ -4,10 +4,11 @@ package joltify.third_party.dydxprotocol.listing;
 import "cosmos_proto/cosmos.proto";
 import "cosmos/msg/v1/msg.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/listing/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/listing/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // SetMarketsHardCap sets a hard cap on the number of markets listed
   rpc SetMarketsHardCap(MsgSetMarketsHardCap)
       returns (MsgSetMarketsHardCapResponse);

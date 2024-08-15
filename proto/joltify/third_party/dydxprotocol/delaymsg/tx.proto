@@ -5,10 +5,11 @@ import "cosmos_proto/cosmos.proto";
 import "cosmos/msg/v1/msg.proto";
 import "google/protobuf/any.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/delaymsg/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // DelayMessage delays the execution of a message for a given number of
   // blocks.
   rpc DelayMessage(MsgDelayMessage) returns (MsgDelayMessageResponse);

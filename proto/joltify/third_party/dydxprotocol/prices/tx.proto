@@ -6,10 +6,11 @@ import "cosmos_proto/cosmos.proto";
 import "cosmos/msg/v1/msg.proto";
 import "joltify/third_party/dydxprotocol/prices/market_param.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/prices/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // UpdateMarketPrices updates the oracle price of a market relative to
   // quoteCurrency.
   rpc UpdateMarketPrices(MsgUpdateMarketPrices)

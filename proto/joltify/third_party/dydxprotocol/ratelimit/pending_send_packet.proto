@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.ratelimit;
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/ratelimit/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types";
 
 // PendingSendPacket contains the channel_id and sequence pair to identify a
 // pending packet

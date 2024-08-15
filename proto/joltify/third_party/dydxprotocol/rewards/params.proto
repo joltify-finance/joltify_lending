@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.rewards;
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/rewards/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/rewards/types";
 
 // Params defines the parameters for x/rewards module.
 message Params {

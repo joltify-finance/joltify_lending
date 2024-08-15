@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/subaccounts/subaccount.proto";
 import "joltify/third_party/dydxprotocol/clob/clob_pair.proto";
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/clob/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types";
 
 // MEVMatch represents all necessary data to calculate MEV for a regular match.
 message MEVMatch {

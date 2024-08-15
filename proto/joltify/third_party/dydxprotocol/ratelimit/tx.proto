@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.ratelimit;
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/ratelimit/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types";
 
 import "cosmos/msg/v1/msg.proto";
 import "joltify/third_party/dydxprotocol/ratelimit/limit_params.proto";
@@ -9,6 +9,7 @@ import "gogoproto/gogo.proto";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // SetLimitParams sets a `LimitParams` object in state.
   rpc SetLimitParams(MsgSetLimitParams) returns (MsgSetLimitParamsResponse);
 }

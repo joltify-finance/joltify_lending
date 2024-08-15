@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.blocktime;
 
-option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/blocktime/types";
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types";
 
 import "cosmos_proto/cosmos.proto";
 import "cosmos/msg/v1/msg.proto";
@@ -10,6 +10,7 @@ import "gogoproto/gogo.proto";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // UpdateDowntimeParams updates the DowntimeParams in state.
   rpc UpdateDowntimeParams(MsgUpdateDowntimeParams)
       returns (MsgUpdateDowntimeParamsResponse);

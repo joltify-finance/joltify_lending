@@ -1,7 +1,7 @@
 syntax = "proto3";
 package joltify.third_party.dydxprotocol.indexer.indexer_manager;
 
-option go_package = "github.com/joltify/third_party/dydxprotocol/v4-chain/protocol/indexer/indexer_manager";
+option go_package = "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager";
 
 import "google/protobuf/timestamp.proto";
 import "gogoproto/gogo.proto";
