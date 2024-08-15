@@ -11,9 +11,9 @@ import (
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/daemons/bridge/api"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	testtx "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/tx"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	testtx "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/tx"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	"github.com/stretchr/testify/require"
 )

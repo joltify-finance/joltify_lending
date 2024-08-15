@@ -6,8 +6,8 @@ import (
 
 	"github.com/cometbft/cometbft/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	feetierstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"

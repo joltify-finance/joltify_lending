@@ -12,8 +12,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/off_chain_updates"
 	ocutypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/off_chain_updates/types"
 	indexersharedtypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared/types"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )

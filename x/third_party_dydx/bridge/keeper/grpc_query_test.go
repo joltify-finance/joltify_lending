@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	pricestest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/prices"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	pricestest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/prices"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"

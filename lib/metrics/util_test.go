@@ -7,8 +7,8 @@ import (
 	"time"
 
 	gometrics "github.com/hashicorp/go-metrics"
-	big_testutil "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/big"
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
+	big_testutil "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/big"
 
 	"github.com/stretchr/testify/require"
 )

@@ -3,8 +3,8 @@ package keeper_test
 import (
 	"testing"
 
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	"github.com/stretchr/testify/require"

@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sim_helpers"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sim_helpers"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"

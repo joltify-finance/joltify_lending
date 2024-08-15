@@ -3,7 +3,7 @@ package rate_limit_test
 import (
 	"testing"
 
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/rate_limit"
 	"github.com/stretchr/testify/require"
 )

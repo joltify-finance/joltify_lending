@@ -10,7 +10,7 @@ import (
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/network"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/network"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/client/cli"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/types"
 	"github.com/stretchr/testify/require"

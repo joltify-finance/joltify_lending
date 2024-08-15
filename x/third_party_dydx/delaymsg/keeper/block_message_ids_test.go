@@ -3,8 +3,8 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/stretchr/testify/require"
 )
 

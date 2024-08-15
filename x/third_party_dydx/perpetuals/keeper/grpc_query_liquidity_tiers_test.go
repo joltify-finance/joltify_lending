@@ -7,8 +7,8 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	"github.com/stretchr/testify/require"
 )

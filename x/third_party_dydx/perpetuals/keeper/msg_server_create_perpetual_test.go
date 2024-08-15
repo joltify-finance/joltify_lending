@@ -6,9 +6,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/lib"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
-	perptest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/perpetuals"
-	pricestest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/prices"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
+	perptest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/perpetuals"
+	pricestest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/prices"
 	perpkeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	priceskeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"

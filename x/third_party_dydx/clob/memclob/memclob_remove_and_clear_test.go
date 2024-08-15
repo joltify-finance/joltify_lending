@@ -3,10 +3,10 @@ package memclob
 import (
 	"testing"
 
-	clobtest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/clob"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	memclobtestutil "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/memclob"
-	sdktest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sdk"
+	clobtest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/clob"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	memclobtestutil "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/memclob"
+	sdktest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sdk"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"github.com/stretchr/testify/require"
 )

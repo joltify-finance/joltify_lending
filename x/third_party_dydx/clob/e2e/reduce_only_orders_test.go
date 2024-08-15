@@ -5,9 +5,9 @@ import (
 
 	"github.com/cometbft/cometbft/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/encoding"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	prices "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"

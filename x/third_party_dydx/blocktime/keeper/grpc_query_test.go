@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 )
 

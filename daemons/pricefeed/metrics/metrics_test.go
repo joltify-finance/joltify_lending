@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed/exchange_config"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons/pricefeed/exchange_config"
 
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants/exchange_common"
 	pricefeedmetrics "github.com/joltify-finance/joltify_lending/daemons/pricefeed/metrics"

@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/status"
 
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	btkeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
 	blocktimetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	sakeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/keeper"

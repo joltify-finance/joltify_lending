@@ -11,10 +11,10 @@ import (
 	d_constants "github.com/joltify-finance/joltify_lending/daemons/constants"
 	"github.com/joltify-finance/joltify_lending/daemons/flags"
 	"github.com/joltify-finance/joltify_lending/daemons/liquidation/client"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
-	daemontestutils "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/grpc"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/appoptions"
+	daemontestutils "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/grpc"
 	"github.com/stretchr/testify/require"
 )
 

@@ -6,9 +6,9 @@ import (
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	testmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/msgs"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	testmsgs "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/msgs"
 	"github.com/stretchr/testify/require"
 )
 

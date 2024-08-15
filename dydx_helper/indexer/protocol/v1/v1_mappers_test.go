@@ -7,7 +7,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 	v1 "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/protocol/v1"
 	v1types "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/protocol/v1/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"

@@ -9,9 +9,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app/process"
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/api"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/encoding"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/stretchr/testify/require"
 )

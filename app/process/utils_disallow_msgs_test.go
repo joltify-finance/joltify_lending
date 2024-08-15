@@ -6,8 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app/process"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/msgs"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"github.com/stretchr/testify/require"
 )

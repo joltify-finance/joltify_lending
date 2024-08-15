@@ -3,15 +3,15 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/nullify"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/nullify"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 

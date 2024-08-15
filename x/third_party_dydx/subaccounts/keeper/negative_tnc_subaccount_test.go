@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/tracer"
 	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/tracer"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"

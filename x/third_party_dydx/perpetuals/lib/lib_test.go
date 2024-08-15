@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	big_testutil "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/big"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	big_testutil "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/big"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"

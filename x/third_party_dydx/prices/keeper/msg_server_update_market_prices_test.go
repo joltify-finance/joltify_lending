@@ -8,10 +8,10 @@ import (
 
 	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/api"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/stretchr/testify/require"

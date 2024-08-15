@@ -12,7 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	testutil_rand "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/rand"
+	testutil_rand "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/rand"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/simulation"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/stretchr/testify/require"

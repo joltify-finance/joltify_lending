@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs/types"
 	"github.com/stretchr/testify/require"
 )

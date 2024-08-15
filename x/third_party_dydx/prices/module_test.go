@@ -10,7 +10,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 
 	errorsmod "cosmossdk.io/errors"
 
@@ -19,9 +19,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons/pricefeed"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices"
 	prices_keeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
 	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"

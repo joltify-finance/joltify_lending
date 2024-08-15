@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types"
 	"github.com/stretchr/testify/require"

@@ -6,7 +6,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sample"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sample"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"
 )

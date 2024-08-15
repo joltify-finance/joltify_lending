@@ -9,7 +9,7 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sim_helpers"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sim_helpers"
 	asstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )

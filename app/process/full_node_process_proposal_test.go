@@ -6,9 +6,9 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 
 	"github.com/joltify-finance/joltify_lending/app/process"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

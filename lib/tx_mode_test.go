@@ -3,9 +3,9 @@ package lib_test
 import (
 	"testing"
 
-	testApp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
 	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/lib/log"
+	testApp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/stretchr/testify/require"
 )
 

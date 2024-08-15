@@ -16,9 +16,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sample"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sample"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"

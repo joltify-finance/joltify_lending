@@ -6,13 +6,13 @@ import (
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/encoding"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	bridgemoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"

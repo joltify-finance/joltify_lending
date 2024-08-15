@@ -9,10 +9,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/joltify-finance/joltify_lending/app/process"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
-	testmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/msgs"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
+	testmsgs "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/msgs"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

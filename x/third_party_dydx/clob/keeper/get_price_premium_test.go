@@ -10,10 +10,10 @@ import (
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 
-	clobtest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/clob"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	clobtest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/clob"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"

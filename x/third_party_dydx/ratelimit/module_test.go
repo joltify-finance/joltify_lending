@@ -12,7 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit"
 	ratelimit_keeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/keeper"
 	"github.com/stretchr/testify/require"

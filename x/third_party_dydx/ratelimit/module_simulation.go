@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sample"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sample"
 	ratelimitsimulation "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/simulation"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
 )

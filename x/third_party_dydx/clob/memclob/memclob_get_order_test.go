@@ -3,7 +3,7 @@ package memclob
 import (
 	"testing"
 
-	sdktest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sdk"
+	sdktest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sdk"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"

@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethcoretypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	libeth "github.com/joltify-finance/joltify_lending/lib/eth"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	"github.com/stretchr/testify/require"
 )

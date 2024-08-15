@@ -5,14 +5,14 @@ import (
 	"time"
 
 	cmt "github.com/cometbft/cometbft/types"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/msgsender"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	blocktimetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"

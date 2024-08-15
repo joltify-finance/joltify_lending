@@ -9,7 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/gogoproto/proto"
-	ante_types "github.com/dydxprotocol/v4-chain/protocol/app/ante/types"
+	ante_types "github.com/joltify-finance/joltify_lending/app/ante/types"
 	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )

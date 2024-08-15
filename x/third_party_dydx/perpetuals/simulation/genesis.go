@@ -15,8 +15,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sim_helpers"
 	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sim_helpers"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )

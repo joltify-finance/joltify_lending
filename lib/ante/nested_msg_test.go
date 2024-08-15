@@ -9,9 +9,9 @@ import (
 	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 
 	appmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/msgs"
-	testmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/msgs"
 	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/lib/ante"
+	testmsgs "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/msgs"
 
 	"github.com/stretchr/testify/require"
 )

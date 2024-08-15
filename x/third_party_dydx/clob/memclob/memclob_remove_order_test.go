@@ -4,10 +4,10 @@ import (
 	"math"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	testutil_memclob "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/memclob"
-	sdktest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sdk"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	testutil_memclob "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/memclob"
+	sdktest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sdk"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/mock"

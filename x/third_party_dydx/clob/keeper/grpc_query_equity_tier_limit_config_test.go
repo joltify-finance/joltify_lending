@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	testApp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testApp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"github.com/stretchr/testify/require"
 )

@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	clobtestutils "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/clob"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	testtx "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/tx"
+	clobtestutils "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/clob"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	testtx "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/tx"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"

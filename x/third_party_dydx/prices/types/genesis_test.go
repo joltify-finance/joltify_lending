@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed/exchange_config"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons/pricefeed/exchange_config"
 
 	errorsmod "cosmossdk.io/errors"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/stretchr/testify/require"
 )

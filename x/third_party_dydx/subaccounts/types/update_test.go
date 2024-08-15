@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"testing"
 
-	testutil "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	testutil "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"
 )

@@ -6,7 +6,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	v1 "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/protocol/v1"
 	sharedtypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	"github.com/stretchr/testify/require"
 )
 

@@ -6,7 +6,7 @@ import (
 	"github.com/cometbft/cometbft/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	delaymsgtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 	"github.com/stretchr/testify/require"
 )

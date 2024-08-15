@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/joltify-finance/joltify_lending/app"
+	"github.com/joltify-finance/joltify_lending/app/constants"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authz "github.com/cosmos/cosmos-sdk/x/authz"
@@ -12,7 +12,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )
 
-const DYDX_MSG_PREFIX = "/" + app.AppDaemonName
+const DYDX_MSG_PREFIX = "/" + constants.AppDaemonName
 
 // IsNestedMsg returns true if the given msg is a nested msg.
 func IsNestedMsg(msg sdk.Msg) bool {

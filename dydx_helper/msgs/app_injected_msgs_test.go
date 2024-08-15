@@ -11,9 +11,9 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/msgs"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
-	testmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/msgs"
 	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/encoding"
+	testmsgs "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/msgs"
 	"github.com/stretchr/testify/require"
 )
 

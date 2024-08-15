@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"testing"
 
-	big_testutil "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/big"
+	big_testutil "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/big"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	big_testutil "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/big"
+	big_testutil "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/big"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/util"
 	"github.com/stretchr/testify/require"

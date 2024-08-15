@@ -3,8 +3,8 @@ package delaymsg_test
 import (
 	"testing"
 
-	testutildelaymsg "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/delaymsg"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	testutildelaymsg "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/delaymsg"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 	"github.com/stretchr/testify/require"

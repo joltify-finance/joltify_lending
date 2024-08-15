@@ -9,8 +9,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/app"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/network"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/network"
 	epochstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs/types"
 	testutil "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/client/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"

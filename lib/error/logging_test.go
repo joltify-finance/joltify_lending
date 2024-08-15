@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sdk"
 	liberror "github.com/joltify-finance/joltify_lending/lib/error"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/sdk"
 )
 
 func TestWrapErrorWithSourceModuleContext_ErrorWithLogContext(t *testing.T) {

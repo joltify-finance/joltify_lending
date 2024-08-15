@@ -9,9 +9,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/nullify"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	keepertest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/nullify"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/memclob"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )

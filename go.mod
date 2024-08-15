@@ -57,7 +57,6 @@ require (
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/ibc-go/modules/capability v1.0.0
 	github.com/deckarep/golang-set/v2 v2.6.0
-	github.com/dydxprotocol/v4-chain/protocol v1.0.1
 	github.com/go-kit/log v0.2.1
 	github.com/gofrs/flock v0.8.1
 	github.com/golang/mock v1.6.0
@@ -151,7 +150,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
 	github.com/google/btree v1.1.2 // indirect
-	github.com/google/flatbuffers v1.12.1 // indirect
+	github.com/google/flatbuffers v2.0.8+incompatible // indirect
 	github.com/google/orderedcode v0.0.1 // indirect
 	github.com/google/pprof v0.0.0-20230228050547-1710fef4ab10 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
@@ -301,9 +300,15 @@ replace (
 	cosmossdk.io/core => cosmossdk.io/core v0.11.0
 	// Use dYdX fork of Cosmos SDK/store
 	cosmossdk.io/store => github.com/dydxprotocol/cosmos-sdk/store v1.0.3-0.20240326192503-dd116391188d
+
+	cosmossdk.io/x/upgrade => cosmossdk.io/x/upgrade v0.1.1
 	// Use dYdX fork of CometBFT
 	github.com/cometbft/cometbft => github.com/dydxprotocol/cometbft v0.38.6-0.20240426214049-c8beeeada40a
 	// Use dYdX fork of Cosmos SDK
 	github.com/cosmos/cosmos-sdk => github.com/dydxprotocol/cosmos-sdk v0.50.6-0.20240606183841-18966898625f
 	github.com/cosmos/iavl => github.com/dydxprotocol/iavl v1.1.1-0.20240509161911-1c8b8e787e85
+
+	github.com/google/pprof => github.com/google/pprof v0.0.0-20230228050547-1710fef4ab10
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.18.0
+	github.com/prometheus/common => github.com/prometheus/common v0.47.0
 )

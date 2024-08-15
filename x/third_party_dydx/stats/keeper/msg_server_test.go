@@ -6,7 +6,7 @@ import (
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/types"
 	"github.com/stretchr/testify/require"

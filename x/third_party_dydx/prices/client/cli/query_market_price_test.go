@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	cli_util "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/prices/cli"
+	cli_util "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/prices/cli"
 
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/flags"

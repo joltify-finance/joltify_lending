@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"testing"
 
-	big_testutil "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/big"
 	"github.com/joltify-finance/joltify_lending/lib"
+	big_testutil "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/big"
 	"github.com/stretchr/testify/require"
 )
 

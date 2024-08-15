@@ -10,8 +10,8 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed"
-	testutildelaymsg "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/delaymsg"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons/pricefeed"
+	testutildelaymsg "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/delaymsg"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -19,8 +19,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg"
 	delaymsg_keeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/keeper"
 	"github.com/stretchr/testify/mock"

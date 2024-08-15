@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/types"
 	"github.com/stretchr/testify/require"
 )

@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/cometbft/cometbft/types"
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
-	clobtestutils "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/clob"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
+	clobtestutils "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/clob"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	feetiertypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
 	prices "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"

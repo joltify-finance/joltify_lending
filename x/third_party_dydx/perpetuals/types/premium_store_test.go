@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	perptest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/perpetuals"
+	perptest "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/perpetuals"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	"github.com/stretchr/testify/require"
 )

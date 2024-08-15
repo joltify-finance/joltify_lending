@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
 	"github.com/stretchr/testify/require"
 )
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/lib"
 
-	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	testapp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
 	"github.com/stretchr/testify/require"

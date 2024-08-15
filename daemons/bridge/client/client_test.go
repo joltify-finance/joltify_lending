@@ -14,10 +14,10 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/bridge/client/types"
 	d_constants "github.com/joltify-finance/joltify_lending/daemons/constants"
 	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/grpc"
 	"github.com/joltify-finance/joltify_lending/mocks"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/appoptions"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/grpc"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	"github.com/stretchr/testify/require"
 )
