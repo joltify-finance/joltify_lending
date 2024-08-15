@@ -1,0 +1,12 @@
+syntax = "proto3";
+package joltify.third_party.dydxprotocol.subaccounts;
+
+import "gogoproto/gogo.proto";
+import "joltify/third_party/dydxprotocol/subaccounts/subaccount.proto";
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/subaccounts/types";
+
+// GenesisState defines the subaccounts module's genesis state.
+message GenesisState {
+  repeated Subaccount subaccounts = 1 [ (gogoproto.nullable) = false ];
+}

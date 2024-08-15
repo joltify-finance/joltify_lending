@@ -1,0 +1,11 @@
+syntax = "proto3";
+package joltify.third_party.dydxprotocol.sending;
+
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/sending/types";
+
+// GenesisState defines the sending module's genesis state.
+message GenesisState {
+  // this line is used by starport scaffolding # genesis/proto/state
+}

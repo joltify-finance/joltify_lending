@@ -1,0 +1,11 @@
+syntax = "proto3";
+package joltify.third_party.dydxprotocol.revshare;
+
+option go_package = "github.com/joltify-finance/joltify_lending/x/third_party/dydx/revshare/types";
+
+// MarketMapperRevShareDetails specifies any details associated with the market
+// mapper revenue share
+message MarketMapperRevShareDetails {
+  // Unix timestamp recorded when the market revenue share expires
+  uint64 expiration_ts = 1;
+}
