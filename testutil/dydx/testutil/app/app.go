@@ -442,6 +442,7 @@ func (builder TestAppBuilder) Build() *TestApp {
 	}
 
 	if tApp.builder.disableHealthMonitorForTesting {
+		// fixme yb we do not have this enabled
 		tApp.App.DisableHealthMonitorForTesting()
 	}
 

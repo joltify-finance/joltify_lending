@@ -510,7 +510,7 @@ func TestOrder_MustGetOrderJson(t *testing.T) {
 
 	require.Equal(t,
 		"order_id: <\n  subaccount_id: <\n    "+
-			"owner: \"dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4\"\n  >\n  order_flags: 64\n>"+
+			"owner: \"jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0\"\n  >\n  order_flags: 64\n>"+
 			"\nside: SIDE_BUY\nquantums: 5\nsubticks: 10\ngood_til_block_time: 15\n",
 		expectedOrder.GetOrderTextString(),
 	)

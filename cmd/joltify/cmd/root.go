@@ -52,7 +52,7 @@ import (
 )
 
 const (
-	EnvPrefix = "DYDX"
+	EnvPrefix = "jolt"
 
 	flagIAVLCacheSize = "iavl-cache-size"
 
