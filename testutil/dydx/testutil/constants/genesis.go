@@ -573,8 +573,8 @@ const GenesisState = `{
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0",
-                "validator_address": "dydxvaloper199tqg4wdlnu4qjlxchpd7seg454937hjxg9yhy",
+                "delegator_address": "jolt1nmgpgr8l4t8pw9zqx9cltuymvz85wmw9t85l0a",
+                "validator_address": "joltvaloper1jr958gyp5598r5mx4ktcdlmx952gwk8zt2hl6q",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
                   "key": "YiARx8259Z+fGFUxQLrz/5FU2RYRT6f5yzvt7D7CrQM="
@@ -635,8 +635,8 @@ const GenesisState = `{
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "jolt1e49wnx7vcna0ccmstm2thu30jgheupdfl67egr",
-                "validator_address": "dydxvaloper1fjg6zp6vv8t9wvy4lps03r5l4g7tkjw9tjdp47",
+                "delegator_address": "jolt1em2mlkrkx0qsa6327tgvl3g0fh8a95hjgrl2nw",
+                "validator_address": "joltvaloper1nmgpgr8l4t8pw9zqx9cltuymvz85wmw9u0wy7g",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
                   "key": "ytLfs1W6E2I41iteKC/YwjyZ/51+CAYCHYxmRHiBeY4="
@@ -697,8 +697,8 @@ const GenesisState = `{
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "jolt14jux2kfgelja5394dxquqn3wh974psqzv4hzgg",
-                "validator_address": "dydxvaloper1wau5mja7j7zdavtfq9lu7ejef05hm6ffudfwmz",
+                "delegator_address": "jolt1g0vtcdzqwr5nxanyp4qjz2kjmp89jz0k9j4t4h",
+                "validator_address": "joltvaloper1em2mlkrkx0qsa6327tgvl3g0fh8a95hjlt93zm",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
                   "key": "yG29kRfZ/hgAE1I7uWjbKQJJL4/gX/05XBnfB+m196A="
@@ -759,8 +759,8 @@ const GenesisState = `{
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "jolt14jux2kfgelja5394dxquqn3wh974psqzv4hzgg",
-                "validator_address": "dydxvaloper10fx7sy6ywd5senxae9dwytf8jxek3t2ga89u8p",
+                "delegator_address": "jolt1jr958gyp5598r5mx4ktcdlmx952gwk8zuzdyt4",
+                "validator_address": "joltvaloper1ze7y9qwdddejmy7jlw4cymqqlt2wh05ykngec3",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
                   "key": "+P8YiogqqQY+iD96yEa9OJx6EgieU95u9eR3pzxfDp0="
