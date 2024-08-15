@@ -15,7 +15,7 @@ import (
 	ibctransfer "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:staticcheck
 	ibcconn "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	blocktime "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	bridge "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	clob "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"

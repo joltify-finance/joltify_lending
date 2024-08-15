@@ -11,10 +11,10 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/memclob"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"

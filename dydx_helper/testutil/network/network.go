@@ -8,6 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/app"
+
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+
 	"cosmossdk.io/log"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	dbm "github.com/cosmos/cosmos-db"
@@ -21,7 +25,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/gofrs/flock"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/appoptions"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/ci"
 	"github.com/stretchr/testify/require"
@@ -129,7 +132,7 @@ func DefaultConfig(options *NetworkConfigOptions) network.Config {
 		onNewApp = options.OnNewApp
 	}
 
-	encoding := app.MakeEncodingConfig()
+	encoding := appconfig.MakeEncodingConfig()
 
 	return network.Config{
 		Codec:             encoding.Marshaler,

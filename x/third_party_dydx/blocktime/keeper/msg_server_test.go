@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"

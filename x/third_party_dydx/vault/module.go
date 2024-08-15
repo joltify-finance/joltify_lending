@@ -17,7 +17,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/client/cli"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types"

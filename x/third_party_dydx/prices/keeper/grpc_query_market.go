@@ -6,7 +6,7 @@ import (
 	errorsmod "cosmossdk.io/errors"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

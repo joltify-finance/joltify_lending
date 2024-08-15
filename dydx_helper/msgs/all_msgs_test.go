@@ -5,9 +5,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/msgs"
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/stretchr/testify/require"
 )
 

@@ -5,7 +5,7 @@ import (
 
 	"cosmossdk.io/math"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	types "github.com/joltify-finance/joltify_lending/x/third_party_dydx/govplus/types"
 	"github.com/stretchr/testify/require"
 )

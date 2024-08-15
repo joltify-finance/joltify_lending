@@ -19,12 +19,12 @@ import (
 	clobtest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/clob"
 	prices "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	blocktimetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/keeper"

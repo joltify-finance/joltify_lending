@@ -13,7 +13,7 @@ import (
 	v1 "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/protocol/v1"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared"
 	sharedtypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/log"
+	"github.com/joltify-finance/joltify_lending/lib/log"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )

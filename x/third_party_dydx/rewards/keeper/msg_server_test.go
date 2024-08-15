@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
 

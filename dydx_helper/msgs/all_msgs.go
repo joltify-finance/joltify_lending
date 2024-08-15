@@ -1,7 +1,7 @@
 package msgs
 
 import (
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 )
 
 var (

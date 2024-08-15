@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"

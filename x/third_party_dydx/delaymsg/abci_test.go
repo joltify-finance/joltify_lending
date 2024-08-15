@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	sdktest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sdk"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 )

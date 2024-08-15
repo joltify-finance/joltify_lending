@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 )
 
 // MutableExchangeMarketConfig stores all mutable market configuration per exchange.

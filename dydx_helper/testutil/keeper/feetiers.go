@@ -2,8 +2,8 @@ package keeper
 
 import (
 	dbm "github.com/cosmos/cosmos-db"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/mocks"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"

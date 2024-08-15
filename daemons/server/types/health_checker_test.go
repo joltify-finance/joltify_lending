@@ -6,7 +6,7 @@ import (
 
 	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/daemons/server/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/stretchr/testify/require"
 )
 

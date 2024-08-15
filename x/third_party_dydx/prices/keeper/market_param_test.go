@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/metrics"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/slinky"
+	"github.com/joltify-finance/joltify_lending/lib/slinky"
 
 	errorsmod "cosmossdk.io/errors"
 

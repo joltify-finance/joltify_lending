@@ -3,15 +3,15 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	clobtest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/clob"
 	keepertest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	perptest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/perpetuals"
 	pricestest "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/prices"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/memclob"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"

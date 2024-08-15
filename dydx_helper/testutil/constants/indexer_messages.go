@@ -5,7 +5,7 @@ import (
 
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/msgsender"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 

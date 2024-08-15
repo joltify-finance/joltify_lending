@@ -5,9 +5,9 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
 	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/liquidations"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/grpc"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	"github.com/stretchr/testify/require"
 )

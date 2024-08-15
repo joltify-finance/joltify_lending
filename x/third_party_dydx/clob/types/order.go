@@ -9,7 +9,7 @@ import (
 
 	proto "github.com/cosmos/gogoproto/proto"
 	gometrics "github.com/hashicorp/go-metrics"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 

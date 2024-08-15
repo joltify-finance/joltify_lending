@@ -13,9 +13,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gogotypes "github.com/cosmos/gogoproto/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/log"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/lib/log"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )

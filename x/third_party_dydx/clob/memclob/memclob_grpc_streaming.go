@@ -5,7 +5,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/off_chain_updates"
 	ocutypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/off_chain_updates/types"
 	indexersharedtypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 

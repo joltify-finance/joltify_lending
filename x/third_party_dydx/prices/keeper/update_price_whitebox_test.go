@@ -3,8 +3,8 @@ package keeper
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/stretchr/testify/require"
 )

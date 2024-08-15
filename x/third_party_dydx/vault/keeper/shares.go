@@ -6,7 +6,7 @@ import (
 	"cosmossdk.io/store/prefix"
 	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types"
 )
 

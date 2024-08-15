@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
@@ -19,9 +19,9 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/sample"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts"
 	sa_keeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/keeper"
 	"github.com/stretchr/testify/mock"

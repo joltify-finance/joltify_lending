@@ -14,9 +14,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gometrics "github.com/hashicorp/go-metrics"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/log"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/lib/log"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
 	ratelimitutil "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/util"
 )

@@ -1,6 +1,6 @@
 package grpc
 
-import "github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+import "github.com/joltify-finance/joltify_lending/mocks"
 
 var TcpEndpoint = "localhost:9090"
 

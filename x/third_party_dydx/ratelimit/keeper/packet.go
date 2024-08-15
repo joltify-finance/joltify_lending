@@ -14,7 +14,7 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:staticcheck
 	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/util"
 )

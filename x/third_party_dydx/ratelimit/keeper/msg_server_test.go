@@ -6,8 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	"github.com/joltify-finance/joltify_lending/lib"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"

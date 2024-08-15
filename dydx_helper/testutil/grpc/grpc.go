@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"google.golang.org/grpc"
 )
 

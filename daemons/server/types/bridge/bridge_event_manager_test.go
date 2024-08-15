@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	bdtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/bridge"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	"github.com/stretchr/testify/require"
 )

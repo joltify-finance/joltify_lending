@@ -11,7 +11,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/constants"
 	liquidationapi "github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
 	daemontypes "github.com/joltify-finance/joltify_lending/daemons/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )
 
 // Server struct defines the shared gRPC server for all daemons.

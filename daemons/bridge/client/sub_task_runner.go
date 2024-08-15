@@ -15,8 +15,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/bridge/api"
 	"github.com/joltify-finance/joltify_lending/daemons/bridge/client/types"
 	"github.com/joltify-finance/joltify_lending/daemons/constants"
-	libeth "github.com/joltify-finance/joltify_lending/dydx_helper/lib/eth"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	libeth "github.com/joltify-finance/joltify_lending/lib/eth"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 )
 

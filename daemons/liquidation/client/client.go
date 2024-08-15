@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/joltify-finance/joltify_lending/daemons/server/types"
-	timelib "github.com/joltify-finance/joltify_lending/dydx_helper/lib/time"
+	timelib "github.com/joltify-finance/joltify_lending/lib/time"
 
 	"cosmossdk.io/log"
 	appflags "github.com/joltify-finance/joltify_lending/app/flags"

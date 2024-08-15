@@ -8,10 +8,10 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/gogoproto/proto"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/mocks"
+	"github.com/joltify-finance/joltify_lending/mocks"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

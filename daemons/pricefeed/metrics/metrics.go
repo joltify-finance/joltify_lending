@@ -3,7 +3,7 @@ package metrics
 import (
 	gometrics "github.com/hashicorp/go-metrics"
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )
 
 const (

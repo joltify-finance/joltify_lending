@@ -9,7 +9,7 @@ import (
 	slinkytypes "github.com/skip-mev/slinky/pkg/types"
 	oracletypes "github.com/skip-mev/slinky/x/oracle/types"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/slinky"
+	"github.com/joltify-finance/joltify_lending/lib/slinky"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 

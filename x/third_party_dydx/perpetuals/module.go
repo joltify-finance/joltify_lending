@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"cosmossdk.io/core/appmodule"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"

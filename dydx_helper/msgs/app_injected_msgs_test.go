@@ -10,10 +10,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/msgs"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
 	testmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/msgs"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/stretchr/testify/require"
 )
 

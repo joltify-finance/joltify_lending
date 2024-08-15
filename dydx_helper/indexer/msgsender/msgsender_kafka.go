@@ -10,7 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/msgsender/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )
 
 // Ensure the `IndexerMessageSender` interface is implemented at compile time.

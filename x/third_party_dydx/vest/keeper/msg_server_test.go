@@ -7,8 +7,8 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
+	"github.com/joltify-finance/joltify_lending/lib"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/types"

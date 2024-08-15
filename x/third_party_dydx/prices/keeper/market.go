@@ -8,8 +8,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/metrics"
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/slinky"
+	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/lib/slinky"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 

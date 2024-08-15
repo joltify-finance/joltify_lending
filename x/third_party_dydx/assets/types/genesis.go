@@ -1,6 +1,6 @@
 package types
 
-import "github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+import "github.com/joltify-finance/joltify_lending/lib"
 
 const (
 	// UusdcDenom is the precomputed denom for IBC Micro USDC.

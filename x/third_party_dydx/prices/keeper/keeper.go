@@ -11,8 +11,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	pricefeedservertypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	libtime "github.com/joltify-finance/joltify_lending/dydx_helper/lib/time"
+	"github.com/joltify-finance/joltify_lending/lib"
+	libtime "github.com/joltify-finance/joltify_lending/lib/time"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 

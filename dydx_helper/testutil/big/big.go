@@ -4,7 +4,7 @@ package big
 import (
 	"math/big"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 )
 
 // MustFirst is used for returning the first value of the SetString

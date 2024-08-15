@@ -6,7 +6,7 @@ import (
 
 	"cosmossdk.io/log"
 	"github.com/joltify-finance/joltify_lending/daemons/types"
-	libtime "github.com/joltify-finance/joltify_lending/dydx_helper/lib/time"
+	libtime "github.com/joltify-finance/joltify_lending/lib/time"
 )
 
 // errorStreak tracks two relevant statistics for an error streak returned by a HealthCheckable - the timestamp of the

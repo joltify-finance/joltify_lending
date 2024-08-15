@@ -5,7 +5,7 @@ import (
 
 	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/log"
+	"github.com/joltify-finance/joltify_lending/lib/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

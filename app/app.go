@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	config2 "github.com/joltify-finance/joltify_lending/app/config"
+
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
 	daemonservertypes "github.com/joltify-finance/joltify_lending/daemons/server/types"
@@ -18,8 +20,6 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	solomachine "github.com/cosmos/ibc-go/v8/modules/light-clients/06-solomachine"
-	params2 "github.com/joltify-finance/joltify_lending/app/params"
-
 	statsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/keeper"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -85,6 +85,7 @@ import (
 	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -371,7 +372,7 @@ func NewApp(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
-	encodingConfig := MakeEncodingConfig()
+	encodingConfig := appconfig.MakeEncodingConfig()
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -1203,8 +1204,8 @@ func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-func (app *App) EncodingConfig() params2.EncodingConfig {
-	return params2.EncodingConfig{
+func (app *App) EncodingConfig() config2.EncodingConfig {
+	return config2.EncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
 		Marshaler:         app.AppCodec(),
 		TxConfig:          app.TxConfig(),

@@ -2,7 +2,7 @@ package types
 
 import (
 	gometrics "github.com/hashicorp/go-metrics"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )
 
 // GetMetricLabels returns a slice of gometrics labels for a match perpetual liquidation.

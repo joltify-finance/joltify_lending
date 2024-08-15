@@ -13,7 +13,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/bridge/client/types/constants"
 	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
 	daemontypes "github.com/joltify-finance/joltify_lending/daemons/types"
-	libtime "github.com/joltify-finance/joltify_lending/dydx_helper/lib/time"
+	libtime "github.com/joltify-finance/joltify_lending/lib/time"
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 )
 

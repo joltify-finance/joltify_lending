@@ -14,9 +14,9 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/rand"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/stretchr/testify/require"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"

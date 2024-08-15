@@ -8,7 +8,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants/exchange_common"
 	pricefeedmetrics "github.com/joltify-finance/joltify_lending/daemons/pricefeed/metrics"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	"github.com/stretchr/testify/require"
 )
 

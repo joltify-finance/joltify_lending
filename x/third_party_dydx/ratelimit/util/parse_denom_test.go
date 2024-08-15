@@ -6,7 +6,7 @@ import (
 
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/util"
 	"github.com/stretchr/testify/require"

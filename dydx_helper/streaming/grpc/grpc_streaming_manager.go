@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/gogoproto/proto"
 	ocutypes "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/off_chain_updates/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/streaming/grpc/types"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 

@@ -4,7 +4,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/joltify-finance/joltify_lending/app"
+	"github.com/joltify-finance/joltify_lending/app/config"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	sendingtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"
@@ -14,7 +14,7 @@ func init() {
 	// This package does not contain the `app/config` package in its import chain, and therefore needs to call
 	// SetAddressPrefixes() explicitly in order to set the `dydx` address prefixes.
 
-	app.SetSDKConfig()
+	config.SetupConfig()
 	_ = TestTxBuilder.SetMsgs(Msg_PlaceOrder)
 	Msg_PlaceOrder_TxBtyes, _ = TestEncodingCfg.TxConfig.TxEncoder()(TestTxBuilder.GetTx())
 

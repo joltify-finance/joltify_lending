@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
-	libtime "github.com/joltify-finance/joltify_lending/dydx_helper/lib/time"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
+	libtime "github.com/joltify-finance/joltify_lending/lib/time"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 )
 

@@ -16,7 +16,7 @@ import (
 	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:staticcheck
 	ibcconn "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	ibccore "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	clob "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	sending "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/types"
 	vault "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/types"

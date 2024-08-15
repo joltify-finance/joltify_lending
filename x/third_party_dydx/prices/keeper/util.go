@@ -4,10 +4,11 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
+
+var OneMillion = uint64(1_000_000)
 
 // isAboveRequiredMinPriceChange returns true if the new price meets the required min price change
 // for the market. Otherwise, returns false.
@@ -91,7 +92,7 @@ func computeTickSizePpm(oldPrice uint64, minPriceChangePpm uint32) *big.Int {
 func priceDeltaIsWithinOneTick(priceDelta *big.Int, tickSizePpm *big.Int) bool {
 	// To compare if a price_delta > tick_size, let's multiply by 1_000_000 and compare against the
 	// tick size in ppm
-	priceDeltaPpm := new(big.Int).Mul(priceDelta, new(big.Int).SetUint64(constants.OneMillion))
+	priceDeltaPpm := new(big.Int).Mul(priceDelta, new(big.Int).SetUint64(OneMillion))
 	return priceDeltaPpm.Cmp(tickSizePpm) <= 0
 }
 
@@ -110,7 +111,7 @@ func newPriceMeetsSqrtCondition(oldDelta *big.Int, newDelta *big.Int, tickSizePp
 	// new_delta * new_delta <= old_delta * tick_size               ==>
 	// new_delta * new_delta * 1_000_000 <= old_delta * tickSizePpm
 	newDeltaSquaredPpm := new(big.Int).Mul(newDelta, newDelta)
-	newDeltaSquaredPpm.Mul(newDeltaSquaredPpm, new(big.Int).SetUint64(constants.OneMillion))
+	newDeltaSquaredPpm.Mul(newDeltaSquaredPpm, new(big.Int).SetUint64(OneMillion))
 	oldDeltaTimesTickSizePpm := new(big.Int).Mul(oldDelta, tickSizePpm)
 	return newDeltaSquaredPpm.Cmp(oldDeltaTimesTickSizePpm) <= 0
 }
@@ -123,7 +124,7 @@ func maximumAllowedPriceDelta(oldDelta *big.Int, tickSizePpm *big.Int) *big.Int 
 	// and the proposed price:
 	// max_allowed = sqrt(old_delta * tick_size_ppm / 1_000_000)
 	maxAllowed := new(big.Int).Mul(oldDelta, tickSizePpm)
-	maxAllowed.Div(maxAllowed, new(big.Int).SetUint64(constants.OneMillion))
+	maxAllowed.Div(maxAllowed, new(big.Int).SetUint64(OneMillion))
 	maxAllowed.Sqrt(maxAllowed)
 	return maxAllowed
 }

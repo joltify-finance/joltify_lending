@@ -5,7 +5,7 @@ import (
 	indexerevents "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/events"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
 	indexershared "github.com/joltify-finance/joltify_lending/dydx_helper/indexer/shared/types"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/log"
+	"github.com/joltify-finance/joltify_lending/lib/log"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 

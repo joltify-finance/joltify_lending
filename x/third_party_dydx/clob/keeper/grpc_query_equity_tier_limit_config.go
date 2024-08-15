@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/grpc/status"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	"google.golang.org/grpc/codes"
 )

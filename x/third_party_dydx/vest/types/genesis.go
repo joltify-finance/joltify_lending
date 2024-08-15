@@ -3,7 +3,7 @@ package types
 import (
 	time "time"
 
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	rewardstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/rewards/types"
 )
 

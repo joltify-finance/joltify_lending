@@ -15,7 +15,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/app"
 	appflags "github.com/joltify-finance/joltify_lending/app/flags"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	assettypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/client/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"

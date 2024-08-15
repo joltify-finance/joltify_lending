@@ -7,7 +7,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
 	"github.com/joltify-finance/joltify_lending/daemons/server/types"
 	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/liquidations"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib/metrics"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )
 
 // LiquidationServer defines the fields required for liquidation updates.

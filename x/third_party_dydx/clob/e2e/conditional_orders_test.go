@@ -7,11 +7,11 @@ import (
 	"github.com/cometbft/cometbft/types"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
 	testapp "github.com/joltify-finance/joltify_lending/dydx_helper/testutil/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/constants"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/daemons/pricefeed/exchange_config"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/testutil/encoding"
+	"github.com/joltify-finance/joltify_lending/lib"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	feetiertypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"

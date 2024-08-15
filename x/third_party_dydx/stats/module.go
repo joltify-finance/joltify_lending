@@ -15,7 +15,7 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/joltify-finance/joltify_lending/dydx_helper/lib"
+	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/client/cli"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats/types"
