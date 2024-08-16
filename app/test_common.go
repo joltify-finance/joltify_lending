@@ -201,7 +201,7 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 }
 
 func (tApp TestApp) GetAccountKeeper() authkeeper.AccountKeeper { return tApp.AccountKeeper }
-func (tApp TestApp) GetBankKeeper() bankkeeper.Keeper           { return tApp.bankKeeper }
+func (tApp TestApp) GetBankKeeper() bankkeeper.Keeper           { return tApp.BankKeeper }
 func (tApp TestApp) GetStakingKeeper() stakingkeeper.Keeper     { return *tApp.stakingKeeper }
 func (tApp TestApp) GetSlashingKeeper() slashingkeeper.Keeper   { return tApp.slashingKeeper }
 func (tApp TestApp) GetMintKeeper() mintkeeper.Keeper           { return tApp.mintKeeper }
@@ -391,17 +391,17 @@ func (tApp TestApp) CheckBalance(t *testing.T, ctx sdk.Context, owner sdk.AccAdd
 // GetModuleAccountBalance gets the current balance of the denom for a module account
 func (tApp TestApp) GetModuleAccountBalance(ctx sdk.Context, moduleName string, denom string) sdkmath.Int {
 	moduleAcc := tApp.AccountKeeper.GetModuleAccount(ctx, moduleName)
-	balance := tApp.bankKeeper.GetBalance(ctx, moduleAcc.GetAddress(), denom)
+	balance := tApp.BankKeeper.GetBalance(ctx, moduleAcc.GetAddress(), denom)
 	return balance.Amount
 }
 
 // FundAccount is a utility function that funds an account by minting and sending the coins to the address.
 func (tApp TestApp) FundAccount(ctx sdk.Context, addr sdk.AccAddress, amounts sdk.Coins) error {
-	if err := tApp.bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
+	if err := tApp.BankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
 		return err
 	}
 
-	return tApp.bankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, amounts)
+	return tApp.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, amounts)
 }
 
 // NewQueryServerTestHelper creates a new QueryServiceTestHelper that wraps the provided sdk.Context.
@@ -411,11 +411,11 @@ func (tApp TestApp) NewQueryServerTestHelper(ctx sdk.Context) *baseapp.QueryServ
 
 // FundModuleAccount is a utility function that funds a module account by minting and sending the coins to the address.
 func (tApp TestApp) FundModuleAccount(ctx sdk.Context, recipientMod string, amounts sdk.Coins) error {
-	if err := tApp.bankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
+	if err := tApp.BankKeeper.MintCoins(ctx, minttypes.ModuleName, amounts); err != nil {
 		return err
 	}
 
-	return tApp.bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, recipientMod, amounts)
+	return tApp.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, recipientMod, amounts)
 }
 
 // GeneratePrivKeyAddressPairs generates (deterministically) a total of n private keys and addresses.
