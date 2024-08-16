@@ -242,7 +242,7 @@ func initRootCmd(
 // Creates an instance of the application that is discarded to enumerate the modules.
 func autoCliOpts(tempApp *joltapp.App, initClientCtx client.Context) autocli.AppOptions {
 	modules := make(map[string]appmodule.AppModule, 0)
-	for _, m := range tempApp.ModuleManger.Modules {
+	for _, m := range tempApp.ModuleManager.Modules {
 		if moduleWithName, ok := m.(module.HasName); ok {
 			moduleName := moduleWithName.Name()
 			if appModule, ok := moduleWithName.(appmodule.AppModule); ok {
@@ -258,7 +258,7 @@ func autoCliOpts(tempApp *joltapp.App, initClientCtx client.Context) autocli.App
 
 	return autocli.AppOptions{
 		Modules:               modules,
-		ModuleOptions:         runtimeservices.ExtractAutoCLIOptions(tempApp.ModuleManger.Modules),
+		ModuleOptions:         runtimeservices.ExtractAutoCLIOptions(tempApp.ModuleManager.Modules),
 		AddressCodec:          authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32AccountAddrPrefix()),
 		ValidatorAddressCodec: authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32ValidatorAddrPrefix()),
 		ConsensusAddressCodec: authcodec.NewBech32Codec(sdktypes.GetConfig().GetBech32ConsensusAddrPrefix()),
