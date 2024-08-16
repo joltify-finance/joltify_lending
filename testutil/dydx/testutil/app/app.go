@@ -631,7 +631,10 @@ func (tApp *TestApp) initChainIfNeeded() {
 
 	tApp.initialized = true
 
-	consensusParamsProto := tApp.genesis.ConsensusParams.ToProto()
+	// consensusParamsProto := tApp.genesis.ConsensusParams.ToProto()
+
+	consensusParamsProto := types.DefaultConsensusParams().ToProto()
+
 	initChainRequest := abcitypes.RequestInitChain{
 		InitialHeight:   tApp.genesis.InitialHeight,
 		AppStateBytes:   tApp.genesis.AppState,
