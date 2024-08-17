@@ -690,7 +690,7 @@ func TestProcessRewardsForBlock(t *testing.T) {
 			k := tApp.App.RewardsKeeper
 
 			// Set up PricesKeeper
-			_, err := tApp.App.PricesKeeper.CreateMarket(
+			_, err := tApp.App.DydxPricesKeeper.CreateMarket(
 				ctx,
 				pricestypes.MarketParam{
 					Id:                 testRewardTokenMarketId,

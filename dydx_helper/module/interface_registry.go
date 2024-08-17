@@ -95,7 +95,7 @@ func NewInterfaceRegistry(addrPrefix string, valAddrPrefix string) (types.Interf
 				"dydxprotocol.vault.MsgDepositToVault": getLegacyMsgSignerFn(
 					[]string{"subaccount_id", "owner"},
 				),
-
+				"joltify.third_party.dydxprotocol.bridge
 				// App injected messages have no signers.
 				"dydxprotocol.bridge.MsgAcknowledgeBridges":  noSigners,
 				"dydxprotocol.clob.MsgProposedOperations":    noSigners,
