@@ -37,7 +37,7 @@ func MustMakeOrderFromHumanInput(
 	baseQuantums := perptest.MustHumanSizeToBaseQuantums(humanSize, perp.Params.AtomicResolution)
 	order.Quantums = baseQuantums
 
-	marketParams, exists := app.PricesKeeper.GetMarketParam(ctx, perp.Params.MarketId)
+	marketParams, exists := app.DydxPricesKeeper.GetMarketParam(ctx, perp.Params.MarketId)
 	if !exists {
 		panic(fmt.Sprintf("marketParam does not exist: %v", perp.Params.MarketId))
 	}

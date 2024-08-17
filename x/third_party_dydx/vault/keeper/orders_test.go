@@ -250,7 +250,7 @@ func TestRefreshVaultClobOrders(t *testing.T) {
 		"Success - Orders refresh due to price updates": {
 			vaultId: constants.Vault_Clob_0,
 			advanceBlock: func(ctx sdk.Context, tApp *testapp.TestApp) sdk.Context {
-				marketPrice, err := tApp.App.PricesKeeper.GetMarketPrice(ctx, constants.Vault_Clob_0.Number)
+				marketPrice, err := tApp.App.DydxPricesKeeper.GetMarketPrice(ctx, constants.Vault_Clob_0.Number)
 				require.NoError(t, err)
 				msgUpdateMarketPrices := &pricestypes.MsgUpdateMarketPrices{
 					MarketPriceUpdates: []*pricestypes.MsgUpdateMarketPrices_MarketPrice{

@@ -8,11 +8,20 @@ import (
 	"path/filepath"
 
 	config2 "github.com/joltify-finance/joltify_lending/app/config"
+	appFlag "github.com/joltify-finance/joltify_lending/app/flags"
+	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
 	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/liquidations"
+	daemontypes "github.com/joltify-finance/joltify_lending/daemons/types"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/indexer_manager"
+	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer/msgsender"
+	streaming "github.com/joltify-finance/joltify_lending/dydx_helper/streaming/grpc"
 	streamingtypes "github.com/joltify-finance/joltify_lending/dydx_helper/streaming/grpc/types"
 	"github.com/joltify-finance/joltify_lending/lib"
+	timelib "github.com/joltify-finance/joltify_lending/lib/time"
 	assetsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets"
+
+	bridgedaemontypes "github.com/joltify-finance/joltify_lending/daemons/server/types/bridge"
 	bridgemodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge"
 	bridgemoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	clobmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob"
@@ -25,13 +34,14 @@ import (
 	feetiersmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers"
 	perpetualsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals"
 	perpetualsmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
-	pricesmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices"
-	pricesmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
+	dydxpricesmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices"
+	dydxpricesmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	rewardsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/rewards"
 	statsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats"
 	subaccountsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 	vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
+	"google.golang.org/grpc"
 
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
@@ -113,6 +123,7 @@ import (
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+	dydxPricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
 	spvmodulekeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -122,9 +133,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt"
 	joltkeeper "github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
 	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
-	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
-	pricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
-	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
+	kavapricefeed "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed"
+	kavapricefeedkeeper "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/keeper"
+	kavapricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	swaptypes "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 	blocktimemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
@@ -206,7 +217,7 @@ import (
 	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
 	bridgemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/keeper"
 	delaymsgmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/keeper"
-	pricesmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
+	dydxpricesmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/keeper"
 	sendingmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending/keeper"
 	vaultmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault/keeper"
 	vestmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest/keeper"
@@ -265,7 +276,7 @@ var (
 		transfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		auction.AppModuleBasic{},
-		pricefeed.AppModuleBasic{},
+		kavapricefeed.AppModuleBasic{},
 		jolt.AppModuleBasic{},
 		incentive.AppModuleBasic{},
 		kycmodule.AppModuleBasic{},
@@ -282,7 +293,7 @@ var (
 	preBlockers = []string{
 		upgradetypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		pricesmoduletypes.ModuleName,
+		dydxpricesmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/preBlockers
 	}
 
@@ -362,7 +373,7 @@ type App struct {
 	transferKeeper   ibctransferkeeper.Keeper
 	auctionKeeper    auctionkeeper.Keeper
 	// issuanceKeeper   issuancekeeper.Keeper
-	pricefeedKeeper pricefeedkeeper.Keeper
+	kavaPricefeedKeeper kavapricefeedkeeper.Keeper
 	// cdpKeeper        cdpkeeper.Keeper
 	joltKeeper              joltkeeper.Keeper
 	incentiveKeeper         incentivekeeper.Keeper
@@ -384,7 +395,7 @@ type App struct {
 	// dydx keepers
 	ClobKeeper        *clobmodulekeeper.Keeper
 	PerpetualsKeeper  *perpetualsmodulekeeper.Keeper
-	PricesKeeper      pricesmodulekeeper.Keeper
+	DydxPricesKeeper  dydxpricesmodulekeeper.Keeper
 	StatsKeeper       statsmodulekeeper.Keeper
 	SubaccountsKeeper subaccountsmodulekeeper.Keeper
 	BlockTimeKeeper   blocktimemodulekeeper.Keeper
@@ -476,7 +487,7 @@ func NewApp(
 		capabilitytypes.StoreKey, auctiontypes.StoreKey,
 		crisistypes.StoreKey,
 		// issuancetypes.StoreKey,
-		pricefeedtypes.StoreKey,
+		kavapricefeedtypes.StoreKey,
 		// cdptypes.StoreKey,
 		jolttypes.StoreKey,
 		incentivetypes.StoreKey,
@@ -489,11 +500,7 @@ func NewApp(
 		consensusparamtypes.StoreKey,
 
 		// dydx
-		clobmoduletypes.StoreKey,
-		satypes.StoreKey,
-		rewardsmoduletypes.StoreKey,
-
-		pricesmoduletypes.StoreKey,
+		dydxpricesmoduletypes.StoreKey,
 		assetsmoduletypes.StoreKey,
 		blocktimemoduletypes.StoreKey,
 		bridgemoduletypes.StoreKey,
@@ -539,6 +546,49 @@ func NewApp(
 		txConfig:          txConfig,
 	}
 
+	timeProvider := &timelib.TimeProviderImpl{}
+
+	appFlagsInstance := appFlag.GetFlagValuesFromOptions(appOpts)
+	app.GrpcStreamingManager = getGrpcStreamingManagerFromOptions(appFlagsInstance, logger)
+
+	msgSender, indexerFlags := getIndexerFromOptions(appOpts, logger)
+	app.IndexerEventManager = indexer_manager.NewIndexerEventManager(
+		msgSender,
+		tkeys[indexer_manager.TransientStoreKey],
+		indexerFlags.SendOffchainData,
+	)
+
+	// Get Daemon Flags.
+	daemonFlags := daemonflags.GetDaemonFlagValuesFromOptions(appOpts)
+	logger.Info("Parsed Daemon flags", "Flags", daemonFlags)
+
+	// Create server that will ingest gRPC messages from daemon clients.
+	// Note that gRPC clients will block on new gRPC connection until the gRPC server is ready to
+	// accept new connections.
+	app.Server = daemonserver.NewServer(
+		logger,
+		grpc.NewServer(),
+		&daemontypes.FileHandlerImpl{},
+		daemonFlags.Shared.SocketAddress,
+	)
+	// Setup server for pricefeed messages. The server will wait for gRPC messages containing price
+	// updates and then encode them into an in-memory cache shared by the prices module.
+	// The in-memory data structure is shared by the x/prices module and PriceFeed daemon.
+	indexPriceCache := dydxPricefeedtypes.NewMarketToExchangePrices(dydxPricefeedtypes.MaxPriceAge)
+	app.Server.WithPriceFeedMarketToExchangePrices(indexPriceCache)
+
+	// Setup server for liquidation messages. The server will wait for gRPC messages containing
+	// potentially liquidatable subaccounts and then encode them into an in-memory slice shared by
+	// the liquidations module.
+	// The in-memory data structure is shared by the x/clob module and liquidations daemon.
+	daemonLiquidationInfo := liquidationtypes.NewDaemonLiquidationInfo()
+	app.Server.WithDaemonLiquidationInfo(daemonLiquidationInfo)
+
+	// Setup server for bridge messages.
+	// The in-memory data structure is shared by the x/bridge module and bridge daemon.
+	bridgeEventManager := bridgedaemontypes.NewBridgeEventManager(timeProvider)
+	app.Server.WithBridgeEventManager(bridgeEventManager)
+
 	// init params keeper and subspaces
 	app.ParamsKeeper = paramskeeper.NewKeeper(
 		appCodec,
@@ -558,7 +608,7 @@ func NewApp(
 	// crisisSubspace := app.ParamsKeeper.Subspace(crisistypes.ModuleName)
 	auctionSubspace := app.ParamsKeeper.Subspace(auctiontypes.ModuleName)
 	// issuanceSubspace := app.ParamsKeeper.Subspace(issuancetypes.ModuleName)
-	pricefeedSubspace := app.ParamsKeeper.Subspace(pricefeedtypes.ModuleName)
+	kavaPricefeedSubspace := app.ParamsKeeper.Subspace(kavapricefeedtypes.ModuleName)
 	// cdpSubspace := app.ParamsKeeper.Subspace(cdptypes.ModuleName)
 	joltSubspace := app.ParamsKeeper.Subspace(jolttypes.ModuleName)
 	incentiveSubspace := app.ParamsKeeper.Subspace(incentivetypes.ModuleName)
@@ -735,10 +785,10 @@ func NewApp(
 		app.AccountKeeper,
 	)
 
-	app.pricefeedKeeper = pricefeedkeeper.NewKeeper(
+	app.kavaPricefeedKeeper = kavapricefeedkeeper.NewKeeper(
 		appCodec,
-		keys[pricefeedtypes.StoreKey],
-		pricefeedSubspace,
+		keys[kavapricefeedtypes.StoreKey],
+		kavaPricefeedSubspace,
 	)
 
 	joltKeeper := joltkeeper.NewKeeper(
@@ -747,7 +797,7 @@ func NewApp(
 		joltSubspace,
 		app.AccountKeeper,
 		app.BankKeeper,
-		app.pricefeedKeeper,
+		app.kavaPricefeedKeeper,
 		app.auctionKeeper,
 	)
 
@@ -762,7 +812,7 @@ func NewApp(
 	app.kycKeeper = *kycmodulekeeper.NewKeeper(appCodec, keys[kycmoduletypes.StoreKey], keys[kycmoduletypes.MemStoreKey], kycSubspace, authtypes.NewModuleAddress(govtypes.ModuleName))
 	app.nftKeeper = nftmodulekeeper.NewKeeper(runtime.NewKVStoreService(keys[nftmoduletypes.StoreKey]), appCodec, app.AccountKeeper, app.BankKeeper)
 
-	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.BankKeeper, app.AccountKeeper, app.nftKeeper, app.pricefeedKeeper, app.auctionKeeper, app.incentiveKeeper)
+	mSpvKeeper := spvmodulekeeper.NewKeeper(appCodec, keys[spvmoduletypes.StoreKey], keys[spvmoduletypes.MemStoreKey], spvSubspace, app.kycKeeper, app.BankKeeper, app.AccountKeeper, app.nftKeeper, app.kavaPricefeedKeeper, app.auctionKeeper, app.incentiveKeeper)
 
 	app.incentiveKeeper = incentivekeeper.NewKeeper(
 		appCodec,
@@ -795,9 +845,9 @@ func NewApp(
 	)
 	epochsModule := epochsmodule.NewAppModule(appCodec, app.EpochsKeeper)
 
-	app.PricesKeeper = *pricesmodulekeeper.NewKeeper(
+	app.DydxPricesKeeper = *dydxpricesmodulekeeper.NewKeeper(
 		appCodec,
-		keys[pricesmoduletypes.StoreKey],
+		keys[dydxpricesmoduletypes.StoreKey],
 		indexPriceCache,
 		timeProvider,
 		app.IndexerEventManager,
@@ -807,12 +857,12 @@ func NewApp(
 			delaymsgmoduletypes.ModuleAddress.String(),
 		},
 	)
-	pricesModule := pricesmodule.NewAppModule(appCodec, app.PricesKeeper, app.AccountKeeper, app.BankKeeper)
+	pricesModule := dydxpricesmodule.NewAppModule(appCodec, app.DydxPricesKeeper, app.AccountKeeper, app.BankKeeper)
 
 	app.AssetsKeeper = *assetsmodulekeeper.NewKeeper(
 		appCodec,
 		keys[assetsmoduletypes.StoreKey],
-		app.PricesKeeper,
+		app.DydxPricesKeeper,
 		app.IndexerEventManager,
 	)
 	assetsModule := assetsmodule.NewAppModule(appCodec, app.AssetsKeeper)
@@ -845,7 +895,7 @@ func NewApp(
 	app.PerpetualsKeeper = perpetualsmodulekeeper.NewKeeper(
 		appCodec,
 		keys[perpetualsmoduletypes.StoreKey],
-		app.PricesKeeper,
+		app.DydxPricesKeeper,
 		app.EpochsKeeper,
 		app.IndexerEventManager,
 		// gov module and delayMsg module accounts are allowed to send messages to the bridge module.
@@ -902,7 +952,7 @@ func NewApp(
 		app.AssetsKeeper,
 		app.BankKeeper,
 		app.FeeTiersKeeper,
-		app.PricesKeeper,
+		app.DydxPricesKeeper,
 		app.IndexerEventManager,
 		// set the governance and delaymsg module accounts as the authority for conducting upgrades
 		[]string{
@@ -932,9 +982,6 @@ func NewApp(
 	memClob := clobmodulememclob.NewMemClobPriceTimePriority(app.IndexerEventManager.Enabled())
 	memClob.SetGenerateOrderbookUpdates(app.GrpcStreamingManager.Enabled())
 
-	daemonLiquidationInfo := liquidationtypes.NewDaemonLiquidationInfo()
-	app.Server.WithDaemonLiquidationInfo(daemonLiquidationInfo)
-
 	app.ClobKeeper = clobmodulekeeper.NewKeeper(
 		appCodec,
 		keys[clobmoduletypes.StoreKey],
@@ -952,7 +999,7 @@ func NewApp(
 		app.BankKeeper,
 		app.FeeTiersKeeper,
 		app.PerpetualsKeeper,
-		app.PricesKeeper,
+		app.DydxPricesKeeper,
 		app.StatsKeeper,
 		app.RewardsKeeper,
 		app.IndexerEventManager,
@@ -1036,9 +1083,9 @@ func NewApp(
 		authzmodule.NewAppModule(appCodec, app.authzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		auction.NewAppModule(app.auctionKeeper, app.AccountKeeper, app.BankKeeper),
 		// issuance.NewAppModule(app.issuanceKeeper, app.AccountKeeper, app.bankKeeper),
-		pricefeed.NewAppModule(app.pricefeedKeeper, app.AccountKeeper),
+		kavapricefeed.NewAppModule(app.kavaPricefeedKeeper, app.AccountKeeper),
 		// cdp.NewAppModule(app.cdpKeeper, app.AccountKeeper, app.pricefeedKeeper, app.bankKeeper),
-		jolt.NewAppModule(app.joltKeeper, app.AccountKeeper, app.BankKeeper, app.pricefeedKeeper),
+		jolt.NewAppModule(app.joltKeeper, app.AccountKeeper, app.BankKeeper, app.kavaPricefeedKeeper),
 		incentive.NewAppModule(app.incentiveKeeper, app.AccountKeeper, app.BankKeeper),
 		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.AccountKeeper, app.BankKeeper),
 
@@ -1054,6 +1101,15 @@ func NewApp(
 		clobmodule.NewAppModule(appCodec, app.ClobKeeper, app.AccountKeeper, app.BankKeeper, app.SubaccountsKeeper),
 		rewardsModule,
 		subaccountsModule,
+		assetsModule,
+		bridgeModule,
+		perpetualsModule,
+		statsModule,
+		feeTiersModule,
+		vestModule,
+		delayMsgModule,
+		epochsModule,
+		pricesModule,
 	)
 
 	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
@@ -1078,6 +1134,10 @@ func NewApp(
 
 	// Warning: Some begin blockers must run before others. Ensure the dependencies are understood before modifying this list.
 	app.ModuleManager.SetOrderBeginBlockers(
+
+		blocktimemoduletypes.ModuleName, // Must be first
+		authz.ModuleName,
+		epochsmoduletypes.ModuleName,
 		// Capability begin blocker runs non state changing initialization.
 		capabilitytypes.ModuleName,
 		// Committee begin blocker changes module params by enacting proposals.
@@ -1105,7 +1165,7 @@ func NewApp(
 		ibcexported.ModuleName,
 		// Add all remaining modules with an empty begin blocker below since cosmos 0.45.0 requires it
 		vestingtypes.ModuleName,
-		pricefeedtypes.ModuleName,
+		kavapricefeedtypes.ModuleName,
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		govtypes.ModuleName,
@@ -1114,12 +1174,23 @@ func NewApp(
 		quotamoduletypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		paramstypes.ModuleName,
-		authz.ModuleName,
 		burnauctionmoduletypes.ModuleName,
 		// dydx
-		clobmoduletypes.ModuleName,
-		rewardsmoduletypes.ModuleName,
+
+		dydxpricesmoduletypes.ModuleName,
+		assetsmoduletypes.ModuleName,
+		bridgemoduletypes.ModuleName,
+		feetiersmoduletypes.ModuleName,
+		perpetualsmoduletypes.ModuleName,
+		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
+		clobmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
+		rewardsmoduletypes.ModuleName,
+		sendingmoduletypes.ModuleName,
+		govplusmoduletypes.ModuleName,
+		delaymsgmoduletypes.ModuleName,
+		vaultmoduletypes.ModuleName,
 	)
 
 	app.ModuleManager.SetOrderPrepareCheckStaters(
@@ -1131,7 +1202,7 @@ func NewApp(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
-		pricefeedtypes.ModuleName,
+		kavapricefeedtypes.ModuleName,
 		// Add all remaining modules with an empty end blocker below since cosmos 0.45.0 requires it
 		capabilitytypes.ModuleName,
 		// issuancetypes.ModuleName,
@@ -1158,17 +1229,36 @@ func NewApp(
 		genutiltypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		paramstypes.ModuleName,
-		authz.ModuleName,
 		burnauctionmoduletypes.ModuleName,
 
 		//dydx
-		clobmoduletypes.ModuleName,
-		rewardsmoduletypes.ModuleName,
+
+		dydxpricesmoduletypes.ModuleName,
+		assetsmoduletypes.ModuleName,
+		bridgemoduletypes.ModuleName,
+		feetiersmoduletypes.ModuleName,
+		perpetualsmoduletypes.ModuleName,
+		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
+		clobmoduletypes.ModuleName,
+		sendingmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
+		rewardsmoduletypes.ModuleName,
+		epochsmoduletypes.ModuleName,
+		govplusmoduletypes.ModuleName,
+		delaymsgmoduletypes.ModuleName,
+		// Vault endblocker should be after clob endblocker. Otherwise,
+		// the block after the one where vault orders expire won't have
+		// any vault orders.
+		vaultmoduletypes.ModuleName,
+		authz.ModuleName,                // No-op.
+		blocktimemoduletypes.ModuleName, // Must be last
+
 	)
 
 	// Warning: Some init genesis methods must run before others. Ensure the dependencies are understood before modifying this list
 	app.ModuleManager.SetOrderInitGenesis(
+		epochsmoduletypes.ModuleName,
 		capabilitytypes.ModuleName, // initialize capabilities, run before any module creating or claiming capabilities in InitGenesis
 		authtypes.ModuleName,       // loads all accounts, run before any module with a module account
 		banktypes.ModuleName,
@@ -1179,12 +1269,11 @@ func NewApp(
 		minttypes.ModuleName,
 		ibcexported.ModuleName,
 		evidencetypes.ModuleName,
-		authz.ModuleName,
 		ibctransfertypes.ModuleName,
 		feegrant.ModuleName,
 		auctiontypes.ModuleName,
 		// issuancetypes.ModuleName,
-		pricefeedtypes.ModuleName,
+		kavapricefeedtypes.ModuleName,
 		// cdptypes.ModuleName, // reads market prices, so must run after pricefeed genesis
 		jolttypes.ModuleName,
 		swaptypes.ModuleName,
@@ -1203,9 +1292,22 @@ func NewApp(
 		burnauctionmoduletypes.ModuleName,
 
 		// dydx
-		clobmoduletypes.ModuleName,
-		rewardsmoduletypes.ModuleName,
+		dydxpricesmoduletypes.ModuleName,
+		assetsmoduletypes.ModuleName,
+		blocktimemoduletypes.ModuleName,
+		bridgemoduletypes.ModuleName,
+		feetiersmoduletypes.ModuleName,
+		perpetualsmoduletypes.ModuleName,
+		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
+		clobmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
+		rewardsmoduletypes.ModuleName,
+		sendingmoduletypes.ModuleName,
+		govplusmoduletypes.ModuleName,
+		delaymsgmoduletypes.ModuleName,
+		vaultmoduletypes.ModuleName,
+		authz.ModuleName,
 	)
 
 	app.ModuleManager.RegisterInvariants(app.crisisKeeper)
@@ -1323,7 +1425,11 @@ func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
 
 // EndBlocker contains app specific logic for the EndBlock abci call.
 func (app *App) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
-	return app.ModuleManager.EndBlock(ctx)
+	ret, err := app.ModuleManager.EndBlock(ctx)
+
+	block := app.IndexerEventManager.ProduceBlock(ctx)
+	app.IndexerEventManager.SendOnchainData(block)
+	return ret, err
 }
 
 // PreBlocker application updates every pre block
@@ -1530,4 +1636,59 @@ func (app *App) AutoCliOpts() autocli.AppOptions {
 		ValidatorAddressCodec: authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
 		ConsensusAddressCodec: authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	}
+}
+
+// getIndexerFromOptions returns an instance of a msgsender.IndexerMessageSender from the specified options.
+// This function will default to try to use any instance that is configured for test execution followed by loading
+// an instance from command line flags and finally returning a no-op instance.
+func getIndexerFromOptions(
+	appOpts servertypes.AppOptions,
+	logger log.Logger,
+) (msgsender.IndexerMessageSender, indexer.IndexerFlags) {
+	v, ok := appOpts.Get(indexer.MsgSenderInstanceForTest).(msgsender.IndexerMessageSender)
+	if ok {
+		return v, indexer.IndexerFlags{
+			SendOffchainData: true,
+		}
+	}
+
+	indexerFlags := indexer.GetIndexerFlagValuesFromOptions(appOpts)
+	logger.Info(
+		"Parsed Indexer flags",
+		"Flags", indexerFlags,
+	)
+
+	var indexerMessageSender msgsender.IndexerMessageSender
+	if len(indexerFlags.KafkaAddrs) == 0 {
+		indexerMessageSender = msgsender.NewIndexerMessageSenderNoop()
+	} else {
+		var err error
+		indexerMessageSender, err = msgsender.NewIndexerMessageSenderKafka(
+			indexerFlags,
+			nil,
+			logger,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return indexerMessageSender, indexerFlags
+}
+
+// getGrpcStreamingManagerFromOptions returns an instance of a streamingtypes.GrpcStreamingManager from the specified
+// options. This function will default to returning a no-op instance.
+func getGrpcStreamingManagerFromOptions(
+	appFlags appFlag.Flags,
+	logger log.Logger,
+) (manager streamingtypes.GrpcStreamingManager) {
+	if appFlags.GrpcStreamingEnabled {
+		logger.Info("GRPC streaming is enabled")
+		return streaming.NewGrpcStreamingManager(
+			logger,
+			appFlags.GrpcStreamingFlushIntervalMs,
+			appFlags.GrpcStreamingMaxBatchSize,
+			appFlags.GrpcStreamingMaxChannelBufferSize,
+		)
+	}
+	return streaming.NewNoopGrpcStreamingManager()
 }
