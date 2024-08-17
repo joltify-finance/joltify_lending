@@ -106,7 +106,7 @@ func (OrderRemovalReason) EnumDescriptor() ([]byte, []int) {
 }
 
 func init() {
-	proto.RegisterEnum("dydxprotocol.indexer.common.OrderRemovalReason", OrderRemovalReason_name, OrderRemovalReason_value)
+	proto.RegisterEnum("joltify.third_party.dydxprotocol.indexer.common.OrderRemovalReason", OrderRemovalReason_name, OrderRemovalReason_value)
 }
 
 func init() {

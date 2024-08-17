@@ -251,10 +251,10 @@ func (m *MarketPriceUpdate) GetExchangePrices() []*ExchangePrice {
 }
 
 func init() {
-	proto.RegisterType((*UpdateMarketPricesRequest)(nil), "dydxprotocol.daemons.pricefeed.UpdateMarketPricesRequest")
-	proto.RegisterType((*UpdateMarketPricesResponse)(nil), "dydxprotocol.daemons.pricefeed.UpdateMarketPricesResponse")
-	proto.RegisterType((*ExchangePrice)(nil), "dydxprotocol.daemons.pricefeed.ExchangePrice")
-	proto.RegisterType((*MarketPriceUpdate)(nil), "dydxprotocol.daemons.pricefeed.MarketPriceUpdate")
+	proto.RegisterType((*UpdateMarketPricesRequest)(nil), "joltify.third_party.dydxprotocol.daemons.pricefeed.UpdateMarketPricesRequest")
+	proto.RegisterType((*UpdateMarketPricesResponse)(nil), "joltify.third_party.dydxprotocol.daemons.pricefeed.UpdateMarketPricesResponse")
+	proto.RegisterType((*ExchangePrice)(nil), "joltify.third_party.dydxprotocol.daemons.pricefeed.ExchangePrice")
+	proto.RegisterType((*MarketPriceUpdate)(nil), "joltify.third_party.dydxprotocol.daemons.pricefeed.MarketPriceUpdate")
 }
 
 func init() {
@@ -364,7 +364,7 @@ func _PriceFeedService_UpdateMarketPrices_Handler(srv interface{}, ctx context.C
 }
 
 var _PriceFeedService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "dydxprotocol.daemons.pricefeed.PriceFeedService",
+	ServiceName: "joltify.third_party.dydxprotocol.daemons.pricefeed.PriceFeedService",
 	HandlerType: (*PriceFeedServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

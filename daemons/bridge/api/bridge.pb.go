@@ -125,8 +125,8 @@ func (m *AddBridgeEventsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_AddBridgeEventsResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*AddBridgeEventsRequest)(nil), "dydxprotocol.daemons.bridge.AddBridgeEventsRequest")
-	proto.RegisterType((*AddBridgeEventsResponse)(nil), "dydxprotocol.daemons.bridge.AddBridgeEventsResponse")
+	proto.RegisterType((*AddBridgeEventsRequest)(nil), "joltify.third_party.dydxprotocol.daemons.bridge.AddBridgeEventsRequest")
+	proto.RegisterType((*AddBridgeEventsResponse)(nil), "joltify.third_party.dydxprotocol.daemons.bridge.AddBridgeEventsResponse")
 }
 
 func init() {
@@ -225,7 +225,7 @@ func _BridgeService_AddBridgeEvents_Handler(srv interface{}, ctx context.Context
 }
 
 var _BridgeService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "dydxprotocol.daemons.bridge.BridgeService",
+	ServiceName: "joltify.third_party.dydxprotocol.daemons.bridge.BridgeService",
 	HandlerType: (*BridgeServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
