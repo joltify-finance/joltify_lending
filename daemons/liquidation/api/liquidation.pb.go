@@ -157,8 +157,8 @@ func (m *LiquidateSubaccountsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_LiquidateSubaccountsResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*LiquidateSubaccountsRequest)(nil), "dydxprotocol.daemons.liquidation.LiquidateSubaccountsRequest")
-	proto.RegisterType((*LiquidateSubaccountsResponse)(nil), "dydxprotocol.daemons.liquidation.LiquidateSubaccountsResponse")
+	proto.RegisterType((*LiquidateSubaccountsRequest)(nil), "joltify.third_party.dydxprotocol.daemons.liquidation.LiquidateSubaccountsRequest")
+	proto.RegisterType((*LiquidateSubaccountsResponse)(nil), "joltify.third_party.dydxprotocol.daemons.liquidation.LiquidateSubaccountsResponse")
 }
 
 func init() {
@@ -266,7 +266,7 @@ func _LiquidationService_LiquidateSubaccounts_Handler(srv interface{}, ctx conte
 }
 
 var _LiquidationService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "dydxprotocol.daemons.liquidation.LiquidationService",
+	ServiceName: "joltify.third_party.dydxprotocol.daemons.liquidation.LiquidationService",
 	HandlerType: (*LiquidationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -77,30 +77,29 @@ func NewInterfaceRegistry(addrPrefix string, valAddrPrefix string) (types.Interf
 			// https://github.com/cosmos/cosmos-sdk/issues/18722 is fixed, replace this with the cosmos.msg.v1.signing
 			// annotation on the protos.
 			CustomGetSigners: map[protoreflect.FullName]signing.GetSignersFunc{
-				"dydxprotocol.clob.MsgBatchCancel": getLegacyMsgSignerFn(
+				"joltify.third_party.dydxprotocol.clob.MsgBatchCancel": getLegacyMsgSignerFn(
 					[]string{"subaccount_id", "owner"},
 				),
-				"dydxprotocol.clob.MsgCancelOrder": getLegacyMsgSignerFn(
+				"joltify.third_party.dydxprotocol.clob.MsgCancelOrder": getLegacyMsgSignerFn(
 					[]string{"order_id", "subaccount_id", "owner"},
 				),
-				"dydxprotocol.clob.MsgPlaceOrder": getLegacyMsgSignerFn(
+				"joltify.third_party.dydxprotocol.clob.MsgPlaceOrder": getLegacyMsgSignerFn(
 					[]string{"order", "order_id", "subaccount_id", "owner"},
 				),
-				"dydxprotocol.sending.MsgCreateTransfer": getLegacyMsgSignerFn(
+				"joltify.third_party.dydxprotocol.sending.MsgCreateTransfer": getLegacyMsgSignerFn(
 					[]string{"transfer", "sender", "owner"},
 				),
-				"dydxprotocol.sending.MsgWithdrawFromSubaccount": getLegacyMsgSignerFn(
+				"joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccount": getLegacyMsgSignerFn(
 					[]string{"sender", "owner"},
 				),
-				"dydxprotocol.vault.MsgDepositToVault": getLegacyMsgSignerFn(
+				"joltify.third_party.dydxprotocol.vault.MsgDepositToVault": getLegacyMsgSignerFn(
 					[]string{"subaccount_id", "owner"},
 				),
-				"joltify.third_party.dydxprotocol.bridge
 				// App injected messages have no signers.
-				"dydxprotocol.bridge.MsgAcknowledgeBridges":  noSigners,
-				"dydxprotocol.clob.MsgProposedOperations":    noSigners,
-				"dydxprotocol.perpetuals.MsgAddPremiumVotes": noSigners,
-				"dydxprotocol.prices.MsgUpdateMarketPrices":  noSigners,
+				"joltify.third_party.dydxprotocol.bridge.MsgAcknowledgeBridges":  noSigners,
+				"joltify.third_party.dydxprotocol.clob.MsgProposedOperations":    noSigners,
+				"joltify.third_party.dydxprotocol.perpetuals.MsgAddPremiumVotes": noSigners,
+				"joltify.third_party.dydxprotocol.prices.MsgUpdateMarketPrices":  noSigners,
 			},
 		},
 	})
