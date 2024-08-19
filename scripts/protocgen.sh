@@ -36,7 +36,6 @@ done
 cd ..
 
 
-sleep 300
 # move proto files to the right places
 #
 # Note: Proto files are suffixed with the current binary version.
