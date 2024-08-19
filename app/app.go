@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	"github.com/cosmos/gogoproto/proto"
 
@@ -44,7 +46,7 @@ import (
 	statsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats"
 	subaccountsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
-	vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
+	// vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
 	"google.golang.org/grpc"
 
 	"cosmossdk.io/client/v2/autocli"
@@ -290,6 +292,9 @@ var (
 		swap.AppModuleBasic{},
 		capability.AppModuleBasic{},
 		burnauctionmodule.AppModuleBasic{},
+
+		// dydx
+
 	)
 
 	preBlockers = []string{
@@ -934,18 +939,18 @@ func NewApp(
 	)
 	feeTiersModule := feetiersmodule.NewAppModule(appCodec, app.FeeTiersKeeper)
 
-	app.VestKeeper = *vestmodulekeeper.NewKeeper(
-		appCodec,
-		keys[vestmoduletypes.StoreKey],
-		app.BankKeeper,
-		app.BlockTimeKeeper,
-		// set the governance and delaymsg module accounts as the authority for conducting upgrades
-		[]string{
-			lib.GovModuleAddress.String(),
-			delaymsgmoduletypes.ModuleAddress.String(),
-		},
-	)
-	vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
+	//app.VestKeeper = *vestmodulekeeper.NewKeeper(
+	//	appCodec,
+	//	keys[vestmoduletypes.StoreKey],
+	//	app.BankKeeper,
+	//	app.BlockTimeKeeper,
+	//	// set the governance and delaymsg module accounts as the authority for conducting upgrades
+	//	[]string{
+	//		lib.GovModuleAddress.String(),
+	//		delaymsgmoduletypes.ModuleAddress.String(),
+	//	},
+	//)
+	//vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
 
 	app.RewardsKeeper = *rewardsmodulekeeper.NewKeeper(
 		appCodec,
@@ -1108,7 +1113,7 @@ func NewApp(
 		perpetualsModule,
 		statsModule,
 		feeTiersModule,
-		vestModule,
+		// vestModule,
 		delayMsgModule,
 		epochsModule,
 		pricesModule,
@@ -1187,7 +1192,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		vestmoduletypes.ModuleName,
+		// vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1244,7 +1249,7 @@ func NewApp(
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
-		vestmoduletypes.ModuleName,
+		// vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		epochsmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1303,7 +1308,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		vestmoduletypes.ModuleName,
+		// vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1418,6 +1423,8 @@ func NewApp(
 			tmos.Exit(err.Error())
 		}
 	}
+
+	app.initializeRateLimiters()
 
 	return app
 }
@@ -1698,4 +1705,13 @@ func getGrpcStreamingManagerFromOptions(
 		)
 	}
 	return streaming.NewNoopGrpcStreamingManager()
+}
+
+// initializeRateLimiters initializes the rate limiters from state if the application is
+// not started from genesis.
+func (app *App) initializeRateLimiters() {
+	// Create an `uncachedCtx` where the underlying MultiStore is the `rootMultiStore`.
+	// We use this to hydrate the `orderRateLimiter` with values from the underlying `rootMultiStore`.
+	uncachedCtx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
+	app.ClobKeeper.InitalizeBlockRateLimitFromStateIfExists(uncachedCtx)
 }

@@ -65,8 +65,7 @@ $BINARY config  set client keyring-backend test
 # Create validator keys and add account to genesis
 validatorKeyName="validator"
 printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover --keyring-backend test
-$BINARY add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3,123456usd-ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
-exit
+$BINARY genesis add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3,123456usd-ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 # Create faucet keys and add account to genesis
 faucetKeyName="faucet"
 printf "$faucetMnemonic\n" | $BINARY keys add $faucetKeyName --recover
@@ -92,7 +91,7 @@ printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
 $BINARY genesis add-genesis-account $relayerKeyName 1000000000ujolt
 
 
-for i in {1..100}
+for i in {1..2}
 do
   a=$(joltify keys add key_$i --keyring-backend test --output json)
   # get the address from the json
@@ -130,5 +129,18 @@ jq '.app_state.gov.params.voting_period = "60s"' $DATA/config/genesis.json|spong
 jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
 jq '.consensus_params.block.max_gas= "8000000000"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+
+
+GENESIS=$DATA/config/genesis.json
+
+dasel put -t json -f "$GENESIS" '.app_state.clob.clob_pairs.[]' -v "{}"
+dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].id' -v '0'
+dasel put -t string -f "$GENESIS" '.app_state.clob.clob_pairs.[0].status' -v "$INITIAL_CLOB_PAIR_STATUS"
+dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].perpetual_clob_metadata.perpetual_id' -v '0'
+dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].step_base_quantums' -v '1000000'
+dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].subticks_per_tick' -v '100000'
+dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].quantum_conversion_exponent' -v '-9'
+
+
 
 #jq '.app_state.feemarket.params.base_fee= "100"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json

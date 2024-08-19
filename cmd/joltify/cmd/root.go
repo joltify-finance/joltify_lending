@@ -178,6 +178,16 @@ func NewRootCmdWithInterceptors(
 	return rootCmd
 }
 
+// genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter
+func genesisCommand(txConfig client.TxConfig, basicManager module.BasicManager, cmds ...*cobra.Command) *cobra.Command {
+	cmd := genutilcli.Commands(txConfig, basicManager, joltapp.DefaultNodeHome)
+
+	for _, subCmd := range cmds {
+		cmd.AddCommand(subCmd)
+	}
+	return cmd
+}
+
 // initRootCmd initializes the app's root command with useful commands.
 func initRootCmd(
 	tempApp *joltapp.App,
@@ -203,8 +213,8 @@ func initRootCmd(
 			valOperAddressCodec,
 		),
 		genutilcli.ValidateGenesisCmd(tempApp.BasicModuleManager),
-		AddGenesisAccountCmd(joltapp.DefaultNodeHome),
-		genutilcli.AddGenesisAccountCmd(joltapp.DefaultNodeHome),
+		// AddGenesisAccountCmd(joltapp.DefaultNodeHome),
+		genesisCommand(tempApp.TxConfig(), tempApp.BasicModuleManager),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),
