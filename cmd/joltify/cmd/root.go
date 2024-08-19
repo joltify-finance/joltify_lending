@@ -154,8 +154,7 @@ func NewRootCmdWithInterceptors(
 			serverCtx := server.GetServerContextFromCmd(cmd)
 
 			// Format logs for error tracking if it is enabled via flags.
-			if ddErrorTrackingFormatterEnabled :=
-				serverCtx.Viper.Get(protocolflags.DdErrorTrackingFormat); ddErrorTrackingFormatterEnabled != nil {
+			if ddErrorTrackingFormatterEnabled := serverCtx.Viper.Get(protocolflags.DdErrorTrackingFormat); ddErrorTrackingFormatterEnabled != nil {
 				if enabled, err := cast.ToBoolE(ddErrorTrackingFormatterEnabled); err == nil && enabled {
 					joltapp.SetZerologDatadogErrorTrackingFormat()
 				}
@@ -205,6 +204,7 @@ func initRootCmd(
 		),
 		genutilcli.ValidateGenesisCmd(tempApp.BasicModuleManager),
 		AddGenesisAccountCmd(joltapp.DefaultNodeHome),
+		genutilcli.AddGenesisAccountCmd(joltapp.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),

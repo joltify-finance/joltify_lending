@@ -7,6 +7,7 @@ import "joltify/third_party/dydxprotocol/clob/liquidations.proto";
 
 option go_package = "github.com/joltify/daemons/liquidation/api";
 
+
 // LiquidationService defines the gRPC service used by liquidation daemon.
 service LiquidationService {
   // Sends a list of subaccount ids that are potentially liquidatable.

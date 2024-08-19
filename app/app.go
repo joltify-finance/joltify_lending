@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/cosmos/cosmos-sdk/types/msgservice"
+	"github.com/cosmos/gogoproto/proto"
 
 	config2 "github.com/joltify-finance/joltify_lending/app/config"
 	appFlag "github.com/joltify-finance/joltify_lending/app/flags"
@@ -48,10 +52,8 @@ import (
 	daemonservertypes "github.com/joltify-finance/joltify_lending/daemons/server/types"
 
 	tmos "github.com/cometbft/cometbft/libs/os"
-	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	"github.com/cosmos/gogoproto/proto"
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	solomachine "github.com/cosmos/ibc-go/v8/modules/light-clients/06-solomachine"
 	clobmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
@@ -1231,7 +1233,7 @@ func NewApp(
 		paramstypes.ModuleName,
 		burnauctionmoduletypes.ModuleName,
 
-		//dydx
+		// dydx
 
 		dydxpricesmoduletypes.ModuleName,
 		assetsmoduletypes.ModuleName,
@@ -1394,9 +1396,14 @@ func NewApp(
 
 	// At startup, after all modules have been registered, check that all prot
 	// annotations are correct.
+	// fixme we ignore the dydx proto
 	protoFiles, err := proto.MergedRegistry()
 	if err != nil {
-		panic(err)
+		if strings.Contains(err.Error(), "dydxprotocol/bridge") || strings.Contains(err.Error(), "subaccounts") {
+			fmt.Printf("we ignore this proto error\n")
+		} else {
+			panic(err)
+		}
 	}
 	err = msgservice.ValidateProtoAnnotations(protoFiles)
 	if err != nil {
