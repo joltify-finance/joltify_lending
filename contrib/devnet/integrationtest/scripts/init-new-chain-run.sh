@@ -1,5 +1,7 @@
 #! /bin/bash
 set -x
+
+source "./genesis.sh"
 base=1000000000000000000
 base2=1000000
 
@@ -91,7 +93,7 @@ printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
 $BINARY genesis add-genesis-account $relayerKeyName 1000000000ujolt
 
 
-for i in {1..2}
+for i in {1..6}
 do
   a=$(joltify keys add key_$i --keyring-backend test --output json)
   # get the address from the json
@@ -144,3 +146,46 @@ dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].quantum_conversio
 
 
 #jq '.app_state.feemarket.params.base_fee= "100"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+
+addr1=$(joltify keys show -a key_1)
+addr2=$(joltify keys show -a key_2)
+addr3=$(joltify keys show -a key_3)
+addr4=$(joltify keys show -a key_4)
+addr5=$(joltify keys show -a key_5)
+addr6=$(joltify keys show -a key_6)
+addr7=$(joltify keys show -a key_7)
+# Define all test accounts for the chain.
+TEST_ACCOUNTS=(
+#	"dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4" # alice
+#	"dydx10fx7sy6ywd5senxae9dwytf8jxek3t2gcen2vs" # bob
+#	"dydx1fjg6zp6vv8t9wvy4lps03r5l4g7tkjw9wvmh70" # carl
+#	"dydx1wau5mja7j7zdavtfq9lu7ejef05hm6ffenlcsn" # dave
+
+$addr1
+$addr2
+$addr3
+$addr4
+
+
+)
+
+FAUCET_ACCOUNTS=(
+#	"dydx1nzuttarf5k2j0nug5yzhr6p74t9avehn9hlh8m" # main fauceta
+$addr5
+)
+
+# Addresses of vaults.
+# Can use ../scripts/vault/get_vault.go to generate a vault's address.
+VAULT_ACCOUNTS=(
+#	"dydx1c0m5x87llaunl5sgv3q5vd7j5uha26d2q2r2q0" # BTC vault
+#	"dydx14rplxdyycc6wxmgl8fggppgq4774l70zt6phkw" # ETH vault
+$addr6
+$addr7
+)
+# Number of each vault, which for CLOB vaults is the ID of the clob pair it quotes on.
+VAULT_NUMBERS=(
+	0 # BTC clob pair ID
+	1 # ETH clob pair ID
+)
+VAL_CONFIG_DIR="$DATA/config"
+edit_genesis "$VAL_CONFIG_DIR" "" "${FAUCET_ACCOUNTS[*]}" "${VAULT_ACCOUNTS[*]}" "${VAULT_NUMBERS[*]}" "" "" "" ""
