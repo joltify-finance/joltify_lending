@@ -4,7 +4,7 @@ import "github.com/joltify-finance/joltify_lending/lib"
 
 const (
 	// UusdcDenom is the precomputed denom for IBC Micro USDC.
-	UusdcDenom         = "ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5"
+	UusdcDenom         = "ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3"
 	UusdcDenomExponent = -6
 )
 

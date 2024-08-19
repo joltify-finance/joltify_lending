@@ -13,9 +13,9 @@ EIGHTEEN_ZEROS="$NINE_ZEROS$NINE_ZEROS"
 # Obtained from `authtypes.NewModuleAddress(subaccounttypes.ModuleName)`.
 SUBACCOUNTS_MODACC_ADDR="jolt1v88c3xv9xyv3eetdx0tvcmq7ung3dywph9jkty"
 REWARDS_VESTER_ACCOUNT_ADDR="jolt1wtws9xa2v5f4r2zncnlg273mr0nda5xc3qx42k"
+BRIDGE_MODACC_ADDR="jolt1zlefkpe3g0vvm9a4h0jf9000lmqutlh93hptrj"
 # Address of the `bridge` module account.
 # Obtained from `authtypes.NewModuleAddress(bridgetypes.ModuleName)`.
-BRIDGE_MODACC_ADDR="jolt1zlefkpe3g0vvm9a4h0jf9000lmqutlh93hptrj"
 USDC_DENOM="ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3"
 REWARD_TOKEN="ujolt"
 NATIVE_TOKEN="ujolt" # public testnet token
@@ -204,6 +204,9 @@ function edit_genesis() {
 	dasel put -t int -f "$GENESIS" '.app_state.perpetuals.perpetuals.[1].params.liquidity_tier' -v '0'
 	dasel put -t int -f "$GENESIS" '.app_state.perpetuals.perpetuals.[1].params.market_type' -v '1'
 
+
+  echo "done1############"
+
 	# Perpetual: LINK-USD
 	dasel put -t json -f "$GENESIS" '.app_state.perpetuals.perpetuals.[]' -v "{}"
 	dasel put -t string -f "$GENESIS" '.app_state.perpetuals.perpetuals.[2].params.ticker' -v 'LINK-USD'
@@ -213,6 +216,10 @@ function edit_genesis() {
 	dasel put -t int -f "$GENESIS" '.app_state.perpetuals.perpetuals.[2].params.default_funding_ppm' -v '0'
 	dasel put -t int -f "$GENESIS" '.app_state.perpetuals.perpetuals.[2].params.liquidity_tier' -v '1'
 	dasel put -t int -f "$GENESIS" '.app_state.perpetuals.perpetuals.[2].params.market_type' -v '1'
+
+
+	echo "done2233##############"
+	exit
 
 	# Perpetual: MATIC-USD
 	dasel put -t json -f "$GENESIS" '.app_state.perpetuals.perpetuals.[]' -v "{}"
@@ -802,6 +809,10 @@ function edit_genesis() {
 	# XLM Exchange Config
 	xlm_exchange_config_json=$(cat "$EXCHANGE_CONFIG_JSON_DIR/xlm_exchange_config.json" | jq -c '.')
 	dasel put -t string -f "$GENESIS" '.app_state.prices.market_params.[18].exchange_config_json' -v "$xlm_exchange_config_json"
+
+
+	echo "done2@@@@@@@@@@@@"
+	exit 0
 
 	# Market: ETC-USD
 	dasel put -t json -f "$GENESIS" '.app_state.prices.market_params.[]' -v "{}"
