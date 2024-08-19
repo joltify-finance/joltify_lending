@@ -93,7 +93,7 @@ printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
 $BINARY genesis add-genesis-account $relayerKeyName 1000000000ujolt
 
 
-for i in {1..6}
+for i in {1..7}
 do
   a=$(joltify keys add key_$i --keyring-backend test --output json)
   # get the address from the json
@@ -131,17 +131,6 @@ jq '.app_state.gov.params.voting_period = "60s"' $DATA/config/genesis.json|spong
 jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
 jq '.consensus_params.block.max_gas= "8000000000"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
-
-
-GENESIS=$DATA/config/genesis.json
-
-dasel put -t json -f "$GENESIS" '.app_state.clob.clob_pairs.[]' -v "{}"
-dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].id' -v '0'
-dasel put -t string -f "$GENESIS" '.app_state.clob.clob_pairs.[0].status' -v "$INITIAL_CLOB_PAIR_STATUS"
-dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].perpetual_clob_metadata.perpetual_id' -v '0'
-dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].step_base_quantums' -v '1000000'
-dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].subticks_per_tick' -v '100000'
-dasel put -t int -f "$GENESIS" '.app_state.clob.clob_pairs.[0].quantum_conversion_exponent' -v '-9'
 
 
 
@@ -188,4 +177,4 @@ VAULT_NUMBERS=(
 	1 # ETH clob pair ID
 )
 VAL_CONFIG_DIR="$DATA/config"
-edit_genesis "$VAL_CONFIG_DIR" "" "${FAUCET_ACCOUNTS[*]}" "${VAULT_ACCOUNTS[*]}" "${VAULT_NUMBERS[*]}" "" "" "" ""
+edit_genesis "$VAL_CONFIG_DIR" "" "${FAUCET_ACCOUNTS[*]}" "${VAULT_ACCOUNTS[*]}" "${VAULT_NUMBERS[*]}" "../dydx_exchange_testdata" "../dydx_delaymsg_config" "" ""

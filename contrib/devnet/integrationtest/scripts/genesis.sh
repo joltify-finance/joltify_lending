@@ -1514,6 +1514,7 @@ function edit_genesis() {
 		dasel put -t string -f "$GENESIS" ".app_state.vault.vaults.[${vault_idx}].owner_shares.[0].shares.num_shares" -v "${DEFAULT_SUBACCOUNT_QUOTE_BALANCE_VAULT}"
 		vault_idx=$(($vault_idx + 1))
 	done
+	echo "done"
 }
 
 function add_subaccount() {

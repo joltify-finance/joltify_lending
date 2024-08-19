@@ -1405,7 +1405,6 @@ func NewApp(
 	protoFiles, err := proto.MergedRegistry()
 	if err != nil {
 		if strings.Contains(err.Error(), "dydxprotocol/bridge") || strings.Contains(err.Error(), "subaccounts") {
-			fmt.Printf("we ignore this proto error\n")
 		} else {
 			panic(err)
 		}
