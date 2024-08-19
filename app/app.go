@@ -6,6 +6,21 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+
+	types2 "github.com/joltify-finance/joltify_lending/app/ante/types"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
+
+	"github.com/joltify-finance/joltify_lending/app/middleware"
+
+	"github.com/joltify-finance/joltify_lending/dydx_helper/mempool"
+
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
+	dydxante "github.com/joltify-finance/joltify_lending/app/ante/dydx_ante"
+
+	"github.com/cosmos/cosmos-sdk/types/msgservice"
+	"github.com/cosmos/gogoproto/proto"
 
 	config2 "github.com/joltify-finance/joltify_lending/app/config"
 	appFlag "github.com/joltify-finance/joltify_lending/app/flags"
@@ -40,7 +55,7 @@ import (
 	statsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats"
 	subaccountsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
-	vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
+	// vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
 	"google.golang.org/grpc"
 
 	"cosmossdk.io/client/v2/autocli"
@@ -48,10 +63,8 @@ import (
 	daemonservertypes "github.com/joltify-finance/joltify_lending/daemons/server/types"
 
 	tmos "github.com/cometbft/cometbft/libs/os"
-	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	"github.com/cosmos/gogoproto/proto"
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	solomachine "github.com/cosmos/ibc-go/v8/modules/light-clients/06-solomachine"
 	clobmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
@@ -235,7 +248,7 @@ import (
 	nftmodule "cosmossdk.io/x/nft/module"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	"github.com/joltify-finance/joltify_lending/app/ante"
+	jante "github.com/joltify-finance/joltify_lending/app/ante"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
 	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
 
@@ -288,6 +301,9 @@ var (
 		swap.AppModuleBasic{},
 		capability.AppModuleBasic{},
 		burnauctionmodule.AppModuleBasic{},
+
+		// dydx
+
 	)
 
 	preBlockers = []string{
@@ -517,6 +533,8 @@ func NewApp(
 		govplusmoduletypes.StoreKey,
 		vaultmoduletypes.StoreKey,
 	)
+
+	keys[authtypes.StoreKey] = keys[authtypes.StoreKey].WithLocking()
 
 	tkeys := storetypes.NewTransientStoreKeys(
 		paramstypes.TStoreKey,
@@ -932,18 +950,18 @@ func NewApp(
 	)
 	feeTiersModule := feetiersmodule.NewAppModule(appCodec, app.FeeTiersKeeper)
 
-	app.VestKeeper = *vestmodulekeeper.NewKeeper(
-		appCodec,
-		keys[vestmoduletypes.StoreKey],
-		app.BankKeeper,
-		app.BlockTimeKeeper,
-		// set the governance and delaymsg module accounts as the authority for conducting upgrades
-		[]string{
-			lib.GovModuleAddress.String(),
-			delaymsgmoduletypes.ModuleAddress.String(),
-		},
-	)
-	vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
+	//app.VestKeeper = *vestmodulekeeper.NewKeeper(
+	//	appCodec,
+	//	keys[vestmoduletypes.StoreKey],
+	//	app.BankKeeper,
+	//	app.BlockTimeKeeper,
+	//	// set the governance and delaymsg module accounts as the authority for conducting upgrades
+	//	[]string{
+	//		lib.GovModuleAddress.String(),
+	//		delaymsgmoduletypes.ModuleAddress.String(),
+	//	},
+	//)
+	//vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
 
 	app.RewardsKeeper = *rewardsmodulekeeper.NewKeeper(
 		appCodec,
@@ -1106,7 +1124,7 @@ func NewApp(
 		perpetualsModule,
 		statsModule,
 		feeTiersModule,
-		vestModule,
+		// vestModule,
 		delayMsgModule,
 		epochsModule,
 		pricesModule,
@@ -1185,7 +1203,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		vestmoduletypes.ModuleName,
+		// vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1231,7 +1249,7 @@ func NewApp(
 		paramstypes.ModuleName,
 		burnauctionmoduletypes.ModuleName,
 
-		//dydx
+		// dydx
 
 		dydxpricesmoduletypes.ModuleName,
 		assetsmoduletypes.ModuleName,
@@ -1242,7 +1260,7 @@ func NewApp(
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
-		vestmoduletypes.ModuleName,
+		// vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		epochsmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1301,7 +1319,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		vestmoduletypes.ModuleName,
+		// vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1364,39 +1382,61 @@ func NewApp(
 		// todo we need to verify here, currently, we allow all the tx to be passed
 		return true
 	}
-
-	anteOptions := ante.HandlerOptions{
+	//
+	anteOptions := jante.HandlerOptions{
 		AccountKeeper:          &app.AccountKeeper,
 		BankKeeper:             app.BankKeeper,
 		SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
 		FeegrantKeeper:         app.feeGrantKeeper,
 		SpvKeeper:              app.spvKeeper,
 		IBCKeeper:              app.ibcKeeper,
-		AddressFetchers:        []ante.AddressFetcher{},
+		AddressFetchers:        []jante.AddressFetcher{},
 		ExtensionOptionChecker: extensionCheck,
 		TxFeeChecker:           nil,
 	}
 
-	anteHandler, err := ante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
+	anteHandlerold, err := jante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}
+	_ = anteHandlerold
 
+	// app.SetAnteHandler(anteHandler)
 	app.setupUpgradeHandlers()
-	app.SetAnteHandler(anteHandler)
+
 	app.SetInitChainer(app.InitChainer)
-	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(app.EndBlocker)
+	app.SetMempool(mempool.NewNoOpMempool())
+	app.setAnteHandler(encodingConfig.TxConfig)
+
 	app.SetPreBlocker(app.PreBlocker)
+
+	app.SetBeginBlocker(app.BeginBlockerDydx)
+	app.SetEndBlocker(app.EndBlockerDydx)
+	app.SetPrecommiter(app.PrecommitterDydx)
+	app.SetPrepareCheckStater(app.PrepareCheckStaterDydx)
+
+	// fixme we disable it here
+	// ProposalHandler setup.
+	// prepareProposalHandler, processProposalHandler := app.createProposalHandlers(appFlags, txConfig, appOpts)
+	// app.SetPrepareProposal(prepareProposalHandler)
+	// app.SetProcessProposal(processProposalHandler)
+
+	// app.SetBeginBlocker(app.BeginBlocker)
+	// app.SetEndBlocker(app.EndBlocker)
+	// app.SetPreBlocker(app.PreBlocker)
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 
 	// At startup, after all modules have been registered, check that all prot
 	// annotations are correct.
+	// fixme we ignore the dydx proto
 	protoFiles, err := proto.MergedRegistry()
 	if err != nil {
-		panic(err)
+		if strings.Contains(err.Error(), "dydxprotocol/bridge") || strings.Contains(err.Error(), "subaccounts") {
+		} else {
+			panic(err)
+		}
 	}
 	err = msgservice.ValidateProtoAnnotations(protoFiles)
 	if err != nil {
@@ -1411,6 +1451,8 @@ func NewApp(
 			tmos.Exit(err.Error())
 		}
 	}
+
+	app.initializeRateLimiters()
 
 	return app
 }
@@ -1432,8 +1474,59 @@ func (app *App) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
 	return ret, err
 }
 
+// BeginBlockerDydx application updates every begin block
+func (app *App) BeginBlockerDydx(ctx sdk.Context) (sdk.BeginBlock, error) {
+	ctx = ctx.WithExecMode(lib.ExecModeBeginBlock)
+
+	// Update the proposer address in the logger for the panic logging middleware.
+	proposerAddr := sdk.ConsAddress(ctx.BlockHeader().ProposerAddress)
+	middleware.Logger = ctx.Logger().With("proposer_cons_addr", proposerAddr.String())
+
+	// app.scheduleForkUpgrade(ctx)
+	return app.ModuleManager.BeginBlock(ctx)
+}
+
+// EndBlockerDydx application updates every end block
+func (app *App) EndBlockerDydx(ctx sdk.Context) (sdk.EndBlock, error) {
+	// Measure the lag between current timestamp and the end blocker time stamp
+	// as an indicator of whether the node is lagging behind.
+	metrics.ModuleMeasureSince(metrics.EndBlocker, metrics.EndBlockerLag, ctx.BlockTime())
+
+	ctx = ctx.WithExecMode(lib.ExecModeEndBlock)
+
+	// Reset the logger for middleware.
+	// Note that the middleware is only used by `CheckTx` and `DeliverTx`, and not `EndBlocker`.
+	// Panics from `EndBlocker` will not be logged by the middleware and will lead to consensus failures.
+	middleware.Logger = app.Logger()
+
+	response, err := app.ModuleManager.EndBlock(ctx)
+	if err != nil {
+		return response, err
+	}
+	block := app.IndexerEventManager.ProduceBlock(ctx)
+	app.IndexerEventManager.SendOnchainData(block)
+	return response, err
+}
+
+// PrecommitterDydx application updates before the commital of a block after all transactions have been delivered.
+func (app *App) PrecommitterDydx(ctx sdk.Context) {
+	if err := app.ModuleManager.Precommit(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// PrepareCheckStaterDydx application updates after commit and before any check state is invoked.
+func (app *App) PrepareCheckStaterDydx(ctx sdk.Context) {
+	ctx = ctx.WithExecMode(lib.ExecModePrepareCheckState)
+
+	if err := app.ModuleManager.PrepareCheckState(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // PreBlocker application updates every pre block
 func (app *App) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+	ctx = ctx.WithGasMeter(types2.NewFreeInfiniteGasMeter())
 	return app.ModuleManager.PreBlock(ctx)
 }
 
@@ -1691,4 +1784,44 @@ func getGrpcStreamingManagerFromOptions(
 		)
 	}
 	return streaming.NewNoopGrpcStreamingManager()
+}
+
+// initializeRateLimiters initializes the rate limiters from state if the application is
+// not started from genesis.
+func (app *App) initializeRateLimiters() {
+	// Create an `uncachedCtx` where the underlying MultiStore is the `rootMultiStore`.
+	// We use this to hydrate the `orderRateLimiter` with values from the underlying `rootMultiStore`.
+	uncachedCtx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
+	app.ClobKeeper.InitalizeBlockRateLimitFromStateIfExists(uncachedCtx)
+}
+
+// buildAnteHandler builds an AnteHandler object configured for the app.
+func (app *App) buildAnteHandler(txConfig client.TxConfig) sdk.AnteHandler {
+	anteHandler, err := dydxante.NewAnteHandler(
+		dydxante.HandlerOptions{
+			HandlerOptions: ante.HandlerOptions{
+				AccountKeeper:   app.AccountKeeper,
+				BankKeeper:      app.BankKeeper,
+				SignModeHandler: txConfig.SignModeHandler(),
+				FeegrantKeeper:  app.feeGrantKeeper,
+				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			},
+			ClobKeeper:   app.ClobKeeper,
+			Codec:        app.appCodec,
+			AuthStoreKey: app.keys[authtypes.StoreKey],
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	return anteHandler
+}
+
+// setAnteHandler creates a new AnteHandler and sets it on the base app and clob keeper.
+func (app *App) setAnteHandler(txConfig client.TxConfig) {
+	anteHandler := app.buildAnteHandler(txConfig)
+	// Prevent a cycle between when we create the clob keeper and the ante handler.
+	app.ClobKeeper.SetAnteHandler(anteHandler)
+	app.SetAnteHandler(anteHandler)
 }

@@ -154,8 +154,7 @@ func NewRootCmdWithInterceptors(
 			serverCtx := server.GetServerContextFromCmd(cmd)
 
 			// Format logs for error tracking if it is enabled via flags.
-			if ddErrorTrackingFormatterEnabled :=
-				serverCtx.Viper.Get(protocolflags.DdErrorTrackingFormat); ddErrorTrackingFormatterEnabled != nil {
+			if ddErrorTrackingFormatterEnabled := serverCtx.Viper.Get(protocolflags.DdErrorTrackingFormat); ddErrorTrackingFormatterEnabled != nil {
 				if enabled, err := cast.ToBoolE(ddErrorTrackingFormatterEnabled); err == nil && enabled {
 					joltapp.SetZerologDatadogErrorTrackingFormat()
 				}
@@ -177,6 +176,16 @@ func NewRootCmdWithInterceptors(
 	}
 
 	return rootCmd
+}
+
+// genesisCommand builds genesis-related `simd genesis` command. Users may provide application specific commands as a parameter
+func genesisCommand(txConfig client.TxConfig, basicManager module.BasicManager, cmds ...*cobra.Command) *cobra.Command {
+	cmd := genutilcli.Commands(txConfig, basicManager, joltapp.DefaultNodeHome)
+
+	for _, subCmd := range cmds {
+		cmd.AddCommand(subCmd)
+	}
+	return cmd
 }
 
 // initRootCmd initializes the app's root command with useful commands.
@@ -204,7 +213,8 @@ func initRootCmd(
 			valOperAddressCodec,
 		),
 		genutilcli.ValidateGenesisCmd(tempApp.BasicModuleManager),
-		AddGenesisAccountCmd(joltapp.DefaultNodeHome),
+		// AddGenesisAccountCmd(joltapp.DefaultNodeHome),
+		genesisCommand(tempApp.TxConfig(), tempApp.BasicModuleManager),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 		confixcmd.ConfigCommand(),

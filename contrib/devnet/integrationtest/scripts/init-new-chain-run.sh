@@ -1,5 +1,7 @@
 #! /bin/bash
 set -x
+
+source "./genesis.sh"
 base=1000000000000000000
 base2=1000000
 
@@ -66,7 +68,6 @@ $BINARY config  set client keyring-backend test
 validatorKeyName="validator"
 printf "$validatorMnemonic\n" | $BINARY keys add $validatorKeyName --recover --keyring-backend test
 $BINARY genesis add-genesis-account $validatorKeyName 200000000000000000ujolt,200000000000000000uoppy,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3,123456usd-ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
-
 # Create faucet keys and add account to genesis
 faucetKeyName="faucet"
 printf "$faucetMnemonic\n" | $BINARY keys add $faucetKeyName --recover
@@ -87,12 +88,24 @@ $BINARY genesis add-genesis-account jolt1kdgjxwdk4w5pexwhtvek009pnp4qw07f4s89ea 
 $BINARY genesis add-genesis-account jolt1nlrlywakama45q59cqfx3sksf4xdkup6d439zk 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 
 
+# Obtained from `authtypes.NewModuleAddress(subaccounttypes.ModuleName)`.
+SUBACCOUNTS_MODACC_ADDR="jolt1v88c3xv9xyv3eetdx0tvcmq7ung3dywph9jkty"
+REWARDS_VESTER_ACCOUNT_ADDR="jolt1wtws9xa2v5f4r2zncnlg273mr0nda5xc3qx42k"
+BRIDGE_MODACC_ADDR="jolt1zlefkpe3g0vvm9a4h0jf9000lmqutlh93hptrj"
+
+
+$BINARY genesis add-genesis-account $SUBACCOUNTS_MODACC_ADDR 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+$BINARY genesis add-genesis-account $REWARDS_VESTER_ACCOUNT_ADDR 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+$BINARY genesis add-genesis-account $BRIDGE_MODACC_ADDR 200000000000000000ujolt,100000000000000000000000000000abnb,100000000000000000000000000000ausdt,100000000000000000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
+
+
+
 relayerKeyName="relayer"
 printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
 $BINARY genesis add-genesis-account $relayerKeyName 1000000000ujolt
 
 
-for i in {1..100}
+for i in {1..7}
 do
   a=$(joltify keys add key_$i --keyring-backend test --output json)
   # get the address from the json
@@ -131,4 +144,49 @@ jq '.app_state.distribution.params.community_tax= "0"' $DATA/config/genesis.json
 
 jq '.consensus_params.block.max_gas= "8000000000"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
 
+
+
 #jq '.app_state.feemarket.params.base_fee= "100"' $DATA/config/genesis.json|sponge $DATA/config/genesis.json
+
+addr1=$(joltify keys show -a key_1)
+addr2=$(joltify keys show -a key_2)
+addr3=$(joltify keys show -a key_3)
+addr4=$(joltify keys show -a key_4)
+addr5=$(joltify keys show -a key_5)
+addr6=$(joltify keys show -a key_6)
+addr7=$(joltify keys show -a key_7)
+# Define all test accounts for the chain.
+TEST_ACCOUNTS=(
+#	"dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4" # alice
+#	"dydx10fx7sy6ywd5senxae9dwytf8jxek3t2gcen2vs" # bob
+#	"dydx1fjg6zp6vv8t9wvy4lps03r5l4g7tkjw9wvmh70" # carl
+#	"dydx1wau5mja7j7zdavtfq9lu7ejef05hm6ffenlcsn" # dave
+
+$addr1
+$addr2
+$addr3
+$addr4
+
+
+)
+
+FAUCET_ACCOUNTS=(
+#	"dydx1nzuttarf5k2j0nug5yzhr6p74t9avehn9hlh8m" # main fauceta
+$addr5
+)
+
+# Addresses of vaults.
+# Can use ../scripts/vault/get_vault.go to generate a vault's address.
+VAULT_ACCOUNTS=(
+#	"dydx1c0m5x87llaunl5sgv3q5vd7j5uha26d2q2r2q0" # BTC vault
+#	"dydx14rplxdyycc6wxmgl8fggppgq4774l70zt6phkw" # ETH vault
+$addr6
+$addr7
+)
+# Number of each vault, which for CLOB vaults is the ID of the clob pair it quotes on.
+VAULT_NUMBERS=(
+	0 # BTC clob pair ID
+	1 # ETH clob pair ID
+)
+VAL_CONFIG_DIR="$DATA/config"
+edit_genesis "$VAL_CONFIG_DIR" "" "${FAUCET_ACCOUNTS[*]}" "${VAULT_ACCOUNTS[*]}" "${VAULT_NUMBERS[*]}" "../dydx_exchange_testdata" "../dydx_delaymsg_config" "" ""

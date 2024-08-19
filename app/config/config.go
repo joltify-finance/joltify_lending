@@ -1,15 +1,23 @@
 package config
 
 import (
+	"fmt"
+
+	"github.com/joltify-finance/joltify_lending/dydx_helper/module"
+
 	"cosmossdk.io/x/tx/signing"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
-	"github.com/cosmos/gogoproto/proto"
+	cosproto "github.com/cosmos/gogoproto/proto"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 const (
@@ -61,10 +69,72 @@ type EncodingConfig struct {
 	Amino             *codec.LegacyAmino
 }
 
+// TODO(CORE-846): Consider having app injected messages return an error instead of empty signers list.
+func noSigners(_ proto.Message) ([][]byte, error) {
+	return [][]byte{}, nil
+}
+
+func getLegacyMsgSignerFn(path []string) func(msg proto.Message) ([][]byte, error) {
+	if len(path) == 0 {
+		panic("path is expected to contain at least one value.")
+	}
+
+	return func(msg proto.Message) ([][]byte, error) {
+		m := msg.ProtoReflect()
+		for _, p := range path[:len(path)-1] {
+			fieldDesc := m.Descriptor().Fields().ByName(protoreflect.Name(p))
+			if fieldDesc.Kind() != protoreflect.MessageKind {
+				return nil, fmt.Errorf("Expected for field %s to be Message type in path %+v for msg %+v.", p, path, msg)
+			}
+			v := m.Get(fieldDesc)
+			if !v.IsValid() {
+				return nil, fmt.Errorf("Expected for field %s to be populated in path %+v for msg %+v.", p, path, msg)
+			}
+			m = v.Message()
+		}
+
+		fieldDesc := m.Descriptor().Fields().ByName(protoreflect.Name(path[len(path)-1]))
+		if fieldDesc.Kind() != protoreflect.StringKind {
+			return nil, fmt.Errorf(
+				"Expected for final field %s to be String type in path %+v for msg %+v.",
+				path[len(path)-1],
+				path,
+				msg,
+			)
+		}
+		signer, err := sdk.AccAddressFromBech32(m.Get(fieldDesc).String())
+		if err != nil {
+			return nil, err
+		}
+		return [][]byte{signer}, nil
+	}
+}
+
 // MakeEncodingConfig creates a new EncodingConfig.
 func MakeEncodingConfig() EncodingConfig {
-	interfaceRegistry, _ := types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
-		ProtoFiles: proto.HybridResolver,
+	// TODO(CORE-840): cosmos.msg.v1.signer annotation doesn't supported nested messages beyond a depth of 1
+	// which requires any message where the authority is nested further to implement its own accessor. Once
+	// https://github.com/cosmos/cosmos-sdk/issues/18722 is fixed, replace this with the cosmos.msg.v1.signing
+	// annotation on the protos.
+
+	customerSigner := make(map[protoreflect.FullName]signing.GetSignersFunc)
+
+	customerSigner["dydxprotocol.bridge.MsgAcknowledgeBridges"] = noSigners
+	customerSigner["dydxprotocol.clob.MsgProposedOperations"] = noSigners
+	customerSigner["dydxprotocol.perpetuals.MsgAddPremiumVotes"] = noSigners
+	customerSigner["dydxprotocol.prices.MsgUpdateMarketPrices"] = noSigners
+
+	customerSigner["dydxprotocol.clob.MsgBatchCancel"] = getLegacyMsgSignerFn(
+		[]string{"subaccount_id", "owner"})
+	customerSigner["dydxprotocol.clob.MsgCancelOrder"] = getLegacyMsgSignerFn(
+		[]string{"order_id", "subaccount_id", "owner"})
+	customerSigner["dydxprotocol.clob.MsgPlaceOrder"] = getLegacyMsgSignerFn([]string{"order", "order_id", "subaccount_id", "owner"})
+	customerSigner["dydxprotocol.sending.MsgCreateTransfer"] = getLegacyMsgSignerFn([]string{"transfer", "sender", "owner"})
+	customerSigner["dydxprotocol.sending.MsgWithdrawFromSubaccount"] = getLegacyMsgSignerFn([]string{"sender", "owner"})
+	customerSigner["dydxprotocol.vault.MsgDepositToVault"] = getLegacyMsgSignerFn([]string{"subaccount_id", "owner"})
+
+	interfaceRegistryold, _ := types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
+		ProtoFiles: cosproto.HybridResolver,
 		SigningOptions: signing.Options{
 			AddressCodec: address.Bech32Codec{
 				Bech32Prefix: sdk.GetConfig().GetBech32AccountAddrPrefix(),
@@ -72,9 +142,15 @@ func MakeEncodingConfig() EncodingConfig {
 			ValidatorAddressCodec: address.Bech32Codec{
 				Bech32Prefix: sdk.GetConfig().GetBech32ValidatorAddrPrefix(),
 			},
+			CustomGetSigners: customerSigner,
 		},
 	})
+	_ = interfaceRegistryold
 
+	interfaceRegistry, err := module.NewInterfaceRegistry(Bech32PrefixAccAddr, Bech32PrefixValAddr)
+	if err != nil {
+		panic(err)
+	}
 	legacyAmino := codec.NewLegacyAmino()
 	// interfaceRegistry := types.NewInterfaceRegistry()
 	marshaler := codec.NewProtoCodec(interfaceRegistry)

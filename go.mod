@@ -311,4 +311,5 @@ replace (
 	github.com/google/pprof => github.com/google/pprof v0.0.0-20230228050547-1710fef4ab10
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/common => github.com/prometheus/common v0.47.0
+
 )

@@ -15,6 +15,7 @@ import (
 // AppInjectedMsgSamples are msgs that are injected into the block by the proposing validator.
 // These messages are reserved for proposing validator's use only.
 var AppInjectedMsgSamples = map[string]sdk.Msg{
+	ss
 	// bridge
 	"/dydxprotocol.bridge.MsgAcknowledgeBridges": &bridgetypes.MsgAcknowledgeBridges{
 		Events: []bridgetypes.BridgeEvent{
