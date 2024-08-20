@@ -77,7 +77,6 @@ message MsgProposedOperationsResponse {}
 
 // MsgPlaceOrder is a request type used for placing orders.
 message MsgPlaceOrder {
-  option (cosmos.msg.v1.signer) = "order";
   Order order = 1 [ (gogoproto.nullable) = false ];
 }
 
