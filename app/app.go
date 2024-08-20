@@ -241,7 +241,7 @@ import (
 	nftmodule "cosmossdk.io/x/nft/module"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	//"github.com/joltify-finance/joltify_lending/app/ante"
+	jante "github.com/joltify-finance/joltify_lending/app/ante"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
 	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
 
@@ -1369,30 +1369,31 @@ func NewApp(
 	//	SigGasConsumer:  cosante.DefaultSigVerificationGasConsumer,
 	//}
 
-	//extensionCheck := func(a *types.Any) bool {
-	//	// todo we need to verify here, currently, we allow all the tx to be passed
-	//	return true
-	//}
+	extensionCheck := func(a *types.Any) bool {
+		// todo we need to verify here, currently, we allow all the tx to be passed
+		return true
+	}
 	//
-	//anteOptions := ante.HandlerOptions{
-	//	AccountKeeper:          &app.AccountKeeper,
-	//	BankKeeper:             app.BankKeeper,
-	//	SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
-	//	FeegrantKeeper:         app.feeGrantKeeper,
-	//	SpvKeeper:              app.spvKeeper,
-	//	IBCKeeper:              app.ibcKeeper,
-	//	AddressFetchers:        []ante.AddressFetcher{},
-	//	ExtensionOptionChecker: extensionCheck,
-	//	TxFeeChecker:           nil,
-	//}
-	//
-	//anteHandler, err := ante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
-	//if err != nil {
-	//	panic(fmt.Sprintf("failed to create anteHandler: %s", err))
-	//}
+	anteOptions := jante.HandlerOptions{
+		AccountKeeper:          &app.AccountKeeper,
+		BankKeeper:             app.BankKeeper,
+		SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
+		FeegrantKeeper:         app.feeGrantKeeper,
+		SpvKeeper:              app.spvKeeper,
+		IBCKeeper:              app.ibcKeeper,
+		AddressFetchers:        []jante.AddressFetcher{},
+		ExtensionOptionChecker: extensionCheck,
+		TxFeeChecker:           nil,
+	}
 
+	anteHandler, err := jante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
+	}
+
+	app.SetAnteHandler(anteHandler)
 	app.setupUpgradeHandlers()
-	app.setAnteHandler(encodingConfig.TxConfig)
+	//app.setAnteHandler(encodingConfig.TxConfig)
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
