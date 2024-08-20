@@ -64,7 +64,6 @@ func init() {
 	); err != nil {
 		panic(err)
 	}
-	fmt.Printf("we have registered the interface registry!!!!!!!!!\n")
 }
 
 func NewInterfaceRegistry(addrPrefix string, valAddrPrefix string) (types.InterfaceRegistry, error) {

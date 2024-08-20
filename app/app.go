@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
+	dydxante "github.com/joltify-finance/joltify_lending/app/ante/dydx_ante"
 
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	"github.com/cosmos/gogoproto/proto"
@@ -239,7 +241,7 @@ import (
 	nftmodule "cosmossdk.io/x/nft/module"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	"github.com/joltify-finance/joltify_lending/app/ante"
+	//"github.com/joltify-finance/joltify_lending/app/ante"
 	kycmodule "github.com/joltify-finance/joltify_lending/x/kyc"
 	spvmodule "github.com/joltify-finance/joltify_lending/x/spv"
 
@@ -1367,30 +1369,30 @@ func NewApp(
 	//	SigGasConsumer:  cosante.DefaultSigVerificationGasConsumer,
 	//}
 
-	extensionCheck := func(a *types.Any) bool {
-		// todo we need to verify here, currently, we allow all the tx to be passed
-		return true
-	}
-
-	anteOptions := ante.HandlerOptions{
-		AccountKeeper:          &app.AccountKeeper,
-		BankKeeper:             app.BankKeeper,
-		SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
-		FeegrantKeeper:         app.feeGrantKeeper,
-		SpvKeeper:              app.spvKeeper,
-		IBCKeeper:              app.ibcKeeper,
-		AddressFetchers:        []ante.AddressFetcher{},
-		ExtensionOptionChecker: extensionCheck,
-		TxFeeChecker:           nil,
-	}
-
-	anteHandler, err := ante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
-	if err != nil {
-		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
-	}
+	//extensionCheck := func(a *types.Any) bool {
+	//	// todo we need to verify here, currently, we allow all the tx to be passed
+	//	return true
+	//}
+	//
+	//anteOptions := ante.HandlerOptions{
+	//	AccountKeeper:          &app.AccountKeeper,
+	//	BankKeeper:             app.BankKeeper,
+	//	SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
+	//	FeegrantKeeper:         app.feeGrantKeeper,
+	//	SpvKeeper:              app.spvKeeper,
+	//	IBCKeeper:              app.ibcKeeper,
+	//	AddressFetchers:        []ante.AddressFetcher{},
+	//	ExtensionOptionChecker: extensionCheck,
+	//	TxFeeChecker:           nil,
+	//}
+	//
+	//anteHandler, err := ante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
+	//if err != nil {
+	//	panic(fmt.Sprintf("failed to create anteHandler: %s", err))
+	//}
 
 	app.setupUpgradeHandlers()
-	app.SetAnteHandler(anteHandler)
+	app.setAnteHandler(encodingConfig.TxConfig)
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
@@ -1713,4 +1715,35 @@ func (app *App) initializeRateLimiters() {
 	// We use this to hydrate the `orderRateLimiter` with values from the underlying `rootMultiStore`.
 	uncachedCtx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
 	app.ClobKeeper.InitalizeBlockRateLimitFromStateIfExists(uncachedCtx)
+}
+
+// buildAnteHandler builds an AnteHandler object configured for the app.
+func (app *App) buildAnteHandler(txConfig client.TxConfig) sdk.AnteHandler {
+	anteHandler, err := dydxante.NewAnteHandler(
+		dydxante.HandlerOptions{
+			HandlerOptions: ante.HandlerOptions{
+				AccountKeeper:   app.AccountKeeper,
+				BankKeeper:      app.BankKeeper,
+				SignModeHandler: txConfig.SignModeHandler(),
+				FeegrantKeeper:  app.feeGrantKeeper,
+				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+			},
+			ClobKeeper:   app.ClobKeeper,
+			Codec:        app.appCodec,
+			AuthStoreKey: app.keys[authtypes.StoreKey],
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	return anteHandler
+}
+
+// setAnteHandler creates a new AnteHandler and sets it on the base app and clob keeper.
+func (app *App) setAnteHandler(txConfig client.TxConfig) {
+	anteHandler := app.buildAnteHandler(txConfig)
+	// Prevent a cycle between when we create the clob keeper and the ante handler.
+	app.ClobKeeper.SetAnteHandler(anteHandler)
+	app.SetAnteHandler(anteHandler)
 }
