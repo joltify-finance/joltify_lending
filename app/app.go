@@ -8,6 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	types2 "github.com/joltify-finance/joltify_lending/app/ante/types"
+	"github.com/joltify-finance/joltify_lending/lib/metrics"
+
+	"github.com/joltify-finance/joltify_lending/app/middleware"
+
+	"github.com/joltify-finance/joltify_lending/dydx_helper/mempool"
+
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	dydxante "github.com/joltify-finance/joltify_lending/app/ante/dydx_ante"
@@ -1386,18 +1393,35 @@ func NewApp(
 		TxFeeChecker:           nil,
 	}
 
-	anteHandler, err := jante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
+	anteHandlerold, err := jante.NewAnteHandler(anteOptions, app.ConsensusParamsKeeper)
 	if err != nil {
 		panic(fmt.Sprintf("failed to create anteHandler: %s", err))
 	}
+	_ = anteHandlerold
 
-	app.SetAnteHandler(anteHandler)
+	// app.SetAnteHandler(anteHandler)
 	app.setupUpgradeHandlers()
-	//app.setAnteHandler(encodingConfig.TxConfig)
+
 	app.SetInitChainer(app.InitChainer)
-	app.SetBeginBlocker(app.BeginBlocker)
-	app.SetEndBlocker(app.EndBlocker)
+	app.SetMempool(mempool.NewNoOpMempool())
+	app.setAnteHandler(encodingConfig.TxConfig)
+
 	app.SetPreBlocker(app.PreBlocker)
+
+	app.SetBeginBlocker(app.BeginBlockerDydx)
+	app.SetEndBlocker(app.EndBlockerDydx)
+	app.SetPrecommiter(app.PrecommitterDydx)
+	app.SetPrepareCheckStater(app.PrepareCheckStaterDydx)
+
+	// fixme we disable it here
+	// ProposalHandler setup.
+	// prepareProposalHandler, processProposalHandler := app.createProposalHandlers(appFlags, txConfig, appOpts)
+	// app.SetPrepareProposal(prepareProposalHandler)
+	// app.SetProcessProposal(processProposalHandler)
+
+	// app.SetBeginBlocker(app.BeginBlocker)
+	// app.SetEndBlocker(app.EndBlocker)
+	// app.SetPreBlocker(app.PreBlocker)
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
@@ -1448,8 +1472,59 @@ func (app *App) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
 	return ret, err
 }
 
+// BeginBlockerDydx application updates every begin block
+func (app *App) BeginBlockerDydx(ctx sdk.Context) (sdk.BeginBlock, error) {
+	ctx = ctx.WithExecMode(lib.ExecModeBeginBlock)
+
+	// Update the proposer address in the logger for the panic logging middleware.
+	proposerAddr := sdk.ConsAddress(ctx.BlockHeader().ProposerAddress)
+	middleware.Logger = ctx.Logger().With("proposer_cons_addr", proposerAddr.String())
+
+	// app.scheduleForkUpgrade(ctx)
+	return app.ModuleManager.BeginBlock(ctx)
+}
+
+// EndBlockerDydx application updates every end block
+func (app *App) EndBlockerDydx(ctx sdk.Context) (sdk.EndBlock, error) {
+	// Measure the lag between current timestamp and the end blocker time stamp
+	// as an indicator of whether the node is lagging behind.
+	metrics.ModuleMeasureSince(metrics.EndBlocker, metrics.EndBlockerLag, ctx.BlockTime())
+
+	ctx = ctx.WithExecMode(lib.ExecModeEndBlock)
+
+	// Reset the logger for middleware.
+	// Note that the middleware is only used by `CheckTx` and `DeliverTx`, and not `EndBlocker`.
+	// Panics from `EndBlocker` will not be logged by the middleware and will lead to consensus failures.
+	middleware.Logger = app.Logger()
+
+	response, err := app.ModuleManager.EndBlock(ctx)
+	if err != nil {
+		return response, err
+	}
+	block := app.IndexerEventManager.ProduceBlock(ctx)
+	app.IndexerEventManager.SendOnchainData(block)
+	return response, err
+}
+
+// PrecommitterDydx application updates before the commital of a block after all transactions have been delivered.
+func (app *App) PrecommitterDydx(ctx sdk.Context) {
+	if err := app.ModuleManager.Precommit(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// PrepareCheckStaterDydx application updates after commit and before any check state is invoked.
+func (app *App) PrepareCheckStaterDydx(ctx sdk.Context) {
+	ctx = ctx.WithExecMode(lib.ExecModePrepareCheckState)
+
+	if err := app.ModuleManager.PrepareCheckState(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // PreBlocker application updates every pre block
 func (app *App) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+	ctx = ctx.WithGasMeter(types2.NewFreeInfiniteGasMeter())
 	return app.ModuleManager.PreBlock(ctx)
 }
 

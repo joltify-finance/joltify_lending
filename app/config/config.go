@@ -147,7 +147,10 @@ func MakeEncodingConfig() EncodingConfig {
 	})
 	_ = interfaceRegistryold
 
-	interfaceRegistry := module.InterfaceRegistry
+	interfaceRegistry, err := module.NewInterfaceRegistry(Bech32PrefixAccAddr, Bech32PrefixValAddr)
+	if err != nil {
+		panic(err)
+	}
 	legacyAmino := codec.NewLegacyAmino()
 	// interfaceRegistry := types.NewInterfaceRegistry()
 	marshaler := codec.NewProtoCodec(interfaceRegistry)

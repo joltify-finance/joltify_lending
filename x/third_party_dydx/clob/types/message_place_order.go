@@ -1,8 +1,6 @@
 package types
 
 import (
-	"fmt"
-
 	errorsmod "cosmossdk.io/errors"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
@@ -60,7 +58,6 @@ func (msg *MsgPlaceOrder) ValidateBasic() (err error) {
 	orderId := msg.Order.GetOrderId()
 	if orderId.IsShortTermOrder() {
 		// This also implicitly verifies that GoodTilBlockTime is not set / is zero for short-term orders.
-		fmt.Printf("we are shot term order!!\n")
 		if msg.Order.GetGoodTilBlock() == uint32(0) {
 			return errorsmod.Wrapf(ErrInvalidOrderGoodTilBlock, "order goodTilBlock cannot be 0")
 		}
