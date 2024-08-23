@@ -144,6 +144,8 @@ func (cd ClobDecorator) AnteHandle(
 				log.OrderHash, cometbftlog.NewLazySprintf("%X", msg.Order.GetOrderHash()),
 				log.OrderStatus, status,
 				"order_side", msg.Order.Side,
+				"detail", msg.Order.String(),
+				"amount", msg.Order.Quantums,
 				log.OrderSizeOptimisticallyFilledFromMatchingQuantums, orderSizeOptimisticallyFilledFromMatchingQuantums,
 				log.Error, err,
 			)
