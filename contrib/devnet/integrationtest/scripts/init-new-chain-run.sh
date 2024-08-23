@@ -189,4 +189,4 @@ VAULT_NUMBERS=(
 	1 # ETH clob pair ID
 )
 VAL_CONFIG_DIR="$DATA/config"
-edit_genesis "$VAL_CONFIG_DIR" "" "${FAUCET_ACCOUNTS[*]}" "${VAULT_ACCOUNTS[*]}" "${VAULT_NUMBERS[*]}" "../dydx_exchange_testdata" "../dydx_delaymsg_config" "" ""
+edit_genesis "$VAL_CONFIG_DIR" "${TEST_ACCOUNTS[*]}" "${FAUCET_ACCOUNTS[*]}" "${VAULT_ACCOUNTS[*]}" "${VAULT_NUMBERS[*]}" "../dydx_exchange_testdata" "../dydx_delaymsg_config" "" ""
