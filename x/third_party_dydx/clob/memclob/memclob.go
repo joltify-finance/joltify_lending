@@ -471,6 +471,9 @@ func (m *MemClobPriceTimePriority) PlaceOrder(
 			orderbook,
 			false, // isBuy
 		)
+
+		fmt.Printf(">>Received new short term order wwwwthis order is %vwww>>>sell:%v-----buy:%v\n", order.Side, hasBid, hasAsk)
+
 		if hasBid && hasAsk && bestBid.Value.Order.Subticks >= bestAsk.Value.Order.Subticks {
 			panic(
 				fmt.Sprintf(

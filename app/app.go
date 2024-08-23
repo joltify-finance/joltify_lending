@@ -8,6 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	vaultmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault"
+
+	govplusmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/govplus"
+	sendingmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/sending"
+
 	types2 "github.com/joltify-finance/joltify_lending/app/ante/types"
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
 
@@ -47,6 +52,7 @@ import (
 	delaymsgmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/delaymsg/types"
 	epochsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs"
 	feetiersmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers"
+	govplusmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/govplus/keeper"
 	perpetualsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals"
 	perpetualsmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 	dydxpricesmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices"
@@ -428,6 +434,8 @@ type App struct {
 	VestKeeper vestmodulekeeper.Keeper
 
 	SendingKeeper sendingmodulekeeper.Keeper
+
+	GovPlusKeeper govplusmodulekeeper.Keeper
 
 	VaultKeeper vaultmodulekeeper.Keeper
 
@@ -1028,6 +1036,56 @@ func NewApp(
 		daemonLiquidationInfo,
 	)
 
+	app.PerpetualsKeeper.SetClobKeeper(app.ClobKeeper)
+
+	app.SendingKeeper = *sendingmodulekeeper.NewKeeper(
+		appCodec,
+		keys[sendingmoduletypes.StoreKey],
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.SubaccountsKeeper,
+		app.IndexerEventManager,
+		// gov module and delayMsg module accounts are allowed to send messages to the sending module.
+		[]string{
+			lib.GovModuleAddress.String(),
+			delaymsgmoduletypes.ModuleAddress.String(),
+		},
+	)
+	sendingModule := sendingmodule.NewAppModule(
+		appCodec,
+		app.SendingKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.SubaccountsKeeper,
+	)
+
+	app.GovPlusKeeper = *govplusmodulekeeper.NewKeeper(
+		appCodec,
+		app.stakingKeeper,
+		keys[govplusmoduletypes.StoreKey],
+		[]string{
+			lib.GovModuleAddress.String(),
+			delaymsgmoduletypes.ModuleAddress.String(),
+		},
+	)
+	govPlusModule := govplusmodule.NewAppModule(appCodec, app.GovPlusKeeper)
+
+	app.VaultKeeper = *vaultmodulekeeper.NewKeeper(
+		appCodec,
+		keys[vaultmoduletypes.StoreKey],
+		app.ClobKeeper,
+		app.PerpetualsKeeper,
+		app.DydxPricesKeeper,
+		app.SendingKeeper,
+		app.SubaccountsKeeper,
+		[]string{
+			lib.GovModuleAddress.String(),
+			delaymsgmoduletypes.ModuleAddress.String(),
+		},
+	)
+	vaultModule := vaultmodule.NewAppModule(appCodec, app.VaultKeeper)
+	app.FeeTiersKeeper.SetVaultKeeper(app.VaultKeeper)
+
 	allKeys := make(map[string]storetypes.StoreKey, len(keys)+len(tkeys)+len(memKeys))
 	for k, v := range keys {
 		allKeys[k] = v
@@ -1128,6 +1186,9 @@ func NewApp(
 		delayMsgModule,
 		epochsModule,
 		pricesModule,
+		sendingModule,
+		govPlusModule,
+		vaultModule,
 	)
 
 	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
