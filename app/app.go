@@ -1530,7 +1530,7 @@ func NewApp(
 	// app.SetAnteHandler(anteHandler)
 	app.setupUpgradeHandlers()
 
-	app.SetInitChainer(app.InitChainer)
+	app.SetInitChainer(app.InitChainerDydx)
 	app.SetMempool(mempool.NewNoOpMempool())
 	app.setAnteHandler(encodingConfig.TxConfig)
 
@@ -1659,6 +1659,28 @@ func (app *App) PrepareCheckStaterDydx(ctx sdk.Context) {
 func (app *App) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
 	ctx = ctx.WithGasMeter(types2.NewFreeInfiniteGasMeter())
 	return app.ModuleManager.PreBlock(ctx)
+}
+
+// InitChainerDydx application update at chain initialization.
+func (app *App) InitChainerDydx(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
+	var genesisState GenesisState
+	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
+		panic(err)
+	}
+	err := app.upgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap())
+	if err != nil {
+		panic(err)
+	}
+	initResponse, err := app.ModuleManager.InitGenesis(ctx, app.appCodec, genesisState)
+	if err != nil {
+		panic(err)
+	}
+	block := app.IndexerEventManager.ProduceBlock(ctx)
+	app.IndexerEventManager.SendOnchainData(block)
+	app.IndexerEventManager.ClearEvents(ctx)
+
+	app.Logger().Info("Initialized chain", "blockHeight", ctx.BlockHeight())
+	return initResponse, err
 }
 
 // InitChainer contains app specific logic for the InitChain abci call.
