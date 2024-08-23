@@ -1,8 +1,6 @@
 package ante
 
 import (
-	"fmt"
-
 	errorsmod "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	cometbftlog "github.com/cometbft/cometbft/libs/log"
@@ -137,16 +135,15 @@ func (cd ClobDecorator) AnteHandle(
 			var status types.OrderStatus
 			// Note that `msg.ValidateBasic` is called before all AnteHandlers.
 			// This guarantees that `MsgPlaceOrder` has undergone stateless validation.
-			fmt.Printf("ready to submit the short term order!!!\n")
 			orderSizeOptimisticallyFilledFromMatchingQuantums, status, err = cd.clobKeeper.PlaceShortTermOrder(
 				ctx,
 				msg,
 			)
-			fmt.Printf("we have sent the short term order %v\n", status.String())
-			log.InfoLog(ctx, "Received new short term order",
+			log.DebugLog(ctx, "Received new short term order",
 				log.Tx, cometbftlog.NewLazySprintf("%X", tmhash.Sum(ctx.TxBytes())),
 				log.OrderHash, cometbftlog.NewLazySprintf("%X", msg.Order.GetOrderHash()),
 				log.OrderStatus, status,
+				"order_side", msg.Order.Side,
 				log.OrderSizeOptimisticallyFilledFromMatchingQuantums, orderSizeOptimisticallyFilledFromMatchingQuantums,
 				log.Error, err,
 			)
