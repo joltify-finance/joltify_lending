@@ -152,6 +152,7 @@ func (k Keeper) ProcessInternalOperations(
 	ctx sdk.Context,
 	operations []types.InternalOperation,
 ) error {
+	fmt.Printf("process internal...........................\n")
 	// Collect all the short-term orders placed for subsequent lookups.
 	// All short term orders in this map have passed validation.
 	placedShortTermOrders := make(map[types.OrderId]types.Order, 0)

@@ -8,6 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/joltify-finance/joltify_lending/app/process"
+	"github.com/skip-mev/slinky/abci/strategies/aggregator"
+	"github.com/skip-mev/slinky/abci/strategies/currencypair"
+	"github.com/skip-mev/slinky/abci/ve"
+	"github.com/skip-mev/slinky/pkg/math/voteweighted"
+
 	vaultmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault"
 
 	govplusmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/govplus"
@@ -15,6 +21,14 @@ import (
 
 	types2 "github.com/joltify-finance/joltify_lending/app/ante/types"
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
+
+	ratelimitmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit"
+	ratelimitmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/keeper"
+	ratelimitmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
+
+	blocktimemodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime"
+	blocktimemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
+	blocktimemoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 
 	"github.com/joltify-finance/joltify_lending/app/middleware"
 
@@ -142,6 +156,7 @@ import (
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+	daemonserver "github.com/joltify-finance/joltify_lending/daemons/server"
 	dydxPricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
 	kycmoduletypes "github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -157,13 +172,9 @@ import (
 	kavapricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 	swapkeeper "github.com/joltify-finance/joltify_lending/x/third_party/swap/keeper"
 	swaptypes "github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
-	blocktimemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
-
-	daemonserver "github.com/joltify-finance/joltify_lending/daemons/server"
 
 	assetsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/keeper"
 	assetsmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/assets/types"
-	blocktimemoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	epochsmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs/keeper"
 	feetiersmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/keeper"
 	feetiersmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/feetiers/types"
@@ -421,6 +432,7 @@ type App struct {
 	StatsKeeper       statsmodulekeeper.Keeper
 	SubaccountsKeeper subaccountsmodulekeeper.Keeper
 	BlockTimeKeeper   blocktimemodulekeeper.Keeper
+	RatelimitKeeper   ratelimitmodulekeeper.Keeper
 
 	AssetsKeeper   assetsmodulekeeper.Keeper
 	FeeTiersKeeper *feetiersmodulekeeper.Keeper
@@ -540,6 +552,7 @@ func NewApp(
 		epochsmoduletypes.StoreKey,
 		govplusmoduletypes.StoreKey,
 		vaultmoduletypes.StoreKey,
+		ratelimitmoduletypes.StoreKey,
 	)
 
 	keys[authtypes.StoreKey] = keys[authtypes.StoreKey].WithLocking()
@@ -660,6 +673,7 @@ func NewApp(
 	app.capabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
 	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibcexported.ModuleName)
 	scopedTransferKeeper := app.capabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
+	app.capabilityKeeper.ScopeToModule(ratelimitmoduletypes.ModuleName)
 	app.capabilityKeeper.Seal()
 
 	// add keepers
@@ -782,6 +796,31 @@ func NewApp(
 	)
 	transferModule := transfer.NewAppModule(app.transferKeeper)
 	transferIBCModule := transfer.NewIBCModule(app.transferKeeper)
+
+	app.BlockTimeKeeper = *blocktimemodulekeeper.NewKeeper(
+		appCodec,
+		keys[blocktimemoduletypes.StoreKey],
+		// set the governance and delaymsg module accounts as the authority for conducting upgrades
+		[]string{
+			lib.GovModuleAddress.String(),
+			delaymsgmoduletypes.ModuleAddress.String(),
+		},
+	)
+	blockTimeModule := blocktimemodule.NewAppModule(appCodec, app.BlockTimeKeeper)
+
+	app.RatelimitKeeper = *ratelimitmodulekeeper.NewKeeper(
+		appCodec,
+		keys[ratelimitmoduletypes.StoreKey],
+		app.BankKeeper,
+		app.BlockTimeKeeper,
+		app.ibcKeeper.ChannelKeeper, // ICS4Wrapper
+		// set the governance and delaymsg module accounts as the authority for conducting upgrades
+		[]string{
+			lib.GovModuleAddress.String(),
+			delaymsgmoduletypes.ModuleAddress.String(),
+		},
+	)
+	rateLimitModule := ratelimitmodule.NewAppModule(appCodec, app.RatelimitKeeper)
 
 	app.mintKeeper = *mintkeeper.NewKeeper(
 		appCodec,
@@ -1036,6 +1075,8 @@ func NewApp(
 		daemonLiquidationInfo,
 	)
 
+	clobModule := clobmodule.NewAppModule(appCodec, app.ClobKeeper, app.AccountKeeper, app.BankKeeper, app.SubaccountsKeeper)
+
 	app.PerpetualsKeeper.SetClobKeeper(app.ClobKeeper)
 
 	app.SendingKeeper = *sendingmodulekeeper.NewKeeper(
@@ -1154,7 +1195,6 @@ func NewApp(
 		ibc.NewAppModule(app.ibcKeeper),
 		upgrade.NewAppModule(app.upgradeKeeper, addresscodec.NewBech32Codec(sdk.Bech32PrefixAccAddr)),
 		evidence.NewAppModule(*app.evidenceKeeper),
-		transferModule,
 		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
 		authzmodule.NewAppModule(appCodec, app.authzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		auction.NewAppModule(app.auctionKeeper, app.AccountKeeper, app.BankKeeper),
@@ -1174,21 +1214,43 @@ func NewApp(
 		burnauctionmodule.NewAppModule(appCodec, app.burnauctionKeeper, app.AccountKeeper, app.BankKeeper),
 
 		// dydx
-		clobmodule.NewAppModule(appCodec, app.ClobKeeper, app.AccountKeeper, app.BankKeeper, app.SubaccountsKeeper),
-		rewardsModule,
-		subaccountsModule,
+
+		transferModule,
+		pricesModule,
 		assetsModule,
+		blockTimeModule,
 		bridgeModule,
+		feeTiersModule,
 		perpetualsModule,
 		statsModule,
-		feeTiersModule,
-		// vestModule,
-		delayMsgModule,
-		epochsModule,
-		pricesModule,
+		rewardsModule,
+		subaccountsModule,
+		clobModule,
 		sendingModule,
 		govPlusModule,
+		delayMsgModule,
+		epochsModule,
+		rateLimitModule,
 		vaultModule,
+
+		// dydx
+		//clobModule,
+		//rewardsModule,
+		//subaccountsModule,
+		//assetsModule,
+		//bridgeModule,
+		//perpetualsModule,
+		//statsModule,
+		//feeTiersModule,
+		//// vestModule,
+		//delayMsgModule,
+		//epochsModule,
+		//pricesModule,
+		//sendingModule,
+		//govPlusModule,
+		//vaultModule,
+		//rateLimitModule,
+		//blockTimeModule,
 	)
 
 	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
@@ -1252,6 +1314,7 @@ func NewApp(
 		genutiltypes.ModuleName,
 		quotamoduletypes.ModuleName,
 		ibctransfertypes.ModuleName,
+		ratelimitmoduletypes.ModuleName,
 		paramstypes.ModuleName,
 		burnauctionmoduletypes.ModuleName,
 		// dydx
@@ -1307,6 +1370,8 @@ func NewApp(
 		banktypes.ModuleName,
 		genutiltypes.ModuleName,
 		ibctransfertypes.ModuleName,
+		ratelimitmoduletypes.ModuleName,
+
 		paramstypes.ModuleName,
 		burnauctionmoduletypes.ModuleName,
 
@@ -1332,7 +1397,6 @@ func NewApp(
 		vaultmoduletypes.ModuleName,
 		authz.ModuleName,                // No-op.
 		blocktimemoduletypes.ModuleName, // Must be last
-
 	)
 
 	// Warning: Some init genesis methods must run before others. Ensure the dependencies are understood before modifying this list
@@ -1386,6 +1450,7 @@ func NewApp(
 		govplusmoduletypes.ModuleName,
 		delaymsgmoduletypes.ModuleName,
 		vaultmoduletypes.ModuleName,
+		ratelimitmoduletypes.ModuleName,
 		authz.ModuleName,
 	)
 
@@ -1475,6 +1540,11 @@ func NewApp(
 	app.SetEndBlocker(app.EndBlockerDydx)
 	app.SetPrecommiter(app.PrecommitterDydx)
 	app.SetPrepareCheckStater(app.PrepareCheckStaterDydx)
+
+	// ProposalHandler setup.
+	prepareProposalHandler, processProposalHandler := app.createProposalHandlers(appFlags, txConfig, appOpts)
+	app.SetPrepareProposal(prepareProposalHandler)
+	app.SetProcessProposal(processProposalHandler)
 
 	// fixme we disable it here
 	// ProposalHandler setup.
@@ -1885,4 +1955,100 @@ func (app *App) setAnteHandler(txConfig client.TxConfig) {
 	// Prevent a cycle between when we create the clob keeper and the ante handler.
 	app.ClobKeeper.SetAnteHandler(anteHandler)
 	app.SetAnteHandler(anteHandler)
+}
+
+func (app *App) createProposalHandlers(
+	appFlags flags.Flags,
+	txConfig client.TxConfig,
+	appOpts servertypes.AppOptions,
+) (sdk.PrepareProposalHandler, sdk.ProcessProposalHandler) {
+	var priceUpdateDecoder process.UpdateMarketPriceTxDecoder = process.NewDefaultUpdateMarketPriceTxDecoder(
+		app.PricesKeeper, app.txConfig.TxDecoder())
+	// If the node is a NonValidatingFullNode, we don't need to run any oracle code
+	// Note: If the command-line flag `--non-validating-full-node` is enabled, this node will use
+	// an implementation of `ProcessProposal` which always returns `abci.ResponseProcessProposal_ACCEPT`.
+	// Full-nodes do not participate in consensus, and therefore should not participate in voting / `ProcessProposal`.
+	if appFlags.NonValidatingFullNode {
+		if app.oracleMetrics == nil {
+			app.oracleMetrics = servicemetrics.NewNopMetrics()
+		}
+		return prepare.FullNodePrepareProposalHandler(), process.FullNodeProcessProposalHandler(
+			txConfig,
+			app.BridgeKeeper,
+			app.ClobKeeper,
+			app.StakingKeeper,
+			app.PerpetualsKeeper,
+			priceUpdateDecoder,
+		)
+	}
+	strategy := currencypair.NewDefaultCurrencyPairStrategy(app.PricesKeeper)
+	var priceUpdateGenerator prices.PriceUpdateGenerator = prices.NewDefaultPriceUpdateGenerator(app.PricesKeeper)
+
+	veCodec := compression.NewCompressionVoteExtensionCodec(
+		compression.NewDefaultVoteExtensionCodec(),
+		compression.NewZLibCompressor(),
+	)
+	extCommitCodec := compression.NewCompressionExtendedCommitCodec(
+		compression.NewDefaultExtendedCommitCodec(),
+		compression.NewZLibCompressor(),
+	)
+
+	// Set Price Update Generators/Decoders for Slinky
+	if appFlags.VEOracleEnabled {
+		priceUpdateGenerator = prices.NewSlinkyPriceUpdateGenerator(
+			aggregator.NewDefaultVoteAggregator(
+				app.Logger(),
+				voteweighted.MedianFromContext(
+					app.Logger(),
+					app.StakingKeeper,
+					voteweighted.DefaultPowerThreshold,
+				),
+				strategy,
+			),
+			extCommitCodec,
+			veCodec,
+			strategy,
+		)
+		priceUpdateDecoder = process.NewSlinkyMarketPriceDecoder(
+			priceUpdateDecoder,
+			priceUpdateGenerator,
+		)
+	}
+	// Generate the dydx handlers
+	dydxPrepareProposalHandler := prepare.PrepareProposalHandler(
+		txConfig,
+		app.BridgeKeeper,
+		app.ClobKeeper,
+		app.PerpetualsKeeper,
+		priceUpdateGenerator,
+	)
+
+	// ProcessProposal setup.
+	dydxProcessProposalHandler := process.ProcessProposalHandler(
+		txConfig,
+		app.BridgeKeeper,
+		app.ClobKeeper,
+		app.StakingKeeper,
+		app.PerpetualsKeeper,
+		app.PricesKeeper,
+		priceUpdateDecoder,
+	)
+
+	// Wrap dydx handlers with slinky handlers
+	if appFlags.VEOracleEnabled {
+		app.initOracle(priceUpdateDecoder)
+		proposalHandler := slinkyproposals.NewProposalHandler(
+			app.Logger(),
+			dydxPrepareProposalHandler,
+			dydxProcessProposalHandler,
+			ve.NewDefaultValidateVoteExtensionsFn(app.StakingKeeper),
+			veCodec,
+			extCommitCodec,
+			strategy,
+			app.oracleMetrics,
+			slinkyproposals.RetainOracleDataInWrappedProposalHandler(),
+		)
+		return proposalHandler.PrepareProposalHandler(), proposalHandler.ProcessProposalHandler()
+	}
+	return dydxPrepareProposalHandler, dydxProcessProposalHandler
 }
