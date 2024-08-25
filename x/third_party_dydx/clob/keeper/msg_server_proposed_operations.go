@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/lib"
@@ -34,8 +33,6 @@ func (k msgServer) ProposedOperations(
 			log.ErrorLogWithError(ctx, "Error in Proposed Operations", err)
 		}
 	}()
-
-	fmt.Printf("2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222\n")
 
 	if err := k.Keeper.ProcessProposerOperations(
 		ctx,

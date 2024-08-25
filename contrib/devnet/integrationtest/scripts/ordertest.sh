@@ -8,9 +8,9 @@ heightsubmuit=$((height + 15))
 
 #sleep 1
 #buy
-joltify tx clob place-order $(joltify keys show -a key_1) 0 0 0 2 1000000 2000000 $heightsubmuit --from key_1 -y
+joltify tx clob place-order $(joltify keys show -a key_1) 0 101 0 2 1000000 2000000 $heightsubmuit --from key_1 -y
 
-joltify tx clob place-order  $(joltify keys show -a key_2) 0 23 0 1 1000000 2000000 $heightsubmuit --from key_2 -y
+joltify tx clob place-order  $(joltify keys show -a key_2) 0 242 0 1 1000000 2000000 $heightsubmuit --from key_2 -y
 
 
 

@@ -49,12 +49,12 @@ func (k Keeper) SetSubaccount(ctx sdk.Context, subaccount types.Subaccount) {
 				),
 			)
 		}
-		ac := k.GetSubaccount(ctx, *subaccount.Id)
-		fmt.Printf(">>>before>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
+		//ac := k.GetSubaccount(ctx, *subaccount.Id)
+		//fmt.Printf(">>>before>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
 		b := k.cdc.MustMarshal(&subaccount)
 		store.Set(key, b)
-		ac = k.GetSubaccount(ctx, *subaccount.Id)
-		fmt.Printf(">>>after>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
+		//ac = k.GetSubaccount(ctx, *subaccount.Id)
+		//fmt.Printf(">>>after>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
 	}
 }
 
