@@ -1,6 +1,7 @@
 package process
 
 import (
+	"fmt"
 	"slices"
 
 	errorsmod "cosmossdk.io/errors"
@@ -78,8 +79,10 @@ func DecodeProcessProposalTxs(
 ) (*ProcessProposalTxs, error) {
 	// Check len (accounting for offset from injected vote-extensions if applicable)
 	offset := pricesTxDecoder.GetTxOffset(ctx)
+	fmt.Printf(">>>>>>>>>>>>>>>>>>offset: %d\n", offset)
 	injectedTxCount := minTxsCount + offset
 	numTxs := len(req.Txs)
+	fmt.Printf("tx we have is >>>>>%v\n", numTxs)
 	if numTxs < injectedTxCount {
 		return nil, errorsmod.Wrapf(
 			ErrUnexpectedNumMsgs,
@@ -105,6 +108,12 @@ func DecodeProcessProposalTxs(
 		return nil, err
 	}
 
+	if operationsTx.msg != nil {
+		fmt.Printf("EMPTY!!!!")
+	} else {
+		fmt.Printf("NOT EMPTY!!!!%v\n", operationsTx.msg.String())
+	}
+
 	// Acknowledge bridges.
 	acknowledgeBridgesTx, err := DecodeAcknowledgeBridgesTx(
 		ctx,
@@ -112,6 +121,13 @@ func DecodeProcessProposalTxs(
 		decoder,
 		req.Txs[numTxs+acknowledgeBridgesTxLenOffset],
 	)
+
+	if acknowledgeBridgesTx.msg != nil {
+		fmt.Printf("EMPTBBBBY!!!!")
+	} else {
+		fmt.Printf("NOT BBBBBEMPTY!!!!%v\n", acknowledgeBridgesTx.msg.String())
+	}
+
 	if err != nil {
 		return nil, err
 	}
