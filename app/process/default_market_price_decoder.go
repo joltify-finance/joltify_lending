@@ -17,7 +17,8 @@ type DefaultUpdateMarketPriceTxDecoder struct {
 
 // NewDefaultUpdateMarketPriceTxDecoder returns a new DefaultUpdateMarketPriceTxDecoder
 func NewDefaultUpdateMarketPriceTxDecoder(
-	pk ProcessPricesKeeper, txDecoder sdk.TxDecoder) *DefaultUpdateMarketPriceTxDecoder {
+	pk ProcessPricesKeeper, txDecoder sdk.TxDecoder,
+) *DefaultUpdateMarketPriceTxDecoder {
 	return &DefaultUpdateMarketPriceTxDecoder{
 		pk:        pk,
 		txDecoder: txDecoder,
@@ -31,8 +32,10 @@ func NewDefaultUpdateMarketPriceTxDecoder(
 //
 // If error occurs during any of the checks, returns error.
 func (mpd *DefaultUpdateMarketPriceTxDecoder) DecodeUpdateMarketPricesTx(
-	ctx sdk.Context, txs [][]byte) (*UpdateMarketPricesTx, error) {
-	return DecodeUpdateMarketPricesTx(ctx, mpd.pk, mpd.txDecoder, txs[len(txs)+updateMarketPricesTxLenOffset])
+	ctx sdk.Context, txs [][]byte,
+) (*UpdateMarketPricesTx, error) {
+	panic("should not call this func as price is disabled")
+	// return DecodeUpdateMarketPricesTx(ctx, mpd.pk, mpd.txDecoder, txs[len(txs)+updateMarketPricesTxLenOffset])
 }
 
 // GetTxOffset returns the offset that other injected txs should be placed with respect to their normally

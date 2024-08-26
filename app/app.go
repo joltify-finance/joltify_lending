@@ -1551,16 +1551,6 @@ func NewApp(
 	app.SetPrepareProposal(prepareProposalHandler)
 	app.SetProcessProposal(processProposalHandler)
 
-	// fixme we disable it here
-	// ProposalHandler setup.
-	// prepareProposalHandler, processProposalHandler := app.createProposalHandlers(appFlags, txConfig, appOpts)
-	// app.SetPrepareProposal(prepareProposalHandler)
-	// app.SetProcessProposal(processProposalHandler)
-
-	// app.SetBeginBlocker(app.BeginBlocker)
-	// app.SetEndBlocker(app.EndBlocker)
-	// app.SetPreBlocker(app.PreBlocker)
-
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 
@@ -1996,7 +1986,6 @@ func (app *App) createProposalHandlers(
 	// an implementation of `ProcessProposal` which always returns `abci.ResponseProcessProposal_ACCEPT`.
 	// Full-nodes do not participate in consensus, and therefore should not participate in voting / `ProcessProposal`.
 	if appFlags.NonValidatingFullNode {
-
 		return prepare.FullNodePrepareProposalHandler(), process.FullNodeProcessProposalHandler(
 			txConfig,
 			app.BridgeKeeper,
@@ -2006,7 +1995,7 @@ func (app *App) createProposalHandlers(
 			priceUpdateDecoder,
 		)
 	}
-	//strategy := currencypair.NewDefaultCurrencyPairStrategy(app.DydxPricesKeeper)
+	// strategy := currencypair.NewDefaultCurrencyPairStrategy(app.DydxPricesKeeper)
 	var priceUpdateGenerator prices.PriceUpdateGenerator = prices.NewDefaultPriceUpdateGenerator(app.DydxPricesKeeper)
 	//
 	//veCodec := compression.NewCompressionVoteExtensionCodec(

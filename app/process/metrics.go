@@ -9,7 +9,6 @@ import (
 	bridgetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 	perptypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
-	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 
 // recordErrorMetricsWithLabel records an error metric in `ProcessProposalHandler` with a label.
@@ -33,16 +32,16 @@ func recordSuccessMetrics(ctx sdk.Context, txs *ProcessProposalTxs, totalNumTxs 
 	)
 
 	// Prices tx.
-	updateMarketPricesMsg, ok := txs.UpdateMarketPricesTx.GetMsg().(*pricestypes.MsgUpdateMarketPrices)
-	if ok {
-		telemetry.SetGauge(
-			float32(len(updateMarketPricesMsg.MarketPriceUpdates)),
-			ModuleName,
-			metrics.NumMarketPricesToUpdate,
-		)
-	} else {
-		ctx.Logger().Error("ProcessProposal: expected MsgUpdateMarketPrices")
-	}
+	//updateMarketPricesMsg, ok := txs.UpdateMarketPricesTx.GetMsg().(*pricestypes.MsgUpdateMarketPrices)
+	//if ok {
+	//	telemetry.SetGauge(
+	//		float32(len(updateMarketPricesMsg.MarketPriceUpdates)),
+	//		ModuleName,
+	//		metrics.NumMarketPricesToUpdate,
+	//	)
+	//} else {
+	//	ctx.Logger().Error("ProcessProposal: expected MsgUpdateMarketPrices")
+	//}
 
 	// Funding tx.
 	// TODO(DEC-1254): add more metrics for Funding tx.
