@@ -131,9 +131,10 @@ func (t *PrepareProposalTxs) GetAvailableBytes() uint64 {
 
 // GetTxsInOrder returns a list of txs in an order that the `ProcessProposal` expects.
 func (t *PrepareProposalTxs) GetTxsInOrder() ([][]byte, error) {
-	if len(t.UpdateMarketPricesTx) == 0 {
-		return nil, errors.New("UpdateMarketPricesTx must be set")
-	}
+	// george we do not need to have the update market price update
+	//if len(t.UpdateMarketPricesTx) == 0 {
+	//	return nil, errors.New("UpdateMarketPricesTx must be set")
+	//}
 
 	if len(t.AddPremiumVotesTx) == 0 {
 		return nil, errors.New("AddPremiumVotesTx must be set")
@@ -162,9 +163,10 @@ func (t *PrepareProposalTxs) GetTxsInOrder() ([][]byte, error) {
 	// The validation for `AddPremiumVotesTx` is done at the beginning.
 	txsToReturn = append(txsToReturn, t.AddPremiumVotesTx)
 
+	// george we do not need to update the price
 	// 5. Price updates.
 	// The validation for `UpdateMarketPricesTx` is done at the beginning.
-	txsToReturn = append(txsToReturn, t.UpdateMarketPricesTx)
+	// txsToReturn = append(txsToReturn, t.UpdateMarketPricesTx)
 
 	return txsToReturn, nil
 }

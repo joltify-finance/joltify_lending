@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	minTxsCount                   = 4
-	proposedOperationsTxIndex     = 0
-	updateMarketPricesTxLenOffset = -1
-	addPremiumVotesTxLenOffset    = -2
-	acknowledgeBridgesTxLenOffset = -3
+	minTxsCount               = 3
+	proposedOperationsTxIndex = 0
+	// updateMarketPricesTxLenOffset = -1
+	addPremiumVotesTxLenOffset    = -1
+	acknowledgeBridgesTxLenOffset = -2
 	lastOtherTxLenOffset          = acknowledgeBridgesTxLenOffset
 	firstOtherTxIndex             = proposedOperationsTxIndex + 1
 )
@@ -25,7 +25,7 @@ func init() {
 		proposedOperationsTxIndex,
 		acknowledgeBridgesTxLenOffset,
 		addPremiumVotesTxLenOffset,
-		updateMarketPricesTxLenOffset,
+		// updateMarketPricesTxLenOffset,
 	}
 	if minTxsCount != len(txIndicesAndOffsets) {
 		panic("minTxsCount does not match expected count of Txs.")
@@ -43,7 +43,7 @@ func init() {
 		proposedOperationsTxIndex,
 		acknowledgeBridgesTxLenOffset + minTxsCount,
 		addPremiumVotesTxLenOffset + minTxsCount,
-		updateMarketPricesTxLenOffset + minTxsCount,
+		// updateMarketPricesTxLenOffset + minTxsCount,
 	}
 	if minTxsCount != len(txIndicesForMinTxsCount) {
 		panic("minTxsCount does not match expected count of Txs.")
@@ -63,7 +63,8 @@ type ProcessProposalTxs struct {
 	ProposedOperationsTx *ProposedOperationsTx
 	AcknowledgeBridgesTx *AcknowledgeBridgesTx
 	AddPremiumVotesTx    *AddPremiumVotesTx
-	UpdateMarketPricesTx *UpdateMarketPricesTx // abstract over MarketPriceUpdates from VEs or default.
+	// george do not need price
+	// UpdateMarketPricesTx *UpdateMarketPricesTx // abstract over MarketPriceUpdates from VEs or default.
 
 	// Multi msgs txs.
 	OtherTxs []*OtherMsgsTx
@@ -93,13 +94,13 @@ func DecodeProcessProposalTxs(
 	}
 
 	// Price updates.
-	updatePricesTx, err := pricesTxDecoder.DecodeUpdateMarketPricesTx(
-		ctx,
-		req.Txs,
-	)
-	if err != nil {
-		return nil, err
-	}
+	//updatePricesTx, err := pricesTxDecoder.DecodeUpdateMarketPricesTx(
+	//	ctx,
+	//	req.Txs,
+	//)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	// Operations.
 	// if vote-extensions were injected, offset will be incremented.
@@ -123,7 +124,6 @@ func DecodeProcessProposalTxs(
 	)
 
 	if acknowledgeBridgesTx.msg != nil {
-		fmt.Printf("EMPTBBBBY!!!!")
 	} else {
 		fmt.Printf("NOT BBBBBEMPTY!!!!%v\n", acknowledgeBridgesTx.msg.String())
 	}
@@ -154,7 +154,6 @@ func DecodeProcessProposalTxs(
 		ProposedOperationsTx: operationsTx,
 		AcknowledgeBridgesTx: acknowledgeBridgesTx,
 		AddPremiumVotesTx:    addPremiumVotesTx,
-		UpdateMarketPricesTx: updatePricesTx,
 		OtherTxs:             allOtherTxs,
 	}, nil
 }
@@ -170,7 +169,6 @@ func (ppt *ProcessProposalTxs) Validate() error {
 		ppt.ProposedOperationsTx,
 		ppt.AddPremiumVotesTx,
 		ppt.AcknowledgeBridgesTx,
-		ppt.UpdateMarketPricesTx,
 	}
 	for _, smt := range singleTxs {
 		if err := smt.Validate(); err != nil {

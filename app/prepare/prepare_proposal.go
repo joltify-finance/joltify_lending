@@ -10,16 +10,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/joltify-finance/joltify_lending/app/constants"
 	"github.com/joltify-finance/joltify_lending/app/prepare/prices"
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	pricetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/skip-mev/slinky/abci/ve"
 )
 
-var (
-	EmptyResponse = abci.ResponsePrepareProposal{Txs: [][]byte{}}
-)
+var EmptyResponse = abci.ResponsePrepareProposal{Txs: [][]byte{}}
 
 // PricesTxResponse represents a response for creating `UpdateMarketPrices` tx.
 type PricesTxResponse struct {
@@ -76,34 +73,35 @@ func PrepareProposalHandler(
 		}
 
 		// Grab the injected VEs from the previous block.
-		var extCommitBzTx []byte
+		//var extCommitBzTx []byte
 		// Sanity check to ensure that there is at least 1 tx. This should never return false unless
 		// before VE are enabled, there are no tx in the block.
-		if len(req.Txs) >= constants.OracleVEInjectedTxs {
-			extCommitBzTx = req.Txs[constants.OracleInfoIndex]
-		}
+		//if len(req.Txs) >= constants.OracleVEInjectedTxs {
+		//	extCommitBzTx = req.Txs[constants.OracleInfoIndex]
+		//}
 
 		// get the update market prices tx
-		msg, err := priceUpdateGenerator.GetValidMarketPriceUpdates(ctx, extCommitBzTx)
-		if err != nil {
-			ctx.Logger().Error(fmt.Sprintf("GetValidMarketPriceUpdates error: %v", err))
-			recordErrorMetricsWithLabel(metrics.PricesTx)
-			return &EmptyResponse, nil
-		}
+		// george we disable the price update for now
+		//msg, err := priceUpdateGenerator.GetValidMarketPriceUpdates(ctx, extCommitBzTx)
+		//if err != nil {
+		//	ctx.Logger().Error(fmt.Sprintf("GetValidMarketPriceUpdates error: %v", err))
+		//	recordErrorMetricsWithLabel(metrics.PricesTx)
+		//	return &EmptyResponse, nil
+		//}
 
 		// Gather "FixedSize" group messages.
-		pricesTxResp, err := EncodeMarketPriceUpdates(txConfig, msg)
-		if err != nil {
-			ctx.Logger().Error(fmt.Sprintf("GetUpdateMarketPricesTx error: %v", err))
-			recordErrorMetricsWithLabel(metrics.PricesTx)
-			return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
-		}
-		err = txs.SetUpdateMarketPricesTx(pricesTxResp.Tx)
-		if err != nil {
-			ctx.Logger().Error(fmt.Sprintf("SetUpdateMarketPricesTx error: %v", err))
-			recordErrorMetricsWithLabel(metrics.PricesTx)
-			return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
-		}
+		//pricesTxResp, err := EncodeMarketPriceUpdates(txConfig, msg)
+		//if err != nil {
+		//	ctx.Logger().Error(fmt.Sprintf("GetUpdateMarketPricesTx error: %v", err))
+		//	recordErrorMetricsWithLabel(metrics.PricesTx)
+		//	return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
+		//}
+		//err = txs.SetUpdateMarketPricesTx(pricesTxResp.Tx)
+		//if err != nil {
+		//	ctx.Logger().Error(fmt.Sprintf("SetUpdateMarketPricesTx error: %v", err))
+		//	recordErrorMetricsWithLabel(metrics.PricesTx)
+		//	return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
+		//}
 
 		fundingTxResp, err := GetAddPremiumVotesTx(ctx, txConfig, perpetualKeeper)
 		if err != nil {
@@ -135,13 +133,17 @@ func PrepareProposalHandler(
 
 		// Gather "Other" group messages.
 		otherBytesAllocated := txs.GetAvailableBytes() / 4 // ~25% of the remainder.
+
 		// filter out txs that have disallow messages.
 		var txsWithoutDisallowMsgs [][]byte
-		if ve.VoteExtensionsEnabled(ctx) {
+		// george cause we do not need to have the price tx,so we do not need to skip the first tx
+		hasPrice := false
+		if ve.VoteExtensionsEnabled(ctx) && hasPrice {
 			txsWithoutDisallowMsgs = RemoveDisallowMsgs(ctx, txConfig.TxDecoder(), req.Txs[1:])
 		} else {
 			txsWithoutDisallowMsgs = RemoveDisallowMsgs(ctx, txConfig.TxDecoder(), req.Txs)
 		}
+
 		otherTxsToInclude, otherTxsRemainder := GetGroupMsgOther(txsWithoutDisallowMsgs, otherBytesAllocated)
 		if len(otherTxsToInclude) > 0 {
 			err := txs.AddOtherTxs(otherTxsToInclude)
@@ -192,7 +194,7 @@ func PrepareProposalHandler(
 		recordSuccessMetrics(
 			successMetricParams{
 				txs:                 txs,
-				pricesTx:            pricesTxResp,
+				pricesTx:            PricesTxResponse{},
 				fundingTx:           fundingTxResp,
 				bridgeTx:            acknowledgeBridgesTxResp,
 				operationsTx:        operationsTxResp,
