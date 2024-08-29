@@ -28,3 +28,5 @@ contrib/devnet/run_deposit
 # Ignore macOS file system metadata
 .DS_Store
 config.yml
+
+.proto-export-deps/
