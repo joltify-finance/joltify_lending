@@ -239,6 +239,10 @@ proto-image-build:
 proto-check-breaking:
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=master
 
+proto-export-deps:
+	@rm -rf ./.proto-export-deps
+	@cd proto && buf export --config ./buf.yaml --output ../.proto-export-deps --exclude-imports && buf export buf.build/cosmos/cosmos-sdk:v0.50.0 --output ../.proto-export-deps
+
 GOOGLE_PROTO_URL = https://raw.githubusercontent.com/googleapis/googleapis/master/google/api
 PROTOBUF_GOOGLE_URL = https://raw.githubusercontent.com/protocolbuffers/protobuf/master/src/google/protobuf
 COSMOS_PROTO_URL = https://raw.githubusercontent.com/cosmos/cosmos-proto/master
