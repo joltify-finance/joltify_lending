@@ -80,10 +80,8 @@ func DecodeProcessProposalTxs(
 ) (*ProcessProposalTxs, error) {
 	// Check len (accounting for offset from injected vote-extensions if applicable)
 	offset := pricesTxDecoder.GetTxOffset(ctx)
-	fmt.Printf(">>>>>>>>>>>>>>>>>>offset: %d\n", offset)
 	injectedTxCount := minTxsCount + offset
 	numTxs := len(req.Txs)
-	fmt.Printf("tx we have is >>>>>%v\n", numTxs)
 	if numTxs < injectedTxCount {
 		return nil, errorsmod.Wrapf(
 			ErrUnexpectedNumMsgs,
