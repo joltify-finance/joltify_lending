@@ -55,8 +55,6 @@ func CmdPlaceOrder() *cobra.Command {
 				return err
 			}
 
-			_ = argGoodTilBlock
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -67,12 +65,6 @@ func CmdPlaceOrder() *cobra.Command {
 				return err
 			}
 
-			var orderflags uint32
-			if longtimeorder {
-				orderflags = types.OrderIdFlags_LongTerm
-			} else {
-				orderflags = types.OrderIdFlags_ShortTerm
-			}
 			msg := types.NewMsgPlaceOrder(
 				types.Order{
 					OrderId: types.OrderId{
@@ -82,15 +74,21 @@ func CmdPlaceOrder() *cobra.Command {
 							Number: argSubaccountNumber,
 						},
 						ClobPairId: argClobPairId,
-						OrderFlags: orderflags,
 					},
-					Side:     types.Order_Side(argSide),
-					Quantums: argQuantums,
-					Subticks: argSubticks,
-					// GoodTilOneof: &types.Order_GoodTilBlock{GoodTilBlock: argGoodTilBlock},
+					Side:         types.Order_Side(argSide),
+					Quantums:     argQuantums,
+					Subticks:     argSubticks,
 					GoodTilOneof: &types.Order_GoodTilBlockTime{GoodTilBlockTime: uint32(time.Now().Unix()) + 3600},
 				},
 			)
+			if longtimeorder {
+				msg.Order.OrderId.OrderFlags = types.OrderIdFlags_LongTerm
+				msg.Order.GoodTilOneof = &types.Order_GoodTilBlockTime{GoodTilBlockTime: uint32(time.Now().Unix()) + 3600}
+			} else {
+				msg.Order.OrderId.OrderFlags = types.OrderIdFlags_ShortTerm
+				msg.Order.GoodTilOneof = &types.Order_GoodTilBlock{GoodTilBlock: argGoodTilBlock}
+			}
+
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
