@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -14,7 +16,7 @@ func CmdPlaceOrder() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "place-order owner subaccount_number clientId clobPairId side quantums subticks goodTilBlock",
 		Short: "Broadcast message place_order. Assumes short term order placement.",
-		Args:  cobra.ExactArgs(8),
+		Args:  cobra.ExactArgs(9),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argOwner := args[0]
 
@@ -53,11 +55,24 @@ func CmdPlaceOrder() *cobra.Command {
 				return err
 			}
 
+			_ = argGoodTilBlock
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
+			longtimeorder, err := cast.ToBoolE(args[8])
+			if err != nil {
+				return err
+			}
+
+			var orderflags uint32
+			if longtimeorder {
+				orderflags = types.OrderIdFlags_LongTerm
+			} else {
+				orderflags = types.OrderIdFlags_ShortTerm
+			}
 			msg := types.NewMsgPlaceOrder(
 				types.Order{
 					OrderId: types.OrderId{
@@ -67,11 +82,13 @@ func CmdPlaceOrder() *cobra.Command {
 							Number: argSubaccountNumber,
 						},
 						ClobPairId: argClobPairId,
+						OrderFlags: orderflags,
 					},
-					Side:         types.Order_Side(argSide),
-					Quantums:     argQuantums,
-					Subticks:     argSubticks,
-					GoodTilOneof: &types.Order_GoodTilBlock{GoodTilBlock: argGoodTilBlock},
+					Side:     types.Order_Side(argSide),
+					Quantums: argQuantums,
+					Subticks: argSubticks,
+					// GoodTilOneof: &types.Order_GoodTilBlock{GoodTilBlock: argGoodTilBlock},
+					GoodTilOneof: &types.Order_GoodTilBlockTime{GoodTilBlockTime: uint32(time.Now().Unix()) + 3600},
 				},
 			)
 			if err := msg.ValidateBasic(); err != nil {
