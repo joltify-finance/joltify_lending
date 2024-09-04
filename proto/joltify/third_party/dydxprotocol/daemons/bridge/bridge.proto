@@ -4,7 +4,7 @@ package joltify.third_party.dydxprotocol.daemons.bridge;
 import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/bridge/bridge_event.proto";
 
-option go_package = "github.com/joltify/daemons/bridge/api";
+option go_package = "github.com/joltify-finance/joltify_lending/daemons/bridge/api";
 
 // BridgeService defines the gRPC service used by bridge daemon.
 service BridgeService {

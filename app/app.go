@@ -1,15 +1,26 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
+	"sync"
+	"time"
+
+	// bridgeclient "github.com/joltify-finance/joltify_lending/daemons/bridge/client"
+	liquidationclient "github.com/joltify-finance/joltify_lending/daemons/liquidation/client"
+
+	pricefeedclient "github.com/joltify-finance/joltify_lending/daemons/pricefeed/client"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants"
 
 	prepare "github.com/joltify-finance/joltify_lending/app/prepare"
 	"github.com/joltify-finance/joltify_lending/app/prepare/prices"
+	"github.com/joltify-finance/joltify_lending/daemons/configs"
 
 	"github.com/joltify-finance/joltify_lending/app/process"
 	vaultmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vault"
@@ -24,6 +35,7 @@ import (
 	ratelimitmodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/keeper"
 	ratelimitmoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/ratelimit/types"
 
+	metricsclient "github.com/joltify-finance/joltify_lending/daemons/metrics/client"
 	blocktimemodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime"
 	blocktimemodulekeeper "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/keeper"
 	blocktimemoduletypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
@@ -461,11 +473,17 @@ type App struct {
 	configurator module.Configurator
 
 	// dydx related
-
+	startDaemons         func()
+	closeOnce            func() error
 	IndexerEventManager  indexer_manager.IndexerEventManager
 	GrpcStreamingManager streamingtypes.GrpcStreamingManager
 	DaemonHealthMonitor  *daemonservertypes.HealthMonitor
-	Server               *daemonserver.Server
+
+	PriceFeedClient    *pricefeedclient.Client
+	LiquidationsClient *liquidationclient.Client
+	// BridgeClient       *bridgeclient.Client
+
+	Server *daemonserver.Server
 }
 
 func init() {
@@ -625,6 +643,129 @@ func NewApp(
 	// The in-memory data structure is shared by the x/bridge module and bridge daemon.
 	bridgeEventManager := bridgedaemontypes.NewBridgeEventManager(timeProvider)
 	app.Server.WithBridgeEventManager(bridgeEventManager)
+
+	app.DaemonHealthMonitor = daemonservertypes.NewHealthMonitor(
+		daemonservertypes.DaemonStartupGracePeriod,
+		daemonservertypes.HealthCheckPollFrequency,
+		app.Logger(),
+		daemonFlags.Shared.PanicOnDaemonFailureEnabled,
+	)
+
+	// dydx flags
+	appFlags := appFlag.GetFlagValuesFromOptions(appOpts)
+	logger.Info("Parsed App flags", "Flags", appFlags)
+
+	app.closeOnce = sync.OnceValue[error](
+		func() error {
+			if app.PriceFeedClient != nil {
+				app.PriceFeedClient.Stop()
+			}
+			if app.Server != nil {
+				app.Server.Stop()
+			}
+			if app.GrpcStreamingManager != nil {
+				app.GrpcStreamingManager.Stop()
+			}
+			return nil
+		},
+	)
+
+	// Create a closure for starting daemons and daemon server. Daemon services are delayed until after the gRPC
+	// service is started because daemons depend on the gRPC service being available. If a node is initialized
+	// with a genesis time in the future, then the gRPC service will not be available until the genesis time, the
+	// daemons will not be able to connect to the cosmos gRPC query service and finish initialization, and the daemon
+	// monitoring service will panic.
+	app.startDaemons = func() {
+		maxDaemonUnhealthyDuration := time.Duration(daemonFlags.Shared.MaxDaemonUnhealthySeconds) * time.Second
+		// Start server for handling gRPC messages from daemons.
+		go app.Server.Start()
+
+		// Start liquidations client for sending potentially liquidatable subaccounts to the application.
+		if daemonFlags.Liquidation.Enabled {
+			app.LiquidationsClient = liquidationclient.NewClient(logger)
+			go func() {
+				app.RegisterDaemonWithHealthMonitor(app.LiquidationsClient, maxDaemonUnhealthyDuration)
+				if err := app.LiquidationsClient.Start(
+					// The client will use `context.Background` so that it can have a different context from
+					// the main application.
+					context.Background(),
+					daemonFlags,
+					appFlags,
+					&daemontypes.GrpcClientImpl{},
+				); err != nil {
+					panic(err)
+				}
+			}()
+		}
+
+		// Non-validating full-nodes have no need to run the oracle.
+		if !appFlags.NonValidatingFullNode {
+			if daemonFlags.Price.Enabled {
+				exchangeQueryConfig := configs.ReadExchangeQueryConfigFile(homePath)
+				// Start pricefeed client for sending prices for the pricefeed server to consume. These prices
+				// are retrieved via third-party APIs like Binance and then are encoded in-memory and
+				// periodically sent via gRPC to a shared socket with the server.
+				app.PriceFeedClient = pricefeedclient.StartNewClient(
+					// The client will use `context.Background` so that it can have a different context from
+					// the main application.
+					context.Background(),
+					daemonFlags,
+					appFlags,
+					logger,
+					&daemontypes.GrpcClientImpl{},
+					exchangeQueryConfig,
+					constants.StaticExchangeDetails,
+					&pricefeedclient.SubTaskRunnerImpl{},
+				)
+				app.RegisterDaemonWithHealthMonitor(app.PriceFeedClient, maxDaemonUnhealthyDuration)
+			}
+		}
+
+		// Start Bridge Daemon.
+		// Non-validating full-nodes have no need to run the bridge daemon.
+		//if !appFlags.NonValidatingFullNode && daemonFlags.Bridge.Enabled {
+		//	app.BridgeClient = bridgeclient.NewClient(logger)
+		//	go func() {
+		//		app.RegisterDaemonWithHealthMonitor(app.BridgeClient, maxDaemonUnhealthyDuration)
+		//		if err := app.BridgeClient.Start(
+		//			// The client will use `context.Background` so that it can have a different context from
+		//			// the main application.
+		//			context.Background(),
+		//			daemonFlags,
+		//			appFlags,
+		//			&daemontypes.GrpcClientImpl{},
+		//		); err != nil {
+		//			panic(err)
+		//		}
+		//	}()
+		//}
+
+		// Start the Metrics Daemon.
+		// The metrics daemon is purely used for observability. It should never bring the app down.
+		// TODO(CLOB-960) Don't start this goroutine if telemetry is disabled
+		// Note: the metrics daemon is such a simple go-routine that we don't bother implementing a health-check
+		// for this service. The task loop does not produce any errors because the telemetry calls themselves are
+		// not error-returning, so in effect this daemon would never become unhealthy.
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Error(
+						"Metrics Daemon exited unexpectedly with a panic.",
+						"panic",
+						r,
+						"stack",
+						string(debug.Stack()),
+					)
+				}
+			}()
+			metricsclient.Start(
+				// The client will use `context.Background` so that it can have a different context from
+				// the main application.
+				context.Background(),
+				logger,
+			)
+		}()
+	}
 
 	// init params keeper and subspaces
 	app.ParamsKeeper = paramskeeper.NewKeeper(
@@ -1541,7 +1682,6 @@ func NewApp(
 
 	// ProposalHandler setup.
 
-	appFlags := appFlag.GetFlagValuesFromOptions(appOpts)
 	logger.Info("Parsed App flags", "Flags", appFlags)
 	// Panic if this is not a full node and gRPC is disabled.
 	if err := appFlags.Validate(); err != nil {
@@ -1731,6 +1871,9 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 	if apiConfig.Swagger {
 		RegisterSwaggerAPI(apiSvr.Router)
 	}
+
+	// start the daemons
+	app.startDaemons()
 
 	// Swagger API configuration is ignored
 	// apiSvr.Router.Handle("/static/openapi.yml", http.FileServer(http.FS(docs.Docs)))
@@ -2049,4 +2192,30 @@ func (app *App) createProposalHandlers(
 	)
 
 	return dydxPrepareProposalHandler, dydxProcessProposalHandler
+}
+
+// RegisterDaemonWithHealthMonitor registers a daemon service with the update monitor, which will commence monitoring
+// the health of the daemon. If the daemon does not register, the method will panic.
+func (app *App) RegisterDaemonWithHealthMonitor(
+	healthCheckableDaemon daemontypes.HealthCheckable,
+	maxDaemonUnhealthyDuration time.Duration,
+) {
+	if err := app.DaemonHealthMonitor.RegisterService(healthCheckableDaemon, maxDaemonUnhealthyDuration); err != nil {
+		app.Logger().Error(
+			"Failed to register daemon service with update monitor",
+			"error",
+			err,
+			"service",
+			healthCheckableDaemon.ServiceName(),
+			"maxDaemonUnhealthyDuration",
+			maxDaemonUnhealthyDuration,
+		)
+		panic(err)
+	}
+}
+
+// Close invokes an ordered shutdown of routines.
+func (app *App) Close() error {
+	app.BaseApp.Close()
+	return app.closeOnce()
 }

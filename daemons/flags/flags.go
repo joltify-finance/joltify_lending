@@ -100,7 +100,7 @@ func GetDefaultDaemonFlags() DaemonFlags {
 				QueryPageLimit: 1_000,
 			},
 			Price: PriceFlags{
-				Enabled:     false,
+				Enabled:     true,
 				LoopDelayMs: 3_000,
 			},
 		}

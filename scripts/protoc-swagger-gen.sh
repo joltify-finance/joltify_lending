@@ -12,7 +12,7 @@ cd proto
 proto_dirs=$(find ./joltify ../tmp_repo/proto -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
 for dir in $proto_dirs; do
   # generate swagger files (filter query files)
-  query_file=$(find "${dir}" -maxdepth 2 \( -name 'query.proto' -o -name 'service.proto' \))
+  query_file=$(find "${dir}" -maxdepth 3 \( -name 'query.proto' -o -name 'service.proto' \))
   if [[ ! -z "$query_file" ]]; then
     buf generate --template buf.gen.swagger.yaml $query_file
   fi

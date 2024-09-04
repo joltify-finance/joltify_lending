@@ -13,7 +13,9 @@ random_value_sell=$((RANDOM % 100))
 random_value_buy=$((RANDOM % 100))
 
 #joltify tx clob place-order $(joltify keys show -a ki) 0 $random_value_sell 0  1 20000000000  2868900000 $heightsubmuit true --from ki -y
-joltify tx clob place-order $(joltify keys show -a ki) 0 $random_value_sell 0  1 60000000000  2000000000 $heightsubmuit true --from ki -y
+joltify tx clob place-order $(joltify keys show -a key_1) 0 $random_value_buy 0  1 60000000000  2000000000 $heightsubmuit true --from key_1 -y
+sleep 3
+joltify tx clob place-order $(joltify keys show -a key_1) 0 $random_value_sell 0  2 60000000000  3000000000 $heightsubmuit true --from key_1 -y
 
 #joltify tx clob place-order  $(joltify keys show -a key_2) 0 $random_value_buy 0 1 1000000 2000000 $heightsubmuit --from key_2 -y
 
