@@ -107,12 +107,6 @@ func DecodeProcessProposalTxs(
 		return nil, err
 	}
 
-	if operationsTx.msg != nil {
-		fmt.Printf("EMPTY!!!!")
-	} else {
-		fmt.Printf("NOT EMPTY!!!!%v\n", operationsTx.msg.String())
-	}
-
 	// Acknowledge bridges.
 	acknowledgeBridgesTx, err := DecodeAcknowledgeBridgesTx(
 		ctx,
