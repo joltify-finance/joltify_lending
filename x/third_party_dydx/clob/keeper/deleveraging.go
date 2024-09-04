@@ -512,7 +512,6 @@ func (k Keeper) ProcessDeleveraging(
 ) (
 	err error,
 ) {
-	fmt.Printf(">>>>>>>>>>>333333333333444444444444555555\n")
 	// Get the liquidated subaccount.
 	liquidatedSubaccount := k.subaccountsKeeper.GetSubaccount(ctx, liquidatedSubaccountId)
 	liquidatedPosition, _ := liquidatedSubaccount.GetPerpetualPositionForId(perpetualId)
@@ -583,7 +582,6 @@ func (k Keeper) ProcessDeleveraging(
 
 	// Apply the update.
 
-	fmt.Printf(">>>>>>>>>>>WWWWWWWWWWWWWWWWWWWWWWWWWW update deleverting>>>>>>>>%v\n")
 	success, successPerUpdate, err := k.subaccountsKeeper.UpdateSubaccounts(ctx, updates, satypes.Match)
 	if err != nil {
 		return err

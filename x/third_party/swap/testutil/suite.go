@@ -145,7 +145,6 @@ func (suite *Suite) PoolLiquidityEqual(coins sdk.Coins) {
 	poolRecord, ok := suite.Keeper.GetPool(suite.Ctx, types.PoolIDFromCoins(coins))
 	suite.Require().True(ok, "expected pool to exist")
 	reserves := sdk.NewCoins(poolRecord.ReservesA, poolRecord.ReservesB)
-	fmt.Printf(">>>>>>>>>>reserved>>>%v\n", reserves)
 	suite.Equal(coins, reserves, fmt.Sprintf("expected pool reserves of %s, got %s", coins, reserves))
 }
 

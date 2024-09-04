@@ -5,8 +5,7 @@ import "gogoproto/gogo.proto";
 import "joltify/third_party/dydxprotocol/subaccounts/subaccount.proto";
 import "joltify/third_party/dydxprotocol/clob/liquidations.proto";
 
-option go_package = "github.com/joltify/daemons/liquidation/api";
-
+option go_package = "github.com/joltify-finance/joltify_lending/daemons/liquidation/api";
 
 // LiquidationService defines the gRPC service used by liquidation daemon.
 service LiquidationService {

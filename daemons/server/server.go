@@ -4,12 +4,13 @@ import (
 	"net"
 	"syscall"
 
+	liquidationapi "github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
+
 	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	gometrics "github.com/hashicorp/go-metrics"
-	bridgeapi "github.com/joltify-finance/joltify_lending/daemons/bridge/api"
 	"github.com/joltify-finance/joltify_lending/daemons/constants"
-	liquidationapi "github.com/joltify-finance/joltify_lending/daemons/liquidation/api"
+	pricefeedapi "github.com/joltify-finance/joltify_lending/daemons/pricefeed/api"
 	daemontypes "github.com/joltify-finance/joltify_lending/daemons/types"
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
 )
@@ -25,6 +26,7 @@ type Server struct {
 	socketAddress string
 
 	BridgeServer
+	PriceFeedServer
 	LiquidationServer
 }
 
@@ -92,7 +94,10 @@ func (server *Server) Start() {
 	// https://pkg.go.dev/google.golang.org/grpc#Server.RegisterService
 
 	// Register Server to ingest gRPC requests from bridge daemon.
-	bridgeapi.RegisterBridgeServiceServer(server.gsrv, server)
+	// bridgeapi.RegisterBridgeServiceServer(server.gsrv, server)
+
+	// Register Server to ingest gRPC requests from price feed daemon and update market prices.
+	pricefeedapi.RegisterPriceFeedServiceServer(server.gsrv, server)
 
 	// Register Server to ingest gRPC requests from liquidation daemon.
 	liquidationapi.RegisterLiquidationServiceServer(server.gsrv, server)

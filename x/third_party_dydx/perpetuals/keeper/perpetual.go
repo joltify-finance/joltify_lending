@@ -1368,7 +1368,6 @@ func (k Keeper) validatePerpetual(
 
 	// Validate `marketId` exists.
 	if _, err := k.pricesKeeper.GetMarketPrice(ctx, perpetual.Params.MarketId); err != nil {
-		fmt.Printf(">>>>>>>>>>%v---%v\n", perpetual.Params.MarketId, perpetual.Params.String())
 		return err
 	}
 

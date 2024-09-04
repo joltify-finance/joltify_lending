@@ -25,10 +25,11 @@ type PriceFeedServer struct {
 // WithPriceFeedMarketToExchangePrices sets the `MarketToExchangePrices` field.
 // This is used by the price feed service to communicate price updates
 // to the main application.
+
 func (server *Server) WithPriceFeedMarketToExchangePrices(
 	marketToExchange *pricefeedtypes.MarketToExchangePrices,
 ) *Server {
-	//server.marketToExchange = marketToExchange
+	server.marketToExchange = marketToExchange
 	return server
 }
 
@@ -50,14 +51,14 @@ func (s *Server) UpdateMarketPrices(
 
 	// This panic is an unexpected condition because we initialize the market price cache in app initialization before
 	// starting the server or daemons.
-	//if s.marketToExchange == nil {
-	//	panic(
-	//		errorsmod.Wrapf(
-	//			daemontypes.ErrServerNotInitializedCorrectly,
-	//			"MarketToExchange not initialized",
-	//		),
-	//	)
-	//}
+	if s.marketToExchange == nil {
+		panic(
+			errorsmod.Wrapf(
+				daemontypes.ErrServerNotInitializedCorrectly,
+				"MarketToExchange not initialized",
+			),
+		)
+	}
 
 	if err = validateMarketPricesUpdatesMessage(req); err != nil {
 		// Log if failure occurs during an update.
@@ -65,7 +66,7 @@ func (s *Server) UpdateMarketPrices(
 		return nil, err
 	}
 
-	//s.marketToExchange.UpdatePrices(req.MarketPriceUpdates)
+	s.marketToExchange.UpdatePrices(req.MarketPriceUpdates)
 
 	// Capture valid responses in metrics.
 	s.reportValidResponse(types.PricefeedDaemonServiceName)
