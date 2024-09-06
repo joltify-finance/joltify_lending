@@ -252,6 +252,9 @@ func (pf *PriceFetcher) runSubTask(
 		[]gometrics.Label{pricefeedmetrics.GetLabelForExchangeId(exchangeId)},
 	)
 
+	// Emit metrics at the `AvailableMarketsSampleRate`.
+	emitMetricsSample := rand.Float64() < metrics.AvailableMarketsSampleRate
+
 	prices, _, err := pf.queryHandler.Query(
 		ctxWithTimeout,
 		&pf.exchangeDetails,
@@ -260,9 +263,6 @@ func (pf *PriceFetcher) runSubTask(
 		requestHandler,
 		taskLoopDefinition.marketExponents,
 	)
-
-	// Emit metrics at the `AvailableMarketsSampleRate`.
-	emitMetricsSample := rand.Float64() < metrics.AvailableMarketsSampleRate
 
 	if err != nil {
 		pf.writeToBufferedChannel(exchangeId, nil, err)

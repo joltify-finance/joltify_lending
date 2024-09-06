@@ -34,8 +34,7 @@ func NewDefaultUpdateMarketPriceTxDecoder(
 func (mpd *DefaultUpdateMarketPriceTxDecoder) DecodeUpdateMarketPricesTx(
 	ctx sdk.Context, txs [][]byte,
 ) (*UpdateMarketPricesTx, error) {
-	panic("should not call this func as price is disabled")
-	// return DecodeUpdateMarketPricesTx(ctx, mpd.pk, mpd.txDecoder, txs[len(txs)+updateMarketPricesTxLenOffset])
+	return DecodeUpdateMarketPricesTx(ctx, mpd.pk, mpd.txDecoder, txs[len(txs)+updateMarketPricesTxLenOffset])
 }
 
 // GetTxOffset returns the offset that other injected txs should be placed with respect to their normally

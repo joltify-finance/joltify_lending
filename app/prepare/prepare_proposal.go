@@ -85,7 +85,7 @@ func PrepareProposalHandler(
 		if err != nil {
 			ctx.Logger().Error(fmt.Sprintf("GetUpdateMarketPricesTx error: %v", err))
 			recordErrorMetricsWithLabel(metrics.PricesTx)
-			return &EmptyResponse, nil
+			return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
 		}
 		err = txs.SetUpdateMarketPricesTx(pricesTxResp.Tx)
 		if err != nil {
