@@ -10,7 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/joltify-finance/joltify_lending/app/prepare/prices"
 	"github.com/joltify-finance/joltify_lending/lib/metrics"
 	pricetypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 	"github.com/skip-mev/slinky/abci/ve"
@@ -54,7 +53,7 @@ func PrepareProposalHandler(
 	bridgeKeeper PrepareBridgeKeeper,
 	clobKeeper PrepareClobKeeper,
 	perpetualKeeper PreparePerpetualsKeeper,
-	priceUpdateGenerator prices.PriceUpdateGenerator,
+	pricesKeeper PreparePricesKeeper,
 ) sdk.PrepareProposalHandler {
 	return func(ctx sdk.Context, req *abci.RequestPrepareProposal) (*abci.ResponsePrepareProposal, error) {
 		defer telemetry.ModuleMeasureSince(
@@ -81,27 +80,19 @@ func PrepareProposalHandler(
 		//}
 
 		// get the update market prices tx
-		// george we disable the price update for now
-		//msg, err := priceUpdateGenerator.GetValidMarketPriceUpdates(ctx, extCommitBzTx)
-		//if err != nil {
-		//	ctx.Logger().Error(fmt.Sprintf("GetValidMarketPriceUpdates error: %v", err))
-		//	recordErrorMetricsWithLabel(metrics.PricesTx)
-		//	return &EmptyResponse, nil
-		//}
-
 		// Gather "FixedSize" group messages.
-		//pricesTxResp, err := EncodeMarketPriceUpdates(txConfig, msg)
-		//if err != nil {
-		//	ctx.Logger().Error(fmt.Sprintf("GetUpdateMarketPricesTx error: %v", err))
-		//	recordErrorMetricsWithLabel(metrics.PricesTx)
-		//	return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
-		//}
-		//err = txs.SetUpdateMarketPricesTx(pricesTxResp.Tx)
-		//if err != nil {
-		//	ctx.Logger().Error(fmt.Sprintf("SetUpdateMarketPricesTx error: %v", err))
-		//	recordErrorMetricsWithLabel(metrics.PricesTx)
-		//	return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
-		//}
+		pricesTxResp, err := GetUpdateMarketPricesTx(ctx, txConfig, pricesKeeper)
+		if err != nil {
+			ctx.Logger().Error(fmt.Sprintf("GetUpdateMarketPricesTx error: %v", err))
+			recordErrorMetricsWithLabel(metrics.PricesTx)
+			return &EmptyResponse, nil
+		}
+		err = txs.SetUpdateMarketPricesTx(pricesTxResp.Tx)
+		if err != nil {
+			ctx.Logger().Error(fmt.Sprintf("SetUpdateMarketPricesTx error: %v", err))
+			recordErrorMetricsWithLabel(metrics.PricesTx)
+			return &abci.ResponsePrepareProposal{Txs: [][]byte{}}, nil
+		}
 
 		fundingTxResp, err := GetAddPremiumVotesTx(ctx, txConfig, perpetualKeeper)
 		if err != nil {
@@ -314,4 +305,30 @@ func EncodeMsgsIntoTxBytes(txConfig client.TxConfig, msgs ...sdk.Msg) ([]byte, e
 	}
 
 	return txBytes, nil
+}
+
+// GetUpdateMarketPricesTx returns a tx containing `MsgUpdateMarketPrices`.
+func GetUpdateMarketPricesTx(
+	ctx sdk.Context,
+	txConfig client.TxConfig,
+	pricesKeeper PreparePricesKeeper,
+) (PricesTxResponse, error) {
+	// Get prices to update.
+	msgUpdateMarketPrices := pricesKeeper.GetValidMarketPriceUpdates(ctx)
+	if msgUpdateMarketPrices == nil {
+		return PricesTxResponse{}, fmt.Errorf("MsgUpdateMarketPrices cannot be nil")
+	}
+
+	tx, err := EncodeMsgsIntoTxBytes(txConfig, msgUpdateMarketPrices)
+	if err != nil {
+		return PricesTxResponse{}, err
+	}
+	if len(tx) == 0 {
+		return PricesTxResponse{}, fmt.Errorf("Invalid tx: %v", tx)
+	}
+
+	return PricesTxResponse{
+		Tx:         tx,
+		NumMarkets: len(msgUpdateMarketPrices.MarketPriceUpdates),
+	}, nil
 }
