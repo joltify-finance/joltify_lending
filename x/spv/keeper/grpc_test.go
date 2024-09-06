@@ -8,7 +8,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/stretchr/testify/suite"
@@ -67,8 +66,9 @@ func setupPoolForQueryTest(suite *querySuite) {
 
 // The default state used by each test
 func (suite *querySuite) SetupTest() {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
+
 	lapp, k, nftKeeper, bankKeeper, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%

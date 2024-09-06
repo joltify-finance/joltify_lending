@@ -1,14 +1,13 @@
 package keeper_test
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+	"github.com/stretchr/testify/require"
 
-	"github.com/joltify-finance/joltify_lending/app"
-	"github.com/joltify-finance/joltify_lending/utils"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/joltify-finance/joltify_lending/x/burnauction/types"
 
@@ -16,8 +15,7 @@ import (
 )
 
 func TestAuction(t *testing.T) {
-	config := app.SetSDKConfig()
-	utils.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 	k, bk, ac, ctx := testkeeper.BurnauctionKeeper(t)
 	k.RunSurplusAuctions(ctx)
 	acc := ac.GetModuleAccount(ctx, types.ModuleAccount)

@@ -55,9 +55,9 @@ func testParams() types.Params {
 
 func TestGenesis(t *testing.T) {
 	ht := types.HistoricalAmount{
-		100,
-		sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(100))),
-		1,
+		BlockHeight: 100,
+		Amount:      sdk.NewCoins(sdk.NewCoin("test", sdkmath.NewInt(100))),
+		IbcSequence: 1,
 	}
 
 	cq := types.CoinsQuota{

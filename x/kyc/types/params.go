@@ -73,7 +73,7 @@ func validateProjectInfo(i interface{}) error {
 
 	out, err := base64.StdEncoding.DecodeString(projectsStr)
 	if err != nil {
-		return fmt.Errorf("fail to decode the project base64 string: %v", err)
+		return fmt.Errorf("fail to decode the project base64 string: %w", err)
 	}
 
 	var projects Projects
@@ -117,7 +117,6 @@ func validateProjectInfo(i interface{}) error {
 		if freq < 0 {
 			return errors.New("pay freq cannot be negative")
 		}
-
 	}
 	return nil
 }

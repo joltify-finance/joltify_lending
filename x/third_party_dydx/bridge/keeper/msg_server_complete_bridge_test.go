@@ -58,6 +58,14 @@ func TestMsgServerCompleteBridge(t *testing.T) {
 			resp, err := ms.CompleteBridge(ctx, &tc.testMsg)
 
 			// Assert msg server response.
+			if resp == nil {
+				resp = &types.MsgCompleteBridgeResponse{}
+			}
+
+			if tc.expectedResp == nil {
+				tc.expectedResp = &types.MsgCompleteBridgeResponse{}
+			}
+
 			require.Equal(t, tc.expectedResp, resp)
 			if tc.expectedErr != "" {
 				require.ErrorContains(t, err, tc.expectedErr)

@@ -75,13 +75,11 @@ func (k msgServer) AddInvestors(goCtx context.Context, msg *types.MsgAddInvestor
 	}
 	allPools := []string{msg.PoolIndex, indexHashreq.Hex()}
 	for _, poolIndex := range allPools {
-
 		investorPoolInfo, found := k.GetInvestorToPool(ctx, poolIndex)
 		if found {
 			newList := addToList(investorPoolInfo.Investors, msg.InvestorID)
 			investorPoolInfo.Investors = newList
 			k.AddInvestorToPool(ctx, &investorPoolInfo)
-
 		} else {
 			v := types.PoolWithInvestors{
 				PoolIndex: poolIndex,

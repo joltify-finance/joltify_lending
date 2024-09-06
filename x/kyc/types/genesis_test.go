@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/app"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/utils"
 
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestGenesisState_Validate(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 	for _, tc := range []struct {
 		desc     string

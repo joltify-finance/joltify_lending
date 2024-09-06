@@ -33,6 +33,20 @@ var (
 		"/cosmos.auth.v1beta1.ModuleAccount":    nil,
 		"/cosmos.auth.v1beta1.ModuleCredential": nil,
 
+		// vest
+
+		"/cosmos.vesting.v1beta1.BaseVestingAccount":                      nil,
+		"/cosmos.vesting.v1beta1.ContinuousVestingAccount":                nil,
+		"/cosmos.vesting.v1beta1.DelayedVestingAccount":                   nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount":         nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccountResponse": nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccount":         nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccountResponse": nil,
+		"/cosmos.vesting.v1beta1.MsgCreateVestingAccount":                 nil,
+		"/cosmos.vesting.v1beta1.MsgCreateVestingAccountResponse":         nil,
+		"/cosmos.vesting.v1beta1.PeriodicVestingAccount":                  nil,
+		"/cosmos.vesting.v1beta1.PermanentLockedAccount":                  nil,
+
 		// authz
 		"/cosmos.authz.v1beta1.GenericAuthorization": nil,
 		"/cosmos.authz.v1beta1.MsgGrant":             &authz.MsgGrant{},
@@ -128,6 +142,10 @@ var (
 		"/cosmos.staking.v1beta1.MsgUndelegateResponse":                nil,
 		"/cosmos.staking.v1beta1.StakeAuthorization":                   nil,
 
+		// nft
+		"/cosmos.nft.v1beta1.MsgSend":         nil,
+		"/cosmos.nft.v1beta1.MsgSendResponse": nil,
+
 		// tx
 		"/cosmos.tx.v1beta1.Tx": nil,
 
@@ -216,27 +234,27 @@ var (
 	// Custom modules
 	NormalMsgsDydxCustom = map[string]sdk.Msg{
 		// clob
-		"/dydxprotocol.clob.MsgBatchCancel":         &clob.MsgBatchCancel{},
-		"/dydxprotocol.clob.MsgBatchCancelResponse": nil,
-		"/dydxprotocol.clob.MsgCancelOrder":         &clob.MsgCancelOrder{},
-		"/dydxprotocol.clob.MsgCancelOrderResponse": nil,
-		"/dydxprotocol.clob.MsgPlaceOrder":          &clob.MsgPlaceOrder{},
-		"/dydxprotocol.clob.MsgPlaceOrderResponse":  nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancel":         &clob.MsgBatchCancel{},
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancelResponse": nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrder":         &clob.MsgCancelOrder{},
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrderResponse": nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrder":          &clob.MsgPlaceOrder{},
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrderResponse":  nil,
 
 		// perpetuals
 
 		// prices
 
 		// sending
-		"/dydxprotocol.sending.MsgCreateTransfer":                 &sending.MsgCreateTransfer{},
-		"/dydxprotocol.sending.MsgCreateTransferResponse":         nil,
-		"/dydxprotocol.sending.MsgDepositToSubaccount":            &sending.MsgDepositToSubaccount{},
-		"/dydxprotocol.sending.MsgDepositToSubaccountResponse":    nil,
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccount":         &sending.MsgWithdrawFromSubaccount{},
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccountResponse": nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransfer":                 &sending.MsgCreateTransfer{},
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransferResponse":         nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccount":            &sending.MsgDepositToSubaccount{},
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccountResponse":    nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccount":         &sending.MsgWithdrawFromSubaccount{},
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccountResponse": nil,
 
 		// vault
-		"/dydxprotocol.vault.MsgDepositToVault":         &vault.MsgDepositToVault{},
-		"/dydxprotocol.vault.MsgDepositToVaultResponse": nil,
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVault":         &vault.MsgDepositToVault{},
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVaultResponse": nil,
 	}
 )

@@ -1441,6 +1441,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(-75_000_000), // -0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1457,6 +1458,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(75_000_000), // 0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1577,6 +1579,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(-75_000_000), // -0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1593,6 +1596,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(75_000_000), // 0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1690,6 +1694,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(-75_000_000), // -0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1764,6 +1769,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							// Deleveraging fails for remaining amount.
 							Quantums:     dtypes.NewInt(-50_000_000), // -0.5 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1839,6 +1845,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(-75_000_000), // -0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1855,6 +1862,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(75_000_000), // 0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -1995,6 +2003,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(-75_000_000), // -0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},
@@ -2011,6 +2020,7 @@ func TestPlacePerpetualLiquidation_Deleveraging(t *testing.T) {
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(75_000_000), // 0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},

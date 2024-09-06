@@ -6,14 +6,13 @@ import (
 
 	types2 "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestQueryByWallet(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := types2.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	acc, err := types2.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
@@ -24,8 +23,6 @@ func TestQueryByWallet(t *testing.T) {
 	addresses := generateNAddr(100)
 	original := make([]string, 100)
 	copy(original, addresses)
-	addressMap := make(map[string]string)
-	investors := make([]*types.Investor, 100)
 	for i := 0; i < 100; i++ {
 		msg := types.MsgUploadInvestor{}
 		msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
@@ -34,12 +31,6 @@ func TestQueryByWallet(t *testing.T) {
 		ret, err := lapp.UploadInvestor(wctx, &msg)
 		require.NoError(t, err)
 		require.EqualValues(t, ret.Wallets, msg.WalletAddress)
-		inv := types.Investor{
-			InvestorId:    msg.InvestorId,
-			WalletAddress: msg.WalletAddress,
-		}
-		addressMap[msg.InvestorId] = msg.WalletAddress[0]
-		investors = append(investors, &inv)
 	}
 
 	for i := 0; i < 100; i++ {
@@ -50,7 +41,7 @@ func TestQueryByWallet(t *testing.T) {
 }
 
 func TestQueryByWalletTwoInvestorIDWithSameWallet(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := types2.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	acc, err := types2.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
@@ -61,8 +52,6 @@ func TestQueryByWalletTwoInvestorIDWithSameWallet(t *testing.T) {
 	addresses := generateNAddr(100)
 	original := make([]string, 100)
 	copy(original, addresses)
-	addressMap := make(map[string]string)
-	investors := make([]*types.Investor, 100)
 	for i := 0; i < 100; i++ {
 		msg := types.MsgUploadInvestor{}
 		msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
@@ -71,12 +60,6 @@ func TestQueryByWalletTwoInvestorIDWithSameWallet(t *testing.T) {
 		ret, err := lapp.UploadInvestor(wctx, &msg)
 		require.NoError(t, err)
 		require.EqualValues(t, ret.Wallets, msg.WalletAddress)
-		inv := types.Investor{
-			InvestorId:    msg.InvestorId,
-			WalletAddress: msg.WalletAddress,
-		}
-		addressMap[msg.InvestorId] = msg.WalletAddress[0]
-		investors = append(investors, &inv)
 	}
 
 	msg := types.MsgUploadInvestor{}

@@ -5,27 +5,14 @@ import (
 	"testing"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/require"
 )
 
-func generateNAddr(n int) []string {
-	addresses := make([]string, n)
-	for i := 0; i < n; i++ {
-		pk := ed25519.GenPrivKey().PubKey()
-		addr := pk.Address().Bytes()
-		a := sdk.AccAddress(addr)
-		addresses[i] = a.String()
-	}
-	return addresses
-}
-
 func TestMsgSERvCreatePool(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
@@ -75,7 +62,7 @@ func TestMsgSERvCreatePool(t *testing.T) {
 }
 
 func TestMsgSERvCreatePoolApyCheck(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	lapp, k, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)

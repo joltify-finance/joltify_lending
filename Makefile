@@ -157,7 +157,11 @@ clean:
 lint:
 	@golangci-lint run --out-format=tab  -v --timeout 3600s -c ./.golangci.yml
 	go mod verify
-.PHONY: lint
+
+lint-fix:
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --build-tags='$(build_tags) all' --fix --out-format=tab --issues-exit-code=0
+.PHONY: lint lint-fix
+
 
 format:
 	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -name '*.pb.go' | xargs gofmt -w -s

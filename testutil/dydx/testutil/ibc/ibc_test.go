@@ -15,7 +15,7 @@ func TestDenomTraceToIBCDenom_Success(t *testing.T) {
 	}{
 		// Check `transfer/channel-0/uusdc` results in expected ibc hash.
 		{
-			denomTrace: "transfer/channel-0/uusdc",
+			denomTrace: "transfer/channel-1/uusdc",
 			expected:   assettypes.UusdcDenom,
 		},
 		// The following test cases and results are obtained from the private testnet.

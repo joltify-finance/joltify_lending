@@ -65,7 +65,6 @@ func (k Keeper) updateInterestData(rctx context.Context, interestData *types.Bor
 			payment = payment.AddAmount(thisPayment.Amount)
 		}
 		return payment, thisPaymentTime, nil
-
 	} else {
 		latestPaymentTime := interestData.Payments[len(interestData.Payments)-1].PaymentTime
 		currentTimeTruncated := ctx.BlockTime().Truncate(time.Duration(interestData.PayFreq) * time.Second)
@@ -97,7 +96,6 @@ func (k Keeper) updateInterestData(rctx context.Context, interestData *types.Bor
 		interestData.Payments = append(interestData.Payments, &currentPayment)
 		interestData.AccInterest = interestData.AccInterest.Add(paymentToInvestor)
 		return payment, thisPaymentTime, nil
-
 	}
 }
 

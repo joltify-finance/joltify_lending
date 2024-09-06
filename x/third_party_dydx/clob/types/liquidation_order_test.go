@@ -1,6 +1,7 @@
 package types_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
@@ -140,6 +141,8 @@ func TestLiquidationOrder_GetOrderHash(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			fmt.Printf(">%v:actual>> %v\n", name, tc.order.GetOrderHash().ToBytes())
+			fmt.Printf(">%v:expected>> %v\n", name, tc.expectedHash.ToBytes())
 			require.Equal(t, tc.expectedHash, tc.order.GetOrderHash())
 		})
 	}

@@ -7,9 +7,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 )
 
-var (
-	msgUpdateMarketPricesType = reflect.TypeOf(types.MsgUpdateMarketPrices{})
-)
+var msgUpdateMarketPricesType = reflect.TypeOf(types.MsgUpdateMarketPrices{})
 
 // UpdateMarketPricesTx represents `MsgUpdateMarketPrices` tx that can be validated.
 type UpdateMarketPricesTx struct {

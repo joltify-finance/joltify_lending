@@ -5,14 +5,13 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMsgSERvUpdatePool(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	lapp, k, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)
@@ -63,7 +62,7 @@ func TestMsgSERvUpdatePool(t *testing.T) {
 }
 
 func TestMsgSERvUpdatePoolWithError(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	lapp, _, _, _, _, wctx := setupMsgServer(t)
 	ctx := sdk.UnwrapSDKContext(wctx)

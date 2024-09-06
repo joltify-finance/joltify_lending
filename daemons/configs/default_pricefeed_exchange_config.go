@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	tmos "github.com/cometbft/cometbft/libs/os"
 	daemonconstants "github.com/joltify-finance/joltify_lending/daemons/constants"
+	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants"
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	"github.com/pelletier/go-toml"
 )
@@ -40,15 +42,22 @@ const (
 func GenerateDefaultExchangeTomlString() bytes.Buffer {
 	// Create the template for turning each `parsableExchangeStartupConfig` into a toml map config in
 	// a stringified toml file.
+
+	// Create the template for turning each `parsableExchangeStartupConfig` into a toml map config in
+	// a stringified toml file.
+	template, err := template.New("").Parse(defaultTomlTemplate)
 	// Panic if failure occurs when parsing the template.
+	if err != nil {
+		panic(err)
+	}
 
 	// Encode toml string into `defaultExchangeToml` and return if successful. Otherwise, panic.
 	var defaultExchangeToml bytes.Buffer
 	// fixme make it useless as we do not need this price feed, we return the blank configure
-	//err = template.Execute(&defaultExchangeToml, constants.StaticExchangeQueryConfig)
-	//if err != nil {
-	//	panic(err)
-	//}
+	err = template.Execute(&defaultExchangeToml, constants.StaticExchangeQueryConfig)
+	if err != nil {
+		panic(err)
+	}
 	return defaultExchangeToml
 }
 
@@ -59,7 +68,7 @@ func WriteDefaultPricefeedExchangeToml(homeDir string) {
 	configFilePath := getConfigFilePath(homeDir)
 	if !tmos.FileExists(configFilePath) {
 		buffer := GenerateDefaultExchangeTomlString()
-		tmos.MustWriteFile(configFilePath, buffer.Bytes(), 0644)
+		tmos.MustWriteFile(configFilePath, buffer.Bytes(), 0o644)
 	}
 }
 

@@ -6,14 +6,13 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestQueryByInvestor(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
@@ -27,7 +26,6 @@ func TestQueryByInvestor(t *testing.T) {
 	original := make([]string, 100)
 	copy(original, addresses)
 	addressMap := make(map[string]string)
-	investors := make([]*types.Investor, 100)
 	for i := 0; i < 100; i++ {
 		msg := types.MsgUploadInvestor{}
 		msg.Creator = "jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8"
@@ -36,12 +34,7 @@ func TestQueryByInvestor(t *testing.T) {
 		ret, err := lapp.UploadInvestor(wctx, &msg)
 		require.NoError(t, err)
 		require.EqualValues(t, ret.Wallets, msg.WalletAddress)
-		inv := types.Investor{
-			InvestorId:    msg.InvestorId,
-			WalletAddress: msg.WalletAddress,
-		}
 		addressMap[msg.InvestorId] = msg.WalletAddress[0]
-		investors = append(investors, &inv)
 	}
 
 	for i := 0; i < 100; i++ {

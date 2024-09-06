@@ -5,6 +5,8 @@ import (
 	"time"
 
 	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/joltify-finance/joltify_lending/app/constants"
+	"github.com/joltify-finance/joltify_lending/app/prepare/prices"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/telemetry"
@@ -53,7 +55,7 @@ func PrepareProposalHandler(
 	bridgeKeeper PrepareBridgeKeeper,
 	clobKeeper PrepareClobKeeper,
 	perpetualKeeper PreparePerpetualsKeeper,
-	pricesKeeper PreparePricesKeeper,
+	priceUpdateGenerator prices.PriceUpdateGenerator,
 ) sdk.PrepareProposalHandler {
 	return func(ctx sdk.Context, req *abci.RequestPrepareProposal) (*abci.ResponsePrepareProposal, error) {
 		defer telemetry.ModuleMeasureSince(
@@ -72,16 +74,23 @@ func PrepareProposalHandler(
 		}
 
 		// Grab the injected VEs from the previous block.
-		//var extCommitBzTx []byte
+		var extCommitBzTx []byte
 		// Sanity check to ensure that there is at least 1 tx. This should never return false unless
 		// before VE are enabled, there are no tx in the block.
-		//if len(req.Txs) >= constants.OracleVEInjectedTxs {
-		//	extCommitBzTx = req.Txs[constants.OracleInfoIndex]
-		//}
+		if len(req.Txs) >= constants.OracleVEInjectedTxs {
+			extCommitBzTx = req.Txs[constants.OracleInfoIndex]
+		}
+
+		msg, err := priceUpdateGenerator.GetValidMarketPriceUpdates(ctx, extCommitBzTx)
+		if err != nil {
+			ctx.Logger().Error(fmt.Sprintf("GetValidMarketPriceUpdates error: %v", err))
+			recordErrorMetricsWithLabel(metrics.PricesTx)
+			return &EmptyResponse, nil
+		}
 
 		// get the update market prices tx
 		// Gather "FixedSize" group messages.
-		pricesTxResp, err := GetUpdateMarketPricesTx(ctx, txConfig, pricesKeeper)
+		pricesTxResp, err := EncodeMarketPriceUpdates(txConfig, msg)
 		if err != nil {
 			ctx.Logger().Error(fmt.Sprintf("GetUpdateMarketPricesTx error: %v", err))
 			recordErrorMetricsWithLabel(metrics.PricesTx)

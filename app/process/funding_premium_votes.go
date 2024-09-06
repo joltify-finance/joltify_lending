@@ -7,9 +7,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 )
 
-var (
-	msgAddPremiumVotesType = reflect.TypeOf(types.MsgAddPremiumVotes{})
-)
+var msgAddPremiumVotesType = reflect.TypeOf(types.MsgAddPremiumVotes{})
 
 // AddPremiumVotesTx represents `MsgAddPremiumVotes` tx that can be validated.
 type AddPremiumVotesTx struct {

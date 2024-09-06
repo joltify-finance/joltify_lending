@@ -39,7 +39,6 @@ func CmdQueryPool() *cobra.Command {
 					return err
 				}
 			} else {
-
 				res, err = queryClient.QueryPool(cmd.Context(), params)
 				if err != nil {
 					return err

@@ -10,17 +10,14 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/daemons/configs"
 	"github.com/joltify-finance/joltify_lending/daemons/constants"
-	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants/exchange_common"
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	binanceId = exchange_common.EXCHANGE_ID_BINANCE
-	filePath  = fmt.Sprintf("config/%v", constants.PricefeedExchangeConfigFileName)
-)
+// binanceId = exchange_common.EXCHANGE_ID_BINANCE
+var filePath = fmt.Sprintf("config/%v", constants.PricefeedExchangeConfigFileName)
 
 const (
 	tomlString = `# This is a TOML config file.
@@ -123,7 +120,11 @@ func TestGenerateDefaultExchangeTomlString(t *testing.T) {
 }
 
 func TestWriteDefaultPricefeedExchangeToml(t *testing.T) {
-	err := os.Mkdir("config", 0700)
+	err := os.Mkdir("config", 0o700)
+	defer func() {
+		err := os.RemoveAll("config")
+		require.NoError(t, err)
+	}()
 	require.NoError(t, err)
 	configs.WriteDefaultPricefeedExchangeToml("")
 
@@ -131,16 +132,15 @@ func TestWriteDefaultPricefeedExchangeToml(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, tomlString, string(buffer[:]))
-	os.RemoveAll("config")
 }
 
 func TestWriteDefaultPricefeedExchangeToml_FileExists(t *testing.T) {
 	helloWorld := "Hello World"
 
-	err := os.Mkdir("config", 0700)
+	err := os.Mkdir("config", 0o700)
 	require.NoError(t, err)
 
-	tmos.MustWriteFile(filePath, bytes.NewBuffer([]byte(helloWorld)).Bytes(), 0644)
+	tmos.MustWriteFile(filePath, bytes.NewBuffer([]byte(helloWorld)).Bytes(), 0o644)
 	configs.WriteDefaultPricefeedExchangeToml("")
 
 	buffer, err := os.ReadFile(filePath)
@@ -165,7 +165,6 @@ func TestReadExchangeStartupConfigFile(t *testing.T) {
 		expectedMaxQueries         uint32
 		expectedPanic              error
 	}{
-
 		"config file cannot be found": {
 			exchangeConfigSourcePath: "test_data/notexisting_test.toml",
 			doNotWriteFile:           true,
@@ -196,7 +195,7 @@ func TestReadExchangeStartupConfigFile(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			if !tc.doNotWriteFile {
-				err := os.Mkdir("config", 0700)
+				err := os.Mkdir("config", 0o700)
 				require.NoError(t, err)
 
 				file, err := os.Open(tc.exchangeConfigSourcePath)

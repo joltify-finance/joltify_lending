@@ -52,7 +52,6 @@ func updatenftmodule(ctx sdk.Context, nftKeeper nftmodulekeeper.Keeper, classes 
 		if err != nil {
 			panic(err)
 		}
-
 	}
 }
 

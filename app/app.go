@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/app/prepare/prices"
 	// bridgeclient "github.com/joltify-finance/joltify_lending/daemons/bridge/client"
 	liquidationclient "github.com/joltify-finance/joltify_lending/daemons/liquidation/client"
 
@@ -50,7 +51,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	"github.com/cosmos/gogoproto/proto"
 
-	config2 "github.com/joltify-finance/joltify_lending/app/config"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	appFlag "github.com/joltify-finance/joltify_lending/app/flags"
 	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
 	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/liquidations"
@@ -84,7 +85,7 @@ import (
 	statsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats"
 	subaccountsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
-	// vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
+	vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
 	"google.golang.org/grpc"
 
 	"cosmossdk.io/client/v2/autocli"
@@ -164,7 +165,6 @@ import (
 	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
-	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	daemonserver "github.com/joltify-finance/joltify_lending/daemons/server"
 	dydxPricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
@@ -360,6 +360,22 @@ var (
 		nftmoduletypes.ModuleName:         {authtypes.Minter, authtypes.Burner},
 		swaptypes.ModuleName:              nil,
 		burnauctionmoduletypes.ModuleName: {authtypes.Burner},
+
+		// -------- dYdX custom module accounts --------
+		// bridge module account mints tokens for bridged funds.
+		bridgemoduletypes.ModuleName: {authtypes.Minter},
+		// subaccounts module account holds tokens for all subaccounts.
+		satypes.ModuleName: nil,
+		// insurance fund account manages insurance fund for liquidations.
+		perpetualsmoduletypes.InsuranceFundName: nil,
+		// rewards treasury account distribute funds trading accounts.
+		rewardsmoduletypes.TreasuryAccountName: nil,
+		// rewards vester account vest rewards tokens into the rewards treasury.
+		rewardsmoduletypes.VesterAccountName: nil,
+		// community treasury account holds funds for community use.
+		vestmoduletypes.CommunityTreasuryAccountName: nil,
+		// community vester account vests funds into the community treasury.
+		vestmoduletypes.CommunityVesterAccountName: nil,
 	}
 )
 
@@ -417,9 +433,9 @@ type App struct {
 	// issuanceKeeper   issuancekeeper.Keeper
 	kavaPricefeedKeeper kavapricefeedkeeper.Keeper
 	// cdpKeeper        cdpkeeper.Keeper
-	joltKeeper              joltkeeper.Keeper
+	JoltKeeper              joltkeeper.Keeper
 	incentiveKeeper         incentivekeeper.Keeper
-	feeGrantKeeper          feegrantkeeper.Keeper
+	FeeGrantKeeper          feegrantkeeper.Keeper
 	kycKeeper               kycmodulekeeper.Keeper
 	spvKeeper               spvmodulekeeper.Keeper
 	burnauctionKeeper       burnauctionmodulekeeper.Keeper
@@ -504,7 +520,7 @@ func NewApp(
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
 	encodingConfig := appconfig.MakeEncodingConfig()
-	appCodec := encodingConfig.Marshaler
+	appCodec := encodingConfig.Codec
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 	txConfig := encodingConfig.TxConfig
@@ -821,11 +837,11 @@ func NewApp(
 		authtypes.ProtoBaseAccount,
 		mAccPerms,
 		addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
-		sdk.Bech32MainPrefix,
+		sdk.GetConfig().GetBech32AccountAddrPrefix(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
-	app.feeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
+	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[banktypes.StoreKey]),
@@ -1135,18 +1151,18 @@ func NewApp(
 	)
 	feeTiersModule := feetiersmodule.NewAppModule(appCodec, app.FeeTiersKeeper)
 
-	//app.VestKeeper = *vestmodulekeeper.NewKeeper(
-	//	appCodec,
-	//	keys[vestmoduletypes.StoreKey],
-	//	app.BankKeeper,
-	//	app.BlockTimeKeeper,
-	//	// set the governance and delaymsg module accounts as the authority for conducting upgrades
-	//	[]string{
-	//		lib.GovModuleAddress.String(),
-	//		delaymsgmoduletypes.ModuleAddress.String(),
-	//	},
-	//)
-	//vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
+	app.VestKeeper = *vestmodulekeeper.NewKeeper(
+		appCodec,
+		keys[vestmoduletypes.StoreKey],
+		app.BankKeeper,
+		app.BlockTimeKeeper,
+		// set the governance and delaymsg module accounts as the authority for conducting upgrades
+		[]string{
+			lib.GovModuleAddress.String(),
+			delaymsgmoduletypes.ModuleAddress.String(),
+		},
+	)
+	vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
 
 	app.RewardsKeeper = *rewardsmodulekeeper.NewKeeper(
 		appCodec,
@@ -1311,7 +1327,7 @@ func NewApp(
 		stakingtypes.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()))
 
 	// app.cdpKeeper = *cdpKeeper.SetHooks(cdptypes.NewMultiCDPHooks(app.incentiveKeeper.Hooks()))
-	app.joltKeeper = *joltKeeper.SetHooks(jolttypes.NewMultiJoltHooks(app.incentiveKeeper.Hooks()))
+	app.JoltKeeper = *joltKeeper.SetHooks(jolttypes.NewMultiJoltHooks(app.incentiveKeeper.Hooks()))
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
@@ -1323,7 +1339,7 @@ func NewApp(
 		authModule,
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.ParamsKeeper.Subspace(banktypes.ModuleName)),
 		capability.NewAppModule(appCodec, *app.capabilityKeeper, false),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.feeGrantKeeper, app.interfaceRegistry),
+		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		staking.NewAppModule(appCodec, app.stakingKeeper, app.AccountKeeper, app.BankKeeper, app.ParamsKeeper.Subspace(stakingtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.mintKeeper, app.AccountKeeper, app.BankKeeper),
 		distr.NewAppModule(appCodec, app.distrKeeper, app.AccountKeeper, app.BankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
@@ -1339,7 +1355,7 @@ func NewApp(
 		// issuance.NewAppModule(app.issuanceKeeper, app.AccountKeeper, app.bankKeeper),
 		kavapricefeed.NewAppModule(app.kavaPricefeedKeeper, app.AccountKeeper),
 		// cdp.NewAppModule(app.cdpKeeper, app.AccountKeeper, app.pricefeedKeeper, app.bankKeeper),
-		jolt.NewAppModule(app.joltKeeper, app.AccountKeeper, app.BankKeeper, app.kavaPricefeedKeeper),
+		jolt.NewAppModule(app.JoltKeeper, app.AccountKeeper, app.BankKeeper, app.kavaPricefeedKeeper),
 		incentive.NewAppModule(app.incentiveKeeper, app.AccountKeeper, app.BankKeeper),
 		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.AccountKeeper, app.BankKeeper),
 
@@ -1361,6 +1377,7 @@ func NewApp(
 		feeTiersModule,
 		perpetualsModule,
 		statsModule,
+		vestModule,
 		rewardsModule,
 		subaccountsModule,
 		clobModule,
@@ -1370,25 +1387,6 @@ func NewApp(
 		epochsModule,
 		rateLimitModule,
 		vaultModule,
-
-		// dydx
-		//clobModule,
-		//rewardsModule,
-		//subaccountsModule,
-		//assetsModule,
-		//bridgeModule,
-		//perpetualsModule,
-		//statsModule,
-		//feeTiersModule,
-		//// vestModule,
-		//delayMsgModule,
-		//epochsModule,
-		//pricesModule,
-		//sendingModule,
-		//govPlusModule,
-		//vaultModule,
-		//rateLimitModule,
-		//blockTimeModule,
 	)
 
 	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
@@ -1465,7 +1463,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		// vestmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1524,7 +1522,7 @@ func NewApp(
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
-		// vestmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		epochsmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1582,7 +1580,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		// vestmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1651,7 +1649,7 @@ func NewApp(
 		AccountKeeper:          &app.AccountKeeper,
 		BankKeeper:             app.BankKeeper,
 		SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
-		FeegrantKeeper:         app.feeGrantKeeper,
+		FeegrantKeeper:         app.FeeGrantKeeper,
 		SpvKeeper:              app.spvKeeper,
 		IBCKeeper:              app.ibcKeeper,
 		AddressFetchers:        []jante.AddressFetcher{},
@@ -1964,7 +1962,6 @@ func (app *App) setupUpgradeHandlers() {
 			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
 		case ibctransfertypes.ModuleName:
 			keyTable = ibctransfertypes.ParamKeyTable()
-
 		}
 		if !subspace.HasKeyTable() {
 			subspace.WithKeyTable(keyTable)
@@ -1992,10 +1989,10 @@ func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-func (app *App) EncodingConfig() config2.EncodingConfig {
-	return config2.EncodingConfig{
+func (app *App) EncodingConfig() appconfig.EncodingConfig {
+	return appconfig.EncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
-		Marshaler:         app.AppCodec(),
+		Codec:             app.AppCodec(),
 		TxConfig:          app.TxConfig(),
 		Amino:             app.LegacyAmino(),
 	}
@@ -2093,7 +2090,7 @@ func (app *App) buildAnteHandler(txConfig client.TxConfig) sdk.AnteHandler {
 				AccountKeeper:   app.AccountKeeper,
 				BankKeeper:      app.BankKeeper,
 				SignModeHandler: txConfig.SignModeHandler(),
-				FeegrantKeeper:  app.feeGrantKeeper,
+				FeegrantKeeper:  app.FeeGrantKeeper,
 				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 			},
 			ClobKeeper:   app.ClobKeeper,
@@ -2137,45 +2134,16 @@ func (app *App) createProposalHandlers(
 			priceUpdateDecoder,
 		)
 	}
-	// strategy := currencypair.NewDefaultCurrencyPairStrategy(app.DydxPricesKeeper)
-	//
-	//veCodec := compression.NewCompressionVoteExtensionCodec(
-	//	compression.NewDefaultVoteExtensionCodec(),
-	//	compression.NewZLibCompressor(),
-	//)
-	//extCommitCodec := compression.NewCompressionExtendedCommitCodec(
-	//	compression.NewDefaultExtendedCommitCodec(),
-	//	compression.NewZLibCompressor(),
-	//)
 
-	// Set Price Update Generators/Decoders for Slinky
-	//if appFlags.VEOracleEnabled {
-	//	priceUpdateGenerator = prices.NewSlinkyPriceUpdateGenerator(
-	//		aggregator.NewDefaultVoteAggregator(
-	//			app.Logger(),
-	//			voteweighted.MedianFromContext(
-	//				app.Logger(),
-	//				app.stakingKeeper,
-	//				voteweighted.DefaultPowerThreshold,
-	//			),
-	//			strategy,
-	//		),
-	//		extCommitCodec,
-	//		veCodec,
-	//		strategy,
-	//	)
-	//	priceUpdateDecoder = process.NewSlinkyMarketPriceDecoder(
-	//		priceUpdateDecoder,
-	//		priceUpdateGenerator,
-	//	)
-	//}
+	var priceUpdateGenerator prices.PriceUpdateGenerator = prices.NewDefaultPriceUpdateGenerator(app.DydxPricesKeeper)
+
 	// Generate the dydx handlers
 	dydxPrepareProposalHandler := prepare.PrepareProposalHandler(
 		txConfig,
 		app.BridgeKeeper,
 		app.ClobKeeper,
 		app.PerpetualsKeeper,
-		app.DydxPricesKeeper,
+		priceUpdateGenerator,
 	)
 
 	// ProcessProposal setup.

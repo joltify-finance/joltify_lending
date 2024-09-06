@@ -5,9 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/joltify-finance/joltify_lending/app"
-
 	sdkmath "cosmossdk.io/math"
+	"github.com/joltify-finance/joltify_lending/app/config"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethabi "github.com/ethereum/go-ethereum/accounts/abi"
@@ -79,7 +78,7 @@ func BridgeLogToEvent(
 	return bridgetypes.BridgeEvent{
 		Id:             id,
 		Coin:           sdk.NewCoin(denom, sdkmath.NewIntFromBigInt(amount)),
-		Address:        sdk.MustBech32ifyAddressBytes(app.Bech32MainPrefix, address),
+		Address:        sdk.MustBech32ifyAddressBytes(config.AccountAddressPrefix, address),
 		EthBlockHeight: log.BlockNumber,
 	}
 }

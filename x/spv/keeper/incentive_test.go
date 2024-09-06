@@ -11,7 +11,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -35,7 +34,7 @@ func TestIncentiveSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *IncentiveSuite) SetupTest() {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	lapp, k, nftKeeper, bankKeeper, _, incentiveKeeper, wctx := setupMsgServerWithIncentiveKeeper(suite.T())

@@ -263,7 +263,6 @@ func (pf *PriceFetcher) runSubTask(
 		requestHandler,
 		taskLoopDefinition.marketExponents,
 	)
-
 	if err != nil {
 		pf.writeToBufferedChannel(exchangeId, nil, err)
 

@@ -14,9 +14,9 @@ import (
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/rand"
+	"github.com/joltify-finance/joltify_lending/utils"
 	"gopkg.in/typ.v4/slices"
 
 	"github.com/joltify-finance/joltify_lending/dydx_helper/indexer"
@@ -100,6 +100,39 @@ var (
 	PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20 = *clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
 		clobtypes.Order{
 			OrderId:      clobtypes.OrderId{SubaccountId: constants.Alice_Num0, ClientId: 0, ClobPairId: 0},
+			Side:         clobtypes.Order_SIDE_BUY,
+			Quantums:     6,
+			Subticks:     10,
+			GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
+		},
+		testapp.DefaultGenesis(),
+	))
+
+	PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20 = *clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
+		clobtypes.Order{
+			OrderId:      clobtypes.OrderId{SubaccountId: constants.Alice_Num0, ClientId: 0, ClobPairId: 0},
+			Side:         clobtypes.Order_SIDE_BUY,
+			Quantums:     12,
+			Subticks:     10,
+			GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
+		},
+		testapp.DefaultGenesis(),
+	))
+
+	PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20 = *clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
+		clobtypes.Order{
+			OrderId:      clobtypes.OrderId{SubaccountId: constants.Alice_Num0, ClientId: 0, ClobPairId: 0},
+			Side:         clobtypes.Order_SIDE_BUY,
+			Quantums:     14,
+			Subticks:     10,
+			GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
+		},
+		testapp.DefaultGenesis(),
+	))
+
+	PlaceOrder_Bob_Num0_Id0_Clob0_Buy6_Price10_GTB20 = *clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
+		clobtypes.Order{
+			OrderId:      clobtypes.OrderId{SubaccountId: constants.Bob_Num0, ClientId: 0, ClobPairId: 0},
 			Side:         clobtypes.Order_SIDE_BUY,
 			Quantums:     6,
 			Subticks:     10,
@@ -525,6 +558,7 @@ func TestHydrationWithMatchPreBlocker(t *testing.T) {
 
 	// Carl and Dave's state should get updated accordingly.
 	carl := tApp.App.SubaccountsKeeper.GetSubaccount(ctx, constants.Carl_Num0)
+
 	require.Equal(t, satypes.Subaccount{
 		Id: &constants.Carl_Num0,
 		AssetPositions: []*satypes.AssetPosition{
@@ -538,6 +572,7 @@ func TestHydrationWithMatchPreBlocker(t *testing.T) {
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000),
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}, carl)
@@ -556,6 +591,7 @@ func TestHydrationWithMatchPreBlocker(t *testing.T) {
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000),
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}, dave)
@@ -589,7 +625,7 @@ func TestConcurrentMatchesAndCancels(t *testing.T) {
 				for _, simAccount := range simAccounts {
 					genesisState.Subaccounts = append(genesisState.Subaccounts, satypes.Subaccount{
 						Id: &satypes.SubaccountId{
-							Owner:  sdktypes.MustBech32ifyAddressBytes(app.Bech32MainPrefix, simAccount.PubKey.Address()),
+							Owner:  sdktypes.MustBech32ifyAddressBytes(utils.Bech32MainPrefix, simAccount.PubKey.Address()),
 							Number: 0,
 						},
 						AssetPositions: []*satypes.AssetPosition{
@@ -609,7 +645,7 @@ func TestConcurrentMatchesAndCancels(t *testing.T) {
 	checkTxsPerAccount := make([][]abcitypes.RequestCheckTx, len(simAccounts))
 	for i, simAccount := range simAccounts {
 		privKeySupplier := func(accAddress string) cryptotypes.PrivKey {
-			expectedAccAddress := sdktypes.MustBech32ifyAddressBytes(app.Bech32MainPrefix, simAccount.PubKey.Address())
+			expectedAccAddress := sdktypes.MustBech32ifyAddressBytes(utils.Bech32MainPrefix, simAccount.PubKey.Address())
 			if accAddress != expectedAccAddress {
 				panic(fmt.Errorf("Unknown account, got %s, expected %s", accAddress, expectedAccAddress))
 			}
@@ -617,7 +653,7 @@ func TestConcurrentMatchesAndCancels(t *testing.T) {
 		}
 		orderId := clobtypes.OrderId{
 			SubaccountId: satypes.SubaccountId{
-				Owner:  sdktypes.MustBech32ifyAddressBytes(app.Bech32MainPrefix, simAccount.PubKey.Address()),
+				Owner:  sdktypes.MustBech32ifyAddressBytes(utils.Bech32MainPrefix, simAccount.PubKey.Address()),
 				Number: 0,
 			},
 			ClientId:   0,

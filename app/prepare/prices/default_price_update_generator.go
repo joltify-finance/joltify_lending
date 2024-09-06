@@ -28,7 +28,8 @@ func NewDefaultPriceUpdateGenerator(keeper PricesKeeper) *DefaultPriceUpdateGene
 }
 
 func (pug *DefaultPriceUpdateGenerator) GetValidMarketPriceUpdates(
-	ctx sdk.Context, _ []byte) (*pricestypes.MsgUpdateMarketPrices, error) {
+	ctx sdk.Context, _ []byte,
+) (*pricestypes.MsgUpdateMarketPrices, error) {
 	msgUpdateMarketPrices := pug.pk.GetValidMarketPriceUpdates(ctx)
 	if msgUpdateMarketPrices == nil {
 		return nil, fmt.Errorf("MsgUpdateMarketPrices cannot be nil")

@@ -9,14 +9,13 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateProject(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	_, k, wctx := setupMsgServer(t)

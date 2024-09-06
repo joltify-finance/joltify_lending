@@ -73,9 +73,10 @@ func TestMsgSetLimitParams(t *testing.T) {
 				Authority:   lib.GovModuleAddress.String(),
 				LimitParams: stakeLimitParams,
 			},
+			// george: we need to make sure the order of the token demo is alphabetically sorted
 			expectedLimitParamsList: []types.LimitParams{
-				stakeLimitParams,
 				types.DefaultUsdcRateLimitParams(),
+				stakeLimitParams,
 			},
 			expErr: false,
 		},

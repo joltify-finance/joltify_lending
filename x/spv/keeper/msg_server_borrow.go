@@ -19,7 +19,6 @@ func (k msgServer) getAllBorrowed(ctx context.Context, poolInfo types.PoolInfo) 
 	var err error
 	sum := sdkmath.ZeroInt()
 	for _, el := range poolInfo.PoolNFTIds {
-
 		class, found := k.NftKeeper.GetClass(ctx, el)
 		if !found {
 			panic(found)

@@ -2,6 +2,7 @@ package pricefeed_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -44,6 +45,9 @@ func (suite *GenesisTestSuite) TestValidGenState() {
 			NewPricefeedGenStateWithOracles(addrs),
 		)
 	})
+
+	out := NewPricefeedGenStateWithOracles(addrs)
+	fmt.Printf(">>>out: %+v\n", out)
 }
 
 func (suite *GenesisTestSuite) TestInitExportGenState() {

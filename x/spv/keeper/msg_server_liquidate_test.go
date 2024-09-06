@@ -10,7 +10,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -34,7 +33,7 @@ func TestLiquidateSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *liquidateTestSuite) SetupTest() {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
@@ -202,8 +201,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 			panic(found)
 		}
 		var borrowInterest types.BorrowInterest
-		var err error
-		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+		err := proto.Unmarshal(class.Data.Value, &borrowInterest)
 		if err != nil {
 			panic(err)
 		}
@@ -273,7 +271,6 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 			panic(found)
 		}
 		var borrowInterest types.BorrowInterest
-		var err error
 		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
 		if err != nil {
 			panic(err)

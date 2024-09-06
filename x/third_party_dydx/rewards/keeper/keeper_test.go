@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	TestAddress1         = "dydx16h7p7f4dysrgtzptxx2gtpt5d8t834g9dj830z"
-	TestAddress2         = "dydx168pjt8rkru35239fsqvz7rzgeclakp49zx3aum"
+	TestAddress1         = "jolt16h7p7f4dysrgtzptxx2gtpt5d8t834g9wt5fuu"
+	TestAddress2         = "jolt168pjt8rkru35239fsqvz7rzgeclakp49plz909"
 	TestAddress3         = "jolt1e49wnx7vcna0ccmstm2thu30jgheupdfl67egr"
 	TestRewardTokenDenom = "test-denom"
 )
@@ -684,10 +684,28 @@ func TestProcessRewardsForBlock(t *testing.T) {
 						})
 					},
 				)
+				//testapp.UpdateGenesisDocWithAppStateForModule(
+				//	&genesis,
+				//	func(genesisState *authtypes.GenesisState) {
+				//		aa := authtypes.BaseAccount{
+				//			Address: types.TreasuryModuleAddress.String(),
+				//		}
+				//		pa, err := authtypes.PackAccounts(authtypes.GenesisAccounts{&aa})
+				//		require.NoError(t, err)
+				//
+				//		genesisState.Accounts = append(genesisState.Accounts, pa...)
+				//	})
+
 				return genesis
 			}).Build()
+
 			ctx := tApp.InitChain()
 			k := tApp.App.RewardsKeeper
+			//aa := authtypes.BaseAccount{
+			//	Address: types.TreasuryModuleAddress.String(),
+			//}
+
+			// tApp.App.AccountKeeper.SetModuleAccount(ctx, authtypes.NewModuleAccount(&aa, authtypes.Burner))
 
 			// Set up PricesKeeper
 			_, err := tApp.App.DydxPricesKeeper.CreateMarket(

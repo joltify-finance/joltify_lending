@@ -227,12 +227,6 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipTwoInvestor() {
 	poolInfoBefore, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	d1, ok := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
-	d2, ok := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
-
-	fmt.Printf(">>333>>>%v\n", d1.WithdrawalAmount)
-	fmt.Printf(">>333>>>>%v\n", d2.WithdrawalAmount)
-
 	_, err = suite.app.TransferOwnership(suite.ctx, &reqOwner)
 	suite.Require().NoError(err)
 
@@ -661,8 +655,6 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByTwoInvestors()
 	// the 8e5 is not released unless deposit more,so the amount is
 	// 1.5e5-1.34e5=0.16e5
 	suite.Require().True(checkValueWithRangeTwo(poolInfo.UsableAmount.Amount, sdkmath.NewIntFromUint64(0.16e5)))
-
-	return
 }
 
 func (suite *withDrawPrincipalSuite) TestTransferOwnershipSharedByMultipleEnoughMoney() {

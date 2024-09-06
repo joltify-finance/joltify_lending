@@ -1,9 +1,10 @@
 package prices
 
 import (
+	"math/big"
+
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 	"github.com/shopspring/decimal"
-	"math/big"
 )
 
 /*

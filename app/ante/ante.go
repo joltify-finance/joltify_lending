@@ -101,7 +101,6 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 			if len(opts) == 1 {
 				typeURL := opts[0].GetTypeUrl()
 				switch typeURL {
-
 				case "/cosmos.authz.v1beta1.MsgRevoke", "/cosmos.authz.v1beta1.MsgExec", "/cosmos.authz.v1beta1.MsgGrant":
 					return normalCosmosTxAnte(ctx, tx, sim, options)
 				default:
@@ -110,10 +109,8 @@ func NewAnteHandler(options HandlerOptions, consensusKeeper consensusparamkeeper
 						"rejecting tx with unsupported extension option: %s", typeURL,
 					)
 				}
-
 			}
 		}
-
 		return normalCosmosTxAnte(ctx, tx, sim, options)
 	}, nil
 }

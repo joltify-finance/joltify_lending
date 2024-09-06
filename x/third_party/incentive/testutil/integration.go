@@ -7,6 +7,7 @@ import (
 	"time"
 
 	storetypes "cosmossdk.io/store/types"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
@@ -36,8 +37,7 @@ type IntegrationTester struct {
 }
 
 func (suite *IntegrationTester) SetupSuite() {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 }
 
 func (suite *IntegrationTester) SetApp() {

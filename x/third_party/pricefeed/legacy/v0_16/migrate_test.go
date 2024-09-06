@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	v015pricefeed "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/legacy/v0_15"
 	"github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
@@ -25,15 +26,15 @@ type migrateTestSuite struct {
 }
 
 func (s *migrateTestSuite) SetupTest() {
-	app.SetSDKConfig()
+	appconfig.SetupConfig()
 
 	s.v15genstate = v015pricefeed.GenesisState{
 		Params:       v015pricefeed.Params{},
 		PostedPrices: v015pricefeed.PostedPrices{},
 	}
 
-	config := app.MakeEncodingConfig()
-	s.cdc = config.Marshaler
+	config := appconfig.MakeEncodingConfig()
+	s.cdc = config.Codec
 
 	legacyCodec := codec.NewLegacyAmino()
 	s.legacyCdc = legacyCodec

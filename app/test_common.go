@@ -103,7 +103,6 @@ func genesisStateWithValSet(
 	bondAmt := sdk.DefaultPowerReduction.Mul(sdkmath.NewInt(1000000))
 
 	for _, val := range valSet {
-
 		val.DelegatorShares = sdkmath.LegacyOneDec()
 		val.Tokens = bondAmt
 		val.Status = stakingtypes.Bonded
@@ -171,8 +170,7 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 	}
 
 	if genbytes == nil {
-
-		genesisState := NewDefaultGenesisState(encCfg.Marshaler)
+		genesisState := NewDefaultGenesisState(encCfg.Codec)
 		genesisState = genesisStateWithValSet(app, genesisState, []*stakingtypes.Validator{&val}, []authtypes.GenesisAccount{acc}, balance)
 
 		stateBytes, err := tmjson.MarshalIndent(genesisState, "", " ")
@@ -212,7 +210,7 @@ func (tApp TestApp) GetParamsKeeper() paramskeeper.Keeper       { return tApp.Pa
 
 func (tApp TestApp) GetAuctionKeeper() auctionkeeper.Keeper     { return tApp.auctionKeeper }
 func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.kavaPricefeedKeeper }
-func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.joltKeeper }
+func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.JoltKeeper }
 func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.incentiveKeeper }
 func (tApp TestApp) GetSwapKeeper() swapkeeper.Keeper           { return tApp.swapKeeper }
 
@@ -273,7 +271,7 @@ func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
 	genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState,
 ) []byte {
 	encoding := config.MakeEncodingConfig()
-	genesisState := NewDefaultGenesisState(encoding.Marshaler)
+	genesisState := NewDefaultGenesisState(encoding.Codec)
 	for _, state := range genesisStates {
 		for k, v := range state {
 			genesisState[k] = v
@@ -324,7 +322,7 @@ func (tApp TestApp) GenerateFromGenesisStatesWithTimeAndChainID(
 func (tApp TestApp) InitializeFromGenesisStatesWithTimeAndChainIDAndHeight(genTime time.Time, chainID string, initialHeight int64, genAccs []authtypes.GenesisAccount, coins sdk.Coins, genesisStates ...GenesisState) []byte {
 	// Create a default genesis state and overwrite with provided values
 	encoding := config.MakeEncodingConfig()
-	genesisState := NewDefaultGenesisState(encoding.Marshaler)
+	genesisState := NewDefaultGenesisState(encoding.Codec)
 	for _, state := range genesisStates {
 		for k, v := range state {
 			genesisState[k] = v
@@ -438,7 +436,7 @@ func GeneratePrivKeyAddressPairs(n int) (keys []cryptotypes.PrivKey, addrs []sdk
 
 // NewFundedGenStateWithSameCoins creates a (auth and bank) genesis state populated with accounts from the given addresses and balance.
 func NewFundedGenStateWithSameCoins(cdc codec.JSONCodec, balance sdk.Coins, addresses []sdk.AccAddress) GenesisState {
-	builder := NewAuthBankGenesisBuilder()
+	builder := NewAuthBankGenesisBuilder(nil, nil)
 	for _, address := range addresses {
 		builder.WithSimpleAccount(address, balance)
 	}
@@ -447,7 +445,7 @@ func NewFundedGenStateWithSameCoins(cdc codec.JSONCodec, balance sdk.Coins, addr
 
 // NewFundedGenStateWithCoins creates a (auth and bank) genesis state populated with accounts from the given addresses and coins.
 func NewFundedGenStateWithCoins(cdc codec.JSONCodec, coins []sdk.Coins, addresses []sdk.AccAddress) GenesisState {
-	builder := NewAuthBankGenesisBuilder()
+	builder := NewAuthBankGenesisBuilder(nil, nil)
 	for i, address := range addresses {
 		builder.WithSimpleAccount(address, coins[i])
 	}
@@ -456,7 +454,7 @@ func NewFundedGenStateWithCoins(cdc codec.JSONCodec, coins []sdk.Coins, addresse
 
 // NewFundedGenStateWithSameCoinsWithModuleAccount creates a (auth and bank) genesis state populated with accounts from the given addresses and balance along with an empty module account
 func NewFundedGenStateWithSameCoinsWithModuleAccount(cdc codec.JSONCodec, coins sdk.Coins, addresses []sdk.AccAddress, modAcc *authtypes.ModuleAccount) GenesisState {
-	builder := NewAuthBankGenesisBuilder()
+	builder := NewAuthBankGenesisBuilder(nil, nil)
 
 	for _, address := range addresses {
 		builder.WithSimpleAccount(address, coins)

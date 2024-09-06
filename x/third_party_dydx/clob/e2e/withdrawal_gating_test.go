@@ -269,6 +269,7 @@ func TestWithdrawalGating_NegativeTncSubaccount_BlocksThenUnblocks(t *testing.T)
 							PerpetualId:  0,
 							Quantums:     dtypes.NewInt(-75_000_000), // -0.75 BTC
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 				},

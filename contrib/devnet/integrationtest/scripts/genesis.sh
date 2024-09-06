@@ -28,7 +28,7 @@ COIN_NAME="jolt Testnet Token"
 TESTNET_VALIDATOR_NATIVE_TOKEN_BALANCE=1000000$EIGHTEEN_ZEROS # 1e24 or 1 million native tokens.
 # Each testnet validator self-delegates 500k whole coins of native token.
 TESTNET_VALIDATOR_SELF_DELEGATE_AMOUNT=500000$EIGHTEEN_ZEROS # 5e23 or 500k native tokens.
-FAUCET_NATIVE_TOKEN_BALANCE=50000000$EIGHTEEN_ZEROS # 5e25 or 50 million native tokens. 
+FAUCET_NATIVE_TOKEN_BALANCE=50000000$EIGHTEEN_ZEROS # 5e25 or 50 million native tokens.
 ETH_CHAIN_ID=11155111 # sepolia
 # https://sepolia.etherscan.io/address/0xf75012c350e4ad55be2048bd67ce6e03b20de82d
 ETH_BRIDGE_ADDRESS="0xf75012c350e4ad55be2048bd67ce6e03b20de82d"
@@ -75,7 +75,7 @@ function edit_genesis() {
 		# Default to 200 million full coins.
 		REWARDS_VESTER_ACCOUNT_BALANCE="200000000$EIGHTEEN_ZEROS"
 	fi
-	
+
 	# Genesis time
 	dasel put -t string -f "$GENESIS" '.genesis_time' -v "$GENESIS_TIME"
 
@@ -205,7 +205,6 @@ function edit_genesis() {
 	dasel put -t int -f "$GENESIS" '.app_state.perpetuals.perpetuals.[1].params.market_type' -v '1'
 
 
-  echo "done1############"
 
 	# Perpetual: LINK-USD
 
@@ -1425,8 +1424,6 @@ function edit_genesis() {
 	dasel put -t int -f "$GENESIS" '.app_state.clob.liquidations_config.subaccount_block_limits.max_quantums_insurance_lost' -v '1000000000000' # 1_000_000 USDC
 	dasel put -t int -f "$GENESIS" '.app_state.clob.liquidations_config.fillable_price_config.bankruptcy_adjustment_ppm' -v '1000000'
 	dasel put -t int -f "$GENESIS" '.app_state.clob.liquidations_config.fillable_price_config.spread_to_maintenance_margin_ratio_ppm' -v '1500000'  # 150%
-echo "done here latest"
-exit 0
 
 
 
@@ -1517,7 +1514,7 @@ exit 0
 	# Set total shares and owner shares of each vault.
 	vault_idx=0
 	if [ -z "${INPUT_TEST_ACCOUNTS[0]}" ]; then
-		vault_owner_address='dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4' # alice as default vault owner
+		vault_owner_address='jolt1mkkvp26dngu6n8rmalaxyp3gwkjuzztqhm4zca' # alice as default vault owner
 	else
 		vault_owner_address="${INPUT_TEST_ACCOUNTS[0]}"
 	fi
@@ -1532,7 +1529,6 @@ exit 0
 		dasel put -t string -f "$GENESIS" ".app_state.vault.vaults.[${vault_idx}].owner_shares.[0].shares.num_shares" -v "${DEFAULT_SUBACCOUNT_QUOTE_BALANCE_VAULT}"
 		vault_idx=$(($vault_idx + 1))
 	done
-	echo "done"
 }
 
 function add_subaccount() {

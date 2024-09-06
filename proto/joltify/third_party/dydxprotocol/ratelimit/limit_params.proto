@@ -9,7 +9,7 @@ option go_package = "github.com/joltify-finance/joltify_lending/x/third_party_dy
 // LimitParams defines rate limit params on a denom.
 message LimitParams {
   // denom is the denomination of the token being rate limited.
-  // e.g. ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5
+  // e.g. ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
   string denom = 1;
   // limiters is a list of rate-limiters on this denom. All limiters
   // must be satified for a withdrawal to proceed.

@@ -27,18 +27,18 @@ func (k Keeper) ArchiveNFT(rctx context.Context, classID, nftID string) error {
 
 	archiveClass, err := k.GetOrCreate(ctx, classID)
 	if err != nil {
-		return fmt.Errorf("failed to get or create the class: %v", err)
+		return fmt.Errorf("failed to get or create the class: %w", err)
 	}
 
 	thisNFT.Id = fmt.Sprintf("%v%v-%v", types.ArchivePrefix, thisNFT.Id, ctx.BlockTime().Unix())
 	thisNFT.ClassId = archiveClass.Id
 	err = k.NftKeeper.Mint(ctx, thisNFT, owner)
 	if err != nil {
-		return fmt.Errorf("failed to update the nft: %v", err)
+		return fmt.Errorf("failed to update the nft: %w", err)
 	}
 
 	if err := k.NftKeeper.Burn(ctx, classID, nftID); err != nil {
-		return fmt.Errorf("failed to burn the nft: %v", err)
+		return fmt.Errorf("failed to burn the nft: %w", err)
 	}
 	return nil
 }

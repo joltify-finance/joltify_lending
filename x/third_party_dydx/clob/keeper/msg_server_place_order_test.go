@@ -414,8 +414,8 @@ func TestHandleMsgPlaceOrder(t *testing.T) {
 			ClobPairId:   0,
 		},
 		Side:         types.Order_SIDE_BUY,
-		Quantums:     100,
-		Subticks:     10_000,
+		Quantums:     1_000_000,
+		Subticks:     100_000,
 		GoodTilOneof: &types.Order_GoodTilBlockTime{GoodTilBlockTime: 15},
 	}
 	tests := map[string]struct {

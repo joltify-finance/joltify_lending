@@ -436,7 +436,6 @@ func TestPerformOrderCancellationStatefulValidation(t *testing.T) {
 			if tc.setupDeliverTxState != nil {
 				tc.setupDeliverTxState(ctx.WithIsCheckTx(false), tApp.App.ClobKeeper)
 			}
-
 			resp := tApp.CheckTx(testapp.MustMakeCheckTxsWithClobMsg(
 				ctx,
 				tApp.App,

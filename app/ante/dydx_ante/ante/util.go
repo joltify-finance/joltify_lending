@@ -17,8 +17,7 @@ import (
 func ShouldSkipSequenceValidation(msgs []sdk.Msg) (shouldSkipValidation bool) {
 	for _, msg := range msgs {
 		switch typedMsg := msg.(type) {
-		case
-			*clobtypes.MsgPlaceOrder:
+		case *clobtypes.MsgPlaceOrder:
 			// Stateful orders need to use sequence numbers for replay prevention.
 			orderId := typedMsg.GetOrder().OrderId
 			if orderId.IsStatefulOrder() {
@@ -26,16 +25,14 @@ func ShouldSkipSequenceValidation(msgs []sdk.Msg) (shouldSkipValidation bool) {
 			}
 			// This is a short term order, continue to check the next message.
 			continue
-		case
-			*clobtypes.MsgCancelOrder:
+		case *clobtypes.MsgCancelOrder:
 			orderId := typedMsg.GetOrderId()
 			if orderId.IsStatefulOrder() {
 				return false
 			}
 			// This is a `GoodTilBlock` message, continue to check the next message.
 			continue
-		case
-			*clobtypes.MsgBatchCancel:
+		case *clobtypes.MsgBatchCancel:
 			// MsgBatchCancel only supports short term orders.
 			continue
 		default:

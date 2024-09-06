@@ -43,7 +43,7 @@ func (suite *GenesisTestSuite) SetupTest() {
 
 	_, addrs := app.GeneratePrivKeyAddressPairs(5)
 
-	authBuilder := app.NewAuthBankGenesisBuilder().
+	authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).
 		WithSimpleAccount(addrs[0], cs(c("bnb", 1e10), c("ujolt", 1e10))).
 		WithSimpleModuleAccount(types.IncentiveMacc, cs(c("hard", 1e15), c("ujolt", 1e15)))
 
