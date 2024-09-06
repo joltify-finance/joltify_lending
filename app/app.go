@@ -19,7 +19,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants"
 
 	prepare "github.com/joltify-finance/joltify_lending/app/prepare"
-	"github.com/joltify-finance/joltify_lending/app/prepare/prices"
 	"github.com/joltify-finance/joltify_lending/daemons/configs"
 
 	"github.com/joltify-finance/joltify_lending/app/process"
@@ -2139,7 +2138,6 @@ func (app *App) createProposalHandlers(
 		)
 	}
 	// strategy := currencypair.NewDefaultCurrencyPairStrategy(app.DydxPricesKeeper)
-	var priceUpdateGenerator prices.PriceUpdateGenerator = prices.NewDefaultPriceUpdateGenerator(app.DydxPricesKeeper)
 	//
 	//veCodec := compression.NewCompressionVoteExtensionCodec(
 	//	compression.NewDefaultVoteExtensionCodec(),
@@ -2177,7 +2175,7 @@ func (app *App) createProposalHandlers(
 		app.BridgeKeeper,
 		app.ClobKeeper,
 		app.PerpetualsKeeper,
-		priceUpdateGenerator,
+		app.DydxPricesKeeper,
 	)
 
 	// ProcessProposal setup.

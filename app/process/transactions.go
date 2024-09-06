@@ -1,7 +1,6 @@
 package process
 
 import (
-	"fmt"
 	"slices"
 
 	errorsmod "cosmossdk.io/errors"
@@ -11,11 +10,11 @@ import (
 )
 
 const (
-	minTxsCount               = 3
-	proposedOperationsTxIndex = 0
-	// updateMarketPricesTxLenOffset = -1
-	addPremiumVotesTxLenOffset    = -1
-	acknowledgeBridgesTxLenOffset = -2
+	minTxsCount                   = 4
+	proposedOperationsTxIndex     = 0
+	updateMarketPricesTxLenOffset = -1
+	addPremiumVotesTxLenOffset    = -2
+	acknowledgeBridgesTxLenOffset = -3
 	lastOtherTxLenOffset          = acknowledgeBridgesTxLenOffset
 	firstOtherTxIndex             = proposedOperationsTxIndex + 1
 )
@@ -25,7 +24,7 @@ func init() {
 		proposedOperationsTxIndex,
 		acknowledgeBridgesTxLenOffset,
 		addPremiumVotesTxLenOffset,
-		// updateMarketPricesTxLenOffset,
+		updateMarketPricesTxLenOffset,
 	}
 	if minTxsCount != len(txIndicesAndOffsets) {
 		panic("minTxsCount does not match expected count of Txs.")
@@ -43,7 +42,7 @@ func init() {
 		proposedOperationsTxIndex,
 		acknowledgeBridgesTxLenOffset + minTxsCount,
 		addPremiumVotesTxLenOffset + minTxsCount,
-		// updateMarketPricesTxLenOffset + minTxsCount,
+		updateMarketPricesTxLenOffset + minTxsCount,
 	}
 	if minTxsCount != len(txIndicesForMinTxsCount) {
 		panic("minTxsCount does not match expected count of Txs.")
@@ -64,7 +63,7 @@ type ProcessProposalTxs struct {
 	AcknowledgeBridgesTx *AcknowledgeBridgesTx
 	AddPremiumVotesTx    *AddPremiumVotesTx
 	// george do not need price
-	// UpdateMarketPricesTx *UpdateMarketPricesTx // abstract over MarketPriceUpdates from VEs or default.
+	UpdateMarketPricesTx *UpdateMarketPricesTx // abstract over MarketPriceUpdates from VEs or default.
 
 	// Multi msgs txs.
 	OtherTxs []*OtherMsgsTx
@@ -92,13 +91,13 @@ func DecodeProcessProposalTxs(
 	}
 
 	// Price updates.
-	//updatePricesTx, err := pricesTxDecoder.DecodeUpdateMarketPricesTx(
-	//	ctx,
-	//	req.Txs,
-	//)
-	//if err != nil {
-	//	return nil, err
-	//}
+	updatePricesTx, err := pricesTxDecoder.DecodeUpdateMarketPricesTx(
+		ctx,
+		req.Txs,
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	// Operations.
 	// if vote-extensions were injected, offset will be incremented.
@@ -114,12 +113,6 @@ func DecodeProcessProposalTxs(
 		decoder,
 		req.Txs[numTxs+acknowledgeBridgesTxLenOffset],
 	)
-
-	if acknowledgeBridgesTx.msg != nil {
-	} else {
-		fmt.Printf("NOT BBBBBEMPTY!!!!%v\n", acknowledgeBridgesTx.msg.String())
-	}
-
 	if err != nil {
 		return nil, err
 	}
@@ -146,6 +139,7 @@ func DecodeProcessProposalTxs(
 		ProposedOperationsTx: operationsTx,
 		AcknowledgeBridgesTx: acknowledgeBridgesTx,
 		AddPremiumVotesTx:    addPremiumVotesTx,
+		UpdateMarketPricesTx: updatePricesTx,
 		OtherTxs:             allOtherTxs,
 	}, nil
 }
