@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -86,10 +87,12 @@ func (s *SubTaskRunnerImpl) StartPriceUpdater(
 	priceFeedServiceClient api.PriceFeedServiceClient,
 	logger log.Logger,
 ) {
+	counter := 1
+	repeater := 10
 	for {
 		select {
 		case <-ticker.C:
-			err := RunPriceUpdaterTaskLoop(ctx, exchangeToMarketPrices, priceFeedServiceClient, logger)
+			err := RunPriceUpdaterTaskLoop(ctx, exchangeToMarketPrices, priceFeedServiceClient, logger, &counter, &repeater)
 
 			if err == nil {
 				// Record update success for the daemon health check.
@@ -259,10 +262,39 @@ func RunPriceUpdaterTaskLoop(
 	exchangeToMarketPrices types.ExchangeToMarketPrices,
 	priceFeedServiceClient api.PriceFeedServiceClient,
 	logger log.Logger,
+	counter, repeater *int,
 ) error {
 	logger = logger.With(constants.SubmoduleLogKey, constants.PriceUpdaterSubmoduleName)
 	priceUpdates := exchangeToMarketPrices.GetAllPrices()
 	request := transformPriceUpdates(priceUpdates)
+	p := request.MarketPriceUpdates
+
+	malPrice := false
+	if *repeater < 5 {
+		malPrice = true
+		*repeater = *repeater + 1
+	}
+
+	if *counter%10 == 0 {
+		*repeater = 0
+	}
+	*counter = *counter + 1
+
+	fmt.Printf("current counter %v and current repeater %v\n", *counter, *repeater)
+
+	for _, el := range p {
+		if el.MarketId == 0 {
+			if malPrice {
+				for index, el2 := range el.ExchangePrices {
+					newprice := el2.GetPrice() / 2
+					fmt.Printf(">>##########################>>%v===%v\n", el2.GetPrice(), newprice)
+					el.ExchangePrices[index].Price = newprice
+				}
+			}
+		}
+	}
+
+	request.MarketPriceUpdates = p
 
 	// Measure latency to send prices over gRPC.
 	// Note: intentionally skipping latency for `GetAllPrices`.
