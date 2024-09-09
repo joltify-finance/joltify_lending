@@ -22,10 +22,17 @@ type AuthBankGenesisBuilder struct {
 }
 
 // NewAuthBankGenesisBuilder creates a AuthBankGenesisBuilder containing default genesis states.
-func NewAuthBankGenesisBuilder() *AuthBankGenesisBuilder {
+func NewAuthBankGenesisBuilder(authgen *authtypes.GenesisState, bankgen *banktypes.GenesisState) *AuthBankGenesisBuilder {
+	if authgen == nil {
+		return &AuthBankGenesisBuilder{
+			AuthGenesis: *authtypes.DefaultGenesisState(),
+			BankGenesis: *banktypes.DefaultGenesisState(),
+		}
+	}
+
 	return &AuthBankGenesisBuilder{
-		AuthGenesis: *authtypes.DefaultGenesisState(),
-		BankGenesis: *banktypes.DefaultGenesisState(),
+		AuthGenesis: *authgen,
+		BankGenesis: *bankgen,
 	}
 }
 

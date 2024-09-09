@@ -58,17 +58,17 @@ func validateInnerMsg(msg sdk.Msg) error {
 	for _, inner := range innerMsgs {
 		// 1. unsupported msgs.
 		if IsUnsupportedMsg(inner) {
-			return fmt.Errorf("Invalid nested msg: unsupported msg type")
+			return fmt.Errorf("invalid nested msg: unsupported msg type")
 		}
 
 		// 2. app-injected msgs.
 		if IsAppInjectedMsg(inner) {
-			return fmt.Errorf("Invalid nested msg: app-injected msg type")
+			return fmt.Errorf("invalid nested msg: app-injected msg type")
 		}
 
 		// 3. double-nested msgs.
 		if IsNestedMsg(inner) {
-			return fmt.Errorf("Invalid nested msg: double-nested msg type")
+			return fmt.Errorf("invalid nested msg: double-nested msg type")
 		}
 
 		// 4. Reject nested dydxprotocol messages in `MsgExec`.
@@ -79,7 +79,7 @@ func validateInnerMsg(msg sdk.Msg) error {
 				metrics.GetLabelForStringValue(metrics.InnerMsg, sdk.MsgTypeURL(inner)),
 			)
 			if IsDydxMsg(inner) {
-				return fmt.Errorf("Invalid nested msg for MsgExec: dydx msg type")
+				return fmt.Errorf("invalid nested msg for MsgExec: dydx msg type")
 			}
 		}
 

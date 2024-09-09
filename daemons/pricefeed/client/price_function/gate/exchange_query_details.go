@@ -5,11 +5,9 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 )
 
-var (
-	GateDetails = types.ExchangeQueryDetails{
-		Exchange:      exchange_common.EXCHANGE_ID_GATE,
-		Url:           "https://api.gateio.ws/api/v4/spot/tickers",
-		PriceFunction: GatePriceFunction,
-		IsMultiMarket: true,
-	}
-)
+var GateDetails = types.ExchangeQueryDetails{
+	Exchange:      exchange_common.EXCHANGE_ID_GATE,
+	Url:           "https://api.gateio.ws/api/v4/spot/tickers",
+	PriceFunction: GatePriceFunction,
+	IsMultiMarket: true,
+}

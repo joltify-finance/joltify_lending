@@ -6,7 +6,6 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -28,7 +27,7 @@ func TestAddInvestorTestSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *addInvestorSuite) SetupTest() {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	lapp, k, _, _, _, wctx := setupMsgServer(suite.T())

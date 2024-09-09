@@ -293,8 +293,8 @@ func TestGetAsset_Success(t *testing.T) {
 		)
 		require.True(t, exists)
 		require.Equal(t,
-			nullify.Fill(&item), //nolint:staticcheck
-			nullify.Fill(&rst),  //nolint:staticcheck
+			nullify.Fill(&item), //nolint:static-check
+			nullify.Fill(&rst),  //nolint:static-check
 		)
 	}
 }
@@ -313,8 +313,8 @@ func TestGetAllAssets_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	require.ElementsMatch(t,
-		nullify.Fill(items),                    //nolint:staticcheck
-		nullify.Fill(keeper.GetAllAssets(ctx)), //nolint:staticcheck
+		nullify.Fill(items),                    //nolint:static-check
+		nullify.Fill(keeper.GetAllAssets(ctx)), //nolint:static-check
 	)
 }
 

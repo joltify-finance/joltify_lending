@@ -17,7 +17,7 @@ func (k Keeper) UnsafeMigrateOrderExpirationState(ctx sdk.Context) {
 
 	prefixStore := prefix.NewStore(
 		store,
-		[]byte(types.LegacyStatefulOrdersTimeSlicePrefix), //nolint:staticcheck
+		[]byte(types.LegacyStatefulOrdersTimeSlicePrefix), //nolint
 	)
 	it := prefixStore.Iterator(nil, nil)
 	defer it.Close()
@@ -52,7 +52,7 @@ func (k Keeper) LegacySetStatefulOrdersTimeSliceInState(
 	b := k.cdc.MustMarshal(&statefulOrderPlacement)
 	store := prefix.NewStore(
 		ctx.KVStore(k.storeKey),
-		[]byte(types.LegacyStatefulOrdersTimeSlicePrefix), //nolint:staticcheck
+		[]byte(types.LegacyStatefulOrdersTimeSlicePrefix), //nolint
 	)
 	store.Set(
 		sdk.FormatTimeBytes(goodTilBlockTime),

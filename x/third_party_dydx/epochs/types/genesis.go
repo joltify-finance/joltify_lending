@@ -42,7 +42,7 @@ func (gs GenesisState) Validate() error {
 	epochInfoIndexMap := make(map[string]struct{})
 
 	for _, epochInfo := range gs.EpochInfoList {
-		index := string(epochInfo.Name)
+		index := epochInfo.Name
 		if _, ok := epochInfoIndexMap[index]; ok {
 			return fmt.Errorf("duplicated index for epochInfo")
 		}

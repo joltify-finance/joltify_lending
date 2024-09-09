@@ -78,7 +78,7 @@ func MustScaleOrder[
 		clobPairId = v.GetClobPairId()
 		msgPlaceOrder = *clobtypes.NewMsgPlaceOrder(v)
 	default:
-		panic(fmt.Errorf("Unknown order type %T to get order", order))
+		panic(fmt.Errorf("unknown order type %T to get order", order))
 	}
 
 	// Find the clob pair based upon the clobPairSrc of the clob information passed in.
@@ -91,17 +91,16 @@ func MustScaleOrder[
 		if hasClobPair, ok := clobPairs[clobPairId]; ok {
 			clobPair = hasClobPair
 		} else {
-			panic(fmt.Errorf("Clob not found in genesis doc for clob id %d", clobPairId))
+			panic(fmt.Errorf("clob not found in genesis doc for clob id %d", clobPairId))
 		}
 	default:
-		panic(fmt.Errorf("Unknown source type %T to get clob pair", clobPairSrc))
+		panic(fmt.Errorf("unknown source type %T to get clob pair", clobPairSrc))
 	}
 
 	// Scale the order based upon the quantums and subticks passed in.
-	msgPlaceOrder.Order.Quantums = msgPlaceOrder.Order.Quantums * clobPair.StepBaseQuantums
-	msgPlaceOrder.Order.Subticks = msgPlaceOrder.Order.Subticks * uint64(clobPair.SubticksPerTick)
-	msgPlaceOrder.Order.ConditionalOrderTriggerSubticks = msgPlaceOrder.Order.ConditionalOrderTriggerSubticks *
-		uint64(clobPair.SubticksPerTick)
+	msgPlaceOrder.Order.Quantums *= clobPair.StepBaseQuantums
+	msgPlaceOrder.Order.Subticks *= uint64(clobPair.SubticksPerTick)
+	msgPlaceOrder.Order.ConditionalOrderTriggerSubticks *= uint64(clobPair.SubticksPerTick)
 
 	// Return a type that matches what the user passed in for the order type.
 	switch any(order).(type) {
@@ -110,7 +109,7 @@ func MustScaleOrder[
 	case clobtypes.Order:
 		return any(msgPlaceOrder.Order).(OrderT)
 	default:
-		panic(fmt.Errorf("Unable to convert to %T to %T", clobtypes.MsgPlaceOrder{}, order))
+		panic(fmt.Errorf("unable to convert to %T to %T", clobtypes.MsgPlaceOrder{}, order))
 	}
 }
 

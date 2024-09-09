@@ -18,7 +18,7 @@ const (
 	// It's set to a larger amount such that the transaction never runs out of gas.
 	TestGasLimit = 1_000_000
 	// TestNativeTokenDenom is the denom of the native token used for testing.
-	TestNativeTokenDenom = "adv4tnt"
+	TestNativeTokenDenom = "ujolt"
 )
 
 var (

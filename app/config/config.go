@@ -64,7 +64,7 @@ func SetAddressPrefixes() {
 // This is provided for compatibility between protobuf and amino implementations.
 type EncodingConfig struct {
 	InterfaceRegistry types.InterfaceRegistry
-	Marshaler         codec.Codec
+	Codec             codec.Codec
 	TxConfig          client.TxConfig
 	Amino             *codec.LegacyAmino
 }
@@ -84,11 +84,11 @@ func getLegacyMsgSignerFn(path []string) func(msg proto.Message) ([][]byte, erro
 		for _, p := range path[:len(path)-1] {
 			fieldDesc := m.Descriptor().Fields().ByName(protoreflect.Name(p))
 			if fieldDesc.Kind() != protoreflect.MessageKind {
-				return nil, fmt.Errorf("Expected for field %s to be Message type in path %+v for msg %+v.", p, path, msg)
+				return nil, fmt.Errorf("expected for field %s to be Message type in path %+v for msg %+v", p, path, msg)
 			}
 			v := m.Get(fieldDesc)
 			if !v.IsValid() {
-				return nil, fmt.Errorf("Expected for field %s to be populated in path %+v for msg %+v.", p, path, msg)
+				return nil, fmt.Errorf("expected for field %s to be populated in path %+v for msg %+v", p, path, msg)
 			}
 			m = v.Message()
 		}
@@ -96,7 +96,7 @@ func getLegacyMsgSignerFn(path []string) func(msg proto.Message) ([][]byte, erro
 		fieldDesc := m.Descriptor().Fields().ByName(protoreflect.Name(path[len(path)-1]))
 		if fieldDesc.Kind() != protoreflect.StringKind {
 			return nil, fmt.Errorf(
-				"Expected for final field %s to be String type in path %+v for msg %+v.",
+				"expected for final field %s to be String type in path %+v for msg %+v",
 				path[len(path)-1],
 				path,
 				msg,
@@ -117,6 +117,7 @@ func MakeEncodingConfig() EncodingConfig {
 	// https://github.com/cosmos/cosmos-sdk/issues/18722 is fixed, replace this with the cosmos.msg.v1.signing
 	// annotation on the protos.
 
+	// fixme do we need to update it??
 	customerSigner := make(map[protoreflect.FullName]signing.GetSignersFunc)
 
 	customerSigner["dydxprotocol.bridge.MsgAcknowledgeBridges"] = noSigners
@@ -161,7 +162,7 @@ func MakeEncodingConfig() EncodingConfig {
 
 	return EncodingConfig{
 		InterfaceRegistry: interfaceRegistry,
-		Marshaler:         marshaler,
+		Codec:             marshaler,
 		TxConfig:          txCfg,
 		Amino:             legacyAmino,
 	}

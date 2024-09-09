@@ -41,5 +41,12 @@ func MustGetOnlySignerAddress(cdc codec.Codec, msg sdk.Msg) string {
 	if err != nil {
 		panic(err)
 	}
-	return signer
+
+	v, err := module.InterfaceRegistry.SigningContext().AddressCodec().StringToBytes(signer)
+	if err != nil {
+		panic(err)
+	}
+
+	ad := sdk.AccAddress(v)
+	return ad.String()
 }

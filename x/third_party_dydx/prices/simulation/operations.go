@@ -21,7 +21,7 @@ import (
 
 // Simulation operation weights constants
 const (
-	opWeightMsgUpdateMarketPrices = "op_weight_msg_update_market_prices"
+	opWeightMsgUpdateMarketPrices = "op_weight_msg_update_market_prices" //nolint
 
 	defaultWeightMsgUpdateMarketPrices int = 100
 )

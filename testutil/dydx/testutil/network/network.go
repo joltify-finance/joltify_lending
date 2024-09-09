@@ -135,7 +135,7 @@ func DefaultConfig(options *NetworkConfigOptions) network.Config {
 	encoding := appconfig.MakeEncodingConfig()
 
 	return network.Config{
-		Codec:             encoding.Marshaler,
+		Codec:             encoding.Codec,
 		TxConfig:          encoding.TxConfig,
 		LegacyAmino:       encoding.Amino,
 		InterfaceRegistry: encoding.InterfaceRegistry,
@@ -157,7 +157,7 @@ func DefaultConfig(options *NetworkConfigOptions) network.Config {
 				baseapp.SetChainID("dydxprotocol"),
 			)
 		},
-		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),
+		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Codec),
 		TimeoutCommit:   2 * time.Second,
 		ChainID:         "dydxprotocol",
 		NumValidators:   1,
@@ -198,7 +198,7 @@ func NewTestNetworkFixture() network.TestFixture {
 
 	return network.TestFixture{
 		AppConstructor: appCtr,
-		GenesisState:   app.ModuleBasics.DefaultGenesis(dydxApp.EncodingConfig().Marshaler),
+		GenesisState:   app.ModuleBasics.DefaultGenesis(dydxApp.EncodingConfig().Codec),
 		EncodingConfig: testutil.TestEncodingConfig{
 			InterfaceRegistry: dydxApp.InterfaceRegistry(),
 			Codec:             dydxApp.AppCodec(),

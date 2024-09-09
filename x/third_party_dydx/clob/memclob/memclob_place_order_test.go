@@ -237,22 +237,25 @@ func TestPlaceOrder_AddOrderToOrderbook(t *testing.T) {
 			expectedOrderStatus:    types.Success,
 			expectedToReplaceOrder: true,
 		},
+		// george we need to swap the order as the hash of the order is reversed compared to the orignal dydx order
 		"Replacing an order fails if OrderHash is less than existing order but GoodTilBlock is the same": {
-			existingOrders: []types.MatchableOrder{
-				&constants.Order_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20,
-			},
-
-			order: constants.Order_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
-
-			expectedErr:            types.ErrInvalidReplacement,
-			expectedToReplaceOrder: false,
-		},
-		"Replacing an order succeeds if OrderHash is greater than existing order but GoodTilBlock is the same": {
 			existingOrders: []types.MatchableOrder{
 				&constants.Order_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
 			},
 
 			order: constants.Order_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20,
+
+			expectedErr:            types.ErrInvalidReplacement,
+			expectedToReplaceOrder: false,
+		},
+
+		// george we need to swap the order as the hash of the order is reversed compared to the orignal dydx order
+		"Replacing an order succeeds if OrderHash is greater than existing order but GoodTilBlock is the same": {
+			existingOrders: []types.MatchableOrder{
+				&constants.Order_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20,
+			},
+
+			order: constants.Order_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
 
 			collateralizationCheck: satypes.Success,
 			expectedOrderStatus:    types.Success,
@@ -298,7 +301,7 @@ func TestPlaceOrder_AddOrderToOrderbook(t *testing.T) {
 				addOrderToOrderbookSize,
 				tc.expectedErr,
 				collatCheckFailures,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Mark the current order as canceled if necessary.
@@ -1064,7 +1067,7 @@ func TestPlaceOrder_MatchOrders(t *testing.T) {
 				addOrderToOrderbookSize,
 				nil,
 				map[int]map[satypes.SubaccountId]satypes.UpdateResult{},
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Run the test case and verify expectations.
@@ -2237,7 +2240,7 @@ func TestPlaceOrder_MatchOrders_PreexistingMatches(t *testing.T) {
 				addOrderToOrderbookSize,
 				tc.expectedErr,
 				map[int]map[satypes.SubaccountId]satypes.UpdateResult{},
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Run the test case and verify expectations.
@@ -2728,7 +2731,7 @@ func TestPlaceOrder_MatchOrders_CollatCheckFailure(t *testing.T) {
 				addOrderToOrderbookSize,
 				nil,
 				tc.collateralizationCheckFailures,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Run the test case and verify expectations.
@@ -3228,7 +3231,7 @@ func TestPlaceOrder_PostOnly(t *testing.T) {
 				addOrderToOrderbookSize,
 				tc.expectedErr,
 				tc.collateralizationCheckFailures,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Run the test case and verify expectations.
@@ -3372,7 +3375,7 @@ func TestPlaceOrder_ImmediateOrCancel(t *testing.T) {
 				addOrderToOrderbookSize,
 				nil,
 				tc.collateralizationCheckFailures,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Run the test case and verify expectations.
@@ -4029,7 +4032,7 @@ func TestPlaceOrder_FillOrKill(t *testing.T) {
 				return big.NewInt(tc.statePositionSizes[subaccountId][clobPairId.ToUint32()])
 			}
 			if tc.statePositionSizes == nil {
-				getStatePositionFn = constants.GetStatePosition_ZeroPositionSize
+				getStatePositionFn = constants.GetstatepositionZeropositionsize
 			}
 
 			memclob, fakeMemClobKeeper, expectedNumCollateralizationChecks, numCollateralChecks := placeOrderTestSetup(

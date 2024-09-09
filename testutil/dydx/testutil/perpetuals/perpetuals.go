@@ -87,7 +87,7 @@ func MustHumanSizeToBaseQuantums(
 	atomicResolution int32,
 ) (baseQuantums uint64) {
 	// Parse the humanSize string to a big rational
-	ratValue, ok := new(big.Rat).SetString(humanSize)
+	ratValue, ok := new(big.Rat).SetString(humanSize) //nolint
 	if !ok {
 		panic("Failed to parse humanSize to big.Rat")
 	}

@@ -167,7 +167,7 @@ func (msgSender *IndexerMessageSenderKafka) handleSuccesses() {
 			msgSender.inputsDone.Done()
 			return
 		}
-		msgSender.successes = msgSender.successes + 1
+		msgSender.successes++
 		telemetry.IncrCounter(1, types.ModuleName, metrics.MessageSendSuccess)
 	}
 }
@@ -189,7 +189,7 @@ func (msgSender *IndexerMessageSenderKafka) handleErrors() {
 			"error",
 			err.Err,
 		)
-		msgSender.errors = msgSender.errors + 1
+		msgSender.errors++
 		telemetry.IncrCounter(1, types.ModuleName, metrics.MessageSendError)
 	}
 }

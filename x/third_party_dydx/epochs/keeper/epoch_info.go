@@ -66,7 +66,7 @@ func (k Keeper) MaybeStartNextEpoch(ctx sdk.Context, id types.EpochInfoName) (ne
 			// genesis `NextTick` and the nearest time in future after current block time,
 			// rounded up.
 			durationMultiplier := (blockTime-epoch.NextTick)/epoch.Duration + 1
-			epoch.NextTick = epoch.NextTick + epoch.Duration*durationMultiplier
+			epoch.NextTick += epoch.Duration * durationMultiplier
 		}
 		k.setEpochInfo(ctx, epoch)
 	}
@@ -79,7 +79,7 @@ func (k Keeper) MaybeStartNextEpoch(ctx sdk.Context, id types.EpochInfoName) (ne
 	// Starts next epoch.
 	currentTick := epoch.NextTick
 
-	epoch.NextTick = epoch.NextTick + epoch.Duration
+	epoch.NextTick += epoch.Duration
 	epoch.CurrentEpoch++
 	epoch.CurrentEpochStartBlock = lib.MustConvertIntegerToUint32(ctx.BlockHeight())
 	k.setEpochInfo(ctx, epoch)

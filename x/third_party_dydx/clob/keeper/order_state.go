@@ -129,10 +129,10 @@ func (k Keeper) GetPruneableOrdersStore(ctx sdk.Context, height uint32) prefix.S
 // AddOrdersForPruning creates or updates `orderIds` to state for potential future pruning from state.
 func (k Keeper) AddOrdersForPruning(ctx sdk.Context, orderIds []types.OrderId, prunableBlockHeight uint32) {
 	store := k.GetPruneableOrdersStore(ctx, prunableBlockHeight)
-	for _, orderId := range orderIds {
+	for i, orderId := range orderIds {
 		store.Set(
 			orderId.ToStateKey(),
-			k.cdc.MustMarshal(&orderId),
+			k.cdc.MustMarshal(&orderIds[i]),
 		)
 	}
 }
@@ -228,7 +228,7 @@ func (k Keeper) PruneOrdersForBlockHeight(ctx sdk.Context, blockHeight uint32) (
 func (k Keeper) MigratePruneableOrders(ctx sdk.Context) {
 	store := prefix.NewStore(
 		ctx.KVStore(k.storeKey),
-		[]byte(types.LegacyBlockHeightToPotentiallyPrunableOrdersPrefix), // nolint:staticcheck
+		[]byte(types.LegacyBlockHeightToPotentiallyPrunableOrdersPrefix), //nolint
 	)
 	it := store.Iterator(nil, nil)
 	defer it.Close()

@@ -62,7 +62,7 @@ func isCrossingIndexPrice(
 
 // isCrossingOldPrice returns true if the old price is between the index price and the new
 // price, noninclusive. Otherwise, returns false.
-func isCrossingOldPrice(
+func isCrossingOldPrice( //nolint
 	priceTuple PriceTuple,
 ) bool {
 	return isCrossingReferencePrice(priceTuple.IndexPrice, priceTuple.OldPrice, priceTuple.NewPrice)

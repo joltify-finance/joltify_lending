@@ -403,7 +403,7 @@ func TestPlacePerpetualLiquidation_Success(t *testing.T) {
 				satypes.BaseQuantums(0),
 				nil,
 				map[int]map[satypes.SubaccountId]satypes.UpdateResult{},
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Run the test case and verify expectations.
@@ -534,7 +534,7 @@ func TestPlacePerpetualLiquidation_CollatCheckFailure(t *testing.T) {
 				satypes.BaseQuantums(0),
 				nil,
 				tc.collateralizationCheckFailures,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 			)
 
 			// Run the test case and verify expectations.

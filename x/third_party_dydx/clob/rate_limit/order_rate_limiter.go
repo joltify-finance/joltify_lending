@@ -51,7 +51,7 @@ func NewPlaceCancelOrderRateLimiter(config types.BlockRateLimitConfiguration) Ra
 	r := placeAndCancelOrderRateLimiter{
 		rateLimitedAccounts: make(map[string]bool, 0),
 	}
-	if len(config.MaxShortTermOrdersAndCancelsPerNBlocks) == 0 {
+	if len(config.MaxShortTermOrdersAndCancelsPerNBlocks) == 0 { //nolint
 		r.checkStateShortTermOrderPlaceCancelRateLimiter = NewNoOpRateLimiter[string]()
 	} else if len(config.MaxShortTermOrdersAndCancelsPerNBlocks) == 1 &&
 		config.MaxShortTermOrdersAndCancelsPerNBlocks[0].NumBlocks == 1 {
@@ -65,7 +65,7 @@ func NewPlaceCancelOrderRateLimiter(config types.BlockRateLimitConfiguration) Ra
 			config.MaxShortTermOrdersAndCancelsPerNBlocks,
 		)
 	}
-	if len(config.MaxStatefulOrdersPerNBlocks) == 0 {
+	if len(config.MaxStatefulOrdersPerNBlocks) == 0 { //nolint
 		r.checkStateStatefulOrderRateLimiter = NewNoOpRateLimiter[string]()
 	} else if len(config.MaxStatefulOrdersPerNBlocks) == 1 &&
 		config.MaxStatefulOrdersPerNBlocks[0].NumBlocks == 1 {

@@ -161,7 +161,7 @@ func (p PriceEncoderImpl) convertPriceUpdate(marketPriceTimestamp *types.MarketP
 		// If the index price is not valid due to insufficient pricing data, return an error.
 		if numPricesMedianized < int(conversionDetails.AdjustByMarketDetails.MinExchanges) {
 			err = fmt.Errorf(
-				"Could not retrieve index price for market %v: "+
+				"could not retrieve index price for market %v: "+
 					"expected median price from %v exchanges, but got %v exchanges",
 				conversionDetails.AdjustByMarketDetails.MarketId,
 				conversionDetails.AdjustByMarketDetails.MinExchanges,
@@ -222,9 +222,8 @@ func (p PriceEncoderImpl) convertPriceUpdate(marketPriceTimestamp *types.MarketP
 func (p *PriceEncoderImpl) UpdatePrice(marketPriceTimestamp *types.MarketPriceTimestamp) {
 	// Convert price.
 	price, err := p.convertPriceUpdate(marketPriceTimestamp)
-
 	if err != nil {
-		var logMethod = p.logger.Info
+		logMethod := p.logger.Info
 		// When the price encoder starts, we expect that some conversions will fail as we are filling the cache with
 		// enough valid prices to generate a valid index price for our adjustment markets. In order to avoid spurious
 		// alerts, only emit error logs if the grace period has passed.
@@ -326,7 +325,7 @@ func (p *PriceEncoderImpl) ProcessPriceFetcherResponse(response *price_fetcher.P
 				response.Err,
 				p.GetExchangeId(),
 			)
-		} else if errors.Is(response.Err, constants.RateLimitingError) {
+		} else if errors.Is(response.Err, constants.ErrRateLimiting) {
 			// Log an error if there are rate limiting errors in the ingested buffered channel prices.
 			p.logger.Error(
 				FailedToUpdateExchangePrice,
@@ -361,7 +360,7 @@ func (p *PriceEncoderImpl) ProcessPriceFetcherResponse(response *price_fetcher.P
 				response.Err,
 				p.GetExchangeId(),
 			)
-		} else if price_function.IsGenericExchangeError(response.Err) {
+		} else if price_function.IsGenericExchangeError(response.Err) { //nolint
 			// Log info if there are 5xx errors in the ingested buffered channel prices. These responses
 			// may have come back with an acceptable status code, but the response body contents indicate
 			// that the exchange is experiencing an internal error.

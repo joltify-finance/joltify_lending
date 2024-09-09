@@ -11,7 +11,6 @@ import (
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/spv"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
@@ -82,7 +81,7 @@ func lsetupMockPool(suite *mockBurnSuite) {
 
 // The default state used by each test
 func (suite *mockBurnSuite) SetupTest() {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	lapp, k, nftKeeper, _, auctionKeeper, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)

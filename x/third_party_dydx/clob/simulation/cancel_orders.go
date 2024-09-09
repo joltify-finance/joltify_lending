@@ -80,7 +80,7 @@ func SimulateMsgCancelOrder(
 		proposer, _ := simtypes.FindAccount(accs, subaccountId.MustGetAccAddress())
 
 		// By default, use a random GoodTilBlock that would successfully cancel the order.
-		var goodTilBlock uint32 = uint32(simtypes.RandIntBetween(
+		goodTilBlock := uint32(simtypes.RandIntBetween(
 			r,
 			int(openOrderToCancel.GetGoodTilBlock()),
 			int(openOrderToCancel.GetGoodTilBlock()+types.ShortBlockWindow),

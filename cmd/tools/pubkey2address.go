@@ -9,7 +9,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/app/config"
 )
 
-//func main() {
+// func main() {
 //	encoded := os.Args[1]
 //	decoded, err := base64.StdEncoding.DecodeString(encoded)
 //	if err != nil {
@@ -43,7 +43,7 @@ func main() {
 
 	for _, el := range addr {
 		valaddr := types.ValAddress(el.Bytes())
-		fmt.Printf(">>>>%v\n", el.String(), valaddr.String())
+		fmt.Printf(">>>>%v--%v\n", el.String(), valaddr.String())
 
 	}
 }

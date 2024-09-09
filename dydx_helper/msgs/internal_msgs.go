@@ -13,7 +13,7 @@ import (
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
 	ibctransfer "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:staticcheck
+	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:static-check
 	ibcconn "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	"github.com/joltify-finance/joltify_lending/lib"
 	blocktime "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
@@ -104,83 +104,83 @@ var (
 	// Custom modules
 	InternalMsgSamplesDydxCustom = map[string]sdk.Msg{
 		// blocktime
-		"/dydxprotocol.blocktime.MsgUpdateDowntimeParams":         &blocktime.MsgUpdateDowntimeParams{},
-		"/dydxprotocol.blocktime.MsgUpdateDowntimeParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.blocktime.MsgUpdateDowntimeParams":         &blocktime.MsgUpdateDowntimeParams{},
+		"/joltify.third_party.dydxprotocol.blocktime.MsgUpdateDowntimeParamsResponse": nil,
 
 		// bridge
-		"/dydxprotocol.bridge.MsgCompleteBridge":              &bridge.MsgCompleteBridge{},
-		"/dydxprotocol.bridge.MsgCompleteBridgeResponse":      nil,
-		"/dydxprotocol.bridge.MsgUpdateEventParams":           &bridge.MsgUpdateEventParams{},
-		"/dydxprotocol.bridge.MsgUpdateEventParamsResponse":   nil,
-		"/dydxprotocol.bridge.MsgUpdateProposeParams":         &bridge.MsgUpdateProposeParams{},
-		"/dydxprotocol.bridge.MsgUpdateProposeParamsResponse": nil,
-		"/dydxprotocol.bridge.MsgUpdateSafetyParams":          &bridge.MsgUpdateSafetyParams{},
-		"/dydxprotocol.bridge.MsgUpdateSafetyParamsResponse":  nil,
+		"/joltify.third_party.dydxprotocol.bridge.MsgCompleteBridge":              &bridge.MsgCompleteBridge{},
+		"/joltify.third_party.dydxprotocol.bridge.MsgCompleteBridgeResponse":      nil,
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateEventParams":           &bridge.MsgUpdateEventParams{},
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateEventParamsResponse":   nil,
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateProposeParams":         &bridge.MsgUpdateProposeParams{},
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateProposeParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateSafetyParams":          &bridge.MsgUpdateSafetyParams{},
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateSafetyParamsResponse":  nil,
 
 		// clob
-		"/dydxprotocol.clob.MsgCreateClobPair":                             &clob.MsgCreateClobPair{},
-		"/dydxprotocol.clob.MsgCreateClobPairResponse":                     nil,
-		"/dydxprotocol.clob.MsgUpdateBlockRateLimitConfiguration":          &clob.MsgUpdateBlockRateLimitConfiguration{},
-		"/dydxprotocol.clob.MsgUpdateBlockRateLimitConfigurationResponse":  nil,
-		"/dydxprotocol.clob.MsgUpdateClobPair":                             &clob.MsgUpdateClobPair{},
-		"/dydxprotocol.clob.MsgUpdateClobPairResponse":                     nil,
-		"/dydxprotocol.clob.MsgUpdateEquityTierLimitConfiguration":         &clob.MsgUpdateEquityTierLimitConfiguration{},
-		"/dydxprotocol.clob.MsgUpdateEquityTierLimitConfigurationResponse": nil,
-		"/dydxprotocol.clob.MsgUpdateLiquidationsConfig":                   &clob.MsgUpdateLiquidationsConfig{},
-		"/dydxprotocol.clob.MsgUpdateLiquidationsConfigResponse":           nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgCreateClobPair":                             &clob.MsgCreateClobPair{},
+		"/joltify.third_party.dydxprotocol.clob.MsgCreateClobPairResponse":                     nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateBlockRateLimitConfiguration":          &clob.MsgUpdateBlockRateLimitConfiguration{},
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateBlockRateLimitConfigurationResponse":  nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateClobPair":                             &clob.MsgUpdateClobPair{},
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateClobPairResponse":                     nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateEquityTierLimitConfiguration":         &clob.MsgUpdateEquityTierLimitConfiguration{},
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateEquityTierLimitConfigurationResponse": nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateLiquidationsConfig":                   &clob.MsgUpdateLiquidationsConfig{},
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateLiquidationsConfigResponse":           nil,
 
 		// delaymsg
-		"/dydxprotocol.delaymsg.MsgDelayMessage":         &delaymsg.MsgDelayMessage{},
-		"/dydxprotocol.delaymsg.MsgDelayMessageResponse": nil,
+		"/joltify.third_party.dydxprotocol.delaymsg.MsgDelayMessage":         &delaymsg.MsgDelayMessage{},
+		"/joltify.third_party.dydxprotocol.delaymsg.MsgDelayMessageResponse": nil,
 
 		// feetiers
-		"/dydxprotocol.feetiers.MsgUpdatePerpetualFeeParams":         &feetiers.MsgUpdatePerpetualFeeParams{},
-		"/dydxprotocol.feetiers.MsgUpdatePerpetualFeeParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.feetiers.MsgUpdatePerpetualFeeParams":         &feetiers.MsgUpdatePerpetualFeeParams{},
+		"/joltify.third_party.dydxprotocol.feetiers.MsgUpdatePerpetualFeeParamsResponse": nil,
 
 		// govplus
-		"/dydxprotocol.govplus.MsgSlashValidator":         &govplus.MsgSlashValidator{},
-		"/dydxprotocol.govplus.MsgSlashValidatorResponse": nil,
+		"/joltify.third_party.dydxprotocol.govplus.MsgSlashValidator":         &govplus.MsgSlashValidator{},
+		"/joltify.third_party.dydxprotocol.govplus.MsgSlashValidatorResponse": nil,
 
 		// perpetuals
-		"/dydxprotocol.perpetuals.MsgCreatePerpetual":               &perpetuals.MsgCreatePerpetual{},
-		"/dydxprotocol.perpetuals.MsgCreatePerpetualResponse":       nil,
-		"/dydxprotocol.perpetuals.MsgSetLiquidityTier":              &perpetuals.MsgSetLiquidityTier{},
-		"/dydxprotocol.perpetuals.MsgSetLiquidityTierResponse":      nil,
-		"/dydxprotocol.perpetuals.MsgUpdateParams":                  &perpetuals.MsgUpdateParams{},
-		"/dydxprotocol.perpetuals.MsgUpdateParamsResponse":          nil,
-		"/dydxprotocol.perpetuals.MsgUpdatePerpetualParams":         &perpetuals.MsgUpdatePerpetualParams{},
-		"/dydxprotocol.perpetuals.MsgUpdatePerpetualParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgCreatePerpetual":               &perpetuals.MsgCreatePerpetual{},
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgCreatePerpetualResponse":       nil,
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgSetLiquidityTier":              &perpetuals.MsgSetLiquidityTier{},
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgSetLiquidityTierResponse":      nil,
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdateParams":                  &perpetuals.MsgUpdateParams{},
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdateParamsResponse":          nil,
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdatePerpetualParams":         &perpetuals.MsgUpdatePerpetualParams{},
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdatePerpetualParamsResponse": nil,
 
 		// prices
-		"/dydxprotocol.prices.MsgCreateOracleMarket":         &prices.MsgCreateOracleMarket{},
-		"/dydxprotocol.prices.MsgCreateOracleMarketResponse": nil,
-		"/dydxprotocol.prices.MsgUpdateMarketParam":          &prices.MsgUpdateMarketParam{},
-		"/dydxprotocol.prices.MsgUpdateMarketParamResponse":  nil,
+		"/joltify.third_party.dydxprotocol.prices.MsgCreateOracleMarket":         &prices.MsgCreateOracleMarket{},
+		"/joltify.third_party.dydxprotocol.prices.MsgCreateOracleMarketResponse": nil,
+		"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketParam":          &prices.MsgUpdateMarketParam{},
+		"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketParamResponse":  nil,
 
 		// ratelimit
-		"/dydxprotocol.ratelimit.MsgSetLimitParams":         &ratelimit.MsgSetLimitParams{},
-		"/dydxprotocol.ratelimit.MsgSetLimitParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.ratelimit.MsgSetLimitParams":         &ratelimit.MsgSetLimitParams{},
+		"/joltify.third_party.dydxprotocol.ratelimit.MsgSetLimitParamsResponse": nil,
 
 		// rewards
-		"/dydxprotocol.rewards.MsgUpdateParams":         &rewards.MsgUpdateParams{},
-		"/dydxprotocol.rewards.MsgUpdateParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.rewards.MsgUpdateParams":         &rewards.MsgUpdateParams{},
+		"/joltify.third_party.dydxprotocol.rewards.MsgUpdateParamsResponse": nil,
 
 		// sending
-		"/dydxprotocol.sending.MsgSendFromModuleToAccount":         &sending.MsgSendFromModuleToAccount{},
-		"/dydxprotocol.sending.MsgSendFromModuleToAccountResponse": nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgSendFromModuleToAccount":         &sending.MsgSendFromModuleToAccount{},
+		"/joltify.third_party.dydxprotocol.sending.MsgSendFromModuleToAccountResponse": nil,
 
 		// stats
-		"/dydxprotocol.stats.MsgUpdateParams":         &stats.MsgUpdateParams{},
-		"/dydxprotocol.stats.MsgUpdateParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.stats.MsgUpdateParams":         &stats.MsgUpdateParams{},
+		"/joltify.third_party.dydxprotocol.stats.MsgUpdateParamsResponse": nil,
 
 		// vault
-		"/dydxprotocol.vault.MsgUpdateParams":         &vault.MsgUpdateParams{},
-		"/dydxprotocol.vault.MsgUpdateParamsResponse": nil,
+		"/joltify.third_party.dydxprotocol.vault.MsgUpdateParams":         &vault.MsgUpdateParams{},
+		"/joltify.third_party.dydxprotocol.vault.MsgUpdateParamsResponse": nil,
 
 		// vest
-		"/dydxprotocol.vest.MsgSetVestEntry":            &vest.MsgSetVestEntry{},
-		"/dydxprotocol.vest.MsgSetVestEntryResponse":    nil,
-		"/dydxprotocol.vest.MsgDeleteVestEntry":         &vest.MsgDeleteVestEntry{},
-		"/dydxprotocol.vest.MsgDeleteVestEntryResponse": nil,
+		"/joltify.third_party.dydxprotocol.vest.MsgSetVestEntry":            &vest.MsgSetVestEntry{},
+		"/joltify.third_party.dydxprotocol.vest.MsgSetVestEntryResponse":    nil,
+		"/joltify.third_party.dydxprotocol.vest.MsgDeleteVestEntry":         &vest.MsgDeleteVestEntry{},
+		"/joltify.third_party.dydxprotocol.vest.MsgDeleteVestEntryResponse": nil,
 	}
 )

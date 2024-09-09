@@ -396,8 +396,8 @@ func (k Keeper) GetClobMetadata(
 		// Use the oracle price instead of the mid price if the mid price doesn't exist or
 		// the spread is greater-than-or-equal-to the max spread.
 		if !exist || new(big.Rat).SetFrac(
-			new(big.Int).SetUint64(uint64(bestAsk.Subticks-bestBid.Subticks)),
-			new(big.Int).SetUint64(uint64(bestBid.Subticks)), // Note that bestBid cannot be 0 if exist is true.
+			new(big.Int).SetUint64(bestAsk.Subticks-bestBid.Subticks),
+			new(big.Int).SetUint64(bestBid.Subticks), // Note that bestBid cannot be 0 if exist is true.
 		).Cmp(MAX_SPREAD_BEFORE_FALLING_BACK_TO_ORACLE) >= 0 {
 			metrics.IncrCounterWithLabels(
 				metrics.MevFallbackToOracle,

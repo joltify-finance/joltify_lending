@@ -59,7 +59,7 @@ func (gs GenesisState) Validate() error {
 		if perp.Params.Id != expectedPerpId {
 			return fmt.Errorf("found a gap in perpetual id")
 		}
-		expectedPerpId = expectedPerpId + 1
+		expectedPerpId++
 
 		if len(perp.Params.Ticker) == 0 {
 			return ErrTickerEmptyString
@@ -83,7 +83,7 @@ func (gs GenesisState) Validate() error {
 		if liquidityTier.Id != expectedLiquidityTierId {
 			return fmt.Errorf("found a gap in liquidity tier id")
 		}
-		expectedLiquidityTierId = expectedLiquidityTierId + 1
+		expectedLiquidityTierId++
 
 		if err := liquidityTier.Validate(); err != nil {
 			return err

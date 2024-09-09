@@ -72,7 +72,7 @@ func (eqh *ExchangeQueryHandlerImpl) Query(
 	)
 	// 1) Validate `marketIds` contains at least one id.
 	if len(marketIds) == 0 {
-		return nil, nil, errors.New("At least one marketId must be queried")
+		return nil, nil, errors.New("at least one marketId must be queried")
 	}
 
 	// 2) Convert the list of `marketIds` to tickers that are specific for a given exchange. Create a mapping
@@ -83,11 +83,11 @@ func (eqh *ExchangeQueryHandlerImpl) Query(
 	for _, marketId := range marketIds {
 		config, ok := exchangeConfig.MarketToMarketConfig[marketId]
 		if !ok {
-			return nil, nil, fmt.Errorf("No market config for market: %v", marketId)
+			return nil, nil, fmt.Errorf("no market config for market: %v", marketId)
 		}
 		priceExponent, ok := marketPriceExponent[marketId]
 		if !ok {
-			return nil, nil, fmt.Errorf("No market price exponent for id: %v", marketId)
+			return nil, nil, fmt.Errorf("no market price exponent for id: %v", marketId)
 		}
 
 		tickers = append(tickers, config.Ticker)
@@ -146,7 +146,7 @@ func (eqh *ExchangeQueryHandlerImpl) Query(
 	)
 
 	if response.StatusCode == 429 {
-		return nil, nil, constants.RateLimitingError
+		return nil, nil, constants.ErrRateLimiting
 	}
 
 	// Verify response is not 4xx or 5xx.
@@ -172,7 +172,7 @@ func (eqh *ExchangeQueryHandlerImpl) Query(
 	for ticker, price := range prices {
 		marketId, ok := tickerToMarketId[ticker]
 		if !ok {
-			return nil, nil, fmt.Errorf("Severe unexpected error: no market id for ticker: %v", ticker)
+			return nil, nil, fmt.Errorf("severe unexpected error: no market id for ticker: %v", ticker)
 		}
 
 		marketPriceTimestamp := &types.MarketPriceTimestamp{
@@ -188,7 +188,7 @@ func (eqh *ExchangeQueryHandlerImpl) Query(
 	for ticker, error := range unavailableTickers {
 		marketId, ok := tickerToMarketId[ticker]
 		if !ok {
-			return nil, nil, fmt.Errorf("Severe unexpected error: no market id for ticker: %v", ticker)
+			return nil, nil, fmt.Errorf("severe unexpected error: no market id for ticker: %v", ticker)
 		}
 		unavailableMarkets[marketId] = error
 	}
@@ -197,5 +197,5 @@ func (eqh *ExchangeQueryHandlerImpl) Query(
 }
 
 func CreateRequestUrl(baseUrl string, tickers []string) string {
-	return strings.Replace(baseUrl, "$", strings.Join(tickers, ","), -1)
+	return strings.Replace(baseUrl, "$", strings.Join(tickers, ","), -1) //nolint
 }

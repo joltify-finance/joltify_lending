@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"encoding/binary"
-	"fmt"
 	"math"
 
 	"cosmossdk.io/store/prefix"
@@ -39,15 +38,6 @@ func (k Keeper) MustSetProcessProposerMatchesEvents(
 	ctx sdk.Context,
 	processProposerMatchesEvents types.ProcessProposerMatchesEvents,
 ) {
-	all := k.subaccountsKeeper.GetAllSubaccount(ctx)
-
-	for _, el := range all {
-		ac := el
-		if el.Id.Owner == "jolt1kwk8equv4vtw4p4fq8hwn45h3e5jj95sj40r8a" || el.Id.Owner == "jolt1llhlxnx3qua7swhhnzjn3llt3xycqt2jxhyrwq" {
-			fmt.Printf(">>>before begin block@##############>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
-		}
-	}
-
 	lib.AssertDeliverTxMode(ctx)
 
 	if err := processProposerMatchesEvents.ValidateProcessProposerMatchesEvents(ctx); err != nil {

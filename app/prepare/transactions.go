@@ -88,13 +88,13 @@ func (t *PrepareProposalTxs) AddOtherTxs(allTxs [][]byte) error {
 	for _, tx := range allTxs {
 		txSize := uint64(len(tx))
 		if txSize == 0 {
-			return fmt.Errorf("Cannot add zero length tx: %v", tx)
+			return fmt.Errorf("cannot add zero length tx: %v", tx)
 		}
 		bytesToAdd += txSize
 	}
 
 	if bytesToAdd == 0 { // no new txs, so return early.
-		return errors.New("No txs to add.")
+		return errors.New("no txs to add")
 	}
 
 	if err := t.UpdateUsedBytes(0, bytesToAdd); err != nil {
@@ -112,12 +112,12 @@ func (t *PrepareProposalTxs) UpdateUsedBytes(
 	bytesToAdd uint64,
 ) error {
 	if t.UsedBytes < bytesToRemove {
-		return errors.New("Result cannot be negative")
+		return errors.New("result cannot be negative")
 	}
 
 	finalBytes := t.UsedBytes - bytesToRemove + bytesToAdd
 	if finalBytes > t.MaxBytes {
-		return fmt.Errorf("Exceeds max: max=%d, used=%d, adding=%d", t.MaxBytes, t.UsedBytes, bytesToAdd)
+		return fmt.Errorf("exceeds max: max=%d, used=%d, adding=%d", t.MaxBytes, t.UsedBytes, bytesToAdd)
 	}
 
 	t.UsedBytes = finalBytes

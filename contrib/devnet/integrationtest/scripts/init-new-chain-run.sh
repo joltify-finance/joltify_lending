@@ -30,6 +30,8 @@ BINARY=joltify
 chainID="joltify_1729-1"
 $BINARY init validator --chain-id $chainID --trace
 
+cp ./pricefeed_exchange_config.toml $DATA/config/pricefeed_exchange_config.toml
+
 #cp  $DATA/config/genesis.json /home/yb/development/joltify/joltify_lending/contrib/gen_raw.json
 
 # hacky enable of rest api
@@ -52,6 +54,8 @@ sed -i -E 's|tcp://127.0.0.1:26657|tcp://0.0.0.0:26657|g' $DATA/config/config.to
 sed -i -E 's|max_subscription_clients = 100|max_subscription_clients = 1000|g' $DATA/config/config.toml
 
 sed -i -E 's|cors_allowed_origins = \[\]|cors_allowed_origins = \[\"*\"\]|g' $DATA/config/config.toml
+
+sed -i -E 's|timeout_commit = "500ms"|timeout_commit = "5s"|g' $DATA/config/config.toml
 
 # Set evm tracer to json
 sed -in-place='' 's/tracer = ""/tracer = "json"/g' $DATA/config/app.toml
@@ -105,7 +109,7 @@ printf "$relayerMnemonic\n" | $BINARY keys add $relayerKeyName  --recover
 $BINARY genesis add-genesis-account $relayerKeyName 1000000000ujolt
 
 
-for i in {1..7}
+for i in {1..100}
 do
   a=$(joltify keys add key_$i --keyring-backend test --output json)
   # get the address from the json
@@ -124,6 +128,7 @@ $BINARY config  set app minimum-gas-prices "0ujolt"
 # Create a delegation tx for the validator and add to genesis
 $BINARY genesis gentx $validatorKeyName 1000000000ujolt --keyring-backend test --chain-id $chainID
 $BINARY genesis collect-gentxs
+
 
 # Replace stake with ujolt
 sed -in-place='' 's/stake/ujolt/g' $DATA/config/genesis.json

@@ -81,8 +81,8 @@ func TestSubaccountQuerySingle(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Equal(t,
-					nullify.Fill(tc.response), //nolint:staticcheck
-					nullify.Fill(response),    //nolint:staticcheck
+					nullify.Fill(tc.response), //nolint:static-check
+					nullify.Fill(response),    //nolint:static-check
 				)
 			}
 		})
@@ -110,8 +110,8 @@ func TestSubaccountQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.Subaccount), step)
 			require.Subset(t,
-				nullify.Fill(msgs),            //nolint:staticcheck
-				nullify.Fill(resp.Subaccount), //nolint:staticcheck
+				nullify.Fill(msgs),            //nolint:static-check
+				nullify.Fill(resp.Subaccount), //nolint:static-check
 			)
 		}
 	})
@@ -123,8 +123,8 @@ func TestSubaccountQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.Subaccount), step)
 			require.Subset(t,
-				nullify.Fill(msgs),            //nolint:staticcheck
-				nullify.Fill(resp.Subaccount), //nolint:staticcheck
+				nullify.Fill(msgs),            //nolint:static-check
+				nullify.Fill(resp.Subaccount), //nolint:static-check
 			)
 			next = resp.Pagination.NextKey
 		}
@@ -134,8 +134,8 @@ func TestSubaccountQueryPaginated(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(msgs), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(msgs),            //nolint:staticcheck
-			nullify.Fill(resp.Subaccount), //nolint:staticcheck
+			nullify.Fill(msgs),            //nolint:static-check
+			nullify.Fill(resp.Subaccount), //nolint:static-check
 		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {

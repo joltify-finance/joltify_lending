@@ -7,6 +7,7 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/ante"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -206,7 +207,7 @@ func TestAuthzLimiterDecorator(t *testing.T) {
 		},
 	}
 
-	txConfig := app.MakeEncodingConfig().TxConfig
+	txConfig := appconfig.MakeEncodingConfig().TxConfig
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {

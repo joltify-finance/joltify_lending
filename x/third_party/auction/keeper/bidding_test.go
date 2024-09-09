@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	"cosmossdk.io/log"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
@@ -27,9 +28,7 @@ const (
 )
 
 func TestAuctionBidding(t *testing.T) {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
-
+	appconfig.SetupConfig()
 	someTime := time.Date(0o001, time.January, 1, 0, 0, 0, 0, time.UTC)
 
 	_, addrsAll := app.GeneratePrivKeyAddressPairs(5)

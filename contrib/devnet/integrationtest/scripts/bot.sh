@@ -1,6 +1,6 @@
 #!/bin/bash
 remote=139.180.193.235
-key_name=ki
+key_name=kt
 set -x
 height=$(curl -s http://$remote:26657/status | jq -r '.result.sync_info.latest_block_height')
 heightsubmuit=$((height + 15))

@@ -129,7 +129,6 @@ func (exchangeToMarketPrices *ExchangeToMarketPricesImpl) GetIndexPrice(
 		return 0, 0
 	}
 	median, err := resolver(prices)
-
 	if err != nil {
 		return 0, 0
 	}

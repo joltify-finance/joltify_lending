@@ -16,6 +16,9 @@ import (
 	"time"
 
 	"github.com/joltify-finance/joltify_lending/app"
+	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
+	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
+	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/store/rootmulti"
@@ -202,7 +205,10 @@ type GenesisStates interface {
 		govtypesv1.GenesisState |
 		ratelimittypes.GenesisState |
 		govplus.GenesisState |
-		vaulttypes.GenesisState
+		vaulttypes.GenesisState |
+		incentivetypes.GenesisState |
+		jolttypes.GenesisState |
+		pricefeedtypes.GenesisState
 }
 
 // UpdateGenesisDocWithAppStateForModule updates the supplied genesis doc using the provided function. The function
@@ -258,8 +264,14 @@ func UpdateGenesisDocWithAppStateForModule[T GenesisStates](genesisDoc *types.Ge
 		moduleName = govplus.ModuleName
 	case vaulttypes.GenesisState:
 		moduleName = vaulttypes.ModuleName
+	case incentivetypes.GenesisState:
+		moduleName = incentivetypes.ModuleName
+	case jolttypes.GenesisState:
+		moduleName = jolttypes.ModuleName
+	case pricefeedtypes.GenesisState:
+		moduleName = pricefeedtypes.ModuleName
 	default:
-		panic(fmt.Errorf("Unsupported type %T", t))
+		panic(fmt.Errorf("unsupported type %T", t))
 	}
 
 	if protoMsg, ok := any(&t).(sdkproto.Message); ok {
@@ -267,7 +279,7 @@ func UpdateGenesisDocWithAppStateForModule[T GenesisStates](genesisDoc *types.Ge
 		fn(&t)
 		appState[moduleName] = constants.TestEncodingCfg.Codec.MustMarshalJSON(protoMsg)
 	} else {
-		panic(fmt.Errorf("Unsupported type %T", t))
+		panic(fmt.Errorf("unsupported type %T", t))
 	}
 
 	bz, err := json.Marshal(appState)
@@ -406,7 +418,7 @@ func (builder TestAppBuilder) Build() *TestApp {
 	tApp.genesis = tApp.builder.genesisDocFn()
 	if tApp.genesis.GenesisTime.UnixNano() <= time.UnixMilli(0).UnixNano() {
 		tApp.builder.t.Fatal(fmt.Errorf(
-			"Unable to start chain at time %v, must be greater than unix epoch.",
+			"unable to start chain at time %v, must be greater than unix epoch",
 			tApp.genesis.GenesisTime,
 		))
 		return nil
@@ -618,7 +630,7 @@ func (tApp *TestApp) InitChain() sdk.Context {
 	defer tApp.mtx.Unlock()
 
 	if tApp.initialized {
-		panic(errors.New("Cannot initialize chain that has been initialized already."))
+		panic(errors.New("cannot initialize chain that has been initialized already"))
 	}
 	tApp.initChainIfNeeded()
 	return tApp.App.NewContextLegacy(true, tApp.header)
@@ -698,10 +710,10 @@ func (tApp *TestApp) AdvanceToBlock(
 		options.BlockTime = tApp.header.Time
 	}
 	if int64(block) <= tApp.header.Height {
-		panic(fmt.Errorf("Expected block height (%d) > current block height (%d).", block, tApp.header.Height))
+		panic(fmt.Errorf("expected block height (%d) > current block height (%d)", block, tApp.header.Height))
 	}
 	if options.BlockTime.UnixNano() < tApp.header.Time.UnixNano() {
-		panic(fmt.Errorf("Expected time (%v) >= current block time (%v).", options.BlockTime, tApp.header.Time))
+		panic(fmt.Errorf("expected time (%v) >= current block time (%v)", options.BlockTime, tApp.header.Time))
 	}
 	if int64(block) == tApp.header.Height {
 		return tApp.App.NewContextLegacy(true, tApp.header)
@@ -928,6 +940,7 @@ func (tApp *TestApp) AdvanceToBlock(
 			}
 		}
 		tApp.passingCheckTxs = passingRecheckTxs
+
 	}
 
 	return tApp.App.NewContextLegacy(true, tApp.header)
@@ -991,7 +1004,7 @@ func finalizeBlockAndCommit(
 			defer expectedItr.Close()
 
 			for ; itr.Valid(); itr.Next() {
-				if !expectedItr.Valid() {
+				if !expectedItr.Valid() { //nolint
 					diffs = append(
 						diffs,
 						fmt.Sprintf(
@@ -1211,14 +1224,14 @@ func prepareValidatorHomeDir(
 	if err = os.WriteFile(
 		filepath.Join(validatorHomeDir, "config", "priv_validator_key.json"),
 		[]byte(alicePrivValidatorKeyJson),
-		0o755,
+		0o600,
 	); err != nil {
 		return "", err
 	}
 	if err = os.WriteFile(
 		filepath.Join(validatorHomeDir, "config", "node_key.json"),
 		[]byte(aliceNodeKeyJson),
-		0o755,
+		0o600,
 	); err != nil {
 		return "", err
 	}

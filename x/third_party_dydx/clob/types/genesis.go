@@ -30,7 +30,7 @@ func (gs GenesisState) Validate() error {
 		if clobPair.Id != expectedId {
 			return fmt.Errorf("found gap in clobPair id")
 		}
-		expectedId = expectedId + 1
+		expectedId++
 	}
 
 	if err := gs.BlockRateLimitConfig.Validate(); err != nil {

@@ -39,7 +39,7 @@ func networkWithSubaccountObjects(t *testing.T, n int) (*network.Network, []type
 			},
 			AssetPositions: keepertest.CreateUsdcAssetPosition(big.NewInt(1_000)),
 		}
-		nullify.Fill(&subaccount) //nolint:staticcheck
+		nullify.Fill(&subaccount) //nolint:static-check
 		state.Subaccounts = append(state.Subaccounts, subaccount)
 	}
 	buf, err := cfg.Codec.MarshalJSON(&state)
@@ -107,8 +107,8 @@ func TestShowSubaccount(t *testing.T) {
 				require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 				require.NotNil(t, resp.Subaccount)
 				require.Equal(t,
-					nullify.Fill(&tc.obj),          //nolint:staticcheck
-					nullify.Fill(&resp.Subaccount), //nolint:staticcheck
+					nullify.Fill(&tc.obj),          //nolint:static-check
+					nullify.Fill(&resp.Subaccount), //nolint:static-check
 				)
 			}
 		})
@@ -144,8 +144,8 @@ func TestListSubaccount(t *testing.T) {
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 			require.LessOrEqual(t, len(resp.Subaccount), step)
 			require.Subset(t,
-				nullify.Fill(objs),            //nolint:staticcheck
-				nullify.Fill(resp.Subaccount), //nolint:staticcheck
+				nullify.Fill(objs),            //nolint:static-check
+				nullify.Fill(resp.Subaccount), //nolint:static-check
 			)
 		}
 	})
@@ -160,8 +160,8 @@ func TestListSubaccount(t *testing.T) {
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 			require.LessOrEqual(t, len(resp.Subaccount), step)
 			require.Subset(t,
-				nullify.Fill(objs),            //nolint:staticcheck
-				nullify.Fill(resp.Subaccount), //nolint:staticcheck
+				nullify.Fill(objs),            //nolint:static-check
+				nullify.Fill(resp.Subaccount), //nolint:static-check
 			)
 			next = resp.Pagination.NextKey
 		}
@@ -175,8 +175,8 @@ func TestListSubaccount(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(objs), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(objs),            //nolint:staticcheck
-			nullify.Fill(resp.Subaccount), //nolint:staticcheck
+			nullify.Fill(objs),            //nolint:static-check
+			nullify.Fill(resp.Subaccount), //nolint:static-check
 		)
 	})
 }

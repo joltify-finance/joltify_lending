@@ -6,7 +6,7 @@ import "time"
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params: Params{
-			WindowDuration: time.Duration(30 * 24 * time.Hour),
+			WindowDuration: 30 * 24 * time.Hour,
 		},
 	}
 }

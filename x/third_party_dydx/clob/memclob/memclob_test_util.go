@@ -1,3 +1,6 @@
+//go:build test
+// +build test
+
 package memclob
 
 import (
@@ -426,7 +429,7 @@ func AssertMemclobHasOrders(
 		require.Len(t, orderbook.Asks, numAskLevels)
 
 		// Verify each order has the correct remaining size and an assigned nonce.
-		expectedRestingOrders := append(expectedAsks, expectedBids...)
+		expectedRestingOrders := append(expectedAsks, expectedBids...) //nolint
 		require.Equal(t, len(expectedRestingOrders), int(orderbook.TotalOpenOrders))
 		for _, order := range expectedRestingOrders {
 			orderId := order.Order.OrderId
@@ -1547,7 +1550,7 @@ func getExpectedPlacePerpetualLiquidationOffchainMessages(
 				// Increment the index to look at the in the expected collateralization failtures map.
 				// As orders from the same subaccount are expected to already be canceled, they are not
 				// included in the map of expected collateralization check failures.
-				orderIdx = orderIdx + 1
+				orderIdx++
 			}
 		}
 	}

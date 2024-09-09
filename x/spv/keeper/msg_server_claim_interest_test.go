@@ -14,7 +14,6 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
@@ -63,8 +62,9 @@ func SetupPool(suite *claimInterestSuite) {
 
 // The default state used by each test
 func (suite *claimInterestSuite) SetupTest() {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
+
 	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)
 	// create the first pool apy 7.8%

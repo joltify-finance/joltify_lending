@@ -13,7 +13,7 @@ import (
 	slashing "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfer "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:staticcheck
+	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	ibcconn "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	ibccore "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	"github.com/joltify-finance/joltify_lending/lib"
@@ -174,7 +174,7 @@ var (
 		"/ibc.core.client.v1.MsgIBCSoftwareUpgradeResponse": nil,
 		"/ibc.core.client.v1.MsgRecoverClient":              &ibcclient.MsgRecoverClient{},
 		"/ibc.core.client.v1.MsgRecoverClientResponse":      nil,
-		"/ibc.core.client.v1.MsgSubmitMisbehaviour":         &ibcclient.MsgSubmitMisbehaviour{}, //nolint:staticcheck
+		"/ibc.core.client.v1.MsgSubmitMisbehaviour":         &ibcclient.MsgSubmitMisbehaviour{}, //nolint
 		"/ibc.core.client.v1.MsgSubmitMisbehaviourResponse": nil,
 		// TODO(CORE-851): Move MsgUpdateClient and MsgUpgradeClient to unsupported_msgs once v4.0.0 upgrade has
 		// been completed and Cosmos 0.50 performs well.
@@ -216,27 +216,27 @@ var (
 	// Custom modules
 	NormalMsgsDydxCustom = map[string]sdk.Msg{
 		// clob
-		"/dydxprotocol.clob.MsgBatchCancel":         &clob.MsgBatchCancel{},
-		"/dydxprotocol.clob.MsgBatchCancelResponse": nil,
-		"/dydxprotocol.clob.MsgCancelOrder":         &clob.MsgCancelOrder{},
-		"/dydxprotocol.clob.MsgCancelOrderResponse": nil,
-		"/dydxprotocol.clob.MsgPlaceOrder":          &clob.MsgPlaceOrder{},
-		"/dydxprotocol.clob.MsgPlaceOrderResponse":  nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancel":         &clob.MsgBatchCancel{},
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancelResponse": nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrder":         &clob.MsgCancelOrder{},
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrderResponse": nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrder":          &clob.MsgPlaceOrder{},
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrderResponse":  nil,
 
 		// perpetuals
 
 		// prices
 
 		// sending
-		"/dydxprotocol.sending.MsgCreateTransfer":                 &sending.MsgCreateTransfer{},
-		"/dydxprotocol.sending.MsgCreateTransferResponse":         nil,
-		"/dydxprotocol.sending.MsgDepositToSubaccount":            &sending.MsgDepositToSubaccount{},
-		"/dydxprotocol.sending.MsgDepositToSubaccountResponse":    nil,
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccount":         &sending.MsgWithdrawFromSubaccount{},
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccountResponse": nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransfer":                 &sending.MsgCreateTransfer{},
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransferResponse":         nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccount":            &sending.MsgDepositToSubaccount{},
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccountResponse":    nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccount":         &sending.MsgWithdrawFromSubaccount{},
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccountResponse": nil,
 
 		// vault
-		"/dydxprotocol.vault.MsgDepositToVault":         &vault.MsgDepositToVault{},
-		"/dydxprotocol.vault.MsgDepositToVaultResponse": nil,
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVault":         &vault.MsgDepositToVault{},
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVaultResponse": nil,
 	}
 )

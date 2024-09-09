@@ -5,22 +5,25 @@ package types
 
 import (
 	fmt "fmt"
+	io "io"
+	math "math"
+	math_bits "math/bits"
+	time "time"
+
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
 	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	github_com_joltify_finance_joltify_lending_dydx_helper_dtypes "github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 	_ "google.golang.org/protobuf/types/known/durationpb"
-	io "io"
-	math "math"
-	math_bits "math/bits"
-	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ = proto.Marshal
-var _ = fmt.Errorf
-var _ = math.Inf
-var _ = time.Kitchen
+var (
+	_ = proto.Marshal
+	_ = fmt.Errorf
+	_ = math.Inf
+	_ = time.Kitchen
+)
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -31,7 +34,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // LimitParams defines rate limit params on a denom.
 type LimitParams struct {
 	// denom is the denomination of the token being rate limited.
-	// e.g. ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5
+	// e.g. ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	// limiters is a list of rate-limiters on this denom. All limiters
 	// must be satified for a withdrawal to proceed.
@@ -44,9 +47,11 @@ func (*LimitParams) ProtoMessage()    {}
 func (*LimitParams) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e410a72ca1c0f930, []int{0}
 }
+
 func (m *LimitParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *LimitParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_LimitParams.Marshal(b, m, deterministic)
@@ -59,12 +64,15 @@ func (m *LimitParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) 
 		return b[:n], nil
 	}
 }
+
 func (m *LimitParams) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_LimitParams.Merge(m, src)
 }
+
 func (m *LimitParams) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *LimitParams) XXX_DiscardUnknown() {
 	xxx_messageInfo_LimitParams.DiscardUnknown(m)
 }
@@ -106,9 +114,11 @@ func (*Limiter) ProtoMessage()    {}
 func (*Limiter) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e410a72ca1c0f930, []int{1}
 }
+
 func (m *Limiter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *Limiter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_Limiter.Marshal(b, m, deterministic)
@@ -121,12 +131,15 @@ func (m *Limiter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
+
 func (m *Limiter) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_Limiter.Merge(m, src)
 }
+
 func (m *Limiter) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *Limiter) XXX_DiscardUnknown() {
 	xxx_messageInfo_Limiter.DiscardUnknown(m)
 }
@@ -287,6 +300,7 @@ func encodeVarintLimitParams(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+
 func (m *LimitParams) Size() (n int) {
 	if m == nil {
 		return 0
@@ -325,9 +339,11 @@ func (m *Limiter) Size() (n int) {
 func sovLimitParams(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
+
 func sozLimitParams(x uint64) (n int) {
 	return sovLimitParams(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
+
 func (m *LimitParams) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -444,6 +460,7 @@ func (m *LimitParams) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func (m *Limiter) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -579,6 +596,7 @@ func (m *Limiter) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func skipLimitParams(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0

@@ -12,7 +12,7 @@ func (k Keeper) GetAcknowledgedEventInfo(
 	ctx sdk.Context,
 ) (acknowledgedEventInfo types.BridgeEventInfo) {
 	store := ctx.KVStore(k.storeKey)
-	var rawBytes []byte = store.Get([]byte(types.AcknowledgedEventInfoKey))
+	rawBytes := store.Get([]byte(types.AcknowledgedEventInfoKey))
 
 	k.cdc.MustUnmarshal(rawBytes, &acknowledgedEventInfo)
 	return acknowledgedEventInfo

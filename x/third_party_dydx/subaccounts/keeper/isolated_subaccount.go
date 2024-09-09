@@ -255,7 +255,7 @@ func (k *Keeper) transferCollateralForIsolatedPerpetual(
 
 	// If an isolated perpetual position was opened in the subaccount, then move collateral from the
 	// cross-perpetual collateral pool to the isolated perpetual collateral pool.
-	if stateTransition.Transition == types.Opened {
+	if stateTransition.Transition == types.Opened { //nolint
 		toModuleAddr = isolatedCollateralPoolAddr
 		fromModuleAddr = types.ModuleAddress
 		// If the isolated perpetual position was closed, then move collateral from the isolated

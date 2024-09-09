@@ -472,8 +472,6 @@ func (m *MemClobPriceTimePriority) PlaceOrder(
 			false, // isBuy
 		)
 
-		fmt.Printf(">>Received new short term order wwwwthis order is %vwww>>>sell:%v-----buy:%v\n", order.Side, hasBid, hasAsk)
-
 		if hasBid && hasAsk && bestBid.Value.Order.Subticks >= bestAsk.Value.Order.Subticks {
 			panic(
 				fmt.Sprintf(
@@ -490,7 +488,10 @@ func (m *MemClobPriceTimePriority) PlaceOrder(
 	offchainUpdates = types.NewOffchainUpdates()
 
 	// Validate the order and return an error if any validation fails.
-	if err := m.validateNewOrder(ctx, order); err != nil {
+
+	err = m.validateNewOrder(ctx, order)
+	if err != nil {
+		m.validateNewOrder(ctx, order)
 		return 0, 0, offchainUpdates, err
 	}
 
@@ -523,7 +524,7 @@ func (m *MemClobPriceTimePriority) PlaceOrder(
 		if order.IsStatefulOrder() {
 			var removalReason types.OrderRemoval_RemovalReason
 
-			if errors.Is(err, types.ErrFokOrderCouldNotBeFullyFilled) {
+			if errors.Is(err, types.ErrFokOrderCouldNotBeFullyFilled) { //nolint
 				if !order.IsConditionalOrder() {
 					panic(
 						fmt.Sprintf(
@@ -928,7 +929,8 @@ func (m *MemClobPriceTimePriority) ReplayOperations(
 	placedPreexistingStatefulOrderIds := make(map[types.OrderId]struct{})
 	placedOrderRemovalOrderIds := make(map[types.OrderId]struct{})
 	// Iterate over all provided operations.
-	for _, operation := range localOperations {
+	for index, operation := range localOperations {
+		fmt.Printf(">>>INMDEX>%v\n", index)
 		switch operation.Operation.(type) {
 		// Replay all short-term and stateful order placements.
 		case *types.InternalOperation_ShortTermOrderPlacement:
@@ -1553,7 +1555,7 @@ func (m *MemClobPriceTimePriority) mustPerformTakerOrderMatching(
 	var makerLevelOrder *types.LevelOrder
 	var takerOrderHash types.OrderHash
 	var takerOrderHashWasSet bool
-	var bigTotalMatchedAmount *big.Int = big.NewInt(0)
+	bigTotalMatchedAmount := big.NewInt(0)
 
 	// Begin attempting to match orders. The below loop performs the following high-level operations, in order:
 	// - Find the next best maker order if it exists. If not, stop matching.

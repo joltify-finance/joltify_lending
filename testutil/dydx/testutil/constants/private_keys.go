@@ -47,7 +47,7 @@ func GetPrivateKeyFromAddress(accAddress string) cryptotypes.PrivKey {
 	privKey, exists := privateKeyMap[accAddress]
 	if !exists {
 		panic(fmt.Errorf(
-			"Unable to look-up private key, acc %s does not match any well known account.",
+			"unable to look-up private key, acc %s does not match any well known account",
 			accAddress))
 	}
 	return privKey

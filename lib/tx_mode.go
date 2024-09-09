@@ -23,7 +23,7 @@ func AssertCheckTxMode(ctx sdk.Context) {
 
 // TxMode returns a textual representation of the tx mode, one of `CheckTx`, `ReCheckTx`, or `DeliverTx`.
 func TxMode(ctx sdk.Context) string {
-	if ctx.IsReCheckTx() {
+	if ctx.IsReCheckTx() { //nolint
 		return log.RecheckTx
 	} else if ctx.IsCheckTx() {
 		return log.CheckTx

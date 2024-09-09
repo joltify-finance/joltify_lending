@@ -83,7 +83,7 @@ func (k Keeper) MaybeDeleverageSubaccount(
 		metrics.GetLabelForIntValue(metrics.PerpetualId, int(perpetualId)),
 		metrics.GetLabelForBoolValue(metrics.IsLong, deltaQuantums.Sign() == -1),
 	}
-	if quantumsDeleveraged.Sign() == 0 {
+	if quantumsDeleveraged.Sign() == 0 { //nolint
 		labels = append(labels, metrics.GetLabelForStringValue(metrics.Status, metrics.Unfilled))
 	} else if quantumsDeleveraged.CmpAbs(deltaQuantums) == 0 {
 		labels = append(labels, metrics.GetLabelForStringValue(metrics.Status, metrics.FullyFilled))

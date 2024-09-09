@@ -25,7 +25,7 @@ func MustCreateOrderPlaceMessage(
 ) msgsender.Message {
 	msg, ok := CreateOrderPlaceMessage(ctx, order)
 	if !ok {
-		panic(fmt.Errorf("Unable to create place order message for order %+v", order))
+		panic(fmt.Errorf("unable to create place order message for order %+v", order))
 	}
 	return msg
 }
@@ -70,7 +70,7 @@ func MustCreateOrderUpdateMessage(
 ) msgsender.Message {
 	msg, ok := CreateOrderUpdateMessage(ctx, orderId, totalFilled)
 	if !ok {
-		panic(fmt.Errorf("Unable to create place order message for order id %+v", orderId))
+		panic(fmt.Errorf("unable to create place order message for order id %+v", orderId))
 	}
 	return msg
 }
@@ -120,7 +120,7 @@ func MustCreateOrderRemoveMessageWithReason(
 ) msgsender.Message {
 	msg, ok := CreateOrderRemoveMessageWithReason(ctx, orderId, reason, removalStatus)
 	if !ok {
-		panic(fmt.Errorf("Unable to create remove order message with reason for order id %+v", orderId))
+		panic(fmt.Errorf("unable to create remove order message with reason for order id %+v", orderId))
 	}
 	return msg
 }
@@ -174,7 +174,7 @@ func MustCreateOrderRemoveMessage(
 ) msgsender.Message {
 	msg, ok := CreateOrderRemoveMessage(ctx, orderId, orderStatus, orderError, removalStatus)
 	if !ok {
-		panic(fmt.Errorf("Unable to create remove order message for order id %+v", orderId))
+		panic(fmt.Errorf("unable to create remove order message for order id %+v", orderId))
 	}
 	return msg
 }
@@ -219,7 +219,7 @@ func CreateOrderRemoveMessageWithDefaultReason(
 	if defaultRemovalReason == sharedtypes.OrderRemovalReason_ORDER_REMOVAL_REASON_UNSPECIFIED {
 		panic(
 			fmt.Errorf(
-				"Invalid parameter: " +
+				"invalid parameter: " +
 					"defaultRemovalReason cannot be OrderRemove_ORDER_REMOVAL_REASON_UNSPECIFIED",
 			),
 		)

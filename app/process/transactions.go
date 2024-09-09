@@ -155,6 +155,7 @@ func (ppt *ProcessProposalTxs) Validate() error {
 		ppt.ProposedOperationsTx,
 		ppt.AddPremiumVotesTx,
 		ppt.AcknowledgeBridgesTx,
+		ppt.UpdateMarketPricesTx,
 	}
 	for _, smt := range singleTxs {
 		if err := smt.Validate(); err != nil {

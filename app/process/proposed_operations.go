@@ -7,9 +7,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
-var (
-	msgProposedOperationsType = reflect.TypeOf(types.MsgProposedOperations{})
-)
+var msgProposedOperationsType = reflect.TypeOf(types.MsgProposedOperations{})
 
 // ProposedOperationsTx represents `MsgProposedOperations` tx that can be validated.
 type ProposedOperationsTx struct {

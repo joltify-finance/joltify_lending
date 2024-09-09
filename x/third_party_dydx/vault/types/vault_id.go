@@ -77,7 +77,7 @@ func (id *VaultId) GetClobOrderId(clientId uint32) *clobtypes.OrderId {
 		SubaccountId: *id.ToSubaccountId(),
 		ClientId:     clientId,
 		OrderFlags:   clobtypes.OrderIdFlags_LongTerm,
-		ClobPairId:   uint32(id.Number),
+		ClobPairId:   id.Number,
 	}
 }
 

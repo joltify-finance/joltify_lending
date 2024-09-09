@@ -50,7 +50,7 @@ func TestUnsafeMigrateOrderExpirationState(t *testing.T) {
 
 			oldStore := prefix.NewStore(
 				ks.Ctx.KVStore(ks.StoreKey),
-				[]byte(types.LegacyStatefulOrdersTimeSlicePrefix), //nolint:staticcheck
+				[]byte(types.LegacyStatefulOrdersTimeSlicePrefix), //nolint:static-check
 			)
 			it := oldStore.Iterator(nil, nil)
 			defer it.Close()

@@ -340,8 +340,8 @@ func TestEpochInfoGet(t *testing.T) {
 		)
 		require.True(t, found)
 		require.Equal(t,
-			nullify.Fill(&item), //nolint:staticcheck
-			nullify.Fill(&rst),  //nolint:staticcheck
+			nullify.Fill(&item), //nolint:static-check
+			nullify.Fill(&rst),  //nolint:static-check
 		)
 	}
 }
@@ -406,8 +406,8 @@ func TestEpochInfoGetAll(t *testing.T) {
 
 	got := keeper.GetAllEpochInfo(ctx)
 	require.ElementsMatch(t,
-		nullify.Fill(items), //nolint:staticcheck
-		nullify.Fill(got),   //nolint:staticcheck
+		nullify.Fill(items), //nolint:static-check
+		nullify.Fill(got),   //nolint:static-check
 	)
 	require.True(t,
 		sort.SliceIsSorted(got, func(p, q int) bool {

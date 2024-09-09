@@ -405,8 +405,8 @@ func TestGetPerpetual_Success(t *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t,
-			nullify.Fill(&perp), //nolint:staticcheck
-			nullify.Fill(&rst),  //nolint:staticcheck
+			nullify.Fill(&perp), //nolint:static-check
+			nullify.Fill(&rst),  //nolint:static-check
 		)
 	}
 }
@@ -483,8 +483,8 @@ func TestGetPerpetuals_Success(t *testing.T) {
 	perps := keepertest.CreateLiquidityTiersAndNPerpetuals(t, pc.Ctx, pc.PerpetualsKeeper, pc.PricesKeeper, 10)
 
 	require.ElementsMatch(t,
-		nullify.Fill(perps), //nolint:staticcheck
-		nullify.Fill(pc.PerpetualsKeeper.GetAllPerpetuals(pc.Ctx)), //nolint:staticcheck
+		nullify.Fill(perps), //nolint:static-check
+		nullify.Fill(pc.PerpetualsKeeper.GetAllPerpetuals(pc.Ctx)), //nolint:static-check
 	)
 }
 

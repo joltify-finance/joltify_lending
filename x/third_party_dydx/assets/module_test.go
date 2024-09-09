@@ -91,7 +91,7 @@ func TestAppModuleBasic_DefaultGenesis(t *testing.T) {
 	require.NoError(t, err)
 
 	expected := `{"assets":[{"id":0,"symbol":"USDC","denom":`
-	expected += `"ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5",`
+	expected += `"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",`
 	expected += `"denom_exponent":-6,"has_market":false,`
 	expected += `"market_id":0,"atomic_resolution":-6}]}`
 	require.Equal(t, expected, string(json))
@@ -125,7 +125,7 @@ func TestAppModuleBasic_ValidateGenesis(t *testing.T) {
 	cdc := codec.NewProtoCodec(module.InterfaceRegistry)
 
 	msg := `{"assets":[{"id":0,"symbol":"USDC","denom":`
-	msg += `"ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5"`
+	msg += `"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3"`
 	msg += `,"denom_exponent":-6,"has_market":false,"atomic_resolution":-6}]}`
 	h := json.RawMessage(msg)
 
@@ -191,7 +191,7 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 	am, keeper, ctx := createAppModuleWithKeeper(t)
 	cdc := codec.NewProtoCodec(module.InterfaceRegistry)
 	msg := `{"assets":[{"id":0,"symbol":"USDC","denom":`
-	msg += `"ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5",`
+	msg += `"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",`
 	msg += `"denom_exponent":-6,"has_market":false,"atomic_resolution":-6}]}`
 	gs := json.RawMessage(msg)
 
@@ -202,7 +202,7 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 
 	require.Equal(t, uint32(0), assets[0].Id)
 	require.Equal(t,
-		"ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5",
+		"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",
 		assets[0].Denom,
 	)
 	require.False(t, assets[0].HasMarket)
@@ -211,7 +211,7 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 
 	genesisJson := am.ExportGenesis(ctx, cdc)
 	expected := `{"assets":[{"id":0,"symbol":"USDC","denom":`
-	expected += `"ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5",`
+	expected += `"ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3",`
 	expected += `"denom_exponent":-6,"has_market":false,`
 	expected += `"market_id":0,"atomic_resolution":-6}]}`
 	require.Equal(t, expected, string(genesisJson))

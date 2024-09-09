@@ -24,11 +24,11 @@ func getLegacyMsgSignerFn(path []string) func(msg proto.Message) ([][]byte, erro
 		for _, p := range path[:len(path)-1] {
 			fieldDesc := m.Descriptor().Fields().ByName(protoreflect.Name(p))
 			if fieldDesc.Kind() != protoreflect.MessageKind {
-				return nil, fmt.Errorf("Expected for field %s to be Message type in path %+v for msg %+v.", p, path, msg)
+				return nil, fmt.Errorf("expected for field %s to be Message type in path %+v for msg %+v", p, path, msg)
 			}
 			v := m.Get(fieldDesc)
 			if !v.IsValid() {
-				return nil, fmt.Errorf("Expected for field %s to be populated in path %+v for msg %+v.", p, path, msg)
+				return nil, fmt.Errorf("expected for field %s to be populated in path %+v for msg %+v", p, path, msg)
 			}
 			m = v.Message()
 		}
@@ -36,7 +36,7 @@ func getLegacyMsgSignerFn(path []string) func(msg proto.Message) ([][]byte, erro
 		fieldDesc := m.Descriptor().Fields().ByName(protoreflect.Name(path[len(path)-1]))
 		if fieldDesc.Kind() != protoreflect.StringKind {
 			return nil, fmt.Errorf(
-				"Expected for final field %s to be String type in path %+v for msg %+v.",
+				"expected for final field %s to be String type in path %+v for msg %+v",
 				path[len(path)-1],
 				path,
 				msg,

@@ -198,7 +198,7 @@ func (k Keeper) Initialize(ctx sdk.Context) {
 func (k Keeper) InitMemStore(ctx sdk.Context) {
 	alreadyInitialized := k.memStoreInitialized.Swap(true)
 	if alreadyInitialized {
-		panic(errors.New("Memory store already initialized and is not intended to be invoked more then once."))
+		panic(errors.New("memory store already initialized and is not intended to be invoked more then once"))
 	}
 
 	memStore := ctx.KVStore(k.memKey)

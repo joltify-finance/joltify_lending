@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	TEST_DENOM = "adv4tnt"
+	TEST_DENOM = "ujolt"
 )
 
 func TestBridge_Success(t *testing.T) {
@@ -408,7 +408,7 @@ func TestBridge_AcknowledgedEventIdGreaterThanRecognizedEventId(t *testing.T) {
 	abciResponse, err := tApp.App.Query(
 		context.Background(),
 		&abcitypes.RequestQuery{
-			Path: "/dydxprotocol.bridge.Query/RecognizedEventInfo",
+			Path: "/joltify.third_party.dydxprotocol.bridge.Query/RecognizedEventInfo",
 			Data: tApp.App.AppCodec().MustMarshal(&reiRequest),
 		},
 	)

@@ -349,7 +349,7 @@ func TestProcessPriceFetcherResponse_Error(t *testing.T) {
 			expectedReason: metrics.HttpGetTimeout,
 		},
 		"Rate limit error": {
-			err:            pf_constants.RateLimitingError,
+			err:            pf_constants.ErrRateLimiting,
 			logAsError:     true,
 			expectedReason: metrics.RateLimit,
 		},

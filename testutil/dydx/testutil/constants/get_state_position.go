@@ -7,8 +7,8 @@ import (
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
 )
 
-// Get state position functions.
-var GetStatePosition_ZeroPositionSize = func(
+// GetstatepositionZeropositionsize Get state position functions.
+var GetstatepositionZeropositionsize = func(
 	subaccountId satypes.SubaccountId,
 	clobPairId clobtypes.ClobPairId,
 ) (

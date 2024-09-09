@@ -13,7 +13,7 @@ import (
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
 	ibctransfer "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:staticcheck
+	ibcclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/types" //nolint:static-check
 	ibcconn "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	blocktime "github.com/joltify-finance/joltify_lending/x/third_party_dydx/blocktime/types"
 	bridge "github.com/joltify-finance/joltify_lending/x/third_party_dydx/bridge/types"

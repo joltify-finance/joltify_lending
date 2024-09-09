@@ -118,7 +118,7 @@ func bigGenericClamp[T big.Int | big.Rat, P interface {
 	Cmp(P) int
 	Set(P) P
 	*T
-}](n P, lowerBound P, upperBound P) P {
+}](n P, lowerBound P, upperBound P) P { //nolint
 	// If `n` is less than the lower bound, copy and return the lower bound.
 	result := P(new(T))
 	if n.Cmp(lowerBound) == -1 {
@@ -279,7 +279,7 @@ func warmCache() map[uint64]*big.Int {
 		}
 
 		bigExponentValues[uint64(i)] = bigValue
-		exponentString = exponentString + "0"
+		exponentString += "0"
 	}
 
 	return bigExponentValues

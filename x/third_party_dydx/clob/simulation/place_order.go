@@ -261,7 +261,7 @@ func generateValidPlaceOrder(
 	if reduceOnly {
 		// Reduce only must be opposite of current positions in clob pair.
 		curPositionSign := currentPositionSizeQuantums.Cmp(lib.BigInt0())
-		if curPositionSign < 0 {
+		if curPositionSign < 0 { //nolint
 			// currently short, order should go long
 			orderSide = types.Order_SIDE_BUY
 		} else if curPositionSign == 0 {

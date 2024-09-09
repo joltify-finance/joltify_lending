@@ -353,6 +353,8 @@ func expectAccountBalance(
 }
 
 func TestSendDelayedCompleteBridgeMessage(t *testing.T) {
+	// george we skip the test as the bridge is not enabled.
+	t.SkipNow()
 	// Create an encoded bridge event set to occur at block 2.
 	// Expect that Alice's account will increase by 888 coins at block 2.
 	// Bridge module account will also decrease by 888 coins at block 2.
@@ -444,6 +446,8 @@ func TestSendDelayedPerpetualFeeParamsUpdate(t *testing.T) {
 }
 
 func TestSendDelayedCompleteBridgeMessage_Failure(t *testing.T) {
+	// george we skip the bridge message test as the bridge is not enabled.
+	t.SkipNow()
 	// Create an encoded bridge event set to occur at block 2.
 	// The bridge event is invalid and will not execute.
 	// Expect no account balance changes, and the message to be deleted from the keeper.

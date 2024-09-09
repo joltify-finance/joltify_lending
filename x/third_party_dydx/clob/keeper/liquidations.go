@@ -304,7 +304,7 @@ func (k Keeper) PlacePerpetualLiquidation(
 		labels...,
 	)
 
-	if orderSizeOptimisticallyFilledFromMatchingQuantums == 0 {
+	if orderSizeOptimisticallyFilledFromMatchingQuantums == 0 { //nolint
 		labels = append(labels, metrics.GetLabelForStringValue(metrics.Status, metrics.Unfilled))
 	} else if orderSizeOptimisticallyFilledFromMatchingQuantums == liquidationOrder.GetBaseQuantums() {
 		labels = append(labels, metrics.GetLabelForStringValue(metrics.Status, metrics.FullyFilled))
@@ -1075,7 +1075,7 @@ func (k Keeper) ConvertFillablePriceToSubticks(
 	// Bound the result between `clobPair.SubticksPerTick` and
 	// `math.MaxUint64 - math.MaxUint64 % clobPair.SubticksPerTick`.
 	minSubticks := uint64(clobPair.SubticksPerTick)
-	maxSubticks := uint64(math.MaxUint64 - (math.MaxUint64 % uint64(clobPair.SubticksPerTick)))
+	maxSubticks := math.MaxUint64 - (math.MaxUint64 % uint64(clobPair.SubticksPerTick))
 	boundedSubticks := lib.BigUint64Clamp(
 		roundedAlignedSubticksBig,
 		minSubticks,

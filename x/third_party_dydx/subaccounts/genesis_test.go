@@ -39,8 +39,8 @@ func TestGenesis(t *testing.T) {
 	got := subaccounts.ExportGenesis(ctx, *k)
 	require.NotNil(t, got)
 
-	nullify.Fill(&genesisState) //nolint:staticcheck
-	nullify.Fill(got)           //nolint:staticcheck
+	nullify.Fill(&genesisState) //nolint:static-check
+	nullify.Fill(got)           //nolint:static-check
 
 	require.ElementsMatch(t, genesisState.Subaccounts, got.Subaccounts)
 }

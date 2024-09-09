@@ -16,7 +16,6 @@ import (
 
 	perpetualstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/perpetuals/types"
 
-
 	pricestypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/prices/types"
 
 	subaccountstypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
@@ -1027,7 +1026,6 @@ func (_m *QueryClient) SubaccountAll(ctx context.Context, in *subaccountstypes.Q
 
 	return r0, r1
 }
-
 
 // NewQueryClient creates a new instance of QueryClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.

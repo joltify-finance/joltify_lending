@@ -243,6 +243,7 @@ func CreateNPerpetuals(
 	for i := range items {
 		var defaultFundingPpm int32
 		marketType := types.PerpetualMarketType_PERPETUAL_MARKET_TYPE_CROSS
+		//nolint
 		if i%3 == 0 {
 			defaultFundingPpm = 1
 			marketType = types.PerpetualMarketType_PERPETUAL_MARKET_TYPE_ISOLATED

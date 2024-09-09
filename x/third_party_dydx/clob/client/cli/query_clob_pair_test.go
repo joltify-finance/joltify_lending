@@ -74,7 +74,7 @@ func networkWithClobPairObjects(t *testing.T, n int) (*network.Network, []types.
 			StepBaseQuantums: 5,
 			Status:           types.ClobPair_STATUS_ACTIVE,
 		}
-		nullify.Fill(&clobPair) //nolint:staticcheck
+		nullify.Fill(&clobPair) //nolint:static-check
 		state.ClobPairs = append(state.ClobPairs, clobPair)
 	}
 	buf, err := cfg.Codec.MarshalJSON(&state)
@@ -131,8 +131,8 @@ func TestShowClobPair(t *testing.T) {
 				require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 				require.NotNil(t, resp.ClobPair)
 				require.Equal(t,
-					nullify.Fill(&tc.obj),        //nolint:staticcheck
-					nullify.Fill(&resp.ClobPair), //nolint:staticcheck
+					nullify.Fill(&tc.obj),        //nolint:static-check
+					nullify.Fill(&resp.ClobPair), //nolint:static-check
 				)
 			}
 		})
@@ -168,8 +168,8 @@ func TestListClobPair(t *testing.T) {
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 			require.LessOrEqual(t, len(resp.ClobPair), step)
 			require.Subset(t,
-				nullify.Fill(objs),          //nolint:staticcheck
-				nullify.Fill(resp.ClobPair), //nolint:staticcheck
+				nullify.Fill(objs),          //nolint:static-check
+				nullify.Fill(resp.ClobPair), //nolint:static-check
 			)
 		}
 	})
@@ -184,8 +184,8 @@ func TestListClobPair(t *testing.T) {
 			require.NoError(t, net.Config.Codec.UnmarshalJSON(out.Bytes(), &resp))
 			require.LessOrEqual(t, len(resp.ClobPair), step)
 			require.Subset(t,
-				nullify.Fill(objs),          //nolint:staticcheck
-				nullify.Fill(resp.ClobPair), //nolint:staticcheck
+				nullify.Fill(objs),          //nolint:static-check
+				nullify.Fill(resp.ClobPair), //nolint:static-check
 			)
 			next = resp.Pagination.NextKey
 		}
@@ -199,8 +199,8 @@ func TestListClobPair(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(objs), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(objs),          //nolint:staticcheck
-			nullify.Fill(resp.ClobPair), //nolint:staticcheck
+			nullify.Fill(objs),          //nolint:static-check
+			nullify.Fill(resp.ClobPair), //nolint:static-check
 		)
 	})
 }

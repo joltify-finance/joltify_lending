@@ -28,8 +28,8 @@ func TestGenesis(t *testing.T) {
 	got := perpetuals.ExportGenesis(pc.Ctx, *pc.PerpetualsKeeper)
 	require.NotNil(t, got)
 
-	nullify.Fill(&genesisState) //nolint:staticcheck
-	nullify.Fill(got)           //nolint:staticcheck
+	nullify.Fill(&genesisState) //nolint:static-check
+	nullify.Fill(got)           //nolint:static-check
 
 	require.ElementsMatch(t, genesisState.Perpetuals, got.Perpetuals)
 	require.Equal(t, genesisState.Params, got.Params)

@@ -19,7 +19,7 @@ func init() {
 	InvalidMsgAddPremiumVotesTxBytes, _ = TestEncodingCfg.TxConfig.TxEncoder()(TestTxBuilder.GetTx())
 }
 
-// LiquidityTier objects.
+// LiquidityTiers objects.
 var LiquidityTiers = []perptypes.LiquidityTier{
 	{
 		Id:                     0,

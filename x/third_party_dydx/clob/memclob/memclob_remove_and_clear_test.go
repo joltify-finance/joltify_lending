@@ -158,7 +158,7 @@ func TestRemoveAndClearOperationsQueue(t *testing.T) {
 				ctx,
 				tc.placedOperations,
 				memclobtestutil.AlwaysSuccessfulCollatCheckFn,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 				tc.preexistingStatefulOrders,
 			)
 

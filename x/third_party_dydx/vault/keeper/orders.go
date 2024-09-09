@@ -91,7 +91,7 @@ func (k Keeper) RefreshVaultClobOrders(ctx sdk.Context, vaultId types.VaultId) (
 			oldClientId := mostRecentClientIds[i]
 			oldOrderId := vaultId.GetClobOrderId(oldClientId)
 			oldOrderPlacement, exists := k.clobKeeper.GetLongTermOrderPlacement(ctx, *oldOrderId)
-			if !exists { // when order expires / fully fills.
+			if !exists { //nolint // when order expires / fully fills.
 				// Flip client ID because
 				// - for an expired order: order expiration event is a block event and order placement
 				//   is a tx event. As block events are processed after tx events, indexer will set
@@ -333,7 +333,7 @@ func (k Keeper) GetVaultClobOrders(
 		)
 
 		minSubticks := uint64(clobPair.SubticksPerTick)
-		maxSubticks := uint64(math.MaxUint64 - (uint64(math.MaxUint64) % uint64(clobPair.SubticksPerTick)))
+		maxSubticks := math.MaxUint64 - (uint64(math.MaxUint64) % uint64(clobPair.SubticksPerTick))
 		subticksRounded := lib.BigUint64Clamp(
 			subticks,
 			minSubticks,

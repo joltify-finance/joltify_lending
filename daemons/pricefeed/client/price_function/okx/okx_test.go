@@ -9,6 +9,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/price_function/testutil"
 	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons/pricefeed"
 	"github.com/stretchr/testify/require"
 )
 
@@ -147,7 +148,7 @@ func TestOkxPriceFunction_Mixed(t *testing.T) {
 			medianFunctionFails: true,
 			expectedPriceMap:    make(map[string]uint64),
 			expectedUnavailableMap: map[string]error{
-				BTCUSDC_TICKER: testutil.MedianizationError,
+				BTCUSDC_TICKER: testutil.ErrMidianization,
 			},
 		},
 		"Mixed - missing btc response and has eth response": {

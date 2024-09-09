@@ -534,7 +534,7 @@ func TestPlaceOrder_LongTerm(t *testing.T) {
 				ctx,
 				tc.placedMatchableOrders,
 				tc.collateralizationCheck,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 				&tc.order,
 			)
 
@@ -573,7 +573,7 @@ func TestPlaceOrder_PreexistingStatefulOrder(t *testing.T) {
 		ctx,
 		[]types.MatchableOrder{},
 		collateralizationCheck,
-		constants.GetStatePosition_ZeroPositionSize,
+		constants.GetstatepositionZeropositionsize,
 		&longTermOrder,
 	)
 

@@ -96,7 +96,7 @@ func MustHumanPriceToMarketPrice(
 	}
 
 	// Parse the humanPrice string to a big rational
-	ratValue, ok := new(big.Rat).SetString(humanPrice)
+	ratValue, ok := new(big.Rat).SetString(humanPrice) //nolint
 	if !ok {
 		panic("Failed to parse humanPrice to big.Rat")
 	}

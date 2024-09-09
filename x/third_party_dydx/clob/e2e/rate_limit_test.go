@@ -656,16 +656,18 @@ func TestRateLimitingOrders_StatefulOrdersDuringDeliverTxAreNotRateLimited(t *te
 		ctx,
 		tApp.App,
 		testapp.MustMakeCheckTxOptions{
-			AccAddressForSigning: constants.Alice_Num0.Owner,
+			AccAddressForSigning:        constants.Alice_Num0.Owner,
+			AccSequenceNumberForSigning: 0,
 		},
 		&LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy5_Price10_GTBT5,
 	)
+	// cause alice is not the validator so the sequence of it is 0
 	secondMarketCheckTx := testapp.MustMakeCheckTx(
 		ctx,
 		tApp.App,
 		testapp.MustMakeCheckTxOptions{
 			AccAddressForSigning:        constants.Alice_Num0.Owner,
-			AccSequenceNumberForSigning: 2,
+			AccSequenceNumberForSigning: 1,
 		},
 		&LongTermPlaceOrder_Alice_Num0_Id0_Clob1_Buy5_Price10_GTBT5,
 	)

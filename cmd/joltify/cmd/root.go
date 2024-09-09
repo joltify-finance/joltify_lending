@@ -260,12 +260,6 @@ func autoCliOpts(tempApp *joltapp.App, initClientCtx client.Context) autocli.App
 			}
 		}
 	}
-
-	//cliKR, err := keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
-	//if err != nil {
-	//	panic(err)
-	//}
-
 	return autocli.AppOptions{
 		Modules:               modules,
 		ModuleOptions:         runtimeservices.ExtractAutoCLIOptions(tempApp.ModuleManager.Modules),

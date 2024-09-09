@@ -80,7 +80,7 @@ func (c *ClobPair) GetClobPairId() ClobPairId {
 
 // Stateless validation on ClobPair.
 func (c *ClobPair) Validate() error {
-	switch c.Metadata.(type) {
+	switch c.Metadata.(type) { //nolint
 	// TODO(DEC-1535): update this when additional clob pair types are supported.
 	case *ClobPair_SpotClobMetadata:
 		return errorsmod.Wrapf(

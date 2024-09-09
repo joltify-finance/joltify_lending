@@ -14,7 +14,7 @@ import (
 //   - nil rand is provided
 func RandomBytesBetween(start []byte, end []byte, rand *rand.Rand) []byte {
 	if rand == nil {
-		panic(errors.New("rand expected to be non-nil."))
+		panic(errors.New("rand expected to be non-nil"))
 	}
 
 	minLen := len(start)
@@ -31,10 +31,10 @@ func RandomBytesBetween(start []byte, end []byte, rand *rand.Rand) []byte {
 		// Lexographically compare the byte.
 		// If equal, copy the byte.
 		// If not equal, then either panic or stop copying (depending on which byte is greater).
-		if start[i] == end[i] {
+		if start[i] == end[i] { //nolint
 			bytes[i] = start[i]
 		} else if start[i] > end[i] {
-			panic(fmt.Errorf("start %x compares lexicographically greater than end %x at position %d.", start, end, i))
+			panic(fmt.Errorf("start %x compares lexicographically greater than end %x at position %d", start, end, i))
 		} else {
 			break
 		}

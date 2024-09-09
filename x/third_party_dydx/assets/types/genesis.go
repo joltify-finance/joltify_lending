@@ -61,7 +61,7 @@ func (gs GenesisState) Validate() error {
 		}
 		assetIdSet[asset.Id] = struct{}{}
 		denomSet[asset.Denom] = struct{}{}
-		expectedId = expectedId + 1
+		expectedId++
 	}
 	return nil
 }

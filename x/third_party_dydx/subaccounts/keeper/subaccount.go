@@ -49,12 +49,12 @@ func (k Keeper) SetSubaccount(ctx sdk.Context, subaccount types.Subaccount) {
 				),
 			)
 		}
-		//ac := k.GetSubaccount(ctx, *subaccount.Id)
-		//fmt.Printf(">>>before>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
+		// ac := k.GetSubaccount(ctx, *subaccount.Id)
+		// fmt.Printf(">>>before>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
 		b := k.cdc.MustMarshal(&subaccount)
 		store.Set(key, b)
-		//ac = k.GetSubaccount(ctx, *subaccount.Id)
-		//fmt.Printf(">>>after>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
+		// ac = k.GetSubaccount(ctx, *subaccount.Id)
+		// fmt.Printf(">>>after>>SetSubaccount:%v---%v\n", ac.Id.String(), ac.AssetPositions[0].Quantums.String())
 	}
 }
 
@@ -195,7 +195,7 @@ func (k Keeper) getRandomBytes(ctx sdk.Context, rand *rand.Rand) ([]byte, error)
 	forwardItr := store.Iterator(nil, nil)
 	defer forwardItr.Close()
 	if !forwardItr.Valid() {
-		return nil, errors.New("No subaccounts")
+		return nil, errors.New("no subaccounts")
 	}
 
 	// Use the reverse iterator to get the last valid key.
@@ -974,8 +974,8 @@ func (k Keeper) internalGetNetCollateralAndMarginRequirements(
 func applyUpdatesToPositions[
 	P types.PositionSize,
 	U types.PositionSize,
-](positions []P, updates []U) ([]types.PositionSize, error) {
-	var result []types.PositionSize = make([]types.PositionSize, 0, len(positions)+len(updates))
+](positions []P, updates []U) ([]types.PositionSize, error) { //nolint
+	result := make([]types.PositionSize, 0, len(positions)+len(updates))
 
 	updateMap := make(map[uint32]types.PositionSize)
 	updateIndexMap := make(map[uint32]int)

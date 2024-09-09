@@ -32,16 +32,16 @@ func recordSuccessMetrics(ctx sdk.Context, txs *ProcessProposalTxs, totalNumTxs 
 	)
 
 	// Prices tx.
-	//updateMarketPricesMsg, ok := txs.UpdateMarketPricesTx.GetMsg().(*pricestypes.MsgUpdateMarketPrices)
-	//if ok {
+	// updateMarketPricesMsg, ok := txs.UpdateMarketPricesTx.GetMsg().(*pricestypes.MsgUpdateMarketPrices)
+	// if ok {
 	//	telemetry.SetGauge(
 	//		float32(len(updateMarketPricesMsg.MarketPriceUpdates)),
 	//		ModuleName,
 	//		metrics.NumMarketPricesToUpdate,
 	//	)
-	//} else {
+	// } else {
 	//	ctx.Logger().Error("ProcessProposal: expected MsgUpdateMarketPrices")
-	//}
+	// }
 
 	// Funding tx.
 	// TODO(DEC-1254): add more metrics for Funding tx.

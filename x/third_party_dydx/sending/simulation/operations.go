@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	opWeightMsgCreateTransfer = "op_weight_msg_create_transfer"
+	opWeightMsgCreateTransfer = "op_weight_msg_create_transfer" //nolint
 
 	defaultWeightMsgCreateTransfer int = 100
 )

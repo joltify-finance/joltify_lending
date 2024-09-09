@@ -516,7 +516,8 @@ func TestGetUpdateMarketPricesTx(t *testing.T) {
 }
 
 func getMarketPriceUpdates(
-	gen prices.PriceUpdateGenerator, txConfig client.TxConfig) (prepare.PricesTxResponse, error) {
+	gen prices.PriceUpdateGenerator, txConfig client.TxConfig,
+) (prepare.PricesTxResponse, error) {
 	msg, err := gen.GetValidMarketPriceUpdates(sdk.Context{}, nil)
 	if err != nil {
 		return prepare.PricesTxResponse{}, err

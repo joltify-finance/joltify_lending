@@ -6,6 +6,7 @@ import (
 
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	"github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	types2 "github.com/joltify-finance/joltify_lending/x/third_party/auction/types"
 	"github.com/stretchr/testify/suite"
@@ -36,8 +37,7 @@ type Suite struct {
 
 // SetupTest instantiates a new app, keepers, and sets suite state
 func (suite *Suite) SetupTest(numAddrs int) {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 	tg := log.NewTestLogger(suite.T())
 	tApp := app.NewTestApp(tg, suite.T().TempDir())
 

@@ -65,7 +65,7 @@ func CalculateNewCapacityList(
 		capacityDiffRat := new(big.Rat).Mul(operandL, operandR)
 		capacityDiff := lib.BigRatRound(capacityDiffRat, false) // rounds down `capacity_diff`
 
-		if new(big.Int).Abs(capacityMinusBaseline).Cmp(capacityDiff) <= 0 {
+		if new(big.Int).Abs(capacityMinusBaseline).Cmp(capacityDiff) <= 0 { //nolint
 			// if `abs(capacity - baseline) < capacity_diff` then `capacity = baseline``
 			newCapacityList[i] = dtypes.NewIntFromBigInt(baseline)
 		} else if capacityMinusBaseline.Sign() < 0 {

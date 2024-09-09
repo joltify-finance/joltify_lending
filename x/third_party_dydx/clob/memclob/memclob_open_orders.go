@@ -96,7 +96,7 @@ func (m *memclobOpenOrders) findNextBestSubticks(
 	nextBestSubtick types.Subticks,
 	found bool,
 ) {
-	var curSubticks types.Subticks = startingTicks
+	curSubticks := startingTicks
 	var curLevel *types.Level
 
 	// Search iteratively through the map of all levels from the current subticks

@@ -155,7 +155,6 @@ func (k Keeper) ProcessSingleMatch(
 			fillAmount,
 			makerMatchableOrder.GetOrderSubticks(),
 		)
-
 		if err != nil {
 			return false, takerUpdateResult, makerUpdateResult, nil, err
 		}
@@ -188,7 +187,6 @@ func (k Keeper) ProcessSingleMatch(
 			curTakerFillAmount,
 			fillAmount,
 		)
-
 		if err != nil {
 			return false, takerUpdateResult, makerUpdateResult, nil, err
 		}
@@ -210,7 +208,6 @@ func (k Keeper) ProcessSingleMatch(
 		curMakerFillAmount,
 		fillAmount,
 	)
-
 	if err != nil {
 		return false, takerUpdateResult, makerUpdateResult, nil, err
 	}
@@ -225,7 +222,6 @@ func (k Keeper) ProcessSingleMatch(
 		bigFillQuoteQuantums,
 		takerInsuranceFundDelta,
 	)
-
 	if err != nil {
 		return false, takerUpdateResult, makerUpdateResult, nil, err
 	}

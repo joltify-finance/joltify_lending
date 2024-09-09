@@ -336,7 +336,7 @@ func (sm *GrpcStreamingManagerImpl) SendOrderbookFillUpdates(
 
 	// Group fills by clob pair id.
 	updatesByClobPairId := make(map[uint32][]clobtypes.StreamUpdate)
-	for _, orderbookFill := range orderbookFills {
+	for i, orderbookFill := range orderbookFills {
 		// Fetch the clob pair id from the first order in `OrderBookMatchFill`.
 		// We can assume there must be an order, and that all orders share the same
 		// clob pair id.
@@ -344,9 +344,10 @@ func (sm *GrpcStreamingManagerImpl) SendOrderbookFillUpdates(
 		if _, ok := updatesByClobPairId[clobPairId]; !ok {
 			updatesByClobPairId[clobPairId] = []clobtypes.StreamUpdate{}
 		}
+		// george update to fix golint error
 		streamUpdate := clobtypes.StreamUpdate{
 			UpdateMessage: &clobtypes.StreamUpdate_OrderFill{
-				OrderFill: &orderbookFill,
+				OrderFill: &orderbookFills[i],
 			},
 			BlockHeight: blockHeight,
 			ExecMode:    uint32(execMode),

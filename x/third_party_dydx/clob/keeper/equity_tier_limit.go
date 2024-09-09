@@ -169,8 +169,8 @@ func (k Keeper) ValidateSubaccountEquityTierLimitForStatefulOrder(ctx sdk.Contex
 		if equityTierCountMaybeNegative < 0 {
 			panic(
 				fmt.Errorf(
-					"Expected ValidateSubaccountEquityTierLimitForStatefulOrder for new order %+v to be >= 0. "+
-						"equityTierCount %d, statefulOrderCount %d, uncommittedStatefulOrderCount %d.",
+					"expected ValidateSubaccountEquityTierLimitForStatefulOrder for new order %+v to be >= 0. "+
+						"equityTierCount %d, statefulOrderCount %d, uncommittedStatefulOrderCount %d",
 					order,
 					equityTierCountMaybeNegative,
 					k.GetStatefulOrderCount(ctx, order.OrderId.SubaccountId),

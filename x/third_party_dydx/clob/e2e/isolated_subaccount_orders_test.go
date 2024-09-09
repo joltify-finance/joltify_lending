@@ -83,6 +83,7 @@ func TestIsolatedSubaccountOrders(t *testing.T) {
 				PerpetualId:  uint32(3),
 				Quantums:     dtypes.NewInt(int64(orderQuantums)),
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -105,6 +106,7 @@ func TestIsolatedSubaccountOrders(t *testing.T) {
 				PerpetualId:  uint32(3),
 				Quantums:     dtypes.NewInt(-1 * int64(orderQuantums)),
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -128,6 +130,7 @@ func TestIsolatedSubaccountOrders(t *testing.T) {
 				// Alice buys 1 more ISO,
 				Quantums:     dtypes.NewInt(2 * int64(orderQuantums)),
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}

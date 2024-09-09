@@ -59,8 +59,8 @@ func TestEpochInfoQuerySingle(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Equal(t,
-					nullify.Fill(tc.response), //nolint:staticcheck
-					nullify.Fill(response),    //nolint:staticcheck
+					nullify.Fill(tc.response), //nolint:static-check
+					nullify.Fill(response),    //nolint:static-check
 				)
 			}
 		})
@@ -88,8 +88,8 @@ func TestEpochInfoQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.EpochInfo), step)
 			require.Subset(t,
-				nullify.Fill(msgs),           //nolint:staticcheck
-				nullify.Fill(resp.EpochInfo), //nolint:staticcheck
+				nullify.Fill(msgs),           //nolint:static-check
+				nullify.Fill(resp.EpochInfo), //nolint:static-check
 			)
 		}
 	})
@@ -101,8 +101,8 @@ func TestEpochInfoQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.EpochInfo), step)
 			require.Subset(t,
-				nullify.Fill(msgs),           //nolint:staticcheck
-				nullify.Fill(resp.EpochInfo), //nolint:staticcheck
+				nullify.Fill(msgs),           //nolint:static-check
+				nullify.Fill(resp.EpochInfo), //nolint:static-check
 			)
 			next = resp.Pagination.NextKey
 		}
@@ -112,8 +112,8 @@ func TestEpochInfoQueryPaginated(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(msgs), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(msgs),           //nolint:staticcheck
-			nullify.Fill(resp.EpochInfo), //nolint:staticcheck
+			nullify.Fill(msgs),           //nolint:static-check
+			nullify.Fill(resp.EpochInfo), //nolint:static-check
 		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {

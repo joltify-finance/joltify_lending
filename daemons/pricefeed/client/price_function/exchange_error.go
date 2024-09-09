@@ -2,6 +2,7 @@ package price_function
 
 import (
 	"fmt"
+
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 )
 

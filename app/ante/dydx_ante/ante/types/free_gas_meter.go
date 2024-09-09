@@ -7,8 +7,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 )
 
-type freeInfiniteGasMeter struct {
-}
+type freeInfiniteGasMeter struct{}
 
 // NewFreeInfiniteGasMeter returns a new gas meter without a limit, where gas is not consumed.
 func NewFreeInfiniteGasMeter() storetypes.GasMeter {

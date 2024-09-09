@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+
 	"cosmossdk.io/x/nft"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
-	"github.com/joltify-finance/joltify_lending/utils"
 	spvkeeper "github.com/joltify-finance/joltify_lending/x/spv/keeper"
 	"github.com/joltify-finance/joltify_lending/x/spv/types"
 	"github.com/stretchr/testify/suite"
@@ -29,8 +29,7 @@ func TestArchiveTestSuite(t *testing.T) {
 
 // The default state used by each test
 func (suite *ArchiveTestSuite) SetupTest() {
-	config := app.SetSDKConfig()
-	utils.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 
 	lapp, k, _, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)

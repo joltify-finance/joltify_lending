@@ -8,6 +8,7 @@ import (
 
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	auctionkeeper "github.com/joltify-finance/joltify_lending/x/third_party/auction/keeper"
 	"github.com/joltify-finance/joltify_lending/x/third_party/jolt/keeper"
@@ -32,8 +33,7 @@ type KeeperTestSuite struct {
 
 // The default state used by each test
 func (suite *KeeperTestSuite) SetupTest() {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 
 	tApp := app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
 	_, addrs := app.GeneratePrivKeyAddressPairs(1)

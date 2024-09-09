@@ -116,7 +116,7 @@ func OrderToIndexerOrder(
 ) v1types.IndexerOrder {
 	switch goodTil := order.GoodTilOneof.(type) {
 	case *clobtypes.Order_GoodTilBlock:
-		return orderToIndexerOrder_GoodTilBlock(
+		return ordertoindexerorderGoodtilblock(
 			order,
 			v1types.IndexerOrder_GoodTilBlock{GoodTilBlock: goodTil.GoodTilBlock},
 		)
@@ -126,11 +126,11 @@ func OrderToIndexerOrder(
 			v1types.IndexerOrder_GoodTilBlockTime{GoodTilBlockTime: goodTil.GoodTilBlockTime},
 		)
 	default:
-		panic(fmt.Errorf("Unexpected GoodTilOneof in Order: %+v", order))
+		panic(fmt.Errorf("unexpected GoodTilOneof in Order: %+v", order))
 	}
 }
 
-func orderToIndexerOrder_GoodTilBlock(
+func ordertoindexerorderGoodtilblock(
 	order clobtypes.Order,
 	goodTilBlock v1types.IndexerOrder_GoodTilBlock,
 ) v1types.IndexerOrder {

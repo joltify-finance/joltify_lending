@@ -70,7 +70,7 @@ func (lo *LiquidationOrder) GetOrderHash() OrderHash {
 // GetBaseQuantums returns the quantums of this liquidation order.
 // This function is necessary for the `LiquidationOrder` type to implement the `MatchableOrder` interface.
 func (lo *LiquidationOrder) GetBaseQuantums() satypes.BaseQuantums {
-	return satypes.BaseQuantums(lo.quantums)
+	return lo.quantums
 }
 
 // GetClobPairId returns the CLOB pair ID of this liquidation order.
@@ -82,7 +82,7 @@ func (lo *LiquidationOrder) GetClobPairId() ClobPairId {
 // GetOrderSubticks returns the subticks of this liquidation order.
 // This function is necessary for the `LiquidationOrder` type to implement the `MatchableOrder` interface.
 func (lo *LiquidationOrder) GetOrderSubticks() Subticks {
-	return Subticks(lo.subticks)
+	return lo.subticks
 }
 
 // GetSubaccountId returns the subaccount ID that is being liquidated.

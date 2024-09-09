@@ -14,8 +14,7 @@ import (
 // Also note that not explicitly setting a `gasMeter` means that the `gasMeter` from the previous transaction
 // or from `BeginBlock` will be used. Not doing this could result in consensus failure as demonstrated in #869.
 // Cosmos SDK expects an explicit call to `WithGasMeter` at the beginning of the AnteHandler chain.
-type FreeInfiniteGasDecorator struct {
-}
+type FreeInfiniteGasDecorator struct{}
 
 func NewFreeInfiniteGasDecorator() FreeInfiniteGasDecorator {
 	return FreeInfiniteGasDecorator{}

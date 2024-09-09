@@ -26,7 +26,7 @@ func Start(
 	ctx context.Context,
 	logger log.Logger,
 ) {
-	ticker := time.NewTicker(time.Duration(METRICS_DAEMON_LOOP_DELAY_DURATION * time.Millisecond))
+	ticker := time.NewTicker(METRICS_DAEMON_LOOP_DELAY_DURATION * time.Millisecond)
 	defer ticker.Stop()
 	for ; true; <-ticker.C {
 		RunMetricsDaemonTaskLoop(

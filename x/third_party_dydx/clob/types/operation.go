@@ -53,9 +53,9 @@ func (o *InternalOperation) GetInternalOperationTextString() string {
 // GetOperationsQueueString returns a string representation of the provided operations.
 func GetInternalOperationsQueueTextString(operations []InternalOperation) string {
 	var buf bytes.Buffer
-	for _, op := range operations {
+	for i := range operations {
 		// Note that MarshalText only throws errors if the writer throws errors which it never does
-		proto.MarshalText(&buf, &op) //nolint:errcheck
+		proto.MarshalText(&buf, &operations[i]) //nolint:errcheck
 		buf.Write([]byte("\n"))
 	}
 	return buf.String()

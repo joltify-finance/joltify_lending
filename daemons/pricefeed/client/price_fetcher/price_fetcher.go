@@ -263,7 +263,6 @@ func (pf *PriceFetcher) runSubTask(
 		requestHandler,
 		taskLoopDefinition.marketExponents,
 	)
-
 	if err != nil {
 		pf.writeToBufferedChannel(exchangeId, nil, err)
 
@@ -290,7 +289,7 @@ func (pf *PriceFetcher) runSubTask(
 				exchangeId,
 				nil,
 				fmt.Errorf(
-					"Invalid price of 0 for exchange: '%v' and market: %v",
+					"invalid price of 0 for exchange: '%v' and market: %v",
 					exchangeId,
 					price.MarketId,
 				),

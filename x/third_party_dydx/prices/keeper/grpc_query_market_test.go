@@ -58,8 +58,8 @@ func TestMarketPriceQuerySingle(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Equal(t,
-					nullify.Fill(tc.response), //nolint:staticcheck
-					nullify.Fill(response),    //nolint:staticcheck
+					nullify.Fill(tc.response), //nolint:static-check
+					nullify.Fill(response),    //nolint:static-check
 				)
 			}
 		})
@@ -92,8 +92,8 @@ func TestMarketPriceQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.MarketPrices), step)
 			require.Subset(t,
-				nullify.Fill(prices),            //nolint:staticcheck
-				nullify.Fill(resp.MarketPrices), //nolint:staticcheck
+				nullify.Fill(prices),            //nolint:static-check
+				nullify.Fill(resp.MarketPrices), //nolint:static-check
 			)
 		}
 	})
@@ -105,8 +105,8 @@ func TestMarketPriceQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.MarketPrices), step)
 			require.Subset(t,
-				nullify.Fill(prices),            //nolint:staticcheck
-				nullify.Fill(resp.MarketPrices), //nolint:staticcheck
+				nullify.Fill(prices),            //nolint:static-check
+				nullify.Fill(resp.MarketPrices), //nolint:static-check
 			)
 			next = resp.Pagination.NextKey
 		}
@@ -116,8 +116,8 @@ func TestMarketPriceQueryPaginated(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(prices), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(prices),            //nolint:staticcheck
-			nullify.Fill(resp.MarketPrices), //nolint:staticcheck
+			nullify.Fill(prices),            //nolint:static-check
+			nullify.Fill(resp.MarketPrices), //nolint:static-check
 		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {
@@ -169,8 +169,8 @@ func TestMarketParamQuerySingle(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Equal(t,
-					nullify.Fill(tc.response), //nolint:staticcheck
-					nullify.Fill(response),    //nolint:staticcheck
+					nullify.Fill(tc.response), //nolint:static-check
+					nullify.Fill(response),    //nolint:static-check
 				)
 			}
 		})
@@ -203,8 +203,8 @@ func TestMarketParamQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.MarketParams), step)
 			require.Subset(t,
-				nullify.Fill(params),            //nolint:staticcheck
-				nullify.Fill(resp.MarketParams), //nolint:staticcheck
+				nullify.Fill(params),            //nolint:static-check
+				nullify.Fill(resp.MarketParams), //nolint:static-check
 			)
 		}
 	})
@@ -216,8 +216,8 @@ func TestMarketParamQueryPaginated(t *testing.T) {
 			require.NoError(t, err)
 			require.LessOrEqual(t, len(resp.MarketParams), step)
 			require.Subset(t,
-				nullify.Fill(params),            //nolint:staticcheck
-				nullify.Fill(resp.MarketParams), //nolint:staticcheck
+				nullify.Fill(params),            //nolint:static-check
+				nullify.Fill(resp.MarketParams), //nolint:static-check
 			)
 			next = resp.Pagination.NextKey
 		}
@@ -227,8 +227,8 @@ func TestMarketParamQueryPaginated(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, len(params), int(resp.Pagination.Total))
 		require.ElementsMatch(t,
-			nullify.Fill(params),            //nolint:staticcheck
-			nullify.Fill(resp.MarketParams), //nolint:staticcheck
+			nullify.Fill(params),            //nolint:static-check
+			nullify.Fill(resp.MarketParams), //nolint:static-check
 		)
 	})
 	t.Run("InvalidRequest", func(t *testing.T) {

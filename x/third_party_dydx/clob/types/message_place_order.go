@@ -56,7 +56,7 @@ func (msg *MsgPlaceOrder) ValidateBasic() (err error) {
 	}
 
 	orderId := msg.Order.GetOrderId()
-	if orderId.IsShortTermOrder() {
+	if orderId.IsShortTermOrder() { //nolint
 		// This also implicitly verifies that GoodTilBlockTime is not set / is zero for short-term orders.
 		if msg.Order.GetGoodTilBlock() == uint32(0) {
 			return errorsmod.Wrapf(ErrInvalidOrderGoodTilBlock, "order goodTilBlock cannot be 0")

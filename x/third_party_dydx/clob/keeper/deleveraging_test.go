@@ -721,6 +721,7 @@ func TestOffsetSubaccountPerpetualPosition(t *testing.T) {
 							PerpetualId:  1,
 							Quantums:     dtypes.NewInt(1_000_000_000), // 1 ETH
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 					AssetPositions: keepertest.CreateUsdcAssetPosition(
@@ -1118,6 +1119,7 @@ func TestProcessDeleveraging(t *testing.T) {
 						PerpetualId:  0,
 						Quantums:     dtypes.NewInt(-90_000_000), // -0.9 BTC
 						FundingIndex: dtypes.ZeroInt(),
+						QuoteBalance: dtypes.ZeroInt(),
 					},
 				},
 			},
@@ -1133,6 +1135,7 @@ func TestProcessDeleveraging(t *testing.T) {
 						PerpetualId:  0,
 						Quantums:     dtypes.NewInt(90_000_000), // 0.9 BTC
 						FundingIndex: dtypes.ZeroInt(),
+						QuoteBalance: dtypes.ZeroInt(),
 					},
 				},
 			},
@@ -1164,12 +1167,14 @@ func TestProcessDeleveraging(t *testing.T) {
 				},
 				PerpetualPositions: []*satypes.PerpetualPosition{
 					{
-						PerpetualId: 0,
-						Quantums:    dtypes.NewInt(-100_000_000), // -1 BTC
+						PerpetualId:  0,
+						Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
+						QuoteBalance: dtypes.ZeroInt(),
 					},
 					{
-						PerpetualId: 1,
-						Quantums:    dtypes.NewInt(-10_000_000_000), // -10 ETH
+						PerpetualId:  1,
+						Quantums:     dtypes.NewInt(-10_000_000_000), // -10 ETH
+						QuoteBalance: dtypes.ZeroInt(),
 					},
 				},
 			},
@@ -1189,6 +1194,7 @@ func TestProcessDeleveraging(t *testing.T) {
 						PerpetualId:  1,
 						Quantums:     dtypes.NewInt(-10_000_000_000), // -10 ETH
 						FundingIndex: dtypes.ZeroInt(),
+						QuoteBalance: dtypes.ZeroInt(),
 					},
 				},
 			},

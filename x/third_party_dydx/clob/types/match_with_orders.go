@@ -33,7 +33,7 @@ func (match MatchWithOrders) Validate() error {
 	fillAmount := match.FillAmount
 	// Make sure the maker and taker order are not for the same Subaccount.
 	if makerOrder.GetSubaccountId() == takerOrder.GetSubaccountId() {
-		return errors.New("Match constitutes a self-trade")
+		return errors.New("match constitutes a self-trade")
 	}
 
 	// Make sure the fill amount is greater than zero.
@@ -48,28 +48,28 @@ func (match MatchWithOrders) Validate() error {
 
 	// Make sure the maker and taker order are for opposing sides of the book.
 	if makerOrder.IsBuy() == takerOrder.IsBuy() {
-		return errors.New("Orders are not on opposing sides of the book in match")
+		return errors.New("orders are not on opposing sides of the book in match")
 	}
 
 	// Make sure the maker and taker order cross.
 	if makerOrder.IsBuy() {
 		if makerOrder.GetOrderSubticks() < takerOrder.GetOrderSubticks() {
-			return errors.New("Orders do not cross in match")
+			return errors.New("orders do not cross in match")
 		}
 	} else {
 		if takerOrder.GetOrderSubticks() < makerOrder.GetOrderSubticks() {
-			return errors.New("Orders do not cross in match")
+			return errors.New("orders do not cross in match")
 		}
 	}
 
 	// Verify that the minimum of the `makerOrder` and `takerOrder` initial quantums does not exceed the `fillAmount`.
 	if fillAmount > makerOrder.GetBaseQuantums() || fillAmount > takerOrder.GetBaseQuantums() {
-		return errors.New("Minimum initial order quantums exceeds fill amount")
+		return errors.New("minimum initial order quantums exceeds fill amount")
 	}
 
 	// Make sure the maker order is not a liquidation order.
 	if makerOrder.IsLiquidation() {
-		return errors.New("Liquidation order cannot be matched as a maker order")
+		return errors.New("liquidation order cannot be matched as a maker order")
 	}
 
 	// Make sure the maker order is not an IOC order.

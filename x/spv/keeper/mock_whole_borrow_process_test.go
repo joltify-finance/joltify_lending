@@ -10,7 +10,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/testutil/keeper"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/spv"
@@ -89,7 +88,7 @@ func setupMockPool(suite *mockWholeProcessSuite) {
 
 // The default state used by each test
 func (suite *mockWholeProcessSuite) SetupTest() {
-	config := app.SetSDKConfig()
+	config := sdk.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	lapp, k, nftKeeper, _, _, wctx := setupMsgServer(suite.T())
 	ctx := sdk.UnwrapSDKContext(wctx)

@@ -318,7 +318,7 @@ func (k Keeper) processStoredPremiums(
 			int64(len(marketPremiums.Premiums))
 
 		padding := make([]int32, lenPadding)
-		paddedPremiums := append(marketPremiums.Premiums, padding...)
+		paddedPremiums := append(marketPremiums.Premiums, padding...) //nolint
 
 		perpIdToPremium[marketPremiums.PerpetualId] = combineFunc(filterFunc(paddedPremiums))
 	}

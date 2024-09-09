@@ -26,15 +26,15 @@ var (
 )
 
 const (
-	opWeightMsgProposedOperations = "op_weight_msg_temp_operations"
+	opWeightMsgProposedOperations = "op_weight_msg_temp_operations" //nolint
 	// TODO(DEC-571): Determine the simulation weight value
 	defaultWeightMsgProposedOperations int = 100
 
-	opWeightMsgPlaceOrder = "op_weight_msg_place_order"
+	opWeightMsgPlaceOrder = "op_weight_msg_place_order" //nolint
 	// TODO(DEC-571): Determine the simulation weight value
 	defaultWeightMsgPlaceOrder int = 100
 
-	opWeightMsgCancelOrder          = "op_weight_msg_cancel_order"
+	opWeightMsgCancelOrder          = "op_weight_msg_cancel_order" //nolint
 	defaultWeightMsgCancelOrder int = 25
 
 	// this line is used by starport scaffolding # simapp/module/const

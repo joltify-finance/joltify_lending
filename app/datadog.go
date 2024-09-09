@@ -18,7 +18,7 @@ import (
 	"gopkg.in/DataDog/dd-trace-go.v1/profiler"
 )
 
-func configureDatadogProfilerOptions(
+func configureDatadogProfilerOptions( //nolint
 	logger log.Logger,
 	ddAgentHost string,
 	ddAgentPort uint16,
@@ -83,7 +83,7 @@ func configureDatadogProfilerOptions(
 		}
 		ddAgentHostPort = net.JoinHostPort(ddAgentHost, found)
 	}
-	return
+	return //nolint
 }
 
 // initDatadogProfiler initializes datadog continuous profiling.
@@ -97,6 +97,8 @@ func configureDatadogProfilerOptions(
 // line flags unless overridden by the DD_AGENT_HOST and DD_TRACE_AGENT_PORT environment variables respectively.
 //
 // See https://docs.datadoghq.com/profiler/enabling/go/ for more details.
+// we avoid the datadog
+// /nolint
 func initDatadogProfiler(logger log.Logger, ddAgentHost string, ddAgentPort uint16) {
 	ddService, ddVersion, ddAgentHostPort, err := configureDatadogProfilerOptions(logger, ddAgentHost, ddAgentPort)
 	if err != nil {
@@ -129,9 +131,7 @@ func (obj DatadogErrorTrackingObject) MarshalZerologObject(e *zerolog.Event) {
 		Str("kind", obj.Kind)
 }
 
-var (
-	zerologFormatterOnce sync.Once
-)
+var zerologFormatterOnce sync.Once
 
 // SetZerologDatadogErrorTrackingFormat sets custom error formatting for log tag
 // values that are errors for the zerolog library. Converts them to a format that

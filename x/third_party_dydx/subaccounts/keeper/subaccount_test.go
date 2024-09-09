@@ -195,8 +195,8 @@ func TestSubaccountGet(t *testing.T) {
 			*item.Id,
 		)
 		require.Equal(t,
-			nullify.Fill(&item), //nolint:staticcheck
-			nullify.Fill(&rst),  //nolint:staticcheck
+			nullify.Fill(&item), //nolint:static-check
+			nullify.Fill(&rst),  //nolint:static-check
 		)
 	}
 }
@@ -2903,6 +2903,9 @@ func TestUpdateSubaccounts(t *testing.T) {
 			newSubaccount := keeper.GetSubaccount(ctx, subaccountId)
 			require.Equal(t, len(newSubaccount.PerpetualPositions), len(tc.expectedPerpetualPositions))
 			for i, ep := range tc.expectedPerpetualPositions {
+				if ep.QuoteBalance.IsNil() {
+					ep.QuoteBalance = dtypes.ZeroInt()
+				}
 				require.Equal(t, *ep, *newSubaccount.PerpetualPositions[i])
 			}
 			require.Equal(t, len(newSubaccount.AssetPositions), len(tc.expectedAssetPositions))
@@ -4360,6 +4363,9 @@ func TestUpdateSubaccounts_WithdrawalsBlocked(t *testing.T) {
 				newSubaccount := keeper.GetSubaccount(ctx, subaccountIdToCheck)
 				require.Equal(t, len(expectedPerpetualPositions), len(newSubaccount.PerpetualPositions))
 				for i, ep := range expectedPerpetualPositions {
+					if ep.QuoteBalance.IsNil() {
+						ep.QuoteBalance = dtypes.ZeroInt()
+					}
 					require.Equal(t, *ep, *newSubaccount.PerpetualPositions[i])
 				}
 			}

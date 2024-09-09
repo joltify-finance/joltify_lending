@@ -37,7 +37,7 @@ func NewFakeMemClobKeeper() *FakeMemClobKeeper {
 		collatCheckFn:                        constants.CollatCheck_EmptyUpdateResults_Success,
 		dirtyFillAmounts:                     make(map[types.OrderId]satypes.BaseQuantums),
 		fillAmounts:                          make(map[types.OrderId]satypes.BaseQuantums),
-		statePositionFn:                      constants.GetStatePosition_ZeroPositionSize,
+		statePositionFn:                      constants.GetstatepositionZeropositionsize,
 		useCollatCheckFnForSingleMatch:       false,
 		positionSizes:                        make(map[satypes.SubaccountId]map[types.ClobPairId]*big.Int),
 		dirtyPositionSizes:                   make(map[satypes.SubaccountId]map[types.ClobPairId]*big.Int),
@@ -125,7 +125,7 @@ func (f *FakeMemClobKeeper) CommitState() {
 		if !exists {
 			f.fillAmounts[orderId] = quantums
 		} else {
-			f.fillAmounts[orderId] = f.fillAmounts[orderId] + quantums
+			f.fillAmounts[orderId] += quantums
 		}
 	}
 

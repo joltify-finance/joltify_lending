@@ -5,7 +5,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/stretchr/testify/require"
@@ -23,7 +22,7 @@ func generateNAddr(n int) []string {
 }
 
 func TestSubmitInvestor(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
@@ -77,7 +76,7 @@ func TestSubmitInvestor(t *testing.T) {
 }
 
 func TestUpdateWallets(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 
 	acc, err := sdk.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")

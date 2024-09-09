@@ -66,7 +66,7 @@ func networkWithLiquidityTierAndPerpetualObjects(
 			MaintenanceFractionPpm: uint32(1_000_000 / (i + 1)),
 			ImpactNotional:         uint64(500_000_000 * (i + 1)),
 		}
-		nullify.Fill(&liquidityTier) //nolint:staticcheck
+		nullify.Fill(&liquidityTier) //nolint:static-check
 		state.LiquidityTiers = append(state.LiquidityTiers, liquidityTier)
 	}
 
@@ -88,7 +88,7 @@ func networkWithLiquidityTierAndPerpetualObjects(
 			FundingIndex: dtypes.ZeroInt(),
 			OpenInterest: dtypes.ZeroInt(),
 		}
-		nullify.Fill(&perpetual) //nolint:staticcheck
+		nullify.Fill(&perpetual) //nolint:static-check
 		state.Perpetuals = append(state.Perpetuals, perpetual)
 	}
 	buf, err := cfg.Codec.MarshalJSON(&state)

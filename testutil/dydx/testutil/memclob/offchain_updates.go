@@ -60,7 +60,7 @@ func MessageCountOfType(
 	offchainUpdates *types.OffchainUpdates,
 	messageType types.OffchainUpdateMessageType,
 ) int {
-	var count int = 0
+	count := 0
 	for _, msg := range offchainUpdates.Messages {
 		if msg.Type == messageType {
 			count += 1

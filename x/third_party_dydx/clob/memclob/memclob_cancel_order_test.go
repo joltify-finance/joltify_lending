@@ -1244,7 +1244,7 @@ func TestCancelOrder_OperationsQueue(t *testing.T) {
 				ctx,
 				tc.placedOperations,
 				tc.collateralizationCheck,
-				constants.GetStatePosition_ZeroPositionSize,
+				constants.GetstatepositionZeropositionsize,
 				[]types.LongTermOrderPlacement{},
 			)
 

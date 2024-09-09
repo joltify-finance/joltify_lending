@@ -8,6 +8,7 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/price_function/testutil"
 	"github.com/joltify-finance/joltify_lending/lib"
 	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons/pricefeed"
 	"github.com/stretchr/testify/require"
 )
 
@@ -70,8 +71,8 @@ func TestKrakenPriceFunction_Mixed(t *testing.T) {
 			medianFunctionFails: true,
 			expectedPriceMap:    map[string]uint64{},
 			expectedUnavailableMap: map[string]error{
-				ETHUSDC_TICKER: testutil.MedianizationError,
-				BTCUSDC_TICKER: testutil.MedianizationError,
+				ETHUSDC_TICKER: testutil.ErrMidianization,
+				BTCUSDC_TICKER: testutil.ErrMidianization,
 			},
 		},
 		"Failure - Kraken API Error response": {

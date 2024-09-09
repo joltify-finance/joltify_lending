@@ -13,10 +13,10 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 
-	appmsgs "github.com/dydxprotocol/v4-chain/protocol/app/msgs"
-	testmsgs "github.com/dydxprotocol/v4-chain/protocol/testutil/msgs"
 	customante "github.com/joltify-finance/joltify_lending/app/ante/dydx_ante/ante"
-	testante "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil"
+	appmsgs "github.com/joltify-finance/joltify_lending/dydx_helper/msgs"
+	testante "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/ante"
+	testmsgs "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/msgs"
 
 	"github.com/stretchr/testify/require"
 )

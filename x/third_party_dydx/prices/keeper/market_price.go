@@ -79,9 +79,9 @@ func (k Keeper) UpdateMarketPrices(
 	}
 
 	// Writes to the store are delayed so that the updates are atomically applied to state.
-	for _, marketPrice := range updatedMarketPrices {
+	for i, marketPrice := range updatedMarketPrices {
 		// Store the modified market price.
-		b := k.cdc.MustMarshal(&marketPrice)
+		b := k.cdc.MustMarshal(&updatedMarketPrices[i])
 		marketPriceStore.Set(lib.Uint32ToKey(marketPrice.Id), b)
 
 		// Monitor the last block a market price is updated.
