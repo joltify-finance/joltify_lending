@@ -12,9 +12,9 @@ import (
 )
 
 func TestGetDowntimeParams(t *testing.T) {
-	//tApp := testapp.NewTestAppBuilder(t).Build()
-	//ctx := tApp.InitChain()
-	//k := tApp.App.BlockTimeKeeper
+	// tApp := testapp.NewTestAppBuilder(t).Build()
+	// ctx := tApp.InitChain()
+	// k := tApp.App.BlockTimeKeeper
 
 	expected := types.DefaultGenesis()
 	ctx, k, _ := keepertest.BlcokTimeKeepers(t)
@@ -27,9 +27,9 @@ func TestSetDowntimeParams_Success(t *testing.T) {
 	tApp := testapp.NewTestAppBuilder(t).Build()
 	tApp.InitChain()
 
-	expected := types.DefaultGenesis()
-	ctx, k, _ := keepertest.BlcokTimeKeepers(t)
-	blocktime.InitGenesis(ctx, *k, *expected)
+	// expected := types.DefaultGenesis()
+	// ctx, k, _ := keepertest.BlcokTimeKeepers(t)
+	// blocktime.InitGenesis(ctx, *k, *expected)
 
 	ctx := tApp.AdvanceToBlock(
 		40,
@@ -37,7 +37,7 @@ func TestSetDowntimeParams_Success(t *testing.T) {
 			BlockTime: time.Unix(400, 0).UTC(),
 		},
 	)
-	//k := tApp.App.BlockTimeKeeper
+	k := tApp.App.BlockTimeKeeper
 
 	k.SetAllDowntimeInfo(ctx, &types.AllDowntimeInfo{
 		Infos: []*types.AllDowntimeInfo_DowntimeInfo{

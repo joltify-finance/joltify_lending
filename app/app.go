@@ -84,7 +84,7 @@ import (
 	statsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/stats"
 	subaccountsmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts"
 	satypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types"
-	// vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
+	vestmodule "github.com/joltify-finance/joltify_lending/x/third_party_dydx/vest"
 	"google.golang.org/grpc"
 
 	"cosmossdk.io/client/v2/autocli"
@@ -360,6 +360,22 @@ var (
 		nftmoduletypes.ModuleName:         {authtypes.Minter, authtypes.Burner},
 		swaptypes.ModuleName:              nil,
 		burnauctionmoduletypes.ModuleName: {authtypes.Burner},
+
+		// -------- dYdX custom module accounts --------
+		// bridge module account mints tokens for bridged funds.
+		bridgemoduletypes.ModuleName: {authtypes.Minter},
+		// subaccounts module account holds tokens for all subaccounts.
+		satypes.ModuleName: nil,
+		// insurance fund account manages insurance fund for liquidations.
+		perpetualsmoduletypes.InsuranceFundName: nil,
+		// rewards treasury account distribute funds trading accounts.
+		rewardsmoduletypes.TreasuryAccountName: nil,
+		// rewards vester account vest rewards tokens into the rewards treasury.
+		rewardsmoduletypes.VesterAccountName: nil,
+		// community treasury account holds funds for community use.
+		vestmoduletypes.CommunityTreasuryAccountName: nil,
+		// community vester account vests funds into the community treasury.
+		vestmoduletypes.CommunityVesterAccountName: nil,
 	}
 )
 
@@ -821,7 +837,7 @@ func NewApp(
 		authtypes.ProtoBaseAccount,
 		mAccPerms,
 		addresscodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
-		sdk.Bech32MainPrefix,
+		sdk.GetConfig().GetBech32AccountAddrPrefix(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
@@ -1135,18 +1151,18 @@ func NewApp(
 	)
 	feeTiersModule := feetiersmodule.NewAppModule(appCodec, app.FeeTiersKeeper)
 
-	//app.VestKeeper = *vestmodulekeeper.NewKeeper(
-	//	appCodec,
-	//	keys[vestmoduletypes.StoreKey],
-	//	app.BankKeeper,
-	//	app.BlockTimeKeeper,
-	//	// set the governance and delaymsg module accounts as the authority for conducting upgrades
-	//	[]string{
-	//		lib.GovModuleAddress.String(),
-	//		delaymsgmoduletypes.ModuleAddress.String(),
-	//	},
-	//)
-	//vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
+	app.VestKeeper = *vestmodulekeeper.NewKeeper(
+		appCodec,
+		keys[vestmoduletypes.StoreKey],
+		app.BankKeeper,
+		app.BlockTimeKeeper,
+		// set the governance and delaymsg module accounts as the authority for conducting upgrades
+		[]string{
+			lib.GovModuleAddress.String(),
+			delaymsgmoduletypes.ModuleAddress.String(),
+		},
+	)
+	vestModule := vestmodule.NewAppModule(appCodec, app.VestKeeper)
 
 	app.RewardsKeeper = *rewardsmodulekeeper.NewKeeper(
 		appCodec,
@@ -1361,6 +1377,7 @@ func NewApp(
 		feeTiersModule,
 		perpetualsModule,
 		statsModule,
+		vestModule,
 		rewardsModule,
 		subaccountsModule,
 		clobModule,
@@ -1370,25 +1387,6 @@ func NewApp(
 		epochsModule,
 		rateLimitModule,
 		vaultModule,
-
-		// dydx
-		//clobModule,
-		//rewardsModule,
-		//subaccountsModule,
-		//assetsModule,
-		//bridgeModule,
-		//perpetualsModule,
-		//statsModule,
-		//feeTiersModule,
-		//// vestModule,
-		//delayMsgModule,
-		//epochsModule,
-		//pricesModule,
-		//sendingModule,
-		//govPlusModule,
-		//vaultModule,
-		//rateLimitModule,
-		//blockTimeModule,
 	)
 
 	// BasicModuleManager defines the module BasicManager which is in charge of setting up basic,
@@ -1465,7 +1463,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		// vestmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1524,7 +1522,7 @@ func NewApp(
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
-		// vestmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		epochsmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -1582,7 +1580,7 @@ func NewApp(
 		statsmoduletypes.ModuleName,
 		satypes.ModuleName,
 		clobmoduletypes.ModuleName,
-		// vestmoduletypes.ModuleName,
+		vestmoduletypes.ModuleName,
 		rewardsmoduletypes.ModuleName,
 		sendingmoduletypes.ModuleName,
 		govplusmoduletypes.ModuleName,
@@ -2137,38 +2135,7 @@ func (app *App) createProposalHandlers(
 			priceUpdateDecoder,
 		)
 	}
-	// strategy := currencypair.NewDefaultCurrencyPairStrategy(app.DydxPricesKeeper)
-	//
-	//veCodec := compression.NewCompressionVoteExtensionCodec(
-	//	compression.NewDefaultVoteExtensionCodec(),
-	//	compression.NewZLibCompressor(),
-	//)
-	//extCommitCodec := compression.NewCompressionExtendedCommitCodec(
-	//	compression.NewDefaultExtendedCommitCodec(),
-	//	compression.NewZLibCompressor(),
-	//)
 
-	// Set Price Update Generators/Decoders for Slinky
-	//if appFlags.VEOracleEnabled {
-	//	priceUpdateGenerator = prices.NewSlinkyPriceUpdateGenerator(
-	//		aggregator.NewDefaultVoteAggregator(
-	//			app.Logger(),
-	//			voteweighted.MedianFromContext(
-	//				app.Logger(),
-	//				app.stakingKeeper,
-	//				voteweighted.DefaultPowerThreshold,
-	//			),
-	//			strategy,
-	//		),
-	//		extCommitCodec,
-	//		veCodec,
-	//		strategy,
-	//	)
-	//	priceUpdateDecoder = process.NewSlinkyMarketPriceDecoder(
-	//		priceUpdateDecoder,
-	//		priceUpdateGenerator,
-	//	)
-	//}
 	// Generate the dydx handlers
 	dydxPrepareProposalHandler := prepare.PrepareProposalHandler(
 		txConfig,

@@ -411,6 +411,7 @@ func changeUsdcBalance(subaccount satypes.Subaccount, deltaQuantums int64) satyp
 			PerpetualId:  pp.PerpetualId,
 			Quantums:     dtypes.NewInt(pp.Quantums.BigInt().Int64()),
 			FundingIndex: dtypes.NewInt(pp.FundingIndex.BigInt().Int64()),
+			QuoteBalance: dtypes.ZeroInt(),
 		})
 	}
 	if len(perpetualPositions) == 0 {

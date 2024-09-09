@@ -55,6 +55,7 @@ require (
 	cosmossdk.io/tools/confix v0.1.1
 	cosmossdk.io/x/feegrant v0.1.0
 	cosmossdk.io/x/tx v0.13.4
+	github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/ibc-go/modules/capability v1.0.0
 	github.com/deckarep/golang-set/v2 v2.6.0

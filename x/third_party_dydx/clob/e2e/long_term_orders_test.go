@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cometbft/cometbft/crypto/tmhash"
-
 	abcitypes "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
@@ -604,6 +603,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 							Quantums: dtypes.NewInt(int64(
 								LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 					AssetPositions: []*satypes.AssetPosition{
@@ -629,6 +629,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 							Quantums: dtypes.NewInt(-int64(
 								LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 					AssetPositions: []*satypes.AssetPosition{
@@ -733,6 +734,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 													Quantums: dtypes.NewInt(int64(
 														LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{
@@ -767,6 +769,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 													Quantums: dtypes.NewInt(-int64(
 														LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{
@@ -937,6 +940,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 							Quantums: dtypes.NewInt(int64(
 								LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy2_Price50000_GTBT5.Order.GetQuantums())),
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 					AssetPositions: []*satypes.AssetPosition{
@@ -965,6 +969,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 									PlaceOrder_Bob_Num0_Id1_Clob0_Sell1_Price50000_GTB20.Order.GetQuantums(),
 							)),
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 					AssetPositions: []*satypes.AssetPosition{
@@ -1080,6 +1085,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 													Quantums: dtypes.NewInt(int64(
 														PlaceOrder_Bob_Num0_Id0_Clob0_Sell1_Price50000_GTB20.Order.GetQuantums())),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{
@@ -1114,6 +1120,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 													Quantums: dtypes.NewInt(-int64(
 														PlaceOrder_Bob_Num0_Id0_Clob0_Sell1_Price50000_GTB20.Order.GetQuantums())),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{
@@ -1249,6 +1256,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 															PlaceOrder_Bob_Num0_Id1_Clob0_Sell1_Price50000_GTB20.Order.GetQuantums(),
 													)),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{
@@ -1285,6 +1293,7 @@ func TestPlaceLongTermOrder(t *testing.T) {
 													Quantums: dtypes.NewInt(int64(
 														LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy2_Price50000_GTBT5.Order.GetQuantums())),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{
@@ -1542,6 +1551,7 @@ func TestRegression_InvalidTimeInForce(t *testing.T) {
 							Quantums: dtypes.NewInt(int64(
 								Invalid_TIF_LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 					AssetPositions: []*satypes.AssetPosition{
@@ -1567,6 +1577,7 @@ func TestRegression_InvalidTimeInForce(t *testing.T) {
 							Quantums: dtypes.NewInt(-int64(
 								Invalid_TIF_LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 							FundingIndex: dtypes.NewInt(0),
+							QuoteBalance: dtypes.ZeroInt(),
 						},
 					},
 					AssetPositions: []*satypes.AssetPosition{
@@ -1654,6 +1665,7 @@ func TestRegression_InvalidTimeInForce(t *testing.T) {
 													Quantums: dtypes.NewInt(int64(
 														Invalid_TIF_LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{
@@ -1688,6 +1700,7 @@ func TestRegression_InvalidTimeInForce(t *testing.T) {
 													Quantums: dtypes.NewInt(-int64(
 														Invalid_TIF_LongTermPlaceOrder_Alice_Num0_Id0_Clob0_Buy1_Price50000_GTBT5.Order.GetQuantums())),
 													FundingIndex: dtypes.NewInt(0),
+													QuoteBalance: dtypes.ZeroInt(),
 												},
 											},
 											[]*satypes.AssetPosition{

@@ -3,8 +3,8 @@
     {
       "id": 1,
       "msg": {
-        "@type": "/dydxprotocol.bridge.MsgCompleteBridge",
-        "authority": "dydx1mkkvp26dngu6n8rmalaxyp3gwkjuzztq5zx6tr",
+        "@type": "/joltify.third_party.dydxprotocol.bridge.MsgCompleteBridge",
+        "authority": "jolt1mkkvp26dngu6n8rmalaxyp3gwkjuzztqhm4zca",
         "event": {
           "id": 1,
           "coin": {

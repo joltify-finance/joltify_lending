@@ -2669,6 +2669,14 @@ func assertSubaccountState(
 
 	for subaccountId, perpetualPositions := range expectedPerpetualPositions {
 		subaccount := subaccountsKeeper.GetSubaccount(ctx, subaccountId)
+
+		// george we need to set the nil big number to 0
+		if subaccount.PerpetualPositions != nil {
+			if perpetualPositions[0].QuoteBalance.IsNil() {
+				perpetualPositions[0].QuoteBalance = dtypes.ZeroInt()
+			}
+		}
+
 		require.ElementsMatch(t, subaccount.PerpetualPositions, perpetualPositions)
 	}
 }

@@ -5,18 +5,21 @@ package types
 
 import (
 	fmt "fmt"
-	_ "github.com/cosmos/gogoproto/gogoproto"
-	proto "github.com/cosmos/gogoproto/proto"
-	github_com_joltify_finance_joltify_lending_dydx_helper_dtypes "github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+
+	_ "github.com/cosmos/gogoproto/gogoproto"
+	proto "github.com/cosmos/gogoproto/proto"
+	github_com_joltify_finance_joltify_lending_dydx_helper_dtypes "github.com/joltify-finance/joltify_lending/dydx_helper/dtypes"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ = proto.Marshal
-var _ = fmt.Errorf
-var _ = math.Inf
+var (
+	_ = proto.Marshal
+	_ = fmt.Errorf
+	_ = math.Inf
+)
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -27,7 +30,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // DenomCapacity stores a list of rate limit capacity for a denom.
 type DenomCapacity struct {
 	// denom is the denomination of the token being rate limited.
-	// e.g. ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5
+	// e.g. ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	// capacity_list is a list of capacity amount tracked for each `Limiter`
 	// on the denom. This list has a 1:1 mapping to `limiter` list under
@@ -41,9 +44,11 @@ func (*DenomCapacity) ProtoMessage()    {}
 func (*DenomCapacity) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e3c29f1fc8f9b92f, []int{0}
 }
+
 func (m *DenomCapacity) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *DenomCapacity) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_DenomCapacity.Marshal(b, m, deterministic)
@@ -56,12 +61,15 @@ func (m *DenomCapacity) XXX_Marshal(b []byte, deterministic bool) ([]byte, error
 		return b[:n], nil
 	}
 }
+
 func (m *DenomCapacity) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_DenomCapacity.Merge(m, src)
 }
+
 func (m *DenomCapacity) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *DenomCapacity) XXX_DiscardUnknown() {
 	xxx_messageInfo_DenomCapacity.DiscardUnknown(m)
 }
@@ -87,9 +95,11 @@ func (*LimiterCapacity) ProtoMessage()    {}
 func (*LimiterCapacity) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e3c29f1fc8f9b92f, []int{1}
 }
+
 func (m *LimiterCapacity) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
+
 func (m *LimiterCapacity) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
 		return xxx_messageInfo_LimiterCapacity.Marshal(b, m, deterministic)
@@ -102,12 +112,15 @@ func (m *LimiterCapacity) XXX_Marshal(b []byte, deterministic bool) ([]byte, err
 		return b[:n], nil
 	}
 }
+
 func (m *LimiterCapacity) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_LimiterCapacity.Merge(m, src)
 }
+
 func (m *LimiterCapacity) XXX_Size() int {
 	return m.Size()
 }
+
 func (m *LimiterCapacity) XXX_DiscardUnknown() {
 	xxx_messageInfo_LimiterCapacity.DiscardUnknown(m)
 }
@@ -254,6 +267,7 @@ func encodeVarintCapacity(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+
 func (m *DenomCapacity) Size() (n int) {
 	if m == nil {
 		return 0
@@ -289,9 +303,11 @@ func (m *LimiterCapacity) Size() (n int) {
 func sovCapacity(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
+
 func sozCapacity(x uint64) (n int) {
 	return sovCapacity(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
+
 func (m *DenomCapacity) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -409,6 +425,7 @@ func (m *DenomCapacity) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func (m *LimiterCapacity) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -525,6 +542,7 @@ func (m *LimiterCapacity) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+
 func skipCapacity(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0

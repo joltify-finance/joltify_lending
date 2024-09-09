@@ -2,7 +2,9 @@ package keeper
 
 import (
 	"bytes"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 	"sort"
@@ -1247,6 +1249,9 @@ func (k Keeper) SortLiquidationOrders(
 		// Sort by order hash by default.
 		xHash := x.GetOrderHash()
 		yHash := y.GetOrderHash()
+		fmt.Printf(">>1111111>>>%v\n", hex.EncodeToString(xHash[:]))
+		fmt.Printf(">>>>>%v\n", hex.EncodeToString(yHash[:]))
+		fmt.Printf(">>>>>>>>>>>>>%v\n", bytes.Compare(xHash[:], yHash[:]))
 		return bytes.Compare(xHash[:], yHash[:]) == -1
 	})
 }

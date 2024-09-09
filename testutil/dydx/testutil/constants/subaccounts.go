@@ -38,6 +38,7 @@ var (
 				PerpetualId:  1,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -51,6 +52,7 @@ var (
 				PerpetualId:  3,
 				Quantums:     dtypes.NewInt(1_000_000_000), // 1 ISO
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -78,6 +80,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -91,6 +94,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // +1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -118,6 +122,7 @@ var (
 				PerpetualId:  3,
 				Quantums:     dtypes.NewInt(1_000_000_000), // 1 ISO
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -131,6 +136,7 @@ var (
 				PerpetualId:  4,
 				Quantums:     dtypes.NewInt(10_000_000), // 1 ISO2
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -144,6 +150,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-10_000_000_000), // -100 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -157,6 +164,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -170,6 +178,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -186,6 +195,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -202,6 +212,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -218,6 +229,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -234,6 +246,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -250,6 +263,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -266,6 +280,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -282,6 +297,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -298,11 +314,13 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 			{
 				PerpetualId:  1,
 				Quantums:     dtypes.NewInt(1_000_000_000), // 1 ETH
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -319,6 +337,7 @@ var (
 				PerpetualId:  3,
 				Quantums:     dtypes.NewInt(-1_000_000_000), // -1 ISO
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -400,6 +419,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(10_000_000), // 0.1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -416,6 +436,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -429,6 +450,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(10_000_000), // 0.1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -442,6 +464,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -458,6 +481,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -471,6 +495,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-100_000_000), // -1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -487,6 +512,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -503,6 +529,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -519,6 +546,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -535,6 +563,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -551,6 +580,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -567,6 +597,7 @@ var (
 				PerpetualId:  3,
 				Quantums:     dtypes.NewInt(1_000_000_000), // 1 ISO
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -583,6 +614,7 @@ var (
 				PerpetualId:  4,
 				Quantums:     dtypes.NewInt(-10_000_000), // -1 ISO2
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -617,6 +649,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-10_000_000_000), // -100 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -630,6 +663,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(10_000_000_000), // 100 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -643,6 +677,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -656,11 +691,13 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 			{
 				PerpetualId:  1,
 				Quantums:     dtypes.NewInt(1_000_000_000), // 1 ETH
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -688,6 +725,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(25_000_000), // 0.25 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -701,6 +739,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(50_000_000), // 0.5 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -714,6 +753,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -727,6 +767,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(-10_000_000_000), // -100 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -743,6 +784,7 @@ var (
 				PerpetualId:  0,
 				Quantums:     dtypes.NewInt(100_000_000), // 1 BTC
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}
@@ -756,6 +798,7 @@ var (
 				PerpetualId:  1,
 				Quantums:     dtypes.NewInt(1_000_000_000), // 1 ETH
 				FundingIndex: dtypes.NewInt(0),
+				QuoteBalance: dtypes.NewInt(0),
 			},
 		},
 	}

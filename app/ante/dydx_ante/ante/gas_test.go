@@ -165,7 +165,7 @@ func TestSubmitTxnWithGas(t *testing.T) {
 			gasFee:       sdk.Coins{},
 			responseCode: sdkerrors.ErrInsufficientFee.ABCICode(),
 			logMessage: "insufficient fees; got:  required: 25000000000000000adv4tnt," +
-				"25000ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5: insufficient fee",
+				"25000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3: insufficient fee",
 		},
 		"Failure: unsupported gas fee denom": {
 			gasFee: sdk.Coins{
@@ -174,7 +174,7 @@ func TestSubmitTxnWithGas(t *testing.T) {
 			},
 			responseCode: sdkerrors.ErrInsufficientFee.ABCICode(),
 			logMessage: "insufficient fees; got: 100000000btc-denom required: 25000000000000000adv4tnt," +
-				"25000ibc/8E27BA2D5493AF5636760E354E46004562C46AB7EC0CC4C1CA14E9E20E2545B5: insufficient fee",
+				"25000ibc/65D0BEC6DAD96C7F5043D1E54E54B6BB5D5B3AEC3FF6CEBB75B9E059F3580EA3: insufficient fee",
 		},
 	}
 	for name, tc := range tests {

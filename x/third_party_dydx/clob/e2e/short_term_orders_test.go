@@ -157,6 +157,7 @@ func TestPlaceOrder(t *testing.T) {
 											Quantums: dtypes.NewInt(-int64(
 												PlaceOrder_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20.Order.GetQuantums())),
 											FundingIndex: dtypes.NewInt(0),
+											QuoteBalance: dtypes.ZeroInt(),
 										},
 									},
 									// Maker fees calculate to 0 so asset position doesn't change.
@@ -184,6 +185,7 @@ func TestPlaceOrder(t *testing.T) {
 											Quantums: dtypes.NewInt(int64(
 												PlaceOrder_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20.Order.GetQuantums())),
 											FundingIndex: dtypes.NewInt(0),
+											QuoteBalance: dtypes.ZeroInt(),
 										},
 									},
 									// Taker fees calculate to 0 so asset position doesn't change.
@@ -334,6 +336,7 @@ func TestPlaceOrder(t *testing.T) {
 											Quantums: dtypes.NewInt(-int64(
 												PlaceOrder_Bob_Num0_Id0_Clob0_Sell5_Price10_GTB20.Order.GetQuantums())),
 											FundingIndex: dtypes.NewInt(0),
+											QuoteBalance: dtypes.ZeroInt(),
 										},
 									},
 									// Maker fees calculate to 0 so asset position doesn't change.
@@ -361,6 +364,7 @@ func TestPlaceOrder(t *testing.T) {
 											Quantums: dtypes.NewInt(int64(
 												PlaceOrder_Bob_Num0_Id0_Clob0_Sell5_Price10_GTB20.Order.GetQuantums())),
 											FundingIndex: dtypes.NewInt(0),
+											QuoteBalance: dtypes.ZeroInt(),
 										},
 									},
 									// Taker fees calculate to 0 so asset position doesn't change.
@@ -511,6 +515,7 @@ func TestPlaceOrder(t *testing.T) {
 											Quantums: dtypes.NewInt(int64(
 												PlaceOrder_Bob_Num0_Id0_Clob0_Sell5_Price10_GTB20.Order.GetQuantums())),
 											FundingIndex: dtypes.NewInt(0),
+											QuoteBalance: dtypes.ZeroInt(),
 										},
 									},
 									// Taker fees calculate to 0 so asset position doesn't change.
@@ -538,6 +543,7 @@ func TestPlaceOrder(t *testing.T) {
 											Quantums: dtypes.NewInt(-int64(
 												PlaceOrder_Bob_Num0_Id0_Clob0_Sell5_Price10_GTB20.Order.GetQuantums())),
 											FundingIndex: dtypes.NewInt(0),
+											QuoteBalance: dtypes.ZeroInt(),
 										},
 									},
 									// Maker fees calculate to 0 so asset position doesn't change.
@@ -659,6 +665,143 @@ func TestPlaceOrder(t *testing.T) {
 		})
 	}
 }
+
+//func TestFailedShorTermOrderReplacement(t *testing.T) {
+//	type orderIdExpectations struct {
+//		shouldExistOnMemclob bool
+//		expectedOrder        clobtypes.Order
+//		expectedFillAmount   uint64
+//	}
+//	type blockOrdersAndExpectations struct {
+//		ordersToPlace        []clobtypes.MsgPlaceOrder
+//		orderIdsExpectations map[clobtypes.OrderId]orderIdExpectations
+//	}
+//	tests := map[string]struct {
+//		blocks []blockOrdersAndExpectations
+//	}{
+//		"Fail: Replacement order attempts to decrease size such that the order would be fully filled": {
+//			blocks: []blockOrdersAndExpectations{
+//				{
+//					ordersToPlace: []clobtypes.MsgPlaceOrder{
+//						PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20,
+//						*clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
+//							clobtypes.Order{
+//								OrderId:      clobtypes.OrderId{SubaccountId: constants.Bob_Num0, ClientId: 0, ClobPairId: 0},
+//								Side:         clobtypes.Order_SIDE_SELL,
+//								Quantums:     6,
+//								Subticks:     10,
+//								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
+//							},
+//							testapp.DefaultGenesis(),
+//						)),
+//					},
+//					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
+//						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
+//							shouldExistOnMemclob: true,
+//							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order,
+//							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order.Quantums / 2,
+//						},
+//					},
+//				},
+//				{
+//					ordersToPlace: []clobtypes.MsgPlaceOrder{
+//						*clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
+//							clobtypes.Order{
+//								OrderId:      clobtypes.OrderId{SubaccountId: constants.Alice_Num0, ClientId: 0, ClobPairId: 0},
+//								Side:         clobtypes.Order_SIDE_BUY,
+//								Quantums:     6,
+//								Subticks:     10,
+//								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
+//							},
+//							testapp.DefaultGenesis(),
+//						)),
+//					},
+//					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
+//						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
+//							shouldExistOnMemclob: true,
+//							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order,
+//							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order.Quantums / 2,
+//						},
+//					},
+//				},
+//			},
+//		},
+//		"Fail: Replacement order attempts to decrease size below partially filled amount": {
+//			blocks: []blockOrdersAndExpectations{
+//				{
+//					ordersToPlace: []clobtypes.MsgPlaceOrder{
+//						PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20,
+//						*clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
+//							clobtypes.Order{
+//								OrderId:      clobtypes.OrderId{SubaccountId: constants.Bob_Num0, ClientId: 0, ClobPairId: 0},
+//								Side:         clobtypes.Order_SIDE_SELL,
+//								Quantums:     7,
+//								Subticks:     10,
+//								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
+//							},
+//							testapp.DefaultGenesis(),
+//						)),
+//					},
+//					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
+//						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
+//							shouldExistOnMemclob: true,
+//							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order,
+//							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order.Quantums / 2,
+//						},
+//					},
+//				},
+//				{
+//					ordersToPlace: []clobtypes.MsgPlaceOrder{
+//						*clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
+//							clobtypes.Order{
+//								OrderId:      clobtypes.OrderId{SubaccountId: constants.Alice_Num0, ClientId: 0, ClobPairId: 0},
+//								Side:         clobtypes.Order_SIDE_BUY,
+//								Quantums:     6,
+//								Subticks:     10,
+//								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
+//							},
+//							testapp.DefaultGenesis(),
+//						)),
+//					},
+//					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
+//						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
+//							shouldExistOnMemclob: true,
+//							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order,
+//							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order.Quantums / 2,
+//						},
+//					},
+//				},
+//			},
+//		},
+//	}
+//
+//	for name, tc := range tests {
+//		t.Run(name, func(t *testing.T) {
+//			tApp := testapp.NewTestAppBuilder(t).Build()
+//			ctx := tApp.InitChain()
+//
+//			for i, block := range tc.blocks {
+//				for _, order := range block.ordersToPlace {
+//					for _, checkTx := range testapp.MustMakeCheckTxsWithClobMsg(ctx, tApp.App, order) {
+//						tApp.CheckTx(checkTx)
+//					}
+//				}
+//
+//				for orderId, expectations := range block.orderIdsExpectations {
+//					order, exists := tApp.App.ClobKeeper.MemClob.GetOrder(ctx, orderId)
+//					require.Equal(t, expectations.shouldExistOnMemclob, exists)
+//					if expectations.shouldExistOnMemclob {
+//						require.Equal(t, expectations.expectedOrder, order)
+//					}
+//					_, fillAmount, _ := tApp.App.ClobKeeper.GetOrderFillAmount(ctx, orderId)
+//					require.Equal(t, expectations.expectedFillAmount, uint64(fillAmount))
+//				}
+//
+//				ctx = tApp.AdvanceToBlock(uint32(i+2), testapp.AdvanceToBlockOptions{})
+//			}
+//		})
+//	}
+//}
 
 func TestShortTermOrderReplacements(t *testing.T) {
 	order := PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20
@@ -925,12 +1068,12 @@ func TestShortTermOrderReplacements(t *testing.T) {
 			blocks: []blockOrdersAndExpectations{
 				{
 					ordersToPlace: []clobtypes.MsgPlaceOrder{
-						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
+						PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20,
 						*clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
 							clobtypes.Order{
 								OrderId:      clobtypes.OrderId{SubaccountId: constants.Bob_Num0, ClientId: 0, ClobPairId: 0},
 								Side:         clobtypes.Order_SIDE_SELL,
-								Quantums:     3,
+								Quantums:     6,
 								Subticks:     10,
 								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
 							},
@@ -940,8 +1083,8 @@ func TestShortTermOrderReplacements(t *testing.T) {
 					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
 						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
 							shouldExistOnMemclob: true,
-							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order,
-							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.Quantums / 2,
+							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order,
+							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order.Quantums / 2,
 						},
 					},
 				},
@@ -951,7 +1094,7 @@ func TestShortTermOrderReplacements(t *testing.T) {
 							clobtypes.Order{
 								OrderId:      clobtypes.OrderId{SubaccountId: constants.Alice_Num0, ClientId: 0, ClobPairId: 0},
 								Side:         clobtypes.Order_SIDE_BUY,
-								Quantums:     3,
+								Quantums:     6,
 								Subticks:     10,
 								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
 							},
@@ -961,8 +1104,8 @@ func TestShortTermOrderReplacements(t *testing.T) {
 					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
 						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
 							shouldExistOnMemclob: true,
-							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order,
-							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.Quantums / 2,
+							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order,
+							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy12_Price10_GTB20.Order.Quantums / 2,
 						},
 					},
 				},
@@ -972,12 +1115,12 @@ func TestShortTermOrderReplacements(t *testing.T) {
 			blocks: []blockOrdersAndExpectations{
 				{
 					ordersToPlace: []clobtypes.MsgPlaceOrder{
-						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
+						PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20,
 						*clobtypes.NewMsgPlaceOrder(testapp.MustScaleOrder(
 							clobtypes.Order{
 								OrderId:      clobtypes.OrderId{SubaccountId: constants.Bob_Num0, ClientId: 0, ClobPairId: 0},
 								Side:         clobtypes.Order_SIDE_SELL,
-								Quantums:     3,
+								Quantums:     7,
 								Subticks:     10,
 								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
 							},
@@ -987,8 +1130,8 @@ func TestShortTermOrderReplacements(t *testing.T) {
 					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
 						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
 							shouldExistOnMemclob: true,
-							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order,
-							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.Quantums / 2,
+							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order,
+							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order.Quantums / 2,
 						},
 					},
 				},
@@ -998,7 +1141,7 @@ func TestShortTermOrderReplacements(t *testing.T) {
 							clobtypes.Order{
 								OrderId:      clobtypes.OrderId{SubaccountId: constants.Alice_Num0, ClientId: 0, ClobPairId: 0},
 								Side:         clobtypes.Order_SIDE_BUY,
-								Quantums:     2,
+								Quantums:     6,
 								Subticks:     10,
 								GoodTilOneof: &clobtypes.Order_GoodTilBlock{GoodTilBlock: 20},
 							},
@@ -1008,13 +1151,14 @@ func TestShortTermOrderReplacements(t *testing.T) {
 					orderIdsExpectations: map[clobtypes.OrderId]orderIdExpectations{
 						PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.OrderId: {
 							shouldExistOnMemclob: true,
-							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order,
-							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20.Order.Quantums / 2,
+							expectedOrder:        PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order,
+							expectedFillAmount:   PlaceOrder_Alice_Num0_Id0_Clob0_Buy14_Price10_GTB20.Order.Quantums / 2,
 						},
 					},
 				},
 			},
 		},
+
 		"Success: Replacing order with FOK which does not fully match results in order being removed from the book": {
 			blocks: []blockOrdersAndExpectations{
 				{

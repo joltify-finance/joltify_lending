@@ -88,14 +88,14 @@ func TestAppModuleBasic_RegisterGRPCGatewayRoutes(t *testing.T) {
 
 	// Expect NumMessages route registered
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest("GET", "/dydxprotocol/v4/rewards/params", nil)
+	req, err := http.NewRequest("GET", "/joltify/third_party/dydxprotocol/v4/rewards/params", nil)
 	require.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 	require.Contains(t, recorder.Body.String(), "no RPC client is defined in offline mode")
 
 	// Expect unexpected route not registered
 	recorder = httptest.NewRecorder()
-	req, err = http.NewRequest("GET", "/dydxprotocol/v4/rewards/foo/bar/baz", nil)
+	req, err = http.NewRequest("GET", "/joltify/third_party/dydxprotocol/v4/rewards/foo/bar/baz", nil)
 	require.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 	require.Equal(t, 404, recorder.Code)
@@ -131,7 +131,7 @@ func TestAppModule_InitExportGenesis(t *testing.T) {
 	params := keeper.GetParams(ctx)
 
 	require.Equal(t, "rewards_treasury", params.TreasuryAccount)
-	require.Equal(t, "adv4tnt", params.Denom)
+	require.Equal(t, "ujolt", params.Denom)
 	require.Equal(t, int32(-18), params.DenomExponent)
 	require.Equal(t, uint32(1), params.MarketId)
 	require.Equal(t, uint32(990000), params.FeeMultiplierPpm)

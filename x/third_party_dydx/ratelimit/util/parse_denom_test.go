@@ -105,8 +105,8 @@ func TestParseDenomFromSendPacket(t *testing.T) {
 		},
 		// Non-native assets are hashed
 		{
-			name:             "uusdc on dYdX",
-			packetDenomTrace: "transfer/channel-0/uusdc",
+			name:             "uusdc on joltify",
+			packetDenomTrace: "transfer/channel-1/uusdc",
 			expectedDenom:    assettypes.UusdcDenom,
 		},
 	}

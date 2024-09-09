@@ -237,22 +237,25 @@ func TestPlaceOrder_AddOrderToOrderbook(t *testing.T) {
 			expectedOrderStatus:    types.Success,
 			expectedToReplaceOrder: true,
 		},
+		// george we need to swap the order as the hash of the order is reversed compared to the orignal dydx order
 		"Replacing an order fails if OrderHash is less than existing order but GoodTilBlock is the same": {
-			existingOrders: []types.MatchableOrder{
-				&constants.Order_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20,
-			},
-
-			order: constants.Order_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
-
-			expectedErr:            types.ErrInvalidReplacement,
-			expectedToReplaceOrder: false,
-		},
-		"Replacing an order succeeds if OrderHash is greater than existing order but GoodTilBlock is the same": {
 			existingOrders: []types.MatchableOrder{
 				&constants.Order_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
 			},
 
 			order: constants.Order_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20,
+
+			expectedErr:            types.ErrInvalidReplacement,
+			expectedToReplaceOrder: false,
+		},
+
+		// george we need to swap the order as the hash of the order is reversed compared to the orignal dydx order
+		"Replacing an order succeeds if OrderHash is greater than existing order but GoodTilBlock is the same": {
+			existingOrders: []types.MatchableOrder{
+				&constants.Order_Alice_Num0_Id0_Clob0_Buy5_Price10_GTB20,
+			},
+
+			order: constants.Order_Alice_Num0_Id0_Clob0_Buy6_Price10_GTB20,
 
 			collateralizationCheck: satypes.Success,
 			expectedOrderStatus:    types.Success,

@@ -3,6 +3,7 @@ package types
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"time"
@@ -111,6 +112,13 @@ func (x *Order) MustCmpReplacementOrder(y *Order) int {
 	// If both orders have the same expiration, use the SHA256 hash for comparison.
 	xHash := x.GetOrderHash()
 	yHash := y.GetOrderHash()
+
+	fmt.Printf(">>>order x %v\n", x)
+	fmt.Printf(">>>order y %v\n", y)
+	fmt.Printf("compare result %v\n", bytes.Compare(xHash[:], yHash[:]))
+	fmt.Printf(">>>hash1 %v\n", hex.EncodeToString(xHash[:]))
+	fmt.Printf(">>>hash2 %v\n", hex.EncodeToString(yHash[:]))
+
 	return bytes.Compare(xHash[:], yHash[:])
 }
 

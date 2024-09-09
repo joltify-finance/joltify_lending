@@ -19,8 +19,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 
-	app2 "github.com/joltify-finance/joltify_lending/app"
-
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	"github.com/stretchr/testify/assert"
 
@@ -104,7 +102,6 @@ func getCodec() codec.Codec {
 }
 
 func TestUploadInvestor(t *testing.T) {
-	app2.SetSDKConfig()
 	k2 := keyring.NewInMemory(getCodec())
 	_, _, err := k2.NewMnemonic("0",
 		keyring.English, sdk.FullFundraiserPath, keyring.DefaultBIP39Passphrase, hd.Secp256k1)
