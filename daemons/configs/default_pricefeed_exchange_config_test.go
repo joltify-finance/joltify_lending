@@ -124,6 +124,10 @@ func TestGenerateDefaultExchangeTomlString(t *testing.T) {
 
 func TestWriteDefaultPricefeedExchangeToml(t *testing.T) {
 	err := os.Mkdir("config", 0700)
+	defer func() {
+		err := os.RemoveAll("config")
+		require.NoError(t, err)
+	}()
 	require.NoError(t, err)
 	configs.WriteDefaultPricefeedExchangeToml("")
 
@@ -131,7 +135,6 @@ func TestWriteDefaultPricefeedExchangeToml(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, tomlString, string(buffer[:]))
-	os.RemoveAll("config")
 }
 
 func TestWriteDefaultPricefeedExchangeToml_FileExists(t *testing.T) {
