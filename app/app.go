@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joltify-finance/joltify_lending/app/prepare/prices"
 	// bridgeclient "github.com/joltify-finance/joltify_lending/daemons/bridge/client"
 	liquidationclient "github.com/joltify-finance/joltify_lending/daemons/liquidation/client"
 
@@ -2136,13 +2137,15 @@ func (app *App) createProposalHandlers(
 		)
 	}
 
+	var priceUpdateGenerator prices.PriceUpdateGenerator = prices.NewDefaultPriceUpdateGenerator(app.DydxPricesKeeper)
+
 	// Generate the dydx handlers
 	dydxPrepareProposalHandler := prepare.PrepareProposalHandler(
 		txConfig,
 		app.BridgeKeeper,
 		app.ClobKeeper,
 		app.PerpetualsKeeper,
-		app.DydxPricesKeeper,
+		priceUpdateGenerator,
 	)
 
 	// ProcessProposal setup.
