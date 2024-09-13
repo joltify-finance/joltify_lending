@@ -216,27 +216,27 @@ var (
 	// Custom modules
 	NormalMsgsDydxCustom = map[string]sdk.Msg{
 		// clob
-		"/dydxprotocol.clob.MsgBatchCancel":         &clob.MsgBatchCancel{},
-		"/dydxprotocol.clob.MsgBatchCancelResponse": nil,
-		"/dydxprotocol.clob.MsgCancelOrder":         &clob.MsgCancelOrder{},
-		"/dydxprotocol.clob.MsgCancelOrderResponse": nil,
-		"/dydxprotocol.clob.MsgPlaceOrder":          &clob.MsgPlaceOrder{},
-		"/dydxprotocol.clob.MsgPlaceOrderResponse":  nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancel":         &clob.MsgBatchCancel{},
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancelResponse": nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrder":         &clob.MsgCancelOrder{},
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrderResponse": nil,
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrder":          &clob.MsgPlaceOrder{},
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrderResponse":  nil,
 
 		// perpetuals
 
 		// prices
 
 		// sending
-		"/dydxprotocol.sending.MsgCreateTransfer":                 &sending.MsgCreateTransfer{},
-		"/dydxprotocol.sending.MsgCreateTransferResponse":         nil,
-		"/dydxprotocol.sending.MsgDepositToSubaccount":            &sending.MsgDepositToSubaccount{},
-		"/dydxprotocol.sending.MsgDepositToSubaccountResponse":    nil,
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccount":         &sending.MsgWithdrawFromSubaccount{},
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccountResponse": nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransfer":                 &sending.MsgCreateTransfer{},
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransferResponse":         nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccount":            &sending.MsgDepositToSubaccount{},
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccountResponse":    nil,
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccount":         &sending.MsgWithdrawFromSubaccount{},
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccountResponse": nil,
 
 		// vault
-		"/dydxprotocol.vault.MsgDepositToVault":         &vault.MsgDepositToVault{},
-		"/dydxprotocol.vault.MsgDepositToVaultResponse": nil,
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVault":         &vault.MsgDepositToVault{},
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVaultResponse": nil,
 	}
 )

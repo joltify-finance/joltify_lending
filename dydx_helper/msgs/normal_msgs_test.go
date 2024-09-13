@@ -1,6 +1,7 @@
 package msgs_test
 
 import (
+	"fmt"
 	"sort"
 	"testing"
 
@@ -216,6 +217,18 @@ func TestNormalMsgs_Key(t *testing.T) {
 		"/ibc.lightclients.tendermint.v1.ConsensusState",
 		"/ibc.lightclients.tendermint.v1.Header",
 		"/ibc.lightclients.tendermint.v1.Misbehaviour",
+	}
+
+	sort.StringsAreSorted(expectedMsgs)
+
+	for _, msg := range expectedMsgs {
+		fmt.Printf("%s\n", msg)
+	}
+
+	fmt.Printf(">>>>>>>>\n\n\n")
+	bb := lib.GetSortedKeys[sort.StringSlice](msgs.NormalMsgs)
+	for _, msg := range bb {
+		fmt.Printf("%s\n", msg)
 	}
 
 	require.Equal(t, expectedMsgs, lib.GetSortedKeys[sort.StringSlice](msgs.NormalMsgs))

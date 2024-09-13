@@ -55,7 +55,7 @@ func TestRunTxPanicLoggingMiddleware(t *testing.T) {
 			func() {
 				defer func() {
 					if r := recover(); r != nil {
-						handler := middleware.NewRunTxPanicLoggingMiddleware(app.ModuleBasics)
+						handler := middleware.NewRunTxPanicLoggingMiddleware(app.BasicModuleManager)
 						err := handler(r)
 						require.Nil(t, err)
 					}

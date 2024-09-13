@@ -64,84 +64,84 @@ func TestInternalMsgSamples_Gov_Key(t *testing.T) {
 		"/cosmos.upgrade.v1beta1.MsgSoftwareUpgradeResponse",
 
 		// blocktime
-		"/dydxprotocol.blocktime.MsgUpdateDowntimeParams",
-		"/dydxprotocol.blocktime.MsgUpdateDowntimeParamsResponse",
+		"/joltify.third_party.dydxprotocol.blocktime.MsgUpdateDowntimeParams",
+		"/joltify.third_party.dydxprotocol.blocktime.MsgUpdateDowntimeParamsResponse",
 
 		// bridge
-		"/dydxprotocol.bridge.MsgCompleteBridge",
-		"/dydxprotocol.bridge.MsgCompleteBridgeResponse",
-		"/dydxprotocol.bridge.MsgUpdateEventParams",
-		"/dydxprotocol.bridge.MsgUpdateEventParamsResponse",
-		"/dydxprotocol.bridge.MsgUpdateProposeParams",
-		"/dydxprotocol.bridge.MsgUpdateProposeParamsResponse",
-		"/dydxprotocol.bridge.MsgUpdateSafetyParams",
-		"/dydxprotocol.bridge.MsgUpdateSafetyParamsResponse",
+		"/joltify.third_party.dydxprotocol.bridge.MsgCompleteBridge",
+		"/joltify.third_party.dydxprotocol.bridge.MsgCompleteBridgeResponse",
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateEventParams",
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateEventParamsResponse",
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateProposeParams",
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateProposeParamsResponse",
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateSafetyParams",
+		"/joltify.third_party.dydxprotocol.bridge.MsgUpdateSafetyParamsResponse",
 
 		// clob
-		"/dydxprotocol.clob.MsgCreateClobPair",
-		"/dydxprotocol.clob.MsgCreateClobPairResponse",
-		"/dydxprotocol.clob.MsgUpdateBlockRateLimitConfiguration",
-		"/dydxprotocol.clob.MsgUpdateBlockRateLimitConfigurationResponse",
-		"/dydxprotocol.clob.MsgUpdateClobPair",
-		"/dydxprotocol.clob.MsgUpdateClobPairResponse",
-		"/dydxprotocol.clob.MsgUpdateEquityTierLimitConfiguration",
-		"/dydxprotocol.clob.MsgUpdateEquityTierLimitConfigurationResponse",
-		"/dydxprotocol.clob.MsgUpdateLiquidationsConfig",
-		"/dydxprotocol.clob.MsgUpdateLiquidationsConfigResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgCreateClobPair",
+		"/joltify.third_party.dydxprotocol.clob.MsgCreateClobPairResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateBlockRateLimitConfiguration",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateBlockRateLimitConfigurationResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateClobPair",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateClobPairResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateEquityTierLimitConfiguration",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateEquityTierLimitConfigurationResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateLiquidationsConfig",
+		"/joltify.third_party.dydxprotocol.clob.MsgUpdateLiquidationsConfigResponse",
 
 		// delaymsg
-		"/dydxprotocol.delaymsg.MsgDelayMessage",
-		"/dydxprotocol.delaymsg.MsgDelayMessageResponse",
+		"/joltify.third_party.dydxprotocol.delaymsg.MsgDelayMessage",
+		"/joltify.third_party.dydxprotocol.delaymsg.MsgDelayMessageResponse",
 
 		// feetiers
-		"/dydxprotocol.feetiers.MsgUpdatePerpetualFeeParams",
-		"/dydxprotocol.feetiers.MsgUpdatePerpetualFeeParamsResponse",
+		"/joltify.third_party.dydxprotocol.feetiers.MsgUpdatePerpetualFeeParams",
+		"/joltify.third_party.dydxprotocol.feetiers.MsgUpdatePerpetualFeeParamsResponse",
 
 		// govplus
-		"/dydxprotocol.govplus.MsgSlashValidator",
-		"/dydxprotocol.govplus.MsgSlashValidatorResponse",
+		"/joltify.third_party.dydxprotocol.govplus.MsgSlashValidator",
+		"/joltify.third_party.dydxprotocol.govplus.MsgSlashValidatorResponse",
 
 		// perpeutals
-		"/dydxprotocol.perpetuals.MsgCreatePerpetual",
-		"/dydxprotocol.perpetuals.MsgCreatePerpetualResponse",
-		"/dydxprotocol.perpetuals.MsgSetLiquidityTier",
-		"/dydxprotocol.perpetuals.MsgSetLiquidityTierResponse",
-		"/dydxprotocol.perpetuals.MsgUpdateParams",
-		"/dydxprotocol.perpetuals.MsgUpdateParamsResponse",
-		"/dydxprotocol.perpetuals.MsgUpdatePerpetualParams",
-		"/dydxprotocol.perpetuals.MsgUpdatePerpetualParamsResponse",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgCreatePerpetual",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgCreatePerpetualResponse",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgSetLiquidityTier",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgSetLiquidityTierResponse",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdateParams",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdateParamsResponse",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdatePerpetualParams",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgUpdatePerpetualParamsResponse",
 
 		// prices
-		"/dydxprotocol.prices.MsgCreateOracleMarket",
-		"/dydxprotocol.prices.MsgCreateOracleMarketResponse",
-		"/dydxprotocol.prices.MsgUpdateMarketParam",
-		"/dydxprotocol.prices.MsgUpdateMarketParamResponse",
+		"/joltify.third_party.dydxprotocol.prices.MsgCreateOracleMarket",
+		"/joltify.third_party.dydxprotocol.prices.MsgCreateOracleMarketResponse",
+		"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketParam",
+		"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketParamResponse",
 
 		// ratelimit
-		"/dydxprotocol.ratelimit.MsgSetLimitParams",
-		"/dydxprotocol.ratelimit.MsgSetLimitParamsResponse",
+		"/joltify.third_party.dydxprotocol.ratelimit.MsgSetLimitParams",
+		"/joltify.third_party.dydxprotocol.ratelimit.MsgSetLimitParamsResponse",
 
 		// rewards
-		"/dydxprotocol.rewards.MsgUpdateParams",
-		"/dydxprotocol.rewards.MsgUpdateParamsResponse",
+		"/joltify.third_party.dydxprotocol.rewards.MsgUpdateParams",
+		"/joltify.third_party.dydxprotocol.rewards.MsgUpdateParamsResponse",
 
 		// sending
-		"/dydxprotocol.sending.MsgSendFromModuleToAccount",
-		"/dydxprotocol.sending.MsgSendFromModuleToAccountResponse",
+		"/joltify.third_party.dydxprotocol.sending.MsgSendFromModuleToAccount",
+		"/joltify.third_party.dydxprotocol.sending.MsgSendFromModuleToAccountResponse",
 
 		// stats
-		"/dydxprotocol.stats.MsgUpdateParams",
-		"/dydxprotocol.stats.MsgUpdateParamsResponse",
+		"/joltify.third_party.dydxprotocol.stats.MsgUpdateParams",
+		"/joltify.third_party.dydxprotocol.stats.MsgUpdateParamsResponse",
 
 		// vault
-		"/dydxprotocol.vault.MsgUpdateParams",
-		"/dydxprotocol.vault.MsgUpdateParamsResponse",
+		"/joltify.third_party.dydxprotocol.vault.MsgUpdateParams",
+		"/joltify.third_party.dydxprotocol.vault.MsgUpdateParamsResponse",
 
 		// vest
-		"/dydxprotocol.vest.MsgDeleteVestEntry",
-		"/dydxprotocol.vest.MsgDeleteVestEntryResponse",
-		"/dydxprotocol.vest.MsgSetVestEntry",
-		"/dydxprotocol.vest.MsgSetVestEntryResponse",
+		"/joltify.third_party.dydxprotocol.vest.MsgDeleteVestEntry",
+		"/joltify.third_party.dydxprotocol.vest.MsgDeleteVestEntryResponse",
+		"/joltify.third_party.dydxprotocol.vest.MsgSetVestEntry",
+		"/joltify.third_party.dydxprotocol.vest.MsgSetVestEntryResponse",
 
 		// ibc
 		"/ibc.applications.interchain_accounts.host.v1.MsgUpdateParams",
