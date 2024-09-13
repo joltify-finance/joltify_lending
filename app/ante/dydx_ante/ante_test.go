@@ -9,7 +9,6 @@ import (
 	dydxante "github.com/joltify-finance/joltify_lending/app/ante/dydx_ante"
 	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
-	"github.com/joltify-finance/joltify_lending/app"
 	testApp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/stretchr/testify/require"
 )
@@ -33,38 +32,38 @@ func newHandlerOptions() dydxante.HandlerOptions {
 
 func TestNewAnteHandler(t *testing.T) {
 	handlerOptions := newHandlerOptions()
-	anteHandler, err := app.NewAnteHandler(handlerOptions)
+	anteHandler, err := dydxante.NewAnteHandler(handlerOptions)
 	require.NoError(t, err, "NewAnteHandler call failed")
 	require.NotNil(t, anteHandler, "expected non-nil AnteHandler function")
 }
 
 func TestNewAnteHandler_Error(t *testing.T) {
 	tests := map[string]struct {
-		handlerMutation func(*app.HandlerOptions)
+		handlerMutation func(*dydxante.HandlerOptions)
 		errorMsg        string
 	}{
 		"nil handlerOptions.AccountKeeper": {
-			handlerMutation: func(options *app.HandlerOptions) { options.AccountKeeper = nil },
+			handlerMutation: func(options *dydxante.HandlerOptions) { options.AccountKeeper = nil },
 			errorMsg:        "account keeper is required for ante builder",
 		},
 		"nil handlerOptions.BankKeeper": {
-			handlerMutation: func(options *app.HandlerOptions) { options.BankKeeper = nil },
+			handlerMutation: func(options *dydxante.HandlerOptions) { options.BankKeeper = nil },
 			errorMsg:        "bank keeper is required for ante builder",
 		},
 		"nil handlerOptions.SignModeHandler": {
-			handlerMutation: func(options *app.HandlerOptions) { options.SignModeHandler = nil },
+			handlerMutation: func(options *dydxante.HandlerOptions) { options.SignModeHandler = nil },
 			errorMsg:        "sign mode handler is required for ante builder",
 		},
 		"nil ClobKeeper": {
-			handlerMutation: func(options *app.HandlerOptions) { options.ClobKeeper = nil },
+			handlerMutation: func(options *dydxante.HandlerOptions) { options.ClobKeeper = nil },
 			errorMsg:        "clob keeper is required for ante builder",
 		},
 		"nil Codec": {
-			handlerMutation: func(options *app.HandlerOptions) { options.Codec = nil },
+			handlerMutation: func(options *dydxante.HandlerOptions) { options.Codec = nil },
 			errorMsg:        "codec is required for ante builder",
 		},
 		"nil AuthStoreKey": {
-			handlerMutation: func(options *app.HandlerOptions) { options.AuthStoreKey = nil },
+			handlerMutation: func(options *dydxante.HandlerOptions) { options.AuthStoreKey = nil },
 			errorMsg:        "auth store key is required for ante builder",
 		},
 	}
@@ -73,7 +72,7 @@ func TestNewAnteHandler_Error(t *testing.T) {
 			handlerOptions := newHandlerOptions()
 			tc.handlerMutation(&handlerOptions)
 
-			anteHandler, err := app.NewAnteHandler(handlerOptions)
+			anteHandler, err := dydxante.NewAnteHandler(handlerOptions)
 			require.Nil(t, anteHandler, "Expected Ante Handler creation to error")
 			require.Errorf(t, err, tc.errorMsg)
 		})

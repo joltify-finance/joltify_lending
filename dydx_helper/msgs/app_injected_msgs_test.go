@@ -20,20 +20,20 @@ import (
 func TestAppInjectedMsgSamples_Key(t *testing.T) {
 	expectedMsgs := []string{
 		// bridge
-		"/dydxprotocol.bridge.MsgAcknowledgeBridges",
-		"/dydxprotocol.bridge.MsgAcknowledgeBridgesResponse",
+		"/joltify.third_party.dydxprotocol.bridge.MsgAcknowledgeBridges",
+		"/joltify.third_party.dydxprotocol.bridge.MsgAcknowledgeBridgesResponse",
 
 		// clob
-		"/dydxprotocol.clob.MsgProposedOperations",
-		"/dydxprotocol.clob.MsgProposedOperationsResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgProposedOperations",
+		"/joltify.third_party.dydxprotocol.clob.MsgProposedOperationsResponse",
 
 		// perpetuals
-		"/dydxprotocol.perpetuals.MsgAddPremiumVotes",
-		"/dydxprotocol.perpetuals.MsgAddPremiumVotesResponse",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgAddPremiumVotes",
+		"/joltify.third_party.dydxprotocol.perpetuals.MsgAddPremiumVotesResponse",
 
 		// prices
-		"/dydxprotocol.prices.MsgUpdateMarketPrices",
-		"/dydxprotocol.prices.MsgUpdateMarketPricesResponse",
+		"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketPrices",
+		"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketPricesResponse",
 	}
 
 	require.Equal(t, expectedMsgs, lib.GetSortedKeys[sort.StringSlice](msgs.AppInjectedMsgSamples))
@@ -72,7 +72,7 @@ func validateMsgValue(
 			require.NotNil(t, sample, "key: %s", key)
 
 			// Sample msg type must match the key it's registered under.
-			expectedTypeUrl := "/" + proto.MessageName(sample)
+			expectedTypeUrl := "/joltify.third_party." + proto.MessageName(sample)
 			require.Equal(t, expectedTypeUrl, key)
 		} else {
 			// "Response" messages are msgs that cannot be submitted, so no sample is provided.
