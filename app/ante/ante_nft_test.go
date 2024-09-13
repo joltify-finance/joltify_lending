@@ -3,6 +3,8 @@ package ante_test
 import (
 	"cosmossdk.io/store/metrics"
 	dbm "github.com/cosmos/cosmos-db"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+
 	"math/rand"
 	"testing"
 	"time"
@@ -74,7 +76,8 @@ func mockAnteHandler(ctx sdk.Context, _ sdk.Tx, _ bool) (newCtx sdk.Context, err
 }
 
 func TestTransferSPVNFT(t *testing.T) {
-	encod := app.MakeEncodingConfig()
+	encod := appconfig.MakeEncodingConfig()
+
 	txConfig := encod.TxConfig
 
 	ctx, k := setupApp(t)

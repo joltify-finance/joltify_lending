@@ -8,6 +8,8 @@ import (
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/price_function/mexc"
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/price_function/testutil"
 	"github.com/joltify-finance/joltify_lending/lib"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants"
+	"github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/daemons/pricefeed"
 	"github.com/stretchr/testify/require"
 )
 

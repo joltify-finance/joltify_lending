@@ -435,7 +435,7 @@ type App struct {
 	// cdpKeeper        cdpkeeper.Keeper
 	joltKeeper              joltkeeper.Keeper
 	incentiveKeeper         incentivekeeper.Keeper
-	feeGrantKeeper          feegrantkeeper.Keeper
+	FeeGrantKeeper          feegrantkeeper.Keeper
 	kycKeeper               kycmodulekeeper.Keeper
 	spvKeeper               spvmodulekeeper.Keeper
 	burnauctionKeeper       burnauctionmodulekeeper.Keeper
@@ -520,7 +520,7 @@ func NewApp(
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
 	encodingConfig := appconfig.MakeEncodingConfig()
-	appCodec := encodingConfig.Marshaler
+	appCodec := encodingConfig.Codec
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 	txConfig := encodingConfig.TxConfig
@@ -841,7 +841,7 @@ func NewApp(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
-	app.feeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
+	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[banktypes.StoreKey]),
@@ -1339,7 +1339,7 @@ func NewApp(
 		authModule,
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.ParamsKeeper.Subspace(banktypes.ModuleName)),
 		capability.NewAppModule(appCodec, *app.capabilityKeeper, false),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.feeGrantKeeper, app.interfaceRegistry),
+		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		staking.NewAppModule(appCodec, app.stakingKeeper, app.AccountKeeper, app.BankKeeper, app.ParamsKeeper.Subspace(stakingtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.mintKeeper, app.AccountKeeper, app.BankKeeper),
 		distr.NewAppModule(appCodec, app.distrKeeper, app.AccountKeeper, app.BankKeeper, app.stakingKeeper, app.ParamsKeeper.Subspace(distrtypes.ModuleName)),
@@ -1649,7 +1649,7 @@ func NewApp(
 		AccountKeeper:          &app.AccountKeeper,
 		BankKeeper:             app.BankKeeper,
 		SignModeHandler:        encodingConfig.TxConfig.SignModeHandler(),
-		FeegrantKeeper:         app.feeGrantKeeper,
+		FeegrantKeeper:         app.FeeGrantKeeper,
 		SpvKeeper:              app.spvKeeper,
 		IBCKeeper:              app.ibcKeeper,
 		AddressFetchers:        []jante.AddressFetcher{},
@@ -1993,7 +1993,7 @@ func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 func (app *App) EncodingConfig() config2.EncodingConfig {
 	return config2.EncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
-		Marshaler:         app.AppCodec(),
+		Codec:             app.AppCodec(),
 		TxConfig:          app.TxConfig(),
 		Amino:             app.LegacyAmino(),
 	}
@@ -2091,7 +2091,7 @@ func (app *App) buildAnteHandler(txConfig client.TxConfig) sdk.AnteHandler {
 				AccountKeeper:   app.AccountKeeper,
 				BankKeeper:      app.BankKeeper,
 				SignModeHandler: txConfig.SignModeHandler(),
-				FeegrantKeeper:  app.feeGrantKeeper,
+				FeegrantKeeper:  app.FeeGrantKeeper,
 				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 			},
 			ClobKeeper:   app.ClobKeeper,

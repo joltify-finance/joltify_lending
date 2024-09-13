@@ -4,18 +4,20 @@ import (
 	"testing"
 
 	"cosmossdk.io/store/rootmulti"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	dydxante "github.com/joltify-finance/joltify_lending/app/ante/dydx_ante"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+
 	"github.com/joltify-finance/joltify_lending/app"
 	testApp "github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/app"
 	"github.com/stretchr/testify/require"
 )
 
-func newHandlerOptions() app.HandlerOptions {
-	encodingConfig := app.GetEncodingConfig()
+func newHandlerOptions() dydxante.HandlerOptions {
+	encodingConfig := appconfig.MakeEncodingConfig()
 	dydxApp := testApp.DefaultTestApp(nil)
-	return app.HandlerOptions{
+	return dydxante.HandlerOptions{
 		HandlerOptions: ante.HandlerOptions{
 			AccountKeeper:   dydxApp.AccountKeeper,
 			BankKeeper:      dydxApp.BankKeeper,

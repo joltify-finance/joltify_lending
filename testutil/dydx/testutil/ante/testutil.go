@@ -281,7 +281,7 @@ func (suite *AnteTestSuite) CreateTestTx(
 
 func MakeTestEncodingConfig(modules ...module.AppModuleBasic) moduletestutil.TestEncodingConfig {
 	encodingConfig := config.MakeEncodingConfig()
-	appCodec := encodingConfig.Marshaler
+	appCodec := encodingConfig.Codec
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 

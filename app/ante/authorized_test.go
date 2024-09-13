@@ -6,6 +6,7 @@ import (
 	"time"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/app/ante"
@@ -33,7 +34,7 @@ func mockAddressFetcher(addresses ...sdk.AccAddress) ante.AddressFetcher {
 }
 
 func TestAuthenticatedMempoolDecorator_AnteHandle_NotCheckTx(t *testing.T) {
-	txConfig := app.MakeEncodingConfig().TxConfig
+	txConfig := appconfig.MakeEncodingConfig().TxConfig
 
 	testPrivKeys, testAddresses := app.GeneratePrivKeyAddressPairs(5)
 	fetcher := mockAddressFetcher(testAddresses[1:]...)
@@ -67,7 +68,7 @@ func TestAuthenticatedMempoolDecorator_AnteHandle_NotCheckTx(t *testing.T) {
 }
 
 func TestAuthenticatedMempoolDecorator_AnteHandle_Pass(t *testing.T) {
-	txConfig := app.MakeEncodingConfig().TxConfig
+	txConfig := appconfig.MakeEncodingConfig().TxConfig
 
 	testPrivKeys, testAddresses := app.GeneratePrivKeyAddressPairs(5)
 	fetcher := mockAddressFetcher(testAddresses[1:]...)
@@ -108,7 +109,7 @@ func TestAuthenticatedMempoolDecorator_AnteHandle_Pass(t *testing.T) {
 }
 
 func TestAuthenticatedMempoolDecorator_AnteHandle_Reject(t *testing.T) {
-	txConfig := app.MakeEncodingConfig().TxConfig
+	txConfig := appconfig.MakeEncodingConfig().TxConfig
 
 	testPrivKeys, testAddresses := app.GeneratePrivKeyAddressPairs(5)
 	fetcher := mockAddressFetcher(testAddresses[1:]...)
