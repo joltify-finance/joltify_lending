@@ -119,28 +119,28 @@ func TestNormalMsgs_Key(t *testing.T) {
 		"/cosmos.upgrade.v1beta1.SoftwareUpgradeProposal",
 
 		// clob
-		"/dydxprotocol.clob.MsgBatchCancel",
-		"/dydxprotocol.clob.MsgBatchCancelResponse",
-		"/dydxprotocol.clob.MsgCancelOrder",
-		"/dydxprotocol.clob.MsgCancelOrderResponse",
-		"/dydxprotocol.clob.MsgPlaceOrder",
-		"/dydxprotocol.clob.MsgPlaceOrderResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancel",
+		"/joltify.third_party.dydxprotocol.clob.MsgBatchCancelResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrder",
+		"/joltify.third_party.dydxprotocol.clob.MsgCancelOrderResponse",
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrder",
+		"/joltify.third_party.dydxprotocol.clob.MsgPlaceOrderResponse",
 
 		// perpetuals
 
 		// prices
 
 		// sending
-		"/dydxprotocol.sending.MsgCreateTransfer",
-		"/dydxprotocol.sending.MsgCreateTransferResponse",
-		"/dydxprotocol.sending.MsgDepositToSubaccount",
-		"/dydxprotocol.sending.MsgDepositToSubaccountResponse",
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccount",
-		"/dydxprotocol.sending.MsgWithdrawFromSubaccountResponse",
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransfer",
+		"/joltify.third_party.dydxprotocol.sending.MsgCreateTransferResponse",
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccount",
+		"/joltify.third_party.dydxprotocol.sending.MsgDepositToSubaccountResponse",
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccount",
+		"/joltify.third_party.dydxprotocol.sending.MsgWithdrawFromSubaccountResponse",
 
 		// vault
-		"/dydxprotocol.vault.MsgDepositToVault",
-		"/dydxprotocol.vault.MsgDepositToVaultResponse",
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVault",
+		"/joltify.third_party.dydxprotocol.vault.MsgDepositToVaultResponse",
 
 		// ibc application module: ICA
 		"/ibc.applications.interchain_accounts.v1.InterchainAccount",

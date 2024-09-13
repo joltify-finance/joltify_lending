@@ -16,7 +16,7 @@ import (
 // These messages are reserved for proposing validator's use only.
 var AppInjectedMsgSamples = map[string]sdk.Msg{
 	// bridge
-	"/dydxprotocol.bridge.MsgAcknowledgeBridges": &bridgetypes.MsgAcknowledgeBridges{
+	"/joltify.third_party.dydxprotocol.bridge.MsgAcknowledgeBridges": &bridgetypes.MsgAcknowledgeBridges{
 		Events: []bridgetypes.BridgeEvent{
 			{
 				Id: 0,
@@ -28,27 +28,27 @@ var AppInjectedMsgSamples = map[string]sdk.Msg{
 			},
 		},
 	},
-	"/dydxprotocol.bridge.MsgAcknowledgeBridgesResponse": nil,
+	"/joltify.third_party.dydxprotocol.bridge.MsgAcknowledgeBridgesResponse": nil,
 
 	// clob
-	"/dydxprotocol.clob.MsgProposedOperations": &clobtypes.MsgProposedOperations{
+	"/joltify.third_party.dydxprotocol.clob.MsgProposedOperations": &clobtypes.MsgProposedOperations{
 		OperationsQueue: make([]clobtypes.OperationRaw, 0),
 	},
-	"/dydxprotocol.clob.MsgProposedOperationsResponse": nil,
+	"/joltify.third_party.dydxprotocol.clob.MsgProposedOperationsResponse": nil,
 
 	// perpetuals
-	"/dydxprotocol.perpetuals.MsgAddPremiumVotes": &perptypes.MsgAddPremiumVotes{
+	"/joltify.third_party.dydxprotocol.perpetuals.MsgAddPremiumVotes": &perptypes.MsgAddPremiumVotes{
 		Votes: []perptypes.FundingPremium{
 			{PerpetualId: 0, PremiumPpm: 1_000},
 		},
 	},
-	"/dydxprotocol.perpetuals.MsgAddPremiumVotesResponse": nil,
+	"/joltify.third_party.dydxprotocol.perpetuals.MsgAddPremiumVotesResponse": nil,
 
 	// prices
-	"/dydxprotocol.prices.MsgUpdateMarketPrices": &pricestypes.MsgUpdateMarketPrices{
+	"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketPrices": &pricestypes.MsgUpdateMarketPrices{
 		MarketPriceUpdates: []*pricestypes.MsgUpdateMarketPrices_MarketPrice{
 			pricestypes.NewMarketPriceUpdate(constants.MarketId0, 123_000),
 		},
 	},
-	"/dydxprotocol.prices.MsgUpdateMarketPricesResponse": nil,
+	"/joltify.third_party.dydxprotocol.prices.MsgUpdateMarketPricesResponse": nil,
 }

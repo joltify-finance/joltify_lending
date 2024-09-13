@@ -72,7 +72,7 @@ func validateMsgValue(
 			require.NotNil(t, sample, "key: %s", key)
 
 			// Sample msg type must match the key it's registered under.
-			expectedTypeUrl := "/joltify.third_party." + proto.MessageName(sample)
+			expectedTypeUrl := "/" + proto.MessageName(sample)
 			require.Equal(t, expectedTypeUrl, key)
 		} else {
 			// "Response" messages are msgs that cannot be submitted, so no sample is provided.

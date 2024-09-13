@@ -117,6 +117,7 @@ func MakeEncodingConfig() EncodingConfig {
 	// https://github.com/cosmos/cosmos-sdk/issues/18722 is fixed, replace this with the cosmos.msg.v1.signing
 	// annotation on the protos.
 
+	// fixme do we need to update it??
 	customerSigner := make(map[protoreflect.FullName]signing.GetSignersFunc)
 
 	customerSigner["dydxprotocol.bridge.MsgAcknowledgeBridges"] = noSigners
