@@ -83,7 +83,7 @@ func TestProposedOperationsTx_Validate(t *testing.T) {
 			txBytes: constants.InvalidProposedOperationsUnspecifiedOrderRemovalReasonTxBytes,
 			expectedErr: errorsmod.Wrap(
 				types.ErrInvalidMsgProposedOperations,
-				"order removal reason must be specified: {{jolt1txtsnx4gr4effr8542778fsxc20j5vzqxet7t0 0} 0 64 0}",
+				"order removal reason must be specified: {{jolt199tqg4wdlnu4qjlxchpd7seg454937hjq0q20t 0} 0 64 0}",
 			),
 		},
 		"Valid: ValidateBasic passes": {

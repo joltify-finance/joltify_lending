@@ -6,14 +6,13 @@ import (
 
 	types2 "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestQueryByWallet(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 	acc, err := types2.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
@@ -50,7 +49,7 @@ func TestQueryByWallet(t *testing.T) {
 }
 
 func TestQueryByWalletTwoInvestorIDWithSameWallet(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 	acc, err := types2.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)

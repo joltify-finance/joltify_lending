@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cosmossdk.io/log"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	"github.com/joltify-finance/joltify_lending/x/third_party/incentive/keeper"
 	"github.com/stretchr/testify/suite"
@@ -30,8 +31,7 @@ type KeeperTestSuite struct {
 
 // SetupTest is run automatically before each suite test
 func (suite *KeeperTestSuite) SetupTest() {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 
 	_, suite.addrs = app.GeneratePrivKeyAddressPairs(5)
 

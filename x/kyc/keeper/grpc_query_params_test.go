@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/cosmos/gogoproto/proto"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -49,7 +48,8 @@ func newParams() types.Params {
 }
 
 func TestParamsQuery(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
+	utils.SetBech32AddressPrefixes(config)
 	utils.SetBech32AddressPrefixes(config)
 	keeper, ctx := testkeeper.KycKeeper(t)
 	wctx := sdk.WrapSDKContext(ctx)

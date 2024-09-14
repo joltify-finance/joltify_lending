@@ -7,6 +7,7 @@ import (
 
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -119,8 +120,7 @@ type BorrowRewardsTestSuite struct {
 
 // SetupTest is run automatically before each suite test
 func (suite *BorrowRewardsTestSuite) SetupTest() {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 
 	_, suite.addrs = app.GeneratePrivKeyAddressPairs(5)
 

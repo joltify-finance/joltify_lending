@@ -3,7 +3,7 @@ package swap_test
 import (
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/app"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
@@ -92,8 +92,8 @@ func (suite *genesisTestSuite) Test_Marshall() {
 		},
 	)
 
-	encodingCfg := app.MakeEncodingConfig()
-	cdc := encodingCfg.Marshaler
+	encodingCfg := appconfig.MakeEncodingConfig()
+	cdc := encodingCfg.Codec
 
 	bz, err := cdc.Marshal(&state)
 	suite.Require().NoError(err, "expected genesis state to marshal without error")
@@ -127,8 +127,8 @@ func (suite *genesisTestSuite) Test_LegacyJSONConversion() {
 		},
 	)
 
-	encodingCfg := app.MakeEncodingConfig()
-	cdc := encodingCfg.Marshaler
+	encodingCfg := appconfig.MakeEncodingConfig()
+	cdc := encodingCfg.Codec
 	legacyCdc := encodingCfg.Amino
 
 	protoJson, err := cdc.MarshalJSON(&state)

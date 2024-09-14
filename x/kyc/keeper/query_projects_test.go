@@ -8,13 +8,12 @@ import (
 	"github.com/joltify-finance/joltify_lending/x/kyc/types"
 
 	types2 "github.com/cosmos/cosmos-sdk/types"
-	"github.com/joltify-finance/joltify_lending/app"
 	"github.com/joltify-finance/joltify_lending/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestQueryProject(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 	_, k, wctx := setupMsgServer(t)
 	ctx := types2.UnwrapSDKContext(wctx)
@@ -39,7 +38,7 @@ func TestQueryProject(t *testing.T) {
 }
 
 func TestListProjects(t *testing.T) {
-	config := app.SetSDKConfig()
+	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
 	_, k, wctx := setupMsgServer(t)
 	ctx := types2.UnwrapSDKContext(wctx)

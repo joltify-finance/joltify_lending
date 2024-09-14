@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"cosmossdk.io/log"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -31,8 +32,7 @@ func TestHandlerTestSuite(t *testing.T) {
 
 // SetupTest is run automatically before each suite test
 func (suite *HandlerTestSuite) SetupTest() {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 
 	_, suite.addrs = app.GeneratePrivKeyAddressPairs(5)
 

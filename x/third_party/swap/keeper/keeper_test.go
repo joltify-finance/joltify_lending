@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/joltify-finance/joltify_lending/app"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/testutil"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types"
 	"github.com/joltify-finance/joltify_lending/x/third_party/swap/types/mocks"
@@ -15,8 +15,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixes(config)
+	appconfig.SetupConfig()
 
 	os.Exit(m.Run())
 }
