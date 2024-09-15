@@ -13,7 +13,7 @@ import (
 )
 
 func TestQueryProject(t *testing.T) {
-	config := sdk.GetConfig()
+	config := types2.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	_, k, wctx := setupMsgServer(t)
 	ctx := types2.UnwrapSDKContext(wctx)
@@ -38,7 +38,7 @@ func TestQueryProject(t *testing.T) {
 }
 
 func TestListProjects(t *testing.T) {
-	config := sdk.GetConfig()
+	config := types2.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	_, k, wctx := setupMsgServer(t)
 	ctx := types2.UnwrapSDKContext(wctx)

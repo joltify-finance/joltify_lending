@@ -12,7 +12,7 @@ import (
 )
 
 func TestQueryByWallet(t *testing.T) {
-	config := sdk.GetConfig()
+	config := types2.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	acc, err := types2.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)
@@ -49,7 +49,7 @@ func TestQueryByWallet(t *testing.T) {
 }
 
 func TestQueryByWalletTwoInvestorIDWithSameWallet(t *testing.T) {
-	config := sdk.GetConfig()
+	config := types2.NewConfig()
 	utils.SetBech32AddressPrefixes(config)
 	acc, err := types2.AccAddressFromBech32("jolt1p3jl6udk43vw0cvc5hjqrpnncsqmsz56wd32z8")
 	require.NoError(t, err)

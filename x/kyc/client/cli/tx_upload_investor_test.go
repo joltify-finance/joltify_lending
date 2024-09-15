@@ -65,8 +65,6 @@ func networkPrepare(t *testing.T, maxValidator uint32, v *keyring.Record) *netwo
 	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[banktypes.ModuleName], &stateBank))
 	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[authtypes.ModuleName], &stateAuth))
 
-	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[authtypes.ModuleName], &stateAuth))
-
 	state.Params.Submitter = []sdk.AccAddress{addr}
 	buf, err := cfg.Codec.MarshalJSON(&state)
 	require.NoError(t, err)

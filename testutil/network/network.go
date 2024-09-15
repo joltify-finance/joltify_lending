@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
+
 	"github.com/labstack/gommon/random"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -54,14 +56,15 @@ func DefaultConfig() network.Config {
 	randomChainName := rd.String(6, random.Alphabetic)
 	randomChainID := strings.ToLower(randomChainName) + "localnet" + "_888-1"
 	// randomChainID := "joltifydev_1729-1"
-	encoding := app.MakeEncodingConfig()
 
-	return network.Config{
-		Codec:             encoding.Marshaler,
-		TxConfig:          encoding.TxConfig,
-		LegacyAmino:       encoding.Amino,
-		InterfaceRegistry: encoding.InterfaceRegistry,
-		AccountRetriever:  authtypes.AccountRetriever{},
+	var encoding appconfig.EncodingConfig
+
+	net := network.Config{
+		// Codec:             encoding.Codec,
+		// TxConfig:          encoding.TxConfig,
+		// LegacyAmino:       encoding.Amino,
+		// InterfaceRegistry: encoding.InterfaceRegistry,
+		AccountRetriever: authtypes.AccountRetriever{},
 		AppConstructor: func(val network.ValidatorI) servertypes.Application {
 			localApp := app.NewApp(
 				val.GetCtx().Logger, dbm.NewMemDB(), nil,
@@ -71,11 +74,11 @@ func DefaultConfig() network.Config {
 				baseapp.SetMinGasPrices("0stake"),
 				baseapp.SetChainID("joltifytest_888-1"),
 			)
-
+			encoding = localApp.EncodingConfig()
 			return localApp
 		},
 
-		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),
+		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Codec),
 		TimeoutCommit:   2 * time.Second,
 		ChainID:         randomChainID,
 		NumValidators:   1,
@@ -89,4 +92,10 @@ func DefaultConfig() network.Config {
 		SigningAlgo:     string(hd.Secp256k1Type),
 		KeyringOptions:  []keyring.Option{},
 	}
+	net.Codec = encoding.Codec
+	net.TxConfig = encoding.TxConfig
+	net.InterfaceRegistry = encoding.InterfaceRegistry
+	net.LegacyAmino = encoding.Amino
+
+	return net
 }

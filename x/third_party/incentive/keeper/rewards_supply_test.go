@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	epochtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/epochs/types"
+
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 	appconfig "github.com/joltify-finance/joltify_lending/app/config"
@@ -65,13 +67,39 @@ func (suite *SupplyIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncin
 		genAcc = append(genAcc, b)
 	}
 
+	dydxEpochgenesisState := epochtypes.GenesisState{
+		EpochInfoList: []epochtypes.EpochInfo{
+			{
+				Name:                "funding-sample",
+				Duration:            60,
+				FastForwardNextTick: true,
+			},
+			{
+				Name:                "funding-tick",
+				Duration:            60,
+				FastForwardNextTick: true,
+			},
+			{
+				Name:                "stats-epoch",
+				Duration:            60,
+				FastForwardNextTick: true,
+			},
+		},
+	}
 	suite.SetApp()
+
+	dydxencoded := suite.App.AppCodec().MustMarshalJSON(&dydxEpochgenesisState)
+	gendydxepochState := app.GenesisState{
+		epochtypes.ModuleName: dydxencoded,
+	}
+
 	suite.StartChain(genAcc, cs(c("bnb", 1e12), c("sbnb", 1e12)),
 		suite.genesisTime,
 		NewPricefeedGenStateMultiFromTime(suite.App.AppCodec(), suite.genesisTime),
 		NewJoltGenStateMulti(suite.genesisTime).BuildMarshalled(suite.App.AppCodec()),
 		authBulder.BuildMarshalled(suite.App.AppCodec()),
 		incentBuilder.BuildMarshalled(suite.App.AppCodec()),
+		gendydxepochState,
 	)
 
 	err := fundModuleAccount(suite.App.GetBankKeeper(), suite.Ctx, types.ModuleName, cs(c("jjolt", 1e18)))

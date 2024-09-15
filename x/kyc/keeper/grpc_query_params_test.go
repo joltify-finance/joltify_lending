@@ -50,7 +50,6 @@ func newParams() types.Params {
 func TestParamsQuery(t *testing.T) {
 	config := sdk.GetConfig()
 	utils.SetBech32AddressPrefixes(config)
-	utils.SetBech32AddressPrefixes(config)
 	keeper, ctx := testkeeper.KycKeeper(t)
 	wctx := sdk.WrapSDKContext(ctx)
 	params := newParams()

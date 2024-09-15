@@ -177,6 +177,12 @@ func (k Keeper) NumBlocksSinceEpochStart(
 	uint32,
 	error,
 ) {
+
+	oo := k.GetAllEpochInfo(ctx)
+	for _, el := range oo {
+		fmt.Printf(">>> %v\n", el.String())
+	}
+
 	epoch, found := k.GetEpochInfo(ctx, id)
 	if !found {
 		return 0, errorsmod.Wrapf(types.ErrEpochInfoNotFound, "EpochInfo Id not found (%s)", id)
