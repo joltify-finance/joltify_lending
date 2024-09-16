@@ -434,7 +434,7 @@ type App struct {
 	// issuanceKeeper   issuancekeeper.Keeper
 	kavaPricefeedKeeper kavapricefeedkeeper.Keeper
 	// cdpKeeper        cdpkeeper.Keeper
-	joltKeeper              joltkeeper.Keeper
+	JoltKeeper              joltkeeper.Keeper
 	incentiveKeeper         incentivekeeper.Keeper
 	FeeGrantKeeper          feegrantkeeper.Keeper
 	kycKeeper               kycmodulekeeper.Keeper
@@ -1328,7 +1328,7 @@ func NewApp(
 		stakingtypes.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()))
 
 	// app.cdpKeeper = *cdpKeeper.SetHooks(cdptypes.NewMultiCDPHooks(app.incentiveKeeper.Hooks()))
-	app.joltKeeper = *joltKeeper.SetHooks(jolttypes.NewMultiJoltHooks(app.incentiveKeeper.Hooks()))
+	app.JoltKeeper = *joltKeeper.SetHooks(jolttypes.NewMultiJoltHooks(app.incentiveKeeper.Hooks()))
 
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
@@ -1356,7 +1356,7 @@ func NewApp(
 		// issuance.NewAppModule(app.issuanceKeeper, app.AccountKeeper, app.bankKeeper),
 		kavapricefeed.NewAppModule(app.kavaPricefeedKeeper, app.AccountKeeper),
 		// cdp.NewAppModule(app.cdpKeeper, app.AccountKeeper, app.pricefeedKeeper, app.bankKeeper),
-		jolt.NewAppModule(app.joltKeeper, app.AccountKeeper, app.BankKeeper, app.kavaPricefeedKeeper),
+		jolt.NewAppModule(app.JoltKeeper, app.AccountKeeper, app.BankKeeper, app.kavaPricefeedKeeper),
 		incentive.NewAppModule(app.incentiveKeeper, app.AccountKeeper, app.BankKeeper),
 		kycmodule.NewAppModule(appCodec, app.kycKeeper, app.AccountKeeper, app.BankKeeper),
 

@@ -336,17 +336,18 @@ func (suite *HandlerTestSuite) TestPayoutHardClaimSingleDenom() {
 	suite.NoError(suite.DeliverJoltMsgDeposit(userAddr, cs(c("bnb", 1e11))))
 	suite.NoError(suite.DeliverJoltMsgBorrow(userAddr, cs(c("bnb", 1e10))))
 
-	de, found := suite.App.GetJoltKeeper().GetDeposit(suite.Ctx, userAddr)
+	//de, found := suite.App.GetJoltKeeper().GetDeposit(suite.Ctx, userAddr)
+	de, found := tApp.App.JoltKeeper.GetDeposit(suite.Ctx, userAddr)
 	fmt.Printf("dep##########1111#######osit %v==%v\n", de, found)
 
-	tApp.App.BankKeeper
+	fmt.Printf("current height %v\n", suite.App.Ctx.BlockHeight())
 	// accumulate some rewards
-	newctx := tApp.AdvanceToBlock(2, testapp.AdvanceToBlockOptions{BlockTime: suite.App.Ctx.BlockTime().Add(time.Second * 7)})
+	newctx := tApp.AdvanceToBlock(20, testapp.AdvanceToBlockOptions{BlockTime: suite.App.Ctx.BlockTime().Add(time.Second * 7)})
 	suite.Ctx = newctx
 	suite.App.Ctx = newctx
 	suite.App.App = *tApp.App
 
-	de, found = suite.App.GetJoltKeeper().GetDeposit(newctx, userAddr)
+	de, found = tApp.App.JoltKeeper.GetDeposit(newctx, userAddr)
 	fmt.Printf("dep#################osit %v==%v\n", de, found)
 
 	preClaimBal := suite.GetBalance(userAddr)

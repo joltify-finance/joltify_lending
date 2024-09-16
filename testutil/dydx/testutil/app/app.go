@@ -897,9 +897,13 @@ func (tApp *TestApp) AdvanceToBlock(
 			}
 		}
 
+		ctxold := tApp.App.NewContextLegacy(true, tApp.header)
 		// Commit the block.
 		_, err := tApp.App.Commit()
 		require.NoError(tApp.builder.t, err)
+
+		de := tApp.App.JoltKeeper.GetTotalDeposited(ctxold, "bnb")
+		fmt.Printf("deBBBBBBBBBBp#22342343243################osit %v\n", de)
 
 		// Finalize and commit all the blocks for the non-determinism checkers.
 		if tApp.builder.enableNonDeterminismChecks {
@@ -940,6 +944,10 @@ func (tApp *TestApp) AdvanceToBlock(
 			}
 		}
 		tApp.passingCheckTxs = passingRecheckTxs
+
+		//ctx := tApp.App.NewContextLegacy(true, tApp.header)
+		//de := tApp.App.JoltKeeper.GetTotalDeposited(ctx, "bnb")
+		//fmt.Printf("dep#22342343243################osit %v\n", de)
 	}
 
 	return tApp.App.NewContextLegacy(true, tApp.header)

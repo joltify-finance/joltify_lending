@@ -212,7 +212,7 @@ func (tApp TestApp) GetParamsKeeper() paramskeeper.Keeper       { return tApp.Pa
 
 func (tApp TestApp) GetAuctionKeeper() auctionkeeper.Keeper     { return tApp.auctionKeeper }
 func (tApp TestApp) GetPriceFeedKeeper() pricefeedkeeper.Keeper { return tApp.kavaPricefeedKeeper }
-func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.joltKeeper }
+func (tApp TestApp) GetJoltKeeper() joltkeeper.Keeper           { return tApp.JoltKeeper }
 func (tApp TestApp) GetIncentiveKeeper() incentivekeeper.Keeper { return tApp.incentiveKeeper }
 func (tApp TestApp) GetSwapKeeper() swapkeeper.Keeper           { return tApp.swapKeeper }
 
