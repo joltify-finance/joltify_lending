@@ -340,7 +340,7 @@ func (suite *PayoutTestSuite) TestSendCoinsToPeriodicVestingAccount() {
 	}
 	for _, tc := range tests {
 		suite.Run(tc.name, func() {
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimplePeriodicVestingAccount(
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimplePeriodicVestingAccount(
 				suite.addrs[0],
 				tc.args.accArgs.origVestingCoins,
 				tc.args.accArgs.periods,
@@ -406,7 +406,7 @@ func fundAccount(bankKeeper bankkeeper.Keeper, ctx context.Context, addr sdk.Acc
 }
 
 func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
-	authBuilder := app.NewAuthBankGenesisBuilder().
+	authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).
 		WithSimpleAccount(suite.addrs[1], cs(c("ujolt", 400))).
 		WithSimpleModuleAccount(types.ModuleName, cs(c("ujolt", 600)))
 
@@ -452,7 +452,7 @@ func (suite *PayoutTestSuite) TestSendCoinsToBaseAccount() {
 }
 
 func (suite *PayoutTestSuite) TestSendCoinsToInvalidAccount() {
-	authBuilder := app.NewAuthBankGenesisBuilder().
+	authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).
 		WithSimpleModuleAccount(types.ModuleName, cs(c("ujolt", 600)))
 
 	suite.SetupApp()

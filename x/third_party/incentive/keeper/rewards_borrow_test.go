@@ -44,7 +44,7 @@ func (suite *BorrowIntegrationTests) SetupTest() {
 func (suite *BorrowIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncing() {
 	userA := suite.addrs[0]
 
-	authBulder := app.NewAuthBankGenesisBuilder().
+	authBulder := app.NewAuthBankGenesisBuilder(nil, nil).
 		WithSimpleModuleAccount(types2.ModuleName, cs(c("uexam", 1e18))). // Fill mint with enough coins to pay out any reward
 		WithSimpleAccount(userA, cs(c("bnb", 1e12)))                      // give the user some coins
 
@@ -243,7 +243,7 @@ func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimpleAccount(
 				userAddr,
 				cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)),
 			)
@@ -411,7 +411,7 @@ func (suite *BorrowRewardsTestSuite) TestInitializeHardBorrowRewards() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimpleAccount(
 				userAddr,
 				cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)),
 			)
@@ -617,7 +617,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).
 				WithSimpleAccount(suite.addrs[2], cs(c("pjolt", 1e9))).
 				WithSimpleAccount(userAddr, cs(c("pjolt", 1e9))).
 				WithSimpleAccount(userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
@@ -920,7 +920,7 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).
 				WithSimpleAccount(
 					userAddr,
 					cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)),
@@ -1063,7 +1063,7 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimpleAccount(userAddr, cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15)))
 
 			incentBuilder := testutil2.NewIncentiveGenesisBuilder().
 				WithGenesisTime(suite.genesisTime).

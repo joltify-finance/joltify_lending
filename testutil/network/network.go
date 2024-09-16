@@ -2,12 +2,14 @@ package network
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"strings"
 	"testing"
 	"time"
 
 	appconfig "github.com/joltify-finance/joltify_lending/app/config"
-
+	configs2 "github.com/joltify-finance/joltify_lending/daemons/configs"
 	"github.com/labstack/gommon/random"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
@@ -43,7 +45,13 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 		cfg = configs[0]
 	}
 
-	net, err := network.New(t, t.TempDir(), cfg)
+	p := t.TempDir()
+	homeDir := path.Join(p, "node0/simd")
+	fmt.Printf("we write to %v\n", homeDir)
+	err := os.MkdirAll(path.Join(homeDir, "config"), 0755)
+	assert.NoError(t, err)
+	configs2.WriteDefaultPricefeedExchangeToml(homeDir) // must manually create config file.
+	net, err := network.New(t, p, cfg)
 	assert.NoError(t, err)
 	t.Cleanup(net.Cleanup)
 	return net
@@ -57,14 +65,15 @@ func DefaultConfig() network.Config {
 	randomChainID := strings.ToLower(randomChainName) + "localnet" + "_888-1"
 	// randomChainID := "joltifydev_1729-1"
 
-	var encoding appconfig.EncodingConfig
+	encoding := appconfig.MakeEncodingConfig()
+	app.ModuleBasics.RegisterInterfaces(encoding.InterfaceRegistry)
 
 	net := network.Config{
-		// Codec:             encoding.Codec,
-		// TxConfig:          encoding.TxConfig,
-		// LegacyAmino:       encoding.Amino,
-		// InterfaceRegistry: encoding.InterfaceRegistry,
-		AccountRetriever: authtypes.AccountRetriever{},
+		Codec:             encoding.Codec,
+		TxConfig:          encoding.TxConfig,
+		LegacyAmino:       encoding.Amino,
+		InterfaceRegistry: encoding.InterfaceRegistry,
+		AccountRetriever:  authtypes.AccountRetriever{},
 		AppConstructor: func(val network.ValidatorI) servertypes.Application {
 			localApp := app.NewApp(
 				val.GetCtx().Logger, dbm.NewMemDB(), nil,
@@ -92,10 +101,5 @@ func DefaultConfig() network.Config {
 		SigningAlgo:     string(hd.Secp256k1Type),
 		KeyringOptions:  []keyring.Option{},
 	}
-	net.Codec = encoding.Codec
-	net.TxConfig = encoding.TxConfig
-	net.InterfaceRegistry = encoding.InterfaceRegistry
-	net.LegacyAmino = encoding.Amino
-
 	return net
 }

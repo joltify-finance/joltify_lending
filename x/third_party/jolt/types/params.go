@@ -231,7 +231,7 @@ func DefaultParams() Params {
 	)
 
 	m2 := NewMoneyMarket(
-		"abnb",
+		"bnb",
 		NewBorrowLimit(
 			false,
 			sdkmath.LegacyNewDec(1e15),

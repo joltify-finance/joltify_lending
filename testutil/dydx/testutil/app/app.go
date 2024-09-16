@@ -16,6 +16,9 @@ import (
 	"time"
 
 	"github.com/joltify-finance/joltify_lending/app"
+	incentivetypes "github.com/joltify-finance/joltify_lending/x/third_party/incentive/types"
+	jolttypes "github.com/joltify-finance/joltify_lending/x/third_party/jolt/types"
+	pricefeedtypes "github.com/joltify-finance/joltify_lending/x/third_party/pricefeed/types"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/store/rootmulti"
@@ -202,7 +205,10 @@ type GenesisStates interface {
 		govtypesv1.GenesisState |
 		ratelimittypes.GenesisState |
 		govplus.GenesisState |
-		vaulttypes.GenesisState
+		vaulttypes.GenesisState |
+		incentivetypes.GenesisState |
+		jolttypes.GenesisState |
+		pricefeedtypes.GenesisState
 }
 
 // UpdateGenesisDocWithAppStateForModule updates the supplied genesis doc using the provided function. The function
@@ -258,6 +264,12 @@ func UpdateGenesisDocWithAppStateForModule[T GenesisStates](genesisDoc *types.Ge
 		moduleName = govplus.ModuleName
 	case vaulttypes.GenesisState:
 		moduleName = vaulttypes.ModuleName
+	case incentivetypes.GenesisState:
+		moduleName = incentivetypes.ModuleName
+	case jolttypes.GenesisState:
+		moduleName = jolttypes.ModuleName
+	case pricefeedtypes.GenesisState:
+		moduleName = pricefeedtypes.ModuleName
 	default:
 		panic(fmt.Errorf("Unsupported type %T", t))
 	}

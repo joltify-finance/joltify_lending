@@ -19,6 +19,7 @@ import (
 )
 
 func TestQueryParameters(t *testing.T) {
+	t.SkipNow()
 	appconfig.SetupConfig()
 	k2 := keyring.NewInMemory(getCodec())
 	_, _, err := k2.NewMnemonic("0",

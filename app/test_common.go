@@ -438,7 +438,7 @@ func GeneratePrivKeyAddressPairs(n int) (keys []cryptotypes.PrivKey, addrs []sdk
 
 // NewFundedGenStateWithSameCoins creates a (auth and bank) genesis state populated with accounts from the given addresses and balance.
 func NewFundedGenStateWithSameCoins(cdc codec.JSONCodec, balance sdk.Coins, addresses []sdk.AccAddress) GenesisState {
-	builder := NewAuthBankGenesisBuilder()
+	builder := NewAuthBankGenesisBuilder(nil, nil)
 	for _, address := range addresses {
 		builder.WithSimpleAccount(address, balance)
 	}
@@ -447,7 +447,7 @@ func NewFundedGenStateWithSameCoins(cdc codec.JSONCodec, balance sdk.Coins, addr
 
 // NewFundedGenStateWithCoins creates a (auth and bank) genesis state populated with accounts from the given addresses and coins.
 func NewFundedGenStateWithCoins(cdc codec.JSONCodec, coins []sdk.Coins, addresses []sdk.AccAddress) GenesisState {
-	builder := NewAuthBankGenesisBuilder()
+	builder := NewAuthBankGenesisBuilder(nil, nil)
 	for i, address := range addresses {
 		builder.WithSimpleAccount(address, coins[i])
 	}
@@ -456,7 +456,7 @@ func NewFundedGenStateWithCoins(cdc codec.JSONCodec, coins []sdk.Coins, addresse
 
 // NewFundedGenStateWithSameCoinsWithModuleAccount creates a (auth and bank) genesis state populated with accounts from the given addresses and balance along with an empty module account
 func NewFundedGenStateWithSameCoinsWithModuleAccount(cdc codec.JSONCodec, coins sdk.Coins, addresses []sdk.AccAddress, modAcc *authtypes.ModuleAccount) GenesisState {
-	builder := NewAuthBankGenesisBuilder()
+	builder := NewAuthBankGenesisBuilder(nil, nil)
 
 	for _, address := range addresses {
 		builder.WithSimpleAccount(address, coins)

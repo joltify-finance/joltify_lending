@@ -47,7 +47,7 @@ func (suite *SupplyIntegrationTests) SetupTest() {
 func (suite *SupplyIntegrationTests) TestSingleUserAccumulatesRewardsAfterSyncing() {
 	userA := suite.addrs[0]
 
-	authBulder := app.NewAuthBankGenesisBuilder().
+	authBulder := app.NewAuthBankGenesisBuilder(nil, nil).
 		WithSimpleModuleAccount(types.ModuleName, cs(c("jjolt", 1e18))). // Fill mintt  with enough coins to pay out any reward
 		WithSimpleAccount(userA, cs(c("bnb", 1e12))).                    // give the user some coins
 		WithSimpleAccount(userA, cs(c("sbnb", 1e12)))                    // give the user some coins
@@ -279,7 +279,7 @@ func (suite *SupplyRewardsTestSuite) TestAccumulateJoltSupplyRewards() {
 		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimpleAccount(
 				userAddr,
 				coins,
 			)
@@ -436,7 +436,7 @@ func (suite *SupplyRewardsTestSuite) TestInitializeJoltSupplyRewards() {
 		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("sbnb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimpleAccount(
 				userAddr,
 				coins,
 			)
@@ -632,7 +632,7 @@ func (suite *SupplyRewardsTestSuite) TestSynchronizeJoltSupplyReward() {
 		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("sbnb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).
 				WithSimpleAccount(suite.addrs[2], cs(c("ujolt", 1e9), c("sbnb", 1e9))).
 				WithSimpleAccount(userAddr, coins)
 
@@ -927,7 +927,7 @@ func (suite *SupplyRewardsTestSuite) TestUpdateJoltSupplyIndexDenoms() {
 		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimpleAccount(
 				userAddr,
 				coins,
 			)
@@ -1018,7 +1018,7 @@ func (suite *SupplyRewardsTestSuite) TestSimulateJoltSupplyRewardSynchronization
 		coins := cs(c("bnb", 1e15), c("ujolt", 1e15), c("btcb", 1e15), c("xrp", 1e15), c("zzz", 1e15))
 		suite.Run(tc.name, func() {
 			userAddr := suite.addrs[3]
-			authBuilder := app.NewAuthBankGenesisBuilder().WithSimpleAccount(
+			authBuilder := app.NewAuthBankGenesisBuilder(nil, nil).WithSimpleAccount(
 				userAddr,
 				coins,
 			)
