@@ -1,0 +1,62 @@
+[[exchanges]]
+ExchangeId = "Binance"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+
+[[exchanges]]
+ExchangeId = "Bybit"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+
+
+[[exchanges]]
+ExchangeId = "CoinbasePro"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+
+[[exchanges]]
+ExchangeId = "Huobi"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+
+
+[[exchanges]]
+ExchangeId = "Gate"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+
+
+[[exchanges]]
+ExchangeId = "Mexc"
+IntervalMs = 1000
+TimeoutMs = 1000
+MaxQueries = 33
+
+
+[[exchanges]]
+ExchangeId = "Kraken"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+
+
+
+[[exchanges]]
+ExchangeId = "Okx"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+
+
+
+[[exchanges]]
+ExchangeId = "Kucoin"
+IntervalMs = 5000
+TimeoutMs = 1000
+MaxQueries = 33
+

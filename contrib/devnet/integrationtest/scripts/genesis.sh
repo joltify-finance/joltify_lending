@@ -1425,8 +1425,6 @@ function edit_genesis() {
 	dasel put -t int -f "$GENESIS" '.app_state.clob.liquidations_config.subaccount_block_limits.max_quantums_insurance_lost' -v '1000000000000' # 1_000_000 USDC
 	dasel put -t int -f "$GENESIS" '.app_state.clob.liquidations_config.fillable_price_config.bankruptcy_adjustment_ppm' -v '1000000'
 	dasel put -t int -f "$GENESIS" '.app_state.clob.liquidations_config.fillable_price_config.spread_to_maintenance_margin_ratio_ppm' -v '1500000'  # 150%
-echo "done here latest"
-exit 0
 
 
 
@@ -1517,7 +1515,7 @@ exit 0
 	# Set total shares and owner shares of each vault.
 	vault_idx=0
 	if [ -z "${INPUT_TEST_ACCOUNTS[0]}" ]; then
-		vault_owner_address='dydx199tqg4wdlnu4qjlxchpd7seg454937hjrknju4' # alice as default vault owner
+		vault_owner_address='jolt1mkkvp26dngu6n8rmalaxyp3gwkjuzztqhm4zca' # alice as default vault owner
 	else
 		vault_owner_address="${INPUT_TEST_ACCOUNTS[0]}"
 	fi
@@ -1532,7 +1530,6 @@ exit 0
 		dasel put -t string -f "$GENESIS" ".app_state.vault.vaults.[${vault_idx}].owner_shares.[0].shares.num_shares" -v "${DEFAULT_SUBACCOUNT_QUOTE_BALANCE_VAULT}"
 		vault_idx=$(($vault_idx + 1))
 	done
-	echo "done"
 }
 
 function add_subaccount() {

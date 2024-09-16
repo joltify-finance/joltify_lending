@@ -338,11 +338,11 @@ func (suite *HandlerTestSuite) TestPayoutHardClaimSingleDenom() {
 
 	//de, found := suite.App.GetJoltKeeper().GetDeposit(suite.Ctx, userAddr)
 	de, found := tApp.App.JoltKeeper.GetDeposit(suite.Ctx, userAddr)
-	fmt.Printf("dep##########1111#######osit %v==%v\n", de, found)
+	fmt.Printf("dep##########1111#######osit %v==%v==%v\n", de, found, suite.App.Ctx.BlockHeight())
 
 	fmt.Printf("current height %v\n", suite.App.Ctx.BlockHeight())
 	// accumulate some rewards
-	newctx := tApp.AdvanceToBlock(20, testapp.AdvanceToBlockOptions{BlockTime: suite.App.Ctx.BlockTime().Add(time.Second * 7)})
+	newctx := tApp.AdvanceToBlock(2, testapp.AdvanceToBlockOptions{BlockTime: suite.App.Ctx.BlockTime().Add(time.Second * 7)})
 	suite.Ctx = newctx
 	suite.App.Ctx = newctx
 	suite.App.App = *tApp.App
