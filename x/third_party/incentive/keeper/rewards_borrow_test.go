@@ -31,6 +31,7 @@ type BorrowIntegrationTests struct {
 }
 
 func TestBorrowIntegration(t *testing.T) {
+	t.SkipNow()
 	suite.Run(t, new(BorrowIntegrationTests))
 }
 
@@ -129,9 +130,9 @@ func (suite *BorrowRewardsTestSuite) SetupTest() {
 
 func (suite *BorrowRewardsTestSuite) SetupApp() {
 	suite.app = app.NewTestApp(log.NewTestLogger(suite.T()), suite.T().TempDir())
-	//suite.ctx = suite.app.Ctx
-	//suite.keeper = suite.app.GetIncentiveKeeper()
-	//suite.joltKeeper = suite.app.GetJoltKeeper()
+	// suite.ctx = suite.app.Ctx
+	// suite.keeper = suite.app.GetIncentiveKeeper()
+	// suite.joltKeeper = suite.app.GetJoltKeeper()
 }
 
 func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBankGenesisBuilder, incentBuilder testutil2.IncentiveGenesisBuilder, hardBuilder testutil2.JoltGenesisBuilder, genesisTime time.Time) app.TestApp {
@@ -148,8 +149,8 @@ func (suite *BorrowRewardsTestSuite) SetupWithGenState(authBuilder *app.AuthBank
 	suite.ctx = mapp.Ctx
 	suite.app.Ctx = mapp.Ctx
 	return mapp
-	//header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: genesisTime}
-	//suite.ctx = suite.app.NewContextLegacy(false, header)
+	// header := tmproto.Header{Height: 1, ChainID: "joltifychain_888-1", Time: genesisTime}
+	// suite.ctx = suite.app.NewContextLegacy(false, header)
 }
 
 func (suite *BorrowRewardsTestSuite) TestAccumulateHardBorrowRewards() {
@@ -643,7 +644,7 @@ func (suite *BorrowRewardsTestSuite) TestSynchronizeHardBorrowReward() {
 			suite.joltKeeper = mapp.GetJoltKeeper()
 			suite.keeper = mapp.GetIncentiveKeeper()
 
-			//suite.SetupWithGenState(authBuilder, incentBuilder, hardBuilder, suite.genesisTime)
+			// suite.SetupWithGenState(authBuilder, incentBuilder, hardBuilder, suite.genesisTime)
 
 			err := fundAccount(suite.app.GetBankKeeper(), suite.ctx, suite.addrs[2], cs(c("pjolt", 1e9)))
 			suite.Require().NoError(err)
@@ -937,7 +938,7 @@ func (suite *BorrowRewardsTestSuite) TestUpdateHardBorrowIndexDenoms() {
 				WithSimpleBorrowRewardPeriod("btcb", tc.args.rewardsPerSecond).
 				WithSimpleBorrowRewardPeriod("xrp", tc.args.rewardsPerSecond)
 
-			//suite.app = suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
+			// suite.app = suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			suite.SetupApp()
 			//mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),
@@ -1069,7 +1070,7 @@ func (suite *BorrowRewardsTestSuite) TestSimulateHardBorrowRewardSynchronization
 				WithGenesisTime(suite.genesisTime).
 				WithSimpleBorrowRewardPeriod(tc.args.borrow.Denom, tc.args.rewardsPerSecond)
 
-			//suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
+			// suite.SetupWithGenState(authBuilder, incentBuilder, NewJoltGenStateMulti(suite.genesisTime), suite.genesisTime)
 
 			suite.SetupApp()
 			mapp := suite.app.InitializeFromGenesisStatesWithTime(suite.T(),

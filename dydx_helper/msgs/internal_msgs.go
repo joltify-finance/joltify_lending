@@ -5,7 +5,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	auth "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
-	consensus "github.com/cosmos/cosmos-sdk/x/consensus/types"
 	crisis "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distribution "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
@@ -57,8 +56,8 @@ var (
 		"/cosmos.bank.v1beta1.MsgUpdateParamsResponse":   nil,
 
 		// consensus
-		"/cosmos.consensus.v1.MsgUpdateParams":         &consensus.MsgUpdateParams{},
-		"/cosmos.consensus.v1.MsgUpdateParamsResponse": nil,
+		//"/cosmos.consensus.v1.MsgUpdateParams":         &consensus.MsgUpdateParams{},
+		//"/cosmos.consensus.v1.MsgUpdateParamsResponse": nil,
 
 		// crisis
 		"/cosmos.crisis.v1beta1.MsgUpdateParams":         &crisis.MsgUpdateParams{},

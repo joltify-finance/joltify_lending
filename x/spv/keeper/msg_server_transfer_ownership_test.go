@@ -227,12 +227,6 @@ func (suite *withDrawPrincipalSuite) TestTransferOwnershipTwoInvestor() {
 	poolInfoBefore, found = suite.keeper.GetPools(suite.ctx, suite.investorPool)
 	suite.Require().True(found)
 
-	d1, ok := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr1)
-	d2, ok := suite.keeper.GetDepositor(suite.ctx, suite.investorPool, creatorAddr2)
-
-	fmt.Printf(">>333>>>%v\n", d1.WithdrawalAmount)
-	fmt.Printf(">>333>>>>%v\n", d2.WithdrawalAmount)
-
 	_, err = suite.app.TransferOwnership(suite.ctx, &reqOwner)
 	suite.Require().NoError(err)
 

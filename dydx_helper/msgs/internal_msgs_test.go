@@ -154,6 +154,7 @@ func TestInternalMsgSamples_Gov_Key(t *testing.T) {
 		"/ibc.core.connection.v1.MsgUpdateParamsResponse",
 	}
 
+	sort.Strings(expectedMsgs)
 	require.Equal(t, expectedMsgs, lib.GetSortedKeys[sort.StringSlice](msgs.InternalMsgSamplesGovAuth))
 }
 

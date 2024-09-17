@@ -33,6 +33,20 @@ var (
 		"/cosmos.auth.v1beta1.ModuleAccount":    nil,
 		"/cosmos.auth.v1beta1.ModuleCredential": nil,
 
+		// vest
+
+		"/cosmos.vesting.v1beta1.BaseVestingAccount":                      nil,
+		"/cosmos.vesting.v1beta1.ContinuousVestingAccount":                nil,
+		"/cosmos.vesting.v1beta1.DelayedVestingAccount":                   nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount":         nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccountResponse": nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccount":         nil,
+		"/cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccountResponse": nil,
+		"/cosmos.vesting.v1beta1.MsgCreateVestingAccount":                 nil,
+		"/cosmos.vesting.v1beta1.MsgCreateVestingAccountResponse":         nil,
+		"/cosmos.vesting.v1beta1.PeriodicVestingAccount":                  nil,
+		"/cosmos.vesting.v1beta1.PermanentLockedAccount":                  nil,
+
 		// authz
 		"/cosmos.authz.v1beta1.GenericAuthorization": nil,
 		"/cosmos.authz.v1beta1.MsgGrant":             &authz.MsgGrant{},
@@ -127,6 +141,10 @@ var (
 		"/cosmos.staking.v1beta1.MsgUndelegate":                        &staking.MsgUndelegate{},
 		"/cosmos.staking.v1beta1.MsgUndelegateResponse":                nil,
 		"/cosmos.staking.v1beta1.StakeAuthorization":                   nil,
+
+		// nft
+		"/cosmos.nft.v1beta1.MsgSend":         nil,
+		"/cosmos.nft.v1beta1.MsgSendResponse": nil,
 
 		// tx
 		"/cosmos.tx.v1beta1.Tx": nil,

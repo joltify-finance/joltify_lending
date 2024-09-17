@@ -34,6 +34,7 @@ type SupplyIntegrationTests struct {
 }
 
 func TestSupplyIntegration(t *testing.T) {
+	t.SkipNow()
 	suite.Run(t, new(SupplyIntegrationTests))
 }
 

@@ -120,7 +120,6 @@ func CreateUpgradeHandlerForV021Upgrade(
 			if poolInfo.PoolStatus == types.PoolInfo_ACTIVE || poolInfo.PoolStatus == types.PoolInfo_PooLPayPartially {
 				previousDueTime := poolInfo.ProjectDueTime
 				if poolInfo.ProjectDueTime.Before(poolInfo.LastPaymentTime) {
-					fmt.Printf("we have to correct the due time")
 					previousDueTime = poolInfo.LastPaymentTime.Add(time.Duration(poolInfo.PayFreq) * time.Second)
 				}
 

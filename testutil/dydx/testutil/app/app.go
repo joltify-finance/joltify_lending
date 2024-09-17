@@ -897,9 +897,6 @@ func (tApp *TestApp) AdvanceToBlock(
 			}
 		}
 
-		ctxold := tApp.App.NewContextLegacy(true, tApp.header)
-		de1 := tApp.App.JoltKeeper.GetTotalDeposited(ctxold, "bnb")
-		fmt.Printf("deCCCCCCCCCC#22342343243################osit %v\n", de1)
 		// Commit the block.
 		_, err := tApp.App.Commit()
 		require.NoError(tApp.builder.t, err)
@@ -944,10 +941,6 @@ func (tApp *TestApp) AdvanceToBlock(
 		}
 		tApp.passingCheckTxs = passingRecheckTxs
 
-		fmt.Printf(">>>now height %v\n", tApp.header.Height)
-		ctxnew := tApp.App.NewContextLegacy(true, tApp.header)
-		de := tApp.App.JoltKeeper.GetTotalDeposited(ctxnew, "bnb")
-		fmt.Printf("deBBBBBBBBBBpWWWWWWWWW#22342343243################osit %v\n", de)
 	}
 
 	return tApp.App.NewContextLegacy(true, tApp.header)
