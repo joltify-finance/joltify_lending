@@ -146,7 +146,6 @@ func (k msgServer) handleDepositClose(rctx context.Context, depositor types.Depo
 				types.EventTypeWithdrawPrincipal,
 			),
 		)
-
 	} else {
 		k.SetPool(ctx, poolInfo)
 	}

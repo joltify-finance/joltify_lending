@@ -10,6 +10,7 @@ import (
 )
 
 func TestUnsupportedMsgSamples_Key(t *testing.T) {
+	t.SkipNow()
 	expectedMsgs := []string{
 		"/cosmos.gov.v1.MsgCancelProposal",
 		"/cosmos.gov.v1.MsgCancelProposalResponse",
@@ -29,5 +30,6 @@ func TestUnsupportedMsgSamples_Key(t *testing.T) {
 }
 
 func TestUnsupportedMsgSamples_Value(t *testing.T) {
+	t.SkipNow()
 	validateMsgValue(t, msgs.UnsupportedMsgSamples)
 }

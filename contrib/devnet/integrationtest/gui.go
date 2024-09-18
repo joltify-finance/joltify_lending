@@ -165,7 +165,6 @@ func processWindow(ctx context.Context, g1, g2, g3 *widgets.Gauge, gwNotify chan
 			if err != nil {
 				display.showOutput(err.Error(), RED)
 			}
-
 		}
 	}
 }
@@ -291,7 +290,6 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 					if err != nil {
 						msg := fmt.Errorf("error dumnp all after %w", err)
 						display.showOutput(msg.Error(), RED)
-
 					}
 
 					pb, ok := new(big.Int).SetString(poolb.PoolInfo.UsableAmount.Amount, 10)
@@ -316,7 +314,6 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 					incorrect := false
 
 					for i, el := range depositorsb {
-
 						before, ok := new(big.Int).SetString(el.Depositor.WithdrawalAmount.Amount, 10)
 						if !ok {
 							continue
@@ -498,9 +495,7 @@ func processEvent(cancel context.CancelFunc, wg *sync.WaitGroup, inputChain chan
 					guiWithdrawAmount = numAccounts
 					msg := fmt.Sprintf("we have submitted the withdraw request for %v users", guiWithdrawAmount)
 					display.showOutput(msg, YELLOW)
-
 				}
-
 			}
 			ui.Render(display.outPannel)
 

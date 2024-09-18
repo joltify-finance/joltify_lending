@@ -319,7 +319,6 @@ func (k Keeper) processInvestors(rctx context.Context, poolInfo *types.PoolInfo,
 	totalLockedLocal := sdkmath.ZeroInt()
 	if depositors != nil {
 		for _, depositor := range depositors {
-
 			if depositor.DepositType != types.DepositorInfo_unset {
 				// since you have submitted the withdrawal/transfer request, we skipp the borrow from it
 				continue
@@ -445,7 +444,6 @@ func (k Keeper) cleanupDepositor(rctx context.Context, poolInfo types.PoolInfo, 
 		if err != nil {
 			return sdkmath.ZeroInt(), err
 		}
-
 	}
 
 	poolInfo.ProcessedTransferAccounts = deleteElement(poolInfo.ProcessedTransferAccounts, depositor.DepositorAddress)
@@ -466,7 +464,6 @@ func (k Keeper) cleanupDepositor(rctx context.Context, poolInfo types.PoolInfo, 
 			return totalPaidAmount, err
 		}
 		k.ArchivePool(ctx, poolInfo)
-
 	} else {
 		k.SetPool(ctx, poolInfo)
 	}

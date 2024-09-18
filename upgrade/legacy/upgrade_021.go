@@ -75,7 +75,6 @@ func CreateUpgradeHandlerForV021Upgrade(
 
 			incentivepaments := borrowInterest.IncentivePayments
 			for index, eachincentive := range incentivepaments {
-
 				if eachincentive.PaymentAmount.IsZero() {
 					continue
 				}

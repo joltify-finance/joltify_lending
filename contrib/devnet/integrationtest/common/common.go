@@ -55,7 +55,7 @@ func GetWindow(poolIndex string) (Window, SPV, error) {
 	var poolInfo SPV
 	out, err := RunCommandWithOutput("joltify", "q", "spv", "query-pool", poolIndex, "--output", "json")
 	if err != nil {
-		err = fmt.Errorf("%v fail to query pool info: %v", err, out)
+		err = fmt.Errorf("%w fail to query pool info: %v", err, out)
 		return Window{}, SPV{}, err
 	}
 

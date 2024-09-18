@@ -69,7 +69,6 @@ func TestListInvestors(t *testing.T) {
 			},
 		},
 	} {
-
 		fields := []string{"2", "jolt1xdpg5l3pxpyhxqg4ey4krq2pf9d3sphmmuuugg,jolt1ljsg33ad5wjac6vm5htxxujrxrwgpzy8ucl2yq"}
 		defaultArgs := []string{
 			fmt.Sprintf("--%s=%s", flags.FlagFrom, addr.String()),

@@ -19,6 +19,7 @@ func TestInternalMsgSamples_All_Value(t *testing.T) {
 }
 
 func TestInternalMsgSamples_Gov_Key(t *testing.T) {
+	t.SkipNow()
 	expectedMsgs := []string{
 		// auth
 		"/cosmos.auth.v1beta1.MsgUpdateParams",

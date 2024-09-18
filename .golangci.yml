@@ -1,28 +1,15 @@
-run:
-  tests: false
-  # timeout for analysis, e.g. 30s, 5m, default is 1m
-  timeout: 5m
-
 linters:
   disable-all: true
   enable:
-    - dogsled
-    - exportloopref
-    - goconst
-    - gocritic
-    - gofumpt
-    - gosec
+    - errorlint
+    - gofmt
     - gosimple
     - govet
-    - ineffassign
-    - misspell
-    - nakedret
-    - nolintlint
-    - staticcheck
-    - stylecheck
+    - importas
+    - revive
     - typecheck
-    - unconvert
     - unused
+    - staticcheck
 
 issues:
   exclude-rules:
@@ -37,6 +24,15 @@ issues:
     - text: "ST1016:"
       linters:
         - stylecheck
+
+    - text: "SA4006:"
+      linters:
+        - staticcheck
+
+    - text: "SA1019:"
+      linters:
+        - staticcheck
+
     - path: "migrations"
       text: "SA1019:"
       linters:
@@ -46,13 +42,18 @@ issues:
   max-same-issues: 10000
 
 linters-settings:
-  dogsled:
-    max-blank-identifiers: 3
-  maligned:
-    # print struct with more effective memory layout or not, false by default
-    suggest-new: true
-  nolintlint:
-    allow-unused: false
-    allow-leading-space: true
-    require-explanation: false
-    require-specific: false
+  revive:
+    rules:
+      - name: duplicated-imports
+        severity: warning
+        disabled: false
+      - name: range-val-address
+        severity: warning
+        disabled: false
+  importas:
+    # List of aliases
+    alias:
+      - pkg: github.com/joltify-finance/joltify_lending/x/third_party_dydx/subaccounts/types
+        alias: satypes
+      - pkg: github.com/joltify-finance/joltify_lending/testutil/dydx/testutil/constants
+        alias: constants

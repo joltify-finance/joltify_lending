@@ -145,7 +145,6 @@ func TestQueryByWallets(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			var args []string
 			args = append(tc.fields, tc.args...)
 			out, err2 := clitestutil.ExecTestCLICmd(ctx, cli.CmdQueryByWallet(), args)
 			if tc.err != nil {
@@ -173,7 +172,6 @@ func TestQueryByWallets(t *testing.T) {
 				if tc.id == "5" {
 					require.EqualValues(t, "3", resp.Investor.InvestorId)
 				}
-
 			}
 		})
 	}

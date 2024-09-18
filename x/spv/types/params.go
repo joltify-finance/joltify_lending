@@ -94,7 +94,7 @@ func validateIncentive(i interface{}) error {
 		}
 		_, err := sdkmath.LegacyNewDecFromStr(el.Spy)
 		if err != nil {
-			return fmt.Errorf("invalid spy: %s with err %v", el.Spy, err)
+			return fmt.Errorf("invalid spy: %s with err %w", el.Spy, err)
 		}
 	}
 	return nil

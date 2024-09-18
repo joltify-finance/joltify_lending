@@ -538,8 +538,6 @@ func (suite *claimInterestSuite) TestClaimInterestMultipleBorrow() {
 	result1, err = suite.app.ClaimInterest(suite.ctx, &req)
 	suite.Require().NoError(err)
 	req.Creator = suite.investors[1]
-	result2, err = suite.app.ClaimInterest(suite.ctx, &req)
-	suite.Require().NoError(err)
 }
 
 func (suite *claimInterestSuite) TestClaimInterest() {

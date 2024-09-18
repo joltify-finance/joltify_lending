@@ -44,6 +44,5 @@ func main() {
 	for _, el := range addr {
 		valaddr := types.ValAddress(el.Bytes())
 		fmt.Printf(">>>>%v-%v\n", el.String(), valaddr.String())
-
 	}
 }

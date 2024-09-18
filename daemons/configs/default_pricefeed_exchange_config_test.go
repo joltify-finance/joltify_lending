@@ -10,17 +10,14 @@ import (
 
 	"github.com/joltify-finance/joltify_lending/daemons/configs"
 	"github.com/joltify-finance/joltify_lending/daemons/constants"
-	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/constants/exchange_common"
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/types"
 
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	binanceId = exchange_common.EXCHANGE_ID_BINANCE
-	filePath  = fmt.Sprintf("config/%v", constants.PricefeedExchangeConfigFileName)
-)
+// binanceId = exchange_common.EXCHANGE_ID_BINANCE
+var filePath = fmt.Sprintf("config/%v", constants.PricefeedExchangeConfigFileName)
 
 const (
 	tomlString = `# This is a TOML config file.

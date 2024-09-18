@@ -35,9 +35,7 @@ func (gs GenesisState) Validate() error {
 				return errors.New("invalid block height")
 			}
 		}
-
 	}
 	// this line is used by starport scaffolding # genesis/types/validate
-
 	return gs.Params.Validate()
 }

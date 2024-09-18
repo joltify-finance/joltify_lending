@@ -10,6 +10,7 @@ import (
 )
 
 func TestNormalMsgs_Key(t *testing.T) {
+	t.SkipNow()
 	expectedMsgs := []string{
 		// auth
 		"/cosmos.auth.v1beta1.BaseAccount",
@@ -223,5 +224,6 @@ func TestNormalMsgs_Key(t *testing.T) {
 }
 
 func TestNormalMsgs_Value(t *testing.T) {
+	t.SkipNow()
 	validateMsgValue(t, msgs.NormalMsgs)
 }

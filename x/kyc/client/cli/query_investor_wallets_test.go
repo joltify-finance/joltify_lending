@@ -112,7 +112,6 @@ func TestQueryInvestorWalletsInvestors(t *testing.T) {
 			},
 		},
 	} {
-
 		tc := tc
 		t.Run(tc.desc, func(t *testing.T) {
 			var argsQuery []string

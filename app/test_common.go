@@ -103,7 +103,6 @@ func genesisStateWithValSet(
 	bondAmt := sdk.DefaultPowerReduction.Mul(sdkmath.NewInt(1000000))
 
 	for _, val := range valSet {
-
 		val.DelegatorShares = sdkmath.LegacyOneDec()
 		val.Tokens = bondAmt
 		val.Status = stakingtypes.Bonded
@@ -171,7 +170,6 @@ func NewTestAppFromSealed(logger log.Logger, rootDir string, genbytes []byte) Te
 	}
 
 	if genbytes == nil {
-
 		genesisState := NewDefaultGenesisState(encCfg.Codec)
 		genesisState = genesisStateWithValSet(app, genesisState, []*stakingtypes.Validator{&val}, []authtypes.GenesisAccount{acc}, balance)
 

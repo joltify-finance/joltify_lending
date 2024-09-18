@@ -51,7 +51,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	"github.com/cosmos/gogoproto/proto"
 
-	config2 "github.com/joltify-finance/joltify_lending/app/config"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	appFlag "github.com/joltify-finance/joltify_lending/app/flags"
 	daemonflags "github.com/joltify-finance/joltify_lending/daemons/flags"
 	liquidationtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/liquidations"
@@ -165,7 +165,6 @@ import (
 	nftmodulekeeper "cosmossdk.io/x/nft/keeper"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
-	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 	daemonserver "github.com/joltify-finance/joltify_lending/daemons/server"
 	dydxPricefeedtypes "github.com/joltify-finance/joltify_lending/daemons/server/types/pricefeed"
 	kycmodulekeeper "github.com/joltify-finance/joltify_lending/x/kyc/keeper"
@@ -1963,7 +1962,6 @@ func (app *App) setupUpgradeHandlers() {
 			keyTable = crisistypes.ParamKeyTable() //nolint:staticcheck
 		case ibctransfertypes.ModuleName:
 			keyTable = ibctransfertypes.ParamKeyTable()
-
 		}
 		if !subspace.HasKeyTable() {
 			subspace.WithKeyTable(keyTable)
@@ -1991,8 +1989,8 @@ func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-func (app *App) EncodingConfig() config2.EncodingConfig {
-	return config2.EncodingConfig{
+func (app *App) EncodingConfig() appconfig.EncodingConfig {
+	return appconfig.EncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
 		Codec:             app.AppCodec(),
 		TxConfig:          app.TxConfig(),

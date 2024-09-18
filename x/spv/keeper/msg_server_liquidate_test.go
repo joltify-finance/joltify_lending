@@ -201,8 +201,7 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckSignleBorrow() {
 			panic(found)
 		}
 		var borrowInterest types.BorrowInterest
-		var err error
-		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
+		err := proto.Unmarshal(class.Data.Value, &borrowInterest)
 		if err != nil {
 			panic(err)
 		}
@@ -272,7 +271,6 @@ func (suite *liquidateTestSuite) TestLiquidateWithPaymentCheckTwoBorrow() {
 			panic(found)
 		}
 		var borrowInterest types.BorrowInterest
-		var err error
 		err = proto.Unmarshal(class.Data.Value, &borrowInterest)
 		if err != nil {
 			panic(err)

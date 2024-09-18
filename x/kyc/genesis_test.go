@@ -46,17 +46,17 @@ func TestT2(t *testing.T) {
 	acc, err := sdk.AccAddressFromBech32("jolt15qdefkmwswysgg4qxgqpqr35k3m49pkxu8ygkq")
 	require.NoError(t, err)
 	b := types.BasicInfo{
-		"This is the test info for Joshua AAAAA",
-		"empty",
-		"ABCCCCCCCCCCCCCCCCCCCc",
-		"ABC123ddddd",
-		[]byte("reserved"),
-		"This is the Test Project 11111",
-		"example@example.com",
-		"example",
-		"empty logo url",
-		"empty project Brief",
-		"empty project description",
+		Description:      "This is the test info for Joshua AAAAA",
+		ProjectsUrl:      "empty",
+		ProjectCountry:   "ABCCCCCCCCCCCCCCCCCCCc",
+		BusinessNumber:   "ABC123ddddd",
+		Reserved:         []byte("reserved"),
+		ProjectName:      "This is the Test Project 11111",
+		Email:            "example@example.com",
+		Name:             "example",
+		ProjectLogo:      "empty logo url",
+		ProjectBrief:     "empty project Brief",
+		ExecutiveSummary: "empty project description",
 	}
 	pi := types.ProjectInfo{
 		Index:                        int32(1 + 1),

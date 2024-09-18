@@ -18,7 +18,7 @@ import (
 	"gopkg.in/DataDog/dd-trace-go.v1/profiler"
 )
 
-func configureDatadogProfilerOptions(
+func configureDatadogProfilerOptions( //nolint
 	logger log.Logger,
 	ddAgentHost string,
 	ddAgentPort uint16,
@@ -97,7 +97,7 @@ func configureDatadogProfilerOptions(
 // line flags unless overridden by the DD_AGENT_HOST and DD_TRACE_AGENT_PORT environment variables respectively.
 //
 // See https://docs.datadoghq.com/profiler/enabling/go/ for more details.
-func initDatadogProfiler(logger log.Logger, ddAgentHost string, ddAgentPort uint16) {
+func initDatadogProfiler(logger log.Logger, ddAgentHost string, ddAgentPort uint16) { //nolint
 	ddService, ddVersion, ddAgentHostPort, err := configureDatadogProfilerOptions(logger, ddAgentHost, ddAgentPort)
 	if err != nil {
 		return

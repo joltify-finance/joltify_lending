@@ -427,8 +427,8 @@ func TestWhiteList(t *testing.T) {
 	err := keeper.UpdateQuota(ctx, testcoins, "testaddr", 1, "testmodule1")
 	require.Error(t, err, "no quota for this module")
 	tParams := testParams()
-	w1 := types.WhiteList{"t1", []string{"jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np", "jolt1h8m4p5vlaup3jzxv3k0tkvwamzel3regpsw5j2"}}
-	w2 := types.WhiteList{"t2", []string{"jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np"}}
+	w1 := types.WhiteList{ModuleName: "t1", AddressList: []string{"jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np", "jolt1h8m4p5vlaup3jzxv3k0tkvwamzel3regpsw5j2"}}
+	w2 := types.WhiteList{ModuleName: "t2", AddressList: []string{"jolt1gl7gfy5tjf9wlpumprya3fffxmdmlwcyykx8np"}}
 	tParams.Whitelist = []*types.WhiteList{&w1, &w2}
 	keeper.SetParams(ctx, tParams)
 
