@@ -129,9 +129,7 @@ func (obj DatadogErrorTrackingObject) MarshalZerologObject(e *zerolog.Event) {
 		Str("kind", obj.Kind)
 }
 
-var (
-	zerologFormatterOnce sync.Once
-)
+var zerologFormatterOnce sync.Once
 
 // SetZerologDatadogErrorTrackingFormat sets custom error formatting for log tag
 // values that are errors for the zerolog library. Converts them to a format that

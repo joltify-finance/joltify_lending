@@ -7,10 +7,8 @@ import (
 	"net/http"
 )
 
-var (
-	// MedianizationError is a generic error returned when the below MedianErr method is called.
-	MedianizationError = errors.New("Failed to get median")
-)
+// MedianizationError is a generic error returned when the below MedianErr method is called.
+var MedianizationError = errors.New("Failed to get median")
 
 // MedianErr mocks the median function and returns an error.
 func MedianErr(a []uint64) (uint64, error) {

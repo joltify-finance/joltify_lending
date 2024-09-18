@@ -21,7 +21,6 @@ func CreateTestTx(
 	msgs []sdk.Msg,
 	timeoutHeight uint64,
 ) (xauthsigning.Tx, error) {
-
 	encodingConfig := appconfig.MakeEncodingConfig()
 	clientCtx := client.Context{}.WithTxConfig(encodingConfig.TxConfig)
 	txBuilder := clientCtx.TxConfig.NewTxBuilder()

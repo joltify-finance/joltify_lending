@@ -10,7 +10,6 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
-
 	tApp := testapp.NewTestAppBuilder(t).Build()
 	ctx := tApp.InitChain()
 	got := bridge.ExportGenesis(ctx, tApp.App.BridgeKeeper)

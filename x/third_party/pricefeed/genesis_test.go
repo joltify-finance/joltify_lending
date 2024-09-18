@@ -48,7 +48,6 @@ func (suite *GenesisTestSuite) TestValidGenState() {
 
 	out := NewPricefeedGenStateWithOracles(addrs)
 	fmt.Printf(">>>out: %+v\n", out)
-
 }
 
 func (suite *GenesisTestSuite) TestInitExportGenState() {

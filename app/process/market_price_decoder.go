@@ -19,7 +19,8 @@ type UpdateMarketPriceTxDecoder interface {
 }
 
 func NewUpdateMarketPricesTx(
-	ctx sdk.Context, pk ProcessPricesKeeper, msg *pricestypes.MsgUpdateMarketPrices) *UpdateMarketPricesTx {
+	ctx sdk.Context, pk ProcessPricesKeeper, msg *pricestypes.MsgUpdateMarketPrices,
+) *UpdateMarketPricesTx {
 	return &UpdateMarketPricesTx{
 		ctx:          ctx,
 		pricesKeeper: pk,

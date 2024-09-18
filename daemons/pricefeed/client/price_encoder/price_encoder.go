@@ -222,9 +222,8 @@ func (p PriceEncoderImpl) convertPriceUpdate(marketPriceTimestamp *types.MarketP
 func (p *PriceEncoderImpl) UpdatePrice(marketPriceTimestamp *types.MarketPriceTimestamp) {
 	// Convert price.
 	price, err := p.convertPriceUpdate(marketPriceTimestamp)
-
 	if err != nil {
-		var logMethod = p.logger.Info
+		logMethod := p.logger.Info
 		// When the price encoder starts, we expect that some conversions will fail as we are filling the cache with
 		// enough valid prices to generate a valid index price for our adjustment markets. In order to avoid spurious
 		// alerts, only emit error logs if the grace period has passed.

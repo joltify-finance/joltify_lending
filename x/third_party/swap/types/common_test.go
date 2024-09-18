@@ -8,6 +8,6 @@ import (
 func init() {
 	kavaConfig := sdk.GetConfig()
 	appconfig.SetupConfig()
-	//app.SetBip44CoinType(kavaConfig)
+	// app.SetBip44CoinType(kavaConfig)
 	kavaConfig.Seal()
 }

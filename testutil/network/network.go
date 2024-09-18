@@ -48,7 +48,7 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 	p := t.TempDir()
 	homeDir := path.Join(p, "node0/simd")
 	fmt.Printf("we write to %v\n", homeDir)
-	err := os.MkdirAll(path.Join(homeDir, "config"), 0755)
+	err := os.MkdirAll(path.Join(homeDir, "config"), 0o755)
 	assert.NoError(t, err)
 	configs2.WriteDefaultPricefeedExchangeToml(homeDir) // must manually create config file.
 	net, err := network.New(t, p, cfg)

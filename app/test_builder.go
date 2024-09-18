@@ -23,7 +23,6 @@ type AuthBankGenesisBuilder struct {
 
 // NewAuthBankGenesisBuilder creates a AuthBankGenesisBuilder containing default genesis states.
 func NewAuthBankGenesisBuilder(authgen *authtypes.GenesisState, bankgen *banktypes.GenesisState) *AuthBankGenesisBuilder {
-
 	if authgen == nil {
 		return &AuthBankGenesisBuilder{
 			AuthGenesis: *authtypes.DefaultGenesisState(),
@@ -35,7 +34,6 @@ func NewAuthBankGenesisBuilder(authgen *authtypes.GenesisState, bankgen *banktyp
 		AuthGenesis: *authgen,
 		BankGenesis: *bankgen,
 	}
-
 }
 
 // BuildMarshalled assembles the final GenesisState and json encodes it into a generic genesis type.

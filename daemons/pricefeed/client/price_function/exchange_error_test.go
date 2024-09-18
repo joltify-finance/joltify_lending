@@ -2,9 +2,10 @@ package price_function_test
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/joltify-finance/joltify_lending/daemons/pricefeed/client/price_function"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestExchangeError(t *testing.T) {

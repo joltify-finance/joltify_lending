@@ -1,8 +1,9 @@
 package types
 
 import (
-	sdkmath "cosmossdk.io/math"
 	"sort"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 // ValuationMap holds the USD value of various coin types

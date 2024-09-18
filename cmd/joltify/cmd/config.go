@@ -9,8 +9,7 @@ import (
 	clobtypes "github.com/joltify-finance/joltify_lending/x/third_party_dydx/clob/types"
 )
 
-//fixme this is where the default config is set
-
+// fixme this is where the default config is set
 const (
 	// `minGasPriceUusdc` is default minimum gas price in micro USDC.
 	minGasPriceUusdc = "0.025" + assettypes.UusdcDenom

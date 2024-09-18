@@ -1,13 +1,13 @@
 package ante_test
 
 import (
-	"cosmossdk.io/store/metrics"
-	dbm "github.com/cosmos/cosmos-db"
-	appconfig "github.com/joltify-finance/joltify_lending/app/config"
-
 	"math/rand"
 	"testing"
 	"time"
+
+	"cosmossdk.io/store/metrics"
+	dbm "github.com/cosmos/cosmos-db"
+	appconfig "github.com/joltify-finance/joltify_lending/app/config"
 
 	"cosmossdk.io/store"
 	storetypes "cosmossdk.io/store/types"

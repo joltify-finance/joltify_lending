@@ -35,9 +35,8 @@ var (
 
 func TestCoinbaseProPriceFunction_Mixed(t *testing.T) {
 	// Test response strings.
-	var (
-		BtcResponseString = pricefeed.ReadJsonTestFile(t, "btc_ticker.json")
-	)
+
+	BtcResponseString := pricefeed.ReadJsonTestFile(t, "btc_ticker.json")
 
 	tests := map[string]struct {
 		// parameters
